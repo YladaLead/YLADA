@@ -218,10 +218,10 @@ function IMCCalculator() {
       <div className="mt-6 text-sm text-gray-600">
         <h4 className="font-semibold mb-2">Classificação do IMC:</h4>
         <ul className="space-y-1">
-          <li>• Abaixo do peso: IMC < 18,5</li>
+          <li>• Abaixo do peso: IMC &lt; 18,5</li>
           <li>• Peso normal: IMC 18,5 - 24,9</li>
           <li>• Sobrepeso: IMC 25 - 29,9</li>
-          <li>• Obesidade: IMC ≥ 30</li>
+          <li>• Obesidade: IMC &ge; 30</li>
         </ul>
       </div>
     </div>
