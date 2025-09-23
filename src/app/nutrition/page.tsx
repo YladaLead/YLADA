@@ -32,161 +32,162 @@ export default function NutritionPage() {
     'Problemas digestivos', 'Pele seca', 'Unhas fracas', 'Resfriados frequentes'
   ]
 
-  const vitamins = [
-    {
-      name: 'Vitamina C',
-      benefits: ['Imunidade', 'Síntese de colágeno', 'Antioxidante'],
-      sources: ['Frutas cítricas', 'Pimentão', 'Brócolis', 'Morango'],
-      rda: { male: 90, female: 75, unit: 'mg' },
-      ul: 2000,
-      deficiency: ['Escorbuto', 'Cicatrização lenta', 'Imunidade baixa'],
-      interactions: [
-        { nutrient: 'Ferro', effect: 'Melhora absorção', type: 'positive' },
-        { nutrient: 'Vitamina E', effect: 'Sinergia antioxidante', type: 'positive' }
-      ],
-      evidence: 'Alta evidência científica',
-      timing: 'Com as refeições',
-      goals: ['immunity', 'energy'],
-      symptoms: ['Resfriados frequentes', 'Fadiga']
-    },
-    {
-      name: 'Vitamina D',
-      benefits: ['Absorção de cálcio', 'Imunidade', 'Função muscular'],
-      sources: ['Sol', 'Peixes gordurosos', 'Gema de ovo', 'Leite fortificado'],
-      rda: { male: 15, female: 15, unit: 'mcg' },
-      ul: 100,
-      deficiency: ['Osteoporose', 'Raquitismo', 'Imunidade baixa'],
-      interactions: [
-        { nutrient: 'Cálcio', effect: 'Melhora absorção', type: 'positive' },
-        { nutrient: 'Magnésio', effect: 'Necessário para ativação', type: 'positive' }
-      ],
-      evidence: 'Alta evidência científica',
-      timing: 'Com gordura',
-      goals: ['immunity', 'muscle'],
-      symptoms: ['Fadiga', 'Dor óssea']
-    },
-    {
-      name: 'Vitamina B12',
-      benefits: ['Formação de glóbulos vermelhos', 'Função neurológica', 'Metabolismo'],
-      sources: ['Carnes', 'Peixes', 'Ovos', 'Laticínios'],
-      rda: { male: 2.4, female: 2.4, unit: 'mcg' },
-      ul: null,
-      deficiency: ['Anemia', 'Neuropatia', 'Fadiga'],
-      interactions: [
-        { nutrient: 'Ácido fólico', effect: 'Trabalham juntos', type: 'positive' },
-        { nutrient: 'Álcool', effect: 'Reduz absorção', type: 'negative' }
-      ],
-      evidence: 'Alta evidência científica',
-      timing: 'Com estômago vazio',
-      goals: ['energy', 'brain'],
-      symptoms: ['Fadiga', 'Problemas de memória']
-    },
-    {
-      name: 'Vitamina B6',
-      benefits: ['Metabolismo de proteínas', 'Função neurológica', 'Síntese de neurotransmissores'],
-      sources: ['Frango', 'Peixe', 'Banana', 'Batata'],
-      rda: { male: 1.3, female: 1.3, unit: 'mg' },
-      ul: 100,
-      deficiency: ['Depressão', 'Anemia', 'Problemas de pele'],
-      interactions: [
-        { nutrient: 'Magnésio', effect: 'Melhora absorção', type: 'positive' },
-        { nutrient: 'Zinco', effect: 'Competição por absorção', type: 'negative' }
-      ],
-      evidence: 'Média evidência científica',
-      timing: 'Com as refeições',
-      goals: ['brain', 'energy'],
-      symptoms: ['Depressão', 'Ansiedade']
-    }
-  ]
-
-  const minerals = [
-    {
-      name: 'Ferro',
-      benefits: ['Transporte de oxigênio', 'Função muscular', 'Imunidade'],
-      sources: ['Carnes vermelhas', 'Espinafre', 'Feijão', 'Lentilha'],
-      rda: { male: 8, female: 18, unit: 'mg' },
-      ul: 45,
-      deficiency: ['Anemia', 'Fadiga', 'Queda de cabelo'],
-      interactions: [
-        { nutrient: 'Vitamina C', effect: 'Melhora absorção', type: 'positive' },
-        { nutrient: 'Cálcio', effect: 'Reduz absorção', type: 'negative' }
-      ],
-      evidence: 'Alta evidência científica',
-      timing: 'Com vitamina C',
-      goals: ['energy', 'immunity'],
-      symptoms: ['Fadiga', 'Queda de cabelo']
-    },
-    {
-      name: 'Magnésio',
-      benefits: ['Função muscular', 'Síntese de proteínas', 'Controle glicêmico'],
-      sources: ['Espinafre', 'Amêndoas', 'Abacate', 'Chocolate amargo'],
-      rda: { male: 420, female: 320, unit: 'mg' },
-      ul: 350,
-      deficiency: ['Cãibras', 'Insônia', 'Ansiedade'],
-      interactions: [
-        { nutrient: 'Vitamina D', effect: 'Necessário para absorção', type: 'positive' },
-        { nutrient: 'Cálcio', effect: 'Equilíbrio importante', type: 'neutral' }
-      ],
-      evidence: 'Alta evidência científica',
-      timing: 'Antes de dormir',
-      goals: ['muscle', 'brain'],
-      symptoms: ['Cãibras musculares', 'Insônia', 'Ansiedade']
-    },
-    {
-      name: 'Zinco',
-      benefits: ['Imunidade', 'Cicatrização', 'Função cognitiva'],
-      sources: ['Ostras', 'Carne bovina', 'Sementes de abóbora', 'Grão-de-bico'],
-      rda: { male: 11, female: 8, unit: 'mg' },
-      ul: 40,
-      deficiency: ['Imunidade baixa', 'Cicatrização lenta', 'Perda de paladar'],
-      interactions: [
-        { nutrient: 'Cobre', effect: 'Competição por absorção', type: 'negative' },
-        { nutrient: 'Ferro', effect: 'Competição por absorção', type: 'negative' }
-      ],
-      evidence: 'Alta evidência científica',
-      timing: 'Com estômago vazio',
-      goals: ['immunity', 'brain'],
-      symptoms: ['Resfriados frequentes', 'Problemas de memória']
-    }
-  ]
-
-  const proteins = [
-    {
-      name: 'Whey Protein',
-      benefits: ['Síntese proteica', 'Recuperação muscular', 'Saciedade'],
-      sources: ['Suplemento', 'Leite', 'Queijo'],
-      rda: { male: 1.6, female: 1.6, unit: 'g/kg' },
-      ul: null,
-      deficiency: ['Perda muscular', 'Fadiga', 'Recuperação lenta'],
-      interactions: [
-        { nutrient: 'Carboidratos', effect: 'Melhora absorção', type: 'positive' },
-        { nutrient: 'Água', effect: 'Necessário para metabolismo', type: 'positive' }
-      ],
-      evidence: 'Alta evidência científica',
-      timing: 'Pós-treino',
-      goals: ['muscle', 'weight-loss'],
-      symptoms: ['Fadiga', 'Cãibras musculares']
-    },
-    {
-      name: 'Caseína',
-      benefits: ['Liberação lenta', 'Recuperação noturna', 'Saciedade prolongada'],
-      sources: ['Leite', 'Queijo', 'Suplemento'],
-      rda: { male: 1.6, female: 1.6, unit: 'g/kg' },
-      ul: null,
-      deficiency: ['Perda muscular', 'Fome noturna'],
-      interactions: [
-        { nutrient: 'Cálcio', effect: 'Melhora absorção', type: 'positive' },
-        { nutrient: 'Vitamina D', effect: 'Melhora absorção', type: 'positive' }
-      ],
-      evidence: 'Média evidência científica',
-      timing: 'Antes de dormir',
-      goals: ['muscle'],
-      symptoms: ['Insônia']
-    }
-  ]
 
   const filteredNutrients = useMemo(() => {
-    let nutrients = []
+    const vitamins = [
+      {
+        name: 'Vitamina C',
+        benefits: ['Imunidade', 'Síntese de colágeno', 'Antioxidante'],
+        sources: ['Frutas cítricas', 'Pimentão', 'Brócolis', 'Morango'],
+        rda: { male: 90, female: 75, unit: 'mg' },
+        ul: 2000,
+        deficiency: ['Escorbuto', 'Cicatrização lenta', 'Imunidade baixa'],
+        interactions: [
+          { nutrient: 'Ferro', effect: 'Melhora absorção', type: 'positive' },
+          { nutrient: 'Vitamina E', effect: 'Sinergia antioxidante', type: 'positive' }
+        ],
+        evidence: 'Alta evidência científica',
+        timing: 'Com as refeições',
+        goals: ['immunity', 'energy'],
+        symptoms: ['Resfriados frequentes', 'Fadiga']
+      },
+      {
+        name: 'Vitamina D',
+        benefits: ['Absorção de cálcio', 'Imunidade', 'Função muscular'],
+        sources: ['Sol', 'Peixes gordurosos', 'Gema de ovo', 'Leite fortificado'],
+        rda: { male: 15, female: 15, unit: 'mcg' },
+        ul: 100,
+        deficiency: ['Osteoporose', 'Raquitismo', 'Imunidade baixa'],
+        interactions: [
+          { nutrient: 'Cálcio', effect: 'Melhora absorção', type: 'positive' },
+          { nutrient: 'Magnésio', effect: 'Necessário para ativação', type: 'positive' }
+        ],
+        evidence: 'Alta evidência científica',
+        timing: 'Com gordura',
+        goals: ['immunity', 'muscle'],
+        symptoms: ['Fadiga', 'Dor óssea']
+      },
+      {
+        name: 'Vitamina B12',
+        benefits: ['Formação de glóbulos vermelhos', 'Função neurológica', 'Metabolismo'],
+        sources: ['Carnes', 'Peixes', 'Ovos', 'Laticínios'],
+        rda: { male: 2.4, female: 2.4, unit: 'mcg' },
+        ul: null,
+        deficiency: ['Anemia', 'Neuropatia', 'Fadiga'],
+        interactions: [
+          { nutrient: 'Ácido fólico', effect: 'Trabalham juntos', type: 'positive' },
+          { nutrient: 'Álcool', effect: 'Reduz absorção', type: 'negative' }
+        ],
+        evidence: 'Alta evidência científica',
+        timing: 'Com estômago vazio',
+        goals: ['energy', 'brain'],
+        symptoms: ['Fadiga', 'Problemas de memória']
+      },
+      {
+        name: 'Vitamina B6',
+        benefits: ['Metabolismo de proteínas', 'Função neurológica', 'Síntese de neurotransmissores'],
+        sources: ['Frango', 'Peixe', 'Banana', 'Batata'],
+        rda: { male: 1.3, female: 1.3, unit: 'mg' },
+        ul: 100,
+        deficiency: ['Depressão', 'Anemia', 'Problemas de pele'],
+        interactions: [
+          { nutrient: 'Magnésio', effect: 'Melhora absorção', type: 'positive' },
+          { nutrient: 'Zinco', effect: 'Competição por absorção', type: 'negative' }
+        ],
+        evidence: 'Média evidência científica',
+        timing: 'Com as refeições',
+        goals: ['brain', 'energy'],
+        symptoms: ['Depressão', 'Ansiedade']
+      }
+    ]
+
+    const minerals = [
+      {
+        name: 'Ferro',
+        benefits: ['Transporte de oxigênio', 'Função muscular', 'Imunidade'],
+        sources: ['Carnes vermelhas', 'Espinafre', 'Feijão', 'Lentilha'],
+        rda: { male: 8, female: 18, unit: 'mg' },
+        ul: 45,
+        deficiency: ['Anemia', 'Fadiga', 'Queda de cabelo'],
+        interactions: [
+          { nutrient: 'Vitamina C', effect: 'Melhora absorção', type: 'positive' },
+          { nutrient: 'Cálcio', effect: 'Reduz absorção', type: 'negative' }
+        ],
+        evidence: 'Alta evidência científica',
+        timing: 'Com vitamina C',
+        goals: ['energy', 'immunity'],
+        symptoms: ['Fadiga', 'Queda de cabelo']
+      },
+      {
+        name: 'Magnésio',
+        benefits: ['Função muscular', 'Síntese de proteínas', 'Controle glicêmico'],
+        sources: ['Espinafre', 'Amêndoas', 'Abacate', 'Chocolate amargo'],
+        rda: { male: 420, female: 320, unit: 'mg' },
+        ul: 350,
+        deficiency: ['Cãibras', 'Insônia', 'Ansiedade'],
+        interactions: [
+          { nutrient: 'Vitamina D', effect: 'Necessário para absorção', type: 'positive' },
+          { nutrient: 'Cálcio', effect: 'Equilíbrio importante', type: 'neutral' }
+        ],
+        evidence: 'Alta evidência científica',
+        timing: 'Antes de dormir',
+        goals: ['muscle', 'brain'],
+        symptoms: ['Cãibras musculares', 'Insônia', 'Ansiedade']
+      },
+      {
+        name: 'Zinco',
+        benefits: ['Imunidade', 'Cicatrização', 'Função cognitiva'],
+        sources: ['Ostras', 'Carne bovina', 'Sementes de abóbora', 'Grão-de-bico'],
+        rda: { male: 11, female: 8, unit: 'mg' },
+        ul: 40,
+        deficiency: ['Imunidade baixa', 'Cicatrização lenta', 'Perda de paladar'],
+        interactions: [
+          { nutrient: 'Cobre', effect: 'Competição por absorção', type: 'negative' },
+          { nutrient: 'Ferro', effect: 'Competição por absorção', type: 'negative' }
+        ],
+        evidence: 'Alta evidência científica',
+        timing: 'Com estômago vazio',
+        goals: ['immunity', 'brain'],
+        symptoms: ['Resfriados frequentes', 'Problemas de memória']
+      }
+    ]
+
+    const proteins = [
+      {
+        name: 'Whey Protein',
+        benefits: ['Síntese proteica', 'Recuperação muscular', 'Saciedade'],
+        sources: ['Suplemento', 'Leite', 'Queijo'],
+        rda: { male: 1.6, female: 1.6, unit: 'g/kg' },
+        ul: null,
+        deficiency: ['Perda muscular', 'Fadiga', 'Recuperação lenta'],
+        interactions: [
+          { nutrient: 'Carboidratos', effect: 'Melhora absorção', type: 'positive' },
+          { nutrient: 'Água', effect: 'Necessário para metabolismo', type: 'positive' }
+        ],
+        evidence: 'Alta evidência científica',
+        timing: 'Pós-treino',
+        goals: ['muscle', 'weight-loss'],
+        symptoms: ['Fadiga', 'Cãibras musculares']
+      },
+      {
+        name: 'Caseína',
+        benefits: ['Liberação lenta', 'Recuperação noturna', 'Saciedade prolongada'],
+        sources: ['Leite', 'Queijo', 'Suplemento'],
+        rda: { male: 1.6, female: 1.6, unit: 'g/kg' },
+        ul: null,
+        deficiency: ['Perda muscular', 'Fome noturna'],
+        interactions: [
+          { nutrient: 'Cálcio', effect: 'Melhora absorção', type: 'positive' },
+          { nutrient: 'Vitamina D', effect: 'Melhora absorção', type: 'positive' }
+        ],
+        evidence: 'Média evidência científica',
+        timing: 'Antes de dormir',
+        goals: ['muscle'],
+        symptoms: ['Insônia']
+      }
+    ]
+
+    let nutrients: typeof vitamins = []
     
     if (activeTab === 'vitamins') nutrients = vitamins
     else if (activeTab === 'minerals') nutrients = minerals
@@ -202,7 +203,7 @@ export default function NutritionPage() {
       
       return matchesSearch && matchesGoal && matchesSymptom
     })
-  }, [activeTab, searchTerm, selectedGoal, selectedSymptom, vitamins, minerals, proteins])
+  }, [activeTab, searchTerm, selectedGoal, selectedSymptom])
 
   const calculateNeeds = () => {
     const age = parseFloat(userProfile.age)
