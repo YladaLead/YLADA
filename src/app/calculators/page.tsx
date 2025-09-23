@@ -232,11 +232,39 @@ function IMCCalculator() {
 function LeanMassCalculator() {
   const [weight, setWeight] = useState('')
   const [bodyFat, setBodyFat] = useState('')
+  const [gender, setGender] = useState('male')
+  const [age, setAge] = useState('')
+  const [height, setHeight] = useState('')
+  const [waist, setWaist] = useState('')
+  const [neck, setNeck] = useState('')
+  const [hip, setHip] = useState('')
   const [result, setResult] = useState<number | null>(null)
+  const [estimatedBodyFat, setEstimatedBodyFat] = useState<number | null>(null)
+  const [method, setMethod] = useState<'manual' | 'estimate'>('estimate')
 
   const calculateLeanMass = () => {
     const w = parseFloat(weight)
-    const bf = parseFloat(bodyFat)
+    let bf = parseFloat(bodyFat)
+    
+    if (method === 'estimate' && w && age && waist && neck) {
+      // Estimativa usando fórmula da Marinha Americana
+      const ageNum = parseFloat(age)
+      const waistNum = parseFloat(waist)
+      const neckNum = parseFloat(neck)
+      const hipNum = parseFloat(hip)
+      
+      if (gender === 'male') {
+        bf = 86.010 * Math.log10(waistNum - neckNum) - 70.041 * Math.log10(parseFloat(height) || 175) + 36.76
+      } else {
+        if (hipNum) {
+          bf = 163.205 * Math.log10(waistNum + hipNum - neckNum) - 97.684 * Math.log10(parseFloat(height) || 165) - 78.387
+        } else {
+          bf = 163.205 * Math.log10(waistNum - neckNum) - 97.684 * Math.log10(parseFloat(height) || 165) - 78.387
+        }
+      }
+      
+      setEstimatedBodyFat(Math.max(0, Math.min(100, bf)))
+    }
     
     if (w && bf) {
       const leanMass = w * (1 - bf / 100)
@@ -248,6 +276,35 @@ function LeanMassCalculator() {
     <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Calculadora de Massa Magra</h2>
       
+      {/* Method Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Como você quer calcular?
+        </label>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setMethod('estimate')}
+            className={`px-4 py-2 rounded-lg font-medium ${
+              method === 'estimate' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Estimativa por Medidas
+          </button>
+          <button
+            onClick={() => setMethod('manual')}
+            className={`px-4 py-2 rounded-lg font-medium ${
+              method === 'manual' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Valor Conhecido
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -261,19 +318,104 @@ function LeanMassCalculator() {
             placeholder="Ex: 80"
           />
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Percentual de Gordura (%)
-          </label>
-          <input
-            type="number"
-            value={bodyFat}
-            onChange={(e) => setBodyFat(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="Ex: 15"
-          />
-        </div>
+
+        {method === 'estimate' ? (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Altura (cm)
+              </label>
+              <input
+                type="number"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Ex: 175"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Idade (anos)
+              </label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Ex: 30"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sexo
+              </label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="male">Masculino</option>
+                <option value="female">Feminino</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cintura (cm)
+              </label>
+              <input
+                type="number"
+                value={waist}
+                onChange={(e) => setWaist(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Ex: 85"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pescoço (cm)
+              </label>
+              <input
+                type="number"
+                value={neck}
+                onChange={(e) => setNeck(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Ex: 38"
+              />
+            </div>
+
+            {gender === 'female' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quadril (cm) - Opcional
+                </label>
+                <input
+                  type="number"
+                  value={hip}
+                  onChange={(e) => setHip(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Ex: 95"
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Percentual de Gordura (%)
+            </label>
+            <input
+              type="number"
+              value={bodyFat}
+              onChange={(e) => setBodyFat(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Ex: 15"
+            />
+          </div>
+        )}
       </div>
 
       <button
@@ -282,6 +424,13 @@ function LeanMassCalculator() {
       >
         Calcular Massa Magra
       </button>
+
+      {estimatedBodyFat && (
+        <div className="bg-blue-50 rounded-lg p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Percentual de Gordura Estimado:</h3>
+          <p className="text-2xl font-bold text-blue-600">{estimatedBodyFat.toFixed(1)}%</p>
+        </div>
+      )}
 
       {result && (
         <div className="bg-green-50 rounded-lg p-6">
@@ -292,15 +441,19 @@ function LeanMassCalculator() {
       )}
 
       <div className="mt-6 text-sm text-gray-600">
-        <h4 className="font-semibold mb-2">O que é Massa Magra?</h4>
-        <p className="mb-2">
-          A massa magra inclui músculos, ossos, órgãos e água corporal. 
-          É importante para o metabolismo e força física.
-        </p>
-        <p>
-          <strong>Dica:</strong> Para resultados mais precisos, consulte um profissional 
-          que possa medir sua composição corporal com equipamentos especializados.
-        </p>
+        <h4 className="font-semibold mb-2">Como medir corretamente:</h4>
+        <ul className="space-y-1 mb-4">
+          <li>• <strong>Cintura:</strong> Meça na parte mais estreita do abdômen</li>
+          <li>• <strong>Pescoço:</strong> Meça logo abaixo do pomo de Adão</li>
+          <li>• <strong>Quadril:</strong> Meça na parte mais larga dos quadris (mulheres)</li>
+        </ul>
+        
+        <h4 className="font-semibold mb-2">Métodos mais precisos:</h4>
+        <ul className="space-y-1">
+          <li>• <strong>DEXA Scan:</strong> Exame médico mais preciso</li>
+          <li>• <strong>Bioimpedância:</strong> Balanças especiais</li>
+          <li>• <strong>Adipômetro:</strong> Medição de dobras cutâneas</li>
+        </ul>
       </div>
     </div>
   )
