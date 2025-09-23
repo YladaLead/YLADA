@@ -36,6 +36,8 @@ export default function CalculatorsPage() {
 
   if (activeCalculator) {
     const calculator = calculators.find(calc => calc.id === activeCalculator)
+    const IconComponent = calculator?.icon
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         {/* Header */}
@@ -50,7 +52,7 @@ export default function CalculatorsPage() {
               </button>
               <div className="flex items-center space-x-3">
                 <div className={`w-10 h-10 ${calculator?.color} rounded-lg flex items-center justify-center`}>
-                  <calculator?.icon className="w-6 h-6 text-white" />
+                  {IconComponent && <IconComponent className="w-6 h-6 text-white" />}
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">{calculator?.title}</h1>
@@ -103,26 +105,29 @@ export default function CalculatorsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {calculators.map((calculator) => (
-            <div
-              key={calculator.id}
-              onClick={() => setActiveCalculator(calculator.id)}
-              className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
-            >
-              <div className={`w-16 h-16 ${calculator.color} rounded-lg flex items-center justify-center mb-4`}>
-                <calculator.icon className="w-8 h-8 text-white" />
+          {calculators.map((calculator) => {
+            const IconComponent = calculator.icon
+            return (
+              <div
+                key={calculator.id}
+                onClick={() => setActiveCalculator(calculator.id)}
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+              >
+                <div className={`w-16 h-16 ${calculator.color} rounded-lg flex items-center justify-center mb-4`}>
+                  <IconComponent className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {calculator.title}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {calculator.description}
+                </p>
+                <div className="text-blue-600 font-medium">
+                  Calcular →
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {calculator.title}
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {calculator.description}
-              </p>
-              <div className="text-blue-600 font-medium">
-                Calcular →
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Info Section */}
