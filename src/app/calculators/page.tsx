@@ -248,7 +248,6 @@ function LeanMassCalculator() {
     
     if (method === 'estimate' && w && age && waist && neck) {
       // Estimativa usando fórmula da Marinha Americana
-      const ageNum = parseFloat(age)
       const waistNum = parseFloat(waist)
       const neckNum = parseFloat(neck)
       const hipNum = parseFloat(hip)

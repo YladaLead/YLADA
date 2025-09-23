@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { BookOpen, Search, Filter, Target, ArrowLeft, Zap, Shield, Heart, Brain, TrendingUp, Users, Star } from 'lucide-react'
+import { BookOpen, Search, Target, ArrowLeft, Zap, Shield, Heart, Brain, TrendingUp, Star } from 'lucide-react'
 import Link from 'next/link'
 
 export default function NutritionPage() {
@@ -202,7 +202,7 @@ export default function NutritionPage() {
       
       return matchesSearch && matchesGoal && matchesSymptom
     })
-  }, [activeTab, searchTerm, selectedGoal, selectedSymptom])
+  }, [activeTab, searchTerm, selectedGoal, selectedSymptom, vitamins, minerals, proteins])
 
   const calculateNeeds = () => {
     const age = parseFloat(userProfile.age)
@@ -257,7 +257,7 @@ export default function NutritionPage() {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'vitamins' | 'minerals' | 'proteins' | 'calculator')}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'bg-green-600 text-white'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calculator, BookOpen, Users, Globe, Zap, Heart, Brain, Shield } from 'lucide-react'
+import { Calculator, BookOpen, Users, Zap, Heart, Brain } from 'lucide-react'
 
 export default function Home() {
   const [language, setLanguage] = useState<'pt' | 'en' | 'es'>('pt')
