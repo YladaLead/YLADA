@@ -165,8 +165,9 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => {
               const isCalculator = feature.title === 'Calculadoras'
-              const Component = isCalculator ? 'a' : 'div'
-              const props = isCalculator ? { href: '/calculators' } : {}
+              const isNutrition = feature.title === 'Tabelas Nutricionais'
+              const Component = (isCalculator || isNutrition) ? 'a' : 'div'
+              const props = isCalculator ? { href: '/calculators' } : isNutrition ? { href: '/nutrition' } : {}
               
               return (
                 <Component
