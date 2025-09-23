@@ -140,9 +140,9 @@ export default function Home() {
             {t.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors">
+            <a href="/calculators" className="px-8 py-4 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors text-center">
               {t.getStarted}
-            </button>
+            </a>
             <button className="px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors">
               {t.features}
             </button>
@@ -163,19 +163,29 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                <div className={`w-16 h-16 ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                  {feature.title}
-                </h4>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+            {features.map((feature, index) => {
+              const isCalculator = feature.title === 'Calculadoras'
+              const Component = isCalculator ? 'a' : 'div'
+              const props = isCalculator ? { href: '/calculators' } : {}
+              
+              return (
+                <Component
+                  key={index}
+                  {...props}
+                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer transform hover:-translate-y-1"
+                >
+                  <div className={`w-16 h-16 ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
+                    <feature.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h4 className="text-xl font-semibold text-gray-900 mb-2">
+                    {feature.title}
+                  </h4>
+                  <p className="text-gray-600">
+                    {feature.description}
+                  </p>
+                </Component>
+              )
+            })}
           </div>
         </div>
       </section>
