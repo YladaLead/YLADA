@@ -317,14 +317,14 @@ export default function LifestyleQuizDemoPage() {
               </div>
 
               <div className="mb-8">
-                <div className={`text-4xl font-bold ${result.color} mb-2`}>
-                  {result.percentage}%
+                <div className={`text-4xl font-bold ${result?.color} mb-2`}>
+                  {result?.percentage}%
                 </div>
-                <div className={`text-xl font-semibold ${result.color}`}>
-                  {result.category}
+                <div className={`text-xl font-semibold ${result?.color}`}>
+                  {result?.category}
                 </div>
                 <div className="text-sm text-gray-600 mt-2">
-                  Pontuação: {result.score}/{result.maxScore}
+                  Pontuação: {result?.score}/{result?.maxScore}
                 </div>
               </div>
 
@@ -334,7 +334,7 @@ export default function LifestyleQuizDemoPage() {
                   Análise do Seu Estilo de Vida:
                 </h3>
                 <ul className="space-y-3">
-                  {result.lifestyleTips.map((tip: string, index: number) => (
+                  {result?.lifestyleTips.map((tip: string, index: number) => (
                     <li key={index} className="flex items-start">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2"></div>
                       <span className="text-gray-700">{tip}</span>
@@ -349,7 +349,7 @@ export default function LifestyleQuizDemoPage() {
                   Recomendações para Melhorar:
                 </h3>
                 <ul className="space-y-3">
-                  {result.recommendations.map((rec: string, index: number) => (
+                  {result?.recommendations.map((rec: string, index: number) => (
                     <li key={index} className="flex items-start">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
                       <span className="text-gray-700">{rec}</span>
