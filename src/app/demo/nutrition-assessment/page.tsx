@@ -21,9 +21,9 @@ export default function NutritionAssessmentDemoPage() {
   const [result, setResult] = useState<{
     bmi: string
     tdee: string
-    score: number
+    score: string
     maxScore: number
-    percentage: number
+    percentage: string
     category: string
     color: string
     recommendations: string[]
