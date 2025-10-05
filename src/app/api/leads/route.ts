@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         professional:professionals(*),
         notes:lead_notes(*)
       `)
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
     if (professionalId) {

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { getCurrentUser, getCurrentUserProfile, signOut } from '@/lib/auth'
 import { 
   Users, 
   TrendingUp, 
@@ -52,6 +54,9 @@ interface DashboardStats {
 }
 
 export default function ProfessionalDashboard() {
+  const router = useRouter()
+  const [user, setUser] = useState<Record<string, unknown> | null>(null)
+  const [userProfile, setUserProfile] = useState<Record<string, unknown> | null>(null)
   const [leads, setLeads] = useState<Lead[]>([])
   const [stats, setStats] = useState<DashboardStats>({
     totalLeads: 0,
@@ -60,12 +65,40 @@ export default function ProfessionalDashboard() {
     convertedLeads: 0,
     conversionRate: 0
   })
-  const [loading] = useState(true)
+  const [loading, setLoading] = useState(true)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [filterStatus, setFilterStatus] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddNote, setShowAddNote] = useState(false)
   const [newNote, setNewNote] = useState('')
+
+  // Verificar autenticação
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const currentUser = await getCurrentUser()
+        if (!currentUser) {
+          router.push('/auth/login')
+          return
+        }
+        
+        const profile = await getCurrentUserProfile(currentUser.id)
+        if (!profile) {
+          router.push('/auth/complete-profile')
+          return
+        }
+
+        setUser(currentUser as unknown as Record<string, unknown>)
+        setUserProfile(profile)
+        setLoading(false)
+      } catch (error) {
+        console.error('Erro de autenticação:', error)
+        router.push('/auth/login')
+      }
+    }
+
+    checkAuth()
+  }, [router])
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -141,7 +174,7 @@ export default function ProfessionalDashboard() {
         body: JSON.stringify({
           leadId: selectedLead.id,
           content: newNote,
-          author: 'Profissional'
+          author: (userProfile?.name as string) || 'Profissional'
         })
       })
 
@@ -152,13 +185,22 @@ export default function ProfessionalDashboard() {
       const updatedLead = { ...selectedLead }
       updatedLead.notes.unshift({
         content: newNote,
-        author: 'Profissional',
+        author: (userProfile?.name as string) || 'Profissional',
         createdAt: new Date().toISOString()
       })
       setSelectedLead(updatedLead)
       
     } catch (error) {
       console.error('Erro ao adicionar anotação:', error)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      router.push('/')
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
     }
   }
 
@@ -206,7 +248,10 @@ export default function ProfessionalDashboard() {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard Profissional</h1>
-              <p className="text-gray-600 mt-1">Gerencie seus leads e acompanhe conversões</p>
+              <p className="text-gray-600 mt-1">
+                Bem-vindo, {(userProfile?.name as string) || 'Usuário'}! 
+                {userProfile?.specialty ? ` - ${userProfile.specialty as string}` : ''}
+              </p>
             </div>
             <div className="flex space-x-3">
               <button
@@ -219,6 +264,12 @@ export default function ProfessionalDashboard() {
               <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2">
                 <Download className="w-4 h-4" />
                 <span>Exportar</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
+              >
+                <span>Sair</span>
               </button>
             </div>
           </div>
