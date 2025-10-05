@@ -398,9 +398,9 @@ export default function HealthGoalsQuizDemoPage() {
               <div className="text-left mb-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                   <Target className="w-6 h-6 text-purple-500 mr-2" />
-                  {result.plan.title}
+                  {result?.plan.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{result.plan.description}</p>
+                <p className="text-gray-600 mb-4">{result?.plan.description}</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -409,7 +409,7 @@ export default function HealthGoalsQuizDemoPage() {
                       Atividades Principais:
                     </h4>
                     <ul className="space-y-2">
-                      {result.plan.activities.map((activity: string, index: number) => (
+                      {result?.plan.activities.map((activity: string, index: number) => (
                         <li key={index} className="flex items-start">
                           <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
                           <span className="text-gray-700">{activity}</span>
@@ -424,7 +424,7 @@ export default function HealthGoalsQuizDemoPage() {
                       Cronograma Semanal:
                     </h4>
                     <ul className="space-y-2">
-                      {result.schedule.map((day: string, index: number) => (
+                      {result?.schedule.map((day: string, index: number) => (
                         <li key={index} className="flex items-start">
                           <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2"></div>
                           <span className="text-gray-700">{day}</span>
@@ -440,7 +440,7 @@ export default function HealthGoalsQuizDemoPage() {
                   Estratégias para Superar Desafios:
                 </h3>
                 <ul className="space-y-2">
-                  {result.strategies.map((strategy: string, index: number) => (
+                  {result?.strategies.map((strategy: string, index: number) => (
                     <li key={index} className="flex items-start">
                       <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3 mt-2"></div>
                       <span className="text-gray-700">{strategy}</span>
@@ -454,7 +454,7 @@ export default function HealthGoalsQuizDemoPage() {
                   Métricas de Sucesso:
                 </h3>
                 <ul className="space-y-2">
-                  {result.successMetrics.map((metric: string, index: number) => (
+                  {result?.successMetrics.map((metric: string, index: number) => (
                     <li key={index} className="flex items-start">
                       <div className="w-2 h-2 bg-purple-500 rounded-full mr-3 mt-2"></div>
                       <span className="text-gray-700">{metric}</span>
