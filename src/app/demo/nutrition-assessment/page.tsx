@@ -12,8 +12,8 @@ export default function NutritionAssessmentDemoPage() {
     height: '',
     activity: 'moderate' as 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active',
     dietQuality: 'good' as 'poor' | 'fair' | 'good' | 'excellent',
-    mealFrequency: '3' as '1' | '2' | '3' | '4' | '5+',
-    waterIntake: 'adequate' as 'poor' | 'fair' | 'adequate' | 'excellent',
+    mealFrequency: '3' as '1-2' | '3' | '4-5' | '6+',
+    waterIntake: 'adequate' as 'inadequate' | 'adequate' | 'excellent',
     supplements: 'none' as 'none' | 'basic' | 'comprehensive',
     healthConditions: [] as string[],
     symptoms: [] as string[]
