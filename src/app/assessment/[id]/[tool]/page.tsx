@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { Calculator, CheckCircle, ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { Calculator, CheckCircle } from 'lucide-react'
 
 export default function ProfessionalAssessmentPage() {
   const params = useParams()
@@ -19,16 +18,25 @@ export default function ProfessionalAssessmentPage() {
     age: '',
     gender: 'masculino'
   })
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    bmi: string
+    category: string
+    color: string
+    recommendations: string[]
+  } | null>(null)
   const [showResult, setShowResult] = useState(false)
-  const [professional, setProfessional] = useState<any>(null)
+  const [professional, setProfessional] = useState<{
+    name: string
+    specialty: string
+    company?: string
+  } | null>(null)
 
   useEffect(() => {
     // Buscar dados do profissional
     fetchProfessionalData()
-  }, [professionalId])
+  }, [fetchProfessionalData])
 
-  const fetchProfessionalData = async () => {
+  const fetchProfessionalData = useCallback(async () => {
     try {
       const response = await fetch(`/api/professionals/${professionalId}`)
       const data = await response.json()
@@ -36,7 +44,7 @@ export default function ProfessionalAssessmentPage() {
     } catch (error) {
       console.error('Erro ao buscar dados do profissional:', error)
     }
-  }
+  }, [professionalId])
 
   const calculateBMI = () => {
     const weight = parseFloat(formData.weight)

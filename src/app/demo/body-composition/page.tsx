@@ -31,9 +31,9 @@ export default function BodyCompositionDemoPage() {
     const weight = parseFloat(formData.weight)
     const height = parseFloat(formData.height) / 100
     const age = parseInt(formData.age)
-    const waist = parseFloat(formData.waist)
-    const neck = parseFloat(formData.neck)
-    const hip = parseFloat(formData.hip)
+    // const waist = parseFloat(formData.waist)
+    // const neck = parseFloat(formData.neck)
+    // const hip = parseFloat(formData.hip)
     
     // Cálculo do IMC
     const bmi = weight / (height * height)

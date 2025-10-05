@@ -125,7 +125,7 @@ export default function MealPlannerDemoPage() {
     setShowResult(true)
   }
 
-  const generateMealSuggestions = (restrictions: string[]) => {
+  const generateMealSuggestions = (_restrictions: string[]) => {
     const suggestions = {
       breakfast: [
         'Aveia com frutas e leite',
@@ -156,7 +156,7 @@ export default function MealPlannerDemoPage() {
     return suggestions
   }
 
-  const generateShoppingList = (restrictions: string[]) => {
+  const generateShoppingList = (_restrictions: string[]) => {
     return [
       'Proteínas: Frango, peixe, ovos, tofu',
       'Carboidratos: Arroz integral, quinoa, batata doce',

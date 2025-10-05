@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator, Shield, Zap, Heart, Brain, CheckCircle, ArrowRight, Users, TrendingUp, Star, ExternalLink, Play, Target, Activity } from 'lucide-react'
+import { Calculator, Shield, Zap, Heart, Brain, CheckCircle, Users, TrendingUp, Star, ExternalLink, Play, Target } from 'lucide-react'
 
 export default function SalesPage() {
   const tools = [

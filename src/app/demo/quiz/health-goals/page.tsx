@@ -151,7 +151,7 @@ export default function HealthGoalsQuizDemoPage() {
     setShowResult(true)
   }
 
-  const generatePersonalizedPlan = (goal: string, timeframe: string, intensity: string, focusArea: string) => {
+  const generatePersonalizedPlan = (goal: string, _timeframe: string, _intensity: string, _focusArea: string) => {
     const plans = {
       'weight-loss': {
         title: 'Plano de Perda de Peso',
@@ -198,7 +198,7 @@ export default function HealthGoalsQuizDemoPage() {
     return plans[goal as keyof typeof plans] || plans['fitness']
   }
 
-  const generateStrategies = (challenge: string, supportPreference: string) => {
+  const generateStrategies = (challenge: string, _supportPreference: string) => {
     const strategies = {
       'time': [
         'Treinos de alta intensidade (HIIT)',
@@ -229,7 +229,7 @@ export default function HealthGoalsQuizDemoPage() {
     return strategies[challenge as keyof typeof strategies] || strategies['motivation']
   }
 
-  const generateSchedule = (timeAvailable: string, intensity: string) => {
+  const generateSchedule = (timeAvailable: string, _intensity: string) => {
     const schedules = {
       '1-2': [
         'Segunda: Treino HIIT (30 min)',
@@ -264,7 +264,7 @@ export default function HealthGoalsQuizDemoPage() {
     return schedules[timeAvailable as keyof typeof schedules] || schedules['3-4']
   }
 
-  const generateSuccessMetrics = (goal: string, timeframe: string) => {
+  const generateSuccessMetrics = (goal: string, _timeframe: string) => {
     const metrics = {
       'weight-loss': [
         'Peso corporal (semanal)',
