@@ -134,15 +134,19 @@ export default function LifestyleQuizDemoPage() {
     let color = ''
     let recommendations = []
     let lifestyleTips = []
+    let description = ''
+    let priorityAreas = []
     
     if (percentage >= 80) {
       category = 'Estilo de Vida Excelente'
       color = 'text-green-600'
+      description = 'Você demonstra excelentes hábitos de vida saudável'
       recommendations = [
         'Continue mantendo seus hábitos saudáveis',
         'Considere compartilhar suas práticas com outros',
         'Monitore regularmente para manter o equilíbrio'
       ]
+      priorityAreas = ['Manutenção', 'Compartilhamento', 'Monitoramento']
       lifestyleTips = [
         'Você tem um estilo de vida muito equilibrado',
         'Suas escolhas promovem bem-estar geral',
@@ -151,11 +155,13 @@ export default function LifestyleQuizDemoPage() {
     } else if (percentage >= 60) {
       category = 'Estilo de Vida Bom'
       color = 'text-blue-600'
+      description = 'Você tem uma base sólida de hábitos saudáveis'
       recommendations = [
         'Melhore gradualmente seus hábitos de sono',
         'Aumente a atividade física regular',
         'Reduza o tempo em frente a telas'
       ]
+      priorityAreas = ['Sono', 'Exercício', 'Tempo de Tela']
       lifestyleTips = [
         'Você tem uma base sólida de hábitos saudáveis',
         'Alguns ajustes podem melhorar ainda mais',
@@ -164,11 +170,13 @@ export default function LifestyleQuizDemoPage() {
     } else if (percentage >= 40) {
       category = 'Estilo de Vida Regular'
       color = 'text-yellow-600'
+      description = 'Há espaço significativo para melhorias no seu estilo de vida'
       recommendations = [
         'Foque em uma área por vez para melhorar',
         'Considere buscar apoio profissional',
         'Implemente mudanças pequenas e sustentáveis'
       ]
+      priorityAreas = ['Foco', 'Apoio Profissional', 'Mudanças Graduais']
       lifestyleTips = [
         'Há espaço significativo para melhorias',
         'Foque em uma área por vez',
@@ -177,12 +185,14 @@ export default function LifestyleQuizDemoPage() {
     } else {
       category = 'Estilo de Vida Precisa Melhorar'
       color = 'text-red-600'
+      description = 'Seu estilo de vida precisa de atenção urgente'
       recommendations = [
         'Consulte profissionais de saúde',
         'Implemente mudanças graduais',
         'Priorize sono, alimentação e exercícios',
         'Considere terapia para saúde mental'
       ]
+      priorityAreas = ['Saúde', 'Mudanças Graduais', 'Prioridades Básicas', 'Saúde Mental']
       lifestyleTips = [
         'Seu estilo de vida precisa de atenção urgente',
         'Mudanças significativas são necessárias',
@@ -196,7 +206,9 @@ export default function LifestyleQuizDemoPage() {
       percentage: percentage.toFixed(0),
       category,
       color,
+      description,
       recommendations,
+      priorityAreas,
       lifestyleTips
     })
     setShowResult(true)
