@@ -1,53 +1,86 @@
 'use client'
 
 import { useState } from 'react'
-import { Calculator, Shield, Zap, Heart, Brain, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react'
+import { Calculator, Shield, Zap, Heart, Brain, CheckCircle, ArrowRight, Users, TrendingUp, Star, ExternalLink } from 'lucide-react'
 
 export default function Home() {
   const [language, setLanguage] = useState<'pt' | 'en' | 'es'>('pt')
 
-  const features = [
+  const tools = [
     {
       icon: Calculator,
       title: 'Calculadora de IMC',
-      description: 'Análise corporal completa e personalizada',
+      description: 'Análise corporal completa com categorização e recomendações personalizadas',
       color: 'bg-emerald-500',
-      href: '/calculators/bmi'
+      href: '/calculators/bmi',
+      category: 'Avaliação Corporal'
     },
     {
       icon: Shield,
-      title: 'Necessidades Proteicas',
-      description: 'Calcule suas necessidades diárias de proteína',
+      title: 'Necessidades de Proteína',
+      description: 'Cálculo preciso baseado em diretrizes da OMS para diferentes objetivos',
       color: 'bg-green-500',
-      href: '/calculators/protein'
+      href: '/calculators/protein',
+      category: 'Nutrição'
     },
     {
       icon: Zap,
       title: 'Composição Corporal',
-      description: 'Avalie massa muscular e gordura corporal',
+      description: 'Avaliação de massa muscular, gordura corporal, BMR e TDEE',
       color: 'bg-yellow-500',
-      href: '/calculators/body-composition'
+      href: '/calculators/body-composition',
+      category: 'Avaliação Corporal'
     },
     {
       icon: Heart,
       title: 'Planejador de Refeições',
-      description: 'Cardápio personalizado e lista de compras',
+      description: 'Cardápio personalizado com distribuição calórica e lista de compras',
       color: 'bg-red-500',
-      href: '/calculators/meal-planner'
+      href: '/calculators/meal-planner',
+      category: 'Nutrição'
     },
     {
       icon: Brain,
       title: 'Monitor de Hidratação',
-      description: 'Controle sua ingestão de água diária',
+      description: 'Controle de ingestão hídrica baseado em atividade e clima',
       color: 'bg-purple-500',
-      href: '/calculators/hydration'
+      href: '/calculators/hydration',
+      category: 'Saúde'
     },
     {
       icon: CheckCircle,
       title: 'Avaliação Nutricional',
-      description: 'Identifique deficiências nutricionais',
+      description: 'Identificação de deficiências e recomendações de suplementos',
       color: 'bg-indigo-500',
-      href: '/calculators/nutrition-assessment'
+      href: '/calculators/nutrition-assessment',
+      category: 'Saúde'
+    }
+  ]
+
+  const benefits = [
+    {
+      icon: Users,
+      title: 'Geração de Leads Qualificados',
+      description: 'Capture dados de clientes interessados em melhorar sua saúde e bem-estar',
+      color: 'text-emerald-600'
+    },
+    {
+      icon: TrendingUp,
+      title: 'Aumento de Conversões',
+      description: 'Ferramentas profissionais aumentam a confiança e conversão de leads',
+      color: 'text-green-600'
+    },
+    {
+      icon: Star,
+      title: 'Credibilidade Profissional',
+      description: 'Demonstre expertise com ferramentas baseadas em diretrizes da OMS',
+      color: 'text-yellow-600'
+    },
+    {
+      icon: Shield,
+      title: 'Dados Seguros',
+      description: 'Sistema seguro para captura e armazenamento de informações dos clientes',
+      color: 'text-purple-600'
     }
   ]
 
@@ -60,11 +93,17 @@ export default function Home() {
       features: 'Funcionalidades',
       about: 'Sobre',
       contact: 'Contato',
-      heroTitle: 'Profissional de Bem-Estar?',
-      heroSubtitle: 'Gere leads qualificados com ferramentas profissionais de avaliação de bem-estar e qualidade de vida',
+      heroTitle: 'Profissional de Saúde?',
+      heroSubtitle: 'Gere leads qualificados com ferramentas profissionais de avaliação nutricional e de bem-estar',
       cta: 'Comece a gerar leads agora',
-      risks: 'Ferramentas Disponíveis',
-      benefits: 'Benefícios do YLADA'
+      toolsTitle: 'Ferramentas Profissionais Disponíveis',
+      toolsSubtitle: 'Calculadoras baseadas em diretrizes da OMS para capturar leads qualificados',
+      benefitsTitle: 'Por que escolher o YLADA?',
+      benefitsSubtitle: 'Aumente sua credibilidade e gere mais leads com ferramentas profissionais',
+      demoTitle: 'Veja como funciona',
+      demoSubtitle: 'Teste nossas ferramentas e veja como seus clientes receberão os resultados',
+      ctaTitle: 'Pronto para gerar mais leads?',
+      ctaSubtitle: 'Acesse ferramentas profissionais e comece a capturar leads qualificados hoje mesmo'
     },
     en: {
       title: 'YLADA',
@@ -74,11 +113,17 @@ export default function Home() {
       features: 'Features',
       about: 'About',
       contact: 'Contact',
-      heroTitle: 'Wellness Professional?',
-      heroSubtitle: 'Generate qualified leads with professional wellness and quality of life assessment tools',
+      heroTitle: 'Health Professional?',
+      heroSubtitle: 'Generate qualified leads with professional nutritional and wellness assessment tools',
       cta: 'Start generating leads now',
-      risks: 'Available Tools',
-      benefits: 'YLADA Benefits'
+      toolsTitle: 'Professional Tools Available',
+      toolsSubtitle: 'Calculators based on WHO guidelines to capture qualified leads',
+      benefitsTitle: 'Why choose YLADA?',
+      benefitsSubtitle: 'Increase your credibility and generate more leads with professional tools',
+      demoTitle: 'See how it works',
+      demoSubtitle: 'Test our tools and see how your clients will receive the results',
+      ctaTitle: 'Ready to generate more leads?',
+      ctaSubtitle: 'Access professional tools and start capturing qualified leads today'
     },
     es: {
       title: 'YLADA',
@@ -88,11 +133,17 @@ export default function Home() {
       features: 'Características',
       about: 'Acerca de',
       contact: 'Contacto',
-      heroTitle: '¿Profesional de Bienestar?',
-      heroSubtitle: 'Genera leads calificados con herramientas profesionales de evaluación de bienestar y calidad de vida',
+      heroTitle: '¿Profesional de Salud?',
+      heroSubtitle: 'Genera leads calificados con herramientas profesionales de evaluación nutricional y bienestar',
       cta: 'Comienza a generar leads ahora',
-      risks: 'Herramientas Disponibles',
-      benefits: 'Beneficios de YLADA'
+      toolsTitle: 'Herramientas Profesionales Disponibles',
+      toolsSubtitle: 'Calculadoras basadas en directrices de la OMS para capturar leads calificados',
+      benefitsTitle: '¿Por qué elegir YLADA?',
+      benefitsSubtitle: 'Aumenta tu credibilidad y genera más leads con herramientas profesionales',
+      demoTitle: 'Ve cómo funciona',
+      demoSubtitle: 'Prueba nuestras herramientas y ve cómo tus clientes recibirán los resultados',
+      ctaTitle: '¿Listo para generar más leads?',
+      ctaSubtitle: 'Accede a herramientas profesionales y comienza a capturar leads calificados hoy mismo'
     }
   }
 
@@ -154,6 +205,11 @@ export default function Home() {
       {/* Hero Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="mb-8">
+            <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-semibold mb-4">
+              Para Profissionais de Saúde
+            </span>
+          </div>
           <h2 className="text-5xl font-bold text-gray-900 mb-6">
             {t.heroTitle}
           </h2>
@@ -162,99 +218,81 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/dashboard" className="px-8 py-4 bg-emerald-600 text-white rounded-lg text-lg font-semibold hover:bg-emerald-700 transition-colors text-center flex items-center justify-center">
-              Acessar Dashboard
+              Acessar Dashboard Profissional
               <ArrowRight className="w-5 h-5 ml-2" />
             </a>
-            <button className="px-8 py-4 border-2 border-emerald-600 text-emerald-600 rounded-lg text-lg font-semibold hover:bg-emerald-50 transition-colors">
-              Ver Ferramentas
-            </button>
+            <a href="#tools" className="px-8 py-4 border-2 border-emerald-600 text-emerald-600 rounded-lg text-lg font-semibold hover:bg-emerald-50 transition-colors">
+              Ver Ferramentas Disponíveis
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-16 bg-emerald-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              {t.benefitsTitle}
+            </h3>
+            <p className="text-lg text-gray-600">
+              {t.benefitsSubtitle}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg p-6 text-center">
+                <div className={`w-16 h-16 ${benefit.color.replace('text-', 'bg-').replace('-600', '-100')} rounded-lg flex items-center justify-center mx-auto mb-4`}>
+                  <benefit.icon className={`w-8 h-8 ${benefit.color}`} />
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">{benefit.title}</h4>
+                <p className="text-gray-600 text-sm">{benefit.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Tools Section */}
-      <section className="py-16 bg-emerald-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              {t.risks}
-            </h3>
-            <p className="text-lg text-gray-600">
-              Ferramentas profissionais para capturar e converter leads qualificados
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Calculator className="w-8 h-8 text-emerald-600" />
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Calculadoras</h4>
-              <p className="text-gray-600 text-sm">IMC, proteína, calorias e composição corporal</p>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-8 h-8 text-green-600" />
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Avaliações</h4>
-              <p className="text-gray-600 text-sm">Quiz de bem-estar e identificação de necessidades</p>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-              <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-8 h-8 text-yellow-600" />
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Links Compartilháveis</h4>
-              <p className="text-gray-600 text-sm">Links personalizados para cada profissional</p>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-purple-600" />
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Dashboard</h4>
-              <p className="text-gray-600 text-sm">Acompanhe leads e conversões em tempo real</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section id="tools" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              {t.benefits}
+              {t.toolsTitle}
             </h3>
             <p className="text-lg text-gray-600">
-              Ferramentas profissionais para profissionais de bem-estar e distribuidores gerarem leads qualificados
+              {t.toolsSubtitle}
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => {
-              const Component = feature.href ? 'a' : 'div'
-              const props = feature.href ? { href: feature.href } : {}
-              
-              return (
-                <Component
-                  key={index}
-                  {...props}
-                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer transform hover:-translate-y-1"
-                >
-                  <div className={`w-16 h-16 ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
-                    <feature.icon className="w-8 h-8 text-white" />
+            {tools.map((tool, index) => (
+              <a
+                key={index}
+                href={tool.href}
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 hover:border-emerald-200"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-16 h-16 ${tool.color} rounded-lg flex items-center justify-center`}>
+                    <tool.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                    {feature.title}
-                  </h4>
-                  <p className="text-gray-600">
-                    {feature.description}
-                  </p>
-                </Component>
-              )
-            })}
+                  <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                    {tool.category}
+                  </span>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                  {tool.title}
+                </h4>
+                <p className="text-gray-600 mb-4">
+                  {tool.description}
+                </p>
+                <div className="flex items-center text-emerald-600 font-medium">
+                  <span>Testar ferramenta</span>
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </section>
@@ -263,15 +301,20 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-r from-emerald-600 to-green-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h3 className="text-3xl font-bold text-white mb-4">
-            Pronto para gerar mais leads?
+            {t.ctaTitle}
           </h3>
           <p className="text-xl text-emerald-100 mb-8">
-            Acesse ferramentas profissionais e comece a capturar leads qualificados hoje mesmo
+            {t.ctaSubtitle}
           </p>
-          <a href="/dashboard" className="px-8 py-4 bg-white text-emerald-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center">
-            Acessar Dashboard
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/dashboard" className="px-8 py-4 bg-white text-emerald-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center">
+              Acessar Dashboard Profissional
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </a>
+            <a href="/quiz" className="px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors">
+              Testar Quiz de Avaliação
+            </a>
+          </div>
         </div>
       </section>
 
