@@ -13,8 +13,10 @@ export default function ProteinDemoPage() {
     goal: 'maintenance'
   })
   const [result, setResult] = useState<{
-    proteinNeeded: string
-    recommendation: string
+    totalProtein: string
+    proteinPerKg: string
+    sources: string[]
+    recommendations: string[]
   } | null>(null)
   const [showResult, setShowResult] = useState(false)
 
