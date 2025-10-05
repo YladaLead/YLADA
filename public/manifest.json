@@ -1,11 +1,11 @@
 {
-  "name": "GLIVA - Seu Guia de Suplementos",
-  "short_name": "GLIVA",
-  "description": "App educativo sobre suplementos, vitaminas e nutrição",
+  "name": "YLADA - Your Lead Advanced Data Assistant",
+  "short_name": "YLADA",
+  "description": "Ferramentas avançadas de geração de leads para profissionais de bem-estar e qualidade de vida",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3B82F6",
+  "theme_color": "#10B981",
   "orientation": "portrait",
   "icons": [
     {
@@ -21,9 +21,11 @@
       "purpose": "maskable any"
     }
   ],
-  "categories": ["health", "education", "lifestyle"],
-  "lang": "pt",
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "en",
   "dir": "ltr",
   "scope": "/",
   "prefer_related_applications": false
 }
+
+

@@ -4,12 +4,12 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'GLIVA - Seu Guia de Suplementos',
-  description: 'App educativo sobre suplementos, vitaminas e nutrição',
-  keywords: 'suplementos, vitaminas, nutrição, saúde, educação',
-  authors: [{ name: 'GLIVA Team' }],
+  title: 'YLADA - Your Lead Advanced Data Assistant',
+  description: 'Ferramentas avançadas de geração de leads para profissionais de bem-estar e qualidade de vida',
+  keywords: 'leads, bem-estar, qualidade de vida, herbalife, distribuidores, profissionais, marketing',
+  authors: [{ name: 'YLADA Team' }],
   viewport: 'width=device-width, initial-scale=1',
-  themeColor: '#3B82F6',
+  themeColor: '#10B981',
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
@@ -27,9 +27,9 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="GLIVA" />
+        <meta name="apple-mobile-web-app-title" content="YLADA" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#3B82F6" />
+        <meta name="msapplication-TileColor" content="#10B981" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className={inter.className}>

@@ -1,36 +1,161 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YLADA - Your Lead Advanced Data Assistant
+
+YLADA is a comprehensive lead generation platform designed for wellness and quality of life professionals, including Herbalife distributors and wellness coaches, to capture and convert leads through personalized health assessments and wellness tools.
+
+## Features
+
+- **Personalized Wellness Assessment**: Quiz-based evaluation for lead capture
+- **Lead Generation Tools**: Calculators, assessments, and interactive content
+- **Professional Dashboard**: Track leads and conversions
+- **Payment Integration**: Stripe-powered purchase system for tools and subscriptions
+- **PWA Support**: Installable web app for mobile and desktop
+- **Multi-language Support**: Available in English, Portuguese, and Spanish
+- **Referral System**: Gamified lead sharing and rewards
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS
+- **Payments**: Stripe
+- **PWA**: Service Worker, Web App Manifest
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ 
+- npm or yarn
+- Stripe account (for payments)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd ylada-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+```bash
+cp env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Configure Stripe:
+   - Get your Stripe API keys from the Stripe Dashboard
+   - Update `.env.local` with your actual keys:
+   ```
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+   STRIPE_SECRET_KEY=sk_test_...
+   ```
 
-## Learn More
+5. Run the development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── api/                 # API routes
+│   ├── quiz/               # Health assessment quiz
+│   ├── protocols/          # Protocol access page
+│   ├── success/            # Payment success page
+│   ├── calculators/        # Nutritional calculators
+│   ├── nutrition/          # Nutrition tables (preserved)
+│   └── page.tsx            # Homepage
+├── lib/
+│   └── stripe.ts           # Stripe configuration
+└── components/             # Reusable components
+```
 
-## Deploy on Vercel
+## Key Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Health Assessment Quiz
+- Multi-step questionnaire for lead capture
+- Personalized recommendations
+- Risk assessment
+- Professional consultation offers
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Payment System
+- Lead generation tools ($9.90 each)
+- Monthly subscription ($7.90/month)
+- Stripe Checkout integration
+- Success page with lead access
+
+### PWA Configuration
+- Installable on mobile and desktop
+- Offline capabilities
+- App-like experience
+- Push notifications ready
+
+## Protocol Structure
+
+Each protocol includes:
+- Overview and objectives
+- Personalized calculations
+- Supplement recommendations
+- Exercise guidelines
+- Progress tracking tools
+- Downloadable PDFs
+
+## Available Tools
+
+1. **BMI Calculator** - Personalized body mass index and health risk assessment
+2. **Body Composition Analyzer** - Muscle mass, fat percentage, and wellness analysis
+3. **Meal Planner** - Personalized meal plans and shopping lists
+4. **Hydration Monitor** - Water intake tracking and wellness reminders
+5. **Wellness Assessment** - Comprehensive health and lifestyle evaluation
+
+## Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push
+
+### Other Platforms
+- Ensure environment variables are set
+- Build command: `npm run build`
+- Start command: `npm start`
+
+## Stripe Setup
+
+1. Create a Stripe account
+2. Get your API keys from the dashboard
+3. Create products and prices for each protocol
+4. Update the price IDs in the code
+5. Test with Stripe's test mode
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is proprietary. All rights reserved.
+
+## Support
+
+For support, email support@ylada.app or visit our help center.
+
+## Roadmap
+
+- [ ] Mobile app (iOS/Android)
+- [ ] Advanced analytics
+- [ ] Community features
+- [ ] Healthcare provider integration
+- [ ] AI-powered recommendations
