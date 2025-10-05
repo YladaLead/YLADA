@@ -280,7 +280,7 @@ export default function MealPlannerDemoPage() {
                   </label>
                   <select
                     value={formData.gender}
-                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                    onChange={(e) => setFormData({...formData, gender: e.target.value as 'masculino' | 'feminino'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="masculino">Masculino</option>
@@ -296,7 +296,7 @@ export default function MealPlannerDemoPage() {
                   </label>
                   <select
                     value={formData.activity}
-                    onChange={(e) => setFormData({...formData, activity: e.target.value})}
+                    onChange={(e) => setFormData({...formData, activity: e.target.value as 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="sedentary">Sedentário</option>
@@ -313,7 +313,7 @@ export default function MealPlannerDemoPage() {
                   </label>
                   <select
                     value={formData.goal}
-                    onChange={(e) => setFormData({...formData, goal: e.target.value})}
+                    onChange={(e) => setFormData({...formData, goal: e.target.value as 'weight-loss' | 'muscle-gain' | 'maintenance' | 'endurance'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="weight-loss">Perda de Peso</option>
