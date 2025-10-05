@@ -62,16 +62,6 @@ export default function UserDashboard() {
 
   useEffect(() => {
     // Simular dados de usuário para desenvolvimento
-    setUser({
-      id: 'dev-user-123',
-      email: 'dev@ylada.com',
-      user_metadata: {
-        user_type: 'professional',
-        name: 'Dr. João Silva',
-        specialty: 'Nutricionista'
-      }
-    })
-    
     setUserProfile({
       id: 'dev-profile-123',
       name: 'Dr. João Silva',
