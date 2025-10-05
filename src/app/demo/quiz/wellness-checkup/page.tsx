@@ -331,17 +331,17 @@ export default function WellnessCheckupQuizDemoPage() {
               </div>
 
               <div className="mb-8">
-                <div className={`text-4xl font-bold ${result.color} mb-2`}>
-                  {result.percentage}%
+                <div className={`text-4xl font-bold ${result?.color} mb-2`}>
+                  {result?.percentage}%
                 </div>
-                <div className={`text-xl font-semibold ${result.color}`}>
-                  {result.wellnessLevel}
+                <div className={`text-xl font-semibold ${result?.color}`}>
+                  {result?.wellnessLevel}
                 </div>
                 <div className="text-sm text-gray-600 mt-2">
-                  Pontuação: {result.score}/{result.maxScore}
+                  Pontuação: {result?.score}/{result?.maxScore}
                 </div>
                 <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-                  {result.description}
+                  {result?.description}
                 </p>
               </div>
 
@@ -351,7 +351,7 @@ export default function WellnessCheckupQuizDemoPage() {
                   Áreas Prioritárias:
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {result.priorityAreas.map((area: string, index: number) => (
+                  {result?.priorityAreas.map((area: string, index: number) => (
                     <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
                       <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
                       <span className="text-gray-700">{area}</span>
@@ -366,7 +366,7 @@ export default function WellnessCheckupQuizDemoPage() {
                   Recomendações Personalizadas:
                 </h3>
                 <ul className="space-y-3">
-                  {result.recommendations.map((rec: string, index: number) => (
+                  {result?.recommendations.map((rec: string, index: number) => (
                     <li key={index} className="flex items-start">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2"></div>
                       <span className="text-gray-700">{rec}</span>
