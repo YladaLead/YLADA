@@ -9,11 +9,11 @@ export default function MealPlannerDemoPage() {
     weight: '',
     height: '',
     age: '',
-    gender: 'masculino',
-    activity: 'moderate',
-    goal: 'maintenance',
+    gender: 'masculino' as 'masculino' | 'feminino',
+    activity: 'moderate' as 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active',
+    goal: 'maintenance' as 'weight-loss' | 'muscle-gain' | 'maintenance' | 'endurance',
     mealsPerDay: '3',
-    dietaryRestrictions: []
+    dietaryRestrictions: [] as string[]
   })
   const [result, setResult] = useState<{
     tdee: number
