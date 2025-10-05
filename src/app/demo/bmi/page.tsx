@@ -14,7 +14,8 @@ export default function BMIDemoPage() {
   const [result, setResult] = useState<{
     bmi: string
     category: string
-    recommendation: string
+    color: string
+    recommendations: string[]
   } | null>(null)
   const [showResult, setShowResult] = useState(false)
 
