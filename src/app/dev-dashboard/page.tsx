@@ -38,9 +38,14 @@ export default function UserDashboard() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [userProfile, setUserProfile] = useState<{
+    id: string
     name: string
     specialty: string
     company?: string
+    email: string
+    phone: string
+    license: string
+    created_at: string
   } | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -69,7 +74,8 @@ export default function UserDashboard() {
       company: 'Clínica Vida Saudável',
       license: 'CRN-12345',
       phone: '(11) 99999-9999',
-      email: 'joao@clinica.com'
+      email: 'joao@clinica.com',
+      created_at: new Date().toISOString()
     })
 
     fetchLeads()

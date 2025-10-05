@@ -88,7 +88,6 @@ export default function ProfessionalDashboard() {
           return
         }
 
-        setUser(currentUser as unknown as Record<string, unknown>)
         setUserProfile(profile)
         setLoading(false)
       } catch (error) {
