@@ -13,7 +13,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
     if (status) updateData.status = status
     if (priority) updateData.priority = priority
     if (professionalId) updateData.professionalId = professionalId

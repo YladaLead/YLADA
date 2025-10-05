@@ -17,10 +17,10 @@ export interface Lead {
   height?: number
   activity?: string
   calculatorType: string
-  results?: any
-  recommendations?: any
+  results?: Record<string, unknown>
+  recommendations?: Record<string, unknown>
   quizType?: string
-  quizResults?: any
+  quizResults?: Record<string, unknown>
   status: string
   priority: string
   source?: string

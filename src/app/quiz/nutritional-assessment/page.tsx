@@ -7,12 +7,9 @@ import {
   ArrowRight, 
   CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Activity,
   Target,
   Share2,
   Copy,
-  Brain,
   Shield
 } from 'lucide-react'
 import Link from 'next/link'

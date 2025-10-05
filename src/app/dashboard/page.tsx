@@ -1,22 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Users, 
   TrendingUp, 
   Clock, 
-  Star,
-  Filter,
   Search,
   Eye,
   Phone,
   Mail,
-  MessageSquare,
   Calendar,
-  Target,
   AlertCircle,
   CheckCircle,
-  XCircle,
   Plus,
   Download,
   RefreshCw
@@ -33,10 +28,10 @@ interface Lead {
   status: string
   priority: string
   createdAt: string
-  results?: any
-  recommendations?: any
+  results?: Record<string, unknown>
+  recommendations?: Record<string, unknown>
   quizType?: string
-  quizResults?: any
+  quizResults?: Record<string, unknown>
   professional?: {
     name: string
     specialty: string
@@ -65,19 +60,14 @@ export default function ProfessionalDashboard() {
     convertedLeads: 0,
     conversionRate: 0
   })
-  const [loading, setLoading] = useState(true)
+  const [loading] = useState(true)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [filterStatus, setFilterStatus] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddNote, setShowAddNote] = useState(false)
   const [newNote, setNewNote] = useState('')
 
-  useEffect(() => {
-    fetchLeads()
-    fetchStats()
-  }, [filterStatus])
-
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       const params = new URLSearchParams()
       if (filterStatus !== 'all') params.append('status', filterStatus)
@@ -88,7 +78,12 @@ export default function ProfessionalDashboard() {
     } catch (error) {
       console.error('Erro ao buscar leads:', error)
     }
-  }
+  }, [filterStatus])
+
+  useEffect(() => {
+    fetchLeads()
+    fetchStats()
+  }, [filterStatus, fetchLeads])
 
   const fetchStats = async () => {
     try {
@@ -186,15 +181,6 @@ export default function ProfessionalDashboard() {
     }
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'new': return <AlertCircle className="w-4 h-4" />
-      case 'contacted': return <Clock className="w-4 h-4" />
-      case 'converted': return <CheckCircle className="w-4 h-4" />
-      case 'lost': return <XCircle className="w-4 h-4" />
-      default: return <AlertCircle className="w-4 h-4" />
-    }
-  }
 
   const filteredLeads = leads.filter(lead => 
     lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

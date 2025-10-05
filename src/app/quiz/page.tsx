@@ -5,8 +5,6 @@ import {
   Calculator, 
   ArrowLeft, 
   ArrowRight, 
-  CheckCircle, 
-  AlertTriangle, 
   Heart,
   Activity,
   Target,
