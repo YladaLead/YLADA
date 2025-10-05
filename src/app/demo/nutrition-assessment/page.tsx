@@ -289,7 +289,7 @@ export default function NutritionAssessmentDemoPage() {
                   </label>
                   <select
                     value={formData.gender}
-                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                    onChange={(e) => setFormData({...formData, gender: e.target.value as 'masculino' | 'feminino'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="masculino">Masculino</option>
@@ -340,7 +340,7 @@ export default function NutritionAssessmentDemoPage() {
                   </label>
                   <select
                     value={formData.activity}
-                    onChange={(e) => setFormData({...formData, activity: e.target.value})}
+                    onChange={(e) => setFormData({...formData, activity: e.target.value as 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="sedentary">Sedentário</option>
@@ -357,7 +357,7 @@ export default function NutritionAssessmentDemoPage() {
                   </label>
                   <select
                     value={formData.dietQuality}
-                    onChange={(e) => setFormData({...formData, dietQuality: e.target.value})}
+                    onChange={(e) => setFormData({...formData, dietQuality: e.target.value as 'poor' | 'fair' | 'good' | 'excellent'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="excellent">Excelente</option>
@@ -375,7 +375,7 @@ export default function NutritionAssessmentDemoPage() {
                   </label>
                   <select
                     value={formData.mealFrequency}
-                    onChange={(e) => setFormData({...formData, mealFrequency: e.target.value})}
+                    onChange={(e) => setFormData({...formData, mealFrequency: e.target.value as '1-2' | '3' | '4-5' | '6+'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="1-2">1-2 refeições</option>
@@ -391,7 +391,7 @@ export default function NutritionAssessmentDemoPage() {
                   </label>
                   <select
                     value={formData.waterIntake}
-                    onChange={(e) => setFormData({...formData, waterIntake: e.target.value})}
+                    onChange={(e) => setFormData({...formData, waterIntake: e.target.value as 'inadequate' | 'adequate' | 'excellent'})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     <option value="inadequate">Inadequada</option>
