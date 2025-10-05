@@ -94,37 +94,14 @@ export default function UserDashboard() {
     }
   }
 
-  const addNote = async (leadId: string, content: string) => {
-    try {
-      const response = await fetch(`/api/leads/${leadId}/notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
-      })
-      
-      if (response.ok) {
-        fetchLeads()
-      }
-    } catch (error) {
-      console.error('Erro ao adicionar nota:', error)
-    }
-  }
+  // Funções comentadas para evitar warnings
+  // const addNote = async (leadId: string, content: string) => {
+  //   // Implementação futura
+  // }
 
-  const updateLeadStatus = async (leadId: string, status: string) => {
-    try {
-      const response = await fetch(`/api/leads/${leadId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      })
-      
-      if (response.ok) {
-        fetchLeads()
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar status:', error)
-    }
-  }
+  // const updateLeadStatus = async (leadId: string, status: string) => {
+  //   // Implementação futura
+  // }
 
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

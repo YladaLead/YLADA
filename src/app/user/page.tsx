@@ -55,7 +55,7 @@ interface DashboardStats {
 
 export default function ProfessionalDashboard() {
   const router = useRouter()
-  const [user, setUser] = useState<Record<string, unknown> | null>(null)
+  // const [user, setUser] = useState<Record<string, unknown> | null>(null)
   const [userProfile, setUserProfile] = useState<Record<string, unknown> | null>(null)
   const [leads, setLeads] = useState<Lead[]>([])
   const [stats, setStats] = useState<DashboardStats>({

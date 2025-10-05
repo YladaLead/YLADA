@@ -122,9 +122,7 @@ export default function HealthGoalsQuizDemoPage() {
     const motivation = answers[2]
     const timeAvailable = answers[3]
     const challenge = answers[4]
-    const supportPreference = answers[5]
     const experience = answers[6]
-    const focusArea = answers[7]
     
     let intensity = 'moderate'
     if (timeAvailable === '7+' && experience === 'advanced') {

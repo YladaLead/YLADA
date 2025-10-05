@@ -31,11 +31,6 @@ export default function ProfessionalAssessmentPage() {
     company?: string
   } | null>(null)
 
-  useEffect(() => {
-    // Buscar dados do profissional
-    fetchProfessionalData()
-  }, [fetchProfessionalData])
-
   const fetchProfessionalData = useCallback(async () => {
     try {
       const response = await fetch(`/api/professionals/${professionalId}`)
@@ -45,6 +40,11 @@ export default function ProfessionalAssessmentPage() {
       console.error('Erro ao buscar dados do profissional:', error)
     }
   }, [professionalId])
+
+  useEffect(() => {
+    // Buscar dados do profissional
+    fetchProfessionalData()
+  }, [fetchProfessionalData])
 
   const calculateBMI = () => {
     const weight = parseFloat(formData.weight)
