@@ -13,7 +13,7 @@ export function createServerSupabaseClient() {
 }
 
 // Middleware para proteger rotas (versão simplificada)
-export async function createMiddlewareSupabaseClient(request: NextRequest) {
+export async function createMiddlewareSupabaseClient(_request: NextRequest) {
   const supabase = createClient(supabaseUrl, supabaseAnonKey)
   return { supabase, response: NextResponse.next() }
 }

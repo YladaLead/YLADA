@@ -12,7 +12,7 @@ export default function BMIDemoPage() {
     gender: 'masculino'
   })
   const [result, setResult] = useState<{
-    bmi: number
+    bmi: string
     category: string
     recommendation: string
   } | null>(null)
