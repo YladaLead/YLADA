@@ -42,7 +42,7 @@ export default function ProteinDemoPage() {
     }
     
     const proteinPerKg = baseProtein * goalMultipliers[formData.goal as keyof typeof goalMultipliers] * activityMultipliers[formData.activity as keyof typeof activityMultipliers]
-    const totalProtein = Math.round(weight * proteinPerKg)
+    const totalProtein = (weight * proteinPerKg).toFixed(0)
     
     const proteinSources = [
       'Carnes magras (frango, peixe, carne bovina)',

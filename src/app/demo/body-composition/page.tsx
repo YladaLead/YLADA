@@ -125,8 +125,8 @@ export default function BodyCompositionDemoPage() {
       fatColor,
       fatMass: fatMass.toFixed(1),
       leanMass: leanMass.toFixed(1),
-      bmr: Math.round(bmr),
-      tdee: Math.round(tdee),
+      bmr: bmr.toFixed(0),
+      tdee: tdee.toFixed(0),
       recommendations
     })
     setShowResult(true)

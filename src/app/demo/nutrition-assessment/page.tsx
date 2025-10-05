@@ -173,17 +173,17 @@ export default function NutritionAssessmentDemoPage() {
     
     // Necessidades nutricionais específicas
     nutritionalNeeds = {
-      calories: Math.round(tdee),
-      protein: Math.round(weight * 1.2), // g/kg
-      carbs: Math.round(tdee * 0.45 / 4), // 45% das calorias
-      fat: Math.round(tdee * 0.25 / 9), // 25% das calorias
-      fiber: Math.round(weight * 0.4), // g/kg
-      water: Math.round(weight * 35) // ml/kg
+      calories: tdee.toFixed(0),
+      protein: (weight * 1.2).toFixed(0), // g/kg
+      carbs: (tdee * 0.45 / 4).toFixed(0), // 45% das calorias
+      fat: (tdee * 0.25 / 9).toFixed(0), // 25% das calorias
+      fiber: (weight * 0.4).toFixed(0), // g/kg
+      water: (weight * 35).toFixed(0) // ml/kg
     }
 
     setResult({
       bmi: bmi.toFixed(1),
-      tdee: Math.round(tdee),
+      tdee: tdee.toFixed(0),
       score: totalScore.toFixed(1),
       maxScore,
       percentage: percentage.toFixed(0),
