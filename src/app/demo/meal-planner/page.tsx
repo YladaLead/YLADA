@@ -105,10 +105,10 @@ export default function MealPlannerDemoPage() {
     const fatPerMeal = Math.round(fatGrams / mealsPerDay)
     
     // Sugestões de refeições
-    const mealSuggestions = generateMealSuggestions(formData.dietaryRestrictions)
+    const mealSuggestions = generateMealSuggestions()
     
     // Lista de compras
-    const shoppingList = generateShoppingList(formData.dietaryRestrictions)
+    const shoppingList = generateShoppingList()
 
     setResult({
       tdee: Math.round(tdee),
@@ -125,7 +125,7 @@ export default function MealPlannerDemoPage() {
     setShowResult(true)
   }
 
-  const generateMealSuggestions = (_restrictions: string[]) => {
+  const generateMealSuggestions = () => {
     const suggestions = {
       breakfast: [
         'Aveia com frutas e leite',
@@ -156,7 +156,7 @@ export default function MealPlannerDemoPage() {
     return suggestions
   }
 
-  const generateShoppingList = (_restrictions: string[]) => {
+  const generateShoppingList = () => {
     return [
       'Proteínas: Frango, peixe, ovos, tofu',
       'Carboidratos: Arroz integral, quinoa, batata doce',

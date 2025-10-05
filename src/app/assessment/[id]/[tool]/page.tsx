@@ -7,7 +7,7 @@ import { Calculator, CheckCircle } from 'lucide-react'
 export default function ProfessionalAssessmentPage() {
   const params = useParams()
   const professionalId = params.id as string
-  const toolType = params.tool as string
+  // const toolType = params.tool as string
   
   const [formData, setFormData] = useState({
     name: '',

@@ -133,10 +133,10 @@ export default function HealthGoalsQuizDemoPage() {
       intensity = 'low'
     }
     
-    const plan = generatePersonalizedPlan(goal, timeframe, intensity, focusArea)
-    const strategies = generateStrategies(challenge, supportPreference)
-    const schedule = generateSchedule(timeAvailable, intensity)
-    const successMetrics = generateSuccessMetrics(goal, timeframe)
+    const plan = generatePersonalizedPlan(goal)
+    const strategies = generateStrategies(challenge)
+    const schedule = generateSchedule(timeAvailable)
+    const successMetrics = generateSuccessMetrics(goal)
 
     setResult({
       goal,
@@ -151,7 +151,7 @@ export default function HealthGoalsQuizDemoPage() {
     setShowResult(true)
   }
 
-  const generatePersonalizedPlan = (goal: string, _timeframe: string, _intensity: string, _focusArea: string) => {
+  const generatePersonalizedPlan = (goal: string) => {
     const plans = {
       'weight-loss': {
         title: 'Plano de Perda de Peso',
@@ -198,7 +198,7 @@ export default function HealthGoalsQuizDemoPage() {
     return plans[goal as keyof typeof plans] || plans['fitness']
   }
 
-  const generateStrategies = (challenge: string, _supportPreference: string) => {
+  const generateStrategies = (challenge: string) => {
     const strategies = {
       'time': [
         'Treinos de alta intensidade (HIIT)',
@@ -229,7 +229,7 @@ export default function HealthGoalsQuizDemoPage() {
     return strategies[challenge as keyof typeof strategies] || strategies['motivation']
   }
 
-  const generateSchedule = (timeAvailable: string, _intensity: string) => {
+  const generateSchedule = (timeAvailable: string) => {
     const schedules = {
       '1-2': [
         'Segunda: Treino HIIT (30 min)',
@@ -264,7 +264,7 @@ export default function HealthGoalsQuizDemoPage() {
     return schedules[timeAvailable as keyof typeof schedules] || schedules['3-4']
   }
 
-  const generateSuccessMetrics = (goal: string, _timeframe: string) => {
+  const generateSuccessMetrics = (goal: string) => {
     const metrics = {
       'weight-loss': [
         'Peso corporal (semanal)',

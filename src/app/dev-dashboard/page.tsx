@@ -5,21 +5,14 @@ import { useRouter } from 'next/navigation'
 import { 
   Users, 
   TrendingUp, 
-  Calendar, 
-  Filter, 
   Search, 
-  Plus, 
   Eye, 
   Edit, 
-  Trash2, 
   MessageSquare, 
   Star,
-  LogOut,
-  User,
-  Building,
-  GraduationCap
+  LogOut
 } from 'lucide-react'
-import { getCurrentUser, getCurrentUserProfile, signOut } from '@/lib/auth'
+import { signOut } from '@/lib/auth'
 
 interface Lead {
   id: string
@@ -44,8 +37,11 @@ export default function UserDashboard() {
   const router = useRouter()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<Record<string, unknown> | null>(null)
-  const [userProfile, setUserProfile] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<{
+    name: string
+    specialty: string
+    company?: string
+  } | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
