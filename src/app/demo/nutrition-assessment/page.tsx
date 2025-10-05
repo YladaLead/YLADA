@@ -7,16 +7,16 @@ import Link from 'next/link'
 export default function NutritionAssessmentDemoPage() {
   const [formData, setFormData] = useState({
     age: '',
-    gender: 'masculino',
+    gender: 'masculino' as 'masculino' | 'feminino',
     weight: '',
     height: '',
-    activity: 'moderate',
-    dietQuality: 'good',
-    mealFrequency: '3',
-    waterIntake: 'adequate',
-    supplements: 'none',
-    healthConditions: [],
-    symptoms: []
+    activity: 'moderate' as 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active',
+    dietQuality: 'good' as 'poor' | 'fair' | 'good' | 'excellent',
+    mealFrequency: '3' as '1' | '2' | '3' | '4' | '5+',
+    waterIntake: 'adequate' as 'poor' | 'fair' | 'adequate' | 'excellent',
+    supplements: 'none' as 'none' | 'basic' | 'comprehensive',
+    healthConditions: [] as string[],
+    symptoms: [] as string[]
   })
   const [result, setResult] = useState<{
     bmi: string
