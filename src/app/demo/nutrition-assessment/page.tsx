@@ -19,8 +19,8 @@ export default function NutritionAssessmentDemoPage() {
     symptoms: []
   })
   const [result, setResult] = useState<{
-    bmi: number
-    tdee: number
+    bmi: string
+    tdee: string
     score: number
     maxScore: number
     percentage: number
@@ -29,12 +29,12 @@ export default function NutritionAssessmentDemoPage() {
     recommendations: string[]
     priorityAreas: string[]
     nutritionalNeeds: {
-      calories: number
-      protein: number
-      carbs: number
-      fat: number
-      fiber: number
-      water: number
+      calories: string
+      protein: string
+      carbs: string
+      fat: string
+      fiber: string
+      water: string
     }
   } | null>(null)
   const [showResult, setShowResult] = useState(false)

@@ -13,7 +13,7 @@ export default function ProteinDemoPage() {
     goal: 'maintenance'
   })
   const [result, setResult] = useState<{
-    proteinNeeded: number
+    proteinNeeded: string
     recommendation: string
   } | null>(null)
   const [showResult, setShowResult] = useState(false)

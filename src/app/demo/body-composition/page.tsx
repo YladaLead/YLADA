@@ -15,14 +15,14 @@ export default function BodyCompositionDemoPage() {
     hip: ''
   })
   const [result, setResult] = useState<{
-    bmi: number
-    bodyFatPercentage: number
+    bmi: string
+    bodyFatPercentage: string
     fatCategory: string
     fatColor: string
-    fatMass: number
-    leanMass: number
-    bmr: number
-    tdee: number
+    fatMass: string
+    leanMass: string
+    bmr: string
+    tdee: string
     recommendations: string[]
   } | null>(null)
   const [showResult, setShowResult] = useState(false)
