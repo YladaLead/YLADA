@@ -126,7 +126,14 @@ export default function NutritionAssessmentDemoPage() {
     let color = ''
     let recommendations = []
     let priorityAreas = []
-    let nutritionalNeeds = {}
+    let nutritionalNeeds = {
+      calories: '0',
+      protein: '0',
+      carbs: '0',
+      fat: '0',
+      fiber: '0',
+      water: '0'
+    }
     
     if (percentage >= 80) {
       category = 'Excelente Estado Nutricional'
