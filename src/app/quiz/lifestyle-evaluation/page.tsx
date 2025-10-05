@@ -21,13 +21,17 @@ interface QuizResults {
   score: number
   riskLevel: string
   riskColor: string
-  deficiencies: string[]
-  recommendations: string[]
-  supplements: string[]
+  lifestyleAreas: {
+    diet: { score: number; recommendations: string[] }
+    exercise: { score: number; recommendations: string[] }
+    stress: { score: number; recommendations: string[] }
+    sleep: { score: number; recommendations: string[] }
+  }
+  overallRecommendations: string[]
   nextSteps: string[]
 }
 
-export default function NutritionalAssessmentQuiz() {
+export default function LifestyleEvaluationQuiz() {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState({
     name: '',
@@ -37,49 +41,54 @@ export default function NutritionalAssessmentQuiz() {
     weight: '',
     height: '',
     gender: '',
-    symptoms: [] as string[],
-    diet: '',
-    lifestyle: '',
-    healthConditions: [] as string[],
-    medications: '',
-    stress: '',
-    sleep: ''
+    dietHabits: [] as string[],
+    exerciseHabits: [] as string[],
+    stressLevel: '',
+    sleepQuality: '',
+    workSchedule: '',
+    socialLife: '',
+    healthGoals: [] as string[]
   })
   const [results, setResults] = useState<QuizResults | null>(null)
   const [showResults, setShowResults] = useState(false)
 
-  const symptoms = [
-    'Fadiga constante',
-    'Fraqueza muscular',
-    'Queda de cabelo',
-    'Unhas quebradiças',
-    'Pele seca',
-    'Cicatrização lenta',
-    'Problemas de memória',
-    'Irritabilidade',
-    'Dores de cabeça frequentes',
-    'Problemas digestivos',
-    'Cãibras musculares',
-    'Sensibilidade ao frio',
-    'Problemas de visão',
-    'Dores nas articulações',
-    'Problemas de sono',
-    'Mudanças de humor'
+  const dietHabits = [
+    'Consumo regular de frutas e vegetais',
+    'Prefere alimentos integrais',
+    'Evita alimentos processados',
+    'Bebe água regularmente',
+    'Faz refeições regulares',
+    'Controla porções',
+    'Evita açúcar em excesso',
+    'Limita consumo de sal',
+    'Inclui proteínas magras',
+    'Consome gorduras saudáveis'
   ]
 
-  const healthConditions = [
-    'Diabetes',
-    'Hipertensão',
-    'Doença cardíaca',
-    'Problemas de tireoide',
-    'Doença renal',
-    'Doença hepática',
-    'Anemia',
-    'Osteoporose',
-    'Artrite',
-    'Depressão',
-    'Ansiedade',
-    'Problemas digestivos'
+  const exerciseHabits = [
+    'Exercícios aeróbicos regulares',
+    'Treinamento de força',
+    'Atividades ao ar livre',
+    'Caminhadas diárias',
+    'Alongamento/flexibilidade',
+    'Esportes recreativos',
+    'Atividades em grupo',
+    'Exercícios em casa',
+    'Uso de escadas',
+    'Movimento durante trabalho'
+  ]
+
+  const healthGoals = [
+    'Perder peso',
+    'Ganhar massa muscular',
+    'Melhorar energia',
+    'Reduzir estresse',
+    'Melhorar sono',
+    'Prevenir doenças',
+    'Aumentar longevidade',
+    'Melhorar humor',
+    'Aumentar produtividade',
+    'Melhorar qualidade de vida'
   ]
 
   const steps = [
@@ -90,163 +99,169 @@ export default function NutritionalAssessmentQuiz() {
       fields: ['name', 'email', 'phone', 'age', 'weight', 'height', 'gender']
     },
     {
-      id: 'symptoms',
-      title: 'Sintomas Atuais',
-      subtitle: 'Selecione todos os sintomas que você apresenta',
-      fields: ['symptoms']
+      id: 'diet-habits',
+      title: 'Hábitos Alimentares',
+      subtitle: 'Selecione seus hábitos alimentares atuais',
+      fields: ['dietHabits']
     },
     {
-      id: 'diet-lifestyle',
-      title: 'Dieta e Estilo de Vida',
-      subtitle: 'Avalie sua alimentação e hábitos de vida',
-      fields: ['diet', 'lifestyle']
+      id: 'exercise-habits',
+      title: 'Atividade Física',
+      subtitle: 'Como você se mantém ativo fisicamente?',
+      fields: ['exerciseHabits']
     },
     {
-      id: 'health-conditions',
-      title: 'Condições de Saúde',
-      subtitle: 'Informe sobre condições de saúde existentes',
-      fields: ['healthConditions', 'medications']
+      id: 'lifestyle-factors',
+      title: 'Fatores de Estilo de Vida',
+      subtitle: 'Avalie outros aspectos do seu estilo de vida',
+      fields: ['stressLevel', 'sleepQuality', 'workSchedule', 'socialLife']
     },
     {
-      id: 'stress-sleep',
-      title: 'Estresse e Sono',
-      subtitle: 'Avalie seus níveis de estresse e qualidade do sono',
-      fields: ['stress', 'sleep']
+      id: 'health-goals',
+      title: 'Objetivos de Saúde',
+      subtitle: 'Quais são seus principais objetivos de saúde?',
+      fields: ['healthGoals']
     }
   ]
 
   const calculateResults = () => {
-    let score = 0
-    
-    // Avaliação por sintomas (40 pontos)
-    const symptomScore = Math.max(0, 40 - (answers.symptoms.length * 2.5))
-    score += symptomScore
-    
-    // Avaliação por dieta (20 pontos)
-    const dietScores = {
-      'excellent': 20,
-      'good': 15,
-      'moderate': 10,
-      'poor': 5,
-      'very-poor': 0
-    }
-    score += dietScores[answers.diet as keyof typeof dietScores] || 0
-    
-    // Avaliação por estilo de vida (20 pontos)
-    const lifestyleScores = {
-      'excellent': 20,
-      'good': 15,
-      'moderate': 10,
-      'poor': 5,
-      'very-poor': 0
-    }
-    score += lifestyleScores[answers.lifestyle as keyof typeof lifestyleScores] || 0
-    
-    // Avaliação por condições de saúde (10 pontos)
-    const healthScore = Math.max(0, 10 - (answers.healthConditions.length * 2))
-    score += healthScore
-    
-    // Avaliação por estresse (5 pontos)
+    let totalScore = 0
+
+    // Avaliação de hábitos alimentares (25 pontos)
+    const dietScore = Math.min(25, answers.dietHabits.length * 2.5)
+    totalScore += dietScore
+
+    // Avaliação de exercícios (25 pontos)
+    const exerciseScore = Math.min(25, answers.exerciseHabits.length * 2.5)
+    totalScore += exerciseScore
+
+    // Avaliação de estresse (15 pontos)
     const stressScores = {
-      'low': 5,
-      'moderate': 3,
-      'high': 1,
+      'very-low': 15,
+      'low': 12,
+      'moderate': 8,
+      'high': 4,
       'very-high': 0
     }
-    score += stressScores[answers.stress as keyof typeof stressScores] || 0
-    
-    // Avaliação por sono (5 pontos)
+    totalScore += stressScores[answers.stressLevel as keyof typeof stressScores] || 0
+
+    // Avaliação de sono (15 pontos)
     const sleepScores = {
-      'excellent': 5,
-      'good': 4,
-      'moderate': 3,
-      'poor': 2,
-      'very-poor': 1
+      'excellent': 15,
+      'good': 12,
+      'moderate': 8,
+      'poor': 4,
+      'very-poor': 0
     }
-    score += sleepScores[answers.sleep as keyof typeof sleepScores] || 0
-    
-    const finalScore = Math.max(0, Math.min(100, score))
-    
+    totalScore += sleepScores[answers.sleepQuality as keyof typeof sleepScores] || 0
+
+    // Avaliação de trabalho (10 pontos)
+    const workScores = {
+      'flexible': 10,
+      'regular': 8,
+      'demanding': 5,
+      'stressful': 2,
+      'very-stressful': 0
+    }
+    totalScore += workScores[answers.workSchedule as keyof typeof workScores] || 0
+
+    // Avaliação de vida social (10 pontos)
+    const socialScores = {
+      'very-active': 10,
+      'active': 8,
+      'moderate': 6,
+      'limited': 3,
+      'isolated': 0
+    }
+    totalScore += socialScores[answers.socialLife as keyof typeof socialScores] || 0
+
+    const finalScore = Math.max(0, Math.min(100, totalScore))
+
     // Determinar nível de risco
-    let riskLevel = 'Baixo'
+    let riskLevel = 'Excelente'
     let riskColor = 'text-green-600'
-    
+
     if (finalScore < 40) {
       riskLevel = 'Alto'
       riskColor = 'text-red-600'
     } else if (finalScore < 60) {
       riskLevel = 'Moderado'
       riskColor = 'text-yellow-600'
+    } else if (finalScore < 80) {
+      riskLevel = 'Bom'
+      riskColor = 'text-blue-600'
     }
-    
-    // Identificar possíveis deficiências
-    const deficiencies = []
-    if (answers.symptoms.includes('Fadiga constante') || answers.symptoms.includes('Fraqueza muscular')) {
-      deficiencies.push('Ferro (Anemia)')
+
+    // Recomendações por área
+    const dietRecommendations = []
+    if (dietScore < 15) {
+      dietRecommendations.push('Aumente o consumo de frutas e vegetais')
+      dietRecommendations.push('Prefira alimentos integrais aos refinados')
+      dietRecommendations.push('Reduza o consumo de alimentos processados')
     }
-    if (answers.symptoms.includes('Queda de cabelo') || answers.symptoms.includes('Unhas quebradiças')) {
-      deficiencies.push('Biotina')
+    if (answers.dietHabits.length < 5) {
+      dietRecommendations.push('Estabeleça horários regulares para refeições')
+      dietRecommendations.push('Mantenha hidratação adequada')
     }
-    if (answers.symptoms.includes('Pele seca') || answers.symptoms.includes('Problemas de visão')) {
-      deficiencies.push('Vitamina A')
+
+    const exerciseRecommendations = []
+    if (exerciseScore < 15) {
+      exerciseRecommendations.push('Inclua pelo menos 30 minutos de atividade física diária')
+      exerciseRecommendations.push('Combine exercícios aeróbicos e de força')
+      exerciseRecommendations.push('Encontre atividades que você goste')
     }
-    if (answers.symptoms.includes('Cãibras musculares') || answers.symptoms.includes('Problemas de sono')) {
-      deficiencies.push('Magnésio')
+    if (answers.exerciseHabits.length < 3) {
+      exerciseRecommendations.push('Comece com caminhadas regulares')
+      exerciseRecommendations.push('Use escadas em vez de elevador')
     }
-    if (answers.symptoms.includes('Problemas de memória') || answers.symptoms.includes('Irritabilidade')) {
-      deficiencies.push('Vitamina B12')
+
+    const stressRecommendations = []
+    if (answers.stressLevel === 'high' || answers.stressLevel === 'very-high') {
+      stressRecommendations.push('Pratique técnicas de respiração')
+      stressRecommendations.push('Inclua momentos de relaxamento na rotina')
+      stressRecommendations.push('Considere meditação ou yoga')
     }
-    if (answers.symptoms.includes('Sensibilidade ao frio') || answers.symptoms.includes('Problemas de tireoide')) {
-      deficiencies.push('Iodo')
+
+    const sleepRecommendations = []
+    if (answers.sleepQuality === 'poor' || answers.sleepQuality === 'very-poor') {
+      sleepRecommendations.push('Estabeleça uma rotina de sono regular')
+      sleepRecommendations.push('Evite telas antes de dormir')
+      sleepRecommendations.push('Crie um ambiente propício ao sono')
     }
-    if (answers.symptoms.includes('Dores nas articulações') || answers.symptoms.includes('Cicatrização lenta')) {
-      deficiencies.push('Vitamina C')
-    }
-    
-    // Recomendações
-    const recommendations = [
-      'Consuma pelo menos 5 porções de frutas e vegetais por dia',
-      'Prefira grãos integrais aos refinados',
-      'Inclua fontes de proteína magra em todas as refeições',
-      'Mantenha hidratação adequada (35ml/kg/dia)',
-      'Limite o consumo de açúcar a menos de 10% das calorias',
-      'Reduza o sal para menos de 5g por dia',
-      'Evite gorduras trans e limite gorduras saturadas',
-      'Faça refeições regulares ao longo do dia'
+
+    // Recomendações gerais
+    const overallRecommendations = [
+      'Mantenha uma rotina diária consistente',
+      'Priorize o autocuidado e bem-estar',
+      'Busque equilíbrio entre trabalho e vida pessoal',
+      'Mantenha conexões sociais positivas',
+      'Monitore regularmente sua saúde',
+      'Ajuste gradualmente seus hábitos',
+      'Celebre pequenas conquistas',
+      'Consulte profissionais quando necessário'
     ]
-    
-    // Suplementos sugeridos
-    const supplements = []
-    if (deficiencies.includes('Ferro (Anemia)')) {
-      supplements.push('Suplemento de Ferro (com orientação médica)')
-    }
-    if (deficiencies.includes('Vitamina B12')) {
-      supplements.push('Vitamina B12 ou Complexo B')
-    }
-    if (deficiencies.includes('Magnésio')) {
-      supplements.push('Suplemento de Magnésio')
-    }
-    if (finalScore < 60) {
-      supplements.push('Multivitamínico de qualidade')
-    }
-    
+
     // Próximos passos
     const nextSteps = [
-      'Agende consulta com nutricionista',
-      'Faça exames laboratoriais completos',
-      'Implemente mudanças graduais na dieta',
-      'Monitore sintomas e progresso',
-      'Consulte médico se necessário',
-      'Mantenha diário alimentar'
+      'Implemente mudanças graduais nos hábitos',
+      'Monitore progresso semanalmente',
+      'Ajuste estratégias conforme necessário',
+      'Busque apoio de profissionais qualificados',
+      'Mantenha motivação através de metas claras',
+      'Compartilhe objetivos com pessoas próximas'
     ]
-    
+
     return {
       score: finalScore,
       riskLevel,
       riskColor,
-      deficiencies: deficiencies.length > 0 ? deficiencies : ['Nenhuma deficiência específica identificada'],
-      recommendations,
-      supplements: supplements.length > 0 ? supplements : ['Multivitamínico básico (opcional)'],
+      lifestyleAreas: {
+        diet: { score: dietScore, recommendations: dietRecommendations },
+        exercise: { score: exerciseScore, recommendations: exerciseRecommendations },
+        stress: { score: stressScores[answers.stressLevel as keyof typeof stressScores] || 0, recommendations: stressRecommendations },
+        sleep: { score: sleepScores[answers.sleepQuality as keyof typeof sleepScores] || 0, recommendations: sleepRecommendations }
+      },
+      overallRecommendations,
       nextSteps
     }
   }
@@ -267,35 +282,29 @@ export default function NutritionalAssessmentQuiz() {
     }
   }
 
-  const toggleSymptom = (symptom: string) => {
+  const toggleArrayItem = (arrayName: 'dietHabits' | 'exerciseHabits' | 'healthGoals', item: string) => {
     setAnswers(prev => ({
       ...prev,
-      symptoms: prev.symptoms.includes(symptom)
-        ? prev.symptoms.filter(s => s !== symptom)
-        : [...prev.symptoms, symptom]
-    }))
-  }
-
-  const toggleHealthCondition = (condition: string) => {
-    setAnswers(prev => ({
-      ...prev,
-      healthConditions: prev.healthConditions.includes(condition)
-        ? prev.healthConditions.filter(c => c !== condition)
-        : [...prev.healthConditions, condition]
+      [arrayName]: prev[arrayName].includes(item)
+        ? prev[arrayName].filter(i => i !== item)
+        : [...prev[arrayName], item]
     }))
   }
 
   const copyResults = () => {
     if (!results) return
-    const text = `Minha Avaliação Nutricional:
+    const text = `Minha Avaliação de Estilo de Vida:
 Pontuação Geral: ${results.score}/100
 Nível de Risco: ${results.riskLevel}
 
-Possíveis Deficiências:
-${results.deficiencies.map(d => `• ${d}`).join('\n')}
+Áreas Avaliadas:
+• Alimentação: ${results.lifestyleAreas.diet.score}/25
+• Exercícios: ${results.lifestyleAreas.exercise.score}/25
+• Estresse: ${results.lifestyleAreas.stress.score}/15
+• Sono: ${results.lifestyleAreas.sleep.score}/15
 
 Recomendações:
-${results.recommendations.map(r => `• ${r}`).join('\n')}
+${results.overallRecommendations.map(r => `• ${r}`).join('\n')}
 
 Calculado com YLADA - Ferramentas profissionais de bem-estar`
     navigator.clipboard.writeText(text)
@@ -304,9 +313,9 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
 
   const shareResults = () => {
     if (!results) return
-    const text = `Fiz minha avaliação nutricional com YLADA! Minha pontuação: ${results.score}/100 - ${results.riskLevel}. Que tal você também fazer a sua?`
+    const text = `Fiz minha avaliação de estilo de vida com YLADA! Minha pontuação: ${results.score}/100 - ${results.riskLevel}. Que tal você também fazer a sua?`
     const url = window.location.href
-    navigator.share({ title: 'Minha Avaliação Nutricional - YLADA', text, url })
+    navigator.share({ title: 'Minha Avaliação de Estilo de Vida - YLADA', text, url })
   }
 
   if (showResults && results) {
@@ -327,8 +336,8 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                   <Calculator className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Sua Avaliação Nutricional</h1>
-                  <p className="text-sm text-gray-600">Avaliação Nutricional Completa - YLADA</p>
+                  <h1 className="text-2xl font-bold text-gray-900">Sua Avaliação de Estilo de Vida</h1>
+                  <p className="text-sm text-gray-600">Avaliação de Estilo de Vida - YLADA</p>
                 </div>
               </div>
             </div>
@@ -338,66 +347,98 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Results Summary */}
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Resultado da Sua Avaliação Nutricional</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Resultado da Sua Avaliação de Estilo de Vida</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="bg-blue-50 rounded-lg p-6 text-center">
                 <h3 className="font-semibold text-gray-900 mb-2">Pontuação Geral</h3>
                 <p className="text-4xl font-bold text-blue-600">{results.score}/100</p>
-                <p className="text-sm text-gray-600">Baseado em múltiplos fatores</p>
+                <p className="text-sm text-gray-600">Avaliação completa de estilo de vida</p>
               </div>
               
               <div className="bg-green-50 rounded-lg p-6 text-center">
                 <h3 className="font-semibold text-gray-900 mb-2">Nível de Risco</h3>
                 <p className={`text-2xl font-bold ${results.riskColor}`}>{results.riskLevel}</p>
                 <p className="text-sm text-gray-600">
-                  {results.riskLevel === 'Baixo' ? 'Continue mantendo bons hábitos' :
-                   results.riskLevel === 'Moderado' ? 'Algumas melhorias são necessárias' :
-                   'Consulte um profissional urgentemente'}
+                  {results.riskLevel === 'Excelente' ? 'Continue mantendo excelentes hábitos' :
+                   results.riskLevel === 'Bom' ? 'Algumas melhorias podem ser feitas' :
+                   results.riskLevel === 'Moderado' ? 'Melhorias significativas são necessárias' :
+                   'Mudanças urgentes são recomendadas'}
                 </p>
               </div>
             </div>
 
-            {/* Deficiencies */}
-            <div className="bg-yellow-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
-                Possíveis Deficiências Nutricionais
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {results.deficiencies.map((deficiency, index) => (
-                  <div key={index} className="flex items-center text-sm text-gray-700">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
-                    {deficiency}
-                  </div>
-                ))}
+            {/* Lifestyle Areas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-emerald-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Heart className="w-5 h-5 text-emerald-600 mr-2" />
+                  Alimentação ({results.lifestyleAreas.diet.score}/25)
+                </h3>
+                <ul className="space-y-2">
+                  {results.lifestyleAreas.diet.recommendations.map((rec, index) => (
+                    <li key={index} className="flex items-start text-sm text-gray-700">
+                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3 mt-2"></div>
+                      {rec}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Activity className="w-5 h-5 text-blue-600 mr-2" />
+                  Exercícios ({results.lifestyleAreas.exercise.score}/25)
+                </h3>
+                <ul className="space-y-2">
+                  {results.lifestyleAreas.exercise.recommendations.map((rec, index) => (
+                    <li key={index} className="flex items-start text-sm text-gray-700">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3 mt-2"></div>
+                      {rec}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Brain className="w-5 h-5 text-yellow-600 mr-2" />
+                  Estresse ({results.lifestyleAreas.stress.score}/15)
+                </h3>
+                <ul className="space-y-2">
+                  {results.lifestyleAreas.stress.recommendations.map((rec, index) => (
+                    <li key={index} className="flex items-start text-sm text-gray-700">
+                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-3 mt-2"></div>
+                      {rec}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-purple-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Shield className="w-5 h-5 text-purple-600 mr-2" />
+                  Sono ({results.lifestyleAreas.sleep.score}/15)
+                </h3>
+                <ul className="space-y-2">
+                  {results.lifestyleAreas.sleep.recommendations.map((rec, index) => (
+                    <li key={index} className="flex items-start text-sm text-gray-700">
+                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-3 mt-2"></div>
+                      {rec}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
 
-            {/* Supplements */}
-            <div className="bg-purple-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Shield className="w-5 h-5 text-purple-600 mr-2" />
-                Suplementos Sugeridos
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {results.supplements.map((supplement, index) => (
-                  <div key={index} className="flex items-center text-sm text-gray-700">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                    {supplement}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recommendations */}
+            {/* Overall Recommendations */}
             <div className="bg-emerald-50 rounded-lg p-6 mb-8">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <CheckCircle className="w-5 h-5 text-emerald-600 mr-2" />
-                Recomendações Nutricionais
+                Recomendações Gerais
               </h4>
               <ul className="space-y-2">
-                {results.recommendations.map((rec, index) => (
+                {results.overallRecommendations.map((rec, index) => (
                   <li key={index} className="flex items-start">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
                     <span className="text-gray-700">{rec}</span>
@@ -460,7 +501,7 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
 
   const currentStepData = steps[currentStep]
   const isStepComplete = currentStepData.fields.every(field => {
-    if (field === 'symptoms' || field === 'healthConditions') {
+    if (field === 'dietHabits' || field === 'exerciseHabits' || field === 'healthGoals') {
       return Array.isArray(answers[field as keyof typeof answers]) && 
              (answers[field as keyof typeof answers] as string[]).length > 0
     }
@@ -481,7 +522,7 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                 <Calculator className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Avaliação Nutricional</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Avaliação de Estilo de Vida</h1>
                 <p className="text-sm text-gray-600">Passo {currentStep + 1} de {steps.length}</p>
               </div>
             </div>
@@ -630,128 +671,71 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
             </div>
           )}
 
-          {/* Symptoms Step */}
+          {/* Diet Habits Step */}
           {currentStep === 1 && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Sintomas que você apresenta (selecione todos que se aplicam):
+                Hábitos alimentares que você pratica (selecione todos que se aplicam):
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {symptoms.map((symptom) => (
+                {dietHabits.map((habit) => (
                   <button
-                    key={symptom}
+                    key={habit}
                     type="button"
-                    onClick={() => toggleSymptom(symptom)}
+                    onClick={() => toggleArrayItem('dietHabits', habit)}
                     className={`p-3 rounded-lg border text-sm text-left transition-colors ${
-                      answers.symptoms.includes(symptom)
+                      answers.dietHabits.includes(habit)
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-gray-300 hover:border-gray-400'
                     }`}
                   >
-                    {symptom}
+                    {habit}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Diet and Lifestyle Step */}
+          {/* Exercise Habits Step */}
           {currentStep === 2 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Qualidade da sua alimentação *
-                </label>
-                <select
-                  required
-                  value={answers.diet}
-                  onChange={(e) => setAnswers({...answers, diet: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="excellent">Excelente (muitas frutas, vegetais, grãos integrais)</option>
-                  <option value="good">Boa (algumas frutas e vegetais)</option>
-                  <option value="moderate">Moderada (poucas frutas e vegetais)</option>
-                  <option value="poor">Ruim (poucos alimentos naturais)</option>
-                  <option value="very-poor">Muito ruim (principalmente processados)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Estilo de vida geral *
-                </label>
-                <select
-                  required
-                  value={answers.lifestyle}
-                  onChange={(e) => setAnswers({...answers, lifestyle: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="excellent">Excelente (exercícios regulares, sono adequado)</option>
-                  <option value="good">Bom (alguns exercícios, sono razoável)</option>
-                  <option value="moderate">Moderado (poucos exercícios, sono irregular)</option>
-                  <option value="poor">Ruim (sedentário, sono ruim)</option>
-                  <option value="very-poor">Muito ruim (sedentário, sono muito ruim)</option>
-                </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Atividades físicas que você pratica (selecione todas que se aplicam):
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {exerciseHabits.map((habit) => (
+                  <button
+                    key={habit}
+                    type="button"
+                    onClick={() => toggleArrayItem('exerciseHabits', habit)}
+                    className={`p-3 rounded-lg border text-sm text-left transition-colors ${
+                      answers.exerciseHabits.includes(habit)
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {habit}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Health Conditions Step */}
+          {/* Lifestyle Factors Step */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Condições de saúde (selecione todas que se aplicam):
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {healthConditions.map((condition) => (
-                    <button
-                      key={condition}
-                      type="button"
-                      onClick={() => toggleHealthCondition(condition)}
-                      className={`p-3 rounded-lg border text-sm text-left transition-colors ${
-                        answers.healthConditions.includes(condition)
-                          ? 'border-red-500 bg-red-50 text-red-700'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      {condition}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Medicamentos que você toma regularmente
-                </label>
-                <textarea
-                  value={answers.medications}
-                  onChange={(e) => setAnswers({...answers, medications: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="Ex: Metformina, Losartana..."
-                  rows={3}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Stress and Sleep Step */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nível de estresse *
+                  Nível de estresse atual *
                 </label>
                 <select
                   required
-                  value={answers.stress}
-                  onChange={(e) => setAnswers({...answers, stress: e.target.value})}
+                  value={answers.stressLevel}
+                  onChange={(e) => setAnswers({...answers, stressLevel: e.target.value})}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
                   <option value="">Selecione</option>
+                  <option value="very-low">Muito baixo</option>
                   <option value="low">Baixo</option>
                   <option value="moderate">Moderado</option>
                   <option value="high">Alto</option>
@@ -765,8 +749,8 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                 </label>
                 <select
                   required
-                  value={answers.sleep}
-                  onChange={(e) => setAnswers({...answers, sleep: e.target.value})}
+                  value={answers.sleepQuality}
+                  onChange={(e) => setAnswers({...answers, sleepQuality: e.target.value})}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
                   <option value="">Selecione</option>
@@ -776,6 +760,69 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                   <option value="poor">Ruim (4-6 horas, sono superficial)</option>
                   <option value="very-poor">Muito ruim (menos de 4 horas)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rotina de trabalho *
+                </label>
+                <select
+                  required
+                  value={answers.workSchedule}
+                  onChange={(e) => setAnswers({...answers, workSchedule: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Selecione</option>
+                  <option value="flexible">Flexível (home office, horários livres)</option>
+                  <option value="regular">Regular (8h/dia, horário fixo)</option>
+                  <option value="demanding">Exigente (muitas horas, prazos apertados)</option>
+                  <option value="stressful">Estressante (alta pressão, responsabilidades)</option>
+                  <option value="very-stressful">Muito estressante (sobrecarga constante)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Vida social *
+                </label>
+                <select
+                  required
+                  value={answers.socialLife}
+                  onChange={(e) => setAnswers({...answers, socialLife: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Selecione</option>
+                  <option value="very-active">Muito ativa (muitos amigos, eventos frequentes)</option>
+                  <option value="active">Ativa (alguns amigos próximos, atividades regulares)</option>
+                  <option value="moderate">Moderada (poucos amigos, atividades ocasionais)</option>
+                  <option value="limited">Limitada (poucos contatos, atividades raras)</option>
+                  <option value="isolated">Isolada (pouco contato social)</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Health Goals Step */}
+          {currentStep === 4 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Objetivos de saúde que você tem (selecione todos que se aplicam):
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {healthGoals.map((goal) => (
+                  <button
+                    key={goal}
+                    type="button"
+                    onClick={() => toggleArrayItem('healthGoals', goal)}
+                    className={`p-3 rounded-lg border text-sm text-left transition-colors ${
+                      answers.healthGoals.includes(goal)
+                        ? 'border-purple-500 bg-purple-50 text-purple-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {goal}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -811,7 +858,7 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
               <p className="text-yellow-700 text-sm">
                 Esta avaliação fornece uma análise preliminar baseada em critérios científicos. 
                 Para um diagnóstico preciso e plano personalizado, consulte sempre um 
-                nutricionista ou médico qualificado.
+                profissional de bem-estar qualificado.
               </p>
             </div>
           </div>
