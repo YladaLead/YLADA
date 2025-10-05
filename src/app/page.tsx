@@ -312,7 +312,7 @@ export default function Home() {
               <ArrowRight className="w-5 h-5 ml-2" />
             </a>
             <a href="/quiz" className="px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors">
-              Testar Quiz de Avaliação
+              Ver Quizzes de Avaliação
             </a>
           </div>
         </div>
