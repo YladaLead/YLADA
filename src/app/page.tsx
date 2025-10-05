@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Calculator, Shield, Zap, Heart, Brain, CheckCircle, ArrowRight, Users, TrendingUp, Star, ExternalLink, Play, Target, Activity } from 'lucide-react'
 
 export default function SalesPage() {
@@ -456,8 +455,8 @@ export default function SalesPage() {
                 ))}
               </div>
               <p className="text-gray-700">
-                "Com o YLADA consegui aumentar em 300% meus leads qualificados. 
-                Os clientes adoram as avaliações personalizadas e eu recebo todos os dados automaticamente."
+                &quot;Com o YLADA consegui aumentar em 300% meus leads qualificados. 
+                Os clientes adoram as avaliações personalizadas e eu recebo todos os dados automaticamente.&quot;
               </p>
             </div>
 
@@ -477,8 +476,8 @@ export default function SalesPage() {
                 ))}
               </div>
               <p className="text-gray-700">
-                "As ferramentas do YLADA me ajudaram a demonstrar minha expertise profissional. 
-                Agora meus clientes confiam mais no meu trabalho e minhas vendas dobraram."
+                &quot;As ferramentas do YLADA me ajudaram a demonstrar minha expertise profissional. 
+                Agora meus clientes confiam mais no meu trabalho e minhas vendas dobraram.&quot;
               </p>
             </div>
 
@@ -498,8 +497,8 @@ export default function SalesPage() {
                 ))}
               </div>
               <p className="text-gray-700">
-                "O YLADA revolucionou meu atendimento. Os quizzes interativos engajam muito mais 
-                os clientes e eu consigo capturar leads de qualidade constantemente."
+                &quot;O YLADA revolucionou meu atendimento. Os quizzes interativos engajam muito mais 
+                os clientes e eu consigo capturar leads de qualidade constantemente.&quot;
               </p>
             </div>
           </div>

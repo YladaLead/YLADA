@@ -8,7 +8,20 @@ export default function HealthGoalsQuizDemoPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showResult, setShowResult] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    goal: string
+    timeframe: string
+    intensity: string
+    plan: {
+      title: string
+      description: string
+      activities: string[]
+    }
+    strategies: string[]
+    schedule: string[]
+    successMetrics: string[]
+    motivation: string
+  } | null>(null)
 
   const questions = [
     {
@@ -485,12 +498,12 @@ export default function HealthGoalsQuizDemoPage() {
             >
               Começar Gratuitamente
             </a>
-            <a
+            <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
             >
               Ver Outras Ferramentas
-            </a>
+            </Link>
           </div>
         </div>
       </main>

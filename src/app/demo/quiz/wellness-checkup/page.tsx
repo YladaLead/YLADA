@@ -8,7 +8,16 @@ export default function WellnessCheckupQuizDemoPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showResult, setShowResult] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    score: number
+    maxScore: number
+    percentage: string
+    wellnessLevel: string
+    color: string
+    description: string
+    recommendations: string[]
+    priorityAreas: string[]
+  } | null>(null)
 
   const questions = [
     {
@@ -423,12 +432,12 @@ export default function WellnessCheckupQuizDemoPage() {
             >
               Começar Gratuitamente
             </a>
-            <a
+            <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
             >
               Ver Outras Ferramentas
-            </a>
+            </Link>
           </div>
         </div>
       </main>

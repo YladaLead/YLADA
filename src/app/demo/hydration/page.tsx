@@ -14,7 +14,16 @@ export default function HydrationDemoPage() {
     exerciseDuration: '',
     exerciseIntensity: 'moderate'
   })
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    totalWater: number
+    hourlyIntake: number
+    morningIntake: number
+    afternoonIntake: number
+    eveningIntake: number
+    dehydrationSigns: string[]
+    hydrationTips: string[]
+    hydratingFoods: string[]
+  } | null>(null)
   const [showResult, setShowResult] = useState(false)
 
   const calculateHydration = () => {
@@ -393,12 +402,12 @@ export default function HydrationDemoPage() {
             >
               Começar Gratuitamente
             </a>
-            <a
+            <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
             >
               Ver Outras Ferramentas
-            </a>
+            </Link>
           </div>
         </div>
       </main>

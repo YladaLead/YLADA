@@ -15,7 +15,23 @@ export default function MealPlannerDemoPage() {
     mealsPerDay: '3',
     dietaryRestrictions: []
   })
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    tdee: number
+    proteinGrams: number
+    carbGrams: number
+    fatGrams: number
+    proteinPerMeal: number
+    carbPerMeal: number
+    fatPerMeal: number
+    mealsPerDay: number
+    mealSuggestions: {
+      breakfast: string[]
+      lunch: string[]
+      dinner: string[]
+      snacks: string[]
+    }
+    shoppingList: string[]
+  } | null>(null)
   const [showResult, setShowResult] = useState(false)
 
   const dietaryOptions = [
@@ -479,12 +495,12 @@ export default function MealPlannerDemoPage() {
             >
               Começar Gratuitamente
             </a>
-            <a
+            <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
             >
               Ver Outras Ferramentas
-            </a>
+            </Link>
           </div>
         </div>
       </main>

@@ -18,7 +18,25 @@ export default function NutritionAssessmentDemoPage() {
     healthConditions: [],
     symptoms: []
   })
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    bmi: number
+    tdee: number
+    score: number
+    maxScore: number
+    percentage: number
+    category: string
+    color: string
+    recommendations: string[]
+    priorityAreas: string[]
+    nutritionalNeeds: {
+      calories: number
+      protein: number
+      carbs: number
+      fat: number
+      fiber: number
+      water: number
+    }
+  } | null>(null)
   const [showResult, setShowResult] = useState(false)
 
   const healthConditions = [
@@ -537,12 +555,12 @@ export default function NutritionAssessmentDemoPage() {
             >
               Começar Gratuitamente
             </a>
-            <a
+            <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
             >
               Ver Outras Ferramentas
-            </a>
+            </Link>
           </div>
         </div>
       </main>

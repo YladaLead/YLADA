@@ -12,7 +12,10 @@ export default function ProteinDemoPage() {
     activity: 'moderate',
     goal: 'maintenance'
   })
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    proteinNeeded: number
+    recommendation: string
+  } | null>(null)
   const [showResult, setShowResult] = useState(false)
 
   const calculateProtein = () => {
@@ -288,12 +291,12 @@ export default function ProteinDemoPage() {
             >
               Começar Gratuitamente
             </a>
-            <a
+            <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
             >
               Ver Outras Ferramentas
-            </a>
+            </Link>
           </div>
         </div>
       </main>

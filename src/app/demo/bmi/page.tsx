@@ -11,7 +11,11 @@ export default function BMIDemoPage() {
     age: '',
     gender: 'masculino'
   })
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    bmi: number
+    category: string
+    recommendation: string
+  } | null>(null)
   const [showResult, setShowResult] = useState(false)
 
   const calculateBMI = () => {
@@ -245,12 +249,12 @@ export default function BMIDemoPage() {
             >
               Começar Gratuitamente
             </a>
-            <a
+            <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
             >
               Ver Outras Ferramentas
-            </a>
+            </Link>
           </div>
         </div>
       </main>
