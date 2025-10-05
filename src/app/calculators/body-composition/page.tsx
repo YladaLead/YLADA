@@ -10,13 +10,23 @@ import {
   Heart,
   Activity,
   Target,
-  Download,
   Share2,
-  Copy,
-  Eye,
-  Zap
+  Copy
 } from 'lucide-react'
 import Link from 'next/link'
+
+interface BodyCompositionResults {
+  bmi: string
+  bmiCategory: string
+  bodyFatPercentage: string
+  bodyFatCategory: string
+  bodyFatColor: string
+  leanMass: string
+  fatMass: string
+  bmr: string
+  tdee: string
+  recommendations: string[]
+}
 
 export default function BodyCompositionPage() {
   const [formData, setFormData] = useState({
@@ -32,7 +42,7 @@ export default function BodyCompositionPage() {
     hip: '',
     activity: ''
   })
-  const [results, setResults] = useState(null)
+  const [results, setResults] = useState<BodyCompositionResults | null>(null)
   const [showResults, setShowResults] = useState(false)
 
   const calculateBodyComposition = () => {
@@ -80,7 +90,7 @@ export default function BodyCompositionPage() {
       'muito-ativo': 1.9
     }
     
-    const tdee = bmr * (activityMultipliers[formData.activity] || 1.2)
+    const tdee = bmr * (activityMultipliers[formData.activity as keyof typeof activityMultipliers] || 1.2)
     
     // Determine body fat category
     let bodyFatCategory = ''
@@ -140,7 +150,7 @@ export default function BodyCompositionPage() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const compositionResults = calculateBodyComposition()
     if (compositionResults) {
@@ -150,6 +160,7 @@ export default function BodyCompositionPage() {
   }
 
   const copyResults = () => {
+    if (!results) return
     const text = `Minha Composição Corporal:
 IMC: ${results.bmi} - ${results.bmiCategory}
 Gordura Corporal: ${results.bodyFatPercentage}% - ${results.bodyFatCategory}
@@ -163,6 +174,7 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
   }
 
   const shareResults = () => {
+    if (!results) return
     const text = `Descobri minha composição corporal com YLADA! Meu percentual de gordura: ${results.bodyFatPercentage}% - ${results.bodyFatCategory}. Que tal você também calcular o seu?`
     const url = window.location.href
     navigator.share({ title: 'Minha Composição Corporal - YLADA', text, url })

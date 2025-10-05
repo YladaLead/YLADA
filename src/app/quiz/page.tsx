@@ -419,7 +419,7 @@ export default function QuizPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentStepData.options?.map((option) => {
-                const IconComponent = option.icon
+                const IconComponent = 'icon' in option ? option.icon : null
                 return (
                   <button
                     key={option.value}

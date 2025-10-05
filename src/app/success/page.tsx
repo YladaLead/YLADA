@@ -75,7 +75,7 @@ export default function SuccessPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-blue-50 rounded-lg p-6">
-              <h4 className="font-semibold text-gray-900 mb-3">What's Included:</h4>
+              <h4 className="font-semibold text-gray-900 mb-3">What&apos;s Included:</h4>
               <ul className="text-sm text-gray-600 space-y-2">
                 <li className="flex items-center">
                   <CheckCircle className="w-4 h-4 text-green-500 mr-2" />

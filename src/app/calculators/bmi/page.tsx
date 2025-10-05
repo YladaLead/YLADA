@@ -10,12 +10,21 @@ import {
   Heart,
   Activity,
   Target,
-  Download,
   Share2,
-  Copy,
-  Eye
+  Copy
 } from 'lucide-react'
 import Link from 'next/link'
+
+interface BMIResults {
+  bmi: string
+  category: string
+  color: string
+  recommendations: string[]
+  idealWeight: {
+    min: string
+    max: string
+  }
+}
 
 export default function BMICalculatorPage() {
   const [formData, setFormData] = useState({
@@ -28,7 +37,7 @@ export default function BMICalculatorPage() {
     gender: '',
     activity: ''
   })
-  const [results, setResults] = useState(null)
+  const [results, setResults] = useState<BMIResults | null>(null)
   const [showResults, setShowResults] = useState(false)
 
   const calculateBMI = () => {
@@ -89,7 +98,7 @@ export default function BMICalculatorPage() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const bmiResults = calculateBMI()
     if (bmiResults) {
@@ -99,12 +108,14 @@ export default function BMICalculatorPage() {
   }
 
   const copyResults = () => {
+    if (!results) return
     const text = `Meu IMC: ${results.bmi} - ${results.category}\n\nRecomendações:\n${results.recommendations.map(r => `• ${r}`).join('\n')}\n\nCalculado com YLADA - Ferramentas profissionais de bem-estar`
     navigator.clipboard.writeText(text)
     alert('Resultados copiados para a área de transferência!')
   }
 
   const shareResults = () => {
+    if (!results) return
     const text = `Descobri meu IMC com YLADA! Meu resultado: ${results.bmi} - ${results.category}. Que tal você também calcular o seu?`
     const url = window.location.href
     navigator.share({ title: 'Meu IMC - YLADA', text, url })
