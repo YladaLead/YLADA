@@ -17,6 +17,7 @@ export default function LifestyleQuizDemoPage() {
     description: string
     recommendations: string[]
     priorityAreas: string[]
+    lifestyleTips: string[]
   } | null>(null)
 
   const questions = [
