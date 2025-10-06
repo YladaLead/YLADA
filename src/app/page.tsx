@@ -1,10 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, CheckCircle } from 'lucide-react'
+import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Mail, MessageSquare } from 'lucide-react'
 
 export default function UniversalLandingPage() {
   const [selectedLanguage, setSelectedLanguage] = useState('pt')
+  const [showContactForm, setShowContactForm] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    profession: '',
+    message: ''
+  })
 
   const languages = [
     { code: 'pt', name: 'Português', flag: '🇧🇷' },
@@ -19,11 +26,10 @@ export default function UniversalLandingPage() {
     pt: {
       title: 'YLADA',
       subtitle: 'Your Lead Accelerated Data App',
-      description: 'Gerador de Leads Profissionais para Nutrição e Bem-Estar',
+      description: 'Gerador de Leads Profissionais',
       heroTitle: 'Transforme Visitantes em Clientes Qualificados',
-      heroSubtitle: 'Ferramentas profissionais de nutrição que capturam leads automaticamente',
-      ctaButton: 'Começar Agora',
-      ctaLink: '/fitlead',
+      heroSubtitle: 'Ferramenta profissional que captura leads automaticamente para qualquer área de atuação',
+      ctaButton: 'Saiba Mais',
       benefits: [
         {
           icon: Users,
@@ -41,19 +47,47 @@ export default function UniversalLandingPage() {
           description: 'Seja o profissional que oferece avaliações modernas'
         }
       ],
+      howItWorks: {
+        title: 'Como Funciona',
+        steps: [
+          {
+            step: '1',
+            title: 'Configure Suas Ferramentas',
+            description: 'Personalize com sua marca e área de atuação'
+          },
+          {
+            step: '2',
+            title: 'Compartilhe com Seus Clientes',
+            description: 'Envie links das ferramentas para seus prospects'
+          },
+          {
+            step: '3',
+            title: 'Receba os Dados Automaticamente',
+            description: 'Todos os formulários preenchidos chegam no seu dashboard'
+          }
+        ]
+      },
+      whyChoose: {
+        title: 'Por que Escolher o YLADA?',
+        reasons: [
+          'Funciona para qualquer área profissional',
+          'Captura dados automaticamente',
+          'Personalização completa com sua marca',
+          'Dashboard intuitivo e fácil de usar',
+          'Suporte técnico especializado'
+        ]
+      },
       socialProof: '+500 profissionais já usam',
       rating: '4.9/5 avaliação',
-      guarantee: 'Garantia de 30 dias',
       footer: '© 2024 YLADA. Todos os direitos reservados.'
     },
     en: {
       title: 'YLADA',
       subtitle: 'Your Lead Accelerated Data App',
-      description: 'Professional Lead Generator for Nutrition and Wellness',
+      description: 'Professional Lead Generator',
       heroTitle: 'Transform Visitors into Qualified Clients',
-      heroSubtitle: 'Professional nutrition tools that automatically capture leads',
-      ctaButton: 'Get Started',
-      ctaLink: '/fitlead',
+      heroSubtitle: 'Professional tool that automatically captures leads for any field of work',
+      ctaButton: 'Learn More',
       benefits: [
         {
           icon: Users,
@@ -71,19 +105,47 @@ export default function UniversalLandingPage() {
           description: 'Be the professional who offers modern assessments'
         }
       ],
+      howItWorks: {
+        title: 'How It Works',
+        steps: [
+          {
+            step: '1',
+            title: 'Configure Your Tools',
+            description: 'Customize with your brand and field of work'
+          },
+          {
+            step: '2',
+            title: 'Share with Your Clients',
+            description: 'Send tool links to your prospects'
+          },
+          {
+            step: '3',
+            title: 'Receive Data Automatically',
+            description: 'All filled forms arrive in your dashboard'
+          }
+        ]
+      },
+      whyChoose: {
+        title: 'Why Choose YLADA?',
+        reasons: [
+          'Works for any professional field',
+          'Automatically captures data',
+          'Complete customization with your brand',
+          'Intuitive and easy-to-use dashboard',
+          'Specialized technical support'
+        ]
+      },
       socialProof: '+500 professionals already use',
       rating: '4.9/5 rating',
-      guarantee: '30-day guarantee',
       footer: '© 2024 YLADA. All rights reserved.'
     },
     es: {
       title: 'YLADA',
       subtitle: 'Your Lead Accelerated Data App',
-      description: 'Generador de Leads Profesionales para Nutrición y Bienestar',
+      description: 'Generador de Leads Profesionales',
       heroTitle: 'Transforma Visitantes en Clientes Calificados',
-      heroSubtitle: 'Herramientas profesionales de nutrición que capturan leads automáticamente',
-      ctaButton: 'Comenzar Ahora',
-      ctaLink: '/fitlead',
+      heroSubtitle: 'Herramienta profesional que captura leads automáticamente para cualquier área de trabajo',
+      ctaButton: 'Saber Más',
       benefits: [
         {
           icon: Users,
@@ -101,19 +163,47 @@ export default function UniversalLandingPage() {
           description: 'Sé el profesional que ofrece evaluaciones modernas'
         }
       ],
+      howItWorks: {
+        title: 'Cómo Funciona',
+        steps: [
+          {
+            step: '1',
+            title: 'Configura Tus Herramientas',
+            description: 'Personaliza con tu marca y área de trabajo'
+          },
+          {
+            step: '2',
+            title: 'Comparte con Tus Clientes',
+            description: 'Envía enlaces de herramientas a tus prospectos'
+          },
+          {
+            step: '3',
+            title: 'Recibe Datos Automáticamente',
+            description: 'Todos los formularios llenos llegan a tu dashboard'
+          }
+        ]
+      },
+      whyChoose: {
+        title: '¿Por qué Elegir YLADA?',
+        reasons: [
+          'Funciona para cualquier área profesional',
+          'Captura datos automáticamente',
+          'Personalización completa con tu marca',
+          'Dashboard intuitivo y fácil de usar',
+          'Soporte técnico especializado'
+        ]
+      },
       socialProof: '+500 profesionales ya usan',
       rating: '4.9/5 calificación',
-      guarantee: 'Garantía de 30 días',
       footer: '© 2024 YLADA. Todos los derechos reservados.'
     },
     fr: {
       title: 'YLADA',
       subtitle: 'Your Lead Accelerated Data App',
-      description: 'Générateur de Leads Professionnels pour la Nutrition et le Bien-être',
+      description: 'Générateur de Leads Professionnels',
       heroTitle: 'Transformez les Visiteurs en Clients Qualifiés',
-      heroSubtitle: 'Outils professionnels de nutrition qui capturent automatiquement les leads',
-      ctaButton: 'Commencer Maintenant',
-      ctaLink: '/fitlead',
+      heroSubtitle: 'Outil professionnel qui capture automatiquement les leads pour tout domaine de travail',
+      ctaButton: 'En Savoir Plus',
       benefits: [
         {
           icon: Users,
@@ -131,19 +221,47 @@ export default function UniversalLandingPage() {
           description: 'Soyez le professionnel qui offre des évaluations modernes'
         }
       ],
+      howItWorks: {
+        title: 'Comment Ça Marche',
+        steps: [
+          {
+            step: '1',
+            title: 'Configurez Vos Outils',
+            description: 'Personnalisez avec votre marque et domaine de travail'
+          },
+          {
+            step: '2',
+            title: 'Partagez avec Vos Clients',
+            description: 'Envoyez des liens d\'outils à vos prospects'
+          },
+          {
+            step: '3',
+            title: 'Recevez les Données Automatiquement',
+            description: 'Tous les formulaires remplis arrivent dans votre tableau de bord'
+          }
+        ]
+      },
+      whyChoose: {
+        title: 'Pourquoi Choisir YLADA?',
+        reasons: [
+          'Fonctionne pour tout domaine professionnel',
+          'Capture automatiquement les données',
+          'Personnalisation complète avec votre marque',
+          'Tableau de bord intuitif et facile à utiliser',
+          'Support technique spécialisé'
+        ]
+      },
       socialProof: '+500 professionnels utilisent déjà',
       rating: '4.9/5 évaluation',
-      guarantee: 'Garantie de 30 jours',
       footer: '© 2024 YLADA. Tous droits réservés.'
     },
     de: {
       title: 'YLADA',
       subtitle: 'Your Lead Accelerated Data App',
-      description: 'Professioneller Lead-Generator für Ernährung und Wellness',
+      description: 'Professioneller Lead-Generator',
       heroTitle: 'Verwandeln Sie Besucher in Qualifizierte Kunden',
-      heroSubtitle: 'Professionelle Ernährungstools, die automatisch Leads erfassen',
-      ctaButton: 'Jetzt Starten',
-      ctaLink: '/fitlead',
+      heroSubtitle: 'Professionelles Tool, das automatisch Leads für jedes Arbeitsfeld erfasst',
+      ctaButton: 'Mehr Erfahren',
       benefits: [
         {
           icon: Users,
@@ -161,19 +279,47 @@ export default function UniversalLandingPage() {
           description: 'Seien Sie der Profi, der moderne Bewertungen anbietet'
         }
       ],
+      howItWorks: {
+        title: 'Wie Es Funktioniert',
+        steps: [
+          {
+            step: '1',
+            title: 'Konfigurieren Sie Ihre Tools',
+            description: 'Personalisieren Sie mit Ihrer Marke und Arbeitsbereich'
+          },
+          {
+            step: '2',
+            title: 'Teilen Sie mit Ihren Kunden',
+            description: 'Senden Sie Tool-Links an Ihre Interessenten'
+          },
+          {
+            step: '3',
+            title: 'Erhalten Sie Daten Automatisch',
+            description: 'Alle ausgefüllten Formulare kommen in Ihr Dashboard'
+          }
+        ]
+      },
+      whyChoose: {
+        title: 'Warum YLADA Wählen?',
+        reasons: [
+          'Funktioniert für jedes Berufsfeld',
+          'Erfasst automatisch Daten',
+          'Vollständige Anpassung mit Ihrer Marke',
+          'Intuitives und benutzerfreundliches Dashboard',
+          'Spezialisierter technischer Support'
+        ]
+      },
       socialProof: '+500 Fachkräfte nutzen bereits',
       rating: '4.9/5 Bewertung',
-      guarantee: '30-Tage-Garantie',
       footer: '© 2024 YLADA. Alle Rechte vorbehalten.'
     },
     it: {
       title: 'YLADA',
       subtitle: 'Your Lead Accelerated Data App',
-      description: 'Generatore di Lead Professionale per Nutrizione e Benessere',
+      description: 'Generatore di Lead Professionale',
       heroTitle: 'Trasforma i Visitatori in Clienti Qualificati',
-      heroSubtitle: 'Strumenti professionali di nutrizione che catturano automaticamente i lead',
-      ctaButton: 'Inizia Ora',
-      ctaLink: '/fitlead',
+      heroSubtitle: 'Strumento professionale che cattura automaticamente i lead per qualsiasi campo di lavoro',
+      ctaButton: 'Scopri di Più',
       benefits: [
         {
           icon: Users,
@@ -191,14 +337,60 @@ export default function UniversalLandingPage() {
           description: 'Sii il professionista che offre valutazioni moderne'
         }
       ],
+      howItWorks: {
+        title: 'Come Funziona',
+        steps: [
+          {
+            step: '1',
+            title: 'Configura i Tuoi Strumenti',
+            description: 'Personalizza con il tuo brand e campo di lavoro'
+          },
+          {
+            step: '2',
+            title: 'Condividi con i Tuoi Clienti',
+            description: 'Invia link degli strumenti ai tuoi prospect'
+          },
+          {
+            step: '3',
+            title: 'Ricevi Dati Automaticamente',
+            description: 'Tutti i moduli compilati arrivano nella tua dashboard'
+          }
+        ]
+      },
+      whyChoose: {
+        title: 'Perché Scegliere YLADA?',
+        reasons: [
+          'Funziona per qualsiasi campo professionale',
+          'Cattura automaticamente i dati',
+          'Personalizzazione completa con il tuo brand',
+          'Dashboard intuitiva e facile da usare',
+          'Supporto tecnico specializzato'
+        ]
+      },
       socialProof: '+500 professionisti già utilizzano',
       rating: '4.9/5 valutazione',
-      guarantee: 'Garanzia di 30 giorni',
       footer: '© 2024 YLADA. Tutti i diritti riservati.'
     }
   }
 
   const currentContent = content[selectedLanguage as keyof typeof content]
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Aqui você pode implementar o envio do e-mail
+    // Por enquanto, vamos apenas mostrar um alerta
+    alert(`Mensagem enviada! Entraremos em contato em breve através do e-mail: ${formData.email}`)
+    
+    // Reset do formulário
+    setFormData({
+      name: '',
+      email: '',
+      profession: '',
+      message: ''
+    })
+    setShowContactForm(false)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
@@ -270,14 +462,15 @@ export default function UniversalLandingPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={currentContent.ctaLink}
+          <div className="flex justify-center">
+            <button
+              onClick={() => setShowContactForm(true)}
               className="px-8 py-4 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
             >
+              <MessageSquare className="w-5 h-5 mr-2" />
               {currentContent.ctaButton}
               <ArrowRight className="w-5 h-5 ml-2" />
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -303,44 +496,149 @@ export default function UniversalLandingPage() {
         </div>
       </section>
 
-      {/* Guarantee Section */}
-      <section className="py-16 bg-emerald-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-emerald-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              {currentContent.guarantee}
+      {/* How It Works Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              {currentContent.howItWorks.title}
             </h3>
-            <p className="text-lg text-gray-600 mb-6">
-              Teste o YLADA por 30 dias sem compromisso. Se não aumentar suas vendas, 
-              devolvemos 100% do seu dinheiro. Sem perguntas, sem burocracia.
-            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {currentContent.howItWorks.steps.map((step, index) => (
+              <div key={index} className="text-center">
+                <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                  {step.step}
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                  {step.title}
+                </h4>
+                <p className="text-gray-600">
+                  {step.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-emerald-600 to-green-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h3 className="text-3xl font-bold mb-4">
-            Pronto para aumentar suas vendas?
-          </h3>
-          <p className="text-xl text-emerald-100 mb-8">
-            Junte-se a mais de 500 profissionais que já transformaram seus negócios
-          </p>
-          <div className="flex justify-center">
-            <a
-              href={currentContent.ctaLink}
-              className="px-8 py-4 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center"
-            >
-              {currentContent.ctaButton}
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </a>
+      {/* Why Choose Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              {currentContent.whyChoose.title}
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {currentContent.whyChoose.reasons.map((reason, index) => (
+              <div key={index} className="flex items-start">
+                <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center mr-3 mt-1">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+                <p className="text-gray-700">{reason}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
+
+      {/* Contact Form Modal */}
+      {showContactForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Entre em Contato</h3>
+              <button
+                onClick={() => setShowContactForm(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome Completo
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  E-mail
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Área de Atuação
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.profession}
+                  onChange={(e) => setFormData({...formData, profession: e.target.value})}
+                  placeholder="Ex: Nutricionista, Personal Trainer, Coach..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sua Dúvida ou Interesse
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  placeholder="Conte-nos como podemos ajudar você a gerar mais leads..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div className="flex space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowContactForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Enviar
+                </button>
+              </div>
+            </form>
+            
+            <div className="mt-4 text-center text-sm text-gray-500">
+              <p>Entraremos em contato através do e-mail:</p>
+              <p className="font-semibold text-emerald-600">YLADA.LEAD@gmail.com</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
