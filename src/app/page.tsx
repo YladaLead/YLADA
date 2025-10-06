@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Mail, MessageSquare } from 'lucide-react'
+import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Mail, MessageSquare, Shield } from 'lucide-react'
 
 export default function UniversalLandingPage() {
   const [selectedLanguage, setSelectedLanguage] = useState('pt')
@@ -69,12 +69,28 @@ export default function UniversalLandingPage() {
       },
       whyChoose: {
         title: 'Por que Escolher o YLADA?',
-        reasons: [
-          'Funciona para qualquer área profissional',
-          'Captura dados automaticamente',
-          'Personalização completa com sua marca',
-          'Dashboard intuitivo e fácil de usar',
-          'Suporte técnico especializado'
+        subtitle: 'Aumente sua credibilidade e gere mais leads com ferramentas profissionais',
+        benefits: [
+          {
+            icon: 'users',
+      title: 'Geração de Leads Qualificados',
+            description: 'Capture dados de clientes interessados em melhorar sua saúde e bem-estar'
+    },
+    {
+            icon: 'trending',
+      title: 'Aumento de Conversões',
+            description: 'Ferramentas profissionais aumentam a confiança e conversão de leads'
+    },
+    {
+            icon: 'star',
+      title: 'Credibilidade Profissional',
+            description: 'Demonstre expertise com ferramentas baseadas em diretrizes da OMS'
+    },
+    {
+            icon: 'shield',
+      title: 'Dados Seguros',
+            description: 'Sistema seguro para captura e armazenamento de informações dos clientes'
+          }
         ]
       },
       socialProof: '+500 profissionais já usam',
@@ -127,12 +143,28 @@ export default function UniversalLandingPage() {
       },
       whyChoose: {
         title: 'Why Choose YLADA?',
-        reasons: [
-          'Works for any professional field',
-          'Automatically captures data',
-          'Complete customization with your brand',
-          'Intuitive and easy-to-use dashboard',
-          'Specialized technical support'
+        subtitle: 'Increase your credibility and generate more leads with professional tools',
+        benefits: [
+          {
+            icon: 'users',
+            title: 'Qualified Lead Generation',
+            description: 'Capture data from clients interested in improving their health and well-being'
+          },
+          {
+            icon: 'trending',
+            title: 'Increased Conversions',
+            description: 'Professional tools increase confidence and lead conversion'
+          },
+          {
+            icon: 'star',
+            title: 'Professional Credibility',
+            description: 'Demonstrate expertise with tools based on WHO guidelines'
+          },
+          {
+            icon: 'shield',
+            title: 'Secure Data',
+            description: 'Secure system for capturing and storing client information'
+          }
         ]
       },
       socialProof: '+500 professionals already use',
@@ -185,12 +217,28 @@ export default function UniversalLandingPage() {
       },
       whyChoose: {
         title: '¿Por qué Elegir YLADA?',
-        reasons: [
-          'Funciona para cualquier área profesional',
-          'Captura datos automáticamente',
-          'Personalización completa con tu marca',
-          'Dashboard intuitivo y fácil de usar',
-          'Soporte técnico especializado'
+        subtitle: 'Aumenta tu credibilidad y genera más leads con herramientas profesionales',
+        benefits: [
+          {
+            icon: 'users',
+            title: 'Generación de Leads Calificados',
+            description: 'Captura datos de clientes interesados en mejorar su salud y bienestar'
+          },
+          {
+            icon: 'trending',
+            title: 'Aumento de Conversiones',
+            description: 'Las herramientas profesionales aumentan la confianza y conversión de leads'
+          },
+          {
+            icon: 'star',
+            title: 'Credibilidad Profesional',
+            description: 'Demuestra experiencia con herramientas basadas en directrices de la OMS'
+          },
+          {
+            icon: 'shield',
+            title: 'Datos Seguros',
+            description: 'Sistema seguro para capturar y almacenar información de clientes'
+          }
         ]
       },
       socialProof: '+500 profesionales ya usan',
@@ -243,12 +291,28 @@ export default function UniversalLandingPage() {
       },
       whyChoose: {
         title: 'Pourquoi Choisir YLADA?',
-        reasons: [
-          'Fonctionne pour tout domaine professionnel',
-          'Capture automatiquement les données',
-          'Personnalisation complète avec votre marque',
-          'Tableau de bord intuitif et facile à utiliser',
-          'Support technique spécialisé'
+        subtitle: 'Augmentez votre crédibilité et générez plus de leads avec des outils professionnels',
+        benefits: [
+          {
+            icon: 'users',
+            title: 'Génération de Leads Qualifiés',
+            description: 'Capturez des données de clients intéressés par l\'amélioration de leur santé et bien-être'
+          },
+          {
+            icon: 'trending',
+            title: 'Augmentation des Conversions',
+            description: 'Les outils professionnels augmentent la confiance et la conversion des leads'
+          },
+          {
+            icon: 'star',
+            title: 'Crédibilité Professionnelle',
+            description: 'Démontrez votre expertise avec des outils basés sur les directives de l\'OMS'
+          },
+          {
+            icon: 'shield',
+            title: 'Données Sécurisées',
+            description: 'Système sécurisé pour capturer et stocker les informations des clients'
+          }
         ]
       },
       socialProof: '+500 professionnels utilisent déjà',
@@ -301,12 +365,28 @@ export default function UniversalLandingPage() {
       },
       whyChoose: {
         title: 'Warum YLADA Wählen?',
-        reasons: [
-          'Funktioniert für jedes Berufsfeld',
-          'Erfasst automatisch Daten',
-          'Vollständige Anpassung mit Ihrer Marke',
-          'Intuitives und benutzerfreundliches Dashboard',
-          'Spezialisierter technischer Support'
+        subtitle: 'Erhöhen Sie Ihre Glaubwürdigkeit und generieren Sie mehr Leads mit professionellen Tools',
+        benefits: [
+          {
+            icon: 'users',
+            title: 'Qualifizierte Lead-Generierung',
+            description: 'Erfassen Sie Daten von Kunden, die an der Verbesserung ihrer Gesundheit und ihres Wohlbefindens interessiert sind'
+          },
+          {
+            icon: 'trending',
+            title: 'Erhöhte Konversionen',
+            description: 'Professionelle Tools erhöhen das Vertrauen und die Lead-Konversion'
+          },
+          {
+            icon: 'star',
+            title: 'Professionelle Glaubwürdigkeit',
+            description: 'Demonstrieren Sie Expertise mit Tools basierend auf WHO-Richtlinien'
+          },
+          {
+            icon: 'shield',
+            title: 'Sichere Daten',
+            description: 'Sicheres System zur Erfassung und Speicherung von Kundeninformationen'
+          }
         ]
       },
       socialProof: '+500 Fachkräfte nutzen bereits',
@@ -359,12 +439,28 @@ export default function UniversalLandingPage() {
       },
       whyChoose: {
         title: 'Perché Scegliere YLADA?',
-        reasons: [
-          'Funziona per qualsiasi campo professionale',
-          'Cattura automaticamente i dati',
-          'Personalizzazione completa con il tuo brand',
-          'Dashboard intuitiva e facile da usare',
-          'Supporto tecnico specializzato'
+        subtitle: 'Aumenta la tua credibilità e genera più lead con strumenti professionali',
+        benefits: [
+          {
+            icon: 'users',
+            title: 'Generazione di Lead Qualificati',
+            description: 'Cattura dati da clienti interessati a migliorare la loro salute e benessere'
+          },
+          {
+            icon: 'trending',
+            title: 'Aumento delle Conversioni',
+            description: 'Gli strumenti professionali aumentano la fiducia e la conversione dei lead'
+          },
+          {
+            icon: 'star',
+            title: 'Credibilità Professionale',
+            description: 'Dimostra competenza con strumenti basati sulle linee guida dell\'OMS'
+          },
+          {
+            icon: 'shield',
+            title: 'Dati Sicuri',
+            description: 'Sistema sicuro per catturare e memorizzare le informazioni dei clienti'
+          }
         ]
       },
       socialProof: '+500 professionisti già utilizzano',
@@ -517,7 +613,7 @@ export default function UniversalLandingPage() {
                 <p className="text-gray-600">
                   {step.description}
                 </p>
-              </div>
+                </div>
             ))}
           </div>
         </div>
@@ -525,22 +621,62 @@ export default function UniversalLandingPage() {
 
       {/* Why Choose Section */}
       <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
               {currentContent.whyChoose.title}
             </h3>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              {currentContent.whyChoose.subtitle}
+            </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {currentContent.whyChoose.reasons.map((reason, index) => (
-              <div key={index} className="flex items-start">
-                <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center mr-3 mt-1">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {currentContent.whyChoose.benefits.map((benefit, index) => {
+              const getIcon = (iconName: string) => {
+                switch (iconName) {
+                  case 'users':
+                    return <Users className="w-8 h-8 text-emerald-600" />
+                  case 'trending':
+                    return <TrendingUp className="w-8 h-8 text-emerald-600" />
+                  case 'star':
+                    return <Star className="w-8 h-8 text-yellow-600" />
+                  case 'shield':
+                    return <Shield className="w-8 h-8 text-purple-600" />
+                  default:
+                    return <Users className="w-8 h-8 text-emerald-600" />
+                }
+              }
+
+              const getIconBg = (iconName: string) => {
+                switch (iconName) {
+                  case 'users':
+                    return 'bg-emerald-100'
+                  case 'trending':
+                    return 'bg-emerald-100'
+                  case 'star':
+                    return 'bg-yellow-100'
+                  case 'shield':
+                    return 'bg-purple-100'
+                  default:
+                    return 'bg-emerald-100'
+                }
+              }
+
+              return (
+                <div key={index} className="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                  <div className={`w-16 h-16 ${getIconBg(benefit.icon)} rounded-lg flex items-center justify-center mx-auto mb-4`}>
+                    {getIcon(benefit.icon)}
+                  </div>
+                  <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                    {benefit.title}
+                  </h4>
+                  <p className="text-gray-600">
+                    {benefit.description}
+                  </p>
                 </div>
-                <p className="text-gray-700">{reason}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -584,9 +720,9 @@ export default function UniversalLandingPage() {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-              </div>
-              
-              <div>
+            </div>
+            
+            <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Área de Atuação
                 </label>
@@ -598,9 +734,9 @@ export default function UniversalLandingPage() {
                   placeholder="Ex: Nutricionista, Personal Trainer, Coach..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-              </div>
-              
-              <div>
+            </div>
+            
+            <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Sua Dúvida ou Interesse
                 </label>
