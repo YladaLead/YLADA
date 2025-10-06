@@ -49,21 +49,21 @@ export default function FitLeadPage() {
   const testimonials = [
     {
       name: 'Maria Silva',
-      role: 'Distribuidora Herbalife - SP',
+      role: 'Distribuidora - SP',
       image: '👩‍💼',
       content: 'Com o FitLead, aumentei minhas vendas em 300% em 3 meses. Os clientes ficam impressionados com as ferramentas profissionais!',
       results: '+300% vendas'
     },
     {
       name: 'João Santos',
-      role: 'Distribuidor Herbalife - RJ',
+      role: 'Distribuidor - RJ',
       image: '👨‍💼',
       content: 'Antes eu perdia muitos leads. Agora capturo dados de todos os interessados e consigo fazer follow-up eficiente.',
       results: '+500 leads/mês'
     },
     {
       name: 'Ana Costa',
-      role: 'Distribuidora Herbalife - MG',
+      role: 'Distribuidora - MG',
       image: '👩‍💼',
       content: 'A credibilidade que as ferramentas dão é incrível. Meus clientes confiam mais e compram mais produtos.',
       results: '+250% conversão'
@@ -75,7 +75,7 @@ export default function FitLeadPage() {
     // Simular resultado do demo
     setDemoResult({
       score: '85%',
-      recommendation: 'Cliente ideal para produtos Herbalife!',
+      recommendation: 'Cliente ideal para produtos nutricionais!',
       nextSteps: ['Agendar consulta', 'Enviar catálogo', 'Oferecer desconto']
     })
   }
@@ -109,7 +109,7 @@ export default function FitLeadPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Exclusivo para Distribuidores Herbalife</span>
+              <span className="text-sm text-gray-600">Exclusivo para Distribuidores</span>
               <button
                 onClick={() => setShowContactForm(true)}
                 className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
@@ -126,12 +126,12 @@ export default function FitLeadPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-8">
             <span className="inline-block px-4 py-2 bg-white/20 rounded-full text-sm font-semibold mb-6">
-              🎯 Exclusivo para Distribuidores Herbalife
+              🎯 Exclusivo para Distribuidores
             </span>
           </div>
           
           <h2 className="text-5xl font-bold mb-6">
-            Escale Seu Negócio Herbalife com Ferramentas Profissionais
+            Escale Seu Negócio com Ferramentas Profissionais
           </h2>
           
           <p className="text-xl mb-8 max-w-3xl mx-auto">
@@ -180,7 +180,7 @@ export default function FitLeadPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Por que Distribuidores Herbalife Escolhem o FitLead?
+              Por que Distribuidores Escolhem o FitLead?
             </h3>
             <p className="text-lg text-gray-600">
               Ferramentas profissionais que aumentam sua credibilidade e multiplicam suas vendas
@@ -391,7 +391,7 @@ export default function FitLeadPage() {
               Casos de Sucesso Reais
             </h3>
             <p className="text-lg text-gray-600">
-              Veja como outros distribuidores Herbalife estão escalando seus negócios
+              Veja como outros distribuidores estão escalando seus negócios
             </p>
           </div>
           
@@ -474,7 +474,7 @@ export default function FitLeadPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-8">
             <span className="inline-block px-4 py-2 bg-white/20 rounded-full text-sm font-semibold mb-6">
-              🎁 Oferta Exclusiva para Distribuidores Herbalife
+              🎁 Oferta Exclusiva para Distribuidores
             </span>
           </div>
           
@@ -581,7 +581,7 @@ export default function FitLeadPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  ID Distribuidor Herbalife
+                  ID Distribuidor
                 </label>
                 <input
                   type="text"
@@ -625,7 +625,7 @@ export default function FitLeadPage() {
             
             <div className="mt-4 text-center text-sm text-gray-500">
               <p>Entraremos em contato em até 2 horas úteis</p>
-              <p className="font-semibold text-emerald-600">Suporte especializado para Herbalife</p>
+              <p className="font-semibold text-emerald-600">Suporte especializado para distribuidores</p>
             </div>
           </div>
         </div>
@@ -642,7 +642,7 @@ export default function FitLeadPage() {
               <h4 className="text-xl font-bold">FitLead</h4>
             </div>
             <p className="text-gray-400 mb-4">
-              Powered by YLADA - Exclusivo para Distribuidores Herbalife
+              Powered by YLADA - Exclusivo para Distribuidores
             </p>
             <p className="text-sm text-gray-500">
               © 2024 YLADA. Todos os direitos reservados.
