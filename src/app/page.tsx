@@ -95,7 +95,20 @@ export default function UniversalLandingPage() {
       },
       socialProof: '+500 profissionais já usam',
       rating: '4.9/5 avaliação',
-      footer: '© 2024 YLADA. Todos os direitos reservados.'
+      footer: '© 2024 YLADA. Todos os direitos reservados.',
+      contactForm: {
+        title: 'Entre em Contato',
+        name: 'Nome Completo',
+        email: 'E-mail',
+        profession: 'Área de Atuação',
+        professionPlaceholder: 'Ex: Nutricionista, Personal Trainer, Coach...',
+        message: 'Sua Dúvida ou Interesse',
+        messagePlaceholder: 'Conte-nos como podemos ajudar você a gerar mais leads...',
+        cancel: 'Cancelar',
+        send: 'Enviar',
+        contactInfo: 'Entraremos em contato através do e-mail:',
+        emailAddress: 'YLADA.LEAD@gmail.com'
+      }
     },
     en: {
       title: 'YLADA',
@@ -169,7 +182,20 @@ export default function UniversalLandingPage() {
       },
       socialProof: '+500 professionals already use',
       rating: '4.9/5 rating',
-      footer: '© 2024 YLADA. All rights reserved.'
+      footer: '© 2024 YLADA. All rights reserved.',
+      contactForm: {
+        title: 'Get in Touch',
+        name: 'Full Name',
+        email: 'Email',
+        profession: 'Field of Work',
+        professionPlaceholder: 'Ex: Nutritionist, Personal Trainer, Coach...',
+        message: 'Your Question or Interest',
+        messagePlaceholder: 'Tell us how we can help you generate more leads...',
+        cancel: 'Cancel',
+        send: 'Send',
+        contactInfo: 'We will contact you via email:',
+        emailAddress: 'YLADA.LEAD@gmail.com'
+      }
     },
     es: {
       title: 'YLADA',
@@ -243,7 +269,20 @@ export default function UniversalLandingPage() {
       },
       socialProof: '+500 profesionales ya usan',
       rating: '4.9/5 calificación',
-      footer: '© 2024 YLADA. Todos los derechos reservados.'
+      footer: '© 2024 YLADA. Todos los derechos reservados.',
+      contactForm: {
+        title: 'Ponte en Contacto',
+        name: 'Nombre Completo',
+        email: 'Correo Electrónico',
+        profession: 'Área de Trabajo',
+        professionPlaceholder: 'Ej: Nutricionista, Entrenador Personal, Coach...',
+        message: 'Tu Pregunta o Interés',
+        messagePlaceholder: 'Cuéntanos cómo podemos ayudarte a generar más leads...',
+        cancel: 'Cancelar',
+        send: 'Enviar',
+        contactInfo: 'Te contactaremos por correo electrónico:',
+        emailAddress: 'YLADA.LEAD@gmail.com'
+      }
     },
     fr: {
       title: 'YLADA',
@@ -317,7 +356,20 @@ export default function UniversalLandingPage() {
       },
       socialProof: '+500 professionnels utilisent déjà',
       rating: '4.9/5 évaluation',
-      footer: '© 2024 YLADA. Tous droits réservés.'
+      footer: '© 2024 YLADA. Tous droits réservés.',
+      contactForm: {
+        title: 'Entrer en Contact',
+        name: 'Nom Complet',
+        email: 'E-mail',
+        profession: 'Domaine de Travail',
+        professionPlaceholder: 'Ex: Nutritionniste, Coach Sportif, Coach...',
+        message: 'Votre Question ou Intérêt',
+        messagePlaceholder: 'Dites-nous comment nous pouvons vous aider à générer plus de leads...',
+        cancel: 'Annuler',
+        send: 'Envoyer',
+        contactInfo: 'Nous vous contacterons par e-mail:',
+        emailAddress: 'YLADA.LEAD@gmail.com'
+      }
     },
     de: {
       title: 'YLADA',
@@ -391,7 +443,20 @@ export default function UniversalLandingPage() {
       },
       socialProof: '+500 Fachkräfte nutzen bereits',
       rating: '4.9/5 Bewertung',
-      footer: '© 2024 YLADA. Alle Rechte vorbehalten.'
+      footer: '© 2024 YLADA. Alle Rechte vorbehalten.',
+      contactForm: {
+        title: 'Kontakt aufnehmen',
+        name: 'Vollständiger Name',
+        email: 'E-Mail',
+        profession: 'Arbeitsbereich',
+        professionPlaceholder: 'Z.B: Ernährungsberater, Personal Trainer, Coach...',
+        message: 'Ihre Frage oder Ihr Interesse',
+        messagePlaceholder: 'Erzählen Sie uns, wie wir Ihnen helfen können, mehr Leads zu generieren...',
+        cancel: 'Abbrechen',
+        send: 'Senden',
+        contactInfo: 'Wir werden Sie per E-Mail kontaktieren:',
+        emailAddress: 'YLADA.LEAD@gmail.com'
+      }
     },
     it: {
       title: 'YLADA',
@@ -465,7 +530,20 @@ export default function UniversalLandingPage() {
       },
       socialProof: '+500 professionisti già utilizzano',
       rating: '4.9/5 valutazione',
-      footer: '© 2024 YLADA. Tutti i diritti riservati.'
+      footer: '© 2024 YLADA. Tutti i diritti riservati.',
+      contactForm: {
+        title: 'Mettiti in Contatto',
+        name: 'Nome Completo',
+        email: 'E-mail',
+        profession: 'Campo di Lavoro',
+        professionPlaceholder: 'Es: Nutrizionista, Personal Trainer, Coach...',
+        message: 'La Tua Domanda o Interesse',
+        messagePlaceholder: 'Raccontaci come possiamo aiutarti a generare più lead...',
+        cancel: 'Annulla',
+        send: 'Invia',
+        contactInfo: 'Ti contatteremo via e-mail:',
+        emailAddress: 'YLADA.LEAD@gmail.com'
+      }
     }
   }
 
@@ -686,7 +764,7 @@ export default function UniversalLandingPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">Entre em Contato</h3>
+              <h3 className="text-2xl font-bold text-gray-900">{currentContent.contactForm.title}</h3>
               <button
                 onClick={() => setShowContactForm(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -698,7 +776,7 @@ export default function UniversalLandingPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome Completo
+                  {currentContent.contactForm.name}
                 </label>
                 <input
                   type="text"
@@ -711,7 +789,7 @@ export default function UniversalLandingPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  E-mail
+                  {currentContent.contactForm.email}
                 </label>
                 <input
                   type="email"
@@ -720,32 +798,32 @@ export default function UniversalLandingPage() {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-            </div>
-            
-            <div>
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Área de Atuação
+                  {currentContent.contactForm.profession}
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.profession}
                   onChange={(e) => setFormData({...formData, profession: e.target.value})}
-                  placeholder="Ex: Nutricionista, Personal Trainer, Coach..."
+                  placeholder={currentContent.contactForm.professionPlaceholder}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-            </div>
-            
-            <div>
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sua Dúvida ou Interesse
+                  {currentContent.contactForm.message}
                 </label>
                 <textarea
                   required
                   rows={4}
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
-                  placeholder="Conte-nos como podemos ajudar você a gerar mais leads..."
+                  placeholder={currentContent.contactForm.messagePlaceholder}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -756,21 +834,21 @@ export default function UniversalLandingPage() {
                   onClick={() => setShowContactForm(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  Cancelar
+                  {currentContent.contactForm.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  Enviar
+                  {currentContent.contactForm.send}
                 </button>
               </div>
             </form>
             
             <div className="mt-4 text-center text-sm text-gray-500">
-              <p>Entraremos em contato através do e-mail:</p>
-              <p className="font-semibold text-emerald-600">YLADA.LEAD@gmail.com</p>
+              <p>{currentContent.contactForm.contactInfo}</p>
+              <p className="font-semibold text-emerald-600">{currentContent.contactForm.emailAddress}</p>
             </div>
           </div>
         </div>
