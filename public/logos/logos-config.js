@@ -2,28 +2,23 @@
 // Use este arquivo para importar os logos no seu projeto
 
 export const logos = {
-  // Logo principal horizontal
+  // Logo principal horizontal (com gráfico verde)
   horizontal: '/logos/ylada-logo-horizontal.png',
-  horizontalWhite: '/logos/ylada-logo-horizontal-white.png',
+  horizontalSvg: '/logos/ylada-logo-horizontal.svg',
   
-  // Logo vertical
-  vertical: '/logos/ylada-logo-vertical.png',
-  verticalWhite: '/logos/ylada-logo-vertical-white.png',
+  // Logo apenas texto
+  textOnly: '/logos/ylada-logo-text-only.png',
+  textOnlySvg: '/logos/ylada-logo-text-only.svg',
   
   // Ícones
   icon: '/logos/ylada-icon.png',
-  iconWhite: '/logos/ylada-icon-white.png',
   iconDark: '/logos/ylada-icon-dark.png',
+  iconSvg: '/logos/ylada-icon.svg',
   
   // Favicons
   favicon16: '/logos/ylada-favicon-16.png',
   favicon32: '/logos/ylada-favicon-32.png',
-  favicon192: '/logos/ylada-favicon-192.png',
-  favicon512: '/logos/ylada-favicon-512.png',
-  
-  // Impressão
-  printPdf: '/logos/ylada-logo-print.pdf',
-  printJpg: '/logos/ylada-logo-print.jpg'
+  faviconIco: '/favicon.ico'
 }
 
 // Cores da marca

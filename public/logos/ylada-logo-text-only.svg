@@ -1,0 +1,10 @@
+<svg width="300" height="80" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="80" fill="white"/>
+  
+  <!-- YLADA text -->
+  <text x="150" y="45" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#374151" text-anchor="middle">YLADA</text>
+  
+  <!-- Tagline -->
+  <text x="150" y="65" font-family="Arial, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Your Lead Accelerated Data App</text>
+</svg>

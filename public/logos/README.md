@@ -1,63 +1,97 @@
-# YLADA LOGOS - ARQUIVOS PARA SUBSTITUIÇÃO
+# 🎨 Logos YLADA - Arquivos Oficiais
 
-## 📁 ESTRUTURA DE ARQUIVOS CRIADA:
+Este diretório contém todos os arquivos de logo da marca YLADA, criados e organizados para uso em diferentes contextos.
 
-### 🎯 LOGOS PRINCIPAIS:
-- `ylada-logo-horizontal.png` - Logo completo horizontal (ícone + texto + tagline)
-- `ylada-logo-horizontal-white.png` - Logo horizontal para fundos escuros
-- `ylada-logo-vertical.png` - Logo vertical (ícone em cima, texto embaixo)
-- `ylada-logo-vertical-white.png` - Logo vertical para fundos escuros
+## 📁 Arquivos Disponíveis
 
-### 🔖 ÍCONES:
-- `ylada-icon.png` - Apenas o ícone verde (pessoa + gráfico)
-- `ylada-icon-white.png` - Ícone branco para fundos escuros
-- `ylada-icon-dark.png` - Ícone escuro para fundos claros
+### 🖼️ Logos Principais
+- **`ylada-logo-horizontal.png`** - Logo principal com gráfico verde (400x120px)
+- **`ylada-logo-horizontal.svg`** - Versão SVG do logo principal
+- **`ylada-logo-text-only.png`** - Logo apenas com texto (300x80px)
+- **`ylada-logo-text-only.svg`** - Versão SVG do logo texto
 
-### 📱 FAVICONS:
-- `ylada-favicon-16.png` - Favicon 16x16px
-- `ylada-favicon-32.png` - Favicon 32x32px
-- `ylada-favicon-192.png` - Favicon 192x192px
-- `ylada-favicon-512.png` - Favicon 512x512px
+### 🎯 Ícones
+- **`ylada-icon.png`** - Ícone isolado para fundos claros (80x80px)
+- **`ylada-icon-dark.png`** - Ícone para fundos escuros com brilho (80x80px)
+- **`ylada-icon.svg`** - Versão SVG do ícone
 
-### 🖨️ IMPRESSÃO:
-- `ylada-logo-print.pdf` - Logo vetorial para impressão
-- `ylada-logo-print.jpg` - Logo para impressão em alta resolução
+### 🔖 Favicons
+- **`ylada-favicon-16.png`** - Favicon 16x16px
+- **`ylada-favicon-32.png`** - Favicon 32x32px
+- **`favicon.ico`** - Favicon principal do site
 
-## 🎨 ESPECIFICAÇÕES TÉCNICAS:
+## 🎨 Características do Design
 
-### 📐 TAMANHOS RECOMENDADOS:
-- **Logo Horizontal:** 400x120px (web), 1200x360px (impressão)
-- **Logo Vertical:** 200x300px (web), 600x900px (impressão)
-- **Ícone:** 64x64px (web), 256x256px (impressão)
-- **Favicon:** 16x16px, 32x32px, 192x192px, 512x512px
+### Elementos Visuais
+- **Gráfico Verde**: Representa crescimento e dados
+- **Silhueta de Pessoa**: Representa o usuário/profissional
+- **Gráfico de Barras**: Representa métricas e performance
+- **Linha Ascendente**: Representa crescimento e sucesso
+- **Seta para Cima**: Representa progresso e melhoria
 
-### 🎨 CORES OFICIAIS:
-- **Verde Principal:** #10B981 (Emerald-500)
-- **Verde Escuro:** #059669 (Emerald-600)
-- **Verde Claro:** #6EE7B7 (Emerald-300)
-- **Cinza Escuro:** #374151 (Gray-700)
-- **Cinza Médio:** #6B7280 (Gray-500)
-- **Branco:** #FFFFFF
-- **Preto:** #000000
+### Cores
+- **Verde Principal**: #10B981 (emerald-500)
+- **Texto Escuro**: #374151 (gray-700)
+- **Texto Claro**: #6B7280 (gray-500)
 
-### 📝 INSTRUÇÕES:
-1. **Substitua os arquivos placeholder** pelos logos reais
-2. **Mantenha os nomes** exatamente como estão
-3. **Use formatos PNG** para web (com transparência)
-4. **Use PDF** para impressão (vetorial)
-5. **Teste em diferentes tamanhos** para garantir qualidade
+## 💻 Como Usar
 
-## 🚀 PRÓXIMOS PASSOS:
-1. **Extraia os logos** das imagens fornecidas
-2. **Salve com os nomes** sugeridos
-3. **Substitua os placeholders** na pasta `public/logos/`
-4. **Teste no site** para verificar se estão funcionando
+### Importação
+```javascript
+import { logos } from './logos-config'
 
-## 📋 CHECKLIST:
-- [ ] Logo horizontal completo
-- [ ] Logo vertical
-- [ ] Ícone simples
-- [ ] Versões para fundos escuros
-- [ ] Favicons em diferentes tamanhos
-- [ ] Versão para impressão
-- [ ] Teste de qualidade em diferentes tamanhos
+// Logo principal
+<img src={logos.horizontal} alt="YLADA" />
+
+// Logo texto apenas
+<img src={logos.textOnly} alt="YLADA" />
+
+// Ícone
+<img src={logos.icon} alt="YLADA Icon" />
+```
+
+### Contextos Recomendados
+- **Header/Cabeçalho**: `horizontal` ou `textOnly`
+- **Mobile**: `icon`
+- **Fundo Escuro**: `iconDark`
+- **Favicon**: `favicon32`
+
+## 📐 Especificações Técnicas
+
+### Formatos
+- **PNG**: Para uso geral (otimizado)
+- **SVG**: Para escalabilidade perfeita
+- **ICO**: Para favicons
+
+### Tamanhos
+- **Logo Horizontal**: 400x120px (proporção 3.33:1)
+- **Logo Texto**: 300x80px (proporção 3.75:1)
+- **Ícone**: 80x80px (quadrado)
+- **Favicon**: 16x16px, 32x32px
+
+## 🔧 Manutenção
+
+### Atualizações
+- Os arquivos SVG são a fonte principal
+- PNGs são gerados automaticamente via script
+- Favicons são criados a partir do ícone principal
+
+### Script de Conversão
+```bash
+node scripts/convert-logos.js
+```
+
+## 📋 Checklist de Uso
+
+- [ ] Logo principal no cabeçalho
+- [ ] Favicon configurado
+- [ ] Ícone para mobile
+- [ ] Versão escura para fundos escuros
+- [ ] Alt text configurado
+- [ ] Lazy loading implementado
+
+---
+
+**Última atualização**: Dezembro 2024  
+**Versão**: 1.0  
+**Status**: ✅ Produção
