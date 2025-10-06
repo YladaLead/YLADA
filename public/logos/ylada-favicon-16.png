@@ -1,0 +1,16 @@
+# PLACEHOLDER - SUBSTITUA PELO LOGO REAL
+
+## ylada-favicon-16.png
+**Descrição:** Favicon 16x16px para navegadores
+
+**Especificações:**
+- Tamanho: 16x16px
+- Formato: PNG com fundo transparente
+- Cores: Verde #10B981
+
+**Como usar:**
+```html
+<link rel="icon" type="image/png" sizes="16x16" href="/logos/ylada-favicon-16.png">
+```
+
+**Substitua este arquivo pelo logo real extraído das imagens fornecidas.**

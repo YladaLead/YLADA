@@ -1,0 +1,16 @@
+# PLACEHOLDER - SUBSTITUA PELO LOGO REAL
+
+## ylada-icon.png
+**Descrição:** Apenas o ícone verde (pessoa + gráfico de crescimento)
+
+**Especificações:**
+- Tamanho: 64x64px (web) / 256x256px (impressão)
+- Formato: PNG com fundo transparente
+- Cores: Verde #10B981
+
+**Como usar:**
+```html
+<img src="/logos/ylada-icon.png" alt="YLADA Icon" />
+```
+
+**Substitua este arquivo pelo logo real extraído das imagens fornecidas.**

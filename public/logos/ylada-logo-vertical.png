@@ -1,0 +1,16 @@
+# PLACEHOLDER - SUBSTITUA PELO LOGO REAL
+
+## ylada-logo-vertical.png
+**Descrição:** Logo vertical com ícone em cima e texto embaixo
+
+**Especificações:**
+- Tamanho: 200x300px (web) / 600x900px (impressão)
+- Formato: PNG com fundo transparente
+- Cores: Verde #10B981 + Cinza escuro #374151
+
+**Como usar:**
+```html
+<img src="/logos/ylada-logo-vertical.png" alt="YLADA Logo" />
+```
+
+**Substitua este arquivo pelo logo real extraído das imagens fornecidas.**

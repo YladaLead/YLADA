@@ -1,0 +1,16 @@
+# PLACEHOLDER - SUBSTITUA PELO LOGO REAL
+
+## ylada-favicon-32.png
+**Descrição:** Favicon 32x32px para navegadores
+
+**Especificações:**
+- Tamanho: 32x32px
+- Formato: PNG com fundo transparente
+- Cores: Verde #10B981
+
+**Como usar:**
+```html
+<link rel="icon" type="image/png" sizes="32x32" href="/logos/ylada-favicon-32.png">
+```
+
+**Substitua este arquivo pelo logo real extraído das imagens fornecidas.**
