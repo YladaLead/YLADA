@@ -1,216 +1,176 @@
 'use client'
 
-import { Calculator, Shield, Zap, Heart, Brain, CheckCircle, Users, TrendingUp, Star, ExternalLink, Play, Target } from 'lucide-react'
+import { useState } from 'react'
+import { Calculator, Users, TrendingUp, Star, Shield, CheckCircle, ArrowRight, Play, Award, Target, Zap, Heart, Activity, Brain, Mail, Phone } from 'lucide-react'
 
 export default function FitLeadPage() {
-  const tools = [
-    {
-      icon: Calculator,
+  const demos = {
+    bmi: {
       title: 'Calculadora de IMC',
-      description: 'Análise corporal completa com categorização e recomendações personalizadas',
-      color: 'bg-emerald-500',
-      demoHref: '/demo/bmi',
-      category: 'Avaliação Corporal',
-      type: 'calculator'
+      description: 'Avalie o peso ideal dos seus clientes',
+      icon: Calculator,
+      color: 'emerald'
     },
-    {
-      icon: Shield,
-      title: 'Necessidades de Proteína',
-      description: 'Cálculo preciso baseado em diretrizes da OMS para diferentes objetivos',
-      color: 'bg-green-500',
-      demoHref: '/demo/protein',
-      category: 'Nutrição',
-      type: 'calculator'
-    },
-    {
-      icon: Zap,
-      title: 'Composição Corporal',
-      description: 'Avaliação de massa muscular, gordura corporal, BMR e TDEE',
-      color: 'bg-yellow-500',
-      demoHref: '/demo/body-composition',
-      category: 'Avaliação Corporal',
-      type: 'calculator'
-    },
-    {
-      icon: Heart,
-      title: 'Planejador de Refeições',
-      description: 'Cardápio personalizado com distribuição calórica e lista de compras',
-      color: 'bg-red-500',
-      demoHref: '/demo/meal-planner',
-      category: 'Nutrição',
-      type: 'calculator'
-    },
-    {
-      icon: Brain,
-      title: 'Monitor de Hidratação',
-      description: 'Controle de ingestão hídrica baseado em atividade e clima',
-      color: 'bg-purple-500',
-      demoHref: '/demo/hydration',
-      category: 'Saúde',
-      type: 'calculator'
-    },
-    {
-      icon: CheckCircle,
+    nutrition: {
       title: 'Avaliação Nutricional',
-      description: 'Identificação de deficiências e recomendações de suplementos',
-      color: 'bg-indigo-500',
-      demoHref: '/demo/nutrition-assessment',
-      category: 'Saúde',
-      type: 'calculator'
-    }
-  ]
-
-  const quizzes = [
-    {
-      icon: Brain,
-      title: 'Avaliação Nutricional Completa',
-      description: 'Identifique deficiências nutricionais e receba recomendações personalizadas',
-      color: 'bg-blue-500',
-      demoHref: '/demo/quiz/nutritional-assessment',
-      category: 'Quiz Nutricional',
-      type: 'quiz',
-      duration: '5-7 minutos',
-      questions: 15
-    },
-    {
+      description: 'Análise completa de necessidades nutricionais',
       icon: Heart,
-      title: 'Avaliação de Estilo de Vida',
-      description: 'Analise seus hábitos de vida e receba orientações para melhorar sua saúde',
-      color: 'bg-green-500',
-      demoHref: '/demo/quiz/lifestyle-evaluation',
-      category: 'Quiz de Estilo de Vida',
-      type: 'quiz',
-      duration: '4-6 minutos',
-      questions: 12
+      color: 'red'
+    },
+    meal: {
+      title: 'Planejador de Refeições',
+      description: 'Crie planos alimentares personalizados',
+      icon: Activity,
+      color: 'blue'
+    },
+    quiz: {
+      title: 'Questionário de Saúde',
+      description: 'Identifique necessidades específicas',
+      icon: Brain,
+      color: 'purple'
+    }
+  }
+
+  const [activeDemo, setActiveDemo] = useState<keyof typeof demos>('bmi')
+  const [demoResult, setDemoResult] = useState<{
+    score: string;
+    recommendation: string;
+    nextSteps: string[];
+  } | null>(null)
+  const [showContactForm, setShowContactForm] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    distributorId: '',
+    message: ''
+  })
+
+  const testimonials = [
+    {
+      name: 'Maria Silva',
+      role: 'Distribuidora Herbalife - SP',
+      image: '👩‍💼',
+      content: 'Com o FitLead, aumentei minhas vendas em 300% em 3 meses. Os clientes ficam impressionados com as ferramentas profissionais!',
+      results: '+300% vendas'
     },
     {
-      icon: Target,
-      title: 'Definição de Objetivos de Saúde',
-      description: 'Estabeleça metas claras e receba um plano personalizado para alcançá-las',
-      color: 'bg-purple-500',
-      demoHref: '/demo/quiz/health-goals',
-      category: 'Quiz de Objetivos',
-      type: 'quiz',
-      duration: '3-5 minutos',
-      questions: 10
+      name: 'João Santos',
+      role: 'Distribuidor Herbalife - RJ',
+      image: '👨‍💼',
+      content: 'Antes eu perdia muitos leads. Agora capturo dados de todos os interessados e consigo fazer follow-up eficiente.',
+      results: '+500 leads/mês'
     },
     {
-      icon: Shield,
-      title: 'Check-up de Bem-Estar',
-      description: 'Avaliação geral de saúde e bem-estar com recomendações preventivas',
-      color: 'bg-emerald-500',
-      demoHref: '/demo/quiz/wellness-checkup',
-      category: 'Quiz de Bem-Estar',
-      type: 'quiz',
-      duration: '6-8 minutos',
-      questions: 18
+      name: 'Ana Costa',
+      role: 'Distribuidora Herbalife - MG',
+      image: '👩‍💼',
+      content: 'A credibilidade que as ferramentas dão é incrível. Meus clientes confiam mais e compram mais produtos.',
+      results: '+250% conversão'
     }
   ]
 
-  const benefits = [
-    {
-      icon: Users,
-      title: 'Capture Leads Qualificados',
-      description: 'Seus clientes preenchem os formulários e você recebe os dados automaticamente'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Aumente Suas Vendas',
-      description: 'Ferramentas profissionais que demonstram sua expertise e geram confiança'
-    },
-    {
-      icon: Star,
-      title: 'Diferencial Competitivo',
-      description: 'Seja o profissional que oferece avaliações modernas e personalizadas'
-    }
-  ]
+  const handleDemoSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Simular resultado do demo
+    setDemoResult({
+      score: '85%',
+      recommendation: 'Cliente ideal para produtos Herbalife!',
+      nextSteps: ['Agendar consulta', 'Enviar catálogo', 'Oferecer desconto']
+    })
+  }
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    alert('Obrigado! Entraremos em contato em breve para agendar sua demonstração personalizada.')
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      distributorId: '',
+      message: ''
+    })
+    setShowContactForm(false)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                <Calculator className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
+                <Calculator className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">YLADA</h1>
-                <p className="text-sm text-gray-600">Your Lead Accelerated Data App</p>
+                <h1 className="text-xl font-bold text-gray-900">FitLead</h1>
+                <p className="text-xs text-gray-600">Powered by YLADA</p>
               </div>
             </div>
-            
-            <div className="flex space-x-4">
-              <a
-                href="/auth/login"
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                Entrar
-              </a>
-              <a
-                href="/auth/register"
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Exclusivo para Distribuidores Herbalife</span>
+              <button
+                onClick={() => setShowContactForm(true)}
                 className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
               >
-                Começar Agora
-              </a>
+                Agendar Demo
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-20">
+      <section className="py-20 bg-gradient-to-r from-emerald-600 to-green-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-8">
-            <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-semibold mb-6">
-              Para Profissionais de Saúde e Bem-Estar
+            <span className="inline-block px-4 py-2 bg-white/20 rounded-full text-sm font-semibold mb-6">
+              🎯 Exclusivo para Distribuidores Herbalife
             </span>
           </div>
           
-          <h2 className="text-5xl font-bold text-gray-900 mb-6">
-            Ferramentas Profissionais para
-            <span className="text-emerald-600"> Capturar Leads</span>
+          <h2 className="text-5xl font-bold mb-6">
+            Escale Seu Negócio Herbalife com Ferramentas Profissionais
           </h2>
           
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Ofereça avaliações personalizadas aos seus clientes e receba os dados automaticamente. 
-            Aumente suas vendas com ferramentas que demonstram sua expertise profissional.
+          <p className="text-xl mb-8 max-w-3xl mx-auto">
+            Transforme visitantes em clientes fiéis com avaliações nutricionais que demonstram sua expertise e capturam leads qualificados automaticamente.
           </p>
 
           {/* Social Proof */}
           <div className="mb-8">
-            <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
+            <div className="flex items-center justify-center space-x-8 text-sm">
               <div className="flex items-center">
                 <div className="flex -space-x-2">
-                  <div className="w-8 h-8 bg-emerald-500 rounded-full border-2 border-white"></div>
-                  <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white"></div>
-                  <div className="w-8 h-8 bg-purple-500 rounded-full border-2 border-white"></div>
+                  <div className="w-8 h-8 bg-white rounded-full border-2 border-emerald-600"></div>
+                  <div className="w-8 h-8 bg-white rounded-full border-2 border-emerald-600"></div>
+                  <div className="w-8 h-8 bg-white rounded-full border-2 border-emerald-600"></div>
                 </div>
-                <span className="ml-3">+500 profissionais já usam</span>
+                <span className="ml-3">+500 distribuidores já usam</span>
               </div>
               <div className="flex items-center">
-                <Star className="w-4 h-4 text-yellow-500 mr-1" />
+                <Star className="w-4 h-4 text-yellow-300 mr-1" />
                 <span>4.9/5 avaliação</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="#demo"
-              className="px-8 py-4 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => setShowContactForm(true)}
+              className="px-8 py-4 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
             >
               <Play className="w-5 h-5 mr-2" />
               Ver Demonstração
-            </a>
-            <a
-              href="/auth/register"
-              className="px-8 py-4 border border-emerald-600 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors flex items-center justify-center"
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </button>
+            <button
+              onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition-colors"
             >
-              <ExternalLink className="w-5 h-5 mr-2" />
-              Começar Gratuitamente
-            </a>
+              Testar Ferramentas
+            </button>
           </div>
         </div>
       </section>
@@ -220,348 +180,456 @@ export default function FitLeadPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Por que escolher o YLADA?
+              Por que Distribuidores Herbalife Escolhem o FitLead?
             </h3>
             <p className="text-lg text-gray-600">
-              Ferramentas desenvolvidas especificamente para profissionais de saúde
+              Ferramentas profissionais que aumentam sua credibilidade e multiplicam suas vendas
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="text-center p-6">
-                <div className="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <benefit.icon className="w-8 h-8 text-emerald-600" />
-                </div>
-                <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                  {benefit.title}
-                </h4>
-                <p className="text-gray-600">
-                  {benefit.description}
-                </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center p-6 bg-emerald-50 rounded-xl">
+              <div className="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-emerald-600" />
               </div>
-            ))}
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                Captura de Leads Qualificados
+              </h4>
+              <p className="text-gray-600">
+                Seus clientes preenchem avaliações e você recebe dados completos automaticamente
+              </p>
+            </div>
+            
+            <div className="text-center p-6 bg-blue-50 rounded-xl">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-8 h-8 text-blue-600" />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                Aumento de Conversões
+              </h4>
+              <p className="text-gray-600">
+                Ferramentas profissionais aumentam a confiança e conversão de leads
+              </p>
+            </div>
+            
+            <div className="text-center p-6 bg-yellow-50 rounded-xl">
+              <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Star className="w-8 h-8 text-yellow-600" />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                Credibilidade Profissional
+              </h4>
+              <p className="text-gray-600">
+                Demonstre expertise com ferramentas baseadas em diretrizes da OMS
+              </p>
+            </div>
+            
+            <div className="text-center p-6 bg-purple-50 rounded-xl">
+              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-purple-600" />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                Dados Seguros
+              </h4>
+              <p className="text-gray-600">
+                Sistema seguro para captura e armazenamento de informações dos clientes
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Tools Demo Section */}
-      <section id="demo" className="py-16">
+      {/* Interactive Demos Section */}
+      <section id="demos" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Experimente Nossas Ferramentas
+              Teste Nossas Ferramentas Agora
             </h3>
             <p className="text-lg text-gray-600">
-              Demonstrações interativas para você testar antes de comprar
+              Experimente como seus clientes vão interagir com suas avaliações profissionais
             </p>
           </div>
-
-          {/* Calculadoras */}
-          <div className="mb-16">
-            <h4 className="text-2xl font-bold text-gray-900 mb-8 text-center">
-              🧮 Calculadoras Profissionais
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {tools.map((tool, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Demo Selector */}
+            <div className="space-y-4">
+              <h4 className="text-xl font-semibold text-gray-900 mb-6">
+                Escolha uma Ferramenta para Testar:
+              </h4>
+              
+              {Object.entries(demos).map(([key, demo]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveDemo(key as keyof typeof demos)}
+                  className={`w-full p-4 rounded-lg border-2 transition-colors ${
+                    activeDemo === key
+                      ? 'border-emerald-500 bg-emerald-50'
+                      : 'border-gray-200 hover:border-emerald-300'
+                  }`}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-16 h-16 ${tool.color} rounded-lg flex items-center justify-center`}>
-                      <tool.icon className="w-8 h-8 text-white" />
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-12 h-12 bg-${demo.color}-100 rounded-lg flex items-center justify-center`}>
+                      <demo.icon className={`w-6 h-6 text-${demo.color}-600`} />
                     </div>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                      {tool.category}
-                    </span>
+                    <div className="text-left">
+                      <h5 className="font-semibold text-gray-900">{demo.title}</h5>
+                      <p className="text-sm text-gray-600">{demo.description}</p>
+                    </div>
                   </div>
-                  
-                  <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                    {tool.title}
-                  </h4>
-                  
-                  <p className="text-gray-600 mb-6">
-                    {tool.description}
-                  </p>
-                  
-                  <div className="flex space-x-3">
-                    <a
-                      href={tool.demoHref}
-                      className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center"
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      Demo
-                    </a>
-                    <a
-                      href="/auth/register"
-                      className="flex-1 px-4 py-2 border border-emerald-600 text-emerald-600 rounded-lg font-medium hover:bg-emerald-50 transition-colors text-center"
-                    >
-                      Comprar
-                    </a>
-                  </div>
-                </div>
+                </button>
               ))}
             </div>
-          </div>
-
-          {/* Quizzes */}
-          <div>
-            <h4 className="text-2xl font-bold text-gray-900 mb-8 text-center">
-              ❓ Quizzes de Avaliação
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {quizzes.map((quiz, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-16 h-16 ${quiz.color} rounded-lg flex items-center justify-center`}>
-                      <quiz.icon className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-right">
-                      <div className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-medium mb-1">
-                        {quiz.category}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {quiz.duration} • {quiz.questions} perguntas
-                      </div>
-                    </div>
+            
+            {/* Demo Interface */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="mb-6">
+                <h4 className="text-xl font-semibold text-gray-900 mb-2">
+                  {demos[activeDemo].title}
+                </h4>
+                <p className="text-gray-600">{demos[activeDemo].description}</p>
+              </div>
+              
+              {!demoResult ? (
+                <form onSubmit={handleDemoSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome do Cliente
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Ex: Maria Silva"
+                    />
                   </div>
                   
-                  <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                    {quiz.title}
-                  </h4>
-                  
-                  <p className="text-gray-600 mb-6">
-                    {quiz.description}
-                  </p>
-                  
-                  <div className="flex space-x-3">
-                    <a
-                      href={quiz.demoHref}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      Demo
-                    </a>
-                    <a
-                      href="/auth/register"
-                      className="flex-1 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors text-center"
-                    >
-                      Comprar
-                    </a>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Idade
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Ex: 35"
+                    />
                   </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Peso (kg)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Ex: 70"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Altura (cm)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Ex: 165"
+                    />
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
+                  >
+                    <Calculator className="w-4 h-4 mr-2" />
+                    Calcular Resultado
+                  </button>
+                </form>
+              ) : (
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <h5 className="text-xl font-semibold text-gray-900 mb-2">
+                    Resultado: {demoResult.score}
+                  </h5>
+                  <p className="text-gray-600 mb-4">{demoResult.recommendation}</p>
+                  
+                  <div className="bg-emerald-50 rounded-lg p-4 mb-4">
+                    <h6 className="font-semibold text-emerald-800 mb-2">Próximos Passos:</h6>
+                    <ul className="text-sm text-emerald-700 space-y-1">
+                      {demoResult.nextSteps.map((step, index) => (
+                        <li key={index} className="flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <button
+                    onClick={() => setDemoResult(null)}
+                    className="px-4 py-2 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
+                  >
+                    Testar Novamente
+                  </button>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Perguntas Frequentes
-            </h3>
-            <p className="text-lg text-gray-600">
-              Tire suas dúvidas sobre o YLADA
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                Como funciona a captura de leads?
-              </h4>
-              <p className="text-gray-700">
-                Seus clientes preenchem os formulários das ferramentas e você recebe automaticamente 
-                todos os dados no seu dashboard. Não precisa fazer nada manualmente!
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                Posso personalizar com minha marca?
-              </h4>
-              <p className="text-gray-700">
-                Sim! Você pode adicionar seu logo, cores da marca e mensagens personalizadas 
-                em todas as ferramentas. Seus clientes verão sua identidade visual.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                Quanto custa o YLADA?
-              </h4>
-              <p className="text-gray-700">
-                Oferecemos um plano gratuito para começar e planos premium a partir de R$ 97/mês. 
-                Sem taxas ocultas ou surpresas. Cancele quando quiser.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                Preciso de conhecimento técnico?
-              </h4>
-              <p className="text-gray-700">
-                Não! O YLADA foi desenvolvido para ser simples e intuitivo. 
-                Em poucos minutos você estará capturando leads qualificados.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                Os dados dos meus clientes são seguros?
-              </h4>
-              <p className="text-gray-700">
-                Absolutamente! Usamos criptografia de nível bancário e seguimos todas as 
-                normas de proteção de dados (LGPD). Seus dados estão 100% seguros.
-              </p>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              Casos de Sucesso Reais
+            </h3>
+            <p className="text-lg text-gray-600">
+              Veja como outros distribuidores Herbalife estão escalando seus negócios
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-gray-50 rounded-xl p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mr-4 text-2xl">
+                    {testimonial.image}
+                  </div>
+                  <div>
+                    <h5 className="font-semibold text-gray-900">{testimonial.name}</h5>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-4">&quot;{testimonial.content}&quot;</p>
+                <div className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-semibold inline-block">
+                  {testimonial.results}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              O que nossos clientes dizem
+              Como Funciona na Prática
             </h3>
             <p className="text-lg text-gray-600">
-              Profissionais que já aumentaram suas vendas com o YLADA
+              3 passos simples para começar a escalar seu negócio hoje
             </p>
           </div>
-
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-emerald-600 font-bold text-lg">MS</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">Maria Silva</h4>
-                  <p className="text-sm text-gray-600">Nutricionista - CRN 12345</p>
-                </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                1
               </div>
-              <div className="flex mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-700">
-                &quot;Com o YLADA consegui aumentar em 300% meus leads qualificados. 
-                Os clientes adoram as avaliações personalizadas e eu recebo todos os dados automaticamente.&quot;
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                Configure Suas Ferramentas
+              </h4>
+              <p className="text-gray-600">
+                Personalize com sua marca e área de atuação. Configure em menos de 10 minutos.
               </p>
             </div>
-
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-blue-600 font-bold text-lg">JS</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">João Santos</h4>
-                  <p className="text-sm text-gray-600">Personal Trainer - CREF 67890</p>
-                </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                2
               </div>
-              <div className="flex mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-700">
-                &quot;As ferramentas do YLADA me ajudaram a demonstrar minha expertise profissional. 
-                Agora meus clientes confiam mais no meu trabalho e minhas vendas dobraram.&quot;
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                Compartilhe com Seus Clientes
+              </h4>
+              <p className="text-gray-600">
+                Envie links das ferramentas para seus prospects via WhatsApp, redes sociais ou e-mail.
               </p>
             </div>
-
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-purple-600 font-bold text-lg">AC</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">Ana Costa</h4>
-                  <p className="text-sm text-gray-600">Nutricionista Esportiva - CRN 11111</p>
-                </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                3
               </div>
-              <div className="flex mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-700">
-                &quot;O YLADA revolucionou meu atendimento. Os quizzes interativos engajam muito mais 
-                os clientes e eu consigo capturar leads de qualidade constantemente.&quot;
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                Receba os Dados Automaticamente
+              </h4>
+              <p className="text-gray-600">
+                Todos os formulários preenchidos chegam no seu dashboard com dados completos dos clientes.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Guarantee Section */}
-      <section className="py-16 bg-emerald-50">
+      {/* Special Offer Section */}
+      <section className="py-16 bg-gradient-to-r from-emerald-600 to-green-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-emerald-600" />
+          <div className="mb-8">
+            <span className="inline-block px-4 py-2 bg-white/20 rounded-full text-sm font-semibold mb-6">
+              🎁 Oferta Exclusiva para Distribuidores Herbalife
+            </span>
+          </div>
+          
+          <h3 className="text-3xl font-bold mb-4">
+            Comece Hoje com 50% de Desconto
+          </h3>
+          
+          <p className="text-xl mb-8">
+            + Suporte personalizado + Treinamento gratuito + Garantia de 30 dias
+          </p>
+          
+          <div className="bg-white/10 rounded-xl p-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              <div>
+                <Award className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                <h4 className="font-semibold mb-1">Suporte Personalizado</h4>
+                <p className="text-sm">Consultoria 1:1 para maximizar resultados</p>
+              </div>
+              <div>
+                <Target className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                <h4 className="font-semibold mb-1">Treinamento Gratuito</h4>
+                <p className="text-sm">Aprenda a usar todas as ferramentas</p>
+              </div>
+              <div>
+                <Zap className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                <h4 className="font-semibold mb-1">Garantia de 30 dias</h4>
+                <p className="text-sm">Se não aumentar vendas, devolvemos o dinheiro</p>
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Garantia de 30 Dias
-            </h3>
-            <p className="text-lg text-gray-600 mb-6">
-              Teste o YLADA por 30 dias sem compromisso. Se não aumentar suas vendas, 
-              devolvemos 100% do seu dinheiro. Sem perguntas, sem burocracia.
-            </p>
-            <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-emerald-500 mr-2" />
-                <span>Sem compromisso</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-emerald-500 mr-2" />
-                <span>Reembolso total</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-emerald-500 mr-2" />
-                <span>Suporte completo</span>
-              </div>
-            </div>
+          </div>
+          
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => setShowContactForm(true)}
+              className="px-8 py-4 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center"
+            >
+              <Phone className="w-5 h-5 mr-2" />
+              Agendar Demonstração
+            </button>
+            <button
+              onClick={() => setShowContactForm(true)}
+              className="px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition-colors flex items-center justify-center"
+            >
+              <Mail className="w-5 h-5 mr-2" />
+              Falar com Especialista
+            </button>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-emerald-600 to-green-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h3 className="text-3xl font-bold mb-4">
-            Pronto para aumentar suas vendas?
-          </h3>
-          <p className="text-xl text-emerald-100 mb-8">
-            Junte-se a mais de 500 profissionais que já transformaram seus negócios
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/auth/register"
-              className="px-8 py-4 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Começar Gratuitamente
-            </a>
-            <a
-              href="#demo"
-              className="px-8 py-4 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
-            >
-              Ver Demonstração
-            </a>
+      {/* Contact Form Modal */}
+      {showContactForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Agendar Demonstração</h3>
+              <button
+                onClick={() => setShowContactForm(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form onSubmit={handleContactSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome Completo
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  E-mail
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  WhatsApp
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  ID Distribuidor Herbalife
+                </label>
+                <input
+                  type="text"
+                  value={formData.distributorId}
+                  onChange={(e) => setFormData({...formData, distributorId: e.target.value})}
+                  placeholder="Ex: 123456"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Como podemos ajudar?
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  placeholder="Conte-nos sobre seus objetivos com o FitLead..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              
+              <div className="flex space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowContactForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Agendar Demo
+                </button>
+              </div>
+            </form>
+            
+            <div className="mt-4 text-center text-sm text-gray-500">
+              <p>Entraremos em contato em até 2 horas úteis</p>
+              <p className="font-semibold text-emerald-600">Suporte especializado para Herbalife</p>
+            </div>
           </div>
         </div>
-      </section>
+      )}
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
@@ -571,10 +639,10 @@ export default function FitLeadPage() {
               <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
                 <Calculator className="w-6 h-6 text-white" />
               </div>
-              <h4 className="text-xl font-bold">YLADA</h4>
+              <h4 className="text-xl font-bold">FitLead</h4>
             </div>
             <p className="text-gray-400 mb-4">
-              Your Lead Accelerated Data App
+              Powered by YLADA - Exclusivo para Distribuidores Herbalife
             </p>
             <p className="text-sm text-gray-500">
               © 2024 YLADA. Todos os direitos reservados.
