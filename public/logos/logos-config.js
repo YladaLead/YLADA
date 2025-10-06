@@ -2,18 +2,20 @@
 // Use este arquivo para importar os logos no seu projeto
 
 export const logos = {
-  // Logo principal horizontal (com gráfico verde)
+  // Logo principal horizontal
   horizontal: '/logos/ylada-logo-horizontal.png',
-  horizontalSvg: '/logos/ylada-logo-horizontal.svg',
+  
+  // Logo principal completo
+  main: '/logos/ylada-logo-main.png',
   
   // Logo apenas texto
   textOnly: '/logos/ylada-logo-text-only.png',
-  textOnlySvg: '/logos/ylada-logo-text-only.svg',
   
-  // Ícones
+  // Logo de uso/exemplo
+  usage: '/logos/ylada-logo-usage.png',
+  
+  // Ícone
   icon: '/logos/ylada-icon.png',
-  iconDark: '/logos/ylada-icon-dark.png',
-  iconSvg: '/logos/ylada-icon.svg',
   
   // Favicons
   favicon16: '/logos/ylada-favicon-16.png',
