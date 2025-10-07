@@ -27,6 +27,7 @@ export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [userLinks, setUserLinks] = useState<any[]>([])
   const [newLink, setNewLink] = useState({
+    project_name: '',
     tool_name: '',
     cta_text: 'Falar com Especialista',
     redirect_url: '',
@@ -200,6 +201,7 @@ export default function UserDashboard() {
       
       const linkData = {
         professional_id: user.id,
+        project_name: newLink.project_name,
         tool_name: newLink.tool_name,
         cta_text: newLink.cta_text,
         redirect_url: newLink.redirect_url,
@@ -225,6 +227,7 @@ export default function UserDashboard() {
         alert(`Link criado com sucesso!\n\nURL: ${customUrl}\n\nEste link é exclusivo e protegido.`)
         setShowLinkModal(false)
         setNewLink({ 
+          project_name: '', 
           tool_name: '', 
           cta_text: 'Falar com Especialista', 
           redirect_url: '',
@@ -494,9 +497,16 @@ export default function UserDashboard() {
                 {userLinks.slice(0, 3).map((link) => (
                   <div key={link.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-gray-900 capitalize text-sm">
-                        {link.tool_name.replace('-', ' ')}
-                      </h4>
+                      <div>
+                        <h4 className="font-medium text-gray-900 text-sm">
+                          {link.project_name || link.tool_name.replace('-', ' ')}
+                        </h4>
+                        {link.project_name && (
+                          <p className="text-xs text-gray-500 capitalize">
+                            {link.tool_name.replace('-', ' ')}
+                          </p>
+                        )}
+                      </div>
                       <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                         link.is_active 
                           ? 'bg-green-100 text-green-800' 
@@ -515,9 +525,10 @@ export default function UserDashboard() {
                           navigator.clipboard.writeText(link.custom_url)
                           alert('Link copiado para a área de transferência!')
                         }}
-                        className="text-emerald-600 hover:text-emerald-700 text-xs font-medium"
+                        className="bg-emerald-600 text-white px-2 py-1 rounded text-xs font-medium hover:bg-emerald-700 flex items-center space-x-1"
                       >
-                        Copiar
+                        <Copy className="w-3 h-3" />
+                        <span>Copiar</span>
                       </button>
                     </div>
                   </div>
@@ -544,13 +555,20 @@ export default function UserDashboard() {
                      onClick={() => {
                        // Auto-preencher WhatsApp se o usuário tiver telefone
                        if (user?.phone) {
-                         const phoneNumbers = user.phone.replace(/\D/g, '')
-                         // Garantir que não há duplicação removendo números repetidos consecutivos
-                         const cleanPhone = phoneNumbers.replace(/(\d)\1+/g, '$1')
+                         // Extrair apenas números do telefone
+                         let phoneNumbers = user.phone.replace(/\D/g, '')
+                         
+                         // Se começar com 55 (Brasil), manter
+                         // Se não começar com código do país, adicionar 55
+                         if (!phoneNumbers.startsWith('55')) {
+                           phoneNumbers = '55' + phoneNumbers
+                         }
+                         
                          setNewLink({
+                           project_name: '',
                            tool_name: '',
                            cta_text: 'Falar com Especialista',
-                           redirect_url: `https://wa.me/${cleanPhone}`,
+                           redirect_url: `https://wa.me/${phoneNumbers}`,
                            custom_message: '',
                            redirect_type: 'whatsapp'
                          })
@@ -598,13 +616,20 @@ export default function UserDashboard() {
               onClick={() => {
                 // Auto-preencher WhatsApp se o usuário tiver telefone
                 if (user?.phone) {
-                  const phoneNumbers = user.phone.replace(/\D/g, '')
-                  // Garantir que não há duplicação removendo números repetidos consecutivos
-                  const cleanPhone = phoneNumbers.replace(/(\d)\1+/g, '$1')
+                  // Extrair apenas números do telefone
+                  let phoneNumbers = user.phone.replace(/\D/g, '')
+                  
+                  // Se começar com 55 (Brasil), manter
+                  // Se não começar com código do país, adicionar 55
+                  if (!phoneNumbers.startsWith('55')) {
+                    phoneNumbers = '55' + phoneNumbers
+                  }
+                  
                   setNewLink({
+                    project_name: '',
                     tool_name: '',
                     cta_text: 'Falar com Especialista',
-                    redirect_url: `https://wa.me/${cleanPhone}`,
+                    redirect_url: `https://wa.me/${phoneNumbers}`,
                     custom_message: '',
                     redirect_type: 'whatsapp'
                   })
@@ -628,13 +653,20 @@ export default function UserDashboard() {
               <button
                 onClick={() => {
                   if (user?.phone) {
-                    const phoneNumbers = user.phone.replace(/\D/g, '')
-                    // Garantir que não há duplicação removendo números repetidos consecutivos
-                    const cleanPhone = phoneNumbers.replace(/(\d)\1+/g, '$1')
+                    // Extrair apenas números do telefone
+                    let phoneNumbers = user.phone.replace(/\D/g, '')
+                    
+                    // Se começar com 55 (Brasil), manter
+                    // Se não começar com código do país, adicionar 55
+                    if (!phoneNumbers.startsWith('55')) {
+                      phoneNumbers = '55' + phoneNumbers
+                    }
+                    
                     setNewLink({
+                      project_name: '',
                       tool_name: '',
                       cta_text: 'Falar com Especialista',
-                      redirect_url: `https://wa.me/${cleanPhone}`,
+                      redirect_url: `https://wa.me/${phoneNumbers}`,
                       custom_message: '',
                       redirect_type: 'whatsapp'
                     })
@@ -652,9 +684,14 @@ export default function UserDashboard() {
                 <div key={link.id} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="font-semibold text-gray-900 capitalize">
-                        {link.tool_name.replace('-', ' ')}
+                      <h3 className="font-semibold text-gray-900">
+                        {link.project_name || link.tool_name.replace('-', ' ')}
                       </h3>
+                      {link.project_name && (
+                        <p className="text-sm text-gray-500 capitalize">
+                          {link.tool_name.replace('-', ' ')}
+                        </p>
+                      )}
                       <p className="text-sm text-gray-600">
                         Criado em {new Date(link.created_at).toLocaleDateString('pt-BR')}
                       </p>
@@ -699,17 +736,19 @@ export default function UserDashboard() {
                           navigator.clipboard.writeText(link.custom_url)
                           alert('Link copiado para a área de transferência!')
                         }}
-                        className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+                        className="bg-emerald-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-emerald-700 flex items-center space-x-1"
                       >
-                        Copiar
+                        <Copy className="w-4 h-4" />
+                        <span>Copiar</span>
                       </button>
                       <button
                         onClick={() => {
                           window.open(link.custom_url, '_blank')
                         }}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
                       >
-                        Testar
+                        <Eye className="w-4 h-4" />
+                        <span>Testar</span>
                       </button>
                     </div>
                   </div>
@@ -846,6 +885,20 @@ export default function UserDashboard() {
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Nome do Projeto/Estratégia
+                        </label>
+                        <input
+                          type="text"
+                          value={newLink.project_name}
+                          onChange={(e) => setNewLink({...newLink, project_name: e.target.value})}
+                          placeholder="Ex: Campanha Instagram, Leads Nutrição, Vendas Q1"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Dê um nome para identificar esta estratégia</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
                           Ferramenta
                         </label>
                     <select
@@ -906,11 +959,16 @@ export default function UserDashboard() {
                             // Auto-preencher WhatsApp se o usuário tiver telefone cadastrado
                             // MAS só se ainda não foi preenchido ou se está mudando de tipo
                             if (redirectType === 'whatsapp' && user?.phone && (!redirectUrl.includes('wa.me') || newLink.redirect_type !== 'whatsapp')) {
-                              // Extrair apenas os números do telefone, removendo duplicações
-                              const phoneNumbers = user.phone.replace(/\D/g, '')
-                              // Garantir que não há duplicação removendo números repetidos consecutivos
-                              const cleanPhone = phoneNumbers.replace(/(\d)\1+/g, '$1')
-                              redirectUrl = `https://wa.me/${cleanPhone}`
+                              // Extrair apenas números do telefone
+                              let phoneNumbers = user.phone.replace(/\D/g, '')
+                              
+                              // Se começar com 55 (Brasil), manter
+                              // Se não começar com código do país, adicionar 55
+                              if (!phoneNumbers.startsWith('55')) {
+                                phoneNumbers = '55' + phoneNumbers
+                              }
+                              
+                              redirectUrl = `https://wa.me/${phoneNumbers}`
                             }
                             
                             setNewLink({
