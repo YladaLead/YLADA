@@ -43,7 +43,7 @@ export default function ProteinDemoPage() {
               <div className="bg-white rounded-lg p-4 border border-yellow-300">
                 <h4 className="font-semibold text-gray-900 mb-2">📱 Como Funciona o Botão Personalizado:</h4>
                 <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• <strong>Texto do botão:</strong> Você escolhe (ex: "Saiba Mais", "Falar com Especialista")</li>
+                  <li>• <strong>Texto do botão:</strong> Você escolhe (ex: &quot;Saiba Mais&quot;, &quot;Falar com Especialista&quot;)</li>
                   <li>• <strong>Redirecionamento:</strong> Pode ser WhatsApp, seu site, formulário, etc.</li>
                   <li>• <strong>URL personalizada:</strong> fitlead.ylada.com/seu-nome/nome-do-projeto</li>
                   <li>• <strong>Mensagem personalizada:</strong> Aparece antes do botão</li>
@@ -137,7 +137,7 @@ export default function ProteinDemoPage() {
                 <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-blue-800 text-sm">
                     💡 <strong>Sua mensagem personalizada:</strong><br/>
-                    "Quer um plano alimentar completo com essas quantidades de proteína? Fale comigo!"
+                    &quot;Quer um plano alimentar completo com essas quantidades de proteína? Fale comigo!&quot;
                   </p>
                 </div>
 
