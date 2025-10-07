@@ -200,7 +200,7 @@ export default function UserDashboard() {
     }
 
     checkAuth()
-  }, [supabase, fetchUserLinks])
+  }, [supabase])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -277,6 +277,7 @@ export default function UserDashboard() {
     console.log('🔗 INICIANDO CRIAÇÃO DE LINK...')
     console.log('👤 User:', user)
     console.log('📝 NewLink:', newLink)
+    console.log('🌐 Supabase client:', !!supabase)
     
     if (!user) {
       console.error('❌ Usuário não encontrado')
@@ -1257,7 +1258,7 @@ export default function UserDashboard() {
                         </label>
                         <input
                           type="url"
-                          value={newLink.redirect_url}
+                          value={newLink.redirect_url || (newLink.redirect_type === 'whatsapp' && user?.phone ? `https://wa.me/${user.phone.replace(/\D/g, '')}` : '')}
                           onChange={(e) => setNewLink({...newLink, redirect_url: e.target.value})}
                           placeholder={
                             newLink.redirect_type === 'whatsapp' 
