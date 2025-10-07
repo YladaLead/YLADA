@@ -43,6 +43,7 @@ export default function UserDashboard() {
     created_at: string;
   }>>([])
   const [editingPhone, setEditingPhone] = useState('')
+  const [authChecked, setAuthChecked] = useState(false)
   const [newLink, setNewLink] = useState({
     project_name: '',
     tool_name: '',
@@ -106,9 +107,12 @@ const supabase = createClient(supabaseUrl, supabaseKey)
   }, [supabase])
 
   useEffect(() => {
+    if (authChecked) return // Evitar execução múltipla
+    
     const checkAuth = async () => {
       try {
         console.log('🔍 VERIFICAÇÃO DE AUTH INICIADA...')
+        setAuthChecked(true) // Marcar como verificado
         
         // 1. Verificar sessão atual
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -200,7 +204,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     }
 
     checkAuth()
-  }, [supabase])
+  }, [supabase, authChecked])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
