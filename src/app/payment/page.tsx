@@ -81,7 +81,7 @@ export default function PaymentPage() {
               ))}
             </div>
             <p className="text-gray-700 italic mb-4">
-              "Em 2 semanas já gerei mais leads do que em 3 meses usando métodos tradicionais. O FitLead é revolucionário!"
+              &ldquo;Em 2 semanas já gerei mais leads do que em 3 meses usando métodos tradicionais. O FitLead é revolucionário!&rdquo;
             </p>
             <p className="text-sm text-gray-500">- Maria Silva, Nutricionista</p>
           </div>

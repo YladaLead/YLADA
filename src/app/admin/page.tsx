@@ -6,13 +6,9 @@ import {
   Users, 
   TrendingUp, 
   Eye, 
-  DollarSign, 
   Activity, 
   BarChart3,
   Calendar,
-  Mail,
-  Phone,
-  Building,
   LogOut,
   RefreshCw
 } from 'lucide-react'
@@ -84,7 +80,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchAdminData()
-  }, [])
+  }, [fetchAdminData])
 
   const fetchAdminData = async () => {
     try {
@@ -199,7 +195,7 @@ export default function AdminDashboard() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'overview' | 'users' | 'leads' | 'links' | 'analytics')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
                     activeTab === tab.id
                       ? 'border-emerald-500 text-emerald-600'
@@ -504,7 +500,7 @@ export default function AdminDashboard() {
                         <div className="text-sm font-medium text-gray-900">{link.tool_name}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">"{link.cta_text}"</div>
+                        <div className="text-sm text-gray-900">&ldquo;{link.cta_text}&rdquo;</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 max-w-xs truncate">{link.redirect_url}</div>

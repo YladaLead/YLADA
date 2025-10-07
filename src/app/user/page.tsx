@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { User, LogOut, Plus, Eye, Edit, MessageSquare, Settings, Link as LinkIcon, Copy, Share2, Camera, Building, Phone, Mail, Zap, X } from 'lucide-react'
+import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -25,7 +25,20 @@ export default function UserDashboard() {
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showReportsModal, setShowReportsModal] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [userLinks, setUserLinks] = useState<any[]>([])
+  const [userLinks, setUserLinks] = useState<Array<{
+    id: string;
+    tool_name: string;
+    project_name?: string;
+    cta_text: string;
+    redirect_url: string;
+    custom_url: string;
+    custom_message?: string;
+    redirect_type: string;
+    secure_id: string;
+    is_active: boolean;
+    views: number;
+    created_at: string;
+  }>>([])
   const [newLink, setNewLink] = useState({
     project_name: '',
     tool_name: '',
@@ -162,7 +175,7 @@ export default function UserDashboard() {
     }
 
     checkAuth()
-  }, [])
+  }, [supabase])
 
   const fetchUserLinks = async (userId: string) => {
     try {

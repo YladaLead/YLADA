@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calculator, Users, TrendingUp, Shield, CheckCircle, ArrowRight, Play, Heart, Activity, Brain, Mail } from 'lucide-react'
+import { Calculator, Users, TrendingUp, Shield, ArrowRight, Play, Heart, Activity, Brain } from 'lucide-react'
 import Link from 'next/link'
 import FitLeadLogo from '@/components/FitLeadLogo'
 
