@@ -899,60 +899,67 @@ export default function UserDashboard() {
                     <div className="text-sm text-gray-600">
                       <span className="font-medium">{link.views}</span> visualizações
                     </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(link.custom_url)
-                          alert('Link copiado para a área de transferência!')
-                        }}
-                        className="bg-emerald-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-emerald-700 flex items-center space-x-1"
-                      >
-                        <Copy className="w-4 h-4" />
-                        <span>Copiar</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          window.open(link.custom_url, '_blank')
-                        }}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
-                      >
-                        <Eye className="w-4 h-4" />
-                        <span>Testar</span>
-                      </button>
-                      <button
-                        onClick={() => editLink(link)}
-                        className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center space-x-1"
-                      >
-                        <Edit className="w-4 h-4" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        onClick={() => toggleLinkStatus(link.id, link.is_active)}
-                        className={`text-sm font-medium flex items-center space-x-1 ${
-                          link.is_active 
-                            ? 'text-red-600 hover:text-red-700' 
-                            : 'text-green-600 hover:text-green-700'
-                        }`}
-                      >
-                        {link.is_active ? (
-                          <>
-                            <ToggleRight className="w-4 h-4" />
-                            <span>Desativar</span>
-                          </>
-                        ) : (
-                          <>
-                            <ToggleLeft className="w-4 h-4" />
-                            <span>Ativar</span>
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => deleteLink(link.id)}
-                        className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span>Excluir</span>
-                      </button>
+                    <div className="space-y-2">
+                      {/* Primeira linha - Ações principais */}
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(link.custom_url)
+                            alert('Link copiado para a área de transferência!')
+                          }}
+                          className="bg-emerald-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-emerald-700 flex items-center space-x-1"
+                        >
+                          <Copy className="w-4 h-4" />
+                          <span>Copiar</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            window.open(link.custom_url, '_blank')
+                          }}
+                          className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>Testar</span>
+                        </button>
+                      </div>
+                      
+                      {/* Segunda linha - Ações de gerenciamento */}
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => editLink(link)}
+                          className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center space-x-1"
+                        >
+                          <Edit className="w-4 h-4" />
+                          <span>Editar</span>
+                        </button>
+                        <button
+                          onClick={() => toggleLinkStatus(link.id, link.is_active)}
+                          className={`text-sm font-medium flex items-center space-x-1 ${
+                            link.is_active 
+                              ? 'text-red-600 hover:text-red-700' 
+                              : 'text-green-600 hover:text-green-700'
+                          }`}
+                        >
+                          {link.is_active ? (
+                            <>
+                              <ToggleRight className="w-4 h-4" />
+                              <span>Desativar</span>
+                            </>
+                          ) : (
+                            <>
+                              <ToggleLeft className="w-4 h-4" />
+                              <span>Ativar</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => deleteLink(link.id)}
+                          className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Excluir</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
