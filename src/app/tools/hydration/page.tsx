@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Activity, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function HydrationPage() {
   const [formData, setFormData] = useState({
@@ -79,12 +80,12 @@ export default function HydrationPage() {
     ]
     
     const recommendations = [
-      'Distribua a ingestão ao longo do dia',
-      'Beba mais água durante exercícios',
-      'Aumente a ingestão em climas quentes',
-      'Considere eletrólitos após exercícios intensos',
-      'Ajuste conforme sua atividade física',
-      'Consulte um médico se tiver problemas renais'
+      '⏰ Distribua a ingestão ao longo do dia para máxima absorção',
+      '🏃‍♂️ Beba mais água durante exercícios para manter performance',
+      '🌡️ Aumente a ingestão em climas quentes para evitar desidratação',
+      '⚡ Considere eletrólitos após exercícios intensos para recuperação rápida',
+      '🎯 Ajuste conforme sua atividade física para resultados otimizados',
+      '👨‍⚕️ Consulte um médico se tiver problemas renais para segurança total'
     ]
     
     setResult({
@@ -327,9 +328,13 @@ export default function HydrationPage() {
                 >
                   Calcular Novamente
                 </button>
+                
+                {/* Botão personalizado do especialista */}
+                <SpecialistCTA toolName="hydration" />
+                
                 <Link
                   href="/fitlead"
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-block"
+                  className="mt-4 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold inline-block"
                 >
                   Voltar às Ferramentas
                 </Link>
