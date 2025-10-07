@@ -27,6 +27,11 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
   response.headers.set('x-project-domain', subdomain)
   
+  // Redirecionar página inicial do projeto para página específica
+  if (url.pathname === '/' && subdomain === 'fitlead') {
+    return NextResponse.redirect(new URL('/fitlead', url))
+  }
+
   // Adicionar contexto do projeto para páginas de auth e ferramentas
   if (url.pathname.startsWith('/tools/') || 
       url.pathname.startsWith('/login') || 
