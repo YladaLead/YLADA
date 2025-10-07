@@ -52,11 +52,71 @@ export default function UserDashboard() {
     custom_message: '',
     redirect_type: 'whatsapp'
   })
+  const [slugAvailability, setSlugAvailability] = useState<{
+    checking: boolean
+    available: boolean | null
+    message: string
+  }>({
+    checking: false,
+    available: null,
+    message: ''
+  })
 
   // Cliente Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase = createClient(supabaseUrl, supabaseKey)
+
+  // Função para verificar disponibilidade do slug
+  const checkSlugAvailability = async (projectName: string, toolName: string) => {
+    if (!projectName || !toolName || !user) return
+    
+    setSlugAvailability({ checking: true, available: null, message: '' })
+    
+    try {
+      // Gerar slug baseado no nome do projeto e ferramenta
+      const toolSlug = toolName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 30)
+      
+      const userSlug = user.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 20)
+      
+      const customSlug = `${userSlug}-${toolSlug}`
+      
+      // Verificar se já existe
+      const { data: existingLink } = await supabase
+        .from('professional_links')
+        .select('id')
+        .eq('custom_slug', customSlug)
+        .single()
+      
+      if (existingLink) {
+        setSlugAvailability({
+          checking: false,
+          available: false,
+          message: '❌ Este nome já está em uso. Tente outro nome para o projeto.'
+        })
+      } else {
+        setSlugAvailability({
+          checking: false,
+          available: true,
+          message: '✅ Nome disponível! Pode criar o link.'
+        })
+      }
+    } catch (error) {
+      setSlugAvailability({
+        checking: false,
+        available: true,
+        message: '✅ Nome disponível! Pode criar o link.'
+      })
+    }
+  }
 
   // Função para limpar e formatar telefone
   const cleanPhoneDisplay = (phone: string) => {
@@ -206,6 +266,17 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     checkAuth()
   }, [supabase, authChecked, fetchUserLinks])
 
+  // Verificar disponibilidade do slug quando os campos mudarem
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (newLink.project_name && newLink.tool_name) {
+        checkSlugAvailability(newLink.project_name, newLink.tool_name)
+      }
+    }, 500) // Debounce de 500ms
+
+    return () => clearTimeout(timeoutId)
+  }, [newLink.project_name, newLink.tool_name])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/auth'
@@ -298,6 +369,17 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     if (!newLink.redirect_url) {
       console.error('❌ URL de redirecionamento não informada')
       alert('Por favor, informe a URL de redirecionamento')
+      return
+    }
+
+    // Verificar se o slug está disponível
+    if (slugAvailability.available === false) {
+      alert('❌ Este nome já está em uso. Por favor, escolha outro nome para o projeto.')
+      return
+    }
+
+    if (slugAvailability.checking) {
+      alert('⏳ Verificando disponibilidade do nome... Aguarde um momento.')
       return
     }
 
@@ -1193,6 +1275,24 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Dê um nome para identificar esta estratégia</p>
+                        
+                        {/* Indicador de disponibilidade do slug */}
+                        {slugAvailability.checking && (
+                          <div className="mt-2 flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            <span className="text-sm text-blue-600">Verificando disponibilidade...</span>
+                          </div>
+                        )}
+                        
+                        {slugAvailability.message && !slugAvailability.checking && (
+                          <div className={`mt-2 p-2 rounded-lg text-sm ${
+                            slugAvailability.available 
+                              ? 'bg-green-50 text-green-700 border border-green-200' 
+                              : 'bg-red-50 text-red-700 border border-red-200'
+                          }`}>
+                            {slugAvailability.message}
+                          </div>
+                        )}
                       </div>
                       
                       <div>
@@ -1370,9 +1470,14 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                       </button>
                       <button
                         onClick={createCustomLink}
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                        disabled={slugAvailability.available === false || slugAvailability.checking}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          slugAvailability.available === false || slugAvailability.checking
+                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        }`}
                       >
-                        Criar Link Protegido
+                        {slugAvailability.checking ? 'Verificando...' : 'Criar Link Protegido'}
                       </button>
                     </div>
                   </div>
