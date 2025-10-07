@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { ArrowLeft, Brain, CheckCircle, Droplets, Sun, Activity } from 'lucide-react'
 
 export default function HydrationDemoPage() {

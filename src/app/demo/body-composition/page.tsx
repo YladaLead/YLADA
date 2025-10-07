@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { ArrowLeft, Zap, CheckCircle } from 'lucide-react'
 
 export default function BodyCompositionDemoPage() {
