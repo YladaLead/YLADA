@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, Circle, ArrowRight, Users, Target, Zap, Heart } from 'lucide-react'
+import { CheckCircle, Circle, Users, Target, Zap } from 'lucide-react'
 
 export default function OnboardingRapidoPage() {
   const [steps, setSteps] = useState([
@@ -80,7 +80,7 @@ export default function OnboardingRapidoPage() {
               Passos para Começar
             </h2>
             <div className="space-y-4">
-              {steps.map((step, index) => (
+              {steps.map((step) => (
                 <div
                   key={step.id}
                   className={`p-4 rounded-xl border-2 transition-all duration-200 ${

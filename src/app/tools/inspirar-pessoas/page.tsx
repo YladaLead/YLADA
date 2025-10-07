@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowRight, Heart, Users, Star, Target, Zap } from 'lucide-react'
+import { ArrowRight, Heart, Users, Star } from 'lucide-react'
 
 export default function InspirarPessoasPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)

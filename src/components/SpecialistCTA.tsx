@@ -24,7 +24,7 @@ interface LinkData {
   }
 }
 
-export default function SpecialistCTA({ toolName, className = '' }: SpecialistCTAProps) {
+export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Shield, Play, X } from 'lucide-react'
+import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Shield, Play, X, Target, Award, Zap } from 'lucide-react'
 
 export default function FitLeadLandingPage() {
   const [showContactForm, setShowContactForm] = useState(false)

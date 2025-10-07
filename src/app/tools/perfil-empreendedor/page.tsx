@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowRight, Heart, Briefcase, DollarSign, Target, Zap } from 'lucide-react'
+import { ArrowRight, Heart, Briefcase, DollarSign, Target } from 'lucide-react'
 
 export default function PerfilEmpreendedorPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)

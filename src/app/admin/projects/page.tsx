@@ -67,7 +67,7 @@ export default function ProjectsAdmin() {
     try {
       const fullDomain = `${newProject.domain}.ylada.com`
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('projects')
         .insert({
           name: newProject.name,

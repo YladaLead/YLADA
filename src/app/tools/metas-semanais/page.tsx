@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Target, Plus, CheckCircle, Calendar, TrendingUp, ArrowRight } from 'lucide-react'
+import { Target, Plus, CheckCircle, TrendingUp, ArrowRight } from 'lucide-react'
 
 export default function MetasSemanaisPage() {
   const [goals, setGoals] = useState([
