@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, CheckCircle2, AlertTriangle, TrendingUp } from 'lucide-react'
-import Link from 'next/link'
 
 export default function NutritionAssessmentDemoPage() {
   const [formData, setFormData] = useState({
