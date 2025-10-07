@@ -5,7 +5,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 // Cliente para uso no cliente (browser)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+})
 
 // Cliente para uso no servidor (sem cookies por enquanto)
 export function createServerSupabaseClient() {
@@ -35,53 +41,106 @@ export interface AuthUser {
 
 // Funções de autenticação
 export async function signUp(email: string, password: string, userType: UserType, profileData: Record<string, unknown>) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        user_type: userType,
-        ...profileData
+  try {
+    console.log('🔐 Iniciando cadastro...', { email, userType })
+    
+    // 1. Criar usuário no Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          user_type: userType,
+          ...profileData
+        }
       }
-    }
-  })
+    })
 
-  if (error) throw error
-
-  // Criar perfil baseado no tipo de usuário
-  if (data.user) {
-    if (userType === 'professional') {
-      await supabase.from('professionals').insert({
-        id: data.user.id,
-        name: profileData.name,
-        email: email,
-        phone: profileData.phone,
-        specialty: profileData.specialty,
-        company: profileData.company
-      })
-    } else {
-      await supabase.from('user_profiles').insert({
-        user_id: data.user.id,
-        name: profileData.name,
-        email: email,
-        phone: profileData.phone,
-        age: profileData.age,
-        gender: profileData.gender
-      })
+    if (authError) {
+      console.error('❌ Erro no auth:', authError)
+      throw authError
     }
+
+    console.log('✅ Usuário criado no auth:', authData.user?.id)
+
+    // 2. Aguardar um pouco para garantir que o usuário foi criado
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+           // 3. Criar perfil na tabela professionals (apenas se não existir)
+           if (authData.user) {
+             console.log('📝 Verificando se perfil já existe...')
+             
+             // Verificar se o perfil já existe
+             const { data: existingProfile, error: checkError } = await supabase
+               .from('professionals')
+               .select('id')
+               .eq('id', authData.user.id)
+               .maybeSingle()
+
+             if (checkError) {
+               console.error('❌ Erro ao verificar perfil existente:', checkError)
+               // Continuar mesmo com erro de verificação
+             }
+
+             if (existingProfile) {
+               console.log('✅ Perfil já existe, não criando duplicado')
+             } else {
+               console.log('📝 Criando novo perfil...')
+               
+               const { data: profileResult, error: profileError } = await supabase
+                 .from('professionals')
+                 .insert({
+                   id: authData.user.id,
+                   name: profileData.name as string,
+                   email: email,
+                   phone: profileData.phone as string,
+                   specialty: profileData.specialty as string,
+                   company: profileData.company as string
+                 })
+                 .select()
+                 .single()
+
+               if (profileError) {
+                 console.error('❌ Erro ao criar perfil:', profileError)
+                 // Se for erro de duplicação, não falhar o cadastro
+                 if (profileError.code === '23505') {
+                   console.log('⚠️ Perfil já existe (duplicação), continuando...')
+                 } else {
+                   throw profileError
+                 }
+               } else {
+                 console.log('✅ Perfil criado:', profileResult)
+               }
+             }
+           }
+
+    return authData
+  } catch (error) {
+    console.error('❌ Erro completo no signUp:', error)
+    throw error
   }
-
-  return data
 }
 
 export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  })
+  try {
+    console.log('🔑 Iniciando login...', { email })
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
 
-  if (error) throw error
-  return data
+    if (error) {
+      console.error('❌ Erro no login:', error)
+      throw error
+    }
+
+    console.log('✅ Login realizado:', data.user?.id)
+    return data
+  } catch (error) {
+    console.error('❌ Erro completo no signIn:', error)
+    throw error
+  }
 }
 
 export async function signOut() {
@@ -96,23 +155,24 @@ export async function getCurrentUser() {
 }
 
 export async function getCurrentUserProfile(userId: string) {
-  // Verificar se é profissional
-  const { data: professional } = await supabase
-    .from('professionals')
-    .select('*')
-    .eq('id', userId)
-    .single()
+  try {
+    console.log('👤 Buscando perfil do usuário...', { userId })
+    
+    const { data: professional, error } = await supabase
+      .from('professionals')
+      .select('*')
+      .eq('id', userId)
+      .single()
 
-  if (professional) {
-    return { ...professional, user_type: 'professional' }
+    if (error) {
+      console.error('❌ Erro ao buscar perfil:', error)
+      throw error
+    }
+
+    console.log('✅ Perfil encontrado:', professional?.name)
+    return professional ? { ...professional, user_type: 'professional' } : null
+  } catch (error) {
+    console.error('❌ Erro completo no getCurrentUserProfile:', error)
+    throw error
   }
-
-  // Se não for profissional, buscar perfil de usuário
-  const { data: userProfile } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
-
-  return userProfile ? { ...userProfile, user_type: 'user' } : null
 }

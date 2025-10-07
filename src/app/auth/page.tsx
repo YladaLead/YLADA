@@ -12,15 +12,13 @@ interface FormData {
   confirmPassword: string
   name: string
   phone: string
+  countryCode: string
   specialty: string
   company: string
-  age: string
-  gender: string
 }
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
-  const [userType, setUserType] = useState<'professional' | 'user'>('professional')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -31,10 +29,9 @@ export default function AuthPage() {
     confirmPassword: '',
     name: '',
     phone: '',
+    countryCode: '55',
     specialty: '',
-    company: '',
-    age: '',
-    gender: 'masculino'
+    company: ''
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,17 +50,12 @@ export default function AuthPage() {
 
         const profileData = {
           name: formData.name,
-          phone: formData.phone,
-          ...(userType === 'professional' ? {
-            specialty: formData.specialty,
-            company: formData.company
-          } : {
-            age: parseInt(formData.age),
-            gender: formData.gender
-          })
+          phone: `${formData.countryCode}${formData.phone}`,
+          specialty: formData.specialty,
+          company: formData.company
         }
 
-        await signUp(formData.email, formData.password, userType, profileData)
+        await signUp(formData.email, formData.password, 'professional', profileData)
                  router.push('/user')
       }
     } catch (err: unknown) {
@@ -89,10 +81,10 @@ export default function AuthPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {isLogin ? 'Entrar' : 'Criar Conta'}
+                  {isLogin ? 'Acessar Dashboard' : 'Começar Agora'}
                 </h1>
                 <p className="text-sm text-gray-600">
-                  {isLogin ? 'Acesse sua conta YLADA' : 'Comece a usar o YLADA'}
+                  {isLogin ? 'Entre na sua área profissional' : 'Crie sua conta e comece a gerar leads'}
                 </p>
               </div>
             </div>
@@ -112,7 +104,7 @@ export default function AuthPage() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Entrar
+              Acessar
             </button>
             <button
               onClick={() => setIsLogin(false)}
@@ -122,44 +114,10 @@ export default function AuthPage() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Registrar
+              Cadastrar
             </button>
           </div>
 
-          {/* User Type Selection (only for register) */}
-          {!isLogin && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Tipo de Usuário
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setUserType('professional')}
-                  className={`p-4 rounded-lg border text-sm font-medium transition-colors ${
-                    userType === 'professional'
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <GraduationCap className="w-5 h-5 mx-auto mb-2" />
-                  Profissional
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUserType('user')}
-                  className={`p-4 rounded-lg border text-sm font-medium transition-colors ${
-                    userType === 'user'
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <User className="w-5 h-5 mx-auto mb-2" />
-                  Usuário Final
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Error Message */}
           {error && (
@@ -247,22 +205,47 @@ export default function AuthPage() {
             )}
 
             {/* Professional fields */}
-            {!isLogin && userType === 'professional' && (
+            {!isLogin && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Telefone
+                    Telefone/WhatsApp
                   </label>
-                  <div className="relative">
-                    <Phone className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="(11) 99999-9999"
-                    />
+                  <div className="flex space-x-2">
+                    <div className="w-24">
+                      <select
+                        value={formData.countryCode || '55'}
+                        onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
+                        className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+                      >
+                        <option value="55">🇧🇷 +55</option>
+                        <option value="1">🇺🇸 +1</option>
+                        <option value="44">🇬🇧 +44</option>
+                        <option value="33">🇫🇷 +33</option>
+                        <option value="49">🇩🇪 +49</option>
+                        <option value="34">🇪🇸 +34</option>
+                        <option value="39">🇮🇹 +39</option>
+                        <option value="52">🇲🇽 +52</option>
+                        <option value="54">🇦🇷 +54</option>
+                        <option value="56">🇨🇱 +56</option>
+                        <option value="57">🇨🇴 +57</option>
+                        <option value="51">🇵🇪 +51</option>
+                      </select>
+                    </div>
+                    <div className="flex-1 relative">
+                      <Phone className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="11999999999"
+                      />
+                    </div>
                   </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Digite apenas números (ex: 11999999999)
+                  </p>
                 </div>
 
                 <div>
@@ -299,58 +282,6 @@ export default function AuthPage() {
               </>
             )}
 
-            {/* User fields */}
-            {!isLogin && userType === 'user' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Telefone
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="(11) 99999-9999"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Idade
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="120"
-                      value={formData.age}
-                      onChange={(e) => setFormData({...formData, age: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="25"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Sexo
-                    </label>
-                    <select
-                      value={formData.gender}
-                      onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    >
-                      <option value="masculino">Masculino</option>
-                      <option value="feminino">Feminino</option>
-                      <option value="outro">Outro</option>
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
 
             {/* Submit Button */}
             <button
@@ -358,7 +289,7 @@ export default function AuthPage() {
               disabled={loading}
               className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Carregando...' : (isLogin ? 'Entrar' : 'Criar Conta')}
+              {loading ? 'Carregando...' : (isLogin ? 'Acessar Dashboard' : 'Criar Conta')}
             </button>
           </form>
 
@@ -370,7 +301,7 @@ export default function AuthPage() {
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-emerald-600 hover:text-emerald-700 font-medium"
               >
-                {isLogin ? 'Criar conta' : 'Fazer login'}
+                {isLogin ? 'Cadastrar agora' : 'Acessar dashboard'}
               </button>
             </p>
           </div>
