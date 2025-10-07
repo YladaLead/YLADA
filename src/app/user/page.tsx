@@ -50,7 +50,8 @@ export default function UserDashboard() {
     cta_text: 'Saiba Mais',
     redirect_url: '',
     custom_message: '',
-    redirect_type: 'whatsapp'
+    redirect_type: 'whatsapp',
+    custom_slug: ''
   })
 
   // Cliente Supabase
@@ -302,14 +303,40 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     }
 
     try {
-      // Gerar URL única com hash de segurança
-      const timestamp = Date.now()
-      const randomHash = Math.random().toString(36).substring(2, 15)
-      const secureId = `${user.id.slice(0, 8)}-${timestamp}-${randomHash}`
+      // Gerar slug personalizado ou automático
+      let customSlug = newLink.custom_slug?.trim()
       
-      // Gerar URL com domínio do projeto
+      if (!customSlug) {
+        // Gerar slug automático baseado no nome do projeto
+        customSlug = newLink.project_name
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+          .replace(/\s+/g, '-') // Substitui espaços por hífens
+          .substring(0, 30) // Limita a 30 caracteres
+        
+        // Adicionar timestamp se estiver vazio
+        if (!customSlug) {
+          customSlug = `link-${Date.now().toString().slice(-6)}`
+        }
+      } else {
+        // Limpar e formatar slug personalizado
+        customSlug = customSlug
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
+          .replace(/-+/g, '-') // Remove hífens duplicados
+          .substring(0, 30) // Limita a 30 caracteres
+      }
+      
+      // Gerar ID único para segurança
+      const timestamp = Date.now()
+      const randomHash = Math.random().toString(36).substring(2, 8)
+      const secureId = `${customSlug}-${timestamp}-${randomHash}`
+      
+      // Gerar URL personalizada
       const projectDomain = user.project_id || 'fitlead' // Default para FitLead
-      const customUrl = generateProjectUrl(newLink.tool_name, secureId, projectDomain)
+      const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
+      const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
+      const customUrl = `${protocol}://${projectDomain}.${baseDomain}/link/${customSlug}`
       
       console.log('🔐 Secure ID:', secureId)
       console.log('🌐 Custom URL:', customUrl)
@@ -324,6 +351,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         custom_message: newLink.custom_message,
         redirect_type: newLink.redirect_type,
         secure_id: secureId,
+        custom_slug: customSlug,
         is_active: true
       }
       
@@ -347,7 +375,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
           cta_text: 'Saiba Mais', 
           redirect_url: '',
           custom_message: '',
-          redirect_type: 'whatsapp'
+          redirect_type: 'whatsapp',
+          custom_slug: ''
         })
         
         // Recarregar lista de links
@@ -1163,8 +1192,19 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Ferramenta
+                          Nome Personalizado da URL
                         </label>
+                        <input
+                          type="text"
+                          value={newLink.custom_slug || ''}
+                          onChange={(e) => setNewLink({...newLink, custom_slug: e.target.value})}
+                          placeholder="Ex: meu-projeto-proteina, campanha-instagram"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          URL será: fitlead.ylada.com/link/{newLink.custom_slug || 'nome-automatico'}
+                        </p>
+                      </div>
                     <select
                           value={newLink.tool_name}
                           onChange={(e) => setNewLink({...newLink, tool_name: e.target.value})}
