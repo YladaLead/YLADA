@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X } from 'lucide-react'
 
@@ -79,6 +79,28 @@ export default function UserDashboard() {
     // Formatar para exibição
     return '+55 ' + cleanPhone.substring(2)
   }
+
+  const fetchUserLinks = useCallback(async (userId: string) => {
+    try {
+      console.log('🔗 Buscando links do usuário...')
+      
+      const { data: links, error } = await supabase
+        .from('professional_links')
+        .select('*')
+        .eq('professional_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('❌ Erro ao buscar links:', error)
+        return
+      }
+
+      console.log('✅ Links encontrados:', links)
+      setUserLinks(links || [])
+    } catch (error) {
+      console.error('❌ Erro inesperado ao buscar links:', error)
+    }
+  }, [supabase])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -175,29 +197,7 @@ export default function UserDashboard() {
     }
 
     checkAuth()
-  }, [supabase])
-
-  const fetchUserLinks = async (userId: string) => {
-    try {
-      console.log('🔗 Buscando links do usuário...')
-      
-      const { data: links, error } = await supabase
-        .from('professional_links')
-        .select('*')
-        .eq('professional_id', userId)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('❌ Erro ao buscar links:', error)
-        return
-      }
-
-      console.log('✅ Links encontrados:', links)
-      setUserLinks(links || [])
-    } catch (error) {
-      console.error('❌ Erro inesperado ao buscar links:', error)
-    }
-  }
+  }, [supabase, fetchUserLinks])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

@@ -20,7 +20,7 @@ interface LinkData {
   }
 }
 
-export default function ToolPage({ params: _params }: { params: { tool: string } }) {
+export default function ToolPage({ params }: { params: { tool: string } }) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
