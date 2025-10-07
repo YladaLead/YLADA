@@ -66,7 +66,27 @@ export async function signUp(email: string, password: string, userType: UserType
     // 2. Aguardar um pouco para garantir que o usuário foi criado
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-           // 3. Criar perfil na tabela professionals (apenas se não existir)
+    // 3. Se o usuário não foi confirmado automaticamente, tentar confirmar
+    if (authData.user && !authData.user.email_confirmed_at) {
+      console.log('📧 Usuário não confirmado, tentando confirmar automaticamente...')
+      try {
+        // Tentar fazer login para forçar confirmação (se a configuração permitir)
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
+        
+        if (loginError) {
+          console.log('⚠️ Não foi possível confirmar automaticamente:', loginError.message)
+        } else {
+          console.log('✅ Email confirmado automaticamente!')
+        }
+      } catch (confirmError) {
+        console.log('⚠️ Erro na confirmação automática:', confirmError)
+      }
+    }
+
+           // 4. Criar perfil na tabela professionals (apenas se não existir)
            if (authData.user) {
              console.log('📝 Verificando se perfil já existe...')
              
