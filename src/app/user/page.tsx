@@ -558,10 +558,19 @@ export default function UserDashboard() {
                          // Extrair apenas números do telefone
                          let phoneNumbers = user.phone.replace(/\D/g, '')
                          
-                         // Se começar com 55 (Brasil), manter
+                         // Remover duplicações de código do país
+                         if (phoneNumbers.startsWith('5555')) {
+                           phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
+                         }
+                         
                          // Se não começar com código do país, adicionar 55
                          if (!phoneNumbers.startsWith('55')) {
                            phoneNumbers = '55' + phoneNumbers
+                         }
+                         
+                         // Limitar a 13 dígitos máximo (55 + 11 dígitos)
+                         if (phoneNumbers.length > 13) {
+                           phoneNumbers = phoneNumbers.substring(0, 13)
                          }
                          
                          setNewLink({
@@ -619,10 +628,19 @@ export default function UserDashboard() {
                   // Extrair apenas números do telefone
                   let phoneNumbers = user.phone.replace(/\D/g, '')
                   
-                  // Se começar com 55 (Brasil), manter
+                  // Remover duplicações de código do país
+                  if (phoneNumbers.startsWith('5555')) {
+                    phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
+                  }
+                  
                   // Se não começar com código do país, adicionar 55
                   if (!phoneNumbers.startsWith('55')) {
                     phoneNumbers = '55' + phoneNumbers
+                  }
+                  
+                  // Limitar a 13 dígitos máximo (55 + 11 dígitos)
+                  if (phoneNumbers.length > 13) {
+                    phoneNumbers = phoneNumbers.substring(0, 13)
                   }
                   
                   setNewLink({
@@ -656,10 +674,19 @@ export default function UserDashboard() {
                     // Extrair apenas números do telefone
                     let phoneNumbers = user.phone.replace(/\D/g, '')
                     
-                    // Se começar com 55 (Brasil), manter
+                    // Remover duplicações de código do país
+                    if (phoneNumbers.startsWith('5555')) {
+                      phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
+                    }
+                    
                     // Se não começar com código do país, adicionar 55
                     if (!phoneNumbers.startsWith('55')) {
                       phoneNumbers = '55' + phoneNumbers
+                    }
+                    
+                    // Limitar a 13 dígitos máximo (55 + 11 dígitos)
+                    if (phoneNumbers.length > 13) {
+                      phoneNumbers = phoneNumbers.substring(0, 13)
                     }
                     
                     setNewLink({
@@ -962,10 +989,19 @@ export default function UserDashboard() {
                               // Extrair apenas números do telefone
                               let phoneNumbers = user.phone.replace(/\D/g, '')
                               
-                              // Se começar com 55 (Brasil), manter
+                              // Remover duplicações de código do país
+                              if (phoneNumbers.startsWith('5555')) {
+                                phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
+                              }
+                              
                               // Se não começar com código do país, adicionar 55
                               if (!phoneNumbers.startsWith('55')) {
                                 phoneNumbers = '55' + phoneNumbers
+                              }
+                              
+                              // Limitar a 13 dígitos máximo (55 + 11 dígitos)
+                              if (phoneNumbers.length > 13) {
+                                phoneNumbers = phoneNumbers.substring(0, 13)
                               }
                               
                               redirectUrl = `https://wa.me/${phoneNumbers}`
@@ -1078,7 +1114,9 @@ export default function UserDashboard() {
                       onChange={(e) => {
                         const currentPhone = user?.phone || ''
                         const phoneNumber = currentPhone.split(' ').slice(1).join(' ')
-                        setUser({...user!, phone: `${e.target.value} ${phoneNumber}`})
+                        // Limpar o número para evitar duplicação
+                        const cleanPhoneNumber = phoneNumber.replace(/\D/g, '')
+                        setUser({...user!, phone: `${e.target.value} ${cleanPhoneNumber}`})
                       }}
                       className="px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-gray-50"
                     >
@@ -1098,7 +1136,9 @@ export default function UserDashboard() {
                       value={user?.phone?.split(' ').slice(1).join(' ') || ''}
                       onChange={(e) => {
                         const countryCode = user?.phone?.split(' ')[0] || '+55'
-                        setUser({...user!, phone: `${countryCode} ${e.target.value}`})
+                        // Limpar o valor de entrada para evitar duplicação
+                        const cleanValue = e.target.value.replace(/\D/g, '')
+                        setUser({...user!, phone: `${countryCode} ${cleanValue}`})
                       }}
                       placeholder="11 99999-9999"
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
