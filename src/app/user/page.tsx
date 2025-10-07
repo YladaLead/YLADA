@@ -252,7 +252,7 @@ export default function UserDashboard() {
     }
   }
 
-  const editLink = (link: any) => {
+  const editLink = (link: { id: string; project_name?: string; tool_name?: string; cta_text?: string; redirect_url?: string; custom_message?: string; redirect_type?: string }) => {
     // Preencher o formulário com os dados do link
     setNewLink({
       project_name: link.project_name || '',
