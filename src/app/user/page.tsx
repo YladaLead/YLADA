@@ -69,8 +69,12 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
   // Função para verificar disponibilidade do slug
   const checkSlugAvailability = async (projectName: string, toolName: string) => {
-    if (!projectName || !toolName || !user) return
+    if (!projectName || !toolName || !user) {
+      setSlugAvailability({ checking: false, available: null, message: '' })
+      return
+    }
     
+    console.log('🔍 Verificando disponibilidade:', { projectName, toolName })
     setSlugAvailability({ checking: true, available: null, message: '' })
     
     try {
@@ -89,12 +93,16 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       
       const customSlug = `${userSlug}-${toolSlug}`
       
+      console.log('🔗 Slug gerado:', customSlug)
+      
       // Verificar se já existe
-      const { data: existingLink } = await supabase
+      const { data: existingLink, error } = await supabase
         .from('professional_links')
         .select('id')
         .eq('custom_slug', customSlug)
         .single()
+      
+      console.log('📊 Resultado da verificação:', { existingLink, error })
       
       if (existingLink) {
         setSlugAvailability({
@@ -110,6 +118,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         })
       }
     } catch (error) {
+      console.error('❌ Erro na verificação:', error)
       setSlugAvailability({
         checking: false,
         available: true,
@@ -268,6 +277,9 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
   // Verificar disponibilidade do slug quando os campos mudarem
   useEffect(() => {
+    // Limpar estado anterior quando campos mudarem
+    setSlugAvailability({ checking: false, available: null, message: '' })
+    
     const timeoutId = setTimeout(() => {
       if (newLink.project_name && newLink.tool_name) {
         checkSlugAvailability(newLink.project_name, newLink.tool_name)
