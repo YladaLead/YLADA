@@ -596,6 +596,75 @@ const supabase = createClient(supabaseUrl, supabaseKey)
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
           
+          {/* Quick Actions - MOVED TO TOP */}
+          <div className="bg-emerald-50 rounded-lg p-6 mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <button 
+                     onClick={() => {
+                       // Auto-preencher WhatsApp se o usuário tiver telefone
+                       if (user?.phone) {
+                         // Extrair apenas números do telefone
+                         let phoneNumbers = user.phone.replace(/\D/g, '')
+                         
+                         // Remover duplicações de código do país
+                         if (phoneNumbers.startsWith('5555')) {
+                           phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
+                         }
+                         
+                         // Se não começar com código do país, adicionar 55
+                         if (!phoneNumbers.startsWith('55')) {
+                           phoneNumbers = '55' + phoneNumbers
+                         }
+                         
+                         // Limitar a 13 dígitos máximo (55 + 11 dígitos)
+                         if (phoneNumbers.length > 13) {
+                           phoneNumbers = phoneNumbers.substring(0, 13)
+                         }
+                         
+                         setNewLink({
+                           project_name: '',
+                           tool_name: '',
+                           cta_text: 'Saiba Mais',
+                           redirect_url: `https://wa.me/${phoneNumbers}`,
+                           custom_message: '',
+                           redirect_type: 'whatsapp',
+                           custom_slug: ''
+                         })
+                       }
+                       setShowLinkModal(true)
+                     }}
+                     className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                   >
+                <Plus className="w-6 h-6 text-emerald-600" />
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Criar Link</p>
+                  <p className="text-sm text-gray-600">Novo link personalizado</p>
+                </div>
+              </button>
+              <button 
+                onClick={() => setShowProfileModal(true)}
+                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
+                <Settings className="w-6 h-6 text-blue-600" />
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Configurar</p>
+                  <p className="text-sm text-gray-600">Editar perfil</p>
+                </div>
+              </button>
+              <button 
+                onClick={() => setShowReportsModal(true)}
+                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
+                <Eye className="w-6 h-6 text-purple-600" />
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Visualizar</p>
+                  <p className="text-sm text-gray-600">Ver relatórios</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
           {/* User Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-gray-50 rounded-lg p-4">
@@ -749,75 +818,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
               )}
             </div>
           )}
-
-          {/* Quick Actions */}
-          <div className="bg-emerald-50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                   <button 
-                     onClick={() => {
-                       // Auto-preencher WhatsApp se o usuário tiver telefone
-                       if (user?.phone) {
-                         // Extrair apenas números do telefone
-                         let phoneNumbers = user.phone.replace(/\D/g, '')
-                         
-                         // Remover duplicações de código do país
-                         if (phoneNumbers.startsWith('5555')) {
-                           phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
-                         }
-                         
-                         // Se não começar com código do país, adicionar 55
-                         if (!phoneNumbers.startsWith('55')) {
-                           phoneNumbers = '55' + phoneNumbers
-                         }
-                         
-                         // Limitar a 13 dígitos máximo (55 + 11 dígitos)
-                         if (phoneNumbers.length > 13) {
-                           phoneNumbers = phoneNumbers.substring(0, 13)
-                         }
-                         
-                         setNewLink({
-                           project_name: '',
-                           tool_name: '',
-                           cta_text: 'Saiba Mais',
-                           redirect_url: `https://wa.me/${phoneNumbers}`,
-                           custom_message: '',
-                           redirect_type: 'whatsapp',
-                           custom_slug: ''
-                         })
-                       }
-                       setShowLinkModal(true)
-                     }}
-                     className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                   >
-                <Plus className="w-6 h-6 text-emerald-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Criar Link</p>
-                  <p className="text-sm text-gray-600">Novo link personalizado</p>
-                </div>
-              </button>
-              <button 
-                onClick={() => setShowProfileModal(true)}
-                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <Settings className="w-6 h-6 text-blue-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Configurar</p>
-                  <p className="text-sm text-gray-600">Editar perfil</p>
-              </div>
-              </button>
-              <button 
-                onClick={() => setShowReportsModal(true)}
-                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <Eye className="w-6 h-6 text-purple-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Visualizar</p>
-                  <p className="text-sm text-gray-600">Ver relatórios</p>
-              </div>
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

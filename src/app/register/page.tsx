@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap } from 'lucide-react'
-import { signUp, signIn } from '@/lib/auth'
+import { signUp, signIn, signOut } from '@/lib/auth'
 
 interface FormData {
   email: string
@@ -65,7 +65,7 @@ export default function RegisterPage() {
         try {
           await signOut()
           console.log('✅ Logout realizado antes do cadastro')
-        } catch (logoutError) {
+        } catch {
           console.log('⚠️ Logout não necessário (usuário não estava logado)')
         }
         if (formData.password !== formData.confirmPassword) {
@@ -81,10 +81,6 @@ export default function RegisterPage() {
         }
 
         await signUp(formData.email, formData.password, 'professional', profileData)
-        
-        // Mostrar mensagem de confirmação de e-mail
-        alert('✅ Cadastro realizado! Verifique seu e-mail para ativar sua conta. (Verifique também a pasta de spam)')
-        
         router.push('/user')
       }
     } catch (err: unknown) {
