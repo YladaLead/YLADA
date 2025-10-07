@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowRight, Heart, Apple, Coffee, Pizza, Salad } from 'lucide-react'
+import { ArrowRight, Heart, Apple, Salad } from 'lucide-react'
 
 export default function AlimentacaoSaudavelPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)

@@ -204,7 +204,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     }
 
     checkAuth()
-  }, [supabase, authChecked])
+  }, [supabase, authChecked, fetchUserLinks])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

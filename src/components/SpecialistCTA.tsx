@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 interface SpecialistCTAProps {
-  toolName: string
+  toolName?: string
   className?: string
 }
 
@@ -60,7 +60,12 @@ export default function SpecialistCTA({ toolName, className = '' }: SpecialistCT
             .single()
 
           if (!error && data) {
-            setLinkData(data as LinkData)
+            // Corrigir estrutura dos dados do Supabase
+            const linkData: LinkData = {
+              ...data,
+              professional: Array.isArray(data.professional) ? data.professional[0] : data.professional
+            }
+            setLinkData(linkData)
           }
         } catch (error) {
           console.error('Erro ao buscar dados do link:', error)
