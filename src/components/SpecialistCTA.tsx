@@ -34,8 +34,12 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
 
   useEffect(() => {
     const fetchLinkData = async () => {
+      console.log('🔍 SpecialistCTA: Iniciando busca de dados...')
       const urlParams = new URLSearchParams(window.location.search)
       const linkId = urlParams.get('ref') || urlParams.get('link')
+      
+      console.log('🌐 URL atual:', window.location.href)
+      console.log('🔗 LinkId encontrado:', linkId)
       
       if (linkId) {
         try {
@@ -67,18 +71,24 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
             .single()
           
           console.log('📊 Dados encontrados:', { data, error })
-
+          
           if (!error && data) {
+            console.log('✅ Dados carregados com sucesso:', data)
             // Corrigir estrutura dos dados do Supabase
             const linkData: LinkData = {
               ...data,
               professional: Array.isArray(data.professional) ? data.professional[0] : data.professional
             }
             setLinkData(linkData)
+            console.log('🎯 LinkData final:', linkData)
+          } else {
+            console.error('❌ Erro ao buscar dados:', error)
           }
         } catch (error) {
-          console.error('Erro ao buscar dados do link:', error)
+          console.error('❌ Erro ao buscar dados do link:', error)
         }
+      } else {
+        console.log('⚠️ Nenhum ref encontrado na URL')
       }
       setLoading(false)
     }
