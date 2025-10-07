@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Shield, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function ProteinPage() {
   const [formData, setFormData] = useState({
@@ -75,12 +76,12 @@ export default function ProteinPage() {
     ]
     
     const recommendations = [
-      'Distribua a proteína ao longo do dia',
-      'Consuma proteína após exercícios',
-      'Prefira fontes completas de proteína',
-      'Combine com carboidratos para melhor absorção',
-      'Mantenha hidratação adequada',
-      'Consulte um nutricionista para ajustes individuais'
+      '⏰ Distribua a proteína ao longo do dia para maximizar absorção',
+      '💪 Consuma proteína após exercícios para acelerar recuperação',
+      '🥩 Prefira fontes completas de proteína para melhores resultados',
+      '🍚 Combine com carboidratos para melhor absorção e energia',
+      '💧 Mantenha hidratação adequada para otimizar metabolismo',
+      '👨‍⚕️ Consulte um nutricionista para ajustes individuais e resultados garantidos'
     ]
     
     setResult({
@@ -263,9 +264,13 @@ export default function ProteinPage() {
                 >
                   Calcular Novamente
                 </button>
+                
+                {/* Botão personalizado do especialista */}
+                <SpecialistCTA toolName="protein" />
+                
                 <Link
                   href="/fitlead"
-                  className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold inline-block"
+                  className="mt-4 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold inline-block"
                 >
                   Voltar às Ferramentas
                 </Link>
