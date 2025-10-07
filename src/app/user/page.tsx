@@ -493,7 +493,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       console.log('🌐 Custom URL:', customUrl)
       
       // Gerar URL da ferramenta (não WhatsApp)
-      const toolUrl = `${protocol}://${projectDomain}.${baseDomain}/tools/${newLink.tool_name}?ref=${secureId}`
       
       const linkData = {
         professional_id: user.id,

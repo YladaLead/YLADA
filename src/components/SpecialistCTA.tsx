@@ -17,6 +17,7 @@ interface LinkData {
   custom_message: string
   redirect_type: string
   project_name?: string
+  custom_slug?: string
   professional: {
     name: string
   }
