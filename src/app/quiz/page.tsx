@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { 
   Calculator, 
   ArrowLeft, 
@@ -316,13 +317,13 @@ export default function QuizSelectionPage() {
               </div>
             </div>
             
-            <a
+            <Link
               href="/dashboard"
               className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center"
             >
               Acessar Dashboard Profissional
               <ArrowRight className="w-5 h-5 ml-2" />
-            </a>
+            </Link>
           </div>
         </section>
       </main>

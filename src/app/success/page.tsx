@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CheckCircle, Download, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { CheckCircle, Download, ArrowRight } from 'lucide-react'
 
 export default function SuccessPage() {
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -158,9 +158,9 @@ export default function SuccessPage() {
               support@gliva.app
             </a>
             <span className="text-gray-400">|</span>
-            <a href="/help" className="text-blue-600 hover:text-blue-700">
+            <Link href="/help" className="text-blue-600 hover:text-blue-700">
               Help Center
-            </a>
+            </Link>
           </div>
         </div>
       </main>

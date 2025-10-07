@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
 export default function TestAuth() {
@@ -98,24 +99,24 @@ export default function TestAuth() {
               <p><strong>Último Login:</strong> {user.last_sign_in_at}</p>
             </div>
             <div className="mt-6">
-              <a 
+              <Link 
                 href="/user" 
                 className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700"
               >
                 Ir para Dashboard
-              </a>
+              </Link>
             </div>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-red-600 mb-4">❌ Usuário Não Autenticado</h2>
             <p className="text-gray-600 mb-4">Você precisa fazer login primeiro.</p>
-            <a 
+            <Link 
               href="/auth" 
               className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700"
             >
               Fazer Login
-            </a>
+            </Link>
           </div>
         )}
       </div>
