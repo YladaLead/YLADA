@@ -71,7 +71,7 @@ export default function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [links, setLinks] = useState<CustomLink[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'leads' | 'links'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'leads' | 'links' | 'analytics'>('overview')
   
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
