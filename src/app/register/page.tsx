@@ -81,6 +81,10 @@ export default function RegisterPage() {
         }
 
         await signUp(formData.email, formData.password, 'professional', profileData)
+        
+        // Mostrar mensagem de confirmação de e-mail
+        alert('✅ Cadastro realizado! Verifique seu e-mail para ativar sua conta. (Verifique também a pasta de spam)')
+        
         router.push('/user')
       }
     } catch (err: unknown) {
