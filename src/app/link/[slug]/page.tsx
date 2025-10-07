@@ -66,6 +66,8 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
             ...data,
             professional: Array.isArray(data.professional) ? data.professional[0] : data.professional
           }
+          console.log('📊 Link data encontrado:', linkData)
+          console.log('🔗 Redirect URL:', linkData.redirect_url)
           setLinkData(linkData)
         }
       } catch (error) {
@@ -81,7 +83,11 @@ export default function CustomLinkPage({ params }: { params: Promise<{ slug: str
 
   const handleRedirect = () => {
     if (linkData?.redirect_url) {
+      console.log('🔗 Redirecionando para:', linkData.redirect_url)
       window.location.href = linkData.redirect_url
+    } else {
+      console.error('❌ URL de redirecionamento não encontrada')
+      alert('Erro: URL de redirecionamento não encontrada')
     }
   }
 
