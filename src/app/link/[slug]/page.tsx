@@ -19,7 +19,7 @@ interface LinkData {
   }
 }
 
-export default function CustomLinkPage({ params }: { params: { slug: string } }) {
+export default function CustomLinkPage({ params }: { params: Promise<{ slug: string }> }) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,6 +33,7 @@ export default function CustomLinkPage({ params }: { params: { slug: string } })
   useEffect(() => {
     const fetchLinkData = async () => {
       try {
+        const resolvedParams = await params
         const { data, error } = await supabase
           .from('professional_links')
           .select(`
@@ -49,7 +50,7 @@ export default function CustomLinkPage({ params }: { params: { slug: string } })
               company
             )
           `)
-          .eq('custom_slug', params.slug)
+          .eq('custom_slug', resolvedParams.slug)
           .eq('is_active', true)
           .single()
 
@@ -76,7 +77,7 @@ export default function CustomLinkPage({ params }: { params: { slug: string } })
     }
 
     fetchLinkData()
-  }, [params.slug, supabase])
+  }, [params, supabase])
 
   const handleRedirect = () => {
     if (linkData?.redirect_url) {
