@@ -61,6 +61,13 @@ export default function RegisterPage() {
         await signIn(formData.email, formData.password)
         router.push('/user')
       } else {
+        // IMPORTANTE: Fazer logout antes de novo cadastro para evitar conflitos
+        try {
+          await signOut()
+          console.log('✅ Logout realizado antes do cadastro')
+        } catch (logoutError) {
+          console.log('⚠️ Logout não necessário (usuário não estava logado)')
+        }
         if (formData.password !== formData.confirmPassword) {
           throw new Error('Senhas não coincidem')
         }
