@@ -557,7 +557,7 @@ export default function NutritionAssessmentDemoPage() {
             e poderá personalizar com sua marca.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
+            <Link
               href="/auth/register"
               className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
