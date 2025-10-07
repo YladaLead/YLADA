@@ -41,6 +41,32 @@ export default function UserDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
+  // Função para limpar e formatar telefone
+  const cleanPhoneDisplay = (phone: string) => {
+    if (!phone) return 'Não informado'
+    
+    // Extrair apenas números
+    let cleanPhone = phone.replace(/\D/g, '')
+    
+    // Remover duplicações de código do país
+    if (cleanPhone.startsWith('5555')) {
+      cleanPhone = cleanPhone.substring(2)
+    }
+    
+    // Garantir código do país
+    if (!cleanPhone.startsWith('55')) {
+      cleanPhone = '55' + cleanPhone
+    }
+    
+    // Limitar a 13 dígitos
+    if (cleanPhone.length > 13) {
+      cleanPhone = cleanPhone.substring(0, 13)
+    }
+    
+    // Formatar para exibição
+    return '+55 ' + cleanPhone.substring(2)
+  }
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -253,6 +279,31 @@ export default function UserDashboard() {
     if (!user) return
 
     try {
+      // Se está atualizando o telefone, limpar e formatar corretamente
+      if (updates.phone) {
+        let cleanPhone = updates.phone.replace(/\D/g, '')
+        
+        // Remover duplicações de código do país
+        if (cleanPhone.startsWith('5555')) {
+          cleanPhone = cleanPhone.substring(2) // Remove o 55 duplicado
+        }
+        
+        // Garantir que tem código do país
+        if (!cleanPhone.startsWith('55')) {
+          cleanPhone = '55' + cleanPhone
+        }
+        
+        // Limitar a 13 dígitos máximo
+        if (cleanPhone.length > 13) {
+          cleanPhone = cleanPhone.substring(0, 13)
+        }
+        
+        // Formatar como +55 xxxxxxxxxxx
+        updates.phone = '+55 ' + cleanPhone.substring(2)
+      }
+
+      console.log('📝 Atualizando perfil com:', updates)
+
       const { error } = await supabase
         .from('professionals')
         .update(updates)
@@ -262,11 +313,23 @@ export default function UserDashboard() {
         setUser({ ...user, ...updates })
         alert('Perfil atualizado com sucesso!')
         setShowProfileModal(false)
+        
+        // Recarregar dados do usuário para garantir sincronização
+        const { data: updatedUser } = await supabase
+          .from('professionals')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+        
+        if (updatedUser) {
+          setUser(updatedUser)
+        }
       } else {
+        console.error('❌ Erro ao atualizar perfil:', error)
         alert('Erro ao atualizar perfil: ' + error.message)
       }
     } catch (error) {
-      console.error('Erro ao atualizar perfil:', error)
+      console.error('❌ Erro ao atualizar perfil:', error)
       alert('Erro ao atualizar perfil')
     }
   }
@@ -447,7 +510,7 @@ export default function UserDashboard() {
                              user.phone.startsWith('+598') ? '🇺🇾' :
                              user.phone.startsWith('+595') ? '🇵🇾' : '📞'}
                           </span>
-                          <span>{user.phone}</span>
+                          <span>{cleanPhoneDisplay(user.phone)}</span>
                         </span>
                       ) : 'Não informado'}
                     </p>
@@ -814,7 +877,7 @@ export default function UserDashboard() {
                     <p className="font-medium text-gray-900">
                       {user.phone ? (
                         <span className="flex items-center space-x-2">
-                          <span>{user.phone}</span>
+                          <span>{cleanPhoneDisplay(user.phone)}</span>
                         </span>
                       ) : (
                         <span className="text-gray-400">Não informado</span>
