@@ -33,3 +33,4 @@ CREATE INDEX IF NOT EXISTS idx_professional_links_secure_id ON public.profession
 SELECT 'Tabela atualizada com sucesso!' as status;
 
 
+

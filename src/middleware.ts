@@ -4,25 +4,33 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
   const hostname = request.headers.get('host') || ''
   
-  // Detectar subdomínio
+  // Detectar domínio do projeto (subdomínio)
   const subdomain = hostname.split('.')[0]
-  
-  // Lista de subdomínios válidos
-  const validSubdomains = ['fitness', 'nutrition', 'wellness', 'business', 'beauty', 'health', 'lifestyle']
+  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
   
   // Se não é um subdomínio válido ou é o domínio principal, continuar normalmente
-  if (!validSubdomains.includes(subdomain) || hostname.includes('localhost') || hostname.includes('vercel.app')) {
+  if (hostname.includes('localhost') || hostname.includes('vercel.app') || subdomain === 'www') {
     return NextResponse.next()
   }
   
-  // Adicionar header para identificar o subdomínio
-  const response = NextResponse.next()
-  response.headers.set('x-subdomain', subdomain)
+  // Verificar se é um domínio de projeto válido
+  const isValidProjectDomain = subdomain !== baseDomain.split('.')[0] && 
+                               subdomain.length >= 3 && 
+                               subdomain.length <= 30 &&
+                               /^[a-z0-9-]+$/.test(subdomain)
   
-  // Se estiver acessando uma ferramenta, adicionar contexto do subdomínio
+  if (!isValidProjectDomain) {
+    return NextResponse.next()
+  }
+  
+  // Adicionar header para identificar o projeto
+  const response = NextResponse.next()
+  response.headers.set('x-project-domain', subdomain)
+  
+  // Se estiver acessando uma ferramenta, adicionar contexto do projeto
   if (url.pathname.startsWith('/tools/')) {
-    // Adicionar parâmetro de contexto do subdomínio
-    url.searchParams.set('business_type', subdomain)
+    // Adicionar parâmetro de contexto do projeto
+    url.searchParams.set('project', subdomain)
     return NextResponse.redirect(url)
   }
   

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
-import { generateSubdomainUrl } from '@/lib/business-config'
+import { generateProjectUrl } from '@/lib/project-config'
 
 interface UserProfile {
   id: string
@@ -16,6 +16,7 @@ interface UserProfile {
   profile_image?: string
   whatsapp_link?: string
   business_type?: string
+  project_id?: string
   website_link?: string
 }
 
@@ -301,9 +302,9 @@ export default function UserDashboard() {
       const randomHash = Math.random().toString(36).substring(2, 15)
       const secureId = `${user.id.slice(0, 8)}-${timestamp}-${randomHash}`
       
-      // Gerar URL com subdomínio usando a função de configuração
-      const businessType = user.business_type || 'fitness'
-      const customUrl = generateSubdomainUrl(newLink.tool_name, secureId, businessType)
+      // Gerar URL com domínio do projeto
+      const projectDomain = user.project_id || 'fitlead' // Default para FitLead
+      const customUrl = generateProjectUrl(newLink.tool_name, secureId, projectDomain)
       
       console.log('🔐 Secure ID:', secureId)
       console.log('🌐 Custom URL:', customUrl)

@@ -29,3 +29,4 @@ CHECK (business_type IN ('fitness', 'nutrition', 'wellness', 'business', 'beauty
 -- beauty: Estética, Cosmética, Beleza
 -- health: Medicina, Fisioterapia, Saúde
 -- lifestyle: Life Coach, Desenvolvimento Pessoal
+

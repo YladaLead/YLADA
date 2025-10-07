@@ -32,3 +32,4 @@ COMMENT ON COLUMN public.professional_links.redirect_type IS 'Tipo de redirecion
 COMMENT ON COLUMN public.professional_links.secure_id IS 'ID único para proteção e controle de acesso do link';
 
 
+
