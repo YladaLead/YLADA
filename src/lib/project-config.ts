@@ -7,7 +7,7 @@ export interface Project {
   description?: string
   business_type: string
   is_active: boolean
-  settings: Record<string, any>
+  settings: Record<string, unknown>
 }
 
 // Configurações por tipo de projeto

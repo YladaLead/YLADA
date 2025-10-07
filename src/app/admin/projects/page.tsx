@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Plus, Settings, Eye, Trash2, Edit, Globe, Users, Link as LinkIcon } from 'lucide-react'
+import { Plus, Eye, Trash2, Edit, Globe, Users, Link as LinkIcon } from 'lucide-react'
 import { PROJECT_TYPES, generateDomainSuggestion, validateProjectDomain } from '@/lib/project-config'
 
 interface Project {
@@ -13,7 +13,7 @@ interface Project {
   description?: string
   business_type: string
   is_active: boolean
-  settings: Record<string, any>
+  settings: Record<string, unknown>
   created_at: string
 }
 
@@ -33,11 +33,7 @@ export default function ProjectsAdmin() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  useEffect(() => {
-    fetchProjects()
-  }, [])
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -51,7 +47,11 @@ export default function ProjectsAdmin() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
 
   const createProject = async () => {
     if (!newProject.name || !newProject.domain) {
