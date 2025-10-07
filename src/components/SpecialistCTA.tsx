@@ -36,10 +36,14 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
   useEffect(() => {
     const fetchLinkData = async () => {
       const urlParams = new URLSearchParams(window.location.search)
-      const linkId = urlParams.get('link')
+      const linkId = urlParams.get('ref') || urlParams.get('link')
       
       if (linkId) {
         try {
+          // Extrair custom_slug do secureId (formato: customSlug-timestamp-hash)
+          const customSlug = linkId.split('-').slice(0, -2).join('-')
+          
+          // Buscar por custom_slug
           const { data, error } = await supabase
             .from('professional_links')
             .select(`
@@ -50,13 +54,15 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
               custom_message,
               redirect_type,
               project_name,
+              custom_slug,
               professional:professional_id (
                 name,
                 specialty,
                 company
               )
             `)
-            .eq('id', linkId)
+            .eq('custom_slug', customSlug)
+            .eq('is_active', true)
             .single()
 
           if (!error && data) {
