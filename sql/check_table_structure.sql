@@ -64,3 +64,4 @@ SELECT
         ELSE 'NÃO EXISTE' 
     END as status;
 
+

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, Circle, Droplets, Coffee, Walking, Share2, Trophy, ArrowRight } from 'lucide-react'
+import { CheckCircle, Circle, Droplets, Coffee, Footprints, Share2, Trophy, ArrowRight } from 'lucide-react'
 
 export default function Desafio7DiasPage() {
   const [currentDay, setCurrentDay] = useState(0)
@@ -14,7 +14,7 @@ export default function Desafio7DiasPage() {
   const dailyHabits = [
     { key: 'agua', label: 'Beber 2L de água', icon: <Droplets className="w-5 h-5" />, points: 2 },
     { key: 'shake', label: 'Tomar shake Herbalife', icon: <Coffee className="w-5 h-5" />, points: 3 },
-    { key: 'caminhada', label: 'Fazer 30min de caminhada', icon: <Walking className="w-5 h-5" />, points: 2 },
+    { key: 'caminhada', label: 'Fazer 30min de caminhada', icon: <Footprints className="w-5 h-5" />, points: 2 },
     { key: 'compartilhar', label: 'Compartilhar progresso', icon: <Share2 className="w-5 h-5" />, points: 1 }
   ]
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
+import { generateSubdomainUrl } from '@/lib/business-config'
 
 interface UserProfile {
   id: string
@@ -14,6 +15,7 @@ interface UserProfile {
   bio?: string
   profile_image?: string
   whatsapp_link?: string
+  business_type?: string
   website_link?: string
 }
 
@@ -299,7 +301,9 @@ export default function UserDashboard() {
       const randomHash = Math.random().toString(36).substring(2, 15)
       const secureId = `${user.id.slice(0, 8)}-${timestamp}-${randomHash}`
       
-      const customUrl = `${window.location.origin}/tools/${newLink.tool_name}?ref=${secureId}`
+      // Gerar URL com subdomínio usando a função de configuração
+      const businessType = user.business_type || 'fitness'
+      const customUrl = generateSubdomainUrl(newLink.tool_name, secureId, businessType)
       
       console.log('🔐 Secure ID:', secureId)
       console.log('🌐 Custom URL:', customUrl)
@@ -607,8 +611,24 @@ export default function UserDashboard() {
                   <div>
                     <p className="text-sm text-gray-600">Especialidade</p>
                     <p className="font-medium text-gray-900">{user.specialty || 'Não informado'}</p>
-          </div>
-              </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Building className="w-5 h-5 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Tipo de Negócio</p>
+                    <p className="font-medium text-gray-900">
+                      {user.business_type === 'fitness' && '🏋️ Fitness & Academia'}
+                      {user.business_type === 'nutrition' && '🥗 Nutrição & Alimentação'}
+                      {user.business_type === 'wellness' && '🧘 Bem-estar & Spa'}
+                      {user.business_type === 'business' && '💼 Negócios & Coaching'}
+                      {user.business_type === 'beauty' && '💄 Beleza & Estética'}
+                      {user.business_type === 'health' && '🏥 Saúde & Medicina'}
+                      {user.business_type === 'lifestyle' && '🌟 Lifestyle & Desenvolvimento'}
+                      {!user.business_type && 'Não informado'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1364,8 +1384,23 @@ export default function UserDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Empresa
+                    Tipo de Negócio
                   </label>
+                  <select
+                    value={user?.business_type || 'fitness'}
+                    onChange={(e) => setUser({...user!, business_type: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  >
+                    <option value="fitness">🏋️ Fitness & Academia</option>
+                    <option value="nutrition">🥗 Nutrição & Alimentação</option>
+                    <option value="wellness">🧘 Bem-estar & Spa</option>
+                    <option value="business">💼 Negócios & Coaching</option>
+                    <option value="beauty">💄 Beleza & Estética</option>
+                    <option value="health">🏥 Saúde & Medicina</option>
+                    <option value="lifestyle">🌟 Lifestyle & Desenvolvimento</option>
+                  </select>
+                </div>
+                <div>
                   <input
                     type="text"
                     value={user?.company || ''}

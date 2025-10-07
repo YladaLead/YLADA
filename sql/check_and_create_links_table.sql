@@ -70,3 +70,4 @@ END $$;
 -- 4. Verificar resultado final
 SELECT 'Tabela professional_links configurada com sucesso!' as status;
 
+

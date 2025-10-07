@@ -31,3 +31,4 @@ COMMENT ON COLUMN public.professional_links.custom_message IS 'Mensagem personal
 COMMENT ON COLUMN public.professional_links.redirect_type IS 'Tipo de redirecionamento: whatsapp, website, instagram, telegram, email';
 COMMENT ON COLUMN public.professional_links.secure_id IS 'ID único para proteção e controle de acesso do link';
 
+

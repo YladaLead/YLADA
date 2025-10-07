@@ -73,3 +73,4 @@ WHERE table_name = 'professional_links'
 AND table_schema = 'public'
 ORDER BY ordinal_position;
 
+
