@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { ArrowLeft, Shield, CheckCircle, ArrowRight, Heart, Brain, Zap, Activity } from 'lucide-react'
 import Link from 'next/link'
 
@@ -411,7 +412,7 @@ export default function WellnessCheckupQuizDemoPage() {
                   className="px-6 py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
                 >
                   Começar Gratuitamente
-                </a>
+                </Link>
               </div>
             </div>
           )}
@@ -431,7 +432,7 @@ export default function WellnessCheckupQuizDemoPage() {
               className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Começar Gratuitamente
-            </a>
+            </Link>
             <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"

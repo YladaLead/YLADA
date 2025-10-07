@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Heart, CheckCircle, Clock, Utensils } from 'lucide-react'
 import Link from 'next/link'
+import { ArrowLeft, Heart, CheckCircle, Clock, Utensils } from 'lucide-react'
 
 export default function MealPlannerDemoPage() {
   const [formData, setFormData] = useState({
@@ -494,7 +494,7 @@ export default function MealPlannerDemoPage() {
               className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Começar Gratuitamente
-            </a>
+            </Link>
             <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"

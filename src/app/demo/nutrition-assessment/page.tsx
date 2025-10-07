@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { ArrowLeft, CheckCircle, CheckCircle2, AlertTriangle, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
@@ -561,7 +562,7 @@ export default function NutritionAssessmentDemoPage() {
               className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Começar Gratuitamente
-            </a>
+            </Link>
             <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"

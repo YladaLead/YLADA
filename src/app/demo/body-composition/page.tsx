@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { ArrowLeft, Zap, CheckCircle } from 'lucide-react'
-import Link from 'next/link'
 
 export default function BodyCompositionDemoPage() {
   const [formData, setFormData] = useState({
@@ -382,12 +381,12 @@ export default function BodyCompositionDemoPage() {
             e poderá personalizar com sua marca.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
+            <Link
               href="/auth/register"
               className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Começar Gratuitamente
-            </a>
+            </Link>
             <Link
               href="/"
               className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
