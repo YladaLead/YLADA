@@ -323,11 +323,11 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       const randomHash = Math.random().toString(36).substring(2, 8)
       const secureId = `${customSlug}-${timestamp}-${randomHash}`
       
-      // Gerar URL personalizada com estrutura usuario/nome-do-link
+      // Gerar URL personalizada simplificada: apenas nome-do-link
       const projectDomain = user.project_id || 'fitlead' // Default para FitLead
       const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-      const customUrl = `${protocol}://${projectDomain}.${baseDomain}/${userSlug}/${customSlug}`
+      const customUrl = `${protocol}://${projectDomain}.${baseDomain}/${customSlug}`
       
       console.log('🔐 Secure ID:', secureId)
       console.log('🌐 Custom URL:', customUrl)

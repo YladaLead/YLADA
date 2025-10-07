@@ -19,7 +19,7 @@ interface LinkData {
   }
 }
 
-export default function UserLinkPage({ params }: { params: Promise<{ user: string; slug: string }> }) {
+export default function UserLinkPage({ params }: { params: Promise<{ slug: string }> }) {
   const [linkData, setLinkData] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -34,22 +34,9 @@ export default function UserLinkPage({ params }: { params: Promise<{ user: strin
     const fetchLinkData = async () => {
       try {
         const resolvedParams = await params
-        const { user: userSlug, slug } = resolvedParams
+        const { slug } = resolvedParams
         
-        // Buscar o usuário pelo slug do nome
-        const { data: professional } = await supabase
-          .from('professionals')
-          .select('id, name')
-          .ilike('name', `%${userSlug.replace(/-/g, ' ')}%`)
-          .single()
-
-        if (!professional) {
-          setError('Usuário não encontrado')
-          setLoading(false)
-          return
-        }
-
-        // Buscar o link específico do usuário
+        // Buscar o link diretamente pelo custom_slug
         const { data, error } = await supabase
           .from('professional_links')
           .select(`
@@ -66,7 +53,6 @@ export default function UserLinkPage({ params }: { params: Promise<{ user: strin
               company
             )
           `)
-          .eq('professional_id', professional.id)
           .eq('custom_slug', slug)
           .eq('is_active', true)
           .single()
