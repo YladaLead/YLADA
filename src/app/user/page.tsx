@@ -483,7 +483,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         project_name: newLink.project_name,
         tool_name: newLink.tool_name,
         cta_text: newLink.cta_text,
-        redirect_url: newLink.redirect_url, // URL escolhida pelo usuário (WhatsApp, site, etc.)
+        redirect_url: `https://fitlead.ylada.com/tools/${newLink.tool_name}?ref=${customSlug}`, // URL da ferramenta com ref
         custom_url: customUrl,
         custom_message: newLink.custom_message,
         redirect_type: newLink.redirect_type,
