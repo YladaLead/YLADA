@@ -42,6 +42,7 @@ export default function UserDashboard() {
     views: number;
     created_at: string;
   }>>([])
+  const [editingPhone, setEditingPhone] = useState('')
   const [newLink, setNewLink] = useState({
     project_name: '',
     tool_name: '',
@@ -364,6 +365,11 @@ export default function UserDashboard() {
     if (!user) return
 
     try {
+      // Se está atualizando o telefone, usar o editingPhone
+      if (updates.phone === undefined && editingPhone) {
+        updates.phone = editingPhone
+      }
+      
       // Se está atualizando o telefone, limpar e formatar corretamente
       if (updates.phone) {
         let cleanPhone = updates.phone.replace(/\D/g, '')
@@ -396,6 +402,7 @@ export default function UserDashboard() {
 
       if (!error) {
         setUser({ ...user, ...updates })
+        setEditingPhone('') // Limpar o estado de edição
         alert('Perfil atualizado com sucesso!')
         setShowProfileModal(false)
         
@@ -1338,10 +1345,9 @@ export default function UserDashboard() {
                   </label>
                   <input
                     type="tel"
-                    value={user?.phone || ''}
+                    value={editingPhone || user?.phone || ''}
                     onChange={(e) => {
-                      // Permitir edição livre do telefone
-                      setUser({...user!, phone: e.target.value})
+                      setEditingPhone(e.target.value)
                     }}
                     placeholder="+55 11 99999-9999"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
