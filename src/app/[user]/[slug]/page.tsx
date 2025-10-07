@@ -84,6 +84,13 @@ export default function UserLinkPage({ params }: { params: Promise<{ user: strin
             professional: Array.isArray(data.professional) ? data.professional[0] : data.professional
           }
           setLinkData(linkData)
+          
+          // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta
+          if (data.redirect_url) {
+            console.log('🚀 Redirecionando automaticamente para:', data.redirect_url)
+            window.location.href = data.redirect_url
+            return
+          }
         }
       } catch (error) {
         console.error('Erro ao buscar dados do link:', error)
