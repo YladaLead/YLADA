@@ -47,7 +47,7 @@ export default function UserDashboard() {
   const [newLink, setNewLink] = useState({
     project_name: '',
     tool_name: '',
-    cta_text: 'Falar com Especialista',
+    cta_text: 'Saiba Mais',
     redirect_url: '',
     custom_message: '',
     redirect_type: 'whatsapp'
@@ -344,7 +344,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         setNewLink({ 
           project_name: '', 
           tool_name: '', 
-          cta_text: 'Falar com Especialista', 
+          cta_text: 'Saiba Mais', 
           redirect_url: '',
           custom_message: '',
           redirect_type: 'whatsapp'
@@ -750,7 +750,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                          setNewLink({
                            project_name: '',
                            tool_name: '',
-                           cta_text: 'Falar com Especialista',
+                           cta_text: 'Saiba Mais',
                            redirect_url: `https://wa.me/${phoneNumbers}`,
                            custom_message: '',
                            redirect_type: 'whatsapp'
@@ -820,7 +820,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                   setNewLink({
                     project_name: '',
                     tool_name: '',
-                    cta_text: 'Falar com Especialista',
+                    cta_text: 'Saiba Mais',
                     redirect_url: `https://wa.me/${phoneNumbers}`,
                     custom_message: '',
                     redirect_type: 'whatsapp'
@@ -866,7 +866,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                     setNewLink({
                       project_name: '',
                       tool_name: '',
-                      cta_text: 'Falar com Especialista',
+                      cta_text: 'Saiba Mais',
                       redirect_url: `https://wa.me/${phoneNumbers}`,
                       custom_message: '',
                       redirect_type: 'whatsapp'
@@ -1206,7 +1206,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                     type="text"
                           value={newLink.cta_text}
                           onChange={(e) => setNewLink({...newLink, cta_text: e.target.value})}
-                          placeholder="Falar com Especialista"
+                          placeholder="Saiba Mais"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         />
                       </div>
