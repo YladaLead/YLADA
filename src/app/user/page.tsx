@@ -316,7 +316,19 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         .replace(/\s+/g, '-') // Substitui espaços por hífens
         .substring(0, 20) // Limita a 20 caracteres
       
-      const customSlug = `${userSlug}-${toolSlug}`
+      let customSlug = `${userSlug}-${toolSlug}`
+      
+      // Verificar se o slug já existe para este usuário
+      const { data: existingLink } = await supabase
+        .from('professional_links')
+        .select('id')
+        .eq('custom_slug', customSlug)
+        .single()
+      
+      if (existingLink) {
+        // Se já existe, adicionar timestamp para tornar único
+        customSlug = `${customSlug}-${Date.now().toString().slice(-6)}`
+      }
       
       // Gerar ID único para segurança
       const timestamp = Date.now()
