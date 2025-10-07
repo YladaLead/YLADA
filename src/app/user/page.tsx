@@ -50,8 +50,7 @@ export default function UserDashboard() {
     cta_text: 'Saiba Mais',
     redirect_url: '',
     custom_message: '',
-    redirect_type: 'whatsapp',
-    custom_slug: ''
+    redirect_type: 'whatsapp'
   })
 
   // Cliente Supabase
@@ -268,8 +267,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       cta_text: link.cta_text || 'Falar com Especialista',
       redirect_url: link.redirect_url || '',
       custom_message: link.custom_message || '',
-      redirect_type: link.redirect_type || 'whatsapp',
-      custom_slug: ''
+      redirect_type: link.redirect_type || 'whatsapp'
     })
     
     // Abrir o modal
@@ -304,42 +302,21 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     }
 
     try {
-      // Gerar slug personalizado ou automático
-      let customSlug = newLink.custom_slug?.trim()
+      // Gerar slug automático baseado no nome da ferramenta
+      const toolSlug = newLink.tool_name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+        .replace(/\s+/g, '-') // Substitui espaços por hífens
+        .substring(0, 30) // Limita a 30 caracteres
       
-      if (!customSlug) {
-        // Gerar slug automático baseado no nome do projeto
-        customSlug = newLink.project_name
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-          .replace(/\s+/g, '-') // Substitui espaços por hífens
-          .substring(0, 30) // Limita a 30 caracteres
-        
-        // Adicionar timestamp se estiver vazio
-        if (!customSlug) {
-          customSlug = `link-${Date.now().toString().slice(-6)}`
-        }
-      } else {
-        // Limpar e formatar slug personalizado
-        customSlug = customSlug
-          .toLowerCase()
-          .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
-          .replace(/-+/g, '-') // Remove hífens duplicados
-          .substring(0, 30) // Limita a 30 caracteres
-      }
+      // Gerar slug do usuário baseado no nome
+      const userSlug = user.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+        .replace(/\s+/g, '-') // Substitui espaços por hífens
+        .substring(0, 20) // Limita a 20 caracteres
       
-      // Verificar se o slug já existe para este usuário
-      const { data: existingLink } = await supabase
-        .from('professional_links')
-        .select('id')
-        .eq('professional_id', user.id)
-        .eq('custom_slug', customSlug)
-        .single()
-      
-      if (existingLink) {
-        // Se já existe, adicionar timestamp para tornar único
-        customSlug = `${customSlug}-${Date.now().toString().slice(-4)}`
-      }
+      const customSlug = `${userSlug}-${toolSlug}`
       
       // Gerar ID único para segurança
       const timestamp = Date.now()
@@ -350,7 +327,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       const projectDomain = user.project_id || 'fitlead' // Default para FitLead
       const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-      const userSlug = user.name.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20)
       const customUrl = `${protocol}://${projectDomain}.${baseDomain}/${userSlug}/${customSlug}`
       
       console.log('🔐 Secure ID:', secureId)
@@ -393,8 +369,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
           cta_text: 'Saiba Mais', 
           redirect_url: '',
           custom_message: '',
-          redirect_type: 'whatsapp',
-          custom_slug: ''
+          redirect_type: 'whatsapp'
         })
         
         // Recarregar lista de links
@@ -646,8 +621,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                            cta_text: 'Saiba Mais',
                            redirect_url: `https://wa.me/${phoneNumbers}`,
                            custom_message: '',
-                           redirect_type: 'whatsapp',
-                           custom_slug: ''
+                           redirect_type: 'whatsapp'
                          })
                        }
                        setShowLinkModal(true)
@@ -872,7 +846,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                     redirect_url: `https://wa.me/${phoneNumbers}`,
                     custom_message: '',
                     redirect_type: 'whatsapp',
-                    custom_slug: ''
                   })
                 }
                 setShowLinkModal(true)
@@ -919,7 +892,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                       redirect_url: `https://wa.me/${phoneNumbers}`,
                       custom_message: '',
                       redirect_type: 'whatsapp',
-                      custom_slug: ''
                     })
                   }
                   setShowLinkModal(true)
@@ -1209,22 +1181,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Dê um nome para identificar esta estratégia</p>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Nome Personalizado da URL
-                        </label>
-                        <input
-                          type="text"
-                          value={newLink.custom_slug || ''}
-                          onChange={(e) => setNewLink({...newLink, custom_slug: e.target.value})}
-                          placeholder="Ex: meu-projeto-proteina, campanha-instagram"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          URL será: fitlead.ylada.com/{user?.name?.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20) || 'usuario'}/{newLink.custom_slug || 'nome-automatico'}
-                        </p>
                       </div>
                       
                       <div>
