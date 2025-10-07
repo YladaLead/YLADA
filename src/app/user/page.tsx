@@ -1335,42 +1335,16 @@ export default function UserDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Telefone
                   </label>
-                  <div className="flex">
-                    <select
-                      value={user?.phone?.split(' ')[0] || '+55'}
-                      onChange={(e) => {
-                        const currentPhone = user?.phone || ''
-                        const phoneNumber = currentPhone.split(' ').slice(1).join(' ')
-                        // Limpar o número para evitar duplicação
-                        const cleanPhoneNumber = phoneNumber.replace(/\D/g, '')
-                        setUser({...user!, phone: `${e.target.value} ${cleanPhoneNumber}`})
-                      }}
-                      className="px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-gray-50"
-                    >
-                      <option value="+55">🇧🇷 +55 (Brasil)</option>
-                      <option value="+1">🇺🇸 +1 (EUA)</option>
-                      <option value="+52">🇲🇽 +52 (México)</option>
-                      <option value="+54">🇦🇷 +54 (Argentina)</option>
-                      <option value="+56">🇨🇱 +56 (Chile)</option>
-                      <option value="+57">🇨🇴 +57 (Colômbia)</option>
-                      <option value="+58">🇻🇪 +58 (Venezuela)</option>
-                      <option value="+51">🇵🇪 +51 (Peru)</option>
-                      <option value="+598">🇺🇾 +598 (Uruguai)</option>
-                      <option value="+595">🇵🇾 +595 (Paraguai)</option>
-                    </select>
-                    <input
-                      type="tel"
-                      value={user?.phone?.split(' ').slice(1).join(' ') || ''}
-                      onChange={(e) => {
-                        const countryCode = user?.phone?.split(' ')[0] || '+55'
-                        // Limpar o valor de entrada para evitar duplicação
-                        const cleanValue = e.target.value.replace(/\D/g, '')
-                        setUser({...user!, phone: `${countryCode} ${cleanValue}`})
-                      }}
-                      placeholder="11 99999-9999"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    />
-                  </div>
+                  <input
+                    type="tel"
+                    value={user?.phone || ''}
+                    onChange={(e) => {
+                      // Permitir edição livre do telefone
+                      setUser({...user!, phone: e.target.value})
+                    }}
+                    placeholder="+55 11 99999-9999"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

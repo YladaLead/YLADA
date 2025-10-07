@@ -30,10 +30,10 @@ export default function UniversalLandingPage() {
         setProjectDomain(subdomain)
         console.log('✅ Project detected:', subdomain)
         
-        // Se é fitlead, redirecionar para login
+        // Se é fitlead, mostrar página de apresentação do projeto
         if (subdomain === 'fitlead') {
-          console.log('🚀 Redirecting to FitLead login...')
-          router.push('/login?project=fitlead')
+          console.log('🎯 FitLead project detected - showing presentation page')
+          // Não redirecionar, mostrar página de apresentação
         }
       } else {
         console.log('❌ No project detected')
@@ -52,8 +52,8 @@ export default function UniversalLandingPage() {
 
   const handleMainAction = () => {
     if (projectDomain) {
-      // Se há um projeto detectado, redirecionar para login
-      router.push('/login')
+      // Se há um projeto detectado, mostrar formulário de contato
+      setShowContactForm(true)
     } else {
       // Se não há projeto, mostrar formulário de contato
       setShowContactForm(true)
@@ -689,19 +689,19 @@ export default function UniversalLandingPage() {
               onClick={handleMainAction}
               className="px-8 py-4 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
             >
-              {projectDomain ? (
-                <>
-                  <Users className="w-5 h-5 mr-2" />
-                  Acessar {getProjectName()}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              ) : (
-                <>
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  {currentContent.ctaButton}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
+          {projectDomain ? (
+            <>
+              <MessageSquare className="w-5 h-5 mr-2" />
+              Saiba Mais sobre {getProjectName()}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </>
+          ) : (
+            <>
+              <MessageSquare className="w-5 h-5 mr-2" />
+              {currentContent.ctaButton}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </>
+          )}
             </button>
           </div>
         </div>
