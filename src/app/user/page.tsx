@@ -111,7 +111,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       // Verificar se já existe (SEMPRE verificar, mesmo se já verificou antes)
       const { data: existingLink, error } = await supabase
         .from('professional_links')
-        .select('id, project_name, tool_name')
+        .select('id, project_name, tool_name, custom_url')
         .eq('custom_slug', customSlug)
         .maybeSingle() // Usar maybeSingle em vez de single para evitar erro 406
       
@@ -136,12 +136,29 @@ const supabase = createClient(supabaseUrl, supabaseKey)
           message: '❌ Este nome já está em uso. Tente outro nome para o projeto.'
         })
       } else {
-        console.log('✅ Slug disponível:', customSlug)
-        setSlugAvailability({
-          checking: false,
-          available: true,
-          message: '✅ Nome disponível! Pode criar o link.'
-        })
+        // Verificar também se a URL customizada já existe
+        const customUrl = `https://fitlead.ylada.com/${customSlug}`
+        const { data: existingUrl } = await supabase
+          .from('professional_links')
+          .select('id')
+          .eq('custom_url', customUrl)
+          .maybeSingle()
+        
+        if (existingUrl) {
+          console.log('❌ URL já existe:', customUrl)
+          setSlugAvailability({
+            checking: false,
+            available: false,
+            message: '❌ Esta URL já existe. Tente outro nome para o projeto.'
+          })
+        } else {
+          console.log('✅ Slug e URL disponíveis:', customSlug)
+          setSlugAvailability({
+            checking: false,
+            available: true,
+            message: '✅ Nome disponível! Pode criar o link.'
+          })
+        }
       }
     } catch (error) {
       console.error('❌ Erro na verificação:', error)
@@ -536,7 +553,11 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       if (!error && data) {
         const action = isEditing ? 'atualizado' : 'criado'
         console.log(`✅ Link ${action} com sucesso!`)
-        alert(`Link ${action} com sucesso!\n\nURL: ${customUrl}\n\nEste link é exclusivo e protegido.`)
+        
+        // Mensagem de sucesso mais bonita
+        const successMessage = `🎉 Link ${action} com sucesso!\n\n🔗 URL: ${customUrl}\n\n✨ Este link é exclusivo e protegido.\n\n📋 Você pode copiar e compartilhar este link com seus clientes.`
+        
+        alert(successMessage)
         setShowLinkModal(false)
         setEditingLinkId(null) // Limpar ID de edição
         setNewLink({ 
@@ -555,7 +576,24 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       } else {
         const action = isEditing ? 'atualizar' : 'criar'
         console.error(`❌ Erro ao ${action} link:`, error)
-        alert(`Erro ao ${action} link: ${error?.message || 'Erro desconhecido'}`)
+        
+        // Traduzir mensagens de erro para português
+        let errorMessage = 'Erro desconhecido'
+        if (error?.message?.includes('duplicate key value violates unique constraint')) {
+          if (error.message.includes('custom_slug')) {
+            errorMessage = 'Este nome de projeto já está em uso. Tente outro nome.'
+          } else if (error.message.includes('custom_url')) {
+            errorMessage = 'Esta URL já existe. Tente outro nome para o projeto.'
+          } else {
+            errorMessage = 'Nome já está em uso. Tente outro nome para o projeto.'
+          }
+        } else if (error?.message?.includes('violates unique constraint')) {
+          errorMessage = 'Este nome já está sendo usado. Escolha outro nome para o projeto.'
+        } else {
+          errorMessage = error?.message || 'Erro desconhecido'
+        }
+        
+        alert(`❌ Erro ao ${action} link:\n\n${errorMessage}`)
       }
     } catch (error) {
       console.error('❌ Erro inesperado ao criar link:', error)
