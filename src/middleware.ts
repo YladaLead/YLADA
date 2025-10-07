@@ -32,9 +32,11 @@ export async function middleware(request: NextRequest) {
       url.pathname.startsWith('/login') || 
       url.pathname.startsWith('/register') ||
       url.pathname.startsWith('/user')) {
-    // Adicionar parâmetro de contexto do projeto
-    url.searchParams.set('project', subdomain)
-    return NextResponse.redirect(url)
+    // Só adicionar parâmetro se não existir
+    if (!url.searchParams.has('project')) {
+      url.searchParams.set('project', subdomain)
+      return NextResponse.redirect(url)
+    }
   }
   
   return response

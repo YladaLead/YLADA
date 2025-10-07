@@ -23,12 +23,23 @@ export default function UniversalLandingPage() {
       const hostname = window.location.hostname
       const subdomain = hostname.split('.')[0]
       
+      console.log('🔍 Detecting project:', { hostname, subdomain })
+      
       // Se não é localhost e tem subdomínio válido
       if (!hostname.includes('localhost') && subdomain !== 'www' && subdomain.length > 2) {
         setProjectDomain(subdomain)
+        console.log('✅ Project detected:', subdomain)
+        
+        // Se é fitlead, redirecionar para login
+        if (subdomain === 'fitlead') {
+          console.log('🚀 Redirecting to FitLead login...')
+          router.push('/login?project=fitlead')
+        }
+      } else {
+        console.log('❌ No project detected')
       }
     }
-  }, [])
+  }, [router])
 
   const getProjectName = () => {
     switch (projectDomain) {
