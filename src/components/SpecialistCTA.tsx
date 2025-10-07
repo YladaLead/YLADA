@@ -117,16 +117,6 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
         <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
           <p className="text-sm text-gray-700">
             👨‍⚕️ <strong>Profissional:</strong> {linkData.professional.name}
-            {linkData.professional.specialty && ` - ${linkData.professional.specialty}`}
-            {linkData.professional.company && ` (${linkData.professional.company})`}
-          </p>
-        </div>
-      )}
-
-      {linkData?.project_name && (
-        <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-          <p className="text-sm text-purple-800">
-            📋 <strong>Projeto:</strong> {linkData.project_name}
           </p>
         </div>
       )}
