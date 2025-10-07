@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 export default function TestAuth() {
-  const [user, setUser] = useState<{ id: string; email: string; name?: string } | null>(null)
+  const [user, setUser] = useState<{ id: string; email?: string; name?: string } | null>(null)
   const [loading, setLoading] = useState(true)
 
   const supabase = createClient(
