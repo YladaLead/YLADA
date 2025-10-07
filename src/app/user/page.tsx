@@ -310,9 +310,9 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         // Gerar slug automático baseado no nome do projeto
         customSlug = newLink.project_name
           .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-          .replace(/\s+/g, '-') // Substitui espaços por hífens
-          .substring(0, 30) // Limita a 30 caracteres
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .substring(0, 30)
         
         // Adicionar timestamp se estiver vazio
         if (!customSlug) {
@@ -322,9 +322,9 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         // Limpar e formatar slug personalizado
         customSlug = customSlug
           .toLowerCase()
-          .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
-          .replace(/-+/g, '-') // Remove hífens duplicados
-          .substring(0, 30) // Limita a 30 caracteres
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .substring(0, 30)
       }
       
       // Gerar ID único para segurança
