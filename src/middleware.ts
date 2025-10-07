@@ -44,6 +44,12 @@ export async function middleware(request: NextRequest) {
     }
   }
   
+  // Redirecionar /user para o subdomínio correto se estiver no domínio principal
+  if (hostname === baseDomain && url.pathname.startsWith('/user')) {
+    const redirectUrl = new URL(`https://fitlead.${baseDomain}${url.pathname}${url.search}`)
+    return NextResponse.redirect(redirectUrl)
+  }
+  
   return response
 }
 

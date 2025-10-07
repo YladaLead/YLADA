@@ -74,7 +74,10 @@ export default function UserLinkPage({ params }: { params: Promise<{ slug: strin
           // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta
           if (data.redirect_url) {
             console.log('🚀 Redirecionando automaticamente para:', data.redirect_url)
-            window.location.href = data.redirect_url
+            // Redirecionamento imediato sem mostrar página intermediária
+            setTimeout(() => {
+              window.location.replace(data.redirect_url)
+            }, 100) // Pequeno delay para garantir que os dados foram carregados
             return
           }
         }
@@ -141,10 +144,6 @@ export default function UserLinkPage({ params }: { params: Promise<{ slug: strin
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <h3 className="font-semibold text-gray-900 mb-2">Profissional</h3>
             <p className="text-gray-700 font-medium">{linkData.professional.name}</p>
-            <p className="text-gray-600 text-sm">{linkData.professional.specialty}</p>
-            {linkData.professional.company && (
-              <p className="text-gray-600 text-sm">{linkData.professional.company}</p>
-            )}
           </div>
         )}
 
