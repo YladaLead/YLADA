@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Calculator, Globe, ArrowRight, Users, TrendingUp, Star, Mail, MessageSquare, Shield } from 'lucide-react'
 
 export default function UniversalLandingPage() {
   const [selectedLanguage, setSelectedLanguage] = useState('pt')
   const [showContactForm, setShowContactForm] = useState(false)
+  const [projectDomain, setProjectDomain] = useState('')
+  const router = useRouter()
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,14 +17,37 @@ export default function UniversalLandingPage() {
     message: ''
   })
 
-  const languages = [
-    { code: 'pt', name: 'Português', flag: '🇧🇷' },
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-    { code: 'it', name: 'Italiano', flag: '🇮🇹' }
-  ]
+  useEffect(() => {
+    // Detectar projeto pelo subdomínio
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      const subdomain = hostname.split('.')[0]
+      
+      // Se não é localhost e tem subdomínio válido
+      if (!hostname.includes('localhost') && subdomain !== 'www' && subdomain.length > 2) {
+        setProjectDomain(subdomain)
+      }
+    }
+  }, [])
+
+  const getProjectName = () => {
+    switch (projectDomain) {
+      case 'fitlead': return 'FitLead'
+      case 'nutri': return 'Nutri'
+      case 'beauty': return 'Beauty'
+      default: return 'YLADA'
+    }
+  }
+
+  const handleMainAction = () => {
+    if (projectDomain) {
+      // Se há um projeto detectado, redirecionar para login
+      router.push('/login')
+    } else {
+      // Se não há projeto, mostrar formulário de contato
+      setShowContactForm(true)
+    }
+  }
 
   const content = {
     pt: {
@@ -577,7 +604,9 @@ export default function UniversalLandingPage() {
                 <Calculator className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">{currentContent.title}</h1>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {projectDomain ? getProjectName() : currentContent.title}
+                </h1>
                 <p className="text-xs text-gray-600">{currentContent.subtitle}</p>
               </div>
             </div>
@@ -638,12 +667,22 @@ export default function UniversalLandingPage() {
 
           <div className="flex justify-center">
             <button
-              onClick={() => setShowContactForm(true)}
+              onClick={handleMainAction}
               className="px-8 py-4 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
             >
-              <MessageSquare className="w-5 h-5 mr-2" />
-              {currentContent.ctaButton}
-              <ArrowRight className="w-5 h-5 ml-2" />
+              {projectDomain ? (
+                <>
+                  <Users className="w-5 h-5 mr-2" />
+                  Acessar {getProjectName()}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              ) : (
+                <>
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                  {currentContent.ctaButton}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              )}
             </button>
           </div>
         </div>

@@ -27,8 +27,11 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
   response.headers.set('x-project-domain', subdomain)
   
-  // Se estiver acessando uma ferramenta, adicionar contexto do projeto
-  if (url.pathname.startsWith('/tools/')) {
+  // Adicionar contexto do projeto para páginas de auth e ferramentas
+  if (url.pathname.startsWith('/tools/') || 
+      url.pathname.startsWith('/login') || 
+      url.pathname.startsWith('/register') ||
+      url.pathname.startsWith('/user')) {
     // Adicionar parâmetro de contexto do projeto
     url.searchParams.set('project', subdomain)
     return NextResponse.redirect(url)
