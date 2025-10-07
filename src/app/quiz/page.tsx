@@ -15,7 +15,6 @@ import {
   Users,
   Star
 } from 'lucide-react'
-import Link from 'next/link'
 
 export default function QuizSelectionPage() {
   const [language, setLanguage] = useState<'pt' | 'en' | 'es'>('pt')
