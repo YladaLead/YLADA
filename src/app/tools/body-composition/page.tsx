@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Activity, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function BodyCompositionPage() {
   const [formData, setFormData] = useState({
@@ -80,12 +81,12 @@ export default function BodyCompositionPage() {
     const muscleMass = weight - fatMass
     
     const recommendations = [
-      'Mantenha uma dieta equilibrada com proteínas adequadas',
-      'Pratique exercícios de força para aumentar massa muscular',
-      'Inclua exercícios cardiovasculares para reduzir gordura',
-      'Monitore sua composição corporal regularmente',
-      'Consulte um profissional para avaliação mais precisa',
-      'Mantenha hidratação adequada para otimizar resultados'
+      '🥗 Mantenha uma dieta equilibrada com proteínas adequadas para maximizar resultados',
+      '💪 Pratique exercícios de força para aumentar massa muscular de qualidade',
+      '🏃‍♂️ Inclua exercícios cardiovasculares para reduzir gordura rapidamente',
+      '📊 Monitore sua composição corporal regularmente para acompanhar progresso',
+      '👨‍⚕️ Consulte um profissional para avaliação mais precisa e resultados garantidos',
+      '💧 Mantenha hidratação adequada para otimizar todos os seus resultados'
     ]
     
     setResult({
@@ -286,9 +287,13 @@ export default function BodyCompositionPage() {
                 >
                   Calcular Novamente
                 </button>
+                
+                {/* Botão personalizado do especialista */}
+                <SpecialistCTA toolName="body-composition" />
+                
                 <Link
                   href="/fitlead"
-                  className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-semibold inline-block"
+                  className="mt-4 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold inline-block"
                 >
                   Voltar às Ferramentas
                 </Link>

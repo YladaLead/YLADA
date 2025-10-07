@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Calculator, ArrowLeft, CheckCircle, MessageSquare } from 'lucide-react'
+import { Calculator, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function BMIPage() {
   const [formData, setFormData] = useState({
@@ -236,29 +237,7 @@ export default function BMIPage() {
                 </button>
                 
                 {/* Botão personalizado do especialista */}
-                <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
-                  <p className="text-sm text-emerald-700 mb-3">
-                    💡 <strong>Quer resultados ainda melhores?</strong><br/>
-                    Um especialista pode criar um plano personalizado para você!
-                  </p>
-                  <button
-                    onClick={() => {
-                      // Buscar dados do link personalizado
-                      const urlParams = new URLSearchParams(window.location.search)
-                      const linkId = urlParams.get('link')
-                      if (linkId) {
-                        window.location.href = `/tools/bmi?link=${linkId}&action=contact`
-                      } else {
-                        // Fallback para página de contato
-                        window.location.href = '/fitlead'
-                      }
-                    }}
-                    className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
-                  >
-                    <MessageSquare className="w-5 h-5 mr-2" />
-                    Falar com Especialista
-                  </button>
-                </div>
+                <SpecialistCTA toolName="bmi" />
                 
                 <Link
                   href="/fitlead"
