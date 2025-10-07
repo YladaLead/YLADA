@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calculator, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Calculator, ArrowLeft, CheckCircle, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 
 export default function BMIPage() {
@@ -37,37 +37,37 @@ export default function BMIPage() {
       category = 'Abaixo do peso'
       color = 'text-blue-600'
       recommendations = [
-        'Consulte um nutricionista para ganho de peso saudável',
-        'Aumente a ingestão calórica gradualmente',
-        'Inclua exercícios de força para ganho de massa muscular',
-        'Considere suplementos nutricionais adequados'
+        '🎯 Consulte um nutricionista para ganho de peso saudável e seguro',
+        '⚡ Aumente a ingestão calórica gradualmente para evitar problemas digestivos',
+        '💪 Inclua exercícios de força para ganho de massa muscular de qualidade',
+        '🔬 Considere suplementos nutricionais adequados para acelerar seus resultados'
       ]
     } else if (bmi >= 18.5 && bmi < 25) {
       category = 'Peso normal'
       color = 'text-green-600'
       recommendations = [
-        'Mantenha uma alimentação equilibrada',
-        'Continue praticando exercícios regularmente',
-        'Monitore seu peso periodicamente',
-        'Mantenha hábitos saudáveis de sono'
+        '✅ Mantenha uma alimentação equilibrada para preservar sua saúde',
+        '🏃 Continue praticando exercícios regularmente para manter a forma',
+        '📊 Monitore seu peso periodicamente para detectar mudanças',
+        '🌟 Considere consultar um especialista para otimizar ainda mais seus resultados'
       ]
     } else if (bmi >= 25 && bmi < 30) {
       category = 'Sobrepeso'
       color = 'text-yellow-600'
       recommendations = [
-        'Reduza a ingestão calórica gradualmente',
-        'Aumente a atividade física',
-        'Foque em alimentos integrais e vegetais',
-        'Considere acompanhamento nutricional'
+        '🔥 Reduza a ingestão calórica gradualmente para resultados duradouros',
+        '💪 Aumente a atividade física para acelerar a perda de peso',
+        '🥗 Foque em alimentos integrais e vegetais para melhorar sua saúde',
+        '👨‍⚕️ Considere acompanhamento nutricional para resultados mais rápidos'
       ]
     } else {
       category = 'Obesidade'
       color = 'text-red-600'
       recommendations = [
-        'Procure acompanhamento médico e nutricional',
-        'Implemente mudanças graduais no estilo de vida',
-        'Aumente significativamente a atividade física',
-        'Considere programas estruturados de perda de peso'
+        '🚨 Procure acompanhamento médico e nutricional URGENTE para sua saúde',
+        '⚡ Implemente mudanças graduais no estilo de vida para resultados seguros',
+        '🏃‍♂️ Aumente significativamente a atividade física para acelerar a transformação',
+        '🎯 Considere programas estruturados de perda de peso para resultados garantidos'
       ]
     }
     
@@ -234,9 +234,35 @@ export default function BMIPage() {
                 >
                   Calcular Novamente
                 </button>
+                
+                {/* Botão personalizado do especialista */}
+                <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+                  <p className="text-sm text-emerald-700 mb-3">
+                    💡 <strong>Quer resultados ainda melhores?</strong><br/>
+                    Um especialista pode criar um plano personalizado para você!
+                  </p>
+                  <button
+                    onClick={() => {
+                      // Buscar dados do link personalizado
+                      const urlParams = new URLSearchParams(window.location.search)
+                      const linkId = urlParams.get('link')
+                      if (linkId) {
+                        window.location.href = `/tools/bmi?link=${linkId}&action=contact`
+                      } else {
+                        // Fallback para página de contato
+                        window.location.href = '/fitlead'
+                      }
+                    }}
+                    className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
+                  >
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    Falar com Especialista
+                  </button>
+                </div>
+                
                 <Link
                   href="/fitlead"
-                  className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold inline-block"
+                  className="mt-4 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold inline-block"
                 >
                   Voltar às Ferramentas
                 </Link>
