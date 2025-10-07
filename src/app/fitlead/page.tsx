@@ -261,16 +261,16 @@ export default function FitLeadLandingPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium mb-6">
-            🏋️ Ferramentas Profissionais para Fitness
+            🚀 Automação Inteligente para Fitness
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Transforme Visitantes em 
-            <span className="text-emerald-600"> Clientes Qualificados</span>
+            Conquiste Novos Clientes Todos os Dias com 
+            <span className="text-emerald-600"> Automação e Inteligência</span>
           </h1>
           
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Ferramentas profissionais que demonstram sua expertise e capturam leads automaticamente para seu negócio de fitness e nutrição.
+            O FitLead ajuda você a gerar leads qualificados e fortalecer sua presença digital no universo fitness e de nutrição.
           </p>
 
           <div className="flex items-center justify-center space-x-8 mb-8">
