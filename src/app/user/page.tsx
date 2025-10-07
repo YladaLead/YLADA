@@ -327,26 +327,43 @@ const supabase = createClient(supabaseUrl, supabaseKey)
           .substring(0, 30) // Limita a 30 caracteres
       }
       
+      // Verificar se o slug já existe para este usuário
+      const { data: existingLink } = await supabase
+        .from('professional_links')
+        .select('id')
+        .eq('professional_id', user.id)
+        .eq('custom_slug', customSlug)
+        .single()
+      
+      if (existingLink) {
+        // Se já existe, adicionar timestamp para tornar único
+        customSlug = `${customSlug}-${Date.now().toString().slice(-4)}`
+      }
+      
       // Gerar ID único para segurança
       const timestamp = Date.now()
       const randomHash = Math.random().toString(36).substring(2, 8)
       const secureId = `${customSlug}-${timestamp}-${randomHash}`
       
-      // Gerar URL personalizada
+      // Gerar URL personalizada com estrutura usuario/nome-do-link
       const projectDomain = user.project_id || 'fitlead' // Default para FitLead
       const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-      const customUrl = `${protocol}://${projectDomain}.${baseDomain}/link/${customSlug}`
+      const userSlug = user.name.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20)
+      const customUrl = `${protocol}://${projectDomain}.${baseDomain}/${userSlug}/${customSlug}`
       
       console.log('🔐 Secure ID:', secureId)
       console.log('🌐 Custom URL:', customUrl)
+      
+      // Gerar URL da ferramenta (não WhatsApp)
+      const toolUrl = `${protocol}://${projectDomain}.${baseDomain}/tools/${newLink.tool_name}?ref=${secureId}`
       
       const linkData = {
         professional_id: user.id,
         project_name: newLink.project_name,
         tool_name: newLink.tool_name,
         cta_text: newLink.cta_text,
-        redirect_url: newLink.redirect_url,
+        redirect_url: toolUrl, // URL da ferramenta, não WhatsApp
         custom_url: customUrl,
         custom_message: newLink.custom_message,
         redirect_type: newLink.redirect_type,
@@ -1205,7 +1222,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          URL será: fitlead.ylada.com/link/{newLink.custom_slug || 'nome-automatico'}
+                          URL será: fitlead.ylada.com/{user?.name?.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 20) || 'usuario'}/{newLink.custom_slug || 'nome-automatico'}
                         </p>
                       </div>
                       
