@@ -1,0 +1,5 @@
+# Vercel Deploy Trigger
+# Este arquivo força o Vercel a detectar mudanças e fazer deploy
+# Commit: e732ec7
+# Data: $(date)
+# Status: FORÇANDO DEPLOY MANUAL
