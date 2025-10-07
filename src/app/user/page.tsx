@@ -1117,15 +1117,38 @@ export default function UserDashboard() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         >
                           <option value="">Selecione uma ferramenta</option>
-                          <option value="bmi">Calculadora de IMC</option>
-                          <option value="protein">Necessidades de Proteína</option>
-                          <option value="body-composition">Composição Corporal</option>
-                          <option value="meal-planner">Planejador de Refeições</option>
-                          <option value="hydration">Monitor de Hidratação</option>
-                          <option value="nutrition-assessment">Avaliação Nutricional</option>
-                          <option value="health-goals">Objetivos de Saúde</option>
-                          <option value="lifestyle-evaluation">Avaliação de Estilo de Vida</option>
-                          <option value="wellness-checkup">Check-up de Bem-estar</option>
+                          
+                          {/* Ferramentas Existentes */}
+                          <optgroup label="📊 Ferramentas Básicas">
+                            <option value="bmi">Calculadora de IMC</option>
+                            <option value="protein">Necessidades de Proteína</option>
+                            <option value="body-composition">Composição Corporal</option>
+                            <option value="meal-planner">Planejador de Refeições</option>
+                            <option value="hydration">Monitor de Hidratação</option>
+                            <option value="nutrition-assessment">Avaliação Nutricional</option>
+                            <option value="health-goals">Objetivos de Saúde</option>
+                          </optgroup>
+                          
+                          {/* Novas Ferramentas - Leads Frios */}
+                          <optgroup label="🎯 Para Leads Frios">
+                            <option value="perfil-bem-estar">Quiz: Perfil de Bem-Estar</option>
+                            <option value="bem-estar-diario">Tabela: Bem-Estar Diário</option>
+                            <option value="alimentacao-saudavel">Quiz: Alimentação Saudável</option>
+                          </optgroup>
+                          
+                          {/* Novas Ferramentas - Clientes Atuais */}
+                          <optgroup label="💚 Para Clientes Atuais">
+                            <option value="desafio-7-dias">Tabela: Desafio 7 Dias</option>
+                            <option value="aproveitando-100">Quiz: Aproveitando 100%</option>
+                            <option value="metas-semanais">Tabela: Metas Semanais</option>
+                          </optgroup>
+                          
+                          {/* Novas Ferramentas - Recrutamento */}
+                          <optgroup label="🧭 Para Recrutamento">
+                            <option value="inspirar-pessoas">Quiz: Inspirar Pessoas</option>
+                            <option value="perfil-empreendedor">Quiz: Perfil Empreendedor</option>
+                            <option value="onboarding-rapido">Tabela: Onboarding Rápido</option>
+                          </optgroup>
                     </select>
                   </div>
                       
