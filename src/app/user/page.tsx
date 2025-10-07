@@ -27,6 +27,7 @@ export default function UserDashboard() {
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showReportsModal, setShowReportsModal] = useState(false)
+  const [editingLinkId, setEditingLinkId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [userLinks, setUserLinks] = useState<Array<{
     id: string;
@@ -62,6 +63,17 @@ export default function UserDashboard() {
     message: ''
   })
 
+  // Debug: Log quando estado de validação mudar
+  useEffect(() => {
+    console.log('🔍 Estado de validação mudou:', slugAvailability)
+  }, [slugAvailability])
+
+  // Função para forçar limpeza do estado de validação
+  const clearValidationState = () => {
+    console.log('🧹 Forçando limpeza do estado de validação')
+    setSlugAvailability({ checking: false, available: null, message: '' })
+  }
+
   // Cliente Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -70,6 +82,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
   // Função para verificar disponibilidade do slug
   const checkSlugAvailability = async (projectName: string, toolName: string) => {
     if (!projectName || !toolName || !user) {
+      console.log('⚠️ Campos incompletos, não verificando')
       setSlugAvailability({ checking: false, available: null, message: '' })
       return
     }
@@ -78,8 +91,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     setSlugAvailability({ checking: true, available: null, message: '' })
     
     try {
-      // Gerar slug baseado no nome do projeto e ferramenta
-      const toolSlug = toolName
+      // Gerar slug baseado APENAS no nome do projeto (mais intuitivo)
+      const projectSlug = projectName
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
@@ -91,26 +104,39 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         .replace(/\s+/g, '-')
         .substring(0, 20)
       
-      const customSlug = `${userSlug}-${toolSlug}`
+      const customSlug = `${userSlug}-${projectSlug}`
       
       console.log('🔗 Slug gerado:', customSlug)
       
-      // Verificar se já existe
+      // Verificar se já existe (SEMPRE verificar, mesmo se já verificou antes)
       const { data: existingLink, error } = await supabase
         .from('professional_links')
-        .select('id')
+        .select('id, project_name, tool_name')
         .eq('custom_slug', customSlug)
-        .single()
+        .maybeSingle() // Usar maybeSingle em vez de single para evitar erro 406
       
       console.log('📊 Resultado da verificação:', { existingLink, error })
       
+      if (error) {
+        console.error('❌ Erro na consulta Supabase:', error)
+        // Se houver erro na consulta, assumir que está disponível
+        setSlugAvailability({
+          checking: false,
+          available: true,
+          message: '✅ Nome disponível! Pode criar o link.'
+        })
+        return
+      }
+      
       if (existingLink) {
+        console.log('❌ Slug já existe:', customSlug, 'Link existente:', existingLink)
         setSlugAvailability({
           checking: false,
           available: false,
           message: '❌ Este nome já está em uso. Tente outro nome para o projeto.'
         })
       } else {
+        console.log('✅ Slug disponível:', customSlug)
         setSlugAvailability({
           checking: false,
           available: true,
@@ -119,6 +145,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       }
     } catch (error) {
       console.error('❌ Erro na verificação:', error)
+      // Em caso de erro, assumir que está disponível
       setSlugAvailability({
         checking: false,
         available: true,
@@ -277,14 +304,21 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
   // Verificar disponibilidade do slug quando os campos mudarem
   useEffect(() => {
-    // Limpar estado anterior quando campos mudarem
+    // SEMPRE limpar estado anterior quando campos mudarem
     setSlugAvailability({ checking: false, available: null, message: '' })
     
     const timeoutId = setTimeout(() => {
       if (newLink.project_name && newLink.tool_name) {
+        console.log('🔄 Campos mudaram, verificando disponibilidade...', {
+          project: newLink.project_name,
+          tool: newLink.tool_name
+        })
         checkSlugAvailability(newLink.project_name, newLink.tool_name)
+      } else {
+        console.log('⚠️ Campos incompletos, limpando estado')
+        setSlugAvailability({ checking: false, available: null, message: '' })
       }
-    }, 500) // Debounce de 500ms
+    }, 200) // Debounce ainda mais rápido para 200ms
 
     return () => clearTimeout(timeoutId)
   }, [newLink.project_name, newLink.tool_name])
@@ -353,18 +387,21 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       redirect_type: link.redirect_type || 'whatsapp'
     })
     
+    // Armazenar ID do link para edição
+    setEditingLinkId(link.id)
+    
     // Abrir o modal
     setShowLinkModal(true)
-    
-    // TODO: Implementar modo de edição (atualizar vs criar novo)
-    alert('Modo de edição será implementado em breve!')
   }
 
   const createCustomLink = async () => {
-    console.log('🔗 INICIANDO CRIAÇÃO DE LINK...')
+    const isEditing = editingLinkId !== null
+    
+    console.log(isEditing ? '✏️ INICIANDO EDIÇÃO DE LINK...' : '🔗 INICIANDO CRIAÇÃO DE LINK...')
     console.log('👤 User:', user)
     console.log('📝 NewLink:', newLink)
     console.log('🌐 Supabase client:', !!supabase)
+    console.log('🆔 Editing Link ID:', editingLinkId)
     
     if (!user) {
       console.error('❌ Usuário não encontrado')
@@ -396,8 +433,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     }
 
     try {
-      // Gerar slug automático baseado no nome da ferramenta
-      const toolSlug = newLink.tool_name
+      // Gerar slug automático baseado APENAS no nome do projeto (mais intuitivo)
+      const projectSlug = newLink.project_name
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
         .replace(/\s+/g, '-') // Substitui espaços por hífens
@@ -410,7 +447,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         .replace(/\s+/g, '-') // Substitui espaços por hífens
         .substring(0, 20) // Limita a 20 caracteres
       
-      let customSlug = `${userSlug}-${toolSlug}`
+      let customSlug = `${userSlug}-${projectSlug}`
       
       // Verificar se o slug já existe para este usuário
       const { data: existingLink } = await supabase
@@ -457,18 +494,51 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       
       console.log('📊 Dados para inserir:', linkData)
       
-      const { data, error } = await supabase
-        .from('professional_links')
-        .insert(linkData)
-        .select()
-        .single()
+      let data, error
+
+      if (isEditing) {
+        // EDIÇÃO: Atualizar link existente
+        console.log('✏️ Atualizando link existente...')
+        const updateData = {
+          project_name: linkData.project_name,
+          tool_name: linkData.tool_name,
+          cta_text: linkData.cta_text,
+          redirect_url: linkData.redirect_url,
+          custom_message: linkData.custom_message,
+          redirect_type: linkData.redirect_type,
+          updated_at: new Date().toISOString()
+        }
+        
+        const result = await supabase
+          .from('professional_links')
+          .update(updateData)
+          .eq('id', editingLinkId)
+          .select()
+          .single()
+        
+        data = result.data
+        error = result.error
+      } else {
+        // CRIAÇÃO: Inserir novo link
+        console.log('🔗 Criando novo link...')
+        const result = await supabase
+          .from('professional_links')
+          .insert(linkData)
+          .select()
+          .single()
+        
+        data = result.data
+        error = result.error
+      }
 
       console.log('📤 Resposta do Supabase:', { data, error })
 
       if (!error && data) {
-        console.log('✅ Link criado com sucesso!')
-        alert(`Link criado com sucesso!\n\nURL: ${customUrl}\n\nEste link é exclusivo e protegido.`)
+        const action = isEditing ? 'atualizado' : 'criado'
+        console.log(`✅ Link ${action} com sucesso!`)
+        alert(`Link ${action} com sucesso!\n\nURL: ${customUrl}\n\nEste link é exclusivo e protegido.`)
         setShowLinkModal(false)
+        setEditingLinkId(null) // Limpar ID de edição
         setNewLink({ 
           project_name: '', 
           tool_name: '', 
@@ -483,8 +553,9 @@ const supabase = createClient(supabaseUrl, supabaseKey)
           await fetchUserLinks(user.id)
         }
       } else {
-        console.error('❌ Erro ao criar link:', error)
-        alert(`Erro ao criar link: ${error?.message || 'Erro desconhecido'}`)
+        const action = isEditing ? 'atualizar' : 'criar'
+        console.error(`❌ Erro ao ${action} link:`, error)
+        alert(`Erro ao ${action} link: ${error?.message || 'Erro desconhecido'}`)
       }
     } catch (error) {
       console.error('❌ Erro inesperado ao criar link:', error)
@@ -1273,7 +1344,9 @@ const supabase = createClient(supabaseUrl, supabaseKey)
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
                   <div className="p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Criar Link Personalizado</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      {editingLinkId ? '✏️ Editar Link Personalizado' : '🔗 Criar Link Personalizado'}
+                    </h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1282,11 +1355,24 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                         <input
                           type="text"
                           value={newLink.project_name}
-                          onChange={(e) => setNewLink({...newLink, project_name: e.target.value})}
+                          onChange={(e) => {
+                            setNewLink({...newLink, project_name: e.target.value})
+                            // Forçar limpeza do estado de validação
+                            clearValidationState()
+                          }}
                           placeholder="Ex: Campanha Instagram, Leads Nutrição, Vendas Q1"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Dê um nome para identificar esta estratégia</p>
+                        
+                        {/* Botão de debug para limpar validação */}
+                        <button
+                          type="button"
+                          onClick={clearValidationState}
+                          className="text-xs text-gray-400 hover:text-gray-600 mt-1 underline"
+                        >
+                          🧹 Limpar Validação (Debug)
+                        </button>
                         
                         {/* Indicador de disponibilidade do slug */}
                         {slugAvailability.checking && (
@@ -1313,7 +1399,11 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                         </label>
                     <select
                           value={newLink.tool_name}
-                          onChange={(e) => setNewLink({...newLink, tool_name: e.target.value})}
+                          onChange={(e) => {
+                            setNewLink({...newLink, tool_name: e.target.value})
+                            // Forçar limpeza do estado de validação
+                            clearValidationState()
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         >
                           <option value="">Selecione uma ferramenta</option>
@@ -1475,7 +1565,11 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                   
                     <div className="flex justify-end space-x-3 mt-6">
                       <button
-                        onClick={() => setShowLinkModal(false)}
+                        onClick={() => {
+                          setShowLinkModal(false)
+                          setEditingLinkId(null)
+                          setSlugAvailability({ checking: false, available: null, message: '' })
+                        }}
                         className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
                       >
                         Cancelar
@@ -1489,7 +1583,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                             : 'bg-emerald-600 text-white hover:bg-emerald-700'
                         }`}
                       >
-                        {slugAvailability.checking ? 'Verificando...' : 'Criar Link Protegido'}
+                        {slugAvailability.checking ? 'Verificando...' : (editingLinkId ? 'Salvar Alterações' : 'Criar Link Protegido')}
                       </button>
                     </div>
                   </div>
