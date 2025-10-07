@@ -99,17 +99,30 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
   return (
     <div className={`mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200 ${className}`}>
       {linkData?.custom_message && (
-        <p className="text-sm text-emerald-700 mb-3">
-          💡 <strong>{linkData.custom_message}</strong>
-        </p>
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            💡 <strong>Mensagem Personalizada:</strong><br/>
+            {linkData.custom_message}
+          </p>
+        </div>
       )}
       
       {linkData?.professional && (
-        <p className="text-xs text-emerald-600 mb-3">
-          👨‍⚕️ <strong>{linkData.professional.name}</strong>
-          {linkData.professional.specialty && ` - ${linkData.professional.specialty}`}
-          {linkData.professional.company && ` (${linkData.professional.company})`}
-        </p>
+        <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <p className="text-sm text-gray-700">
+            👨‍⚕️ <strong>Profissional:</strong> {linkData.professional.name}
+            {linkData.professional.specialty && ` - ${linkData.professional.specialty}`}
+            {linkData.professional.company && ` (${linkData.professional.company})`}
+          </p>
+        </div>
+      )}
+
+      {linkData?.project_name && (
+        <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+          <p className="text-sm text-purple-800">
+            📋 <strong>Projeto:</strong> {linkData.project_name}
+          </p>
+        </div>
       )}
       
       <button
@@ -119,6 +132,12 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
         <MessageSquare className="w-5 h-5 mr-2" />
         {linkData?.cta_text || 'Falar com Especialista'}
       </button>
+      
+      {linkData && (
+        <div className="mt-3 text-xs text-gray-500 text-center">
+          Link personalizado • {linkData.redirect_type}
+        </div>
+      )}
     </div>
   )
 }

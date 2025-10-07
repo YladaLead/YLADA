@@ -909,28 +909,50 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                   <div className="space-y-3 mb-4">
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide">URL do Link</p>
-                      <p className="text-sm font-mono bg-white p-2 rounded border break-all">
-                        {link.custom_url}
-                      </p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm font-mono bg-white p-2 rounded border break-all flex-1">
+                          {link.custom_url}
+                        </p>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(link.custom_url)
+                            alert('Link copiado!')
+                          }}
+                          className="px-2 py-1 bg-emerald-600 text-white rounded text-xs hover:bg-emerald-700"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                     
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wide">Redireciona para</p>
-                      <p className="text-sm text-gray-900">{link.redirect_url}</p>
+                      <p className="text-sm text-gray-900 break-all">{link.redirect_url}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Texto do Botão</p>
+                      <div className="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded text-sm font-medium text-emerald-800">
+                        {link.cta_text || 'Falar com Especialista'}
+                      </div>
                     </div>
                     
                     {link.custom_message && (
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wide">Mensagem</p>
-                        <p className="text-sm text-gray-900">{link.custom_message}</p>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Mensagem Personalizada</p>
+                        <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                          {link.custom_message}
+                        </div>
                       </div>
                     )}
+
+                    <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t">
+                      <span><strong>{link.views}</strong> visualizações</span>
+                      <span>Tipo: {link.redirect_type}</span>
+                    </div>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">{link.views}</span> visualizações
-                    </div>
                     <div className="space-y-2">
                       {/* Primeira linha - Ações principais */}
                       <div className="flex space-x-2">
