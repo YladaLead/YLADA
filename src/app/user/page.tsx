@@ -53,10 +53,9 @@ export default function UserDashboard() {
   })
 
   // Cliente Supabase
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
   // Função para limpar e formatar telefone
   const cleanPhoneDisplay = (phone: string) => {
@@ -365,8 +364,8 @@ export default function UserDashboard() {
     if (!user) return
 
     try {
-      // Se está atualizando o telefone, usar o editingPhone
-      if (updates.phone === undefined && editingPhone) {
+      // Se está atualizando o telefone, usar o editingPhone se disponível
+      if (editingPhone) {
         updates.phone = editingPhone
       }
       
