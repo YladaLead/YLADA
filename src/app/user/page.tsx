@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X } from 'lucide-react'
+import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -202,6 +202,72 @@ export default function UserDashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/auth'
+  }
+
+  const toggleLinkStatus = async (linkId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('professional_links')
+        .update({ is_active: !currentStatus })
+        .eq('id', linkId)
+
+      if (!error) {
+        setUserLinks(prevLinks => 
+          prevLinks.map(link => 
+            link.id === linkId ? { ...link, is_active: !currentStatus } : link
+          )
+        )
+        alert(`Link ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`)
+      } else {
+        console.error('❌ Erro ao alterar status do link:', error)
+        alert('Erro ao alterar status do link')
+      }
+    } catch (error) {
+      console.error('❌ Erro ao alterar status do link:', error)
+      alert('Erro ao alterar status do link')
+    }
+  }
+
+  const deleteLink = async (linkId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este link? Esta ação não pode ser desfeita.')) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('professional_links')
+        .delete()
+        .eq('id', linkId)
+
+      if (!error) {
+        setUserLinks(prevLinks => prevLinks.filter(link => link.id !== linkId))
+        alert('Link excluído com sucesso!')
+      } else {
+        console.error('❌ Erro ao excluir link:', error)
+        alert('Erro ao excluir link')
+      }
+    } catch (error) {
+      console.error('❌ Erro ao excluir link:', error)
+      alert('Erro ao excluir link')
+    }
+  }
+
+  const editLink = (link: any) => {
+    // Preencher o formulário com os dados do link
+    setNewLink({
+      project_name: link.project_name || '',
+      tool_name: link.tool_name || '',
+      cta_text: link.cta_text || 'Falar com Especialista',
+      redirect_url: link.redirect_url || '',
+      custom_message: link.custom_message || '',
+      redirect_type: link.redirect_type || 'whatsapp'
+    })
+    
+    // Abrir o modal
+    setShowLinkModal(true)
+    
+    // TODO: Implementar modo de edição (atualizar vs criar novo)
+    alert('Modo de edição será implementado em breve!')
   }
 
   const createCustomLink = async () => {
@@ -852,6 +918,40 @@ export default function UserDashboard() {
                       >
                         <Eye className="w-4 h-4" />
                         <span>Testar</span>
+                      </button>
+                      <button
+                        onClick={() => editLink(link)}
+                        className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center space-x-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        onClick={() => toggleLinkStatus(link.id, link.is_active)}
+                        className={`text-sm font-medium flex items-center space-x-1 ${
+                          link.is_active 
+                            ? 'text-red-600 hover:text-red-700' 
+                            : 'text-green-600 hover:text-green-700'
+                        }`}
+                      >
+                        {link.is_active ? (
+                          <>
+                            <ToggleRight className="w-4 h-4" />
+                            <span>Desativar</span>
+                          </>
+                        ) : (
+                          <>
+                            <ToggleLeft className="w-4 h-4" />
+                            <span>Ativar</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => deleteLink(link.id)}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Excluir</span>
                       </button>
                     </div>
                   </div>
