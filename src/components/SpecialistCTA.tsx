@@ -19,8 +19,6 @@ interface LinkData {
   project_name?: string
   professional: {
     name: string
-    specialty: string
-    company: string
   }
 }
 
@@ -40,8 +38,12 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
       
       if (linkId) {
         try {
-          // Extrair custom_slug do secureId (formato: customSlug-timestamp-hash)
-          const customSlug = linkId.split('-').slice(0, -2).join('-')
+          console.log('🔍 Buscando dados do link com ref:', linkId)
+          
+          // O ref agora é o custom_slug diretamente
+          const customSlug = linkId
+          
+          console.log('🔗 Custom slug extraído:', customSlug)
           
           // Buscar por custom_slug
           const { data, error } = await supabase
@@ -56,14 +58,14 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
               project_name,
               custom_slug,
               professional:professional_id (
-                name,
-                specialty,
-                company
+                name
               )
             `)
             .eq('custom_slug', customSlug)
             .eq('is_active', true)
             .single()
+          
+          console.log('📊 Dados encontrados:', { data, error })
 
           if (!error && data) {
             // Corrigir estrutura dos dados do Supabase
@@ -118,6 +120,11 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
           <p className="text-sm text-gray-700">
             👨‍⚕️ <strong>Profissional:</strong> {linkData.professional.name}
           </p>
+          {linkData.project_name && (
+            <p className="text-xs text-gray-600 mt-1">
+              📋 <strong>Projeto:</strong> {linkData.project_name}
+            </p>
+          )}
         </div>
       )}
       
@@ -132,6 +139,13 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
       {linkData && (
         <div className="mt-3 text-xs text-gray-500 text-center">
           Link personalizado • {linkData.redirect_type}
+        </div>
+      )}
+      
+      {/* Debug info - remover depois */}
+      {process.env.NODE_ENV === 'development' && linkData && (
+        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+          <strong>Debug:</strong> {linkData.custom_slug} → {linkData.redirect_url}
         </div>
       )}
     </div>
