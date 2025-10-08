@@ -117,28 +117,16 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
 
   return (
     <div className={`mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200 ${className}`}>
+      {/* Mostrar apenas a mensagem personalizada (sem label) */}
       {linkData?.custom_message && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
-            💡 <strong>Mensagem Personalizada:</strong><br/>
             {linkData.custom_message}
           </p>
         </div>
       )}
       
-      {linkData?.professional && (
-        <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-          <p className="text-sm text-gray-700">
-            👨‍⚕️ <strong>Profissional:</strong> {linkData.professional.name}
-          </p>
-          {linkData.project_name && (
-            <p className="text-xs text-gray-600 mt-1">
-              📋 <strong>Projeto:</strong> {linkData.project_name}
-            </p>
-          )}
-        </div>
-      )}
-      
+      {/* Botão personalizado */}
       <button
         onClick={handleContactSpecialist}
         className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
@@ -146,12 +134,6 @@ export default function SpecialistCTA({ className = '' }: SpecialistCTAProps) {
         <MessageSquare className="w-5 h-5 mr-2" />
         {linkData?.cta_text || 'Falar com Especialista'}
       </button>
-      
-      {linkData && (
-        <div className="mt-3 text-xs text-gray-500 text-center">
-          Link personalizado • {linkData.redirect_type}
-        </div>
-      )}
       
       {/* Debug info - remover depois */}
       {process.env.NODE_ENV === 'development' && linkData && (

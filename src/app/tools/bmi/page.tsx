@@ -238,13 +238,6 @@ export default function BMIPage() {
                 
                 {/* Botão personalizado do especialista */}
                 <SpecialistCTA toolName="bmi" />
-                
-                <Link
-                  href="/fitlead"
-                  className="mt-4 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold inline-block"
-                >
-                  Voltar às Ferramentas
-                </Link>
               </div>
             </div>
           )}
