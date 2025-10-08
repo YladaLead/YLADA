@@ -28,7 +28,6 @@ export default function QuizSuccessPage({ params }: { params: { id: string } }) 
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  const [user, setUser] = useState<{ id: string } | null>(null)
 
   const quizUrl = `${window.location.origin}/quiz/${params.id}`
 
@@ -44,11 +43,7 @@ export default function QuizSuccessPage({ params }: { params: { id: string } }) 
         if (error) throw error
         setQuiz(data)
 
-        // Buscar usuário logado
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          setUser({ id: user.id })
-        }
+        // Quiz carregado com sucesso
       } catch (error) {
         console.error('Erro ao buscar quiz:', error)
       } finally {

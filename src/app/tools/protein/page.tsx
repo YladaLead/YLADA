@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Shield, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function ProteinPage() {
   const [formData, setFormData] = useState({

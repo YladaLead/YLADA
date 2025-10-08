@@ -24,6 +24,7 @@ interface Quiz {
     randomizeQuestions: boolean
     timeLimit?: number
     attempts?: number
+    customButtonText?: string
   }
   questions: Question[]
 }
@@ -103,17 +104,6 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     fetchQuiz()
   }, [params.id])
 
-  // Timer countdown
-  useEffect(() => {
-    if (timeLeft && timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1)
-      }, 1000)
-      return () => clearTimeout(timer)
-    } else if (timeLeft === 0) {
-      handleSubmitQuiz()
-    }
-  }, [timeLeft, handleSubmitQuiz])
 
   const handleAnswer = (questionId: string, answer: string | number) => {
     setResponses(prev => {
@@ -189,6 +179,18 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     }
   }, [quiz, userInfo, responses, totalPoints, timeLeft])
 
+  // Timer countdown
+  useEffect(() => {
+    if (timeLeft && timeLeft > 0) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    } else if (timeLeft === 0) {
+      handleSubmitQuiz()
+    }
+  }, [timeLeft, handleSubmitQuiz])
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -263,7 +265,6 @@ export default function QuizPage({ params }: { params: { id: string } }) {
                 onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
                 className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
                 style={{ 
-                  focusRingColor: quiz.colors.primary,
                   borderColor: quiz.colors.primary + '30'
                 }}
                 placeholder="Seu nome completo"
@@ -278,7 +279,6 @@ export default function QuizPage({ params }: { params: { id: string } }) {
                 onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
                 className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
                 style={{ 
-                  focusRingColor: quiz.colors.primary,
                   borderColor: quiz.colors.primary + '30'
                 }}
                 placeholder="seu@email.com"
@@ -450,27 +450,6 @@ export default function QuizPage({ params }: { params: { id: string } }) {
 
         {/* Opções de resposta */}
         {question.question_type === 'multiple' ? (
-          <div className="space-y-3 mb-6">
-            {question.options?.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswer(question.id, index)}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                  userResponse?.answer === index 
-                    ? 'border-emerald-500 bg-emerald-50' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                style={{
-                  color: quiz.colors.text,
-                  borderColor: userResponse?.answer === index ? quiz.colors.primary : undefined,
-                  backgroundColor: userResponse?.answer === index ? quiz.colors.primary + '10' : undefined
-                }}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        ) : question.question_type === 'true_false' ? (
           <div className="space-y-3 mb-6">
             {question.options?.map((option, index) => (
               <button

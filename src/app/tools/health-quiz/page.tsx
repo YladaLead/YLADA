@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Brain, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function HealthQuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)

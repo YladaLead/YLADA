@@ -80,7 +80,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase = createClient(supabaseUrl, supabaseKey)
 
   // Função para verificar disponibilidade do slug
-  const checkSlugAvailability = async (projectName: string, toolName: string) => {
+  const checkSlugAvailability = useCallback(async (projectName: string, toolName: string) => {
     if (!projectName || !toolName || !user) {
       console.log('⚠️ Campos incompletos, não verificando')
       setSlugAvailability({ checking: false, available: null, message: '' })
@@ -169,7 +169,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         message: '✅ Nome disponível! Pode criar o link.'
       })
     }
-  }
+  }, [user, supabase])
 
   // Função para limpar e formatar telefone
   const cleanPhoneDisplay = (phone: string) => {

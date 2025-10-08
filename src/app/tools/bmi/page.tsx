@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Calculator, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function BMIPage() {
   const [formData, setFormData] = useState({

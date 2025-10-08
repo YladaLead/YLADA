@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Activity, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function LifestyleQuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)

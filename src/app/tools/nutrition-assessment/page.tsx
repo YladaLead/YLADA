@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Heart, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function NutritionAssessmentPage() {
   const [formData, setFormData] = useState({
