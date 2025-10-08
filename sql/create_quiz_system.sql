@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS quizzes (
     "showCorrectAnswers": true,
     "randomizeQuestions": false,
     "timeLimit": null,
-    "attempts": null
+    "attempts": null,
+    "customButtonText": "Falar com Especialista"
   }'::jsonb,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

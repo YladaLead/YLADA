@@ -25,6 +25,7 @@ interface Quiz {
     attempts?: number
     showCorrectAnswers: boolean
     randomizeQuestions: boolean
+    customButtonText?: string
   }
   questions: Question[]
   is_active: boolean
@@ -55,7 +56,8 @@ export default function QuizBuilder() {
     },
     settings: {
       showCorrectAnswers: true,
-      randomizeQuestions: false
+      randomizeQuestions: false,
+      customButtonText: 'Falar com Especialista'
     },
     questions: [],
     is_active: true
@@ -206,6 +208,11 @@ export default function QuizBuilder() {
         setQuiz({...quiz, id: quizData.id})
         setSaved(true)
         setTimeout(() => setSaved(false), 3000)
+        
+        // Redirecionar para página de sucesso após 2 segundos
+        setTimeout(() => {
+          window.location.href = `/quiz-success/${quizData.id}`
+        }, 2000)
       }
     } catch (error) {
       console.error('Erro ao salvar quiz:', error)
@@ -246,10 +253,10 @@ export default function QuizBuilder() {
 
     return (
       <div 
-        className="h-full flex items-center justify-center p-8 rounded-lg"
+        className="h-full flex items-center justify-center p-4 lg:p-8 rounded-lg"
         style={{backgroundColor: quiz.colors.background}}
       >
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-8 max-w-2xl w-full">
           {/* Navegação entre perguntas */}
           {quiz.questions.length > 1 && (
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -371,7 +378,7 @@ export default function QuizBuilder() {
             className="w-full mt-6 py-3 rounded-lg text-white font-semibold transition-all hover:opacity-90"
             style={{backgroundColor: quiz.colors.primary}}
           >
-            {previewQuestion < quiz.questions.length - 1 ? 'Próxima Questão' : 'Finalizar Quiz'}
+            {quiz.settings.customButtonText || 'Falar com Especialista'}
           </button>
         </div>
       </div>
@@ -424,9 +431,9 @@ export default function QuizBuilder() {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Painel Editor - Esquerda */}
-        <div className="w-1/2 overflow-y-auto p-6 space-y-6">
+        <div className="w-full lg:w-1/2 min-w-0 overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
           {/* Informações do Quiz */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-bold mb-4">📋 Informações do Quiz</h2>
@@ -541,6 +548,21 @@ export default function QuizBuilder() {
                   }`} />
                 </button>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Texto do Botão Final</label>
+                <input
+                  type="text"
+                  value={quiz.settings.customButtonText || 'Falar com Especialista'}
+                  onChange={(e) => setQuiz({
+                    ...quiz, 
+                    settings: {...quiz.settings, customButtonText: e.target.value}
+                  })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="Ex: Agendar Consulta, Falar com Especialista, Saiba Mais"
+                />
+                <p className="text-xs text-gray-500 mt-1">Texto que aparece no botão após finalizar o quiz</p>
+              </div>
             </div>
           </div>
 
@@ -653,7 +675,7 @@ export default function QuizBuilder() {
         </div>
 
         {/* Preview ao Vivo - Direita */}
-        <div className="w-1/2 bg-gray-100 border-l">
+        <div className="w-full lg:w-1/2 min-w-0 bg-gray-100 border-t lg:border-t-0 lg:border-l">
           <div className="sticky top-0 bg-white border-b px-6 py-3">
             <h2 className="text-lg font-bold text-gray-700">👁️ Preview ao Vivo</h2>
             <p className="text-xs text-gray-500">Veja como seu quiz aparece em tempo real</p>

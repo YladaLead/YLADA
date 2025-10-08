@@ -384,7 +384,15 @@ export default function QuizPage({ params }: { params: { id: string } }) {
           )}
 
           {/* Botão personalizado do especialista */}
-          <SpecialistCTA toolName="quiz" />
+          <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+            <button
+              onClick={() => window.location.href = '/fitlead'}
+              className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
+            >
+              <MessageSquare className="w-5 h-5 mr-2" />
+              {quiz.settings.customButtonText || 'Falar com Especialista'}
+            </button>
+          </div>
         </div>
       </div>
     )
