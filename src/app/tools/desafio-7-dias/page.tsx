@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { CheckCircle, Circle, Droplets, Coffee, Footprints, Share2, Trophy, ArrowRight } from 'lucide-react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function Desafio7DiasPage() {
   const [currentDay, setCurrentDay] = useState(0)

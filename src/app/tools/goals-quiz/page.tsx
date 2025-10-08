@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { Brain, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -365,7 +366,10 @@ export default function GoalsQuizPage() {
             </div>
           )}
         </div>
-      </main>
+                    {/* Botão personalizado do especialista */}
+
+                    <SpecialistCTA toolName="goals-quiz" />
+</main>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { Activity, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -361,7 +362,10 @@ export default function LifestyleQuizPage() {
             </div>
           )}
         </div>
-      </main>
+                    {/* Botão personalizado do especialista */}
+
+                    <SpecialistCTA toolName="lifestyle-quiz" />
+</main>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { CheckCircle, Circle, Users, Target, Zap } from 'lucide-react'
 
 export default function OnboardingRapidoPage() {

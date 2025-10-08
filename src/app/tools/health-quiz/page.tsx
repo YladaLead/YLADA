@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { Brain, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -255,7 +256,10 @@ export default function HealthQuizPage() {
             </div>
           )}
         </div>
-      </main>
+                    {/* Botão personalizado do especialista */}
+
+                    <SpecialistCTA toolName="health-quiz" />
+</main>
     </div>
   )
 }

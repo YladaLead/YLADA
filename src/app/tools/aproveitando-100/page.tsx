@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import SpecialistCTA from '@/components/SpecialistCTA'
 import { Heart, Star, Target, Zap, CheckCircle } from 'lucide-react'
 
 export default function Aproveitando100Page() {
