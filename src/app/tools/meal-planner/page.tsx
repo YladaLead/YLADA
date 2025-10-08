@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Heart, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function MealPlannerPage() {
   const [formData, setFormData] = useState({
@@ -393,13 +394,10 @@ export default function MealPlannerPage() {
                 >
                   Gerar Novo Plano
                 </button>
-                <Link
-                  href="/fitlead"
-                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold inline-block"
-                >
-                  Voltar às Ferramentas
-                </Link>
               </div>
+              
+              {/* Botão personalizado do especialista */}
+              <SpecialistCTA toolName="meal-planner" />
             </div>
           )}
         </div>
