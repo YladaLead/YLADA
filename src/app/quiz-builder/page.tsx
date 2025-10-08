@@ -50,7 +50,7 @@ interface Question {
 
 export default function QuizBuilder() {
   const [projectDomain, setProjectDomain] = useState('')
-  const [projectConfig, setProjectConfig] = useState<any>(null)
+  const [projectConfig, setProjectConfig] = useState<ReturnType<typeof getProjectConfig> | null>(null)
   
   // Detectar projeto pelo subdomínio
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function QuizBuilder() {
         colors: getDefaultColors()
       }))
     }
-  }, [projectDomain, projectConfig])
+  }, [projectDomain, projectConfig, getDefaultColors])
 
   // Buscar usuário logado
   useEffect(() => {
