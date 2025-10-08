@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Activity, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import SpecialistCTA from '@/components/SpecialistCTA'
 
 export default function BodyCompositionPage() {
   const [formData, setFormData] = useState({

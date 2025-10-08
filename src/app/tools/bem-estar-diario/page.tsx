@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import SpecialistCTA from '@/components/SpecialistCTA'
 import { CheckCircle, Circle, Heart, Zap, Moon, Sun, ArrowRight } from 'lucide-react'
 
 export default function BemEstarDiarioPage() {

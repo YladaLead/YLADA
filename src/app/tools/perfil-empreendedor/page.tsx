@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import SpecialistCTA from '@/components/SpecialistCTA'
 import { ArrowRight, Heart, Briefcase, DollarSign, Target } from 'lucide-react'
 
 export default function PerfilEmpreendedorPage() {

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Plus, Trash2, Save, Info, Eye, EyeOff, Copy, Share2 } from 'lucide-react'
+import { Plus, Trash2, Save, Info, Copy } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -67,7 +67,7 @@ export default function QuizBuilder() {
   const [showColorInfo, setShowColorInfo] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string } | null>(null)
 
   // Buscar usuário logado
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function QuizBuilder() {
     setPreviewQuestion(quiz.questions.length)
   }
 
-  const updateQuestion = (id: number, field: string, value: any) => {
+  const updateQuestion = (id: number, field: string, value: string | number | string[]) => {
     setQuiz({
       ...quiz,
       questions: quiz.questions.map((q, index) => 

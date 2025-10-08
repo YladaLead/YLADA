@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { CheckCircle, Copy, Share2, Eye, Link as LinkIcon, MessageSquare } from 'lucide-react'
+import { CheckCircle, Copy, Share2, Eye, Link as LinkIcon } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -28,7 +28,7 @@ export default function QuizSuccessPage({ params }: { params: { id: string } }) 
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string } | null>(null)
 
   const quizUrl = `${window.location.origin}/quiz/${params.id}`
 
@@ -46,7 +46,9 @@ export default function QuizSuccessPage({ params }: { params: { id: string } }) 
 
         // Buscar usuário logado
         const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
+        if (user) {
+          setUser({ id: user.id })
+        }
       } catch (error) {
         console.error('Erro ao buscar quiz:', error)
       } finally {
@@ -130,7 +132,7 @@ export default function QuizSuccessPage({ params }: { params: { id: string } }) 
             Quiz Criado com Sucesso!
           </h1>
           <p className="text-gray-600 mb-4">
-            Seu quiz <strong>"{quiz.title}"</strong> está pronto para ser compartilhado.
+            Seu quiz <strong>&quot;{quiz.title}&quot;</strong> está pronto para ser compartilhado.
           </p>
         </div>
 

@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, CheckCircle, Clock, Trophy, MessageSquare } from 'lucide-react'
+import { CheckCircle, Clock, Trophy, MessageSquare } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
-import SpecialistCTA from '@/components/SpecialistCTA'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -113,7 +112,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     } else if (timeLeft === 0) {
       handleSubmitQuiz()
     }
-  }, [timeLeft])
+  }, [timeLeft, handleSubmitQuiz])
 
   const handleAnswer = (questionId: string, answer: string | number) => {
     setResponses(prev => {
@@ -174,7 +173,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
           responses: responses.reduce((acc, r) => {
             acc[r.questionId] = r.answer
             return acc
-          }, {} as Record<string, any>),
+          }, {} as Record<string, string | number>),
           score: calculatedScore,
           total_points: totalPoints,
           time_spent: quiz.settings?.timeLimit ? (quiz.settings.timeLimit * 60) - (timeLeft || 0) : null
@@ -346,7 +345,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
                 Respostas Corretas:
               </h3>
               <div className="space-y-3">
-                {quiz.questions.map((question, index) => {
+                {quiz.questions.map((question) => {
                   const userResponse = responses.find(r => r.questionId === question.id)
                   const isCorrect = question.question_type === 'multiple' || question.question_type === 'true_false' 
                     ? userResponse?.answer === question.correct_answer

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import SpecialistCTA from '@/components/SpecialistCTA'
 import { Brain, ArrowLeft, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 

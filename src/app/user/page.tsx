@@ -323,7 +323,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
   useEffect(() => {
     // SEMPRE limpar estado anterior quando campos mudarem
     setSlugAvailability({ checking: false, available: null, message: '' })
-    
+
     const timeoutId = setTimeout(() => {
       if (newLink.project_name && newLink.tool_name) {
         console.log('🔄 Campos mudaram, verificando disponibilidade...', {
@@ -338,7 +338,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     }, 200) // Debounce ainda mais rápido para 200ms
 
     return () => clearTimeout(timeoutId)
-  }, [newLink.project_name, newLink.tool_name])
+  }, [newLink.project_name, newLink.tool_name, checkSlugAvailability])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
