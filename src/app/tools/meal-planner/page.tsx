@@ -1,4 +1,3 @@
-import SpecialistCTA from '@/components/SpecialistCTA'
 'use client'
 
 import { useState } from 'react'

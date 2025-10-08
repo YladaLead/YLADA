@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { CheckCircle, Circle, Droplets, Coffee, Footprints, Share2, Trophy, ArrowRight } from 'lucide-react'
 

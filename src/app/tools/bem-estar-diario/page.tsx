@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { CheckCircle, Circle, Heart, Zap, Moon, Sun, ArrowRight } from 'lucide-react'
 

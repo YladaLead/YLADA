@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { Heart, Star, Target, Zap, CheckCircle } from 'lucide-react'
 

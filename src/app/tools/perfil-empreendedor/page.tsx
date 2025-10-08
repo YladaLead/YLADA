@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { ArrowRight, Heart, Briefcase, DollarSign, Target } from 'lucide-react'
 

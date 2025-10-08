@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { CheckCircle, Circle, Users, Target, Zap } from 'lucide-react'
 
