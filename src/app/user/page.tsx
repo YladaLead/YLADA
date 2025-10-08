@@ -806,7 +806,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
           {/* Quick Actions - MOVED TO TOP */}
           <div className="bg-emerald-50 rounded-lg p-6 mb-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                    <button 
                      onClick={() => {
                        // Auto-preencher WhatsApp se o usuário tiver telefone
@@ -866,6 +866,16 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                 <div className="text-left">
                   <p className="font-medium text-gray-900">Visualizar</p>
                   <p className="text-sm text-gray-600">Ver relatórios</p>
+                </div>
+              </button>
+              <button 
+                onClick={() => window.location.href = '/quiz-builder'}
+                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
+                <MessageSquare className="w-6 h-6 text-green-600" />
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Criar Quiz</p>
+                  <p className="text-sm text-gray-600">Quiz personalizado</p>
                 </div>
               </button>
             </div>

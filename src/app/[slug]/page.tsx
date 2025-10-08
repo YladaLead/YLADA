@@ -71,15 +71,13 @@ export default function UserLinkPage({ params }: { params: Promise<{ slug: strin
           }
           setLinkData(linkData)
           
-          // REDIRECIONAMENTO AUTOMÁTICO para a ferramenta
+          // REDIRECIONAMENTO IMEDIATO para a ferramenta (sem tela intermediária)
           if (data.tool_name) {
             // Construir URL da ferramenta com ref do usuário
             const toolUrl = `https://fitlead.ylada.com/tools/${data.tool_name}?ref=${slug}`
-            console.log('🚀 Redirecionando automaticamente para ferramenta:', toolUrl)
-            // Redirecionamento imediato para a ferramenta
-            setTimeout(() => {
-              window.location.replace(toolUrl)
-            }, 100)
+            console.log('🚀 Redirecionando IMEDIATAMENTE para ferramenta:', toolUrl)
+            // Redirecionamento IMEDIATO - sem delay
+            window.location.replace(toolUrl)
             return
           }
         }
