@@ -36,7 +36,8 @@ export async function middleware(request: NextRequest) {
   if (url.pathname.startsWith('/tools/') || 
       url.pathname.startsWith('/login') || 
       url.pathname.startsWith('/register') ||
-      url.pathname.startsWith('/user')) {
+      url.pathname.startsWith('/user') ||
+      url.pathname.startsWith('/quiz-builder')) {
     // Só adicionar parâmetro se não existir
     if (!url.searchParams.has('project')) {
       url.searchParams.set('project', subdomain)
