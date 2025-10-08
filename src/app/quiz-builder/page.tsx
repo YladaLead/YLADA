@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Plus, Trash2, Save, Info, Copy, ChevronDown, ChevronRight } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
+import { getProjectConfig } from '@/lib/project-config'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,16 +49,55 @@ interface Question {
 }
 
 export default function QuizBuilder() {
+  const [projectDomain, setProjectDomain] = useState('')
+  const [projectConfig, setProjectConfig] = useState<any>(null)
+  
+  // Detectar projeto pelo subdomínio
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      const subdomain = hostname.split('.')[0]
+      
+      console.log('🔍 Detecting project in quiz builder:', { hostname, subdomain })
+      
+      // Se não é localhost e tem subdomínio válido
+      if (!hostname.includes('localhost') && subdomain !== 'www' && subdomain.length > 2) {
+        setProjectDomain(subdomain)
+        const config = getProjectConfig(subdomain === 'fitlead' ? 'fitness' : 'fitness')
+        setProjectConfig(config)
+        console.log('✅ Project detected in quiz builder:', subdomain, config)
+      } else {
+        console.log('❌ No project detected in quiz builder, using default')
+        setProjectDomain('ylada')
+        setProjectConfig(getProjectConfig('fitness'))
+      }
+    }
+  }, [])
+
+  // Cores padrão baseadas no projeto
+  const getDefaultColors = () => {
+    if (projectDomain === 'fitlead') {
+      return {
+        primary: '#3B82F6', // blue-500 (FitLead)
+        secondary: '#8B5CF6', // violet-500
+        background: '#EFF6FF', // blue-50
+        text: '#1F2937' // gray-800
+      }
+    } else {
+      return {
+        primary: '#10B981', // emerald-500 (YLADA)
+        secondary: '#8B5CF6', // violet-500
+        background: '#F0FDF4', // green-50
+        text: '#1F2937' // gray-800
+      }
+    }
+  }
+
   const [quiz, setQuiz] = useState<Quiz>({
     professional_id: '',
     title: 'Meu Quiz',
     description: 'Descrição do quiz',
-    colors: {
-      primary: '#10B981', // emerald-500 (nossa cor padrão)
-      secondary: '#8B5CF6', // violet-500
-      background: '#F0FDF4', // green-50
-      text: '#1F2937' // gray-800
-    },
+    colors: getDefaultColors(),
     settings: {
       showCorrectAnswers: true,
       randomizeQuestions: false,
@@ -78,6 +118,16 @@ export default function QuizBuilder() {
   const [showColors, setShowColors] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showQuestions, setShowQuestions] = useState(false)
+
+  // Atualizar cores quando projeto mudar
+  useEffect(() => {
+    if (projectConfig) {
+      setQuiz(prev => ({
+        ...prev,
+        colors: getDefaultColors()
+      }))
+    }
+  }, [projectDomain, projectConfig])
 
   // Buscar usuário logado
   useEffect(() => {
@@ -472,8 +522,15 @@ export default function QuizBuilder() {
       <header className="bg-white border-b">
         <div className="px-6 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Construtor de Quiz</h1>
-            <p className="text-sm text-gray-600">Crie quizzes personalizados para seus clientes</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {projectDomain === 'fitlead' ? '🏋️ FitLead Quiz Builder' : 'Construtor de Quiz'}
+            </h1>
+            <p className="text-sm text-gray-600">
+              {projectDomain === 'fitlead' 
+                ? 'Crie quizzes personalizados para fitness e academia'
+                : 'Crie quizzes personalizados para seus clientes'
+              }
+            </p>
           </div>
           <div className="flex gap-3">
             {quiz.id && (
