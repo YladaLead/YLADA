@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import Link from 'next/link'
 import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
-import { generateProjectUrl } from '@/lib/project-config'
 
 interface UserProfile {
   id: string
@@ -505,12 +505,12 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">❌ Acesso Negado</h1>
           <p className="text-gray-600 mb-4">Você precisa fazer login primeiro.</p>
-          <a 
+          <Link 
             href="/auth" 
             className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700"
           >
             Fazer Login
-          </a>
+          </Link>
         </div>
       </div>
     )
