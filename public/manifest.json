@@ -2,7 +2,7 @@
   "name": "YLADA - Your Lead Advanced Data Assistant",
   "short_name": "YLADA",
   "description": "Ferramentas avançadas de geração de leads para profissionais de bem-estar e qualidade de vida",
-  "start_url": "/",
+  "start_url": "/?v=20241220",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10B981",
