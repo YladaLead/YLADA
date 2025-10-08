@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { CheckCircle, Clock, Trophy, MessageSquare } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
@@ -31,11 +31,12 @@ interface Quiz {
 interface Question {
   id: string
   question_text: string
-  question_type: 'multiple' | 'essay' | 'true_false'
+  question_type: 'multiple' | 'essay'
   order: number
   options?: string[]
   correct_answer?: number | string
   points: number
+  button_text?: string
 }
 
 interface QuizResponse {
@@ -139,7 +140,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     }
   }
 
-  const handleSubmitQuiz = async () => {
+  const handleSubmitQuiz = useCallback(async () => {
     if (!quiz || !userInfo.name || !userInfo.email) return
 
     try {
@@ -148,7 +149,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
       quiz.questions.forEach(question => {
         const userResponse = responses.find(r => r.questionId === question.id)
         if (userResponse) {
-          if (question.question_type === 'multiple' || question.question_type === 'true_false') {
+          if (question.question_type === 'multiple') {
             if (userResponse.answer === question.correct_answer) {
               calculatedScore += question.points || 1
             }
@@ -186,7 +187,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
       console.error('Erro ao salvar quiz:', error)
       alert('Erro ao salvar suas respostas. Tente novamente.')
     }
-  }
+  }, [quiz, userInfo, responses, totalPoints, timeLeft])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -347,7 +348,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
               <div className="space-y-3">
                 {quiz.questions.map((question) => {
                   const userResponse = responses.find(r => r.questionId === question.id)
-                  const isCorrect = question.question_type === 'multiple' || question.question_type === 'true_false' 
+                  const isCorrect = question.question_type === 'multiple' 
                     ? userResponse?.answer === question.correct_answer
                     : userResponse?.answer && userResponse.answer !== ''
 
@@ -363,7 +364,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
                         </div>
                         <div className="flex-1">
                           <p className="font-medium mb-2">{question.question_text}</p>
-                          {(question.question_type === 'multiple' || question.question_type === 'true_false') && (
+                          {question.question_type === 'multiple' && (
                             <div>
                               <p className="text-sm text-gray-600">
                                 <strong>Sua resposta:</strong> {question.options?.[userResponse?.answer as number] || 'Não respondida'}
@@ -518,7 +519,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
             className="px-6 py-2 text-white font-semibold rounded-lg transition-all hover:opacity-90"
             style={{ backgroundColor: quiz.colors.primary }}
           >
-            {currentQuestion < quiz.questions.length - 1 ? 'Próxima' : 'Finalizar'}
+            {question.button_text || (currentQuestion < quiz.questions.length - 1 ? 'Próxima Questão' : 'Finalizar Quiz')}
           </button>
         </div>
       </div>

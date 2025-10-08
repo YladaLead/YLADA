@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash2, Save, Info, Copy } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
@@ -36,11 +36,12 @@ interface Question {
   id?: string
   quiz_id?: string
   question_text: string
-  question_type: 'multiple' | 'essay' | 'true_false'
+  question_type: 'multiple' | 'essay'
   order: number
   options?: string[]
   correct_answer?: number | string
   points?: number
+  button_text?: string
 }
 
 export default function QuizBuilder() {
@@ -104,14 +105,16 @@ export default function QuizBuilder() {
     }
   }
 
-  const addQuestion = (type: 'multiple' | 'essay' | 'true_false') => {
+  const addQuestion = (type: 'multiple' | 'essay') => {
+    const isLastQuestion = quiz.questions.length === 0
     const newQuestion: Question = {
       question_text: '',
       question_type: type,
       order: quiz.questions.length,
-      options: type === 'multiple' ? ['', '', '', ''] : type === 'true_false' ? ['Verdadeiro', 'Falso'] : [],
-      correct_answer: type === 'multiple' ? 0 : type === 'true_false' ? 0 : '',
-      points: 1
+      options: type === 'multiple' ? ['', '', '', ''] : [],
+      correct_answer: type === 'multiple' ? 0 : '',
+      points: 1,
+      button_text: isLastQuestion ? 'Finalizar Quiz' : 'Próxima Questão'
     }
     setQuiz({...quiz, questions: [...quiz.questions, newQuestion]})
     setPreviewQuestion(quiz.questions.length)
@@ -196,7 +199,8 @@ export default function QuizBuilder() {
           order: index,
           options: q.options,
           correct_answer: q.correct_answer,
-          points: q.points || 1
+          points: q.points || 1,
+          button_text: q.button_text
         }))
 
         const { error: questionsError } = await supabase
@@ -293,8 +297,7 @@ export default function QuizBuilder() {
                   color: quiz.colors.secondary
                 }}
               >
-                {question.question_type === 'multiple' ? 'Múltipla Escolha' : 
-                 question.question_type === 'true_false' ? 'Verdadeiro/Falso' : 'Dissertativa'}
+                {question.question_type === 'multiple' ? 'Múltipla Escolha' : 'Dissertativa'}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -339,30 +342,6 @@ export default function QuizBuilder() {
                 </button>
               ))}
             </div>
-          ) : question.question_type === 'true_false' ? (
-            <div className="space-y-3">
-              {question.options?.map((option, index) => (
-                <button
-                  key={index}
-                  className="w-full p-4 rounded-lg border-2 text-left transition-all hover:scale-102"
-                  style={{
-                    borderColor: '#e5e7eb',
-                    backgroundColor: 'white',
-                    color: quiz.colors.text
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = quiz.colors.primary
-                    e.currentTarget.style.backgroundColor = quiz.colors.primary + '10'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#e5e7eb'
-                    e.currentTarget.style.backgroundColor = 'white'
-                  }}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
           ) : (
             <textarea
               placeholder="Digite sua resposta aqui..."
@@ -378,7 +357,7 @@ export default function QuizBuilder() {
             className="w-full mt-6 py-3 rounded-lg text-white font-semibold transition-all hover:opacity-90"
             style={{backgroundColor: quiz.colors.primary}}
           >
-            {quiz.settings.customButtonText || 'Falar com Especialista'}
+            {question.button_text || (previewQuestion < quiz.questions.length - 1 ? 'Próxima Questão' : 'Finalizar Quiz')}
           </button>
         </div>
       </div>
@@ -576,14 +555,7 @@ export default function QuizBuilder() {
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 hover:bg-blue-600 text-sm"
                 >
                   <Plus size={16} />
-                  Múltipla
-                </button>
-                <button
-                  onClick={() => addQuestion('true_false')}
-                  className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center gap-2 hover:bg-purple-600 text-sm"
-                >
-                  <Plus size={16} />
-                  V/F
+                  Múltipla Escolha
                 </button>
                 <button
                   onClick={() => addQuestion('essay')}
@@ -609,9 +581,7 @@ export default function QuizBuilder() {
                   <div className="flex justify-between items-start mb-3">
                     <span className="text-sm font-semibold text-gray-600">
                       Questão {qIndex + 1} - {
-                        question.question_type === 'multiple' ? '✓ Múltipla Escolha' : 
-                        question.question_type === 'true_false' ? '⚖️ Verdadeiro/Falso' :
-                        '✍️ Dissertativa'
+                        question.question_type === 'multiple' ? '✓ Múltipla Escolha' : '✍️ Dissertativa'
                       }
                     </span>
                     <button
@@ -634,7 +604,22 @@ export default function QuizBuilder() {
                     onClick={(e) => e.stopPropagation()}
                   />
 
-                  {(question.question_type === 'multiple' || question.question_type === 'true_false') && (
+                  {/* Campo de texto do botão */}
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Texto do Botão:
+                    </label>
+                    <input
+                      type="text"
+                      value={question.button_text || (qIndex === quiz.questions.length - 1 ? 'Finalizar Quiz' : 'Próxima Questão')}
+                      onChange={(e) => updateQuestion(qIndex, 'button_text', e.target.value)}
+                      placeholder={qIndex === quiz.questions.length - 1 ? 'Finalizar Quiz' : 'Próxima Questão'}
+                      className="w-full px-3 py-2 border rounded text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {question.question_type === 'multiple' && (
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-gray-500 mb-2">
                         Opções (selecione a correta):

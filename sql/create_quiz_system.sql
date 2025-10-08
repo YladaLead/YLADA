@@ -30,11 +30,12 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   quiz_id UUID REFERENCES quizzes(id) ON DELETE CASCADE,
   question_text TEXT NOT NULL,
-  question_type TEXT NOT NULL CHECK (question_type IN ('multiple', 'essay', 'true_false')),
+  question_type TEXT NOT NULL CHECK (question_type IN ('multiple', 'essay')),
   order INTEGER NOT NULL,
-  options JSONB, -- Array de opções para múltipla escolha e V/F
+  options JSONB, -- Array de opções para múltipla escolha
   correct_answer JSONB, -- Resposta correta (número para múltipla escolha, texto para dissertativa)
   points INTEGER DEFAULT 1,
+  button_text TEXT DEFAULT 'Próxima Questão', -- Texto personalizado do botão
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
