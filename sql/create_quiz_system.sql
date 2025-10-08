@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS quizzes (
     "randomizeQuestions": false,
     "timeLimit": null,
     "attempts": null,
-    "customButtonText": "Falar com Especialista"
+    "customButtonText": "Próxima Questão",
+    "congratulationsMessage": "Parabéns! Você concluiu o quiz com sucesso! 🎉",
+    "specialistButtonText": "Falar com Especialista",
+    "specialistRedirectUrl": ""
   }'::jsonb,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

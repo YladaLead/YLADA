@@ -26,6 +26,9 @@ interface Quiz {
     showCorrectAnswers: boolean
     randomizeQuestions: boolean
     customButtonText?: string
+    congratulationsMessage?: string
+    specialistButtonText?: string
+    specialistRedirectUrl?: string
   }
   questions: Question[]
   is_active: boolean
@@ -58,7 +61,10 @@ export default function QuizBuilder() {
     settings: {
       showCorrectAnswers: true,
       randomizeQuestions: false,
-      customButtonText: 'Falar com Especialista'
+      customButtonText: 'Próxima Questão',
+      congratulationsMessage: 'Parabéns! Você concluiu o quiz com sucesso! 🎉',
+      specialistButtonText: 'Falar com Especialista',
+      specialistRedirectUrl: ''
     },
     questions: [],
     is_active: true
@@ -541,6 +547,54 @@ export default function QuizBuilder() {
                   placeholder="Ex: Agendar Consulta, Falar com Especialista, Saiba Mais"
                 />
                 <p className="text-xs text-gray-500 mt-1">Texto que aparece no botão após finalizar o quiz</p>
+              </div>
+
+              {/* Mensagem de Parabéns */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Mensagem de Parabéns</label>
+                <textarea
+                  value={quiz.settings.congratulationsMessage || 'Parabéns! Você concluiu o quiz com sucesso! 🎉'}
+                  onChange={(e) => setQuiz({
+                    ...quiz, 
+                    settings: {...quiz.settings, congratulationsMessage: e.target.value}
+                  })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="Ex: Parabéns! Você concluiu o quiz com sucesso! 🎉"
+                  rows={3}
+                />
+                <p className="text-xs text-gray-500 mt-1">Mensagem que aparece quando o usuário finaliza o quiz</p>
+              </div>
+
+              {/* Botão do Especialista */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Texto do Botão do Especialista</label>
+                <input
+                  type="text"
+                  value={quiz.settings.specialistButtonText || 'Falar com Especialista'}
+                  onChange={(e) => setQuiz({
+                    ...quiz, 
+                    settings: {...quiz.settings, specialistButtonText: e.target.value}
+                  })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="Ex: Falar com Especialista, Agendar Consulta, WhatsApp"
+                />
+                <p className="text-xs text-gray-500 mt-1">Texto do botão que leva para o especialista</p>
+              </div>
+
+              {/* URL de Redirecionamento */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">URL de Redirecionamento</label>
+                <input
+                  type="url"
+                  value={quiz.settings.specialistRedirectUrl || ''}
+                  onChange={(e) => setQuiz({
+                    ...quiz, 
+                    settings: {...quiz.settings, specialistRedirectUrl: e.target.value}
+                  })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="Ex: https://wa.me/5511999999999, https://calendly.com/seu-link"
+                />
+                <p className="text-xs text-gray-500 mt-1">Para onde o usuário será redirecionado ao clicar no botão</p>
               </div>
             </div>
           </div>

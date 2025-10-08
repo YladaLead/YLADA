@@ -25,6 +25,9 @@ interface Quiz {
     timeLimit?: number
     attempts?: number
     customButtonText?: string
+    congratulationsMessage?: string
+    specialistButtonText?: string
+    specialistRedirectUrl?: string
   }
   questions: Question[]
 }
@@ -320,7 +323,9 @@ export default function QuizPage({ params }: { params: { id: string } }) {
             <h1 className="text-3xl font-bold mb-2" style={{ color: quiz.colors.text }}>
               Quiz Concluído!
             </h1>
-            <p className="text-gray-600 mb-4">Parabéns, {userInfo.name}!</p>
+            <p className="text-gray-600 mb-4">
+              {quiz.settings.congratulationsMessage || `Parabéns, ${userInfo.name}!`}
+            </p>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
@@ -386,11 +391,17 @@ export default function QuizPage({ params }: { params: { id: string } }) {
           {/* Botão personalizado do especialista */}
           <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
             <button
-              onClick={() => window.location.href = '/fitlead'}
+              onClick={() => {
+                if (quiz.settings.specialistRedirectUrl) {
+                  window.open(quiz.settings.specialistRedirectUrl, '_blank')
+                } else {
+                  alert('URL de redirecionamento não configurada')
+                }
+              }}
               className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
             >
               <MessageSquare className="w-5 h-5 mr-2" />
-              {quiz.settings.customButtonText || 'Falar com Especialista'}
+              {quiz.settings.specialistButtonText || 'Falar com Especialista'}
             </button>
           </div>
         </div>
