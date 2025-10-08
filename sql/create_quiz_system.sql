@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
   quiz_id UUID REFERENCES quizzes(id) ON DELETE CASCADE,
   question_text TEXT NOT NULL,
   question_type TEXT NOT NULL CHECK (question_type IN ('multiple', 'essay')),
-  order INTEGER NOT NULL,
+  "order" INTEGER NOT NULL,
   options JSONB, -- Array de opções para múltipla escolha
   correct_answer JSONB, -- Resposta correta (número para múltipla escolha, texto para dissertativa)
   points INTEGER DEFAULT 1,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS quiz_responses (
 CREATE INDEX IF NOT EXISTS idx_quizzes_professional_id ON quizzes(professional_id);
 CREATE INDEX IF NOT EXISTS idx_quizzes_active ON quizzes(is_active);
 CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_id ON quiz_questions(quiz_id);
-CREATE INDEX IF NOT EXISTS idx_quiz_questions_order ON quiz_questions(quiz_id, order);
+CREATE INDEX IF NOT EXISTS idx_quiz_questions_order ON quiz_questions(quiz_id, "order");
 CREATE INDEX IF NOT EXISTS idx_quiz_responses_quiz_id ON quiz_responses(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_responses_email ON quiz_responses(user_email);
 
@@ -128,10 +128,10 @@ BEGIN
   FOR question_record IN 
     SELECT * FROM quiz_questions 
     WHERE quiz_id = p_quiz_id 
-    ORDER BY order
+    ORDER BY "order"
   LOOP
     -- Obter resposta do usuário para esta pergunta
-    user_answer := p_responses->question_record.order::text;
+    user_answer := p_responses->question_record."order"::text;
     
     -- Obter resposta correta
     correct_answer := question_record.correct_answer;
