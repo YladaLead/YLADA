@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
+import { generateProjectUrl } from '@/lib/project-config'
 
 interface UserProfile {
   id: string
@@ -24,11 +24,9 @@ export default function UserDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [creatingLink, setCreatingLink] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showReportsModal, setShowReportsModal] = useState(false)
-  const [editingLinkId, setEditingLinkId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [userLinks, setUserLinks] = useState<Array<{
     id: string;
@@ -52,105 +50,14 @@ export default function UserDashboard() {
     cta_text: 'Saiba Mais',
     redirect_url: '',
     custom_message: '',
-    redirect_type: 'whatsapp'
-  })
-  const [slugAvailability, setSlugAvailability] = useState<{
-    checking: boolean
-    available: boolean | null
-    message: string
-  }>({
-    checking: false,
-    available: null,
-    message: ''
+    redirect_type: 'whatsapp',
+    custom_slug: ''
   })
 
-  // Função para forçar limpeza do estado de validação
-  const clearValidationState = () => {
-    setSlugAvailability({ checking: false, available: null, message: '' })
-  }
-
-  // Cliente Supabase já importado de @/lib/supabase
-
-  // Função para verificar disponibilidade do slug - OTIMIZADA
-  const checkSlugAvailability = useCallback(async (projectName: string, toolName: string) => {
-    if (!projectName || !toolName || !user) {
-      setSlugAvailability({ checking: false, available: null, message: '' })
-      return
-    }
-    
-    setSlugAvailability({ checking: true, available: null, message: '' })
-    
-    try {
-      // Gerar slug baseado APENAS no nome do projeto (mais intuitivo)
-      const projectSlug = projectName
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 30)
-      
-      const userSlug = user.name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 20)
-      
-      const customSlug = `${userSlug}-${projectSlug}`
-      
-      // Verificar se já existe
-      const { data: existingLink, error } = await supabase
-        .from('professional_links')
-        .select('id, project_name, tool_name, custom_url')
-        .eq('custom_slug', customSlug)
-        .maybeSingle()
-      
-      if (error) {
-        console.error('❌ Erro na consulta Supabase:', error)
-        setSlugAvailability({
-          checking: false,
-          available: true,
-          message: '✅ Nome disponível! Pode criar o link.'
-        })
-        return
-      }
-      
-      if (existingLink) {
-        setSlugAvailability({
-          checking: false,
-          available: false,
-          message: '❌ Este nome já está em uso. Tente outro nome para o projeto.'
-        })
-      } else {
-        // Verificar também se a URL customizada já existe
-        const customUrl = `https://fitlead.ylada.com/${customSlug}`
-        const { data: existingUrl } = await supabase
-          .from('professional_links')
-          .select('id')
-          .eq('custom_url', customUrl)
-          .maybeSingle()
-        
-        if (existingUrl) {
-          setSlugAvailability({
-            checking: false,
-            available: false,
-            message: '❌ Esta URL já existe. Tente outro nome para o projeto.'
-          })
-        } else {
-          setSlugAvailability({
-            checking: false,
-            available: true,
-            message: '✅ Nome disponível! Pode criar o link.'
-          })
-        }
-      }
-    } catch (error) {
-      console.error('❌ Erro na verificação:', error)
-      setSlugAvailability({
-        checking: false,
-        available: true,
-        message: '✅ Nome disponível! Pode criar o link.'
-      })
-    }
-  }, [user?.id, user?.name]) // Dependências mais específicas
+  // Cliente Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
   // Função para limpar e formatar telefone
   const cleanPhoneDisplay = (phone: string) => {
@@ -180,6 +87,8 @@ export default function UserDashboard() {
 
   const fetchUserLinks = useCallback(async (userId: string) => {
     try {
+      console.log('🔗 Buscando links do usuário...')
+      
       const { data: links, error } = await supabase
         .from('professional_links')
         .select('*')
@@ -191,43 +100,67 @@ export default function UserDashboard() {
         return
       }
 
+      console.log('✅ Links encontrados:', links)
       setUserLinks(links || [])
     } catch (error) {
       console.error('❌ Erro inesperado ao buscar links:', error)
     }
-  }, []) // Removida dependência do supabase
+  }, [supabase])
 
   useEffect(() => {
     if (authChecked) return // Evitar execução múltipla
     
     const checkAuth = async () => {
       try {
+        console.log('🔍 VERIFICAÇÃO DE AUTH INICIADA...')
         setAuthChecked(true) // Marcar como verificado
         
         // 1. Verificar sessão atual
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        console.log('📊 Resultado da sessão:', { 
+          hasSession: !!session, 
+          userId: session?.user?.id,
+          error: sessionError?.message 
+        })
 
         if (sessionError) {
+          console.error('❌ Erro na sessão:', sessionError)
           setError('Erro de autenticação: ' + sessionError.message)
           setLoading(false)
           return
         }
         
         if (!session) {
+          console.log('❌ Nenhuma sessão encontrada - redirecionando')
           window.location.href = '/auth'
           return
         }
 
+        console.log('✅ Sessão válida encontrada:', session.user.email)
+
         // 2. Buscar perfil do usuário
+        console.log('🔍 Buscando perfil do usuário...')
         const { data: profile, error: profileError } = await supabase
           .from('professionals')
           .select('*')
           .eq('id', session.user.id)
           .single()
 
+        console.log('📊 Resultado do perfil:', { 
+          hasProfile: !!profile, 
+          profileName: profile?.name,
+          error: profileError?.message,
+          errorCode: profileError?.code
+        })
+
         if (profileError) {
+          console.error('❌ Erro ao buscar perfil:', profileError)
+          
           // Se perfil não existe, criar automaticamente
           if (profileError.code === 'PGRST116') {
+            console.log('🔍 Perfil não existe, criando...')
+            
             const { data: newProfile, error: createError } = await supabase
               .from('professionals')
               .insert({
@@ -242,11 +175,13 @@ export default function UserDashboard() {
               .single()
 
             if (createError) {
+              console.error('❌ Erro ao criar perfil:', createError)
               setError('Erro ao criar perfil: ' + createError.message)
               setLoading(false)
               return
             }
 
+            console.log('✅ Perfil criado:', newProfile.name)
             setUser(newProfile)
           } else {
             setError('Erro ao buscar perfil: ' + profileError.message)
@@ -254,6 +189,7 @@ export default function UserDashboard() {
             return
           }
         } else if (profile) {
+          console.log('✅ Perfil encontrado:', profile.name)
           setUser(profile)
         }
 
@@ -261,6 +197,7 @@ export default function UserDashboard() {
         await fetchUserLinks(session.user.id)
 
       } catch (error) {
+        console.error('❌ Erro geral:', error)
         setError('Erro inesperado: ' + (error as Error).message)
       } finally {
         setLoading(false)
@@ -268,21 +205,7 @@ export default function UserDashboard() {
     }
 
     checkAuth()
-  }, [authChecked]) // Removidas dependências desnecessárias
-
-  // Verificar disponibilidade do slug quando os campos mudarem - OTIMIZADO
-  useEffect(() => {
-    if (!newLink.project_name || !newLink.tool_name) {
-      setSlugAvailability({ checking: false, available: null, message: '' })
-      return
-    }
-
-    const timeoutId = setTimeout(() => {
-      checkSlugAvailability(newLink.project_name, newLink.tool_name)
-    }, 500) // Debounce aumentado para reduzir chamadas
-
-    return () => clearTimeout(timeoutId)
-  }, [newLink.project_name, newLink.tool_name, checkSlugAvailability])
+  }, [supabase, authChecked, fetchUserLinks])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -345,74 +268,64 @@ export default function UserDashboard() {
       cta_text: link.cta_text || 'Falar com Especialista',
       redirect_url: link.redirect_url || '',
       custom_message: link.custom_message || '',
-      redirect_type: link.redirect_type || 'whatsapp'
+      redirect_type: link.redirect_type || 'whatsapp',
+      custom_slug: ''
     })
-    
-    // Armazenar ID do link para edição
-    setEditingLinkId(link.id)
     
     // Abrir o modal
     setShowLinkModal(true)
+    
+    // TODO: Implementar modo de edição (atualizar vs criar novo)
+    alert('Modo de edição será implementado em breve!')
   }
 
   const createCustomLink = async () => {
-    const isEditing = editingLinkId !== null
+    console.log('🔗 INICIANDO CRIAÇÃO DE LINK...')
+    console.log('👤 User:', user)
+    console.log('📝 NewLink:', newLink)
+    console.log('🌐 Supabase client:', !!supabase)
     
     if (!user) {
+      console.error('❌ Usuário não encontrado')
       alert('Erro: Usuário não encontrado')
       return
     }
     
     if (!newLink.tool_name) {
+      console.error('❌ Ferramenta não selecionada')
       alert('Por favor, selecione uma ferramenta')
       return
     }
     
     if (!newLink.redirect_url) {
+      console.error('❌ URL de redirecionamento não informada')
       alert('Por favor, informe a URL de redirecionamento')
       return
     }
 
-    // Verificar se o slug está disponível
-    if (slugAvailability.available === false) {
-      alert('❌ Este nome já está em uso. Por favor, escolha outro nome para o projeto.')
-      return
-    }
-
-    if (slugAvailability.checking) {
-      alert('⏳ Verificando disponibilidade do nome... Aguarde um momento.')
-      return
-    }
-
-    setCreatingLink(true)
-
     try {
-      // Gerar slug automático baseado APENAS no nome do projeto (mais intuitivo)
-      const projectSlug = newLink.project_name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-        .replace(/\s+/g, '-') // Substitui espaços por hífens
-        .substring(0, 30) // Limita a 30 caracteres
+      // Gerar slug personalizado ou automático
+      let customSlug = newLink.custom_slug?.trim()
       
-      // Gerar slug do usuário baseado no nome
-      const userSlug = user.name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-        .replace(/\s+/g, '-') // Substitui espaços por hífens
-        .substring(0, 20) // Limita a 20 caracteres
-      
-      let customSlug = `${userSlug}-${projectSlug}`
-      
-      // Verificar se o slug já existe para este usuário
-      const { data: existingLink } = await supabase
-        .from('professional_links')
-        .select('id')
-        .eq('custom_slug', customSlug)
-        .single()
-      
-      if (existingLink) {
-        // Se já existe, adicionar timestamp para tornar único
-        customSlug = `${customSlug}-${Date.now().toString().slice(-6)}`
+      if (!customSlug) {
+        // Gerar slug automático baseado no nome do projeto
+        customSlug = newLink.project_name
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .substring(0, 30)
+        
+        // Adicionar timestamp se estiver vazio
+        if (!customSlug) {
+          customSlug = `link-${Date.now().toString().slice(-6)}`
+        }
+      } else {
+        // Limpar e formatar slug personalizado
+        customSlug = customSlug
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .substring(0, 30)
       }
       
       // Gerar ID único para segurança
@@ -420,23 +333,21 @@ export default function UserDashboard() {
       const randomHash = Math.random().toString(36).substring(2, 8)
       const secureId = `${customSlug}-${timestamp}-${randomHash}`
       
-      // Gerar URL personalizada simplificada: apenas nome-do-link
+      // Gerar URL personalizada
       const projectDomain = user.project_id || 'fitlead' // Default para FitLead
       const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-      const customUrl = `${protocol}://${projectDomain}.${baseDomain}/${customSlug}`
+      const customUrl = `${protocol}://${projectDomain}.${baseDomain}/link/${customSlug}`
       
       console.log('🔐 Secure ID:', secureId)
       console.log('🌐 Custom URL:', customUrl)
-      
-      // Gerar URL da ferramenta (não WhatsApp)
       
       const linkData = {
         professional_id: user.id,
         project_name: newLink.project_name,
         tool_name: newLink.tool_name,
         cta_text: newLink.cta_text,
-        redirect_url: newLink.redirect_url, // URL de redirecionamento informada pelo usuário
+        redirect_url: newLink.redirect_url,
         custom_url: customUrl,
         custom_message: newLink.custom_message,
         redirect_type: newLink.redirect_type,
@@ -447,62 +358,26 @@ export default function UserDashboard() {
       
       console.log('📊 Dados para inserir:', linkData)
       
-      let data, error
-
-      if (isEditing) {
-        // EDIÇÃO: Atualizar link existente
-        console.log('✏️ Atualizando link existente...')
-        const updateData = {
-          project_name: linkData.project_name,
-          tool_name: linkData.tool_name,
-          cta_text: linkData.cta_text,
-          redirect_url: linkData.redirect_url,
-          custom_message: linkData.custom_message,
-          redirect_type: linkData.redirect_type,
-          updated_at: new Date().toISOString()
-        }
-        
-        const result = await supabase
-          .from('professional_links')
-          .update(updateData)
-          .eq('id', editingLinkId)
-          .select()
-          .single()
-        
-        data = result.data
-        error = result.error
-      } else {
-        // CRIAÇÃO: Inserir novo link
-        console.log('🔗 Criando novo link...')
-        const result = await supabase
-          .from('professional_links')
-          .insert(linkData)
-          .select()
-          .single()
-        
-        data = result.data
-        error = result.error
-      }
+      const { data, error } = await supabase
+        .from('professional_links')
+        .insert(linkData)
+        .select()
+        .single()
 
       console.log('📤 Resposta do Supabase:', { data, error })
 
       if (!error && data) {
-        const action = isEditing ? 'atualizado' : 'criado'
-        console.log(`✅ Link ${action} com sucesso!`)
-        
-        // Mensagem de sucesso mais bonita
-        const successMessage = `🎉 Link ${action} com sucesso!\n\n🔗 URL: ${customUrl}\n\n✨ Este link é exclusivo e protegido.\n\n📋 Você pode copiar e compartilhar este link com seus clientes.`
-        
-        alert(successMessage)
+        console.log('✅ Link criado com sucesso!')
+        alert(`Link criado com sucesso!\n\nURL: ${customUrl}\n\nEste link é exclusivo e protegido.`)
         setShowLinkModal(false)
-        setEditingLinkId(null) // Limpar ID de edição
         setNewLink({ 
           project_name: '', 
           tool_name: '', 
           cta_text: 'Saiba Mais', 
           redirect_url: '',
           custom_message: '',
-          redirect_type: 'whatsapp'
+          redirect_type: 'whatsapp',
+          custom_slug: ''
         })
         
         // Recarregar lista de links
@@ -510,32 +385,12 @@ export default function UserDashboard() {
           await fetchUserLinks(user.id)
         }
       } else {
-        const action = isEditing ? 'atualizar' : 'criar'
-        console.error(`❌ Erro ao ${action} link:`, error)
-        
-        // Traduzir mensagens de erro para português
-        let errorMessage = 'Erro desconhecido'
-        if (error?.message?.includes('duplicate key value violates unique constraint')) {
-          if (error.message.includes('custom_slug')) {
-            errorMessage = 'Este nome de projeto já está em uso. Tente outro nome.'
-          } else if (error.message.includes('custom_url')) {
-            errorMessage = 'Esta URL já existe. Tente outro nome para o projeto.'
-          } else {
-            errorMessage = 'Nome já está em uso. Tente outro nome para o projeto.'
-          }
-        } else if (error?.message?.includes('violates unique constraint')) {
-          errorMessage = 'Este nome já está sendo usado. Escolha outro nome para o projeto.'
-        } else {
-          errorMessage = error?.message || 'Erro desconhecido'
-        }
-        
-        alert(`❌ Erro ao ${action} link:\n\n${errorMessage}`)
+        console.error('❌ Erro ao criar link:', error)
+        alert(`Erro ao criar link: ${error?.message || 'Erro desconhecido'}`)
       }
     } catch (error) {
       console.error('❌ Erro inesperado ao criar link:', error)
       alert(`Erro inesperado: ${error}`)
-    } finally {
-      setCreatingLink(false)
     }
   }
 
@@ -650,12 +505,12 @@ export default function UserDashboard() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">❌ Acesso Negado</h1>
           <p className="text-gray-600 mb-4">Você precisa fazer login primeiro.</p>
-          <Link 
+          <a 
             href="/auth" 
             className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700"
           >
             Fazer Login
-          </Link>
+          </a>
         </div>
       </div>
     )
@@ -742,84 +597,6 @@ export default function UserDashboard() {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
           
-          {/* Quick Actions - MOVED TO TOP */}
-          <div className="bg-emerald-50 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                   <button 
-                     onClick={() => {
-                       // Auto-preencher WhatsApp se o usuário tiver telefone
-                       if (user?.phone) {
-                         // Extrair apenas números do telefone
-                         let phoneNumbers = user.phone.replace(/\D/g, '')
-                         
-                         // Remover duplicações de código do país
-                         if (phoneNumbers.startsWith('5555')) {
-                           phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
-                         }
-                         
-                         // Se não começar com código do país, adicionar 55
-                         if (!phoneNumbers.startsWith('55')) {
-                           phoneNumbers = '55' + phoneNumbers
-                         }
-                         
-                         // Limitar a 13 dígitos máximo (55 + 11 dígitos)
-                         if (phoneNumbers.length > 13) {
-                           phoneNumbers = phoneNumbers.substring(0, 13)
-                         }
-                         
-                         setNewLink({
-                           project_name: '',
-                           tool_name: '',
-                           cta_text: 'Saiba Mais',
-                           redirect_url: `https://wa.me/${phoneNumbers}`,
-                           custom_message: '',
-                           redirect_type: 'whatsapp'
-                         })
-                       }
-                       setShowLinkModal(true)
-                     }}
-                     className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                   >
-                <Plus className="w-6 h-6 text-emerald-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Criar Link</p>
-                  <p className="text-sm text-gray-600">Novo link personalizado</p>
-                </div>
-              </button>
-              <button 
-                onClick={() => setShowProfileModal(true)}
-                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <Settings className="w-6 h-6 text-blue-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Configurar</p>
-                  <p className="text-sm text-gray-600">Editar perfil</p>
-                </div>
-              </button>
-              <button 
-                onClick={() => setShowReportsModal(true)}
-                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <Eye className="w-6 h-6 text-purple-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Visualizar</p>
-                  <p className="text-sm text-gray-600">Ver relatórios</p>
-                </div>
-              </button>
-              <button 
-                onClick={() => window.location.href = '/quiz-builder'}
-                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <MessageSquare className="w-6 h-6 text-green-600" />
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Criar Quiz</p>
-                  <p className="text-sm text-gray-600">Quiz personalizado</p>
-                </div>
-              </button>
-            </div>
-          </div>
-
           {/* User Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-gray-50 rounded-lg p-4">
@@ -973,6 +750,75 @@ export default function UserDashboard() {
               )}
             </div>
           )}
+
+          {/* Quick Actions */}
+          <div className="bg-emerald-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <button 
+                     onClick={() => {
+                       // Auto-preencher WhatsApp se o usuário tiver telefone
+                       if (user?.phone) {
+                         // Extrair apenas números do telefone
+                         let phoneNumbers = user.phone.replace(/\D/g, '')
+                         
+                         // Remover duplicações de código do país
+                         if (phoneNumbers.startsWith('5555')) {
+                           phoneNumbers = phoneNumbers.substring(2) // Remove o 55 duplicado
+                         }
+                         
+                         // Se não começar com código do país, adicionar 55
+                         if (!phoneNumbers.startsWith('55')) {
+                           phoneNumbers = '55' + phoneNumbers
+                         }
+                         
+                         // Limitar a 13 dígitos máximo (55 + 11 dígitos)
+                         if (phoneNumbers.length > 13) {
+                           phoneNumbers = phoneNumbers.substring(0, 13)
+                         }
+                         
+                         setNewLink({
+                           project_name: '',
+                           tool_name: '',
+                           cta_text: 'Saiba Mais',
+                           redirect_url: `https://wa.me/${phoneNumbers}`,
+                           custom_message: '',
+                           redirect_type: 'whatsapp',
+                           custom_slug: ''
+                         })
+                       }
+                       setShowLinkModal(true)
+                     }}
+                     className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                   >
+                <Plus className="w-6 h-6 text-emerald-600" />
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Criar Link</p>
+                  <p className="text-sm text-gray-600">Novo link personalizado</p>
+                </div>
+              </button>
+              <button 
+                onClick={() => setShowProfileModal(true)}
+                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
+                <Settings className="w-6 h-6 text-blue-600" />
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Configurar</p>
+                  <p className="text-sm text-gray-600">Editar perfil</p>
+              </div>
+              </button>
+              <button 
+                onClick={() => setShowReportsModal(true)}
+                className="flex items-center space-x-3 bg-white rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
+                <Eye className="w-6 h-6 text-purple-600" />
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Visualizar</p>
+                  <p className="text-sm text-gray-600">Ver relatórios</p>
+              </div>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1009,6 +855,7 @@ export default function UserDashboard() {
                     redirect_url: `https://wa.me/${phoneNumbers}`,
                     custom_message: '',
                     redirect_type: 'whatsapp',
+                    custom_slug: ''
                   })
                 }
                 setShowLinkModal(true)
@@ -1055,6 +902,7 @@ export default function UserDashboard() {
                       redirect_url: `https://wa.me/${phoneNumbers}`,
                       custom_message: '',
                       redirect_type: 'whatsapp',
+                      custom_slug: ''
                     })
                   }
                   setShowLinkModal(true)
@@ -1330,9 +1178,7 @@ export default function UserDashboard() {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
                   <div className="p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                      {editingLinkId ? '✏️ Editar Link Personalizado' : '🔗 Criar Link Personalizado'}
-                    </h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Criar Link Personalizado</h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1341,55 +1187,31 @@ export default function UserDashboard() {
                         <input
                           type="text"
                           value={newLink.project_name}
-                          onChange={(e) => {
-                            setNewLink({...newLink, project_name: e.target.value})
-                            // Forçar limpeza do estado de validação
-                            clearValidationState()
-                          }}
+                          onChange={(e) => setNewLink({...newLink, project_name: e.target.value})}
                           placeholder="Ex: Campanha Instagram, Leads Nutrição, Vendas Q1"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Dê um nome para identificar esta estratégia</p>
-                        
-                        {/* Botão de debug para limpar validação */}
-                        <button
-                          type="button"
-                          onClick={clearValidationState}
-                          className="text-xs text-gray-400 hover:text-gray-600 mt-1 underline"
-                        >
-                          🧹 Limpar Validação (Debug)
-                        </button>
-                        
-                        {/* Indicador de disponibilidade do slug */}
-                        {slugAvailability.checking && (
-                          <div className="mt-2 flex items-center space-x-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                            <span className="text-sm text-blue-600">Verificando disponibilidade...</span>
-                          </div>
-                        )}
-                        
-                        {slugAvailability.message && !slugAvailability.checking && (
-                          <div className={`mt-2 p-2 rounded-lg text-sm ${
-                            slugAvailability.available 
-                              ? 'bg-green-50 text-green-700 border border-green-200' 
-                              : 'bg-red-50 text-red-700 border border-red-200'
-                          }`}>
-                            {slugAvailability.message}
-                          </div>
-                        )}
                       </div>
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Ferramenta
+                          Nome Personalizado da URL
                         </label>
+                        <input
+                          type="text"
+                          value={newLink.custom_slug || ''}
+                          onChange={(e) => setNewLink({...newLink, custom_slug: e.target.value})}
+                          placeholder="Ex: meu-projeto-proteina, campanha-instagram"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          URL será: fitlead.ylada.com/link/{newLink.custom_slug || 'nome-automatico'}
+                        </p>
+                      </div>
                     <select
                           value={newLink.tool_name}
-                          onChange={(e) => {
-                            setNewLink({...newLink, tool_name: e.target.value})
-                            // Forçar limpeza do estado de validação
-                            clearValidationState()
-                          }}
+                          onChange={(e) => setNewLink({...newLink, tool_name: e.target.value})}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         >
                           <option value="">Selecione uma ferramenta</option>
@@ -1440,7 +1262,7 @@ export default function UserDashboard() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Esta mensagem aparecerá antes do botão de ação</p>
-                      </div>
+                </div>
                 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1551,32 +1373,20 @@ export default function UserDashboard() {
                   
                     <div className="flex justify-end space-x-3 mt-6">
                       <button
-                        onClick={() => {
-                          setShowLinkModal(false)
-                          setEditingLinkId(null)
-                          setSlugAvailability({ checking: false, available: null, message: '' })
-                        }}
+                        onClick={() => setShowLinkModal(false)}
                         className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
                       >
                         Cancelar
                       </button>
                       <button
                         onClick={createCustomLink}
-                        disabled={slugAvailability.available === false || slugAvailability.checking || creatingLink}
-                        className={`px-4 py-2 rounded-lg transition-colors ${
-                          slugAvailability.available === false || slugAvailability.checking || creatingLink
-                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                            : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                        }`}
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
                       >
-                        {creatingLink ? 'Criando...' : 
-                         slugAvailability.checking ? 'Verificando...' : 
-                         (editingLinkId ? 'Salvar Alterações' : 'Criar Link Protegido')}
+                        Criar Link Protegido
                       </button>
                     </div>
                   </div>
                 </div>
-              </div>
             )}
 
       {/* Modal Configurar Perfil */}

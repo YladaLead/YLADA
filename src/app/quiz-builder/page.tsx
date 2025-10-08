@@ -75,9 +75,9 @@ export default function QuizBuilder() {
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [user, setUser] = useState<{ id: string } | null>(null)
-  const [showColors, setShowColors] = useState(true)
+  const [showColors, setShowColors] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [showQuestions, setShowQuestions] = useState(true)
+  const [showQuestions, setShowQuestions] = useState(false)
 
   // Buscar usuário logado
   useEffect(() => {
@@ -820,7 +820,9 @@ export default function QuizBuilder() {
             <h2 className="text-lg font-bold text-gray-700">👁️ Preview ao Vivo</h2>
             <p className="text-xs text-gray-500">Veja como seu quiz aparece em tempo real</p>
           </div>
-          <LivePreview />
+          <div className="h-96 lg:h-full">
+            <LivePreview />
+          </div>
         </div>
       </div>
   )
