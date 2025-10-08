@@ -48,7 +48,7 @@ interface QuizResponse {
   answer: string | number
 }
 
-export default function QuizPage({ params }: { params: { id: string } }) {
+export default function QuizPage({ params }: { params: Promise<{ id: string }> }) {
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [responses, setResponses] = useState<QuizResponse[]>([])
@@ -60,6 +60,16 @@ export default function QuizPage({ params }: { params: { id: string } }) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [quizId, setQuizId] = useState<string>('')
+
+  // Resolver params
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params
+      setQuizId(resolvedParams.id)
+    }
+    resolveParams()
+  }, [params])
 
   // Buscar dados do quiz
   useEffect(() => {
@@ -68,7 +78,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
         const { data: quizData, error: quizError } = await supabase
           .from('quizzes')
           .select('*')
-          .eq('id', params.id)
+          .eq('id', quizId)
           .eq('is_active', true)
           .single()
 
@@ -77,7 +87,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
         const { data: questionsData, error: questionsError } = await supabase
           .from('quiz_questions')
           .select('*')
-          .eq('quiz_id', params.id)
+          .eq('quiz_id', quizId)
           .order('order')
 
         if (questionsError) throw questionsError
@@ -105,7 +115,7 @@ export default function QuizPage({ params }: { params: { id: string } }) {
     }
 
     fetchQuiz()
-  }, [params.id])
+  }, [quizId])
 
 
   const handleAnswer = (questionId: string, answer: string | number) => {

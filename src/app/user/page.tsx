@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 import { User, LogOut, Plus, Eye, MessageSquare, Settings, Copy, Building, Phone, Mail, Zap, X, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
 
 interface UserProfile {
@@ -24,6 +24,7 @@ export default function UserDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [creatingLink, setCreatingLink] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [showReportsModal, setShowReportsModal] = useState(false)
@@ -63,31 +64,20 @@ export default function UserDashboard() {
     message: ''
   })
 
-  // Debug: Log quando estado de validação mudar
-  useEffect(() => {
-    console.log('🔍 Estado de validação mudou:', slugAvailability)
-  }, [slugAvailability])
-
   // Função para forçar limpeza do estado de validação
   const clearValidationState = () => {
-    console.log('🧹 Forçando limpeza do estado de validação')
     setSlugAvailability({ checking: false, available: null, message: '' })
   }
 
-  // Cliente Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
+  // Cliente Supabase já importado de @/lib/supabase
 
-  // Função para verificar disponibilidade do slug
+  // Função para verificar disponibilidade do slug - OTIMIZADA
   const checkSlugAvailability = useCallback(async (projectName: string, toolName: string) => {
     if (!projectName || !toolName || !user) {
-      console.log('⚠️ Campos incompletos, não verificando')
       setSlugAvailability({ checking: false, available: null, message: '' })
       return
     }
     
-    console.log('🔍 Verificando disponibilidade:', { projectName, toolName })
     setSlugAvailability({ checking: true, available: null, message: '' })
     
     try {
@@ -106,20 +96,15 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       
       const customSlug = `${userSlug}-${projectSlug}`
       
-      console.log('🔗 Slug gerado:', customSlug)
-      
-      // Verificar se já existe (SEMPRE verificar, mesmo se já verificou antes)
+      // Verificar se já existe
       const { data: existingLink, error } = await supabase
         .from('professional_links')
         .select('id, project_name, tool_name, custom_url')
         .eq('custom_slug', customSlug)
-        .maybeSingle() // Usar maybeSingle em vez de single para evitar erro 406
-      
-      console.log('📊 Resultado da verificação:', { existingLink, error })
+        .maybeSingle()
       
       if (error) {
         console.error('❌ Erro na consulta Supabase:', error)
-        // Se houver erro na consulta, assumir que está disponível
         setSlugAvailability({
           checking: false,
           available: true,
@@ -129,7 +114,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       }
       
       if (existingLink) {
-        console.log('❌ Slug já existe:', customSlug, 'Link existente:', existingLink)
         setSlugAvailability({
           checking: false,
           available: false,
@@ -145,14 +129,12 @@ const supabase = createClient(supabaseUrl, supabaseKey)
           .maybeSingle()
         
         if (existingUrl) {
-          console.log('❌ URL já existe:', customUrl)
           setSlugAvailability({
             checking: false,
             available: false,
             message: '❌ Esta URL já existe. Tente outro nome para o projeto.'
           })
         } else {
-          console.log('✅ Slug e URL disponíveis:', customSlug)
           setSlugAvailability({
             checking: false,
             available: true,
@@ -162,14 +144,13 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       }
     } catch (error) {
       console.error('❌ Erro na verificação:', error)
-      // Em caso de erro, assumir que está disponível
       setSlugAvailability({
         checking: false,
         available: true,
         message: '✅ Nome disponível! Pode criar o link.'
       })
     }
-  }, [user, supabase])
+  }, [user?.id, user?.name]) // Dependências mais específicas
 
   // Função para limpar e formatar telefone
   const cleanPhoneDisplay = (phone: string) => {
@@ -199,8 +180,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
   const fetchUserLinks = useCallback(async (userId: string) => {
     try {
-      console.log('🔗 Buscando links do usuário...')
-      
       const { data: links, error } = await supabase
         .from('professional_links')
         .select('*')
@@ -212,67 +191,43 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         return
       }
 
-      console.log('✅ Links encontrados:', links)
       setUserLinks(links || [])
     } catch (error) {
       console.error('❌ Erro inesperado ao buscar links:', error)
     }
-  }, [supabase])
+  }, []) // Removida dependência do supabase
 
   useEffect(() => {
     if (authChecked) return // Evitar execução múltipla
     
     const checkAuth = async () => {
       try {
-        console.log('🔍 VERIFICAÇÃO DE AUTH INICIADA...')
         setAuthChecked(true) // Marcar como verificado
         
         // 1. Verificar sessão atual
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
-        console.log('📊 Resultado da sessão:', { 
-          hasSession: !!session, 
-          userId: session?.user?.id,
-          error: sessionError?.message 
-        })
 
         if (sessionError) {
-          console.error('❌ Erro na sessão:', sessionError)
           setError('Erro de autenticação: ' + sessionError.message)
           setLoading(false)
           return
         }
         
         if (!session) {
-          console.log('❌ Nenhuma sessão encontrada - redirecionando')
           window.location.href = '/auth'
           return
         }
 
-        console.log('✅ Sessão válida encontrada:', session.user.email)
-
         // 2. Buscar perfil do usuário
-        console.log('🔍 Buscando perfil do usuário...')
         const { data: profile, error: profileError } = await supabase
           .from('professionals')
           .select('*')
           .eq('id', session.user.id)
           .single()
 
-        console.log('📊 Resultado do perfil:', { 
-          hasProfile: !!profile, 
-          profileName: profile?.name,
-          error: profileError?.message,
-          errorCode: profileError?.code
-        })
-
         if (profileError) {
-          console.error('❌ Erro ao buscar perfil:', profileError)
-          
           // Se perfil não existe, criar automaticamente
           if (profileError.code === 'PGRST116') {
-            console.log('🔍 Perfil não existe, criando...')
-            
             const { data: newProfile, error: createError } = await supabase
               .from('professionals')
               .insert({
@@ -287,13 +242,11 @@ const supabase = createClient(supabaseUrl, supabaseKey)
               .single()
 
             if (createError) {
-              console.error('❌ Erro ao criar perfil:', createError)
               setError('Erro ao criar perfil: ' + createError.message)
               setLoading(false)
               return
             }
 
-            console.log('✅ Perfil criado:', newProfile.name)
             setUser(newProfile)
           } else {
             setError('Erro ao buscar perfil: ' + profileError.message)
@@ -301,7 +254,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
             return
           }
         } else if (profile) {
-          console.log('✅ Perfil encontrado:', profile.name)
           setUser(profile)
         }
 
@@ -309,7 +261,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         await fetchUserLinks(session.user.id)
 
       } catch (error) {
-        console.error('❌ Erro geral:', error)
         setError('Erro inesperado: ' + (error as Error).message)
       } finally {
         setLoading(false)
@@ -317,25 +268,18 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     }
 
     checkAuth()
-  }, [supabase, authChecked, fetchUserLinks])
+  }, [authChecked]) // Removidas dependências desnecessárias
 
-  // Verificar disponibilidade do slug quando os campos mudarem
+  // Verificar disponibilidade do slug quando os campos mudarem - OTIMIZADO
   useEffect(() => {
-    // SEMPRE limpar estado anterior quando campos mudarem
-    setSlugAvailability({ checking: false, available: null, message: '' })
+    if (!newLink.project_name || !newLink.tool_name) {
+      setSlugAvailability({ checking: false, available: null, message: '' })
+      return
+    }
 
     const timeoutId = setTimeout(() => {
-      if (newLink.project_name && newLink.tool_name) {
-        console.log('🔄 Campos mudaram, verificando disponibilidade...', {
-          project: newLink.project_name,
-          tool: newLink.tool_name
-        })
-        checkSlugAvailability(newLink.project_name, newLink.tool_name)
-      } else {
-        console.log('⚠️ Campos incompletos, limpando estado')
-        setSlugAvailability({ checking: false, available: null, message: '' })
-      }
-    }, 200) // Debounce ainda mais rápido para 200ms
+      checkSlugAvailability(newLink.project_name, newLink.tool_name)
+    }, 500) // Debounce aumentado para reduzir chamadas
 
     return () => clearTimeout(timeoutId)
   }, [newLink.project_name, newLink.tool_name, checkSlugAvailability])
@@ -414,26 +358,17 @@ const supabase = createClient(supabaseUrl, supabaseKey)
   const createCustomLink = async () => {
     const isEditing = editingLinkId !== null
     
-    console.log(isEditing ? '✏️ INICIANDO EDIÇÃO DE LINK...' : '🔗 INICIANDO CRIAÇÃO DE LINK...')
-    console.log('👤 User:', user)
-    console.log('📝 NewLink:', newLink)
-    console.log('🌐 Supabase client:', !!supabase)
-    console.log('🆔 Editing Link ID:', editingLinkId)
-    
     if (!user) {
-      console.error('❌ Usuário não encontrado')
       alert('Erro: Usuário não encontrado')
       return
     }
     
     if (!newLink.tool_name) {
-      console.error('❌ Ferramenta não selecionada')
       alert('Por favor, selecione uma ferramenta')
       return
     }
     
     if (!newLink.redirect_url) {
-      console.error('❌ URL de redirecionamento não informada')
       alert('Por favor, informe a URL de redirecionamento')
       return
     }
@@ -448,6 +383,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
       alert('⏳ Verificando disponibilidade do nome... Aguarde um momento.')
       return
     }
+
+    setCreatingLink(true)
 
     try {
       // Gerar slug automático baseado APENAS no nome do projeto (mais intuitivo)
@@ -499,7 +436,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
         project_name: newLink.project_name,
         tool_name: newLink.tool_name,
         cta_text: newLink.cta_text,
-        redirect_url: `https://fitlead.ylada.com/tools/${newLink.tool_name}?ref=${customSlug}`, // URL da ferramenta com ref
+        redirect_url: newLink.redirect_url, // URL de redirecionamento informada pelo usuário
         custom_url: customUrl,
         custom_message: newLink.custom_message,
         redirect_type: newLink.redirect_type,
@@ -597,6 +534,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
     } catch (error) {
       console.error('❌ Erro inesperado ao criar link:', error)
       alert(`Erro inesperado: ${error}`)
+    } finally {
+      setCreatingLink(false)
     }
   }
 
@@ -1623,14 +1562,16 @@ const supabase = createClient(supabaseUrl, supabaseKey)
                       </button>
                       <button
                         onClick={createCustomLink}
-                        disabled={slugAvailability.available === false || slugAvailability.checking}
+                        disabled={slugAvailability.available === false || slugAvailability.checking || creatingLink}
                         className={`px-4 py-2 rounded-lg transition-colors ${
-                          slugAvailability.available === false || slugAvailability.checking
+                          slugAvailability.available === false || slugAvailability.checking || creatingLink
                             ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                             : 'bg-emerald-600 text-white hover:bg-emerald-700'
                         }`}
                       >
-                        {slugAvailability.checking ? 'Verificando...' : (editingLinkId ? 'Salvar Alterações' : 'Criar Link Protegido')}
+                        {creatingLink ? 'Criando...' : 
+                         slugAvailability.checking ? 'Verificando...' : 
+                         (editingLinkId ? 'Salvar Alterações' : 'Criar Link Protegido')}
                       </button>
                     </div>
                   </div>

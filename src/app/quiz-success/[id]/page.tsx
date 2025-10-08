@@ -24,12 +24,28 @@ interface Quiz {
   }
 }
 
-export default function QuizSuccessPage({ params }: { params: { id: string } }) {
+export default function QuizSuccessPage({ params }: { params: Promise<{ id: string }> }) {
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [quizUrl, setQuizUrl] = useState('')
+  const [quizId, setQuizId] = useState<string>('')
 
-  const quizUrl = `${window.location.origin}/quiz/${params.id}`
+  // Resolver params
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params
+      setQuizId(resolvedParams.id)
+    }
+    resolveParams()
+  }, [params])
+
+  useEffect(() => {
+    // Definir URL apenas no cliente
+    if (typeof window !== 'undefined') {
+      setQuizUrl(`${window.location.origin}/quiz/${quizId}`)
+    }
+  }, [quizId])
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -37,7 +53,7 @@ export default function QuizSuccessPage({ params }: { params: { id: string } }) 
         const { data, error } = await supabase
           .from('quizzes')
           .select('*')
-          .eq('id', params.id)
+          .eq('id', quizId)
           .single()
 
         if (error) throw error
@@ -52,7 +68,7 @@ export default function QuizSuccessPage({ params }: { params: { id: string } }) 
     }
 
     fetchQuiz()
-  }, [params.id])
+  }, [quizId])
 
   const copyToClipboard = async () => {
     try {
