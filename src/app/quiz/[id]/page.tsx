@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { CheckCircle, Clock, Trophy, MessageSquare } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import { ArrowLeft, Clock, CheckCircle, XCircle } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,10 +21,10 @@ interface Quiz {
     text: string
   }
   settings: {
-    showCorrectAnswers: boolean
-    randomizeQuestions: boolean
     timeLimit?: number
     attempts?: number
+    showCorrectAnswers: boolean
+    randomizeQuestions: boolean
     customButtonText?: string
     congratulationsMessage?: string
     specialistButtonText?: string
@@ -39,187 +40,189 @@ interface Question {
   order: number
   options?: string[]
   correct_answer?: number | string
-  points: number
+  points?: number
   button_text?: string
-}
-
-interface QuizResponse {
-  questionId: string
-  answer: string | number
 }
 
 export default function QuizPage({ params }: { params: Promise<{ id: string }> }) {
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [responses, setResponses] = useState<QuizResponse[]>([])
-  const [userInfo, setUserInfo] = useState({ name: '', email: '' })
-  const [showUserForm, setShowUserForm] = useState(true)
-  const [quizCompleted, setQuizCompleted] = useState(false)
-  const [score, setScore] = useState(0)
-  const [totalPoints, setTotalPoints] = useState(0)
+  const [answers, setAnswers] = useState<Record<string, string | number>>({})
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [score, setScore] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [quizId, setQuizId] = useState<string>('')
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
-  // Resolver params
   useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await params
-      setQuizId(resolvedParams.id)
-    }
-    resolveParams()
-  }, [params])
-
-  // Buscar dados do quiz
-  useEffect(() => {
-    const fetchQuiz = async () => {
+    const loadQuiz = async () => {
       try {
+        const resolvedParams = await params
+        // Buscar quiz
         const { data: quizData, error: quizError } = await supabase
           .from('quizzes')
-          .select('*')
-          .eq('id', quizId)
+          .select(`
+            id,
+            title,
+            description,
+            colors,
+            settings,
+            questions (
+              id,
+              question_text,
+              question_type,
+              order_number,
+              options,
+              correct_answer,
+              points,
+              button_text
+            )
+          `)
+          .eq('id', resolvedParams.id)
           .eq('is_active', true)
           .single()
 
-        if (quizError) throw quizError
+        if (quizError || !quizData) {
+          setError('Quiz não encontrado ou inativo')
+          setLoading(false)
+          return
+        }
 
-        const { data: questionsData, error: questionsError } = await supabase
-          .from('quiz_questions')
-          .select('*')
-          .eq('quiz_id', quizId)
-          .order('order')
-
-        if (questionsError) throw questionsError
-
+        // Ordenar perguntas e mapear campos
+        const sortedQuestions = quizData.questions
+          .sort((a: { order_number: number }, b: { order_number: number }) => a.order_number - b.order_number)
+          .map((q: { id: string; question_text: string; question_type: 'multiple' | 'essay'; order_number: number; options: string[]; correct_answer: string | number; points: number; button_text: string }) => ({
+            id: q.id,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            order: q.order_number, // Mapear order_number para order
+            options: q.options,
+            correct_answer: q.correct_answer,
+            points: q.points,
+            button_text: q.button_text
+          }))
+        
         setQuiz({
           ...quizData,
-          questions: questionsData
+          questions: sortedQuestions
         })
 
-        // Calcular pontos totais
-        const total = questionsData.reduce((sum, q) => sum + (q.points || 1), 0)
-        setTotalPoints(total)
-
         // Configurar timer se houver limite de tempo
-        if (quizData.settings?.timeLimit) {
+        if (quizData.settings.timeLimit) {
           setTimeLeft(quizData.settings.timeLimit * 60) // Converter minutos para segundos
         }
 
-      } catch (error) {
-        console.error('Erro ao buscar quiz:', error)
-        setError('Quiz não encontrado ou inativo')
-      } finally {
+        setLoading(false)
+      } catch (err) {
+        console.error('Erro ao carregar quiz:', err)
+        setError('Erro ao carregar quiz')
         setLoading(false)
       }
     }
 
-    fetchQuiz()
-  }, [quizId])
+    loadQuiz()
+  }, [params])
 
+  const handleComplete = useCallback(async () => {
+    if (!quiz) return
 
-  const handleAnswer = (questionId: string, answer: string | number) => {
-    setResponses(prev => {
-      const existing = prev.find(r => r.questionId === questionId)
-      if (existing) {
-        return prev.map(r => r.questionId === questionId ? { ...r, answer } : r)
-      } else {
-        return [...prev, { questionId, answer }]
+    setIsCompleted(true)
+    
+    // Calcular score
+    let totalScore = 0
+    let correctAnswers = 0
+
+    quiz.questions.forEach(question => {
+      const userAnswer = answers[question.id]
+      if (userAnswer !== undefined) {
+        if (question.question_type === 'multiple') {
+          if (userAnswer === question.correct_answer) {
+            totalScore += question.points || 1
+            correctAnswers++
+          }
+        } else {
+          // Para perguntas dissertativas, dar pontos por responder
+          totalScore += question.points || 1
+        }
       }
     })
-  }
 
-  const nextQuestion = () => {
-    if (currentQuestion < quiz!.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
-    } else {
-      handleSubmitQuiz()
-    }
-  }
+    setScore(totalScore)
 
-  const prevQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
-    }
-  }
-
-  const handleSubmitQuiz = useCallback(async () => {
-    if (!quiz || !userInfo.name || !userInfo.email) return
-
+    // Salvar sessão no banco (opcional)
     try {
-      // Calcular pontuação
-      let calculatedScore = 0
-      quiz.questions.forEach(question => {
-        const userResponse = responses.find(r => r.questionId === question.id)
-        if (userResponse) {
-          if (question.question_type === 'multiple') {
-            if (userResponse.answer === question.correct_answer) {
-              calculatedScore += question.points || 1
-            }
-          } else {
-            // Para dissertativa, dar pontos se respondeu
-            if (userResponse.answer && userResponse.answer !== '') {
-              calculatedScore += question.points || 1
-            }
-          }
-        }
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      
+      await supabase.from('quiz_sessions').insert({
+        quiz_id: quiz.id,
+        user_session_id: sessionId,
+        total_questions: quiz.questions.length,
+        correct_answers: correctAnswers,
+        total_points: totalScore,
+        completed: true,
+        completed_at: new Date().toISOString()
       })
-
-      setScore(calculatedScore)
-
-      // Salvar resposta no banco
-      const { error } = await supabase
-        .from('quiz_responses')
-        .insert({
-          quiz_id: quiz.id,
-          user_name: userInfo.name,
-          user_email: userInfo.email,
-          responses: responses.reduce((acc, r) => {
-            acc[r.questionId] = r.answer
-            return acc
-          }, {} as Record<string, string | number>),
-          score: calculatedScore,
-          total_points: totalPoints,
-          time_spent: quiz.settings?.timeLimit ? (quiz.settings.timeLimit * 60) - (timeLeft || 0) : null
-        })
-
-      if (error) throw error
-
-      setQuizCompleted(true)
-    } catch (error) {
-      console.error('Erro ao salvar quiz:', error)
-      alert('Erro ao salvar suas respostas. Tente novamente.')
+    } catch (err) {
+      console.error('Erro ao salvar sessão:', err)
     }
-  }, [quiz, userInfo, responses, totalPoints, timeLeft])
+
+    // Redirecionar para página de conclusão após completar
+    setTimeout(() => {
+      router.push(`/quiz-completed/${quiz.id}`)
+    }, 2000)
+  }, [quiz, answers, router])
 
   // Timer countdown
   useEffect(() => {
-    if (timeLeft && timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1)
-      }, 1000)
-      return () => clearTimeout(timer)
-    } else if (timeLeft === 0) {
-      handleSubmitQuiz()
+    if (timeLeft === null || timeLeft <= 0) return
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev === null || prev <= 1) {
+          handleComplete()
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [timeLeft, handleComplete])
+
+  const handleAnswer = (questionId: string, answer: string | number) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }))
+  }
+
+  const handleNext = () => {
+    if (quiz && currentQuestion < quiz.questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1)
+    } else {
+      handleComplete()
     }
-  }, [timeLeft, handleSubmitQuiz])
+  }
+
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(prev => prev - 1)
+    }
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
   if (loading) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ backgroundColor: '#F0FDF4' }}
-      >
-        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md">
-          <div className="animate-spin w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Carregando Quiz...</h2>
-          <p className="text-gray-600">Preparando suas perguntas</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F0FDF4' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando quiz...</p>
         </div>
       </div>
     )
@@ -227,300 +230,152 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
 
   if (error || !quiz) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ backgroundColor: '#F0FDF4' }}
-      >
-        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-red-600" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Quiz não encontrado</h2>
-          <p className="text-gray-600 mb-4">{error || 'Este quiz não existe ou foi desativado.'}</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F0FDF4' }}>
+        <div className="text-center">
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Quiz não encontrado</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => window.history.back()}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            onClick={() => router.push('/')}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
-            Voltar
+            Voltar ao início
           </button>
         </div>
       </div>
     )
   }
 
-  // Formulário de informações do usuário
-  if (showUserForm) {
+  if (isCompleted) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ backgroundColor: quiz.colors.background }}
-      >
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-          <div className="text-center mb-6">
-            <div 
-              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ backgroundColor: quiz.colors.primary + '20' }}
-            >
-              <Trophy className="w-8 h-8" style={{ color: quiz.colors.primary }} />
-            </div>
-            <h1 className="text-2xl font-bold mb-2" style={{ color: quiz.colors.text }}>
-              {quiz.title}
-            </h1>
-            <p className="text-gray-600">{quiz.description}</p>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Nome Completo *</label>
-              <input
-                type="text"
-                value={userInfo.name}
-                onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
-                style={{ 
-                  borderColor: quiz.colors.primary + '30'
-                }}
-                placeholder="Seu nome completo"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Email *</label>
-              <input
-                type="email"
-                value={userInfo.email}
-                onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
-                style={{ 
-                  borderColor: quiz.colors.primary + '30'
-                }}
-                placeholder="seu@email.com"
-                required
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowUserForm(false)}
-            disabled={!userInfo.name || !userInfo.email}
-            className="w-full mt-6 py-3 rounded-lg text-white font-semibold transition-all hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: quiz.colors.primary }}
-          >
-            Iniciar Quiz
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Quiz completado - mostrar resultado
-  if (quizCompleted) {
-    const percentage = Math.round((score / totalPoints) * 100)
-    
-    return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ backgroundColor: quiz.colors.background }}
-      >
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
-          <div className="text-center mb-6">
-            <div 
-              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ backgroundColor: quiz.colors.primary + '20' }}
-            >
-              <Trophy className="w-10 h-10" style={{ color: quiz.colors.primary }} />
-            </div>
-            <h1 className="text-3xl font-bold mb-2" style={{ color: quiz.colors.text }}>
-              Quiz Concluído!
-            </h1>
-            <p className="text-gray-600 mb-4">
-              {quiz.settings.congratulationsMessage || `Parabéns, ${userInfo.name}!`}
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: quiz.colors.background }}>
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
+          <h1 className="text-3xl font-bold mb-4" style={{ color: quiz.colors.text }}>
+            Parabéns! 🎉
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {quiz.settings.congratulationsMessage || 'Você concluiu o quiz com sucesso!'}
+          </p>
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <p className="text-sm text-gray-600 mb-2">Sua pontuação:</p>
+            <p className="text-2xl font-bold" style={{ color: quiz.colors.primary }}>
+              {score} pontos
             </p>
           </div>
-
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold" style={{ color: quiz.colors.primary }}>
-                  {score}
-                </div>
-                <div className="text-sm text-gray-600">Pontos Obtidos</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold" style={{ color: quiz.colors.secondary }}>
-                  {percentage}%
-                </div>
-                <div className="text-sm text-gray-600">Desempenho</div>
-              </div>
-            </div>
-          </div>
-
-          {quiz.settings.showCorrectAnswers && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-4" style={{ color: quiz.colors.text }}>
-                Respostas Corretas:
-              </h3>
-              <div className="space-y-3">
-                {quiz.questions.map((question) => {
-                  const userResponse = responses.find(r => r.questionId === question.id)
-                  const isCorrect = question.question_type === 'multiple' 
-                    ? userResponse?.answer === question.correct_answer
-                    : userResponse?.answer && userResponse.answer !== ''
-
-                  return (
-                    <div key={question.id} className="border rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <div 
-                          className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
-                            isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                          }`}
-                        >
-                          {isCorrect ? '✓' : '✗'}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium mb-2">{question.question_text}</p>
-                          {question.question_type === 'multiple' && (
-                            <div>
-                              <p className="text-sm text-gray-600">
-                                <strong>Sua resposta:</strong> {question.options?.[userResponse?.answer as number] || 'Não respondida'}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                <strong>Resposta correta:</strong> {question.options?.[question.correct_answer as number]}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Botão personalizado do especialista */}
-          <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+          {quiz.settings.specialistRedirectUrl && (
             <button
-              onClick={() => {
-                if (quiz.settings.specialistRedirectUrl) {
-                  window.open(quiz.settings.specialistRedirectUrl, '_blank')
-                } else {
-                  alert('URL de redirecionamento não configurada')
-                }
-              }}
-              className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold flex items-center justify-center"
+              onClick={() => window.open(quiz.settings.specialistRedirectUrl, '_blank')}
+              className="w-full px-6 py-3 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: quiz.colors.primary }}
             >
-              <MessageSquare className="w-5 h-5 mr-2" />
               {quiz.settings.specialistButtonText || 'Falar com Especialista'}
             </button>
-          </div>
+          )}
         </div>
       </div>
     )
   }
 
-  // Quiz em andamento
   const question = quiz.questions[currentQuestion]
-  const userResponse = responses.find(r => r.questionId === question.id)
+  const progress = ((currentQuestion + 1) / quiz.questions.length) * 100
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: quiz.colors.background }}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
-        {/* Header com progresso e timer */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <span 
-              className="text-sm font-semibold"
-              style={{ color: quiz.colors.secondary }}
+    <div className="min-h-screen" style={{ backgroundColor: quiz.colors.background }}>
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center text-gray-600 hover:text-gray-900"
             >
-              Questão {currentQuestion + 1} de {quiz.questions.length}
-            </span>
-            {timeLeft && (
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" style={{ color: quiz.colors.secondary }} />
-                <span 
-                  className="text-sm font-semibold"
-                  style={{ color: quiz.colors.secondary }}
-                >
-                  {formatTime(timeLeft)}
-                </span>
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Voltar
+            </button>
+            {timeLeft !== null && (
+              <div className="flex items-center text-red-600">
+                <Clock className="w-5 h-5 mr-2" />
+                <span className="font-mono">{formatTime(timeLeft)}</span>
               </div>
             )}
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="h-2 rounded-full transition-all duration-300"
-              style={{
-                width: `${((currentQuestion + 1) / quiz.questions.length) * 100}%`,
-                backgroundColor: quiz.colors.primary
-              }}
-            />
+          <div className="mt-4">
+            <h1 className="text-2xl font-bold" style={{ color: quiz.colors.text }}>
+              {quiz.title}
+            </h1>
+            <p className="text-gray-600 mt-1">{quiz.description}</p>
+          </div>
+          <div className="mt-4">
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>Pergunta {currentQuestion + 1} de {quiz.questions.length}</span>
+              <span>{Math.round(progress)}% concluído</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="h-2 rounded-full transition-all duration-300"
+                style={{ 
+                  width: `${progress}%`,
+                  backgroundColor: quiz.colors.primary
+                }}
+              ></div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Pergunta */}
-        <h3 
-          className="text-2xl font-bold mb-6"
-          style={{ color: quiz.colors.text }}
-        >
-          {question.question_text}
-        </h3>
+      {/* Question */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <h2 className="text-xl font-semibold mb-6" style={{ color: quiz.colors.text }}>
+            {question.question_text}
+          </h2>
 
-        {/* Opções de resposta */}
-        {question.question_type === 'multiple' ? (
-          <div className="space-y-3 mb-6">
-            {question.options?.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswer(question.id, index)}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                  userResponse?.answer === index 
-                    ? 'border-emerald-500 bg-emerald-50' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                style={{
-                  color: quiz.colors.text,
-                  borderColor: userResponse?.answer === index ? quiz.colors.primary : undefined,
-                  backgroundColor: userResponse?.answer === index ? quiz.colors.primary + '10' : undefined
-                }}
-              >
-                {option}
-              </button>
-            ))}
+          {question.question_type === 'multiple' && question.options && (
+            <div className="space-y-3">
+              {question.options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(question.id, index)}
+                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                    answers[question.id] === index
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <span className="font-medium">{option}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {question.question_type === 'essay' && (
+            <textarea
+              value={answers[question.id] || ''}
+              onChange={(e) => handleAnswer(question.id, e.target.value)}
+              placeholder="Digite sua resposta aqui..."
+              className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              rows={4}
+            />
+          )}
+
+          {/* Navigation */}
+          <div className="flex justify-between mt-8">
+            <button
+              onClick={handlePrevious}
+              disabled={currentQuestion === 0}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            <button
+              onClick={handleNext}
+              className="px-6 py-2 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: quiz.colors.primary }}
+            >
+              {currentQuestion === quiz.questions.length - 1 ? 'Finalizar' : 'Próxima'}
+            </button>
           </div>
-        ) : (
-          <textarea
-            value={userResponse?.answer as string || ''}
-            onChange={(e) => handleAnswer(question.id, e.target.value)}
-            placeholder="Digite sua resposta aqui..."
-            className="w-full p-4 border-2 rounded-lg min-h-32 mb-6"
-            style={{
-              borderColor: quiz.colors.primary,
-              color: quiz.colors.text
-            }}
-          />
-        )}
-
-        {/* Botões de navegação */}
-        <div className="flex justify-between">
-          <button
-            onClick={prevQuestion}
-            disabled={currentQuestion === 0}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Anterior
-          </button>
-          
-          <button
-            onClick={nextQuestion}
-            className="px-6 py-2 text-white font-semibold rounded-lg transition-all hover:opacity-90"
-            style={{ backgroundColor: quiz.colors.primary }}
-          >
-            {question.button_text || (currentQuestion < quiz.questions.length - 1 ? 'Próxima Questão' : 'Finalizar Quiz')}
-          </button>
         </div>
       </div>
     </div>

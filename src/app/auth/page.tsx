@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap } from 'lucide-react'
-import { signUp, signIn } from '@/lib/auth'
+import { signUp, signIn } from '@/lib/supabase'
 
 interface FormData {
   email: string

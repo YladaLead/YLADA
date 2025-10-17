@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { MessageSquare, ExternalLink, Copy, CheckCircle } from 'lucide-react'
+import HelpButton from '@/components/HelpButton'
 
 interface LinkData {
   id: string
@@ -33,6 +34,21 @@ export default function ToolPage() {
   useEffect(() => {
     const fetchLinkData = async () => {
       try {
+        // Verificar se é uma rota antiga que deve ser redirecionada
+        const currentPath = window.location.pathname
+        if (currentPath === '/tools/perfil-bem-estar') {
+          window.location.href = '/demo/wellness-profile'
+          return
+        }
+        if (currentPath === '/tools/bem-estar-diario') {
+          window.location.href = '/demo/daily-wellness'
+          return
+        }
+        if (currentPath === '/tools/alimentacao-saudavel') {
+          window.location.href = '/demo/healthy-eating'
+          return
+        }
+
         const urlParams = new URLSearchParams(window.location.search)
         const ref = urlParams.get('ref')
         
@@ -42,16 +58,47 @@ export default function ToolPage() {
           return
         }
 
-        // Buscar dados do link usando o secure_id
-        const { data, error: linkError } = await supabase
-          .from('professional_links')
-          .select(`
-            *,
-            professional:professionals(name, specialty, company)
-          `)
-          .eq('secure_id', ref)
-          .eq('is_active', true)
+        // Extrair usuário e projeto do ref (formato: usuario/projeto)
+        const refParts = ref.split('/')
+        const usuario = refParts[0]
+        const projeto = refParts[1]
+        
+        console.log('🔍 Buscando dados para ref:', ref, 'usuario:', usuario, 'projeto:', projeto)
+        
+        // Buscar o usuário pelo nome
+        const { data: userData, error: userError } = await supabase
+          .from('professionals')
+          .select('id, name, email')
+          .ilike('name', `%${usuario.replace(/-/g, ' ')}%`)
           .single()
+
+        if (userError || !userData) {
+          console.error('Usuário não encontrado:', userError)
+          setError('Usuário não encontrado')
+          setLoading(false)
+          return
+        }
+
+        // Buscar o projeto do usuário na tabela links
+        console.log('🔍 Buscando projeto:', projeto, 'para usuário:', userData.id)
+        const { data, error: linkError } = await supabase
+          .from('links')
+          .select(`
+            id,
+            name,
+            tool_name,
+            cta_text,
+            redirect_url,
+            custom_message,
+            status,
+            user_id
+          `)
+          .eq('user_id', userData.id)
+          .ilike('name', `%${projeto.replace(/-/g, ' ')}%`)
+          .eq('status', 'active')
+          .single()
+        
+        console.log('📋 Resultado da busca:', { data, linkError })
 
         if (linkError || !data) {
           setError('Link não encontrado ou desativado')
@@ -59,21 +106,41 @@ export default function ToolPage() {
           return
         }
 
-        // Verificar se o profissional está ativo (aqui você pode adicionar lógica de pagamento)
-        if (!data.professional) {
-          setError('Profissional não encontrado')
-          setLoading(false)
-          return
+        // Buscar dados do profissional
+        const { data: professionalData } = await supabase
+          .from('professionals')
+          .select('name, specialty, company')
+          .eq('id', data.user_id)
+          .single()
+
+        // Criar estrutura compatível com a interface LinkData
+        const formattedData: LinkData = {
+          id: data.id,
+          tool_name: data.tool_name,
+          cta_text: data.cta_text,
+          redirect_url: data.redirect_url,
+          custom_message: data.custom_message || '',
+          redirect_type: 'whatsapp', // Assumindo WhatsApp por padrão
+          secure_id: data.id,
+          is_active: data.status === 'active',
+          professional: {
+            name: professionalData?.name || 'Profissional',
+            specialty: professionalData?.specialty || '',
+            company: professionalData?.company || ''
+          }
         }
 
-        setLinkData(data)
+        console.log('📊 Dados formatados:', formattedData)
+        console.log('💬 Custom message:', formattedData.custom_message)
+        console.log('🔘 CTA text:', formattedData.cta_text)
+        console.log('🔗 Redirect URL:', formattedData.redirect_url)
+        setLinkData(formattedData)
 
         // Incrementar contador de visualizações
         await supabase
-          .from('professional_links')
+          .from('links')
           .update({ 
-            views: data.views + 1,
-            last_accessed: new Date().toISOString()
+            clicks: 1
           })
           .eq('id', data.id)
 
@@ -93,8 +160,8 @@ export default function ToolPage() {
     
     // Registrar clique (opcional)
     supabase
-      .from('professional_links')
-      .update({ last_accessed: new Date().toISOString() })
+      .from('links')
+      .update({ leads: 1 })
       .eq('id', linkData.id)
 
     // Redirecionar
@@ -259,6 +326,9 @@ export default function ToolPage() {
           </div>
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

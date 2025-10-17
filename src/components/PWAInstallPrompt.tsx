@@ -74,10 +74,10 @@ export default function PWAInstallPrompt() {
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center">
             <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-white font-bold text-lg">Y</span>
+              <span className="text-white font-bold text-lg">H</span>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Instalar YLADA</h3>
+              <h3 className="font-semibold text-gray-900">Instalar Herbalead</h3>
               <p className="text-sm text-gray-600">Acesse rapidamente suas ferramentas</p>
             </div>
           </div>

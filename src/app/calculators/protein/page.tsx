@@ -10,159 +10,160 @@ import {
   Heart,
   Activity,
   Target,
-  Share2,
-  Copy,
-  Shield
+  Star,
+  MessageCircle
 } from 'lucide-react'
-import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
 
 interface ProteinResults {
   dailyProtein: string
-  proteinPerMeal: string
-  proteinSources: string[]
+  category: string
+  color: string
   recommendations: string[]
-  riskLevel: string
-  riskColor: string
+  improvements: string[]
+  proteinSources: string[]
 }
 
 export default function ProteinCalculatorPage() {
+  const { userData, getWhatsAppUrl, getCustomMessage, getPageTitle, getButtonText } = useUserData()
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
     age: '',
     weight: '',
     height: '',
     gender: '',
     activity: '',
-    goal: '',
-    healthCondition: ''
+    goal: ''
   })
   const [results, setResults] = useState<ProteinResults | null>(null)
   const [showResults, setShowResults] = useState(false)
 
-  const calculateProteinNeeds = () => {
+  const calculateProtein = () => {
     const weight = parseFloat(formData.weight)
-    const age = parseFloat(formData.age)
-    const height = parseFloat(formData.height)
+    const age = parseInt(formData.age)
     
-    if (!weight || !age || !height) return null
+    if (!weight || !age) return null
     
-    // Cálculo baseado em diretrizes da OMS e FAO
-    // RDA (Recommended Dietary Allowance) para proteína: 0.8g/kg/dia (adultos saudáveis)
-    let baseProtein = weight * 0.8 // RDA básica
+    let proteinPerKg = 0.8 // Base para sedentários
     
-    // Ajustes por idade (OMS)
-    if (age >= 65) {
-      baseProtein = weight * 1.0 // Idosos precisam de mais proteína
-    } else if (age < 18) {
-      baseProtein = weight * 1.2 // Adolescentes em crescimento
+    // Ajustar baseado no nível de atividade
+    switch (formData.activity) {
+      case 'sedentario':
+        proteinPerKg = 0.8
+        break
+      case 'leve':
+        proteinPerKg = 1.0
+        break
+      case 'moderado':
+        proteinPerKg = 1.2
+        break
+      case 'intenso':
+        proteinPerKg = 1.6
+        break
+      case 'muito-intenso':
+        proteinPerKg = 2.0
+        break
     }
     
-    // Ajustes por atividade física (OMS/FAO)
-    const activityMultipliers = {
-      'sedentario': 1.0,
-      'leve': 1.1,
-      'moderado': 1.2,
-      'ativo': 1.3,
-      'muito-ativo': 1.4,
-      'atleta': 1.6
+    // Ajustar baseado no objetivo
+    switch (formData.goal) {
+      case 'perda-peso':
+        proteinPerKg += 0.2
+        break
+      case 'ganho-massa':
+        proteinPerKg += 0.4
+        break
+      case 'manutencao':
+        // Manter valor atual
+        break
     }
     
-    const activityMultiplier = activityMultipliers[formData.activity as keyof typeof activityMultipliers] || 1.0
-    let adjustedProtein = baseProtein * activityMultiplier
+    const dailyProtein = weight * proteinPerKg
     
-    // Ajustes por objetivos específicos
-    if (formData.goal === 'muscle-gain') {
-      adjustedProtein = weight * 1.6 // Para ganho de massa muscular
-    } else if (formData.goal === 'weight-loss') {
-      adjustedProtein = weight * 1.2 // Para preservar massa muscular durante perda de peso
-    } else if (formData.goal === 'maintenance') {
-      adjustedProtein = weight * 1.0 // Manutenção
+    let category = ''
+    let color = ''
+    let recommendations = []
+    let improvements = []
+    let proteinSources = []
+    
+    if (dailyProtein < weight * 0.8) {
+      category = 'Proteína Insuficiente'
+      color = 'text-red-600'
+      recommendations = [
+        'Consulte um especialista para aumentar ingestão proteica',
+        'Inclua mais fontes de proteína na alimentação',
+        'Considere suplementação se necessário'
+      ]
+      improvements = [
+        'Aumentar massa muscular',
+        'Melhorar recuperação pós-exercício',
+        'Otimizar síntese proteica'
+      ]
+    } else if (dailyProtein <= weight * 1.2) {
+      category = 'Proteína Adequada'
+      color = 'text-green-600'
+      recommendations = [
+        'Mantenha a ingestão proteica atual',
+        'Distribua proteína ao longo do dia',
+        'Monitore resultados regularmente'
+      ]
+      improvements = [
+        'Manter massa muscular',
+        'Otimizar performance',
+        'Prevenir perda muscular'
+      ]
+    } else if (dailyProtein <= weight * 1.6) {
+      category = 'Proteína Otimizada'
+      color = 'text-blue-600'
+      recommendations = [
+        'Excelente ingestão para atividade física',
+        'Mantenha distribuição equilibrada',
+        'Considere timing das refeições'
+      ]
+      improvements = [
+        'Maximizar ganho muscular',
+        'Melhorar recuperação',
+        'Otimizar composição corporal'
+      ]
+    } else {
+      category = 'Proteína Elevada'
+      color = 'text-purple-600'
+      recommendations = [
+        'Consulte um especialista para monitoramento',
+        'Verifique função renal regularmente',
+        'Ajuste conforme necessário'
+      ]
+      improvements = [
+        'Maximizar resultados atléticos',
+        'Otimizar recuperação intensa',
+        'Manter saúde renal'
+      ]
     }
     
-    // Ajustes por condições de saúde
-    if (formData.healthCondition === 'diabetes') {
-      adjustedProtein = weight * 1.1 // Diabéticos podem precisar de mais proteína
-    } else if (formData.healthCondition === 'kidney-disease') {
-      adjustedProtein = weight * 0.6 // Doença renal requer restrição
-    } else if (formData.healthCondition === 'pregnancy') {
-      adjustedProtein = weight * 1.1 // Gestantes precisam de mais proteína
-    }
-    
-    const proteinPerMeal = adjustedProtein / 3 // Distribuir em 3 refeições
-    
-    // Fontes de proteína recomendadas (OMS)
-    const proteinSources = [
-      'Carnes magras (frango, peixe, carne bovina)',
-      'Ovos (proteína completa)',
-      'Leite e derivados (queijo, iogurte)',
+    proteinSources = [
+      'Carnes magras (frango, peixe, carne vermelha)',
+      'Ovos e laticínios',
       'Leguminosas (feijão, lentilha, grão-de-bico)',
-      'Oleaginosas (amêndoas, castanhas)',
-      'Quinoa e outros grãos integrais'
+      'Nozes e sementes',
+      'Suplementos proteicos'
     ]
-    
-    // Recomendações baseadas em diretrizes da OMS
-    const recommendations = [
-      'Distribua a proteína ao longo do dia em 3-4 refeições',
-      'Consuma proteína de alta qualidade biológica',
-      'Combine proteínas vegetais para melhor absorção',
-      'Evite excesso de proteína (>2g/kg/dia) sem orientação médica',
-      'Mantenha hidratação adequada (35ml/kg/dia)',
-      'Consulte um nutricionista para plano personalizado'
-    ]
-    
-    // Avaliação de risco
-    let riskLevel = 'Normal'
-    let riskColor = 'text-green-600'
-    
-    if (adjustedProtein < weight * 0.8) {
-      riskLevel = 'Baixo'
-      riskColor = 'text-blue-600'
-    } else if (adjustedProtein > weight * 2.0) {
-      riskLevel = 'Alto'
-      riskColor = 'text-red-600'
-    }
     
     return {
-      dailyProtein: adjustedProtein.toFixed(1),
-      proteinPerMeal: proteinPerMeal.toFixed(1),
-      proteinSources,
+      dailyProtein: dailyProtein.toFixed(1),
+      category,
+      color,
       recommendations,
-      riskLevel,
-      riskColor
+      improvements,
+      proteinSources
     }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const proteinResults = calculateProteinNeeds()
+    const proteinResults = calculateProtein()
     if (proteinResults) {
       setResults(proteinResults)
       setShowResults(true)
     }
-  }
-
-  const copyResults = () => {
-    if (!results) return
-    const text = `Minhas Necessidades de Proteína:
-Proteína Diária: ${results.dailyProtein}g
-Por Refeição: ${results.proteinPerMeal}g
-Nível de Risco: ${results.riskLevel}
-
-Recomendações:
-${results.recommendations.map(r => `• ${r}`).join('\n')}
-
-Calculado com YLADA - Ferramentas profissionais de bem-estar`
-    navigator.clipboard.writeText(text)
-    alert('Resultados copiados para a área de transferência!')
-  }
-
-  const shareResults = () => {
-    if (!results) return
-    const text = `Descobri minhas necessidades de proteína com YLADA! Preciso de ${results.dailyProtein}g por dia. Que tal você também calcular as suas?`
-    const url = window.location.href
-    navigator.share({ title: 'Minhas Necessidades de Proteína - YLADA', text, url })
   }
 
   if (showResults && results) {
@@ -184,7 +185,7 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Seus Resultados</h1>
-                  <p className="text-sm text-gray-600">Necessidades de Proteína - YLADA</p>
+                  <p className="text-sm text-gray-600">Calculadora de Proteína - Herbalead</p>
                 </div>
               </div>
             </div>
@@ -194,51 +195,51 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Results Summary */}
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Suas Necessidades de Proteína</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Sua Necessidade Diária de Proteína</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-blue-50 rounded-lg p-6 text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">Proteína Diária</h3>
-                <p className="text-3xl font-bold text-blue-600">{results.dailyProtein}g</p>
-                <p className="text-sm text-gray-600">Baseado em diretrizes da OMS</p>
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-emerald-100 to-green-100 rounded-full mb-4">
+                <span className="text-4xl font-bold text-emerald-600">{results.dailyProtein}g</span>
               </div>
-              
-              <div className="bg-green-50 rounded-lg p-6 text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">Por Refeição</h3>
-                <p className="text-3xl font-bold text-green-600">{results.proteinPerMeal}g</p>
-                <p className="text-sm text-gray-600">Distribuído em 3 refeições</p>
-              </div>
+              <h3 className={`text-2xl font-semibold ${results.color} mb-2`}>
+                {results.category}
+              </h3>
+              <p className="text-gray-600">
+                Recomendação diária baseada no seu perfil
+              </p>
             </div>
 
-            {/* Risk Assessment */}
-            <div className="bg-yellow-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Shield className="w-5 h-5 text-yellow-600 mr-2" />
-                Avaliação de Risco
-              </h3>
-              <div className="flex items-center">
-                <span className={`text-xl font-bold ${results.riskColor} mr-3`}>
-                  {results.riskLevel}
-                </span>
-                <span className="text-gray-700">
-                  {results.riskLevel === 'Normal' ? 'Necessidades dentro dos parâmetros saudáveis' :
-                   results.riskLevel === 'Baixo' ? 'Considere aumentar a ingestão de proteína' :
-                   'Consulte um profissional antes de aumentar a ingestão'}
-                </span>
+            {/* Improvements Section */}
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Star className="w-5 h-5 text-emerald-600 mr-2" />
+                O que você pode melhorar
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {results.improvements.map((improvement, index) => (
+                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center mb-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+                      <span className="text-sm font-medium text-gray-900">{improvement}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Protein Sources */}
-            <div className="bg-purple-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Heart className="w-5 h-5 text-purple-600 mr-2" />
+            <div className="bg-blue-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Heart className="w-5 h-5 text-blue-600 mr-2" />
                 Fontes de Proteína Recomendadas
-              </h3>
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {results.proteinSources.map((source, index) => (
-                  <div key={index} className="flex items-center text-sm text-gray-700">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                    {source}
+                  <div key={index} className="bg-white rounded-lg p-3 shadow-sm">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      <span className="text-sm text-gray-700">{source}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -260,35 +261,27 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
               </ul>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={copyResults}
-                className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
-              >
-                <Copy className="w-5 h-5 mr-2" />
-                Copiar Resultados
-              </button>
-              <button
-                onClick={shareResults}
-                className="flex-1 px-6 py-3 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center"
-              >
-                <Share2 className="w-5 h-5 mr-2" />
-                Compartilhar
-              </button>
-            </div>
           </div>
 
           {/* CTA Section */}
-          <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white text-center">
-            <h3 className="text-2xl font-bold mb-4">
-              Quer um plano nutricional personalizado?
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
+            <h3 className="text-3xl font-bold mb-4 text-gray-800">
+              🎯 {getPageTitle()}
             </h3>
-            <p className="text-emerald-100 mb-6">
-              Consulte um nutricionista profissional para um plano alimentar baseado nas suas necessidades específicas de proteína
+            <p className="text-gray-600 mb-8 text-lg">
+              {getCustomMessage()}
             </p>
-            <button className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Consultar Nutricionista Profissional
+            <button 
+              onClick={() => {
+                const whatsappUrl = getWhatsAppUrl()
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                console.log('👤 Dados do usuário:', userData)
+                window.open(whatsappUrl, '_blank')
+              }}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-emerald-500"
+            >
+              <MessageCircle className="w-8 h-8 mr-3" />
+              {getButtonText()}
             </button>
           </div>
         </main>
@@ -302,16 +295,19 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-4">
-            <Link href="/" className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button
+              onClick={() => window.history.back()}
+              className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </Link>
+            </button>
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
                 <Calculator className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Necessidades de Proteína</h1>
-                <p className="text-sm text-gray-600">Calcule suas necessidades diárias de proteína</p>
+                <h1 className="text-2xl font-bold text-gray-900">Calculadora de Proteína</h1>
+                <p className="text-sm text-gray-600">Análise nutricional completa e personalizada</p>
               </div>
             </div>
           </div>
@@ -321,11 +317,10 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Info Section */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Por que a Proteína é Importante?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Por que a proteína é importante?</h2>
           <p className="text-gray-600 mb-6">
-            A proteína é essencial para a construção e reparo de tecidos, produção de enzimas e hormônios, 
-            e manutenção da massa muscular. Nossa calculadora utiliza diretrizes oficiais da Organização 
-            Mundial da Saúde (OMS) para determinar suas necessidades específicas.
+            A proteína é essencial para construção e reparo muscular, produção de enzimas e hormônios, 
+            e manutenção da saúde óssea. Suas necessidades variam conforme idade, peso, atividade física e objetivos.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -334,77 +329,34 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                 <Heart className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Saúde</h3>
-              <p className="text-sm text-gray-600">Baseado em diretrizes da OMS</p>
+              <p className="text-sm text-gray-600">Essencial para funções vitais</p>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Activity className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Personalizado</h3>
-              <p className="text-sm text-gray-600">Considera idade, atividade e objetivos</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Performance</h3>
+              <p className="text-sm text-gray-600">Melhora recuperação e força</p>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Target className="w-8 h-8 text-yellow-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Preciso</h3>
-              <p className="text-sm text-gray-600">Cálculos científicos validados</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Personalizado</h3>
+              <p className="text-sm text-gray-600">Baseado no seu perfil</p>
             </div>
           </div>
         </div>
 
         {/* Calculator Form */}
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Calcule suas Necessidades de Proteína</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Calcule sua Necessidade de Proteína</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome Completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="Seu nome completo"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="seu@email.com"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="(11) 99999-9999"
-                />
-              </div>
-              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Idade *
@@ -419,6 +371,22 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   placeholder="25"
                 />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gênero *
+                </label>
+                <select
+                  required
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
+                </select>
               </div>
             </div>
 
@@ -458,80 +426,42 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
               </div>
             </div>
 
-            {/* Additional Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sexo *
-                </label>
-                <select
-                  required
-                  value={formData.gender}
-                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="masculino">Masculino</option>
-                  <option value="feminino">Feminino</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nível de Atividade *
-                </label>
-                <select
-                  required
-                  value={formData.activity}
-                  onChange={(e) => setFormData({...formData, activity: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="sedentario">Sedentário</option>
-                  <option value="leve">Leve (1-3x/semana)</option>
-                  <option value="moderado">Moderado (3-5x/semana)</option>
-                  <option value="ativo">Ativo (6-7x/semana)</option>
-                  <option value="muito-ativo">Muito Ativo (2x/dia)</option>
-                  <option value="atleta">Atleta</option>
-                </select>
-              </div>
+            {/* Activity Level */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nível de Atividade Física *
+              </label>
+              <select
+                required
+                value={formData.activity}
+                onChange={(e) => setFormData({...formData, activity: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
+                <option value="leve">Leve (exercício leve 1-3 dias/semana)</option>
+                <option value="moderado">Moderado (exercício moderado 3-5 dias/semana)</option>
+                <option value="intenso">Intenso (exercício intenso 6-7 dias/semana)</option>
+                <option value="muito-intenso">Muito Intenso (exercício muito intenso, trabalho físico)</option>
+              </select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Objetivo Principal *
-                </label>
-                <select
-                  required
-                  value={formData.goal}
-                  onChange={(e) => setFormData({...formData, goal: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="maintenance">Manutenção</option>
-                  <option value="muscle-gain">Ganho de Massa Muscular</option>
-                  <option value="weight-loss">Perda de Peso</option>
-                  <option value="performance">Performance Esportiva</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Condição de Saúde
-                </label>
-                <select
-                  value={formData.healthCondition}
-                  onChange={(e) => setFormData({...formData, healthCondition: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Nenhuma</option>
-                  <option value="diabetes">Diabetes</option>
-                  <option value="kidney-disease">Doença Renal</option>
-                  <option value="pregnancy">Gestação</option>
-                  <option value="hypertension">Hipertensão</option>
-                </select>
-              </div>
+            {/* Goal */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Objetivo *
+              </label>
+              <select
+                required
+                value={formData.goal}
+                onChange={(e) => setFormData({...formData, goal: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="manutencao">Manutenção do peso atual</option>
+                <option value="perda-peso">Perda de peso</option>
+                <option value="ganho-massa">Ganho de massa muscular</option>
+              </select>
             </div>
 
             {/* Submit Button */}
@@ -540,7 +470,7 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                 type="submit"
                 className="w-full px-8 py-4 bg-emerald-600 text-white rounded-lg text-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
               >
-                Calcular Necessidades de Proteína
+                Calcular Proteína
                 <ArrowRight className="w-5 h-5 ml-2" />
               </button>
             </div>
@@ -554,9 +484,8 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
             <div>
               <h4 className="font-semibold text-yellow-800 mb-2">Importante</h4>
               <p className="text-yellow-700 text-sm">
-                Esta calculadora fornece uma estimativa baseada em diretrizes da OMS. 
-                Para necessidades específicas ou condições de saúde, consulte sempre um 
-                nutricionista ou médico qualificado.
+                Esta calculadora é uma ferramenta de orientação e não substitui uma avaliação nutricional completa. 
+                Consulte sempre um especialista para um plano alimentar personalizado.
               </p>
             </div>
           </div>

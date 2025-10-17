@@ -1,0 +1,89 @@
+{
+  "common": {
+    "welcome": "Bienvenido a YLADA",
+    "tools": "Herramientas",
+    "calculators": "Calculadoras",
+    "admin": "Administración",
+    "login": "Entrar",
+    "register": "Registrarse",
+    "contact": "Contacto",
+    "demo": "Demostración",
+    "start": "Comenzar",
+    "test": "Probar",
+    "learn_more": "Saber Más"
+  },
+  "hero": {
+    "title": "Transforma tu negocio en una máquina de generar contactos con YLADA",
+    "subtitle": "Herramientas avanzadas de generación de leads para profesionales de salud y bienestar",
+    "cta_demo": "Ver demostraciones",
+    "cta_start": "Quiero empezar ahora"
+  },
+  "benefits": {
+    "title": "Transforma tu negocio en una máquina de resultados",
+    "leads": {
+      "title": "Genera leads automáticos y segmentados",
+      "description": "Captura datos calificados de tus clientes automáticamente a través de quizzes y evaluaciones personalizadas"
+    },
+    "data": {
+      "title": "Captura datos de clientes vía quizzes y evaluaciones",
+      "description": "Recopila información valiosa sobre objetivos, hábitos y necesidades de tus clientes"
+    },
+    "engagement": {
+      "title": "Crea desafíos y metas para engagement",
+      "description": "Mantén a tus clientes comprometidos con desafíos de 7 días y seguimiento de metas semanales"
+    },
+    "progress": {
+      "title": "Acompaña el progreso de tu equipo",
+      "description": "Monitorea resultados, conversiones y rendimiento de tu equipo de distribuidores en tiempo real"
+    }
+  },
+  "tools": {
+    "title": "Acelerador de Leads",
+    "subtitle": "Prueba nuestras herramientas y ve cómo pueden aumentar tus conversiones",
+    "bmi": {
+      "title": "Calculadora IMC",
+      "description": "Calcula el Índice de Masa Corporal de tus clientes"
+    },
+    "protein": {
+      "title": "Calculadora de Proteína",
+      "description": "Calcula necesidades proteicas individuales"
+    },
+    "hydration": {
+      "title": "Calculadora de Hidratación",
+      "description": "Evalúa necesidades de agua y electrolitos"
+    },
+    "body_composition": {
+      "title": "Composición Corporal",
+      "description": "Evalúa masa muscular, grasa e hidratación"
+    },
+    "meal_planner": {
+      "title": "Planificador de Comidas",
+      "description": "Crea planes alimentarios personalizados"
+    },
+    "nutrition_assessment": {
+      "title": "Evaluación Nutricional",
+      "description": "Cuestionario completo de hábitos alimentarios"
+    },
+    "wellness_profile": {
+      "title": "Quiz: Perfil de Bienestar",
+      "description": "Descubre el perfil de bienestar de tus leads"
+    },
+    "daily_wellness": {
+      "title": "Tabla: Bienestar Diario",
+      "description": "Acompaña métricas de bienestar diarias"
+    },
+    "healthy_eating": {
+      "title": "Quiz: Alimentación Saludable",
+      "description": "Evalúa hábitos alimentarios y orienta nutricionalmente"
+    }
+  },
+  "cta": {
+    "title": "¿Listo para acelerar tu crecimiento?",
+    "subtitle": "Únete a los profesionales de salud que ya están transformando sus negocios en máquinas de resultados.",
+    "button": "Quiero empezar ahora"
+  },
+  "footer": {
+    "description": "YLADA - Your Lead Advanced Data Assistant",
+    "copyright": "© 2024 YLADA. Todos los derechos reservados."
+  }
+}

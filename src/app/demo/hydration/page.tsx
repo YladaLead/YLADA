@@ -1,131 +1,299 @@
 'use client'
 
 import { useState } from 'react'
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  CheckCircle, 
+  AlertTriangle, 
+  Star,
+  MessageCircle,
+  Droplets
+} from 'lucide-react'
 import Link from 'next/link'
-import { ArrowLeft, Brain, CheckCircle, Droplets, Sun, Activity } from 'lucide-react'
+
+interface HydrationResults {
+  dailyWater: string
+  dailyWaterLiters: string
+  category: string
+  color: string
+  recommendations: string[]
+  improvements: string[]
+  hydrationTips: string[]
+}
 
 export default function HydrationDemoPage() {
   const [formData, setFormData] = useState({
-    weight: '',
     age: '',
-    gender: 'masculino',
-    activity: 'moderate',
-    climate: 'temperate',
-    exerciseDuration: '',
-    exerciseIntensity: 'moderate'
+    weight: '',
+    height: '',
+    gender: '',
+    activity: '',
+    climate: ''
   })
-  const [result, setResult] = useState<{
-    totalWater: number
-    hourlyIntake: number
-    morningIntake: number
-    afternoonIntake: number
-    eveningIntake: number
-    dehydrationSigns: string[]
-    hydrationTips: string[]
-    hydratingFoods: string[]
-  } | null>(null)
-  const [showResult, setShowResult] = useState(false)
+  const [results, setResults] = useState<HydrationResults | null>(null)
+  const [showResults, setShowResults] = useState(false)
 
   const calculateHydration = () => {
     const weight = parseFloat(formData.weight)
     const age = parseInt(formData.age)
-    const exerciseDuration = parseFloat(formData.exerciseDuration) || 0
     
-    // Cálculo base de água (ml/kg)
-    let baseWaterPerKg = 35 // ml por kg de peso corporal
+    if (!weight || !age) return null
     
-    // Ajustes por idade
-    if (age > 65) baseWaterPerKg = 30
-    if (age < 18) baseWaterPerKg = 40
+    // Base: 35ml por kg de peso corporal
+    let baseWater = weight * 35
     
-    // Ajustes por gênero
-    if (formData.gender === 'feminino') baseWaterPerKg = baseWaterPerKg * 0.9
-    
-    // Cálculo base
-    let totalWater = weight * baseWaterPerKg
-    
-    // Ajustes por atividade
-    const activityMultipliers = {
-      'sedentary': 1.0,
-      'light': 1.1,
-      'moderate': 1.2,
-      'active': 1.3,
-      'very-active': 1.4
+    // Ajustar baseado no nível de atividade
+    switch (formData.activity) {
+      case 'sedentario':
+        baseWater += 0
+        break
+      case 'leve':
+        baseWater += 300 // +300ml
+        break
+      case 'moderado':
+        baseWater += 500 // +500ml
+        break
+      case 'intenso':
+        baseWater += 800 // +800ml
+        break
+      case 'muito-intenso':
+        baseWater += 1000 // +1000ml
+        break
     }
     
-    totalWater = totalWater * activityMultipliers[formData.activity as keyof typeof activityMultipliers]
-    
-    // Ajustes por clima
-    const climateAdjustments = {
-      'cold': 1.0,
-      'temperate': 1.1,
-      'hot': 1.3,
-      'very-hot': 1.5
+    // Ajustar baseado no clima
+    switch (formData.climate) {
+      case 'frio':
+        baseWater += 0
+        break
+      case 'temperado':
+        baseWater += 200 // +200ml
+        break
+      case 'quente':
+        baseWater += 500 // +500ml
+        break
     }
     
-    totalWater = totalWater * climateAdjustments[formData.climate as keyof typeof climateAdjustments]
-    
-    // Ajustes por exercício
-    const exerciseIntensityMultipliers = {
-      'light': 0.5,
-      'moderate': 0.7,
-      'intense': 1.0
+    // Ajustar baseado na idade (idosos precisam de mais água)
+    if (age > 65) {
+      baseWater += 200
     }
     
-    const exerciseWater = exerciseDuration * exerciseIntensityMultipliers[formData.exerciseIntensity as keyof typeof exerciseIntensityMultipliers] * 10
-    totalWater += exerciseWater
+    const dailyWaterLiters = (baseWater / 1000).toFixed(1)
     
-    // Distribuição ao longo do dia
-    const hourlyIntake = Math.round(totalWater / 16) // 16 horas acordado
-    const morningIntake = Math.round(totalWater * 0.2) // 20% pela manhã
-    const afternoonIntake = Math.round(totalWater * 0.4) // 40% à tarde
-    const eveningIntake = Math.round(totalWater * 0.4) // 40% à noite
+    let category = ''
+    let color = ''
+    let recommendations = []
+    let improvements = []
+    let hydrationTips = []
     
-    // Sinais de desidratação
-    const dehydrationSigns = [
-      'Sede excessiva',
-      'Boca seca',
-      'Urina escura',
-      'Fadiga',
-      'Dor de cabeça',
-      'Tontura'
+    if (baseWater < weight * 30) {
+      category = 'Hidratação Insuficiente'
+      color = 'text-red-600'
+      recommendations = [
+        'Consulte um especialista para aumentar ingestão hídrica',
+        'Inclua mais água na rotina diária',
+        'Monitore sinais de desidratação'
+      ]
+      improvements = [
+        'Melhorar função renal',
+        'Otimizar circulação sanguínea',
+        'Prevenir fadiga e cansaço'
+      ]
+    } else if (baseWater <= weight * 40) {
+      category = 'Hidratação Adequada'
+      color = 'text-green-600'
+      recommendations = [
+        'Mantenha a ingestão hídrica atual',
+        'Distribua água ao longo do dia',
+        'Monitore sinais de sede'
+      ]
+      improvements = [
+        'Manter equilíbrio hídrico',
+        'Otimizar função celular',
+        'Prevenir desidratação'
+      ]
+    } else if (baseWater <= weight * 50) {
+      category = 'Hidratação Otimizada'
+      color = 'text-blue-600'
+      recommendations = [
+        'Excelente ingestão hídrica',
+        'Mantenha distribuição equilibrada',
+        'Considere eletrólitos durante exercícios'
+      ]
+      improvements = [
+        'Maximizar performance física',
+        'Melhorar recuperação',
+        'Otimizar função cognitiva'
+      ]
+    } else {
+      category = 'Hidratação Elevada'
+      color = 'text-purple-600'
+      recommendations = [
+        'Consulte um especialista para monitoramento',
+        'Verifique equilíbrio eletrolítico',
+        'Ajuste conforme necessário'
+      ]
+      improvements = [
+        'Maximizar hidratação celular',
+        'Otimizar transporte de nutrientes',
+        'Manter saúde renal'
+      ]
+    }
+    
+    hydrationTips = [
+      'Beba água ao acordar para ativar o metabolismo',
+      'Consuma água 30 minutos antes das refeições',
+      'Mantenha uma garrafa de água sempre por perto',
+      'Monitore a cor da urina (deve ser clara)',
+      'Inclua frutas e vegetais ricos em água'
     ]
     
-    // Dicas de hidratação
-    const hydrationTips = [
-      'Beba água ao acordar',
-      'Mantenha uma garrafa sempre por perto',
-      'Beba antes de sentir sede',
-      'Consuma frutas com alto teor de água',
-      'Evite álcool e cafeína em excesso',
-      'Monitore a cor da urina'
-    ]
-    
-    // Alimentos hidratantes
-    const hydratingFoods = [
-      'Melancia (92% água)',
-      'Pepino (95% água)',
-      'Tomate (94% água)',
-      'Laranja (87% água)',
-      'Iogurte (85% água)',
-      'Sopa de vegetais'
-    ]
+    return {
+      dailyWater: baseWater.toFixed(0),
+      dailyWaterLiters,
+      category,
+      color,
+      recommendations,
+      improvements,
+      hydrationTips
+    }
+  }
 
-    setResult({
-      totalWater: Math.round(totalWater),
-      hourlyIntake,
-      morningIntake,
-      afternoonIntake,
-      eveningIntake,
-      dehydrationSigns,
-      hydrationTips,
-      hydratingFoods
-    })
-    setShowResult(true)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const hydrationResults = calculateHydration()
+    if (hydrationResults) {
+      setResults(hydrationResults)
+      setShowResults(true)
+    }
+  }
+
+  if (showResults && results) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center py-4">
+              <button
+                onClick={() => setShowResults(false)}
+                className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
+                  <Droplets className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Seus Resultados</h1>
+                  <p className="text-sm text-gray-600">Calculadora de Hidratação - Demo Herbalead</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Results Summary */}
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Sua Necessidade Diária de Água</h2>
+            
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full mb-4">
+                <span className="text-4xl font-bold text-blue-600">{results.dailyWaterLiters}L</span>
+              </div>
+              <h3 className={`text-2xl font-semibold ${results.color} mb-2`}>
+                {results.category}
+              </h3>
+              <p className="text-gray-600">
+                {results.dailyWater}ml por dia baseado no seu perfil
+              </p>
+            </div>
+
+            {/* Improvements Section */}
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Star className="w-5 h-5 text-blue-600 mr-2" />
+                O que você pode melhorar
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {results.improvements.map((improvement, index) => (
+                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center mb-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                      <span className="text-sm font-medium text-gray-900">{improvement}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Hydration Tips */}
+            <div className="bg-cyan-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Droplets className="w-5 h-5 text-cyan-600 mr-2" />
+                Dicas de Hidratação
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {results.hydrationTips.map((tip, index) => (
+                  <div key={index} className="bg-white rounded-lg p-3 shadow-sm">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-cyan-500 rounded-full mr-3"></div>
+                      <span className="text-sm text-gray-700">{tip}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="bg-blue-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <CheckCircle className="w-5 h-5 text-blue-600 mr-2" />
+                Recomendações Personalizadas
+              </h4>
+              <ul className="space-y-2">
+                {results.recommendations.map((rec, index) => (
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2"></div>
+                    <span className="text-gray-700">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+
+          {/* CTA Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-8 text-center shadow-2xl border-2 border-blue-200">
+            <h3 className="text-3xl font-bold mb-4 text-gray-800">
+              🎯 Quer uma análise mais completa?
+            </h3>
+            <p className="text-gray-600 mb-8 text-lg">
+              Esta é uma demonstração! Na versão real, este botão redirecionaria para o WhatsApp do especialista com uma mensagem personalizada.
+            </p>
+            <button 
+              onClick={() => {
+                
+                
+              }}
+              className="px-12 py-6 bg-blue-600 text-white rounded-xl font-bold text-xl hover:bg-blue-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-blue-500"
+            >
+              <MessageCircle className="w-8 h-8 mr-3" />
+              Consultar Especialista
+            </button>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-100">
+      {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-4">
@@ -133,12 +301,12 @@ export default function HydrationDemoPage() {
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </Link>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
+                <Droplets className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Monitor de Hidratação - Demo</h1>
-                <p className="text-sm text-gray-600">Demonstração da ferramenta profissional</p>
+                <h1 className="text-2xl font-bold text-gray-900">Calculadora de Hidratação</h1>
+                <p className="text-sm text-gray-600">Demo - Herbalead</p>
               </div>
             </div>
           </div>
@@ -146,268 +314,210 @@ export default function HydrationDemoPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <CheckCircle className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                Esta é uma demonstração
-              </h3>
-              <p className="text-blue-700">
-                Esta é uma versão de demonstração da ferramenta. Na versão completa, 
-                você receberá os dados dos seus clientes automaticamente e poderá 
-                personalizar com sua marca.
-              </p>
-            </div>
+        {/* Impact Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl shadow-lg p-8 mb-8 text-white text-center">
+          <h2 className="text-3xl font-bold mb-4">
+            Veja como seus clientes terão uma experiência incrível
+          </h2>
+          <p className="text-xl text-blue-100 mb-6">
+            E como cada ferramenta pode gerar novos contatos automaticamente!
+          </p>
+          <div className="bg-white/20 rounded-lg p-4 inline-block">
+            <p className="text-sm">
+              💡 Esta é uma versão de demonstração. Quando você adquirir o acesso, poderá personalizar o botão, mensagem e link de destino (WhatsApp, formulário ou site).
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Monitor de Hidratação
-            </h2>
+        {/* How It Works */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            🚀 Como funciona esta ferramenta para gerar leads
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600">1️⃣</span>
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Cliente preenche dados</h4>
+              <p className="text-sm text-gray-600">Peso, idade, atividade física e clima</p>
+            </div>
             
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Peso (kg) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    max="300"
-                    step="0.1"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="70.5"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Idade *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    max="120"
-                    value={formData.age}
-                    onChange={(e) => setFormData({...formData, age: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="25"
-                  />
-                </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600">2️⃣</span>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sexo *
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="masculino">Masculino</option>
-                    <option value="feminino">Feminino</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nível de Atividade *
-                  </label>
-                  <select
-                    value={formData.activity}
-                    onChange={(e) => setFormData({...formData, activity: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="sedentary">Sedentário</option>
-                    <option value="light">Leve</option>
-                    <option value="moderate">Moderado</option>
-                    <option value="active">Ativo</option>
-                    <option value="very-active">Muito Ativo</option>
-                  </select>
-                </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Sistema calcula hidratação</h4>
+              <p className="text-sm text-gray-600">Necessidade diária com dicas personalizadas</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600">3️⃣</span>
               </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Cliente entra em contato</h4>
+              <p className="text-sm text-gray-600">Clica no botão e conversa com você automaticamente</p>
+            </div>
+          </div>
+          <div className="text-center mt-6">
+            <p className="text-blue-600 font-semibold">💬 Você escolhe o texto e o link do botão!</p>
+          </div>
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Clima *
-                  </label>
-                  <select
-                    value={formData.climate}
-                    onChange={(e) => setFormData({...formData, climate: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="cold">Frio</option>
-                    <option value="temperate">Temperado</option>
-                    <option value="hot">Quente</option>
-                    <option value="very-hot">Muito Quente</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Exercício por Dia (min)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="300"
-                    value={formData.exerciseDuration}
-                    onChange={(e) => setFormData({...formData, exerciseDuration: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="30"
-                  />
-                </div>
-              </div>
-
+        {/* Calculator Form */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Calcule sua Necessidade de Hidratação</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Personal Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Intensidade do Exercício
+                  Idade *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="120"
+                  value={formData.age}
+                  onChange={(e) => setFormData({...formData, age: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="25"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gênero *
                 </label>
                 <select
-                  value={formData.exerciseIntensity}
-                  onChange={(e) => setFormData({...formData, exerciseIntensity: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  required
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="light">Leve</option>
-                  <option value="moderate">Moderada</option>
-                  <option value="intense">Intensa</option>
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
                 </select>
               </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={calculateHydration}
-                disabled={!formData.weight || !formData.age}
-                className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            {/* Physical Measurements */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Peso (kg) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="300"
+                  step="0.1"
+                  value={formData.weight}
+                  onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="70.5"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Altura (cm) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="50"
+                  max="250"
+                  value={formData.height}
+                  onChange={(e) => setFormData({...formData, height: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="175"
+                />
+              </div>
+            </div>
+
+            {/* Activity Level */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nível de Atividade Física *
+              </label>
+              <select
+                required
+                value={formData.activity}
+                onChange={(e) => setFormData({...formData, activity: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                Calcular Necessidades de Hidratação
+                <option value="">Selecione</option>
+                <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
+                <option value="leve">Leve (exercício leve 1-3 dias/semana)</option>
+                <option value="moderado">Moderado (exercício moderado 3-5 dias/semana)</option>
+                <option value="intenso">Intenso (exercício intenso 6-7 dias/semana)</option>
+                <option value="muito-intenso">Muito Intenso (exercício muito intenso, trabalho físico)</option>
+              </select>
+            </div>
+
+            {/* Climate */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Clima da Região *
+              </label>
+              <select
+                required
+                value={formData.climate}
+                onChange={(e) => setFormData({...formData, climate: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="frio">Frio (temperaturas baixas)</option>
+                <option value="temperado">Temperado (clima moderado)</option>
+                <option value="quente">Quente (temperaturas altas)</option>
+              </select>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-6">
+              <button
+                type="submit"
+                className="w-full px-8 py-4 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center"
+              >
+                Calcular Hidratação
+                <ArrowRight className="w-5 h-5 ml-2" />
               </button>
-            </form>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Plano de Hidratação
-            </h2>
-            
-            {showResult && result ? (
-              <div className="space-y-6">
-                <div className="text-center p-6 bg-blue-50 rounded-lg">
-                  <div className="flex items-center justify-center mb-2">
-                    <Droplets className="w-8 h-8 text-blue-600 mr-2" />
-                    <div className="text-3xl font-bold text-blue-600">{result.totalWater}ml</div>
-                  </div>
-                  <div className="text-lg text-gray-600">Água por dia</div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    {Math.round(result.totalWater / 1000 * 10) / 10} litros
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                    <Sun className="w-6 h-6 text-yellow-600 mx-auto mb-2" />
-                    <div className="text-lg font-bold text-yellow-600">{result.morningIntake}ml</div>
-                    <div className="text-xs text-gray-600">Manhã</div>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <Activity className="w-6 h-6 text-orange-600 mx-auto mb-2" />
-                    <div className="text-lg font-bold text-orange-600">{result.afternoonIntake}ml</div>
-                    <div className="text-xs text-gray-600">Tarde</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <Droplets className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                    <div className="text-lg font-bold text-purple-600">{result.eveningIntake}ml</div>
-                    <div className="text-xs text-gray-600">Noite</div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-semibold text-gray-900 mb-2">Consumo por Hora:</h3>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-gray-700">{result.hourlyIntake}ml</div>
-                    <div className="text-sm text-gray-600">A cada hora acordado</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Sinais de Desidratação:</h3>
-                  <ul className="space-y-1">
-                    {result.dehydrationSigns.map((sign: string, index: number) => (
-                      <li key={index} className="flex items-start text-sm text-gray-700">
-                        <div className="w-2 h-2 bg-red-500 rounded-full mr-3 mt-2"></div>
-                        {sign}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Dicas de Hidratação:</h3>
-                  <ul className="space-y-1">
-                    {result.hydrationTips.map((tip: string, index: number) => (
-                      <li key={index} className="flex items-start text-sm text-gray-700">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
-                        {tip}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Alimentos Hidratantes:</h3>
-                  <ul className="space-y-1">
-                    {result.hydratingFoods.map((food: string, index: number) => (
-                      <li key={index} className="flex items-start text-sm text-gray-700">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2"></div>
-                        {food}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-12">
-                <Brain className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p>Preencha os dados para ver o plano</p>
-              </div>
-            )}
-          </div>
+            </div>
+          </form>
         </div>
 
-        <div className="mt-12 bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white text-center">
-          <h3 className="text-2xl font-bold mb-4">
-            Gostou da demonstração?
+        {/* Final CTA */}
+        <div className="bg-gray-50 rounded-xl p-8 text-center shadow-lg border border-gray-200">
+          <h3 className="text-3xl font-bold mb-4 text-gray-800">
+            💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
           </h3>
-          <p className="text-emerald-100 mb-6">
-            Com a versão completa, você receberá os dados dos seus clientes automaticamente 
-            e poderá personalizar com sua marca.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/register"
-              className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            <p className="text-gray-600 mb-8 text-lg">
+              Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
+            </p>
+            <button 
+              onClick={() => window.location.href = '/payment'}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
             >
-              Começar Gratuitamente
-            </Link>
-            <Link
-              href="/"
-              className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
-            >
-              Ver Outras Ferramentas
-            </Link>
+              Clique abaixo e começa a gerar seus leads agora
+            </button>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mt-8 bg-yellow-50 rounded-lg p-6">
+          <div className="flex items-start">
+            <AlertTriangle className="w-6 h-6 text-yellow-600 mr-3 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-yellow-800 mb-2">Importante</h4>
+              <p className="text-yellow-700 text-sm">
+                Esta calculadora é uma ferramenta de orientação e não substitui uma avaliação médica completa. 
+                Consulte sempre um especialista para um plano de hidratação personalizado.
+              </p>
+            </div>
           </div>
         </div>
       </main>

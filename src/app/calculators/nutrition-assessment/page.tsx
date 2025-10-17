@@ -9,12 +9,13 @@ import {
   AlertTriangle, 
   Activity,
   Target,
-  Share2,
-  Copy,
+  MessageCircle,
   Brain,
   Shield
 } from 'lucide-react'
 import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
+import HelpButton from '@/components/HelpButton'
 
 interface NutritionAssessmentResults {
   overallScore: string
@@ -28,6 +29,7 @@ interface NutritionAssessmentResults {
 }
 
 export default function NutritionAssessmentPage() {
+  const { userData, getWhatsAppUrl, getCustomMessage, getPageTitle, getButtonText } = useUserData()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -266,29 +268,7 @@ export default function NutritionAssessmentPage() {
     }))
   }
 
-  const copyResults = () => {
-    if (!results) return
-    const text = `Minha Avaliação Nutricional:
-Pontuação Geral: ${results.overallScore}/100
-Nível de Risco: ${results.riskLevel}
 
-Possíveis Deficiências:
-${results.deficiencies.map(d => `• ${d}`).join('\n')}
-
-Recomendações:
-${results.recommendations.map(r => `• ${r}`).join('\n')}
-
-Calculado com YLADA - Ferramentas profissionais de bem-estar`
-    navigator.clipboard.writeText(text)
-    alert('Resultados copiados para a área de transferência!')
-  }
-
-  const shareResults = () => {
-    if (!results) return
-    const text = `Fiz minha avaliação nutricional com YLADA! Minha pontuação: ${results.overallScore}/100 - ${results.riskLevel}. Que tal você também fazer a sua?`
-    const url = window.location.href
-    navigator.share({ title: 'Minha Avaliação Nutricional - YLADA', text, url })
-  }
 
   if (showResults && results) {
     return (
@@ -419,37 +399,29 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
               </ul>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={copyResults}
-                className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
+            {/* CTA Section */}
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
+              <h3 className="text-3xl font-bold mb-4 text-gray-800">
+                🎯 {getPageTitle()}
+              </h3>
+              <p className="text-gray-600 mb-8 text-lg">
+                {getCustomMessage()}
+              </p>
+              <button 
+                onClick={() => {
+                  const whatsappUrl = getWhatsAppUrl()
+                  console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                  console.log('👤 Dados do usuário:', userData)
+                  window.open(whatsappUrl, '_blank')
+                }}
+                className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-emerald-500"
               >
-                <Copy className="w-5 h-5 mr-2" />
-                Copiar Avaliação
-              </button>
-              <button
-                onClick={shareResults}
-                className="flex-1 px-6 py-3 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center"
-              >
-                <Share2 className="w-5 h-5 mr-2" />
-                Compartilhar
+                <MessageCircle className="w-8 h-8 mr-3" />
+                {getButtonText()}
               </button>
             </div>
           </div>
 
-          {/* CTA Section */}
-          <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white text-center">
-            <h3 className="text-2xl font-bold mb-4">
-              Quer uma avaliação nutricional completa?
-            </h3>
-            <p className="text-emerald-100 mb-6">
-              Consulte um nutricionista profissional para uma avaliação detalhada e plano personalizado
-            </p>
-            <button className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Consultar Nutricionista Profissional
-            </button>
-          </div>
         </main>
       </div>
     )
@@ -801,6 +773,9 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
           </div>
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

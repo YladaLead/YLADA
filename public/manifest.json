@@ -1,38 +1,27 @@
 {
-  "name": "YLADA - Your Lead Advanced Data Assistant",
-  "short_name": "YLADA",
-  "description": "Ferramentas avançadas de geração de leads para profissionais de bem-estar e qualidade de vida",
-  "start_url": "/?v=20241220",
+  "name": "Herbalead - Bem-Estar Natural e Tecnologia",
+  "short_name": "Herbalead",
+  "description": "Conquiste novos clientes todos os dias com bem-estar natural e tecnologia. Ferramentas profissionais para gerar leads qualificados.",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10B981",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/logos/herbalead/herbalead-icon-square.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icon.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon.svg",
+      "src": "/logos/herbalead/herbalead-icon-square.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ],
-  "categories": ["health", "medical", "lifestyle"],
-  "lang": "en",
-  "dir": "ltr",
-  "scope": "/",
-  "prefer_related_applications": false
+  "categories": ["business", "productivity", "health"],
+  "lang": "pt-BR",
+  "dir": "ltr"
 }
-
-
-

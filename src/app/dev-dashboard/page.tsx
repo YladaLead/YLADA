@@ -12,7 +12,7 @@ import {
   Star,
   LogOut
 } from 'lucide-react'
-import { signOut } from '@/lib/auth'
+import { signOut } from '@/lib/supabase'
 
 interface Lead {
   id: string

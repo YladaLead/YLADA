@@ -1,226 +1,425 @@
 'use client'
 
 import { useState } from 'react'
+import { 
+  Calculator, 
+  ArrowLeft, 
+  ArrowRight, 
+  CheckCircle, 
+  AlertTriangle, 
+  Activity,
+  Target,
+  MessageCircle,
+  Brain,
+  Shield
+} from 'lucide-react'
 import Link from 'next/link'
-import { ArrowLeft, CheckCircle, CheckCircle2, AlertTriangle, TrendingUp } from 'lucide-react'
+
+interface NutritionAssessmentResults {
+  overallScore: string
+  riskLevel: string
+  riskColor: string
+  deficiencies: string[]
+  recommendations: string[]
+  supplements: string[]
+  lifestyleChanges: string[]
+  nextSteps: string[]
+}
 
 export default function NutritionAssessmentDemoPage() {
   const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
     age: '',
-    gender: 'masculino' as 'masculino' | 'feminino',
     weight: '',
     height: '',
-    activity: 'moderate' as 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active',
-    dietQuality: 'good' as 'poor' | 'fair' | 'good' | 'excellent',
-    mealFrequency: '3' as '1-2' | '3' | '4-5' | '6+',
-    waterIntake: 'adequate' as 'inadequate' | 'adequate' | 'excellent',
-    supplements: 'none' as 'none' | 'basic' | 'comprehensive',
+    gender: '',
+    symptoms: [] as string[],
+    diet: '',
+    lifestyle: '',
     healthConditions: [] as string[],
-    symptoms: [] as string[]
+    medications: '',
+    stress: '',
+    sleep: ''
   })
-  const [result, setResult] = useState<{
-    bmi: string
-    tdee: string
-    score: string
-    maxScore: number
-    percentage: string
-    category: string
-    color: string
-    recommendations: string[]
-    priorityAreas: string[]
-    nutritionalNeeds: {
-      calories: string
-      protein: string
-      carbs: string
-      fat: string
-      fiber: string
-      water: string
-    }
-  } | null>(null)
-  const [showResult, setShowResult] = useState(false)
+  const [results, setResults] = useState<NutritionAssessmentResults | null>(null)
+  const [showResults, setShowResults] = useState(false)
+
+  const symptoms = [
+    'Fadiga constante',
+    'Fraqueza muscular',
+    'Queda de cabelo',
+    'Unhas quebradiças',
+    'Pele seca',
+    'Cicatrização lenta',
+    'Problemas de memória',
+    'Irritabilidade',
+    'Dores de cabeça frequentes',
+    'Problemas digestivos',
+    'Cãibras musculares',
+    'Sensibilidade ao frio',
+    'Problemas de visão',
+    'Dores nas articulações',
+    'Problemas de sono',
+    'Mudanças de humor'
+  ]
 
   const healthConditions = [
     'Diabetes',
     'Hipertensão',
-    'Colesterol alto',
-    'Problemas digestivos',
-    'Alergias alimentares',
-    'Intolerâncias',
-    'Outros'
-  ]
-
-  const symptoms = [
-    'Fadiga constante',
-    'Dificuldade de concentração',
-    'Problemas de sono',
-    'Mudanças de humor',
-    'Problemas digestivos',
-    'Dores de cabeça',
-    'Fraqueza muscular',
-    'Outros'
+    'Doença cardíaca',
+    'Problemas de tireoide',
+    'Doença renal',
+    'Doença hepática',
+    'Anemia',
+    'Osteoporose',
+    'Artrite',
+    'Depressão',
+    'Ansiedade',
+    'Problemas digestivos'
   ]
 
   const calculateNutritionAssessment = () => {
-    const age = parseInt(formData.age)
+    const age = parseFloat(formData.age)
     const weight = parseFloat(formData.weight)
-    const height = parseFloat(formData.height) / 100
+    const height = parseFloat(formData.height)
     
-    // Cálculo do IMC
-    const bmi = weight / (height * height)
+    if (!age || !weight || !height) return null
     
-    // Cálculo do TDEE
-    let bmr = 0
-    if (formData.gender === 'masculino') {
-      bmr = (10 * weight) + (6.25 * height * 100) - (5 * age) + 5
-    } else {
-      bmr = (10 * weight) + (6.25 * height * 100) - (5 * age) - 161
+    let score = 0
+    
+    // Avaliação por sintomas (40 pontos)
+    const symptomScore = Math.max(0, 40 - (formData.symptoms.length * 2.5))
+    score += symptomScore
+    
+    // Avaliação por dieta (20 pontos)
+    const dietScores = {
+      'excellent': 20,
+      'good': 15,
+      'moderate': 10,
+      'poor': 5,
+      'very-poor': 0
+    }
+    score += dietScores[formData.diet as keyof typeof dietScores] || 0
+    
+    // Avaliação por estilo de vida (20 pontos)
+    const lifestyleScores = {
+      'excellent': 20,
+      'good': 15,
+      'moderate': 10,
+      'poor': 5,
+      'very-poor': 0
+    }
+    score += lifestyleScores[formData.lifestyle as keyof typeof lifestyleScores] || 0
+    
+    // Avaliação por condições de saúde (10 pontos)
+    const healthScore = Math.max(0, 10 - (formData.healthConditions.length * 2))
+    score += healthScore
+    
+    // Avaliação por estresse (5 pontos)
+    const stressScores = {
+      'low': 5,
+      'moderate': 3,
+      'high': 1,
+      'very-high': 0
+    }
+    score += stressScores[formData.stress as keyof typeof stressScores] || 0
+    
+    // Avaliação por sono (5 pontos)
+    const sleepScores = {
+      'excellent': 5,
+      'good': 4,
+      'moderate': 3,
+      'poor': 2,
+      'very-poor': 1
+    }
+    score += sleepScores[formData.sleep as keyof typeof sleepScores] || 0
+    
+    const overallScore = Math.max(0, Math.min(100, score))
+    
+    // Determinar nível de risco
+    let riskLevel = 'Baixo'
+    let riskColor = 'text-green-600'
+    
+    if (overallScore < 40) {
+      riskLevel = 'Alto'
+      riskColor = 'text-red-600'
+    } else if (overallScore < 60) {
+      riskLevel = 'Moderado'
+      riskColor = 'text-yellow-600'
     }
     
-    const activityMultipliers = {
-      'sedentary': 1.2,
-      'light': 1.375,
-      'moderate': 1.55,
-      'active': 1.725,
-      'very-active': 1.9
+    // Identificar possíveis deficiências baseadas em sintomas
+    const deficiencies = []
+    if (formData.symptoms.includes('Fadiga constante') || formData.symptoms.includes('Fraqueza muscular')) {
+      deficiencies.push('Ferro (Anemia)')
+    }
+    if (formData.symptoms.includes('Queda de cabelo') || formData.symptoms.includes('Unhas quebradiças')) {
+      deficiencies.push('Biotina')
+    }
+    if (formData.symptoms.includes('Pele seca') || formData.symptoms.includes('Problemas de visão')) {
+      deficiencies.push('Vitamina A')
+    }
+    if (formData.symptoms.includes('Cãibras musculares') || formData.symptoms.includes('Problemas de sono')) {
+      deficiencies.push('Magnésio')
+    }
+    if (formData.symptoms.includes('Problemas de memória') || formData.symptoms.includes('Irritabilidade')) {
+      deficiencies.push('Vitamina B12')
+    }
+    if (formData.symptoms.includes('Sensibilidade ao frio') || formData.symptoms.includes('Problemas de tireoide')) {
+      deficiencies.push('Iodo')
+    }
+    if (formData.symptoms.includes('Dores nas articulações') || formData.symptoms.includes('Cicatrização lenta')) {
+      deficiencies.push('Vitamina C')
     }
     
-    const tdee = bmr * activityMultipliers[formData.activity as keyof typeof activityMultipliers]
+    // Recomendações baseadas em diretrizes da OMS
+    const recommendations = [
+      'Consuma pelo menos 5 porções de frutas e vegetais por dia',
+      'Prefira grãos integrais aos refinados',
+      'Inclua fontes de proteína magra em todas as refeições',
+      'Mantenha hidratação adequada (35ml/kg/dia)',
+      'Limite o consumo de açúcar a menos de 10% das calorias',
+      'Reduza o sal para menos de 5g por dia',
+      'Evite gorduras trans e limite gorduras saturadas',
+      'Faça refeições regulares ao longo do dia'
+    ]
     
-    // Avaliação da qualidade da dieta
-    let dietScore = 0
-    switch(formData.dietQuality) {
-      case 'excellent': dietScore = 4; break
-      case 'good': dietScore = 3; break
-      case 'fair': dietScore = 2; break
-      case 'poor': dietScore = 1; break
+    // Suplementos sugeridos (baseados em deficiências identificadas)
+    const supplements = []
+    if (deficiencies.includes('Ferro (Anemia)')) {
+      supplements.push('Suplemento de Ferro (com orientação médica)')
+    }
+    if (deficiencies.includes('Vitamina B12')) {
+      supplements.push('Vitamina B12 ou Complexo B')
+    }
+    if (deficiencies.includes('Magnésio')) {
+      supplements.push('Suplemento de Magnésio')
+    }
+    if (deficiencies.includes('Vitamina D')) {
+      supplements.push('Vitamina D3')
+    }
+    if (overallScore < 60) {
+      supplements.push('Multivitamínico de qualidade')
     }
     
-    // Avaliação da frequência de refeições
-    let mealScore = 0
-    switch(formData.mealFrequency) {
-      case '1-2': mealScore = 1; break
-      case '3': mealScore = 3; break
-      case '4-5': mealScore = 4; break
-      case '6+': mealScore = 2; break
-    }
+    // Mudanças de estilo de vida
+    const lifestyleChanges = [
+      'Estabeleça uma rotina de sono regular (7-9 horas)',
+      'Pratique exercícios físicos regularmente',
+      'Gerencie o estresse através de técnicas de relaxamento',
+      'Evite fumar e limite o consumo de álcool',
+      'Exponha-se ao sol moderadamente para vitamina D',
+      'Mantenha um peso saudável',
+      'Faça exames médicos regulares',
+      'Consulte um nutricionista para plano personalizado'
+    ]
     
-    // Avaliação da hidratação
-    let waterScore = 0
-    switch(formData.waterIntake) {
-      case 'inadequate': waterScore = 1; break
-      case 'adequate': waterScore = 3; break
-      case 'excellent': waterScore = 4; break
-    }
+    // Próximos passos
+    const nextSteps = [
+      'Agende consulta com nutricionista',
+      'Faça exames laboratoriais completos',
+      'Implemente mudanças graduais na dieta',
+      'Monitore sintomas e progresso',
+      'Consulte médico se necessário',
+      'Mantenha diário alimentar'
+    ]
     
-    // Penalidades por condições de saúde e sintomas
-    const healthPenalty = formData.healthConditions.length * 0.5
-    const symptomPenalty = formData.symptoms.length * 0.3
-    
-    // Cálculo do score total
-    const totalScore = dietScore + mealScore + waterScore - healthPenalty - symptomPenalty
-    const maxScore = 11
-    const percentage = (totalScore / maxScore) * 100
-    
-    // Classificação
-    let category = ''
-    let color = ''
-    let recommendations = []
-    let priorityAreas = []
-    let nutritionalNeeds = {
-      calories: '0',
-      protein: '0',
-      carbs: '0',
-      fat: '0',
-      fiber: '0',
-      water: '0'
-    }
-    
-    if (percentage >= 80) {
-      category = 'Excelente Estado Nutricional'
-      color = 'text-green-600'
-      recommendations = [
-        'Continue mantendo seus hábitos alimentares saudáveis',
-        'Monitore regularmente sua composição corporal',
-        'Considere otimizações específicas para seus objetivos',
-        'Mantenha a consistência na hidratação'
-      ]
-      priorityAreas = ['Manutenção', 'Otimização', 'Consistência']
-    } else if (percentage >= 60) {
-      category = 'Bom Estado Nutricional'
-      color = 'text-blue-600'
-      recommendations = [
-        'Melhore gradualmente a qualidade da sua alimentação',
-        'Ajuste a frequência das refeições conforme necessário',
-        'Mantenha hidratação adequada',
-        'Considere suplementação específica se necessário'
-      ]
-      priorityAreas = ['Qualidade alimentar', 'Hidratação', 'Frequência de refeições']
-    } else if (percentage >= 40) {
-      category = 'Estado Nutricional Regular'
-      color = 'text-yellow-600'
-      recommendations = [
-        'Foque em melhorar a qualidade da alimentação',
-        'Estabeleça uma rotina regular de refeições',
-        'Aumente a ingestão de água',
-        'Considere buscar orientação nutricional profissional'
-      ]
-      priorityAreas = ['Qualidade alimentar', 'Rotina alimentar', 'Hidratação']
-    } else {
-      category = 'Estado Nutricional Precisa Atenção'
-      color = 'text-red-600'
-      recommendations = [
-        'Busque orientação nutricional profissional urgente',
-        'Implemente mudanças graduais na alimentação',
-        'Priorize hidratação adequada',
-        'Considere avaliação médica completa',
-        'Foque em alimentos integrais e nutritivos'
-      ]
-      priorityAreas = ['Orientação profissional', 'Mudanças alimentares', 'Hidratação']
-    }
-    
-    // Necessidades nutricionais específicas
-    nutritionalNeeds = {
-      calories: tdee.toFixed(0),
-      protein: (weight * 1.2).toFixed(0), // g/kg
-      carbs: (tdee * 0.45 / 4).toFixed(0), // 45% das calorias
-      fat: (tdee * 0.25 / 9).toFixed(0), // 25% das calorias
-      fiber: (weight * 0.4).toFixed(0), // g/kg
-      water: (weight * 35).toFixed(0) // ml/kg
-    }
-
-    setResult({
-      bmi: bmi.toFixed(1),
-      tdee: tdee.toFixed(0),
-      score: totalScore.toFixed(1),
-      maxScore,
-      percentage: percentage.toFixed(0),
-      category,
-      color,
+    return {
+      overallScore: overallScore.toFixed(0),
+      riskLevel,
+      riskColor,
+      deficiencies: deficiencies.length > 0 ? deficiencies : ['Nenhuma deficiência específica identificada'],
       recommendations,
-      priorityAreas,
-      nutritionalNeeds
-    })
-    setShowResult(true)
+      supplements: supplements.length > 0 ? supplements : ['Multivitamínico básico (opcional)'],
+      lifestyleChanges,
+      nextSteps
+    }
   }
 
-  const handleHealthConditionChange = (condition: string) => {
-    const conditions = formData.healthConditions.includes(condition)
-      ? formData.healthConditions.filter(c => c !== condition)
-      : [...formData.healthConditions, condition]
-    
-    setFormData({ ...formData, healthConditions: conditions })
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const assessmentResults = calculateNutritionAssessment()
+    if (assessmentResults) {
+      setResults(assessmentResults)
+      setShowResults(true)
+    }
   }
 
-  const handleSymptomChange = (symptom: string) => {
-    const symptoms = formData.symptoms.includes(symptom)
-      ? formData.symptoms.filter(s => s !== symptom)
-      : [...formData.symptoms, symptom]
-    
-    setFormData({ ...formData, symptoms })
+  const toggleSymptom = (symptom: string) => {
+    setFormData(prev => ({
+      ...prev,
+      symptoms: prev.symptoms.includes(symptom)
+        ? prev.symptoms.filter(s => s !== symptom)
+        : [...prev.symptoms, symptom]
+    }))
+  }
+
+  const toggleHealthCondition = (condition: string) => {
+    setFormData(prev => ({
+      ...prev,
+      healthConditions: prev.healthConditions.includes(condition)
+        ? prev.healthConditions.filter(c => c !== condition)
+        : [...prev.healthConditions, condition]
+    }))
+  }
+
+  if (showResults && results) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center py-4">
+              <button
+                onClick={() => setShowResults(false)}
+                className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
+                  <Calculator className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Sua Avaliação Nutricional</h1>
+                  <p className="text-sm text-gray-600">Demo - Herbalead</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Results Summary */}
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Resultado da Sua Avaliação Nutricional</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-blue-50 rounded-lg p-6 text-center">
+                <h3 className="font-semibold text-gray-900 mb-2">Pontuação Geral</h3>
+                <p className="text-4xl font-bold text-blue-600">{results.overallScore}/100</p>
+                <p className="text-sm text-gray-600">Baseado em múltiplos fatores</p>
+              </div>
+              
+              <div className="bg-green-50 rounded-lg p-6 text-center">
+                <h3 className="font-semibold text-gray-900 mb-2">Nível de Risco</h3>
+                <p className={`text-2xl font-bold ${results.riskColor}`}>{results.riskLevel}</p>
+                <p className="text-sm text-gray-600">
+                  {results.riskLevel === 'Baixo' ? 'Continue mantendo bons hábitos' :
+                   results.riskLevel === 'Moderado' ? 'Algumas melhorias são necessárias' :
+                   'Consulte um profissional urgentemente'}
+                </p>
+              </div>
+            </div>
+
+            {/* Deficiencies */}
+            <div className="bg-yellow-50 rounded-lg p-6 mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
+                Possíveis Deficiências Nutricionais
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {results.deficiencies.map((deficiency, index) => (
+                  <div key={index} className="flex items-center text-sm text-gray-700">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
+                    {deficiency}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Supplements */}
+            <div className="bg-purple-50 rounded-lg p-6 mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Shield className="w-5 h-5 text-purple-600 mr-2" />
+                Suplementos Sugeridos
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {results.supplements.map((supplement, index) => (
+                  <div key={index} className="flex items-center text-sm text-gray-700">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                    {supplement}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="bg-emerald-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <CheckCircle className="w-5 h-5 text-emerald-600 mr-2" />
+                Recomendações Nutricionais
+              </h4>
+              <ul className="space-y-2">
+                {results.recommendations.map((rec, index) => (
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
+                    <span className="text-gray-700">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Lifestyle Changes */}
+            <div className="bg-blue-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Activity className="w-5 h-5 text-blue-600 mr-2" />
+                Mudanças de Estilo de Vida
+              </h4>
+              <ul className="space-y-2">
+                {results.lifestyleChanges.map((change, index) => (
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2"></div>
+                    <span className="text-gray-700">{change}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Next Steps */}
+            <div className="bg-orange-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Target className="w-5 h-5 text-orange-600 mr-2" />
+                Próximos Passos Recomendados
+              </h4>
+              <ul className="space-y-2">
+                {results.nextSteps.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mr-3 mt-2"></div>
+                    <span className="text-gray-700">{step}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* CTA Section */}
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
+              <h3 className="text-3xl font-bold mb-4 text-gray-800">
+                💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
+              </h3>
+              <p className="text-gray-600 mb-8 text-lg">
+                Clique abaixo e começa a gerar seus leads agora
+              </p>
+              <button 
+                onClick={() => window.location.href = '/payment'}
+                className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-emerald-500"
+              >
+                <MessageCircle className="w-8 h-8 mr-3" />
+                Quero gerar meus leads agora
+              </button>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+      {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-4">
@@ -228,12 +427,12 @@ export default function NutritionAssessmentDemoPage() {
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </Link>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
+                <Calculator className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Avaliação Nutricional - Demo</h1>
-                <p className="text-sm text-gray-600">Demonstração da ferramenta profissional</p>
+                <h1 className="text-2xl font-bold text-gray-900">Avaliação Nutricional</h1>
+                <p className="text-sm text-gray-600">Demo - Herbalead</p>
               </div>
             </div>
           </div>
@@ -241,333 +440,357 @@ export default function NutritionAssessmentDemoPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <CheckCircle2 className="w-6 h-6 text-blue-600" />
+        {/* Impact Header */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-lg p-8 mb-8 text-white text-center">
+          <h2 className="text-3xl font-bold mb-4">
+            Veja como seus clientes terão uma experiência incrível
+          </h2>
+          <p className="text-xl text-green-100 mb-6">
+            E como cada ferramenta pode gerar novos contatos automaticamente!
+          </p>
+          <div className="bg-white/20 rounded-lg p-4 inline-block">
+            <p className="text-sm">
+              💡 Esta é uma versão de demonstração. Quando você adquirir o acesso, poderá personalizar o botão, mensagem e link de destino (WhatsApp, formulário ou site).
+            </p>
+          </div>
+        </div>
+
+        {/* Info Section */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Avaliação Nutricional Completa</h2>
+          <p className="text-gray-600 mb-6">
+            Uma avaliação nutricional adequada pode identificar possíveis deficiências e orientar 
+            melhorias na alimentação. Nossa ferramenta utiliza critérios baseados em diretrizes da 
+            Organização Mundial da Saúde (OMS) para fornecer uma análise abrangente do seu estado nutricional.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Brain className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Completa</h3>
+              <p className="text-sm text-gray-600">Avalia múltiplos aspectos nutricionais</p>
             </div>
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                Esta é uma demonstração
-              </h3>
-              <p className="text-blue-700">
-                Esta é uma versão de demonstração da ferramenta. Na versão completa, 
-                você receberá os dados dos seus clientes automaticamente e poderá 
-                personalizar com sua marca.
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Shield className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Precisa</h3>
+              <p className="text-sm text-gray-600">Baseada em critérios científicos</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Target className="w-8 h-8 text-yellow-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Orientativa</h3>
+              <p className="text-sm text-gray-600">Fornece recomendações práticas</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Assessment Form */}
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Faça sua Avaliação Nutricional</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Personal Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome Completo *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="Seu nome completo"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="seu@email.com"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Telefone
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Idade *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="120"
+                  value={formData.age}
+                  onChange={(e) => setFormData({...formData, age: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="25"
+                />
+              </div>
+            </div>
+
+            {/* Physical Measurements */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Peso (kg) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="300"
+                  step="0.1"
+                  value={formData.weight}
+                  onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="70.5"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Altura (cm) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="50"
+                  max="250"
+                  value={formData.height}
+                  onChange={(e) => setFormData({...formData, height: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="175"
+                />
+              </div>
+            </div>
+
+            {/* Gender */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sexo *
+              </label>
+              <select
+                  required
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
+                </select>
+              </div>
+
+            {/* Symptoms */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Sintomas que você apresenta (selecione todos que se aplicam):
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {symptoms.map((symptom) => (
+                  <button
+                    key={symptom}
+                    type="button"
+                    onClick={() => toggleSymptom(symptom)}
+                    className={`p-3 rounded-lg border text-sm text-left transition-colors ${
+                      formData.symptoms.includes(symptom)
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {symptom}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Diet Quality */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Qualidade da sua alimentação *
+              </label>
+              <select
+                required
+                value={formData.diet}
+                onChange={(e) => setFormData({...formData, diet: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="excellent">Excelente (muitas frutas, vegetais, grãos integrais)</option>
+                <option value="good">Boa (algumas frutas e vegetais)</option>
+                <option value="moderate">Moderada (poucas frutas e vegetais)</option>
+                <option value="poor">Ruim (poucos alimentos naturais)</option>
+                <option value="very-poor">Muito ruim (principalmente processados)</option>
+              </select>
+            </div>
+
+            {/* Lifestyle */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Estilo de vida geral *
+              </label>
+              <select
+                required
+                value={formData.lifestyle}
+                onChange={(e) => setFormData({...formData, lifestyle: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="excellent">Excelente (exercícios regulares, sono adequado)</option>
+                <option value="good">Bom (alguns exercícios, sono razoável)</option>
+                <option value="moderate">Moderado (poucos exercícios, sono irregular)</option>
+                <option value="poor">Ruim (sedentário, sono ruim)</option>
+                <option value="very-poor">Muito ruim (sedentário, sono muito ruim)</option>
+              </select>
+            </div>
+
+            {/* Health Conditions */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Condições de saúde (selecione todas que se aplicam):
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {healthConditions.map((condition) => (
+                  <button
+                    key={condition}
+                    type="button"
+                    onClick={() => toggleHealthCondition(condition)}
+                    className={`p-3 rounded-lg border text-sm text-left transition-colors ${
+                      formData.healthConditions.includes(condition)
+                        ? 'border-red-500 bg-red-50 text-red-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {condition}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Medications */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Medicamentos que você toma regularmente
+              </label>
+              <textarea
+                value={formData.medications}
+                onChange={(e) => setFormData({...formData, medications: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                placeholder="Ex: Metformina, Losartana..."
+                rows={3}
+              />
+            </div>
+
+            {/* Stress Level */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nível de estresse *
+              </label>
+              <select
+                required
+                value={formData.stress}
+                onChange={(e) => setFormData({...formData, stress: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="low">Baixo</option>
+                <option value="moderate">Moderado</option>
+                <option value="high">Alto</option>
+                <option value="very-high">Muito alto</option>
+              </select>
+            </div>
+
+            {/* Sleep Quality */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Qualidade do sono *
+              </label>
+              <select
+                required
+                value={formData.sleep}
+                onChange={(e) => setFormData({...formData, sleep: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="excellent">Excelente (7-9 horas, sono profundo)</option>
+                <option value="good">Boa (6-8 horas, sono razoável)</option>
+                <option value="moderate">Moderada (5-7 horas, sono irregular)</option>
+                <option value="poor">Ruim (4-6 horas, sono superficial)</option>
+                <option value="very-poor">Muito ruim (menos de 4 horas)</option>
+              </select>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-6">
+              <button
+                type="submit"
+                className="w-full px-8 py-4 bg-emerald-600 text-white rounded-lg text-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
+              >
+                Fazer Avaliação Nutricional
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Final CTA */}
+        <div className="bg-gray-50 rounded-xl p-8 text-center shadow-lg border border-gray-200">
+          <h3 className="text-3xl font-bold mb-4 text-gray-800">
+            💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
+          </h3>
+          <p className="text-gray-600 mb-8 text-lg">
+            Clique abaixo e começa a gerar seus leads agora
+          </p>
+            <button 
+              onClick={() => window.location.href = '/payment'}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
+            >
+              Clique abaixo e começa a gerar seus leads agora
+          </button>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mt-8 bg-yellow-50 rounded-lg p-6">
+          <div className="flex items-start">
+            <AlertTriangle className="w-6 h-6 text-yellow-600 mr-3 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-yellow-800 mb-2">Importante</h4>
+              <p className="text-yellow-700 text-sm">
+                Esta avaliação fornece uma análise preliminar baseada em critérios da OMS. 
+                Para um diagnóstico preciso e plano personalizado, consulte sempre um 
+                nutricionista ou médico qualificado.
               </p>
             </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Avaliação Nutricional
-            </h2>
-            
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Idade *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    max="120"
-                    value={formData.age}
-                    onChange={(e) => setFormData({...formData, age: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="25"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sexo *
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) => setFormData({...formData, gender: e.target.value as 'masculino' | 'feminino'})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="masculino">Masculino</option>
-                    <option value="feminino">Feminino</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Peso (kg) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    max="300"
-                    step="0.1"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="70.5"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Altura (cm) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="50"
-                    max="250"
-                    value={formData.height}
-                    onChange={(e) => setFormData({...formData, height: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="175"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nível de Atividade *
-                  </label>
-                  <select
-                    value={formData.activity}
-                    onChange={(e) => setFormData({...formData, activity: e.target.value as 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active'})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="sedentary">Sedentário</option>
-                    <option value="light">Leve</option>
-                    <option value="moderate">Moderado</option>
-                    <option value="active">Ativo</option>
-                    <option value="very-active">Muito Ativo</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Qualidade da Dieta *
-                  </label>
-                  <select
-                    value={formData.dietQuality}
-                    onChange={(e) => setFormData({...formData, dietQuality: e.target.value as 'poor' | 'fair' | 'good' | 'excellent'})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="excellent">Excelente</option>
-                    <option value="good">Boa</option>
-                    <option value="fair">Regular</option>
-                    <option value="poor">Ruim</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Refeições por Dia *
-                  </label>
-                  <select
-                    value={formData.mealFrequency}
-                    onChange={(e) => setFormData({...formData, mealFrequency: e.target.value as '1-2' | '3' | '4-5' | '6+'})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="1-2">1-2 refeições</option>
-                    <option value="3">3 refeições</option>
-                    <option value="4-5">4-5 refeições</option>
-                    <option value="6+">6+ refeições</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hidratação *
-                  </label>
-                  <select
-                    value={formData.waterIntake}
-                    onChange={(e) => setFormData({...formData, waterIntake: e.target.value as 'inadequate' | 'adequate' | 'excellent'})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="inadequate">Inadequada</option>
-                    <option value="adequate">Adequada</option>
-                    <option value="excellent">Excelente</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Condições de Saúde
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {healthConditions.map((condition) => (
-                    <label key={condition} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.healthConditions.includes(condition)}
-                        onChange={() => handleHealthConditionChange(condition)}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700">{condition}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sintomas Relacionados à Nutrição
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {symptoms.map((symptom) => (
-                    <label key={symptom} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.symptoms.includes(symptom)}
-                        onChange={() => handleSymptomChange(symptom)}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700">{symptom}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={calculateNutritionAssessment}
-                disabled={!formData.age || !formData.weight || !formData.height}
-                className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Realizar Avaliação Nutricional
-              </button>
-            </form>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Resultado da Avaliação
-            </h2>
-            
-            {showResult && result ? (
-              <div className="space-y-6">
-                <div className="text-center p-6 bg-gray-50 rounded-lg">
-                  <div className={`text-4xl font-bold ${result.color} mb-2`}>
-                    {result.percentage}%
-                  </div>
-                  <div className={`text-xl font-semibold ${result.color}`}>
-                    {result.category}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-2">
-                    Score: {result.score}/{result.maxScore}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{result.bmi}</div>
-                    <div className="text-sm text-gray-600">IMC</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{result.tdee}</div>
-                    <div className="text-sm text-gray-600">Calorias/dia</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                    <TrendingUp className="w-5 h-5 text-emerald-500 mr-2" />
-                    Necessidades Nutricionais Diárias:
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-red-50 rounded-lg text-center">
-                      <div className="font-bold text-red-600">{result.nutritionalNeeds.protein}g</div>
-                      <div className="text-xs text-gray-600">Proteína</div>
-                    </div>
-                    <div className="p-3 bg-yellow-50 rounded-lg text-center">
-                      <div className="font-bold text-yellow-600">{result.nutritionalNeeds.carbs}g</div>
-                      <div className="text-xs text-gray-600">Carboidrato</div>
-                    </div>
-                    <div className="p-3 bg-purple-50 rounded-lg text-center">
-                      <div className="font-bold text-purple-600">{result.nutritionalNeeds.fat}g</div>
-                      <div className="text-xs text-gray-600">Gordura</div>
-                    </div>
-                    <div className="p-3 bg-green-50 rounded-lg text-center">
-                      <div className="font-bold text-green-600">{result.nutritionalNeeds.fiber}g</div>
-                      <div className="text-xs text-gray-600">Fibra</div>
-                    </div>
-                  </div>
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg text-center">
-                    <div className="font-bold text-blue-600">{result.nutritionalNeeds.water}ml</div>
-                    <div className="text-xs text-gray-600">Água</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                    <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2" />
-                    Áreas Prioritárias:
-                  </h3>
-                  <ul className="space-y-2">
-                    {result.priorityAreas.map((area: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3 mt-2"></div>
-                        <span className="text-gray-700">{area}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    Recomendações:
-                  </h3>
-                  <ul className="space-y-2">
-                    {result.recommendations.map((rec: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
-                        <span className="text-gray-700">{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-12">
-                <CheckCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p>Preencha os dados para ver o resultado</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-12 bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white text-center">
-          <h3 className="text-2xl font-bold mb-4">
-            Gostou da demonstração?
-          </h3>
-          <p className="text-emerald-100 mb-6">
-            Com a versão completa, você receberá os dados dos seus clientes automaticamente 
-            e poderá personalizar com sua marca.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/register"
-              className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Começar Gratuitamente
-            </Link>
-            <Link
-              href="/"
-              className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
-            >
-              Ver Outras Ferramentas
-            </Link>
           </div>
         </div>
       </main>

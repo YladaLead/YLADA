@@ -10,16 +10,19 @@ import {
   Heart,
   Activity,
   Target,
-  Share2,
-  Copy
+  Star,
+  MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
+import HelpButton from '@/components/HelpButton'
 
 interface BMIResults {
   bmi: string
   category: string
   color: string
   recommendations: string[]
+  improvements: string[]
   idealWeight: {
     min: string
     max: string
@@ -27,10 +30,8 @@ interface BMIResults {
 }
 
 export default function BMICalculatorPage() {
+  const { userData, getWhatsAppUrl, getCustomMessage, getPageTitle, getButtonText } = useUserData()
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
     age: '',
     weight: '',
     height: '',
@@ -51,14 +52,20 @@ export default function BMICalculatorPage() {
     let category = ''
     let color = ''
     let recommendations = []
+    let improvements = []
     
     if (bmi < 18.5) {
       category = 'Abaixo do peso'
       color = 'text-blue-600'
       recommendations = [
-        'Consulte um nutricionista para ganho de peso saudável',
+        'Consulte um especialista para ganho de peso saudável',
         'Foque em alimentos nutritivos e calóricos',
         'Considere exercícios de força para ganho de massa muscular'
+      ]
+      improvements = [
+        'Aumentar massa muscular com exercícios de força',
+        'Melhorar densidade óssea com atividades físicas',
+        'Otimizar absorção de nutrientes com alimentação balanceada'
       ]
     } else if (bmi < 25) {
       category = 'Peso normal'
@@ -68,21 +75,36 @@ export default function BMICalculatorPage() {
         'Continue praticando exercícios regularmente',
         'Monitore seu peso periodicamente'
       ]
+      improvements = [
+        'Manter composição corporal ideal',
+        'Otimizar performance física',
+        'Prevenir ganho de peso futuro'
+      ]
     } else if (bmi < 30) {
       category = 'Sobrepeso'
       color = 'text-yellow-600'
       recommendations = [
-        'Consulte um nutricionista para plano de emagrecimento',
+        'Consulte um especialista para plano de emagrecimento',
         'Reduza calorias e aumente atividade física',
         'Foque em alimentos integrais e vegetais'
+      ]
+      improvements = [
+        'Reduzir gordura corporal de forma saudável',
+        'Aumentar massa muscular magra',
+        'Melhorar resistência cardiovascular'
       ]
     } else {
       category = 'Obesidade'
       color = 'text-red-600'
       recommendations = [
-        'Consulte um médico e nutricionista urgentemente',
+        'Consulte um especialista urgentemente',
         'Plano de emagrecimento supervisionado',
         'Acompanhamento médico regular'
+      ]
+      improvements = [
+        'Reduzir riscos cardiovasculares',
+        'Melhorar qualidade de vida',
+        'Prevenir complicações de saúde'
       ]
     }
     
@@ -91,6 +113,7 @@ export default function BMICalculatorPage() {
       category,
       color,
       recommendations,
+      improvements,
       idealWeight: {
         min: (18.5 * height * height).toFixed(1),
         max: (24.9 * height * height).toFixed(1)
@@ -107,19 +130,6 @@ export default function BMICalculatorPage() {
     }
   }
 
-  const copyResults = () => {
-    if (!results) return
-    const text = `Meu IMC: ${results.bmi} - ${results.category}\n\nRecomendações:\n${results.recommendations.map(r => `• ${r}`).join('\n')}\n\nCalculado com YLADA - Ferramentas profissionais de bem-estar`
-    navigator.clipboard.writeText(text)
-    alert('Resultados copiados para a área de transferência!')
-  }
-
-  const shareResults = () => {
-    if (!results) return
-    const text = `Descobri meu IMC com YLADA! Meu resultado: ${results.bmi} - ${results.category}. Que tal você também calcular o seu?`
-    const url = window.location.href
-    navigator.share({ title: 'Meu IMC - YLADA', text, url })
-  }
 
   if (showResults && results) {
     return (
@@ -140,7 +150,7 @@ export default function BMICalculatorPage() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Seus Resultados</h1>
-                  <p className="text-sm text-gray-600">Calculadora de IMC - YLADA</p>
+                  <p className="text-sm text-gray-600">Calculadora de IMC - Herbalead</p>
                 </div>
               </div>
             </div>
@@ -188,6 +198,24 @@ export default function BMICalculatorPage() {
               </div>
             </div>
 
+            {/* Improvements Section */}
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Star className="w-5 h-5 text-emerald-600 mr-2" />
+                O que você pode melhorar
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {results.improvements.map((improvement, index) => (
+                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center mb-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+                      <span className="text-sm font-medium text-gray-900">{improvement}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Recommendations */}
             <div className="bg-emerald-50 rounded-lg p-6 mb-8">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -204,35 +232,27 @@ export default function BMICalculatorPage() {
               </ul>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={copyResults}
-                className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
-              >
-                <Copy className="w-5 h-5 mr-2" />
-                Copiar Resultados
-              </button>
-              <button
-                onClick={shareResults}
-                className="flex-1 px-6 py-3 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center"
-              >
-                <Share2 className="w-5 h-5 mr-2" />
-                Compartilhar
-              </button>
-            </div>
           </div>
 
           {/* CTA Section */}
-          <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white text-center">
-            <h3 className="text-2xl font-bold mb-4">
-              Quer uma análise mais completa?
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-8 text-center shadow-2xl border-2 border-emerald-200">
+            <h3 className="text-3xl font-bold mb-4 text-gray-800">
+              🎯 {getPageTitle()}
             </h3>
-            <p className="text-emerald-100 mb-6">
-              Consulte um profissional de bem-estar para um plano personalizado baseado no seu IMC
+            <p className="text-gray-600 mb-8 text-lg">
+              {getCustomMessage()}
             </p>
-            <button className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Consultar Profissional de Bem-Estar
+            <button 
+              onClick={() => {
+                const whatsappUrl = getWhatsAppUrl()
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                console.log('👤 Dados do usuário:', userData)
+                window.open(whatsappUrl, '_blank')
+              }}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-emerald-500"
+            >
+              <MessageCircle className="w-8 h-8 mr-3" />
+              {getButtonText()}
             </button>
           </div>
         </main>
@@ -308,49 +328,6 @@ export default function BMICalculatorPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome Completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="Seu nome completo"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="seu@email.com"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="(11) 99999-9999"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Idade *
                 </label>
                 <input
@@ -363,6 +340,22 @@ export default function BMICalculatorPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   placeholder="25"
                 />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gênero *
+                </label>
+                <select
+                  required
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
+                </select>
               </div>
             </div>
 
@@ -402,42 +395,24 @@ export default function BMICalculatorPage() {
               </div>
             </div>
 
-            {/* Additional Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sexo *
-                </label>
-                <select
-                  required
-                  value={formData.gender}
-                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="masculino">Masculino</option>
-                  <option value="feminino">Feminino</option>
-                  <option value="outro">Outro</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nível de Atividade
-                </label>
-                <select
-                  value={formData.activity}
-                  onChange={(e) => setFormData({...formData, activity: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="sedentario">Sedentário</option>
-                  <option value="leve">Leve</option>
-                  <option value="moderado">Moderado</option>
-                  <option value="ativo">Ativo</option>
-                  <option value="muito-ativo">Muito Ativo</option>
-                </select>
-              </div>
+            {/* Activity Level */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nível de Atividade Física *
+              </label>
+              <select
+                required
+                value={formData.activity}
+                onChange={(e) => setFormData({...formData, activity: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
+                <option value="leve">Leve (exercício leve 1-3 dias/semana)</option>
+                <option value="moderado">Moderado (exercício moderado 3-5 dias/semana)</option>
+                <option value="intenso">Intenso (exercício intenso 6-7 dias/semana)</option>
+                <option value="muito-intenso">Muito Intenso (exercício muito intenso, trabalho físico)</option>
+              </select>
             </div>
 
             {/* Submit Button */}
@@ -467,6 +442,9 @@ export default function BMICalculatorPage() {
           </div>
         </div>
       </main>
+      
+      {/* Botão de Ajuda */}
+      <HelpButton />
     </div>
   )
 }

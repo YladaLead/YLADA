@@ -2,176 +2,206 @@
 
 import { useState } from 'react'
 import { 
-  Calculator, 
   ArrowLeft, 
   ArrowRight, 
   CheckCircle, 
   AlertTriangle, 
-  Heart,
-  Target,
-  Share2,
-  Copy,
+  Star,
+  MessageCircle,
   Utensils,
-  Clock
+  Heart,
+  Activity,
+  Target
 } from 'lucide-react'
-import Link from 'next/link'
+import { useUserData } from '@/lib/useUserData'
 
 interface MealPlanResults {
   dailyCalories: string
-  mealCalories: {
-    breakfast: string
-    lunch: string
-    dinner: string
-    snacks: string
-  }
-  macronutrients: {
+  protein: string
+  carbs: string
+  fat: string
+  meals: {
+    name: string
+    calories: string
     protein: string
     carbs: string
     fat: string
-  }
-  mealSuggestions: {
-    breakfast: string[]
-    lunch: string[]
-    dinner: string[]
-    snacks: string[]
-  }
+    time: string
+  }[]
   recommendations: string[]
-  shoppingList: string[]
+  improvements: string[]
+  mealTips: string[]
 }
 
-export default function MealPlannerPage() {
+export default function MealPlannerCalculatorPage() {
+  const { userData, getWhatsAppUrl, getCustomMessage, getPageTitle, getButtonText } = useUserData()
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
     age: '',
     weight: '',
     height: '',
     gender: '',
     activity: '',
-    goal: '',
-    dietaryRestrictions: '',
-    preferences: ''
+    goal: ''
   })
   const [results, setResults] = useState<MealPlanResults | null>(null)
   const [showResults, setShowResults] = useState(false)
 
   const calculateMealPlan = () => {
     const weight = parseFloat(formData.weight)
-    const age = parseFloat(formData.age)
-    const height = parseFloat(formData.height)
+    const height = parseFloat(formData.height) / 100 // Convert cm to meters
+    const age = parseInt(formData.age)
     
-    if (!weight || !age || !height) return null
+    if (!weight || !height || !age) return null
     
-    // Cálculo de calorias baseado na fórmula de Mifflin-St Jeor (OMS)
-    let bmr
+    // Calculate BMR (Basal Metabolic Rate) using Mifflin-St Jeor Equation
+    let bmr = 0
     if (formData.gender === 'masculino') {
-      bmr = 10 * weight + 6.25 * height - 5 * age + 5
+      bmr = 10 * weight + 6.25 * (height * 100) - 5 * age + 5
     } else {
-      bmr = 10 * weight + 6.25 * height - 5 * age - 161
+      bmr = 10 * weight + 6.25 * (height * 100) - 5 * age - 161
     }
     
-    // Fatores de atividade (OMS)
-    const activityFactors = {
-      'sedentario': 1.2,
-      'leve': 1.375,
-      'moderado': 1.55,
-      'ativo': 1.725,
-      'muito-ativo': 1.9
+    // Activity multiplier
+    let activityMultiplier = 1.2 // Sedentary
+    switch (formData.activity) {
+      case 'sedentario':
+        activityMultiplier = 1.2
+        break
+      case 'leve':
+        activityMultiplier = 1.375
+        break
+      case 'moderado':
+        activityMultiplier = 1.55
+        break
+      case 'intenso':
+        activityMultiplier = 1.725
+        break
+      case 'muito-intenso':
+        activityMultiplier = 1.9
+        break
     }
     
-    const activityFactor = activityFactors[formData.activity as keyof typeof activityFactors] || 1.2
-    let dailyCalories = bmr * activityFactor
-    
-    // Ajustes por objetivo
-    if (formData.goal === 'weight-loss') {
-      dailyCalories = dailyCalories * 0.8 // Déficit de 20%
-    } else if (formData.goal === 'muscle-gain') {
-      dailyCalories = dailyCalories * 1.1 // Superávit de 10%
+    // Goal adjustment
+    let goalMultiplier = 1.0
+    switch (formData.goal) {
+      case 'perda-peso':
+        goalMultiplier = 0.8 // 20% deficit
+        break
+      case 'ganho-peso':
+        goalMultiplier = 1.2 // 20% surplus
+        break
+      case 'manutencao':
+        goalMultiplier = 1.0
+        break
     }
     
-    // Distribuição das calorias por refeição (OMS)
-    const mealCalories = {
-      breakfast: (dailyCalories * 0.25).toFixed(0),
-      lunch: (dailyCalories * 0.35).toFixed(0),
-      dinner: (dailyCalories * 0.25).toFixed(0),
-      snacks: (dailyCalories * 0.15).toFixed(0)
-    }
+    const dailyCalories = Math.round(bmr * activityMultiplier * goalMultiplier)
     
-    // Distribuição de macronutrientes (OMS)
-    const macronutrients = {
-      protein: (dailyCalories * 0.15 / 4).toFixed(1), // 15% das calorias
-      carbs: (dailyCalories * 0.55 / 4).toFixed(1), // 55% das calorias
-      fat: (dailyCalories * 0.30 / 9).toFixed(1) // 30% das calorias
-    }
+    // Macronutrient distribution
+    const protein = Math.round(dailyCalories * 0.25 / 4) // 25% calories from protein
+    const carbs = Math.round(dailyCalories * 0.45 / 4) // 45% calories from carbs
+    const fat = Math.round(dailyCalories * 0.30 / 9) // 30% calories from fat
     
-    // Sugestões de refeições baseadas em diretrizes da OMS
-    const mealSuggestions = {
-      breakfast: [
-        'Aveia com frutas e leite',
-        'Pão integral com ovos e abacate',
-        'Iogurte grego com granola',
-        'Smoothie de frutas com proteína'
-      ],
-      lunch: [
-        'Salada com proteína magra',
-        'Arroz integral com frango grelhado',
-        'Quinoa com legumes e peixe',
-        'Sopa de legumes com pão integral'
-      ],
-      dinner: [
-        'Peixe grelhado com vegetais',
-        'Frango com batata doce',
-        'Lentilhas com arroz integral',
-        'Salmão com quinoa e brócolis'
-      ],
-      snacks: [
-        'Frutas frescas',
-        'Oleaginosas (castanhas, amêndoas)',
-        'Iogurte natural',
-        'Vegetais com hummus'
+    // Meal distribution (5 meals)
+    const meals = [
+      {
+        name: 'Café da Manhã',
+        calories: Math.round(dailyCalories * 0.25).toString(),
+        protein: Math.round(protein * 0.25).toString(),
+        carbs: Math.round(carbs * 0.25).toString(),
+        fat: Math.round(fat * 0.25).toString(),
+        time: '07:00'
+      },
+      {
+        name: 'Lanche da Manhã',
+        calories: Math.round(dailyCalories * 0.10).toString(),
+        protein: Math.round(protein * 0.10).toString(),
+        carbs: Math.round(carbs * 0.10).toString(),
+        fat: Math.round(fat * 0.10).toString(),
+        time: '10:00'
+      },
+      {
+        name: 'Almoço',
+        calories: Math.round(dailyCalories * 0.30).toString(),
+        protein: Math.round(protein * 0.30).toString(),
+        carbs: Math.round(carbs * 0.30).toString(),
+        fat: Math.round(fat * 0.30).toString(),
+        time: '13:00'
+      },
+      {
+        name: 'Lanche da Tarde',
+        calories: Math.round(dailyCalories * 0.15).toString(),
+        protein: Math.round(protein * 0.15).toString(),
+        carbs: Math.round(carbs * 0.15).toString(),
+        fat: Math.round(fat * 0.15).toString(),
+        time: '16:00'
+      },
+      {
+        name: 'Jantar',
+        calories: Math.round(dailyCalories * 0.20).toString(),
+        protein: Math.round(protein * 0.20).toString(),
+        carbs: Math.round(carbs * 0.20).toString(),
+        fat: Math.round(fat * 0.20).toString(),
+        time: '19:00'
+      }
+    ]
+    
+    let recommendations = []
+    let improvements = []
+    let mealTips = []
+    
+    if (formData.goal === 'perda-peso') {
+      recommendations = [
+        'Consulte um especialista para plano personalizado',
+        'Mantenha déficit calórico controlado',
+        'Priorize alimentos integrais e proteínas'
+      ]
+      improvements = [
+        'Reduzir gordura corporal',
+        'Manter massa muscular',
+        'Melhorar composição corporal'
+      ]
+    } else if (formData.goal === 'ganho-peso') {
+      recommendations = [
+        'Consulte um especialista para ganho saudável',
+        'Aumente calorias gradualmente',
+        'Foque em alimentos nutritivos e calóricos'
+      ]
+      improvements = [
+        'Aumentar massa muscular',
+        'Melhorar densidade óssea',
+        'Otimizar absorção de nutrientes'
+      ]
+    } else {
+      recommendations = [
+        'Mantenha alimentação equilibrada',
+        'Monitore progresso regularmente',
+        'Ajuste conforme necessário'
+      ]
+      improvements = [
+        'Manter composição corporal',
+        'Otimizar performance',
+        'Prevenir ganho de peso'
       ]
     }
     
-    // Lista de compras baseada nas sugestões
-    const shoppingList = [
-      'Aveia integral',
-      'Frutas da estação',
-      'Leite ou leite vegetal',
-      'Pão integral',
-      'Ovos',
-      'Abacate',
-      'Iogurte grego',
-      'Granola sem açúcar',
-      'Proteína em pó',
-      'Vegetais frescos',
-      'Proteína magra (frango, peixe)',
-      'Arroz integral',
-      'Quinoa',
-      'Leguminosas',
-      'Oleaginosas',
-      'Azeite extra virgem'
-    ]
-    
-    // Recomendações baseadas em diretrizes da OMS
-    const recommendations = [
-      'Consuma pelo menos 5 porções de frutas e vegetais por dia',
-      'Prefira grãos integrais aos refinados',
-      'Limite o consumo de açúcar a menos de 10% das calorias',
-      'Reduza o sal para menos de 5g por dia',
-      'Evite gorduras trans e limite gorduras saturadas',
-      'Mantenha hidratação adequada (35ml/kg/dia)',
-      'Faça refeições regulares ao longo do dia',
-      'Consulte um nutricionista para plano personalizado'
+    mealTips = [
+      'Faça 5-6 refeições por dia para manter metabolismo ativo',
+      'Consuma proteína em todas as refeições',
+      'Inclua vegetais em pelo menos 2 refeições',
+      'Beba água entre as refeições',
+      'Evite pular refeições para manter energia estável'
     ]
     
     return {
-      dailyCalories: dailyCalories.toFixed(0),
-      mealCalories,
-      macronutrients,
-      mealSuggestions,
+      dailyCalories: dailyCalories.toString(),
+      protein: protein.toString(),
+      carbs: carbs.toString(),
+      fat: fat.toString(),
+      meals,
       recommendations,
-      shoppingList
+      improvements,
+      mealTips
     }
   }
 
@@ -184,37 +214,9 @@ export default function MealPlannerPage() {
     }
   }
 
-  const copyResults = () => {
-    if (!results) return
-    const text = `Meu Plano de Refeições:
-Calorias Diárias: ${results.dailyCalories}kcal
-
-Distribuição por Refeição:
-• Café da manhã: ${results.mealCalories.breakfast}kcal
-• Almoço: ${results.mealCalories.lunch}kcal
-• Jantar: ${results.mealCalories.dinner}kcal
-• Lanches: ${results.mealCalories.snacks}kcal
-
-Macronutrientes:
-• Proteína: ${results.macronutrients.protein}g
-• Carboidratos: ${results.macronutrients.carbs}g
-• Gorduras: ${results.macronutrients.fat}g
-
-Calculado com YLADA - Ferramentas profissionais de bem-estar`
-    navigator.clipboard.writeText(text)
-    alert('Resultados copiados para a área de transferência!')
-  }
-
-  const shareResults = () => {
-    if (!results) return
-    const text = `Criei meu plano de refeições personalizado com YLADA! Preciso de ${results.dailyCalories}kcal por dia. Que tal você também criar o seu?`
-    const url = window.location.href
-    navigator.share({ title: 'Meu Plano de Refeições - YLADA', text, url })
-  }
-
   if (showResults && results) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100">
         {/* Header */}
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -226,12 +228,12 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                  <Calculator className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-red-600 rounded-lg flex items-center justify-center">
+                  <Utensils className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Seu Plano de Refeições</h1>
-                  <p className="text-sm text-gray-600">Planejador de Refeições - YLADA</p>
+                  <p className="text-sm text-gray-600">Planejador de Refeições - Herbalead</p>
                 </div>
               </div>
             </div>
@@ -241,188 +243,151 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Results Summary */}
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Seu Plano de Refeições Personalizado</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Seu Plano Nutricional Diário</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-blue-50 rounded-lg p-6 text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">Calorias Diárias</h3>
-                <p className="text-3xl font-bold text-blue-600">{results.dailyCalories}kcal</p>
-                <p className="text-sm text-gray-600">Baseado em diretrizes da OMS</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-100 to-red-100 rounded-full mb-4">
+                  <span className="text-2xl font-bold text-orange-600">{results.dailyCalories}</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Calorias</h3>
+                <p className="text-gray-600 text-sm">Por dia</p>
               </div>
               
-              <div className="bg-green-50 rounded-lg p-6 text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">Distribuição</h3>
-                <p className="text-lg font-bold text-green-600">25% - 35% - 25% - 15%</p>
-                <p className="text-sm text-gray-600">Café - Almoço - Jantar - Lanches</p>
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-red-100 to-orange-100 rounded-full mb-4">
+                  <span className="text-2xl font-bold text-red-600">{results.protein}g</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Proteína</h3>
+                <p className="text-gray-600 text-sm">25% das calorias</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full mb-4">
+                  <span className="text-2xl font-bold text-yellow-600">{results.carbs}g</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Carboidratos</h3>
+                <p className="text-gray-600 text-sm">45% das calorias</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-100 to-yellow-100 rounded-full mb-4">
+                  <span className="text-2xl font-bold text-green-600">{results.fat}g</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Gorduras</h3>
+                <p className="text-gray-600 text-sm">30% das calorias</p>
               </div>
             </div>
 
-            {/* Meal Calories */}
-            <div className="bg-purple-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Clock className="w-5 h-5 text-purple-600 mr-2" />
-                Distribuição de Calorias por Refeição
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <h4 className="font-medium text-gray-900">Café da Manhã</h4>
-                  <p className="text-xl font-bold text-purple-600">{results.mealCalories.breakfast}kcal</p>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-medium text-gray-900">Almoço</h4>
-                  <p className="text-xl font-bold text-purple-600">{results.mealCalories.lunch}kcal</p>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-medium text-gray-900">Jantar</h4>
-                  <p className="text-xl font-bold text-purple-600">{results.mealCalories.dinner}kcal</p>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-medium text-gray-900">Lanches</h4>
-                  <p className="text-xl font-bold text-purple-600">{results.mealCalories.snacks}kcal</p>
-                </div>
+            {/* Meal Plan */}
+            <div className="bg-orange-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Utensils className="w-5 h-5 text-orange-600 mr-2" />
+                Distribuição das Refeições
+              </h4>
+              <div className="space-y-4">
+                {results.meals.map((meal, index) => (
+                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex justify-between items-center mb-2">
+                      <h5 className="font-semibold text-gray-900">{meal.name}</h5>
+                      <span className="text-sm text-gray-500">{meal.time}</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Calorias:</span>
+                        <span className="font-semibold text-orange-600 ml-1">{meal.calories}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Proteína:</span>
+                        <span className="font-semibold text-red-600 ml-1">{meal.protein}g</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Carboidratos:</span>
+                        <span className="font-semibold text-yellow-600 ml-1">{meal.carbs}g</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Gorduras:</span>
+                        <span className="font-semibold text-green-600 ml-1">{meal.fat}g</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Macronutrients */}
-            <div className="bg-yellow-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Target className="w-5 h-5 text-yellow-600 mr-2" />
-                Distribuição de Macronutrientes
-              </h3>
+            {/* Improvements Section */}
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Star className="w-5 h-5 text-orange-600 mr-2" />
+                O que você pode melhorar
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <h4 className="font-medium text-gray-900">Proteína</h4>
-                  <p className="text-2xl font-bold text-yellow-600">{results.macronutrients.protein}g</p>
-                  <p className="text-sm text-gray-600">15% das calorias</p>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-medium text-gray-900">Carboidratos</h4>
-                  <p className="text-2xl font-bold text-yellow-600">{results.macronutrients.carbs}g</p>
-                  <p className="text-sm text-gray-600">55% das calorias</p>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-medium text-gray-900">Gorduras</h4>
-                  <p className="text-2xl font-bold text-yellow-600">{results.macronutrients.fat}g</p>
-                  <p className="text-sm text-gray-600">30% das calorias</p>
-                </div>
+                {results.improvements.map((improvement, index) => (
+                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center mb-2">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                      <span className="text-sm font-medium text-gray-900">{improvement}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Meal Suggestions */}
-            <div className="bg-emerald-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Utensils className="w-5 h-5 text-emerald-600 mr-2" />
-                Sugestões de Refeições
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Café da Manhã</h4>
-                  <ul className="space-y-1">
-                    {results.mealSuggestions.breakfast.map((meal, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex items-center">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
-                        {meal}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Almoço</h4>
-                  <ul className="space-y-1">
-                    {results.mealSuggestions.lunch.map((meal, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex items-center">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
-                        {meal}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Jantar</h4>
-                  <ul className="space-y-1">
-                    {results.mealSuggestions.dinner.map((meal, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex items-center">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
-                        {meal}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Lanches</h4>
-                  <ul className="space-y-1">
-                    {results.mealSuggestions.snacks.map((meal, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex items-center">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
-                        {meal}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Shopping List */}
-            <div className="bg-blue-50 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Heart className="w-5 h-5 text-blue-600 mr-2" />
-                Lista de Comras Sugerida
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {results.shoppingList.map((item, index) => (
-                  <div key={index} className="text-sm text-gray-700 flex items-center">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></div>
-                    {item}
+            {/* Meal Tips */}
+            <div className="bg-red-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Heart className="w-5 h-5 text-red-600 mr-2" />
+                Dicas de Alimentação
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {results.mealTips.map((tip, index) => (
+                  <div key={index} className="bg-white rounded-lg p-3 shadow-sm">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
+                      <span className="text-sm text-gray-700">{tip}</span>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Recommendations */}
-            <div className="bg-emerald-50 rounded-lg p-6 mb-8">
+            <div className="bg-orange-50 rounded-lg p-6 mb-8">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <CheckCircle className="w-5 h-5 text-emerald-600 mr-2" />
-                Recomendações Nutricionais
+                <CheckCircle className="w-5 h-5 text-orange-600 mr-2" />
+                Recomendações Personalizadas
               </h4>
               <ul className="space-y-2">
                 {results.recommendations.map((rec, index) => (
                   <li key={index} className="flex items-start">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mr-3 mt-2"></div>
                     <span className="text-gray-700">{rec}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={copyResults}
-                className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center"
-              >
-                <Copy className="w-5 h-5 mr-2" />
-                Copiar Plano
-              </button>
-              <button
-                onClick={shareResults}
-                className="flex-1 px-6 py-3 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center"
-              >
-                <Share2 className="w-5 h-5 mr-2" />
-                Compartilhar
-              </button>
-            </div>
           </div>
 
           {/* CTA Section */}
-          <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white text-center">
-            <h3 className="text-2xl font-bold mb-4">
-              Quer um plano alimentar personalizado?
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-8 text-center shadow-2xl border-2 border-orange-200">
+            <h3 className="text-3xl font-bold mb-4 text-gray-800">
+              🎯 {getPageTitle()}
             </h3>
-            <p className="text-emerald-100 mb-6">
-              Consulte um nutricionista profissional para um plano alimentar detalhado baseado nas suas necessidades específicas
+            <p className="text-gray-600 mb-8 text-lg">
+              {getCustomMessage()}
             </p>
-            <button className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Consultar Nutricionista Profissional
+            <button 
+              onClick={() => {
+                const whatsappUrl = getWhatsAppUrl()
+                console.log('📱 Abrindo WhatsApp:', whatsappUrl)
+                console.log('👤 Dados do usuário:', userData)
+                window.open(whatsappUrl, '_blank')
+              }}
+              className="px-12 py-6 bg-orange-600 text-white rounded-xl font-bold text-xl hover:bg-orange-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-orange-500"
+            >
+              <MessageCircle className="w-8 h-8 mr-3" />
+              {getButtonText()}
             </button>
           </div>
         </main>
@@ -431,21 +396,24 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-4">
-            <Link href="/" className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button
+              onClick={() => window.history.back()}
+              className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </Link>
+            </button>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                <Calculator className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-red-600 rounded-lg flex items-center justify-center">
+                <Utensils className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Planejador de Refeições</h1>
-                <p className="text-sm text-gray-600">Cardápio personalizado e lista de compras</p>
+                <p className="text-sm text-gray-600">Plano nutricional completo e personalizado</p>
               </div>
             </div>
           </div>
@@ -455,36 +423,36 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Info Section */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Planejamento Nutricional Inteligente</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Por que planejar suas refeições?</h2>
           <p className="text-gray-600 mb-6">
-            Um plano de refeições bem estruturado é fundamental para alcançar seus objetivos de saúde. 
-            Nossa calculadora utiliza diretrizes oficiais da Organização Mundial da Saúde (OMS) 
-            para criar um plano personalizado baseado nas suas necessidades específicas.
+            O planejamento de refeições ajuda a manter uma alimentação equilibrada, controlar calorias, 
+            distribuir macronutrientes adequadamente e alcançar seus objetivos de saúde e fitness. 
+            Um plano estruturado facilita a adesão e melhora os resultados.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Utensils className="w-8 h-8 text-blue-600" />
+              <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Heart className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Personalizado</h3>
-              <p className="text-sm text-gray-600">Baseado em suas necessidades específicas</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Equilíbrio</h3>
+              <p className="text-sm text-gray-600">Distribuição adequada de nutrientes</p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Clock className="w-8 h-8 text-green-600" />
+              <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Activity className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Equilibrado</h3>
-              <p className="text-sm text-gray-600">Distribuição ideal de macronutrientes</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Controle</h3>
+              <p className="text-sm text-gray-600">Gestão precisa de calorias</p>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Target className="w-8 h-8 text-yellow-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Prático</h3>
-              <p className="text-sm text-gray-600">Lista de compras e sugestões incluídas</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Objetivos</h3>
+              <p className="text-sm text-gray-600">Alinhado com suas metas</p>
             </div>
           </div>
         </div>
@@ -498,49 +466,6 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome Completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="Seu nome completo"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="seu@email.com"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="(11) 99999-9999"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Idade *
                 </label>
                 <input
@@ -550,9 +475,25 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                   max="120"
                   value={formData.age}
                   onChange={(e) => setFormData({...formData, age: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="25"
                 />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gênero *
+                </label>
+                <select
+                  required
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
+                </select>
               </div>
             </div>
 
@@ -570,7 +511,7 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                   step="0.1"
                   value={formData.weight}
                   onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="70.5"
                 />
               </div>
@@ -586,106 +527,55 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
                   max="250"
                   value={formData.height}
                   onChange={(e) => setFormData({...formData, height: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="175"
                 />
               </div>
             </div>
 
-            {/* Additional Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sexo *
-                </label>
-                <select
-                  required
-                  value={formData.gender}
-                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="masculino">Masculino</option>
-                  <option value="feminino">Feminino</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nível de Atividade *
-                </label>
-                <select
-                  required
-                  value={formData.activity}
-                  onChange={(e) => setFormData({...formData, activity: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="sedentario">Sedentário</option>
-                  <option value="leve">Leve (1-3x/semana)</option>
-                  <option value="moderado">Moderado (3-5x/semana)</option>
-                  <option value="ativo">Ativo (6-7x/semana)</option>
-                  <option value="muito-ativo">Muito Ativo (2x/dia)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Objetivo Principal *
-                </label>
-                <select
-                  required
-                  value={formData.goal}
-                  onChange={(e) => setFormData({...formData, goal: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Selecione</option>
-                  <option value="maintenance">Manutenção</option>
-                  <option value="weight-loss">Perda de Peso</option>
-                  <option value="muscle-gain">Ganho de Massa Muscular</option>
-                  <option value="performance">Performance Esportiva</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Restrições Alimentares
-                </label>
-                <select
-                  value={formData.dietaryRestrictions}
-                  onChange={(e) => setFormData({...formData, dietaryRestrictions: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                >
-                  <option value="">Nenhuma</option>
-                  <option value="vegetarian">Vegetariano</option>
-                  <option value="vegan">Vegano</option>
-                  <option value="gluten-free">Sem Glúten</option>
-                  <option value="lactose-free">Sem Lactose</option>
-                  <option value="keto">Cetogênica</option>
-                </select>
-              </div>
-            </div>
-
+            {/* Activity Level */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Preferências Alimentares
+                Nível de Atividade Física *
               </label>
-              <textarea
-                value={formData.preferences}
-                onChange={(e) => setFormData({...formData, preferences: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Ex: Não gosto de peixe, prefiro refeições rápidas..."
-                rows={3}
-              />
+              <select
+                required
+                value={formData.activity}
+                onChange={(e) => setFormData({...formData, activity: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
+                <option value="leve">Leve (exercício leve 1-3 dias/semana)</option>
+                <option value="moderado">Moderado (exercício moderado 3-5 dias/semana)</option>
+                <option value="intenso">Intenso (exercício intenso 6-7 dias/semana)</option>
+                <option value="muito-intenso">Muito Intenso (exercício muito intenso, trabalho físico)</option>
+              </select>
+            </div>
+
+            {/* Goal */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Objetivo *
+              </label>
+              <select
+                required
+                value={formData.goal}
+                onChange={(e) => setFormData({...formData, goal: e.target.value})}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="manutencao">Manutenção do peso atual</option>
+                <option value="perda-peso">Perda de peso</option>
+                <option value="ganho-peso">Ganho de peso</option>
+              </select>
             </div>
 
             {/* Submit Button */}
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full px-8 py-4 bg-emerald-600 text-white rounded-lg text-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center"
+                className="w-full px-8 py-4 bg-orange-600 text-white rounded-lg text-lg font-semibold hover:bg-orange-700 transition-colors flex items-center justify-center"
               >
                 Criar Plano de Refeições
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -701,9 +591,8 @@ Calculado com YLADA - Ferramentas profissionais de bem-estar`
             <div>
               <h4 className="font-semibold text-yellow-800 mb-2">Importante</h4>
               <p className="text-yellow-700 text-sm">
-                Este plano fornece uma base nutricional baseada em diretrizes da OMS. 
-                Para necessidades específicas, restrições alimentares ou condições de saúde, 
-                consulte sempre um nutricionista qualificado.
+                Este planejador é uma ferramenta de orientação baseada na equação de Mifflin-St Jeor. 
+                Não substitui uma avaliação nutricional completa. Consulte sempre um especialista.
               </p>
             </div>
           </div>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HerbaLead - Nutrição</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            width: 1200px;
+            height: 630px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            color: white;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .nutrition-icon {
+            font-size: 120px;
+            margin-bottom: 20px;
+            animation: rotate 4s linear infinite;
+        }
+        
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 28px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .brand {
+            font-size: 24px;
+            font-weight: 600;
+            color: #10B981;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+        }
+        
+        .food-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .food {
+            position: absolute;
+            font-size: 40px;
+            animation: bounce 3s ease-in-out infinite;
+        }
+        
+        .food:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .food:nth-child(2) { top: 30%; right: 20%; animation-delay: 0.5s; }
+        .food:nth-child(3) { bottom: 25%; left: 25%; animation-delay: 1s; }
+        .food:nth-child(4) { bottom: 35%; right: 15%; animation-delay: 1.5s; }
+        .food:nth-child(5) { top: 50%; left: 10%; animation-delay: 2s; }
+        .food:nth-child(6) { top: 60%; right: 10%; animation-delay: 2.5s; }
+        .food:nth-child(7) { bottom: 20%; left: 40%; animation-delay: 3s; }
+        .food:nth-child(8) { bottom: 50%; right: 35%; animation-delay: 3.5s; }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="food-elements">
+        <div class="food">🥗</div>
+        <div class="food">🍎</div>
+        <div class="food">🥕</div>
+        <div class="food">🥦</div>
+        <div class="food">🍌</div>
+        <div class="food">🥑</div>
+        <div class="food">🍇</div>
+        <div class="food">🥒</div>
+    </div>
+    
+    <div class="container">
+        <div class="nutrition-icon">🥗</div>
+        <div class="title">Avaliação Nutricional</div>
+        <div class="subtitle">Descubra seu perfil nutricional personalizado</div>
+        <div class="brand">HerbaLead</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,244 @@
+# TEMPLATE DE CERTIFICADO - HERBALEAD
+
+## 🏆 CERTIFICADO DE CONCLUSÃO
+
+### Estrutura do Certificado
+
+#### Cabeçalho
+```
+HERBALEAD - YOUR LEAD ACCELERATOR
+CERTIFICADO DE CONCLUSÃO
+```
+
+#### Conteúdo Principal
+```
+Certificamos que
+
+[NOME DO PARTICIPANTE]
+
+concluiu com sucesso o curso
+
+"NOME DO CURSO"
+
+com carga horária de [X] horas
+
+Data de Conclusão: [DD/MM/AAAA]
+```
+
+#### Rodapé
+```
+Herbalead - Your Lead Accelerator
+Transformando distribuidores em máquinas de resultados
+herbalead.com | (19) 99604-9800
+```
+
+---
+
+## 📋 TIPOS DE CERTIFICADO
+
+### Certificado Básico
+- Conclusão do curso
+- Carga horária
+- Data de conclusão
+- Assinatura digital
+
+### Certificado Avançado
+- Conclusão do curso
+- Nota final
+- Projeto prático
+- Mentoria individual
+
+### Certificado Premium
+- Conclusão do curso
+- Nota final
+- Projeto prático
+- Mentoria individual
+- Selo de qualidade
+- Numeração única
+
+---
+
+## 🎨 ELEMENTOS VISUAIS
+
+### Cores
+- **Verde Principal:** #10B981
+- **Verde Secundário:** #059669
+- **Cinza:** #6B7280
+- **Branco:** #FFFFFF
+
+### Fontes
+- **Título:** Bold, 24px
+- **Nome:** Bold, 20px
+- **Conteúdo:** Regular, 16px
+- **Rodapé:** Regular, 12px
+
+### Elementos
+- Logo do Herbalead
+- Borda decorativa
+- Selo de qualidade
+- Assinatura digital
+
+---
+
+## 📝 CONTEÚDO PERSONALIZADO
+
+### Por Curso
+**Curso Básico:**
+- "Fundamentos de Captação de Leads"
+- 8 horas
+- Certificado de participação
+
+**Curso Avançado:**
+- "Estratégias Avançadas de Vendas"
+- 16 horas
+- Certificado de conclusão
+
+**Curso Premium:**
+- "Especialista em Lead Generation"
+- 24 horas
+- Certificado de especialização
+
+### Por Desempenho
+**Excelente (90-100%):**
+- Selo de destaque
+- Menção honrosa
+- Convite para mentoria
+
+**Bom (70-89%):**
+- Certificado padrão
+- Parabéns pela conclusão
+- Convite para curso avançado
+
+**Regular (50-69%):**
+- Certificado de participação
+- Sugestão de revisão
+- Convite para reforço
+
+---
+
+## 🔧 IMPLEMENTAÇÃO TÉCNICA
+
+### Campos Dinâmicos
+- [NOME]: Nome do participante
+- [CURSO]: Nome do curso
+- [CARGA_HORARIA]: Horas do curso
+- [DATA]: Data de conclusão
+- [NOTA]: Nota final (opcional)
+- [PROJETO]: Projeto prático (opcional)
+
+### Validação
+- Código único de validação
+- QR Code para verificação
+- Link de verificação online
+- Assinatura digital
+
+### Armazenamento
+- Banco de dados
+- Backup em nuvem
+- Histórico de emissão
+- Relatórios de certificados
+
+---
+
+## 📊 MÉTRICAS DE CERTIFICAÇÃO
+
+### KPIs Importantes
+- **Taxa de Conclusão:** % que terminam o curso
+- **Taxa de Certificação:** % que recebem certificado
+- **Tempo Médio:** Tempo para conclusão
+- **Satisfação:** Avaliação do curso
+
+### Metas Sugeridas
+- Taxa de Conclusão: > 80%
+- Taxa de Certificação: > 70%
+- Tempo Médio: < 30 dias
+- Satisfação: > 4.5/5
+
+---
+
+## 🎯 ESTRATÉGIAS DE ENGAGEMENT
+
+### Gamificação
+- Badges por módulo concluído
+- Pontos por atividade
+- Ranking de participantes
+- Desafios especiais
+
+### Reconhecimento
+- Certificado público
+- Compartilhamento nas redes
+- Menção no site
+- Convite para comunidade
+
+### Continuidade
+- Convite para curso avançado
+- Acesso a materiais exclusivos
+- Participação em webinars
+- Mentoria individual
+
+---
+
+## 📱 INTEGRAÇÃO COM REDES SOCIAIS
+
+### Compartilhamento Automático
+- Post no LinkedIn
+- Story no Instagram
+- Post no Facebook
+- Tweet no Twitter
+
+### Templates de Compartilhamento
+**LinkedIn:**
+```
+"Acabei de concluir o curso [NOME DO CURSO] na Herbalead!
+Aprendi estratégias incríveis para captação de leads.
+Recomendo para todos os profissionais de vendas! 🚀"
+```
+
+**Instagram:**
+```
+"🎓 Certificado conquistado! 
+Acabei de concluir o curso [NOME DO CURSO] na Herbalead.
+Muito conhecimento e estratégias práticas!
+#Herbalead #Certificado #Vendas #Leads"
+```
+
+---
+
+## ⚠️ CONSIDERAÇÕES IMPORTANTES
+
+### Validação
+- Verificar autenticidade
+- Confirmar conclusão
+- Validar carga horária
+- Checar data de emissão
+
+### Segurança
+- Código único de validação
+- Assinatura digital
+- Backup seguro
+- Controle de acesso
+
+### Legal
+- Termos de uso
+- Política de privacidade
+- Direitos autorais
+- Responsabilidades
+
+---
+
+## 📞 SUPORTE E PRÓXIMOS PASSOS
+
+### Em caso de dúvidas
+- WhatsApp: (19) 99604-9800
+- E-mail: suporte@herbalead.com
+
+### Próximos Desenvolvimentos
+- Sistema de certificação digital
+- Integração com LinkedIn
+- Marketplace de cursos
+- Programa de afiliados
+
+---
+
+**Herbalead - Your Lead Accelerator**
+*Reconhecendo e valorizando o aprendizado*

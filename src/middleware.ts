@@ -4,54 +4,11 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
   const hostname = request.headers.get('host') || ''
   
-  // Detectar domínio do projeto (subdomínio)
-  const subdomain = hostname.split('.')[0]
-  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'ylada.com'
+  console.log(`🔍 Middleware executando para: ${hostname}${url.pathname}`)
   
-  // Se não é um subdomínio válido ou é o domínio principal, continuar normalmente
-  if (hostname.includes('localhost') || hostname.includes('vercel.app') || subdomain === 'www') {
-    return NextResponse.next()
-  }
-  
-  // Verificar se é um domínio de projeto válido
-  const isValidProjectDomain = subdomain !== baseDomain.split('.')[0] && 
-                               subdomain.length >= 3 && 
-                               subdomain.length <= 30 &&
-                               /^[a-z0-9-]+$/.test(subdomain)
-  
-  if (!isValidProjectDomain) {
-    return NextResponse.next()
-  }
-  
-  // Adicionar header para identificar o projeto
-  const response = NextResponse.next()
-  response.headers.set('x-project-domain', subdomain)
-  
-  // Redirecionar página inicial do projeto para página específica
-  if (url.pathname === '/' && subdomain === 'fitlead') {
-    return NextResponse.redirect(new URL('/fitlead', url))
-  }
-
-  // Adicionar contexto do projeto para páginas de auth e ferramentas
-  if (url.pathname.startsWith('/tools/') || 
-      url.pathname.startsWith('/login') || 
-      url.pathname.startsWith('/register') ||
-      url.pathname.startsWith('/user') ||
-      url.pathname.startsWith('/quiz-builder')) {
-    // Só adicionar parâmetro se não existir
-    if (!url.searchParams.has('project')) {
-      url.searchParams.set('project', subdomain)
-      return NextResponse.redirect(url)
-    }
-  }
-  
-  // Redirecionar /user para o subdomínio correto se estiver no domínio principal
-  if (hostname === baseDomain && url.pathname.startsWith('/user')) {
-    const redirectUrl = new URL(`https://fitlead.${baseDomain}${url.pathname}${url.search}`)
-    return NextResponse.redirect(redirectUrl)
-  }
-  
-  return response
+  // TEMPORÁRIO: Permitir TODOS os requests para resolver problema de roteamento
+  console.log(`✅ Permitindo acesso a: ${url.pathname}`)
+  return NextResponse.next()
 }
 
 export const config = {

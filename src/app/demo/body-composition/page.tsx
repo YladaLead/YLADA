@@ -1,139 +1,398 @@
 'use client'
 
 import { useState } from 'react'
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  CheckCircle, 
+  AlertTriangle, 
+  Star,
+  MessageCircle,
+  Users
+} from 'lucide-react'
 import Link from 'next/link'
-import { ArrowLeft, Zap, CheckCircle } from 'lucide-react'
+
+interface BodyCompositionResults {
+  bmi: string
+  bodyFatPercentage: string
+  leanMass: string
+  fatMass: string
+  category: string
+  color: string
+  recommendations: string[]
+  improvements: string[]
+  measurements: string[]
+}
 
 export default function BodyCompositionDemoPage() {
   const [formData, setFormData] = useState({
+    age: '',
     weight: '',
     height: '',
-    age: '',
-    gender: 'masculino',
+    gender: '',
     waist: '',
-    neck: '',
-    hip: ''
+    hip: '',
+    neck: ''
   })
-  const [result, setResult] = useState<{
-    bmi: string
-    bodyFatPercentage: string
-    fatCategory: string
-    fatColor: string
-    fatMass: string
-    leanMass: string
-    bmr: string
-    tdee: string
-    recommendations: string[]
-  } | null>(null)
-  const [showResult, setShowResult] = useState(false)
+  const [results, setResults] = useState<BodyCompositionResults | null>(null)
+  const [showResults, setShowResults] = useState(false)
 
   const calculateBodyComposition = () => {
     const weight = parseFloat(formData.weight)
-    const height = parseFloat(formData.height) / 100
+    const height = parseFloat(formData.height) / 100 // Convert cm to meters
     const age = parseInt(formData.age)
-    // const waist = parseFloat(formData.waist)
-    // const neck = parseFloat(formData.neck)
-    // const hip = parseFloat(formData.hip)
+    const waist = parseFloat(formData.waist)
+    const hip = parseFloat(formData.hip)
+    const neck = parseFloat(formData.neck)
     
-    // Cálculo do IMC
+    if (!weight || !height || !age || !waist || !neck) return null
+    
+    // Calculate BMI
     const bmi = weight / (height * height)
     
-    // Estimativa de gordura corporal usando fórmula de Deurenberg
+    // Calculate body fat percentage using Navy method
     let bodyFatPercentage = 0
+    
     if (formData.gender === 'masculino') {
-      bodyFatPercentage = (1.20 * bmi) + (0.23 * age) - 16.2
+      // Male formula: %BF = 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450
+      const logWaistNeck = Math.log10(waist - neck)
+      const logHeight = Math.log10(height * 100) // Convert back to cm
+      bodyFatPercentage = 495 / (1.0324 - 0.19077 * logWaistNeck + 0.15456 * logHeight) - 450
     } else {
-      bodyFatPercentage = (1.20 * bmi) + (0.23 * age) - 5.4
+      // Female formula: %BF = 495 / (1.29579 - 0.35004 * log10(waist + hip - neck) + 0.22100 * log10(height)) - 450
+      if (!hip) return null
+      const logWaistHipNeck = Math.log10(waist + hip - neck)
+      const logHeight = Math.log10(height * 100) // Convert back to cm
+      bodyFatPercentage = 495 / (1.29579 - 0.35004 * logWaistHipNeck + 0.22100 * logHeight) - 450
     }
     
-    // Massa gorda e massa magra
-    const fatMass = (weight * bodyFatPercentage) / 100
-    const leanMass = weight - fatMass
+    // Calculate fat mass and lean mass
+    const fatMass = (weight * bodyFatPercentage / 100).toFixed(1)
+    const leanMass = (weight - parseFloat(fatMass)).toFixed(1)
     
-    // Taxa Metabólica Basal (BMR) - Fórmula de Mifflin-St Jeor
-    let bmr = 0
-    if (formData.gender === 'masculino') {
-      bmr = (10 * weight) + (6.25 * height * 100) - (5 * age) + 5
-    } else {
-      bmr = (10 * weight) + (6.25 * height * 100) - (5 * age) - 161
-    }
+    let category = ''
+    let color = ''
+    let recommendations = []
+    let improvements = []
+    let measurements = []
     
-    // TDEE (Taxa de Dispêndio Energético Total) - estimativa moderada
-    const tdee = bmr * 1.55
-    
-    // Classificação da gordura corporal
-    let fatCategory = ''
-    let fatColor = ''
-    
+    // Body fat categories
     if (formData.gender === 'masculino') {
       if (bodyFatPercentage < 6) {
-        fatCategory = 'Atlético'
-        fatColor = 'text-blue-600'
+        category = 'Gordura Essencial'
+        color = 'text-blue-600'
+        recommendations = [
+          'Consulte um especialista para avaliação',
+          'Monitore saúde cardiovascular',
+          'Mantenha nutrição adequada'
+        ]
+        improvements = [
+          'Otimizar composição corporal',
+          'Manter saúde metabólica',
+          'Prevenir perda muscular'
+        ]
       } else if (bodyFatPercentage < 14) {
-        fatCategory = 'Bom'
-        fatColor = 'text-green-600'
+        category = 'Atleta'
+        color = 'text-green-600'
+        recommendations = [
+          'Excelente composição corporal',
+          'Mantenha rotina de exercícios',
+          'Continue alimentação balanceada'
+        ]
+        improvements = [
+          'Manter performance atlética',
+          'Otimizar recuperação',
+          'Prevenir lesões'
+        ]
       } else if (bodyFatPercentage < 18) {
-        fatCategory = 'Aceitável'
-        fatColor = 'text-yellow-600'
+        category = 'Boa Forma'
+        color = 'text-emerald-600'
+        recommendations = [
+          'Boa composição corporal',
+          'Mantenha atividade física regular',
+          'Monitore progresso'
+        ]
+        improvements = [
+          'Manter massa muscular',
+          'Otimizar definição',
+          'Melhorar resistência'
+        ]
       } else if (bodyFatPercentage < 25) {
-        fatCategory = 'Sobrepeso'
-        fatColor = 'text-orange-600'
+        category = 'Aceitável'
+        color = 'text-yellow-600'
+        recommendations = [
+          'Consulte um especialista para melhorias',
+          'Aumente atividade física',
+          'Ajuste alimentação'
+        ]
+        improvements = [
+          'Reduzir gordura corporal',
+          'Aumentar massa muscular',
+          'Melhorar condicionamento'
+        ]
       } else {
-        fatCategory = 'Obeso'
-        fatColor = 'text-red-600'
+        category = 'Acima do Ideal'
+        color = 'text-red-600'
+        recommendations = [
+          'Consulte um especialista urgentemente',
+          'Plano de exercícios supervisionado',
+          'Acompanhamento nutricional'
+        ]
+        improvements = [
+          'Reduzir riscos à saúde',
+          'Melhorar composição corporal',
+          'Prevenir doenças crônicas'
+        ]
       }
     } else {
+      // Female categories
       if (bodyFatPercentage < 10) {
-        fatCategory = 'Atlético'
-        fatColor = 'text-blue-600'
+        category = 'Gordura Essencial'
+        color = 'text-blue-600'
+        recommendations = [
+          'Consulte um especialista para avaliação',
+          'Monitore saúde hormonal',
+          'Mantenha nutrição adequada'
+        ]
+        improvements = [
+          'Otimizar composição corporal',
+          'Manter saúde metabólica',
+          'Prevenir perda muscular'
+        ]
+      } else if (bodyFatPercentage < 16) {
+        category = 'Atleta'
+        color = 'text-green-600'
+        recommendations = [
+          'Excelente composição corporal',
+          'Mantenha rotina de exercícios',
+          'Continue alimentação balanceada'
+        ]
+        improvements = [
+          'Manter performance atlética',
+          'Otimizar recuperação',
+          'Prevenir lesões'
+        ]
       } else if (bodyFatPercentage < 20) {
-        fatCategory = 'Bom'
-        fatColor = 'text-green-600'
+        category = 'Boa Forma'
+        color = 'text-emerald-600'
+        recommendations = [
+          'Boa composição corporal',
+          'Mantenha atividade física regular',
+          'Monitore progresso'
+        ]
+        improvements = [
+          'Manter massa muscular',
+          'Otimizar definição',
+          'Melhorar resistência'
+        ]
       } else if (bodyFatPercentage < 25) {
-        fatCategory = 'Aceitável'
-        fatColor = 'text-yellow-600'
-      } else if (bodyFatPercentage < 32) {
-        fatCategory = 'Sobrepeso'
-        fatColor = 'text-orange-600'
+        category = 'Aceitável'
+        color = 'text-yellow-600'
+        recommendations = [
+          'Consulte um especialista para melhorias',
+          'Aumente atividade física',
+          'Ajuste alimentação'
+        ]
+        improvements = [
+          'Reduzir gordura corporal',
+          'Aumentar massa muscular',
+          'Melhorar condicionamento'
+        ]
       } else {
-        fatCategory = 'Obeso'
-        fatColor = 'text-red-600'
+        category = 'Acima do Ideal'
+        color = 'text-red-600'
+        recommendations = [
+          'Consulte um especialista urgentemente',
+          'Plano de exercícios supervisionado',
+          'Acompanhamento nutricional'
+        ]
+        improvements = [
+          'Reduzir riscos à saúde',
+          'Melhorar composição corporal',
+          'Prevenir doenças crônicas'
+        ]
       }
     }
-
-    // Recomendações baseadas nos resultados
-    const recommendations = []
     
-    if (bodyFatPercentage > 25) {
-      recommendations.push('Foque em exercícios cardiovasculares para redução de gordura')
-      recommendations.push('Mantenha um déficit calórico moderado (300-500 kcal/dia)')
-      recommendations.push('Inclua treinamento de força para preservar massa muscular')
-    } else if (bodyFatPercentage < 15) {
-      recommendations.push('Mantenha uma dieta equilibrada para preservar massa muscular')
-      recommendations.push('Foque em treinamento de força para ganho de massa')
-      recommendations.push('Considere um pequeno superávit calórico se o objetivo for hipertrofia')
-    } else {
-      recommendations.push('Mantenha uma dieta equilibrada e exercícios regulares')
-      recommendations.push('Combine treinamento cardiovascular e de força')
-      recommendations.push('Monitore regularmente sua composição corporal')
-    }
-
-    setResult({
+    measurements = [
+      'Circunferência da cintura: ' + waist + 'cm',
+      'Circunferência do pescoço: ' + neck + 'cm',
+      formData.gender === 'feminino' ? 'Circunferência do quadril: ' + hip + 'cm' : 'Altura: ' + (height * 100) + 'cm',
+      'Peso corporal: ' + weight + 'kg'
+    ]
+    
+    return {
       bmi: bmi.toFixed(1),
       bodyFatPercentage: bodyFatPercentage.toFixed(1),
-      fatCategory,
-      fatColor,
-      fatMass: fatMass.toFixed(1),
-      leanMass: leanMass.toFixed(1),
-      bmr: bmr.toFixed(0),
-      tdee: tdee.toFixed(0),
-      recommendations
-    })
-    setShowResult(true)
+      leanMass,
+      fatMass,
+      category,
+      color,
+      recommendations,
+      improvements,
+      measurements
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const bodyCompositionResults = calculateBodyComposition()
+    if (bodyCompositionResults) {
+      setResults(bodyCompositionResults)
+      setShowResults(true)
+    }
+  }
+
+  if (showResults && results) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center py-4">
+              <button
+                onClick={() => setShowResults(false)}
+                className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Seus Resultados</h1>
+                  <p className="text-sm text-gray-600">Composição Corporal - Demo Herbalead</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Results Summary */}
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Sua Composição Corporal</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full mb-4">
+                  <span className="text-4xl font-bold text-purple-600">{results.bodyFatPercentage}%</span>
+                </div>
+                <h3 className={`text-2xl font-semibold ${results.color} mb-2`}>
+                  {results.category}
+                </h3>
+                <p className="text-gray-600">Percentual de Gordura Corporal</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full mb-4">
+                  <span className="text-4xl font-bold text-indigo-600">{results.leanMass}kg</span>
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                  Massa Magra
+                </h3>
+                <p className="text-gray-600">Músculos, ossos e órgãos</p>
+              </div>
+            </div>
+
+            {/* Body Composition Details */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <h4 className="font-semibold text-gray-900 mb-2">IMC</h4>
+                <p className="text-2xl font-bold text-gray-700">{results.bmi}</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <h4 className="font-semibold text-gray-900 mb-2">Massa Gorda</h4>
+                <p className="text-2xl font-bold text-gray-700">{results.fatMass}kg</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <h4 className="font-semibold text-gray-900 mb-2">Massa Magra</h4>
+                <p className="text-2xl font-bold text-gray-700">{results.leanMass}kg</p>
+              </div>
+            </div>
+
+            {/* Improvements Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Star className="w-5 h-5 text-purple-600 mr-2" />
+                O que você pode melhorar
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {results.improvements.map((improvement, index) => (
+                  <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center mb-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                      <span className="text-sm font-medium text-gray-900">{improvement}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Measurements */}
+            <div className="bg-indigo-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Users className="w-5 h-5 text-indigo-600 mr-2" />
+                Medidas Utilizadas
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {results.measurements.map((measurement, index) => (
+                  <div key={index} className="bg-white rounded-lg p-3 shadow-sm">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></div>
+                      <span className="text-sm text-gray-700">{measurement}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="bg-purple-50 rounded-lg p-6 mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <CheckCircle className="w-5 h-5 text-purple-600 mr-2" />
+                Recomendações Personalizadas
+              </h4>
+              <ul className="space-y-2">
+                {results.recommendations.map((rec, index) => (
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-3 mt-2"></div>
+                    <span className="text-gray-700">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+
+          {/* CTA Section */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-8 text-center shadow-2xl border-2 border-purple-200">
+            <h3 className="text-3xl font-bold mb-4 text-gray-800">
+              🎯 Quer uma análise mais completa?
+            </h3>
+            <p className="text-gray-600 mb-8 text-lg">
+              Esta é uma demonstração! Na versão real, este botão redirecionaria para o WhatsApp do especialista com uma mensagem personalizada.
+            </p>
+            <button 
+              onClick={() => {
+                
+                
+              }}
+              className="px-12 py-6 bg-purple-600 text-white rounded-xl font-bold text-xl hover:bg-purple-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl flex items-center justify-center mx-auto border-4 border-purple-500"
+            >
+              <MessageCircle className="w-8 h-8 mr-3" />
+              Consultar Especialista
+            </button>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
+      {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-4">
@@ -141,12 +400,12 @@ export default function BodyCompositionDemoPage() {
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </Link>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Composição Corporal - Demo</h1>
-                <p className="text-sm text-gray-600">Demonstração da ferramenta profissional</p>
+                <h1 className="text-2xl font-bold text-gray-900">Composição Corporal</h1>
+                <p className="text-sm text-gray-600">Demo - Herbalead</p>
               </div>
             </div>
           </div>
@@ -154,246 +413,226 @@ export default function BodyCompositionDemoPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <CheckCircle className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                Esta é uma demonstração
-              </h3>
-              <p className="text-blue-700">
-                Esta é uma versão de demonstração da ferramenta. Na versão completa, 
-                você receberá os dados dos seus clientes automaticamente e poderá 
-                personalizar com sua marca.
-              </p>
-            </div>
+        {/* Impact Header */}
+        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-lg p-8 mb-8 text-white text-center">
+          <h2 className="text-3xl font-bold mb-4">
+            Veja como seus clientes terão uma experiência incrível
+          </h2>
+          <p className="text-xl text-purple-100 mb-6">
+            E como cada ferramenta pode gerar novos contatos automaticamente!
+          </p>
+          <div className="bg-white/20 rounded-lg p-4 inline-block">
+            <p className="text-sm">
+              💡 Esta é uma versão de demonstração. Quando você adquirir o acesso, poderá personalizar o botão, mensagem e link de destino (WhatsApp, formulário ou site).
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Composição Corporal
-            </h2>
+        {/* How It Works */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            🚀 Como funciona esta ferramenta para gerar leads
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-purple-600">1️⃣</span>
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Cliente preenche dados</h4>
+              <p className="text-sm text-gray-600">Peso, altura, circunferências e medidas corporais</p>
+            </div>
             
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Peso (kg) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    max="300"
-                    step="0.1"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="70.5"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Altura (cm) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="50"
-                    max="250"
-                    value={formData.height}
-                    onChange={(e) => setFormData({...formData, height: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="175"
-                  />
-                </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-purple-600">2️⃣</span>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Idade *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    max="120"
-                    value={formData.age}
-                    onChange={(e) => setFormData({...formData, age: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="25"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sexo *
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    <option value="masculino">Masculino</option>
-                    <option value="feminino">Feminino</option>
-                  </select>
-                </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Sistema calcula composição</h4>
+              <p className="text-sm text-gray-600">Percentual de gordura, massa magra e recomendações</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-purple-600">3️⃣</span>
               </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Cliente entra em contato</h4>
+              <p className="text-sm text-gray-600">Clica no botão e conversa com você automaticamente</p>
+            </div>
+          </div>
+          <div className="text-center mt-6">
+            <p className="text-purple-600 font-semibold">💬 Você escolhe o texto e o link do botão!</p>
+          </div>
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cintura (cm)
-                  </label>
-                  <input
-                    type="number"
-                    min="30"
-                    max="200"
-                    value={formData.waist}
-                    onChange={(e) => setFormData({...formData, waist: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="80"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Pescoço (cm)
-                  </label>
-                  <input
-                    type="number"
-                    min="20"
-                    max="60"
-                    value={formData.neck}
-                    onChange={(e) => setFormData({...formData, neck: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="35"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quadril (cm)
-                  </label>
-                  <input
-                    type="number"
-                    min="30"
-                    max="200"
-                    value={formData.hip}
-                    onChange={(e) => setFormData({...formData, hip: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="95"
-                  />
-                </div>
+        {/* Calculator Form */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Calcule sua Composição Corporal</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Personal Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Idade *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="120"
+                  value={formData.age}
+                  onChange={(e) => setFormData({...formData, age: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="25"
+                />
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gênero *
+                </label>
+                <select
+                  required
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="">Selecione</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="feminino">Feminino</option>
+                </select>
+              </div>
+            </div>
 
+            {/* Physical Measurements */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Peso (kg) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="300"
+                  step="0.1"
+                  value={formData.weight}
+                  onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="70.5"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Altura (cm) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="50"
+                  max="250"
+                  value={formData.height}
+                  onChange={(e) => setFormData({...formData, height: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="175"
+                />
+              </div>
+            </div>
+
+            {/* Circumferences */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cintura (cm) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="30"
+                  max="200"
+                  step="0.1"
+                  value={formData.waist}
+                  onChange={(e) => setFormData({...formData, waist: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="80.0"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Pescoço (cm) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="20"
+                  max="60"
+                  step="0.1"
+                  value={formData.neck}
+                  onChange={(e) => setFormData({...formData, neck: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="35.0"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quadril (cm) {formData.gender === 'feminino' ? '*' : '(opcional)'}
+                </label>
+                <input
+                  type="number"
+                  required={formData.gender === 'feminino'}
+                  min="30"
+                  max="200"
+                  step="0.1"
+                  value={formData.hip}
+                  onChange={(e) => setFormData({...formData, hip: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="95.0"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-6">
               <button
-                type="button"
-                onClick={calculateBodyComposition}
-                disabled={!formData.weight || !formData.height || !formData.age}
-                className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
+                className="w-full px-8 py-4 bg-purple-600 text-white rounded-lg text-lg font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center"
               >
                 Calcular Composição Corporal
+                <ArrowRight className="w-5 h-5 ml-2" />
               </button>
-            </form>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Resultado
-            </h2>
-            
-            {showResult && result ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900">{result.bmi}</div>
-                    <div className="text-sm text-gray-600">IMC</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className={`text-2xl font-bold ${result.fatColor}`}>{result.bodyFatPercentage}%</div>
-                    <div className="text-sm text-gray-600">Gordura Corporal</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-red-50 rounded-lg">
-                    <div className="text-xl font-bold text-red-600">{result.fatMass}kg</div>
-                    <div className="text-sm text-gray-600">Massa Gorda</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-xl font-bold text-green-600">{result.leanMass}kg</div>
-                    <div className="text-sm text-gray-600">Massa Magra</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-xl font-bold text-blue-600">{result.bmr}</div>
-                    <div className="text-sm text-gray-600">BMR (kcal/dia)</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-xl font-bold text-purple-600">{result.tdee}</div>
-                    <div className="text-sm text-gray-600">TDEE (kcal/dia)</div>
-                  </div>
-                </div>
-
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className={`text-lg font-semibold ${result.fatColor}`}>
-                    Classificação: {result.fatCategory}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    Recomendações:
-                  </h3>
-                  <ul className="space-y-2">
-                    {result.recommendations.map((rec: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3 mt-2"></div>
-                        <span className="text-gray-700">{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-12">
-                <Zap className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p>Preencha os dados para ver o resultado</p>
-              </div>
-            )}
-          </div>
+            </div>
+          </form>
         </div>
 
-        <div className="mt-12 bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-8 text-white text-center">
-          <h3 className="text-2xl font-bold mb-4">
-            Gostou da demonstração?
+        {/* Final CTA */}
+        <div className="bg-gray-50 rounded-xl p-8 text-center shadow-lg border border-gray-200">
+          <h3 className="text-3xl font-bold mb-4 text-gray-800">
+            💼 Pronto para ter esta ferramenta com seu nome e link personalizado?
           </h3>
-          <p className="text-emerald-100 mb-6">
-            Com a versão completa, você receberá os dados dos seus clientes automaticamente 
-            e poderá personalizar com sua marca.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/register"
-              className="px-8 py-3 bg-white text-emerald-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            <p className="text-gray-600 mb-8 text-lg">
+              Clique em &quot;Assinar Agora&quot; e comece a gerar seus próprios leads com o Herbalead.
+            </p>
+            <button 
+              onClick={() => window.location.href = '/payment'}
+              className="px-12 py-6 bg-emerald-600 text-white rounded-xl font-bold text-xl hover:bg-emerald-700 transition-all duration-300 shadow-2xl transform hover:scale-110 hover:shadow-3xl"
             >
-              Começar Gratuitamente
-            </Link>
-            <Link
-              href="/"
-              className="px-8 py-3 border border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-600 transition-colors"
-            >
-              Ver Outras Ferramentas
-            </Link>
+              Clique abaixo e começa a gerar seus leads agora
+            </button>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mt-8 bg-yellow-50 rounded-lg p-6">
+          <div className="flex items-start">
+            <AlertTriangle className="w-6 h-6 text-yellow-600 mr-3 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-yellow-800 mb-2">Importante</h4>
+              <p className="text-yellow-700 text-sm">
+                Esta calculadora é uma ferramenta de orientação baseada no método da Marinha dos EUA. 
+                Não substitui uma avaliação médica completa. Consulte sempre um especialista.
+              </p>
+            </div>
           </div>
         </div>
       </main>

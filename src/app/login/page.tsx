@@ -3,36 +3,24 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Lock, User, Phone, Building, GraduationCap } from 'lucide-react'
-import { signUp, signIn, signOut } from '@/lib/auth'
+import { ArrowLeft, Mail, Lock, User, CreditCard, Eye, EyeOff } from 'lucide-react'
+import { signIn } from '@/lib/supabase'
 
-interface FormData {
+interface LoginFormData {
   email: string
   password: string
-  confirmPassword: string
-  name: string
-  phone: string
-  countryCode: string
-  specialty: string
-  company: string
 }
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [projectDomain, setProjectDomain] = useState('')
   const router = useRouter()
 
-  const [formData, setFormData] = useState<FormData>({
+  const [showPassword, setShowPassword] = useState(false)
+  const [formData, setFormData] = useState<LoginFormData>({
     email: '',
-    password: '',
-    confirmPassword: '',
-    name: '',
-    phone: '',
-    countryCode: '55',
-    specialty: '',
-    company: ''
+    password: ''
   })
 
   useEffect(() => {
@@ -46,7 +34,7 @@ export default function LoginPage() {
         setProjectDomain(subdomain)
       } else {
         // Fallback para desenvolvimento ou domínio principal
-        setProjectDomain('fitlead')
+        setProjectDomain('herbalead')
       }
     }
   }, [])
@@ -57,35 +45,12 @@ export default function LoginPage() {
     setError('')
 
     try {
-      if (isLogin) {
-        await signIn(formData.email, formData.password)
-        router.push('/user')
-      } else {
-        // IMPORTANTE: Fazer logout antes de novo cadastro para evitar conflitos
-        try {
-          await signOut()
-          console.log('✅ Logout realizado antes do cadastro')
-        } catch {
-          console.log('⚠️ Logout não necessário (usuário não estava logado)')
-        }
-        if (formData.password !== formData.confirmPassword) {
-          throw new Error('Senhas não coincidem')
-        }
-
-        const profileData = {
-          name: formData.name,
-          phone: `${formData.countryCode}${formData.phone}`,
-          specialty: formData.specialty,
-          company: formData.company,
-          project_id: projectDomain // Associar ao projeto detectado
-        }
-
-        await signUp(formData.email, formData.password, 'professional', profileData)
-        router.push('/user')
-      }
+      await signIn(formData.email, formData.password)
+      router.push('/user')
     } catch (err: unknown) {
       const error = err as Error
-      setError(error.message || 'Erro ao fazer login/registro')
+      console.error('❌ Erro no login:', error)
+      setError(error.message || 'Erro ao fazer login')
     } finally {
       setLoading(false)
     }
@@ -93,10 +58,10 @@ export default function LoginPage() {
 
   const getProjectName = () => {
     switch (projectDomain) {
-      case 'fitlead': return 'FitLead'
+      case 'herbalead': return 'Herbalead'
       case 'nutri': return 'Nutri'
       case 'beauty': return 'Beauty'
-      default: return 'FitLead'
+      default: return 'Herbalead'
     }
   }
 
@@ -115,10 +80,10 @@ export default function LoginPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {isLogin ? 'Acessar Dashboard' : 'Começar Agora'}
+                  Acessar Dashboard
                 </h1>
                 <p className="text-sm text-gray-600">
-                  {isLogin ? `Entre na sua área profissional - ${getProjectName()}` : `Crie sua conta e comece a gerar leads - ${getProjectName()}`}
+                  Entre na sua área profissional - {getProjectName()}
                 </p>
               </div>
             </div>
@@ -137,28 +102,11 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Toggle Login/Register */}
-          <div className="flex mb-8">
-            <button
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-                isLogin
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Acessar
-            </button>
-            <button
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-                !isLogin
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Cadastrar
-            </button>
+          {/* Login Only */}
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-800 rounded-lg text-sm font-medium">
+              🔐 Acesso ao Dashboard
+            </div>
           </div>
 
           {/* Error Message */}
@@ -170,26 +118,6 @@ export default function LoginPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name (register only) */}
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome Completo *
-                </label>
-                <div className="relative">
-                  <User className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="Seu nome completo"
-                  />
-                </div>
-              </div>
-            )}
-
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -216,113 +144,22 @@ export default function LoginPage() {
               <div className="relative">
                 <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   placeholder="Sua senha"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
-
-            {/* Confirm Password (register only) */}
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirmar Senha *
-                </label>
-                <div className="relative">
-                  <Lock className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="Confirme sua senha"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Professional fields */}
-            {!isLogin && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Telefone/WhatsApp
-                  </label>
-                  <div className="flex space-x-2">
-                    <div className="w-24">
-                      <select
-                        value={formData.countryCode || '55'}
-                        onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
-                        className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-                      >
-                        <option value="55">🇧🇷 +55</option>
-                        <option value="1">🇺🇸 +1</option>
-                        <option value="44">🇬🇧 +44</option>
-                        <option value="33">🇫🇷 +33</option>
-                        <option value="49">🇩🇪 +49</option>
-                        <option value="34">🇪🇸 +34</option>
-                        <option value="39">🇮🇹 +39</option>
-                        <option value="52">🇲🇽 +52</option>
-                        <option value="54">🇦🇷 +54</option>
-                        <option value="56">🇨🇱 +56</option>
-                        <option value="57">🇨🇴 +57</option>
-                        <option value="51">🇵🇪 +51</option>
-                      </select>
-                    </div>
-                    <div className="flex-1 relative">
-                      <Phone className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                        placeholder="11999999999"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Digite apenas números (ex: 11999999999)
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Especialidade
-                  </label>
-                  <div className="relative">
-                    <GraduationCap className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={formData.specialty}
-                      onChange={(e) => setFormData({...formData, specialty: e.target.value})}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Ex: Nutricionista, Personal Trainer"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Empresa/Clínica
-                  </label>
-                  <div className="relative">
-                    <Building className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={formData.company}
-                      onChange={(e) => setFormData({...formData, company: e.target.value})}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Nome da sua empresa"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
 
             {/* Submit Button */}
             <button
@@ -330,20 +167,28 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Carregando...' : (isLogin ? 'Acessar Dashboard' : 'Criar Conta')}
+              {loading ? 'Carregando...' : 'Acessar Dashboard'}
             </button>
           </form>
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
-              <button
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-emerald-600 hover:text-emerald-700 font-medium"
-              >
-                {isLogin ? 'Cadastrar agora' : 'Acessar dashboard'}
-              </button>
+            <p className="text-sm text-gray-600 mb-4">
+              Não tem uma conta?
+            </p>
+            
+            <Link 
+              href="/payment"
+              className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              <CreditCard className="w-5 h-5 mr-2" />
+              Criar Conta - Escolher Plano
+            </Link>
+            
+            <p className="text-xs text-gray-500 mt-3">
+              ✓ 7 dias de garantia total<br />
+              ✓ Cancele quando quiser<br />
+              ✓ Sem taxa de setup
             </p>
           </div>
         </div>

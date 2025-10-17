@@ -203,7 +203,7 @@ export default function ProjectsAdmin() {
                     type="text"
                     value={newProject.name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="Ex: FitLead, Nutri, Beauty"
+                    placeholder="Ex: Herbalead, Nutri, Beauty"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
@@ -217,7 +217,7 @@ export default function ProjectsAdmin() {
                       type="text"
                       value={newProject.domain}
                       onChange={(e) => setNewProject({...newProject, domain: e.target.value})}
-                      placeholder="fitlead"
+                      placeholder="herbalead"
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                     <span className="text-gray-500">.ylada.com</span>
