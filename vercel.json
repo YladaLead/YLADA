@@ -2,11 +2,5 @@
   "version": 2,
   "env": {
     "NEXT_PUBLIC_BASE_DOMAIN": "ylada.com"
-  },
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    }
   }
 }
-
