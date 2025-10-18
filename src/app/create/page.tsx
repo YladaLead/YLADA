@@ -10,7 +10,7 @@ const PROFESSIONS = [
   // Prioridade 1: Saúde & Bem-estar
   { id: 'nutricionista', name: 'Nutricionista', category: 'saude-bemestar', icon: '🥗' },
   { id: 'coach-saude', name: 'Coach de Saúde', category: 'saude-bemestar', icon: '💪' },
-  { id: 'distribuidor-herbalife', name: 'Distribuidor Herbalife', category: 'saude-bemestar', icon: '🌿' },
+  { id: 'distribuidor-suplementos', name: 'Distribuidor de Suplementos', category: 'saude-bemestar', icon: '🌿' },
   { id: 'personal-trainer', name: 'Personal Trainer', category: 'saude-bemestar', icon: '🏋️' },
   { id: 'fisioterapeuta', name: 'Fisioterapeuta', category: 'saude-bemestar', icon: '🩺' },
   
@@ -68,7 +68,7 @@ const OBJECTIVES = {
 const TOOL_SUGGESTIONS = {
   'nutricionista': { type: 'quiz', suggestion: 'Quiz de Avaliação Nutricional' },
   'coach-saude': { type: 'quiz', suggestion: 'Quiz de Bem-estar' },
-  'distribuidor-herbalife': { type: 'quiz', suggestion: 'Quiz de Produtos Herbalife' },
+  'distribuidor-suplementos': { type: 'quiz', suggestion: 'Quiz de Suplementos e Nutracêuticos' },
   'personal-trainer': { type: 'quiz', suggestion: 'Quiz de Condicionamento Físico' },
   'fisioterapeuta': { type: 'quiz', suggestion: 'Quiz de Avaliação Postural' },
   'esteticista': { type: 'quiz', suggestion: 'Quiz de Cuidados com a Pele' },

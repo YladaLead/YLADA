@@ -81,8 +81,8 @@ export default function HomePage() {
               </div>
               <div className="bg-white rounded-lg p-6 shadow-lg text-center">
                 <div className="text-4xl mb-4">🌿</div>
-                <h3 className="text-lg font-semibold mb-2">Distribuidores Herbalife</h3>
-                <p className="text-gray-600 text-sm">Quiz de produtos e bem-estar</p>
+                <h3 className="text-lg font-semibold mb-2">Distribuidores de Suplementos</h3>
+                <p className="text-gray-600 text-sm">Quiz de produtos e nutracêuticos</p>
               </div>
               <div className="bg-white rounded-lg p-6 shadow-lg text-center">
                 <div className="text-4xl mb-4">✨</div>

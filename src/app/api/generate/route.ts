@@ -52,7 +52,8 @@ Retorne apenas JSON válido com estrutura:
   ]
 }
 
-Foque em perguntas relevantes para ${profession} e que ajudem a ${objective}.`
+Foque em perguntas relevantes para ${profession} e que ajudem a ${objective}. 
+Se for sobre suplementos, use termos como "nutracêuticos", "suplementação" e "bem-estar".`
 
         await openai.beta.threads.messages.create(thread.id, {
           role: 'user',
