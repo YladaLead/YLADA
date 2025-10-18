@@ -5,87 +5,79 @@ import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 
-// Novas categorias organizadas por prioridade
+// Templates pré-definidos por segmento
+const TEMPLATES = {
+  'nutricionista': [
+    { id: 'quiz-avaliacao-nutricional', name: 'Quiz de Avaliação Nutricional', type: 'quiz', description: 'Avalie hábitos alimentares e necessidades nutricionais' },
+    { id: 'calculadora-imc', name: 'Calculadora de IMC', type: 'calculator', description: 'Calcule índice de massa corporal e classificação' },
+    { id: 'plano-alimentar', name: 'Plano Alimentar Personalizado', type: 'form', description: 'Crie plano alimentar baseado em objetivos' },
+    { id: 'diario-alimentar', name: 'Diário Alimentar', type: 'tracker', description: 'Registre refeições e acompanhe progresso' }
+  ],
+  'fisioterapeuta': [
+    { id: 'quiz-avaliacao-postural', name: 'Quiz de Avaliação Postural', type: 'quiz', description: 'Identifique problemas posturais e dores' },
+    { id: 'teste-flexibilidade', name: 'Teste de Flexibilidade', type: 'quiz', description: 'Avalie amplitude de movimento articular' },
+    { id: 'avaliacao-dor', name: 'Avaliação de Dor Muscular', type: 'quiz', description: 'Identifique origem e intensidade da dor' },
+    { id: 'plano-exercicios', name: 'Plano de Exercícios', type: 'form', description: 'Crie rotina de exercícios terapêuticos' }
+  ],
+  'personal-trainer': [
+    { id: 'quiz-condicionamento', name: 'Quiz de Condicionamento Físico', type: 'quiz', description: 'Avalie nível de condicionamento atual' },
+    { id: 'teste-forca', name: 'Teste de Força', type: 'quiz', description: 'Meça força muscular e resistência' },
+    { id: 'objetivos-fitness', name: 'Definir Objetivos Fitness', type: 'form', description: 'Estabeleça metas de treinamento' },
+    { id: 'plano-treino', name: 'Plano de Treino', type: 'form', description: 'Crie programa de exercícios personalizado' }
+  ],
+  'distribuidor-suplementos': [
+    { id: 'quiz-necessidades-nutricionais', name: 'Quiz de Necessidades Nutricionais', type: 'quiz', description: 'Identifique necessidades de suplementação' },
+    { id: 'avaliacao-produtos', name: 'Avaliação de Produtos', type: 'quiz', description: 'Recomende produtos baseado no perfil' },
+    { id: 'calculadora-dosagem', name: 'Calculadora de Dosagem', type: 'calculator', description: 'Calcule dosagem ideal de suplementos' },
+    { id: 'plano-suplementacao', name: 'Plano de Suplementação', type: 'form', description: 'Crie cronograma de suplementação' }
+  ],
+  'esteticista': [
+    { id: 'quiz-tipo-pele', name: 'Quiz de Tipo de Pele', type: 'quiz', description: 'Identifique tipo e necessidades da pele' },
+    { id: 'avaliacao-facial', name: 'Avaliação Facial', type: 'quiz', description: 'Avalie condições da pele facial' },
+    { id: 'rotina-skincare', name: 'Rotina de Skincare', type: 'form', description: 'Crie rotina personalizada de cuidados' },
+    { id: 'agendamento-tratamento', name: 'Agendamento de Tratamento', type: 'form', description: 'Agende consulta e tratamento' }
+  ],
+  'consultor-beleza': [
+    { id: 'quiz-estilo', name: 'Quiz de Estilo Pessoal', type: 'quiz', description: 'Descubra estilo e preferências de beleza' },
+    { id: 'avaliacao-maquiagem', name: 'Avaliação de Maquiagem', type: 'quiz', description: 'Identifique tons e produtos ideais' },
+    { id: 'tutorial-produtos', name: 'Tutorial de Produtos', type: 'form', description: 'Demonstre uso de produtos cosméticos' },
+    { id: 'consultoria-beleza', name: 'Consultoria de Beleza', type: 'form', description: 'Agende consultoria personalizada' }
+  ],
+  'distribuidor-cosmeticos': [
+    { id: 'quiz-necessidades-beleza', name: 'Quiz de Necessidades de Beleza', type: 'quiz', description: 'Identifique necessidades cosméticas' },
+    { id: 'avaliacao-produtos-cosmeticos', name: 'Avaliação de Produtos Cosméticos', type: 'quiz', description: 'Recomende produtos baseado no perfil' },
+    { id: 'demonstracao-produtos', name: 'Demonstração de Produtos', type: 'form', description: 'Demonstre benefícios dos produtos' },
+    { id: 'plano-beleza', name: 'Plano de Beleza', type: 'form', description: 'Crie rotina completa de beleza' }
+  ],
+  'dermatologista': [
+    { id: 'quiz-avaliacao-dermatologica', name: 'Quiz de Avaliação Dermatológica', type: 'quiz', description: 'Avalie condições da pele e cabelo' },
+    { id: 'teste-sensibilidade', name: 'Teste de Sensibilidade', type: 'quiz', description: 'Identifique sensibilidades cutâneas' },
+    { id: 'agendamento-consulta', name: 'Agendamento de Consulta', type: 'form', description: 'Agende consulta dermatológica' },
+    { id: 'prescricao-tratamento', name: 'Prescrição de Tratamento', type: 'form', description: 'Prescreva tratamento personalizado' }
+  ]
+}
+
+// Profissões organizadas por prioridade
 const PROFESSIONS = [
   // Prioridade 1: Saúde & Bem-estar
   { id: 'nutricionista', name: 'Nutricionista', category: 'saude-bemestar', icon: '🥗' },
-  { id: 'coach-saude', name: 'Coach de Saúde', category: 'saude-bemestar', icon: '💪' },
-  { id: 'distribuidor-suplementos', name: 'Distribuidor de Suplementos', category: 'saude-bemestar', icon: '🌿' },
-  { id: 'personal-trainer', name: 'Personal Trainer', category: 'saude-bemestar', icon: '🏋️' },
   { id: 'fisioterapeuta', name: 'Fisioterapeuta', category: 'saude-bemestar', icon: '🩺' },
+  { id: 'personal-trainer', name: 'Personal Trainer', category: 'saude-bemestar', icon: '🏋️' },
+  { id: 'distribuidor-suplementos', name: 'Distribuidor de Suplementos', category: 'saude-bemestar', icon: '🌿' },
   
   // Prioridade 2: Beleza & Cosméticos
   { id: 'esteticista', name: 'Esteticista', category: 'beleza-cosmeticos', icon: '✨' },
   { id: 'consultor-beleza', name: 'Consultor de Beleza', category: 'beleza-cosmeticos', icon: '💄' },
   { id: 'distribuidor-cosmeticos', name: 'Distribuidor de Cosméticos', category: 'beleza-cosmeticos', icon: '🧴' },
-  
-  // Outras áreas
-  { id: 'coach-executivo', name: 'Coach Executivo', category: 'negocios', icon: '💼' },
-  { id: 'vendedor', name: 'Vendedor/Vendas', category: 'negocios', icon: '📈' },
-  { id: 'educador', name: 'Educador/Professor', category: 'educacao', icon: '🎓' },
-  { id: 'consultor', name: 'Consultor', category: 'servicos', icon: '💡' },
-  { id: 'empreendedor', name: 'Empreendedor', category: 'negocios', icon: '🚀' },
+  { id: 'dermatologista', name: 'Dermatologista', category: 'beleza-cosmeticos', icon: '🩺' }
 ]
 
-const OBJECTIVES = {
-  'saude-bemestar': [
-    'Gerar leads para consultas',
-    'Educar sobre nutrição',
-    'Vender produtos de saúde',
-    'Agendar avaliações',
-    'Criar comunidade de bem-estar'
-  ],
-  'beleza-cosmeticos': [
-    'Demonstrar produtos',
-    'Agendar consultas de beleza',
-    'Educar sobre skincare',
-    'Vender cosméticos',
-    'Criar tutorial de maquiagem'
-  ],
-  'negocios': [
-    'Gerar leads B2B',
-    'Agendar reuniões',
-    'Demonstrar produtos',
-    'Educar clientes',
-    'Fechar vendas'
-  ],
-  'educacao': [
-    'Capturar interessados em cursos',
-    'Educar sobre temas',
-    'Agendar aulas',
-    'Vender cursos online',
-    'Criar comunidade de aprendizado'
-  ],
-  'servicos': [
-    'Agendar consultorias',
-    'Demonstrar serviços',
-    'Educar clientes',
-    'Gerar leads qualificados',
-    'Fechar contratos'
-  ]
-}
-
-const TOOL_SUGGESTIONS = {
-  'nutricionista': { type: 'quiz', suggestion: 'Quiz de Avaliação Nutricional' },
-  'coach-saude': { type: 'quiz', suggestion: 'Quiz de Bem-estar' },
-  'distribuidor-suplementos': { type: 'quiz', suggestion: 'Quiz de Suplementos e Nutracêuticos' },
-  'personal-trainer': { type: 'quiz', suggestion: 'Quiz de Condicionamento Físico' },
-  'fisioterapeuta': { type: 'quiz', suggestion: 'Quiz de Avaliação Postural' },
-  'esteticista': { type: 'quiz', suggestion: 'Quiz de Cuidados com a Pele' },
-  'consultor-beleza': { type: 'quiz', suggestion: 'Quiz de Tipo de Pele' },
-  'distribuidor-cosmeticos': { type: 'quiz', suggestion: 'Quiz de Produtos Cosméticos' },
-  'coach-executivo': { type: 'quiz', suggestion: 'Quiz de Desenvolvimento Profissional' },
-  'vendedor': { type: 'quiz', suggestion: 'Quiz de Necessidades do Cliente' },
-  'educador': { type: 'quiz', suggestion: 'Quiz Educacional' },
-  'consultor': { type: 'quiz', suggestion: 'Quiz de Avaliação de Necessidades' },
-  'empreendedor': { type: 'quiz', suggestion: 'Quiz de Perfil Empreendedor' }
-}
 
 export default function CreatePage() {
   const [step, setStep] = useState(1)
   const [selectedProfession, setSelectedProfession] = useState('')
-  const [selectedObjective, setSelectedObjective] = useState('')
-  const [prompt, setPrompt] = useState('')
+  const [selectedTemplate, setSelectedTemplate] = useState('')
+  const [customPrompt, setCustomPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedLink, setGeneratedLink] = useState('')
 
@@ -94,19 +86,21 @@ export default function CreatePage() {
     setStep(2)
   }
 
-  const handleObjectiveSelect = (objective: string) => {
-    setSelectedObjective(objective)
-    setStep(3)
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId)
   }
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return
-
     setIsGenerating(true)
 
     try {
       const profession = PROFESSIONS.find(p => p.id === selectedProfession)
-      const toolSuggestion = TOOL_SUGGESTIONS[selectedProfession as keyof typeof TOOL_SUGGESTIONS]
+      const template = TEMPLATES[selectedProfession as keyof typeof TEMPLATES]?.find(t => t.id === selectedTemplate)
+      
+      // Se não selecionou template, usar prompt personalizado
+      const finalPrompt = selectedTemplate 
+        ? `${template?.name}: ${template?.description}` 
+        : customPrompt
 
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -114,11 +108,11 @@ export default function CreatePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt,
+          prompt: finalPrompt,
           profession: profession?.name,
           category: profession?.category,
-          type: toolSuggestion?.type || 'quiz',
-          objective: selectedObjective
+          type: template?.type || 'quiz',
+          templateId: selectedTemplate
         }),
       })
 
@@ -126,7 +120,7 @@ export default function CreatePage() {
 
       if (data.success) {
         setGeneratedLink(data.data.url)
-        setStep(4)
+        setStep(3)
       } else {
         throw new Error(data.error || 'Erro ao gerar link')
       }
@@ -141,8 +135,8 @@ export default function CreatePage() {
   const resetForm = () => {
     setStep(1)
     setSelectedProfession('')
-    setSelectedObjective('')
-    setPrompt('')
+    setSelectedTemplate('')
+    setCustomPrompt('')
     setGeneratedLink('')
   }
 
@@ -173,7 +167,7 @@ export default function CreatePage() {
           {/* Progress Steps */}
           <div className="flex justify-center mb-8">
             <div className="flex items-center space-x-4">
-              {[1, 2, 3, 4].map((stepNumber) => (
+              {[1, 2, 3].map((stepNumber) => (
                 <div key={stepNumber} className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                     step >= stepNumber 
@@ -182,7 +176,7 @@ export default function CreatePage() {
                   }`}>
                     {stepNumber}
                   </div>
-                  {stepNumber < 4 && (
+                  {stepNumber < 3 && (
                     <div className={`w-8 h-0.5 ${
                       step > stepNumber ? 'bg-blue-600' : 'bg-gray-200'
                     }`} />
@@ -213,54 +207,60 @@ export default function CreatePage() {
             </div>
           )}
 
-          {/* Step 2: Objetivo */}
+          {/* Step 2: Templates */}
           {step === 2 && (
             <div className="bg-white rounded-lg shadow-lg p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                Qual seu objetivo?
+                Escolha um template ou crie personalizado
               </h2>
-              <div className="space-y-3">
-                {OBJECTIVES[PROFESSIONS.find(p => p.id === selectedProfession)?.category as keyof typeof OBJECTIVES]?.map((objective) => (
-                  <button
-                    key={objective}
-                    onClick={() => handleObjectiveSelect(objective)}
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
-                  >
-                    <div className="font-semibold text-gray-900">{objective}</div>
-                  </button>
-                ))}
+              
+              {/* Templates Pré-definidos */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Templates Recomendados:</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {TEMPLATES[selectedProfession as keyof typeof TEMPLATES]?.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleTemplateSelect(template.id)}
+                      className={`p-4 border-2 rounded-lg text-left transition-all ${
+                        selectedTemplate === template.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="text-2xl">
+                          {template.type === 'quiz' ? '❓' : 
+                           template.type === 'calculator' ? '🧮' : 
+                           template.type === 'form' ? '📝' : 
+                           template.type === 'tracker' ? '📊' : '📋'}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 mb-1">{template.name}</h4>
+                          <p className="text-sm text-gray-600">{template.description}</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <button
-                onClick={() => setStep(1)}
-                className="mt-6 text-blue-600 hover:text-blue-800"
-              >
-                ← Voltar
-              </button>
-            </div>
-          )}
 
-          {/* Step 3: Prompt */}
-          {step === 3 && (
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                Descreva o que você precisa
-              </h2>
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <strong>Sugestão:</strong> {TOOL_SUGGESTIONS[selectedProfession as keyof typeof TOOL_SUGGESTIONS]?.suggestion}
-                </p>
+              {/* Opção Personalizada */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Ou crie algo personalizado:</h3>
+                <textarea
+                  className="w-full p-4 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500"
+                  rows={4}
+                  placeholder="Descreva exatamente o que você precisa..."
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  disabled={isGenerating}
+                />
               </div>
-              <textarea
-                className="w-full p-4 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500"
-                rows={5}
-                placeholder={`Ex: Quero um quiz de avaliação nutricional para capturar leads interessados em emagrecimento saudável.`}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                disabled={isGenerating}
-              />
-              <div className="flex space-x-4">
+
+              <div className="flex space-x-4 mt-6">
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(1)}
                   className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   ← Voltar
@@ -270,7 +270,7 @@ export default function CreatePage() {
                   className={`flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors ${
                     isGenerating ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  disabled={isGenerating}
+                  disabled={isGenerating || (!selectedTemplate && !customPrompt.trim())}
                 >
                   {isGenerating ? 'Gerando...' : 'Gerar Link em 60 Segundos'}
                 </button>
@@ -278,8 +278,8 @@ export default function CreatePage() {
             </div>
           )}
 
-          {/* Step 4: Resultado */}
-          {step === 4 && generatedLink && (
+          {/* Step 3: Resultado */}
+          {step === 3 && generatedLink && (
             <div className="bg-white rounded-lg shadow-lg p-8">
               <div className="text-center">
                 <div className="text-6xl mb-4">🎉</div>
