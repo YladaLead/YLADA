@@ -33,7 +33,7 @@ export default function YLADALogo({
 
   // Logo paths - usando os logos YLADA existentes
   const logoPaths = {
-    horizontal: '/logos/ylada-logo-horizontal.png',
+    horizontal: '/logos/ylada-logo-horizontal-vazado.png',
     vertical: '/logos/ylada-logo-main.png',
     iconOnly: '/logos/ylada-icon.png',
     minimal: '/logos/ylada-logo-text-only.png',
