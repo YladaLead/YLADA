@@ -76,14 +76,28 @@ const PROFESSIONS = [
   { id: 'outro', name: 'Outro', category: 'outros', icon: '✏️', status: 'custom' }
 ]
 
-// Propósitos por profissão - PARA PERSONALIZAÇÃO
+// Propósitos por profissão - EXPANDIDO PARA NUTRICIONISTAS
 const PURPOSES = {
   'nutricionista': [
-    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em consultoria nutricional', icon: '🎯' },
-    { id: 'avaliacao-nutricional', name: 'Avaliação Nutricional', description: 'Avaliar hábitos alimentares e necessidades nutricionais', icon: '📊' },
-    { id: 'educacao-alimentar', name: 'Educação Alimentar', description: 'Ensinar sobre alimentação saudável e nutrição', icon: '📚' },
-    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Monitorar progresso e resultados dos clientes', icon: '📈' },
-    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Promover consultorias e planos alimentares', icon: '💰' }
+    // 🔹 Geração e Engajamento
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em consultoria nutricional', icon: '🎯', category: 'geracao' },
+    { id: 'engajamento-redes', name: 'Engajamento nas Redes', description: 'Criar quizzes e testes para atrair seguidores e gerar conversas', icon: '📣', category: 'geracao' },
+    { id: 'feedback-clientes', name: 'Feedback de Clientes', description: 'Coletar opiniões e resultados de programas de nutrição', icon: '💬', category: 'geracao' },
+    
+    // 🔹 Avaliação e Diagnóstico
+    { id: 'avaliacao-nutricional', name: 'Avaliação Nutricional', description: 'Diagnóstico e personalização de hábitos alimentares', icon: '📊', category: 'avaliacao' },
+    { id: 'analise-habitos', name: 'Análise de Hábitos e Estilo de Vida', description: 'Avaliar sono, estresse e rotina para entender impacto na alimentação', icon: '🧬', category: 'avaliacao' },
+    { id: 'performance-energia', name: 'Performance & Energia', description: 'Otimizar foco, disposição e resultados físicos', icon: '⚡', category: 'avaliacao' },
+    
+    // 🔹 Acompanhamento e Retenção
+    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Retenção e fidelização de clientes', icon: '📈', category: 'acompanhamento' },
+    { id: 'monitoramento-ia', name: 'Monitoramento Inteligente (IA)', description: 'Automatizar reavaliações, progressos e check-ins com IA', icon: '🤖', category: 'acompanhamento' },
+    { id: 'mindset-nutricional', name: 'Mindset Nutricional', description: 'Trabalhar mentalidade e comportamento alimentar', icon: '🧠', category: 'acompanhamento' },
+    
+    // 🔹 Educação e Monetização
+    { id: 'educacao-alimentar', name: 'Educação Alimentar', description: 'Conteúdo de valor e autoridade na área', icon: '📚', category: 'educacao' },
+    { id: 'bemestar-emagrecimento', name: 'Bem-Estar & Emagrecimento Saudável', description: 'Ajudar cliente a melhorar corpo e mente com hábitos equilibrados', icon: '🌿', category: 'educacao' },
+    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Conversão direta e monetização de consultorias', icon: '💰', category: 'educacao' }
   ],
   'personal-trainer': [
     { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em treinamento', icon: '🎯' },
@@ -299,28 +313,156 @@ export default function CreatePage() {
                 Escolha o objetivo principal da sua ferramenta
               </p>
               
-              {/* Lista de Propósitos */}
-              <div className="space-y-3">
-                {PURPOSES[selectedProfession as keyof typeof PURPOSES]?.map((purpose) => (
-                  <button
-                    key={purpose.id}
-                    onClick={() => handlePurposeSelect(purpose.id)}
-                    className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="text-3xl">{purpose.icon}</div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900 text-lg">{purpose.name}</div>
-                        <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
-                      </div>
-                      <div className="text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+              {/* Lista de Propósitos Agrupados */}
+              <div className="space-y-6">
+                {selectedProfession === 'nutricionista' ? (
+                  // Interface especial para nutricionistas com categorias
+                  <>
+                    {/* 🔹 Geração e Engajamento */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <span className="text-blue-600 mr-2">🔹</span>
+                        Geração e Engajamento
+                      </h3>
+                      <div className="space-y-2">
+                        {PURPOSES.nutricionista.filter(p => p.category === 'geracao').map((purpose) => (
+                          <button
+                            key={purpose.id}
+                            onClick={() => handlePurposeSelect(purpose.id)}
+                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="text-2xl">{purpose.icon}</div>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
+                                <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                              </div>
+                              <div className="text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  </button>
-                ))}
+
+                    {/* 🔹 Avaliação e Diagnóstico */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <span className="text-green-600 mr-2">🔹</span>
+                        Avaliação e Diagnóstico
+                      </h3>
+                      <div className="space-y-2">
+                        {PURPOSES.nutricionista.filter(p => p.category === 'avaliacao').map((purpose) => (
+                          <button
+                            key={purpose.id}
+                            onClick={() => handlePurposeSelect(purpose.id)}
+                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="text-2xl">{purpose.icon}</div>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
+                                <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                              </div>
+                              <div className="text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 🔹 Acompanhamento e Retenção */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <span className="text-purple-600 mr-2">🔹</span>
+                        Acompanhamento e Retenção
+                      </h3>
+                      <div className="space-y-2">
+                        {PURPOSES.nutricionista.filter(p => p.category === 'acompanhamento').map((purpose) => (
+                          <button
+                            key={purpose.id}
+                            onClick={() => handlePurposeSelect(purpose.id)}
+                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="text-2xl">{purpose.icon}</div>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
+                                <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                              </div>
+                              <div className="text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 🔹 Educação e Monetização */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <span className="text-orange-600 mr-2">🔹</span>
+                        Educação e Monetização
+                      </h3>
+                      <div className="space-y-2">
+                        {PURPOSES.nutricionista.filter(p => p.category === 'educacao').map((purpose) => (
+                          <button
+                            key={purpose.id}
+                            onClick={() => handlePurposeSelect(purpose.id)}
+                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="text-2xl">{purpose.icon}</div>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
+                                <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                              </div>
+                              <div className="text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // Interface padrão para outras profissões
+                  <div className="space-y-3">
+                    {PURPOSES[selectedProfession as keyof typeof PURPOSES]?.map((purpose) => (
+                      <button
+                        key={purpose.id}
+                        onClick={() => handlePurposeSelect(purpose.id)}
+                        className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="text-3xl">{purpose.icon}</div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-900 text-lg">{purpose.name}</div>
+                            <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                          </div>
+                          <div className="text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-center mt-6">
