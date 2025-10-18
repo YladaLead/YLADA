@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import OpenAI from 'openai'
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,16 +26,79 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Usar template encontrado ou padrão
-    let template = templates?.[0]?.content || {
-      title: 'Quiz Personalizado',
-      description: 'Quiz criado especialmente para você',
-      questions: [
-        {
-          question: 'Como você se sente hoje?',
-          options: ['Ótimo', 'Bom', 'Regular', 'Ruim']
+    // Usar Assistant ID para gerar conteúdo personalizado
+    let template
+    try {
+      const assistantId = process.env.OPENAI_ASSISTANT_ID
+      
+      if (assistantId && prompt) {
+        // Criar thread e usar assistant
+        const thread = await openai.beta.threads.create()
+        
+        await openai.beta.threads.messages.create(thread.id, {
+          role: 'user',
+          content: `Crie um ${type || 'quiz'} sobre ${category || 'energia'} baseado neste prompt: "${prompt}". Retorne apenas JSON válido com estrutura: {"title": "Título", "description": "Descrição", "questions": [{"question": "Pergunta", "options": ["Opção1", "Opção2", "Opção3", "Opção4"]}]}`
+        })
+
+        const run = await openai.beta.threads.runs.create(thread.id, {
+          assistant_id: assistantId,
+        })
+
+        // Aguardar conclusão
+        let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
+        while (runStatus.status !== 'completed') {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
         }
-      ]
+
+        // Obter resposta
+        const messages = await openai.beta.threads.messages.list(thread.id)
+        const lastMessage = messages.data[0]
+        
+        if (lastMessage?.content[0]?.type === 'text') {
+          const responseText = lastMessage.content[0].text.value
+          try {
+            template = JSON.parse(responseText)
+          } catch {
+            // Se não conseguir fazer parse, usar template padrão
+            template = templates?.[0]?.content || {
+              title: 'Quiz Personalizado',
+              description: 'Quiz criado especialmente para você',
+              questions: [
+                {
+                  question: 'Como você se sente hoje?',
+                  options: ['Ótimo', 'Bom', 'Regular', 'Ruim']
+                }
+              ]
+            }
+          }
+        }
+      } else {
+        // Usar template encontrado ou padrão
+        template = templates?.[0]?.content || {
+          title: 'Quiz Personalizado',
+          description: 'Quiz criado especialmente para você',
+          questions: [
+            {
+              question: 'Como você se sente hoje?',
+              options: ['Ótimo', 'Bom', 'Regular', 'Ruim']
+            }
+          ]
+        }
+      }
+    } catch (aiError) {
+      console.error('Erro ao usar Assistant:', aiError)
+      // Fallback para template padrão
+      template = templates?.[0]?.content || {
+        title: 'Quiz Personalizado',
+        description: 'Quiz criado especialmente para você',
+        questions: [
+          {
+            question: 'Como você se sente hoje?',
+            options: ['Ótimo', 'Bom', 'Regular', 'Ruim']
+          }
+        ]
+      }
     }
 
     // Gerar slug único
