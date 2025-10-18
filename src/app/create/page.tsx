@@ -25,12 +25,18 @@ const TEMPLATES = {
     { id: 'objetivos-fitness', name: 'Definir Objetivos Fitness', type: 'form', description: 'Estabeleça metas de treinamento' },
     { id: 'plano-treino', name: 'Plano de Treino', type: 'form', description: 'Crie programa de exercícios personalizado' }
   ],
-  'distribuidor-suplementos': [
-    { id: 'quiz-necessidades-nutricionais', name: 'Quiz de Necessidades Nutricionais', type: 'quiz', description: 'Identifique necessidades de suplementação' },
-    { id: 'avaliacao-produtos', name: 'Avaliação de Produtos', type: 'quiz', description: 'Recomende produtos baseado no perfil' },
-    { id: 'calculadora-dosagem', name: 'Calculadora de Dosagem', type: 'calculator', description: 'Calcule dosagem ideal de suplementos' },
-    { id: 'plano-suplementacao', name: 'Plano de Suplementação', type: 'form', description: 'Crie cronograma de suplementação' }
-  ],
+      'coach-bemestar': [
+        { id: 'quiz-bemestar', name: 'Quiz de Bem-estar', type: 'quiz', description: 'Avalie nível de bem-estar e qualidade de vida' },
+        { id: 'avaliacao-estresse', name: 'Avaliação de Estresse', type: 'quiz', description: 'Identifique níveis de estresse e ansiedade' },
+        { id: 'plano-mindfulness', name: 'Plano de Mindfulness', type: 'form', description: 'Crie rotina de meditação e relaxamento' },
+        { id: 'consultoria-vida', name: 'Consultoria de Vida', type: 'form', description: 'Agende sessão de coaching pessoal' }
+      ],
+      'vendedor-saude': [
+        { id: 'quiz-necessidades-saude', name: 'Quiz de Necessidades de Saúde', type: 'quiz', description: 'Identifique necessidades de produtos de saúde' },
+        { id: 'avaliacao-produtos-saude', name: 'Avaliação de Produtos de Saúde', type: 'quiz', description: 'Recomende produtos baseado no perfil' },
+        { id: 'calculadora-suplementos', name: 'Calculadora de Suplementos', type: 'calculator', description: 'Calcule dosagem ideal de produtos' },
+        { id: 'plano-saude', name: 'Plano de Saúde', type: 'form', description: 'Crie cronograma de produtos de saúde' }
+      ],
   'esteticista': [
     { id: 'quiz-tipo-pele', name: 'Quiz de Tipo de Pele', type: 'quiz', description: 'Identifique tipo e necessidades da pele' },
     { id: 'avaliacao-facial', name: 'Avaliação Facial', type: 'quiz', description: 'Avalie condições da pele facial' },
@@ -57,14 +63,14 @@ const TEMPLATES = {
   ]
 }
 
-// Profissões simplificadas - APENAS AS MAIS ÓBVIAS
+// Profissões simplificadas - CONFORME SOLICITADO
 const PROFESSIONS = [
-  // Profissões mais óbvias e comuns
+  // Profissões conforme solicitado pelo usuário
   { id: 'nutricionista', name: 'Nutricionista', category: 'saude-bemestar', icon: '🥗', status: 'active' },
   { id: 'personal-trainer', name: 'Personal Trainer', category: 'saude-bemestar', icon: '🏋️', status: 'active' },
   { id: 'fisioterapeuta', name: 'Fisioterapeuta', category: 'saude-bemestar', icon: '🩺', status: 'active' },
-  { id: 'distribuidor-suplementos', name: 'Distribuidor de Suplementos', category: 'saude-bemestar', icon: '🌿', status: 'active' },
-  { id: 'esteticista', name: 'Esteticista', category: 'beleza-cosmeticos', icon: '✨', status: 'active' },
+  { id: 'coach-bemestar', name: 'Coach do Bem-estar', category: 'saude-bemestar', icon: '🧘', status: 'active' },
+  { id: 'vendedor-saude', name: 'Vendedor de Produtos de Saúde', category: 'saude-bemestar', icon: '💊', status: 'active' },
   
   // Opção para outros casos
   { id: 'outro', name: 'Outro', category: 'outros', icon: '✏️', status: 'custom' }
