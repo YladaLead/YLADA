@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
 import { Globe } from 'lucide-react'
 
 interface LanguageSelectorProps {
@@ -9,8 +8,6 @@ interface LanguageSelectorProps {
 }
 
 export default function LanguageSelector({ className = '' }: LanguageSelectorProps) {
-  const router = useRouter()
-  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
   const languages = [
@@ -20,8 +17,9 @@ export default function LanguageSelector({ className = '' }: LanguageSelectorPro
   ]
 
   const handleLanguageChange = (langCode: string) => {
-    // Para Next.js com i18n, precisamos usar o router com locale
-    router.push(pathname, { locale: langCode })
+    // Por enquanto, apenas fecha o dropdown
+    // Implementação de i18n será feita depois
+    console.log('Language changed to:', langCode)
     setIsOpen(false)
   }
 
@@ -29,7 +27,7 @@ export default function LanguageSelector({ className = '' }: LanguageSelectorPro
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-emerald-600 transition-colors"
+        className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
       >
         <Globe className="w-4 h-4" />
         <span className="text-sm font-medium">Idioma</span>
@@ -50,7 +48,7 @@ export default function LanguageSelector({ className = '' }: LanguageSelectorPro
                 <button
                   key={lang.code}
                   onClick={() => handleLanguageChange(lang.code)}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center space-x-3"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center space-x-3"
                 >
                   <span className="text-lg">{lang.flag}</span>
                   <span>{lang.name}</span>
