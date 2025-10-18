@@ -76,28 +76,17 @@ const PROFESSIONS = [
   { id: 'outro', name: 'Outro', category: 'outros', icon: '✏️', status: 'custom' }
 ]
 
-// Propósitos por profissão - EXPANDIDO PARA NUTRICIONISTAS
+// Propósitos por profissão - NOVA FILOSOFIA ESTRATÉGICA YLADA
 const PURPOSES = {
   'nutricionista': [
-    // 🔹 Geração e Engajamento
-    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em consultoria nutricional', icon: '🎯', category: 'geracao' },
-    { id: 'engajamento-redes', name: 'Engajamento nas Redes', description: 'Criar quizzes e testes para atrair seguidores e gerar conversas', icon: '📣', category: 'geracao' },
-    { id: 'feedback-clientes', name: 'Feedback de Clientes', description: 'Coletar opiniões e resultados de programas de nutrição', icon: '💬', category: 'geracao' },
-    
-    // 🔹 Avaliação e Diagnóstico
-    { id: 'avaliacao-nutricional', name: 'Avaliação Nutricional', description: 'Diagnóstico e personalização de hábitos alimentares', icon: '📊', category: 'avaliacao' },
-    { id: 'analise-habitos', name: 'Análise de Hábitos e Estilo de Vida', description: 'Avaliar sono, estresse e rotina para entender impacto na alimentação', icon: '🧬', category: 'avaliacao' },
-    { id: 'performance-energia', name: 'Performance & Energia', description: 'Otimizar foco, disposição e resultados físicos', icon: '⚡', category: 'avaliacao' },
-    
-    // 🔹 Acompanhamento e Retenção
-    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Retenção e fidelização de clientes', icon: '📈', category: 'acompanhamento' },
-    { id: 'monitoramento-ia', name: 'Monitoramento Inteligente (IA)', description: 'Automatizar reavaliações, progressos e check-ins com IA', icon: '🤖', category: 'acompanhamento' },
-    { id: 'mindset-nutricional', name: 'Mindset Nutricional', description: 'Trabalhar mentalidade e comportamento alimentar', icon: '🧠', category: 'acompanhamento' },
-    
-    // 🔹 Educação e Monetização
-    { id: 'educacao-alimentar', name: 'Educação Alimentar', description: 'Conteúdo de valor e autoridade na área', icon: '📚', category: 'educacao' },
-    { id: 'bemestar-emagrecimento', name: 'Bem-Estar & Emagrecimento Saudável', description: 'Ajudar cliente a melhorar corpo e mente com hábitos equilibrados', icon: '🌿', category: 'educacao' },
-    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Conversão direta e monetização de consultorias', icon: '💰', category: 'educacao' }
+    // 🎯 FOCO EM ATRACTION, CONVERSÃO E INDICAÇÃO
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos contatos interessados em nutrição, saúde e bem-estar', icon: '🎯', category: 'atracao', priority: 'essencial' },
+    { id: 'engajar-clientes', name: 'Engajar Clientes e Seguidores', description: 'Criar curiosidade e interação com quem já te acompanha', icon: '💬', category: 'atracao', priority: 'alta' },
+    { id: 'gerar-indicacoes', name: 'Gerar Indicações', description: 'Criar ferramentas que motivem clientes e amigos a compartilharem', icon: '👥', category: 'indicacao', priority: 'fundamental' },
+    { id: 'promover-produtos', name: 'Promover Produtos e Desafios', description: 'Mostrar soluções e programas de forma criativa e interativa', icon: '⚡', category: 'conversao', priority: 'alta' },
+    { id: 'educar-valor', name: 'Educar e Gerar Valor', description: 'Ajudar pessoas com informações práticas, reforçando autoridade', icon: '🧠', category: 'conversao', priority: 'alta' },
+    { id: 'avaliar-habitos', name: 'Avaliar Hábitos e Estilo de Vida', description: 'Diagnosticar o perfil de energia, alimentação ou rotina do lead', icon: '📊', category: 'conversao', priority: 'media' },
+    { id: 'vender-consultas', name: 'Vender Consultas e Programas', description: 'Converter leads em clientes pagos ou planos personalizados', icon: '💼', category: 'conversao', priority: 'alta' }
   ],
   'personal-trainer': [
     { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em treinamento', icon: '🎯' },
@@ -313,19 +302,19 @@ export default function CreatePage() {
                 Escolha o objetivo principal da sua ferramenta
               </p>
               
-              {/* Lista de Propósitos Agrupados */}
+              {/* Lista de Propósitos - NOVA FILOSOFIA ESTRATÉGICA */}
               <div className="space-y-6">
                 {selectedProfession === 'nutricionista' ? (
-                  // Interface especial para nutricionistas com categorias
+                  // Interface especial para nutricionistas com nova filosofia
                   <>
-                    {/* 🔹 Geração e Engajamento */}
+                    {/* 🎯 ATRACTION - Atração e Engajamento */}
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                        <span className="text-blue-600 mr-2">🔹</span>
-                        Geração e Engajamento
+                        <span className="text-blue-600 mr-2">🎯</span>
+                        Atração e Engajamento
                       </h3>
                       <div className="space-y-2">
-                        {PURPOSES.nutricionista.filter(p => p.category === 'geracao').map((purpose) => (
+                        {PURPOSES.nutricionista.filter(p => p.category === 'atracao').map((purpose) => (
                           <button
                             key={purpose.id}
                             onClick={() => handlePurposeSelect(purpose.id)}
@@ -336,6 +325,11 @@ export default function CreatePage() {
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
                                 <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                                <div className="text-xs text-blue-600 mt-1 font-medium">
+                                  {purpose.priority === 'essencial' ? '⭐ Essencial' : 
+                                   purpose.priority === 'alta' ? '🔥 Alta Prioridade' : 
+                                   purpose.priority === 'fundamental' ? '💎 Fundamental' : '📊 Média Prioridade'}
+                                </div>
                               </div>
                               <div className="text-gray-400">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -348,24 +342,27 @@ export default function CreatePage() {
                       </div>
                     </div>
 
-                    {/* 🔹 Avaliação e Diagnóstico */}
+                    {/* 👥 INDICAÇÃO - Gerar Compartilhamento */}
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                        <span className="text-green-600 mr-2">🔹</span>
-                        Avaliação e Diagnóstico
+                        <span className="text-green-600 mr-2">👥</span>
+                        Gerar Indicações e Compartilhamento
                       </h3>
                       <div className="space-y-2">
-                        {PURPOSES.nutricionista.filter(p => p.category === 'avaliacao').map((purpose) => (
+                        {PURPOSES.nutricionista.filter(p => p.category === 'indicacao').map((purpose) => (
                           <button
                             key={purpose.id}
                             onClick={() => handlePurposeSelect(purpose.id)}
-                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-green-500 hover:bg-green-50 active:bg-green-100"
                           >
                             <div className="flex items-center space-x-4">
                               <div className="text-2xl">{purpose.icon}</div>
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
                                 <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                                <div className="text-xs text-green-600 mt-1 font-medium">
+                                  💎 Fundamental - Transforma clientes em promotores
+                                </div>
                               </div>
                               <div className="text-gray-400">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,54 +375,27 @@ export default function CreatePage() {
                       </div>
                     </div>
 
-                    {/* 🔹 Acompanhamento e Retenção */}
+                    {/* 💼 CONVERSÃO - Venda e Monetização */}
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                        <span className="text-purple-600 mr-2">🔹</span>
-                        Acompanhamento e Retenção
+                        <span className="text-purple-600 mr-2">💼</span>
+                        Conversão e Monetização
                       </h3>
                       <div className="space-y-2">
-                        {PURPOSES.nutricionista.filter(p => p.category === 'acompanhamento').map((purpose) => (
+                        {PURPOSES.nutricionista.filter(p => p.category === 'conversao').map((purpose) => (
                           <button
                             key={purpose.id}
                             onClick={() => handlePurposeSelect(purpose.id)}
-                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-purple-500 hover:bg-purple-50 active:bg-purple-100"
                           >
                             <div className="flex items-center space-x-4">
                               <div className="text-2xl">{purpose.icon}</div>
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
                                 <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
-                              </div>
-                              <div className="text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 🔹 Educação e Monetização */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                        <span className="text-orange-600 mr-2">🔹</span>
-                        Educação e Monetização
-                      </h3>
-                      <div className="space-y-2">
-                        {PURPOSES.nutricionista.filter(p => p.category === 'educacao').map((purpose) => (
-                          <button
-                            key={purpose.id}
-                            onClick={() => handlePurposeSelect(purpose.id)}
-                            className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
-                          >
-                            <div className="flex items-center space-x-4">
-                              <div className="text-2xl">{purpose.icon}</div>
-                              <div className="flex-1">
-                                <div className="font-semibold text-gray-900 text-base">{purpose.name}</div>
-                                <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                                <div className="text-xs text-purple-600 mt-1 font-medium">
+                                  {purpose.priority === 'alta' ? '🔥 Alta Prioridade' : '📊 Média Prioridade'}
+                                </div>
                               </div>
                               <div className="text-gray-400">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
