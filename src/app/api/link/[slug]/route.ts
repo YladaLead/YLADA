@@ -3,14 +3,16 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params
+
     // Buscar dados do link
     const { data: link, error } = await supabaseAdmin
       .from('generated_links')
       .select('*')
-      .eq('slug', params.slug)
+      .eq('slug', slug)
       .eq('status', 'active')
       .single()
 

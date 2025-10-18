@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import YLADALogo from '@/components/YLADALogo'
 
-export default function LinkPage({ params }: { params: { slug: string } }) {
+export default function LinkPage({ params }: { params: Promise<{ slug: string }> }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,14 +12,24 @@ export default function LinkPage({ params }: { params: { slug: string } }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [linkData, setLinkData] = useState<any>(null)
+  const [slug, setSlug] = useState<string>('')
 
   useEffect(() => {
+    // Aguardar params e extrair slug
+    params.then((resolvedParams) => {
+      setSlug(resolvedParams.slug)
+    })
+  }, [params])
+
+  useEffect(() => {
+    if (!slug) return
+
     // Buscar dados do link
     const fetchLinkData = async () => {
       try {
-        const response = await fetch(`/api/link/${params.slug}`)
+        const response = await fetch(`/api/link/${slug}`)
         const data = await response.json()
-        
+
         if (data.success) {
           setLinkData(data.data)
         }
@@ -31,11 +41,11 @@ export default function LinkPage({ params }: { params: { slug: string } }) {
     }
 
     fetchLinkData()
-  }, [params.slug])
+  }, [slug])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
       const response = await fetch('/api/leads', {
         method: 'POST',
@@ -43,7 +53,7 @@ export default function LinkPage({ params }: { params: { slug: string } }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          slug: params.slug,
+          slug: slug,
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
