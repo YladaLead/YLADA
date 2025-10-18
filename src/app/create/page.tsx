@@ -57,19 +57,17 @@ const TEMPLATES = {
   ]
 }
 
-// Profissões organizadas por prioridade - FOCO EM SAÚDE & BEM-ESTAR
+// Profissões simplificadas - APENAS AS MAIS ÓBVIAS
 const PROFESSIONS = [
-  // Prioridade 1: Saúde & Bem-estar (IMPLEMENTADO)
+  // Profissões mais óbvias e comuns
   { id: 'nutricionista', name: 'Nutricionista', category: 'saude-bemestar', icon: '🥗', status: 'active' },
-  { id: 'fisioterapeuta', name: 'Fisioterapeuta', category: 'saude-bemestar', icon: '🩺', status: 'active' },
   { id: 'personal-trainer', name: 'Personal Trainer', category: 'saude-bemestar', icon: '🏋️', status: 'active' },
+  { id: 'fisioterapeuta', name: 'Fisioterapeuta', category: 'saude-bemestar', icon: '🩺', status: 'active' },
   { id: 'distribuidor-suplementos', name: 'Distribuidor de Suplementos', category: 'saude-bemestar', icon: '🌿', status: 'active' },
+  { id: 'esteticista', name: 'Esteticista', category: 'beleza-cosmeticos', icon: '✨', status: 'active' },
   
-  // Prioridade 2: Beleza & Cosméticos (EM CONSTRUÇÃO)
-  { id: 'esteticista', name: 'Esteticista', category: 'beleza-cosmeticos', icon: '✨', status: 'coming-soon' },
-  { id: 'consultor-beleza', name: 'Consultor de Beleza', category: 'beleza-cosmeticos', icon: '💄', status: 'coming-soon' },
-  { id: 'distribuidor-cosmeticos', name: 'Distribuidor de Cosméticos', category: 'beleza-cosmeticos', icon: '🧴', status: 'coming-soon' },
-  { id: 'dermatologista', name: 'Dermatologista', category: 'beleza-cosmeticos', icon: '🩺', status: 'coming-soon' }
+  // Opção para outros casos
+  { id: 'outro', name: 'Outro', category: 'outros', icon: '✏️', status: 'custom' }
 ]
 
 
@@ -86,6 +84,13 @@ export default function CreatePage() {
     
     if (profession?.status === 'coming-soon') {
       alert('Esta área está em construção! Em breve teremos templates específicos para esta profissão.')
+      return
+    }
+    
+    if (profession?.status === 'custom') {
+      // Para "Outro", ir direto para criação personalizada
+      setSelectedProfession('outro')
+      setStep(2)
       return
     }
     
@@ -226,56 +231,96 @@ export default function CreatePage() {
             </div>
           )}
 
-          {/* Step 2: Templates */}
+          {/* Step 2: Templates ou Personalizado */}
           {step === 2 && (
             <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                Escolha um template ou crie personalizado
-              </h2>
-              
-              {/* Templates Pré-definidos */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Templates Recomendados:</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {TEMPLATES[selectedProfession as keyof typeof TEMPLATES]?.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => handleTemplateSelect(template.id)}
-                      className={`p-4 border-2 rounded-lg text-left transition-all ${
-                        selectedTemplate === template.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25'
-                      }`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className="text-2xl">
-                          {template.type === 'quiz' ? '❓' : 
-                           template.type === 'calculator' ? '🧮' : 
-                           template.type === 'form' ? '📝' : 
-                           template.type === 'tracker' ? '📊' : '📋'}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">{template.name}</h4>
-                          <p className="text-sm text-gray-600">{template.description}</p>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {selectedProfession === 'outro' ? (
+                // Interface para "Outro"
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                    Descreva sua profissão e o que você precisa
+                  </h2>
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Sua profissão:
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ex: Coach de Vida, Consultor Financeiro, etc."
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        disabled={isGenerating}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        O que você quer criar:
+                      </label>
+                      <textarea
+                        className="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        rows={4}
+                        placeholder="Ex: Quero um quiz de avaliação financeira para capturar leads interessados em investimentos..."
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        disabled={isGenerating}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Interface normal com templates
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                    Escolha um template ou crie personalizado
+                  </h2>
+                  
+                  {/* Templates Pré-definidos */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Templates Recomendados:</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {TEMPLATES[selectedProfession as keyof typeof TEMPLATES]?.map((template) => (
+                        <button
+                          key={template.id}
+                          onClick={() => handleTemplateSelect(template.id)}
+                          className={`p-4 border-2 rounded-lg text-left transition-all ${
+                            selectedTemplate === template.id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className="text-2xl">
+                              {template.type === 'quiz' ? '❓' : 
+                               template.type === 'calculator' ? '🧮' : 
+                               template.type === 'form' ? '📝' : 
+                               template.type === 'tracker' ? '📊' : '📋'}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 mb-1">{template.name}</h4>
+                              <p className="text-sm text-gray-600">{template.description}</p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* Opção Personalizada */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Ou crie algo personalizado:</h3>
-                <textarea
-                  className="w-full p-4 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500"
-                  rows={4}
-                  placeholder="Descreva exatamente o que você precisa..."
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  disabled={isGenerating}
-                />
-              </div>
+                  {/* Opção Personalizada */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Ou crie algo personalizado:</h3>
+                    <textarea
+                      className="w-full p-4 border border-gray-300 rounded-lg mb-4 focus:ring-blue-500 focus:border-blue-500"
+                      rows={4}
+                      placeholder="Descreva exatamente o que você precisa..."
+                      value={customPrompt}
+                      onChange={(e) => setCustomPrompt(e.target.value)}
+                      disabled={isGenerating}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="flex space-x-4 mt-6">
                 <button
