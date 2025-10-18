@@ -76,10 +76,57 @@ const PROFESSIONS = [
   { id: 'outro', name: 'Outro', category: 'outros', icon: '✏️', status: 'custom' }
 ]
 
+// Propósitos por profissão - PARA PERSONALIZAÇÃO
+const PURPOSES = {
+  'nutricionista': [
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em consultoria nutricional', icon: '🎯' },
+    { id: 'avaliacao-nutricional', name: 'Avaliação Nutricional', description: 'Avaliar hábitos alimentares e necessidades nutricionais', icon: '📊' },
+    { id: 'educacao-alimentar', name: 'Educação Alimentar', description: 'Ensinar sobre alimentação saudável e nutrição', icon: '📚' },
+    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Monitorar progresso e resultados dos clientes', icon: '📈' },
+    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Promover consultorias e planos alimentares', icon: '💰' }
+  ],
+  'personal-trainer': [
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em treinamento', icon: '🎯' },
+    { id: 'avaliacao-fisica', name: 'Avaliação Física', description: 'Avaliar condicionamento físico e objetivos', icon: '📊' },
+    { id: 'educacao-fitness', name: 'Educação Fitness', description: 'Ensinar sobre exercícios e condicionamento', icon: '📚' },
+    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Monitorar progresso e resultados dos alunos', icon: '📈' },
+    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Promover treinos e planos personalizados', icon: '💰' }
+  ],
+  'fisioterapeuta': [
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos pacientes interessados em fisioterapia', icon: '🎯' },
+    { id: 'avaliacao-postural', name: 'Avaliação Postural', description: 'Avaliar problemas posturais e dores', icon: '📊' },
+    { id: 'educacao-prevencao', name: 'Educação Preventiva', description: 'Ensinar sobre prevenção de lesões', icon: '📚' },
+    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Monitorar evolução do tratamento', icon: '📈' },
+    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Promover sessões e tratamentos', icon: '💰' }
+  ],
+  'coach-bemestar': [
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em coaching', icon: '🎯' },
+    { id: 'avaliacao-bemestar', name: 'Avaliação de Bem-estar', description: 'Avaliar nível de bem-estar e qualidade de vida', icon: '📊' },
+    { id: 'educacao-mindfulness', name: 'Educação Mindfulness', description: 'Ensinar técnicas de relaxamento e mindfulness', icon: '📚' },
+    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Monitorar evolução pessoal e emocional', icon: '📈' },
+    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Promover sessões de coaching e consultoria', icon: '💰' }
+  ],
+  'vendedor-saude': [
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados em produtos', icon: '🎯' },
+    { id: 'avaliacao-necessidades', name: 'Avaliação de Necessidades', description: 'Identificar necessidades de produtos de saúde', icon: '📊' },
+    { id: 'educacao-produtos', name: 'Educação sobre Produtos', description: 'Ensinar sobre benefícios dos produtos', icon: '📚' },
+    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Monitorar uso e resultados dos produtos', icon: '📈' },
+    { id: 'venda-produtos', name: 'Venda de Produtos', description: 'Promover e vender produtos de saúde', icon: '💰' }
+  ],
+  'outro': [
+    { id: 'capturar-leads', name: 'Capturar Leads', description: 'Gerar novos clientes interessados', icon: '🎯' },
+    { id: 'avaliacao-cliente', name: 'Avaliação de Cliente', description: 'Avaliar necessidades e perfil do cliente', icon: '📊' },
+    { id: 'educacao-area', name: 'Educação na Área', description: 'Ensinar sobre sua área de atuação', icon: '📚' },
+    { id: 'acompanhamento', name: 'Acompanhamento', description: 'Monitorar progresso e resultados', icon: '📈' },
+    { id: 'venda-servicos', name: 'Venda de Serviços', description: 'Promover seus serviços e produtos', icon: '💰' }
+  ]
+}
+
 
 export default function CreatePage() {
   const [step, setStep] = useState(1)
   const [selectedProfession, setSelectedProfession] = useState('')
+  const [selectedPurpose, setSelectedPurpose] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('')
   const [customPrompt, setCustomPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -93,15 +140,13 @@ export default function CreatePage() {
       return
     }
     
-    if (profession?.status === 'custom') {
-      // Para "Outro", ir direto para criação personalizada
-      setSelectedProfession('outro')
-      setStep(2)
-      return
-    }
-    
     setSelectedProfession(professionId)
-    setStep(2)
+    setStep(2) // Ir para etapa de Propósito
+  }
+
+  const handlePurposeSelect = (purposeId: string) => {
+    setSelectedPurpose(purposeId)
+    setStep(3) // Ir para etapa de Templates/Ferramentas
   }
 
   const handleTemplateSelect = (templateId: string) => {
@@ -136,10 +181,10 @@ export default function CreatePage() {
 
       const data = await response.json()
 
-      if (data.success) {
-        setGeneratedLink(data.data.url)
-        setStep(3)
-      } else {
+          if (data.success) {
+            setGeneratedLink(data.data.url)
+            setStep(4)
+          } else {
         throw new Error(data.error || 'Erro ao gerar link')
       }
     } catch (error) {
@@ -153,6 +198,7 @@ export default function CreatePage() {
   const resetForm = () => {
     setStep(1)
     setSelectedProfession('')
+    setSelectedPurpose('')
     setSelectedTemplate('')
     setCustomPrompt('')
     setGeneratedLink('')
@@ -182,27 +228,27 @@ export default function CreatePage() {
             </p>
           </div>
 
-          {/* Progress Steps */}
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center space-x-4">
-              {[1, 2, 3].map((stepNumber) => (
-                <div key={stepNumber} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    step >= stepNumber 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {stepNumber}
-                  </div>
-                  {stepNumber < 3 && (
-                    <div className={`w-8 h-0.5 ${
-                      step > stepNumber ? 'bg-blue-600' : 'bg-gray-200'
-                    }`} />
-                  )}
+              {/* Progress Steps */}
+              <div className="flex justify-center mb-8">
+                <div className="flex items-center space-x-2">
+                  {[1, 2, 3, 4].map((stepNumber) => (
+                    <div key={stepNumber} className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                        step >= stepNumber 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {stepNumber}
+                      </div>
+                      {stepNumber < 4 && (
+                        <div className={`w-6 h-0.5 ${
+                          step > stepNumber ? 'bg-blue-600' : 'bg-gray-200'
+                        }`} />
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
           {/* Step 1: Profissão */}
           {step === 1 && (
@@ -243,8 +289,53 @@ export default function CreatePage() {
             </div>
           )}
 
-          {/* Step 2: Templates ou Personalizado */}
+          {/* Step 2: Propósito */}
           {step === 2 && (
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Qual é o seu propósito?
+              </h2>
+              <p className="text-gray-600 mb-6 text-center">
+                Escolha o objetivo principal da sua ferramenta
+              </p>
+              
+              {/* Lista de Propósitos */}
+              <div className="space-y-3">
+                {PURPOSES[selectedProfession as keyof typeof PURPOSES]?.map((purpose) => (
+                  <button
+                    key={purpose.id}
+                    onClick={() => handlePurposeSelect(purpose.id)}
+                    className="w-full p-4 border-2 rounded-xl transition-all text-left hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="text-3xl">{purpose.icon}</div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 text-lg">{purpose.name}</div>
+                        <div className="text-sm text-gray-600 mt-1">{purpose.description}</div>
+                      </div>
+                      <div className="text-gray-400">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => setStep(1)}
+                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  ← Voltar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Templates ou Personalizado */}
+          {step === 3 && (
             <div className="bg-white rounded-lg shadow-lg p-8">
               {selectedProfession === 'outro' ? (
                 // Interface para "Outro"
@@ -334,13 +425,13 @@ export default function CreatePage() {
                 </>
               )}
 
-              <div className="flex space-x-4 mt-6">
-                <button
-                  onClick={() => setStep(1)}
-                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  ← Voltar
-                </button>
+                  <div className="flex space-x-4 mt-6">
+                    <button
+                      onClick={() => setStep(2)}
+                      className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      ← Voltar
+                    </button>
                 <button
                   onClick={handleGenerate}
                   className={`flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors ${
@@ -354,8 +445,8 @@ export default function CreatePage() {
             </div>
           )}
 
-          {/* Step 3: Resultado */}
-          {step === 3 && generatedLink && (
+          {/* Step 4: Resultado */}
+          {step === 4 && generatedLink && (
             <div className="bg-white rounded-lg shadow-lg p-8">
               <div className="text-center">
                 <div className="text-6xl mb-4">🎉</div>
