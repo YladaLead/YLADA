@@ -1,72 +1,82 @@
-# YLADA - Your Lead Advanced Data Assistant
+# 🚀 YLADA - Your Lead Advanced Data Assistant
 
-## 🎯 **Sobre o YLADA**
+**Transforme suas ideias em links inteligentes em 60 segundos**
 
-YLADA é uma plataforma avançada de geração de leads especificamente desenvolvida para **profissionais de saúde e bem-estar**. Nossa missão é transformar seu negócio em uma máquina de resultados através de ferramentas inteligentes e personalizadas.
+## ✨ Sobre o YLADA
 
-## 🌟 **Características Principais**
+YLADA é uma plataforma revolucionária de geração de links inteligentes powered by AI. Digite o que você quer criar e receba um link pronto para gerar leads e engajamento em segundos.
 
-### 🏥 **Foco em Saúde e Bem-estar**
-- **9 Ferramentas especializadas** em saúde
-- **Calculadoras nutricionais** avançadas
-- **Quizzes de avaliação** personalizados
-- **Planejamento alimentar** inteligente
+## 🎯 Funcionalidades
 
-### 🌍 **Múltiplos Idiomas**
-- **Português** (padrão)
-- **Espanhol** 
-- **Inglês**
+- **⚡ Super Rápido**: Criação de links em menos de 60 segundos
+- **🤖 Powered by AI**: Inteligência artificial entende exatamente o que você quer
+- **🌍 Global**: Funciona em todos os idiomas e segmentos
+- **📊 Analytics**: Dashboard completo com métricas de performance
+- **🔗 Templates**: Sistema inteligente de templates com aprendizado contínuo
 
-### 🛠️ **Ferramentas Disponíveis**
+## 🏗️ Tecnologias
 
-#### 📊 **Calculadoras**
-1. **IMC** - Índice de Massa Corporal
-2. **Proteína** - Necessidades proteicas individuais
-3. **Hidratação** - Necessidades hídricas e eletrólitos
-4. **Composição Corporal** - Análise completa de massa muscular e gordura
-5. **Planejador de Refeições** - Planos alimentares personalizados
-6. **Avaliação Nutricional** - Questionário completo de hábitos
+- **Frontend**: Next.js 15 + TypeScript + TailwindCSS
+- **Backend**: Supabase (PostgreSQL + Auth + RLS)
+- **Deploy**: Vercel
+- **IA**: OpenAI GPT-4 (em desenvolvimento)
 
-#### 🧠 **Quizzes e Avaliações**
-7. **Perfil de Bem-Estar** - Avaliação geral de saúde
-8. **Bem-Estar Diário** - Acompanhamento de hábitos diários
-9. **Alimentação Saudável** - Guia nutricional personalizado
+## 🚀 Como Usar
 
-## 🚀 **Tecnologias**
+1. **Acesse**: https://ylada.com
+2. **Digite**: O que você quer criar (ex: "Quiz de energia matinal")
+3. **Receba**: Link pronto em segundos
+4. **Compartilhe**: E colete leads automaticamente
 
-- **Next.js 15** - Framework React
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Estilização
-- **Supabase** - Backend e autenticação
-- **Stripe** - Pagamentos
-- **Vercel** - Deploy e hospedagem
+## 📁 Estrutura do Projeto
 
-## 📱 **Funcionalidades**
+```
+src/
+├── app/
+│   ├── api/           # APIs RESTful
+│   ├── create/        # Página de criação
+│   ├── dashboard/     # Painel do usuário
+│   ├── link/[slug]/   # Visualização de links
+│   └── page.tsx       # Homepage
+├── components/        # Componentes React
+└── lib/              # Configurações
+```
 
-- ✅ **Sistema de múltiplos idiomas**
-- ✅ **Interface responsiva** (mobile-first)
-- ✅ **Autenticação segura**
-- ✅ **Geração de leads automática**
-- ✅ **Dashboard personalizado**
-- ✅ **Quiz builder** avançado
-- ✅ **PWA** (Progressive Web App)
+## 🔧 Desenvolvimento
 
-## 🎨 **Branding**
+```bash
+# Instalar dependências
+npm install
 
-- **Cores principais:** Verde esmeralda (#10B981)
-- **Logo:** YLADA horizontal e vertical
-- **Identidade:** Profissional, confiável, inovadora
+# Executar localmente
+npm run dev
 
-## 🌐 **Deploy**
+# Build para produção
+npm run build
+```
 
-- **Produção:** [ylada.com](https://ylada.com)
-- **Desenvolvimento:** [localhost:3000](http://localhost:3000)
+## 🌐 Deploy
 
-## 📞 **Contato**
+O projeto está configurado para deploy automático no Vercel:
+- **Repositório**: https://github.com/YladaLead/YLADA
+- **Deploy**: Automático via GitHub
 
-- **WhatsApp:** +55 19 99604-9800
-- **Email:** contato@ylada.com
+## 📊 Status
+
+- ✅ **MVP Funcional**
+- ✅ **Supabase Integrado**
+- ✅ **APIs Implementadas**
+- ✅ **Deploy Configurado**
+- 🔄 **IA em Desenvolvimento**
+
+## 🎯 Roadmap
+
+- [ ] Integração completa com OpenAI
+- [ ] Sistema de pagamentos (Stripe)
+- [ ] Multi-idioma completo
+- [ ] White-label para marcas
+- [ ] API pública
 
 ---
 
-**© 2024 YLADA. Todos os direitos reservados.**
+**Desenvolvido com ❤️ para democratizar a criação de ferramentas digitais**
