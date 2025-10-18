@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
-import { i18n } from './next-i18next.config';
 
 const nextConfig: NextConfig = {
-  i18n,
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
@@ -44,15 +42,6 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/api/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
-        ],
-      },
-      {
-        source: '/admin/(.*)',
         headers: [
           {
             key: 'Cache-Control',
