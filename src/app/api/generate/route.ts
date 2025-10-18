@@ -8,14 +8,14 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, category, type } = await request.json()
+    const { prompt, profession, category, type, objective } = await request.json()
 
-    // Buscar template similar no banco
+    // Buscar template similar no banco baseado na profissão e categoria
     const { data: templates, error } = await supabaseAdmin
       .from('templates_base')
       .select('*')
       .eq('type', type || 'quiz')
-      .eq('category', category || 'energia')
+      .eq('category', category || 'saude-bemestar')
       .limit(1)
 
     if (error) {
@@ -35,9 +35,28 @@ export async function POST(request: NextRequest) {
         // Criar thread e usar assistant
         const thread = await openai.beta.threads.create()
         
+        // Prompt mais específico baseado na profissão e objetivo
+        const enhancedPrompt = `Crie um ${type || 'quiz'} para ${profession || 'profissional'} com objetivo de "${objective || 'gerar leads'}".
+
+Prompt do usuário: "${prompt}"
+
+Retorne apenas JSON válido com estrutura:
+{
+  "title": "Título do Quiz",
+  "description": "Descrição clara do que o quiz faz",
+  "questions": [
+    {
+      "question": "Pergunta específica",
+      "options": ["Opção 1", "Opção 2", "Opção 3", "Opção 4"]
+    }
+  ]
+}
+
+Foque em perguntas relevantes para ${profession} e que ajudem a ${objective}.`
+
         await openai.beta.threads.messages.create(thread.id, {
           role: 'user',
-          content: `Crie um ${type || 'quiz'} sobre ${category || 'energia'} baseado neste prompt: "${prompt}". Retorne apenas JSON válido com estrutura: {"title": "Título", "description": "Descrição", "questions": [{"question": "Pergunta", "options": ["Opção1", "Opção2", "Opção3", "Opção4"]}]}`
+          content: enhancedPrompt
         })
 
         const run = await openai.beta.threads.runs.create(thread.id, {
@@ -62,8 +81,8 @@ export async function POST(request: NextRequest) {
           } catch {
             // Se não conseguir fazer parse, usar template padrão
             template = templates?.[0]?.content || {
-              title: 'Quiz Personalizado',
-              description: 'Quiz criado especialmente para você',
+              title: `${profession ? `Quiz para ${profession}` : 'Quiz Personalizado'}`,
+              description: `${objective ? `Ferramenta para ${objective.toLowerCase()}` : 'Quiz criado especialmente para você'}`,
               questions: [
                 {
                   question: 'Como você se sente hoje?',
@@ -76,8 +95,8 @@ export async function POST(request: NextRequest) {
       } else {
         // Usar template encontrado ou padrão
         template = templates?.[0]?.content || {
-          title: 'Quiz Personalizado',
-          description: 'Quiz criado especialmente para você',
+          title: `${profession ? `Quiz para ${profession}` : 'Quiz Personalizado'}`,
+          description: `${objective ? `Ferramenta para ${objective.toLowerCase()}` : 'Quiz criado especialmente para você'}`,
           questions: [
             {
               question: 'Como você se sente hoje?',
@@ -90,8 +109,8 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao usar Assistant:', aiError)
       // Fallback para template padrão
       template = templates?.[0]?.content || {
-        title: 'Quiz Personalizado',
-        description: 'Quiz criado especialmente para você',
+        title: `${profession ? `Quiz para ${profession}` : 'Quiz Personalizado'}`,
+        description: `${objective ? `Ferramenta para ${objective.toLowerCase()}` : 'Quiz criado especialmente para você'}`,
         questions: [
           {
             question: 'Como você se sente hoje?',
@@ -151,7 +170,9 @@ export async function POST(request: NextRequest) {
         slug: newLink.slug,
         template: {
           type: type || 'quiz',
-          category: category || 'energia',
+          category: category || 'saude-bemestar',
+          profession: profession,
+          objective: objective,
           ...template
         },
         url: newLink.url,

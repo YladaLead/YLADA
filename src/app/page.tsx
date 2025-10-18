@@ -61,10 +61,39 @@ export default function HomePage() {
             
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🌍</span>
+                <span className="text-2xl">🎯</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Global</h3>
-              <p className="text-gray-600">Funciona em todos os idiomas e segmentos</p>
+              <h3 className="text-xl font-semibold mb-2">Personalizado</h3>
+              <p className="text-gray-600">Adaptado para sua profissão e objetivos específicos</p>
+            </div>
+          </div>
+
+          {/* Categories */}
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+              Perfeito para profissionais de:
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+                <div className="text-4xl mb-4">🥗</div>
+                <h3 className="text-lg font-semibold mb-2">Nutricionistas</h3>
+                <p className="text-gray-600 text-sm">Quiz de avaliação nutricional</p>
+              </div>
+              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+                <div className="text-4xl mb-4">🌿</div>
+                <h3 className="text-lg font-semibold mb-2">Distribuidores Herbalife</h3>
+                <p className="text-gray-600 text-sm">Quiz de produtos e bem-estar</p>
+              </div>
+              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+                <div className="text-4xl mb-4">✨</div>
+                <h3 className="text-lg font-semibold mb-2">Esteticistas</h3>
+                <p className="text-gray-600 text-sm">Quiz de cuidados com a pele</p>
+              </div>
+              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+                <div className="text-4xl mb-4">💪</div>
+                <h3 className="text-lg font-semibold mb-2">Coaches de Saúde</h3>
+                <p className="text-gray-600 text-sm">Quiz de bem-estar e fitness</p>
+              </div>
             </div>
           </div>
         </div>
