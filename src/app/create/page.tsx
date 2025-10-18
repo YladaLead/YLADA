@@ -78,7 +78,6 @@ export default function CreatePage() {
   const [customPrompt, setCustomPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedLink, setGeneratedLink] = useState('')
-  const [currentSlide, setCurrentSlide] = useState(0)
 
   const handleProfessionSelect = (professionId: string) => {
     const profession = PROFESSIONS.find(p => p.id === professionId)
@@ -205,109 +204,35 @@ export default function CreatePage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
                 O que você é?
               </h2>
-              {/* Mobile-First Carousel */}
-              <div className="relative">
-                {/* Cards Container */}
-                <div className="overflow-hidden">
-                  <div 
-                    className="flex transition-transform duration-300 ease-in-out"
-                    style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              {/* Lista Vertical Mobile-First */}
+              <div className="space-y-3">
+                {PROFESSIONS.map((profession) => (
+                  <button
+                    key={profession.id}
+                    onClick={() => handleProfessionSelect(profession.id)}
+                    className={`w-full p-4 border-2 rounded-xl transition-all text-left relative ${
+                      profession.status === 'coming-soon'
+                        ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                        : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100'
+                    }`}
+                    disabled={profession.status === 'coming-soon'}
                   >
-                    {/* Slide 1: Primeiras 3 profissões */}
-                    <div className="w-full flex-shrink-0 px-2">
-                      <div className="grid grid-cols-1 gap-4">
-                        {PROFESSIONS.slice(0, 3).map((profession) => (
-                          <button
-                            key={profession.id}
-                            onClick={() => handleProfessionSelect(profession.id)}
-                            className={`p-6 border-2 rounded-xl transition-all text-left relative ${
-                              profession.status === 'coming-soon'
-                                ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                                : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
-                            }`}
-                            disabled={profession.status === 'coming-soon'}
-                          >
-                            <div className="flex items-center space-x-4">
-                              <div className="text-4xl">{profession.icon}</div>
-                              <div className="font-semibold text-gray-900 text-lg">{profession.name}</div>
-                            </div>
-                            {profession.status === 'coming-soon' && (
-                              <div className="absolute top-2 right-2">
-                                <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
-                                  Em breve
-                                </span>
-                              </div>
-                            )}
-                          </button>
-                        ))}
+                    <div className="flex items-center space-x-4">
+                      <div className="text-3xl">{profession.icon}</div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 text-lg">{profession.name}</div>
+                        {profession.status === 'coming-soon' && (
+                          <div className="text-sm text-orange-600 mt-1">Em breve</div>
+                        )}
+                      </div>
+                      <div className="text-gray-400">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
                     </div>
-
-                    {/* Slide 2: Últimas 3 profissões */}
-                    <div className="w-full flex-shrink-0 px-2">
-                      <div className="grid grid-cols-1 gap-4">
-                        {PROFESSIONS.slice(3).map((profession) => (
-                          <button
-                            key={profession.id}
-                            onClick={() => handleProfessionSelect(profession.id)}
-                            className={`p-6 border-2 rounded-xl transition-all text-left relative ${
-                              profession.status === 'coming-soon'
-                                ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                                : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
-                            }`}
-                            disabled={profession.status === 'coming-soon'}
-                          >
-                            <div className="flex items-center space-x-4">
-                              <div className="text-4xl">{profession.icon}</div>
-                              <div className="font-semibold text-gray-900 text-lg">{profession.name}</div>
-                            </div>
-                            {profession.status === 'coming-soon' && (
-                              <div className="absolute top-2 right-2">
-                                <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
-                                  Em breve
-                                </span>
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Navigation Dots */}
-                <div className="flex justify-center mt-6 space-x-2">
-                  {[0, 1].map((index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentSlide(index)}
-                      className={`w-3 h-3 rounded-full transition-colors ${
-                        currentSlide === index ? 'bg-blue-600' : 'bg-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                {/* Navigation Arrows */}
-                <button
-                  onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-colors"
-                  disabled={currentSlide === 0}
-                >
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <button
-                  onClick={() => setCurrentSlide(Math.min(1, currentSlide + 1))}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-colors"
-                  disabled={currentSlide === 1}
-                >
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                  </button>
+                ))}
               </div>
             </div>
           )}
