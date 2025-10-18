@@ -57,19 +57,19 @@ const TEMPLATES = {
   ]
 }
 
-// Profissões organizadas por prioridade
+// Profissões organizadas por prioridade - FOCO EM SAÚDE & BEM-ESTAR
 const PROFESSIONS = [
-  // Prioridade 1: Saúde & Bem-estar
-  { id: 'nutricionista', name: 'Nutricionista', category: 'saude-bemestar', icon: '🥗' },
-  { id: 'fisioterapeuta', name: 'Fisioterapeuta', category: 'saude-bemestar', icon: '🩺' },
-  { id: 'personal-trainer', name: 'Personal Trainer', category: 'saude-bemestar', icon: '🏋️' },
-  { id: 'distribuidor-suplementos', name: 'Distribuidor de Suplementos', category: 'saude-bemestar', icon: '🌿' },
+  // Prioridade 1: Saúde & Bem-estar (IMPLEMENTADO)
+  { id: 'nutricionista', name: 'Nutricionista', category: 'saude-bemestar', icon: '🥗', status: 'active' },
+  { id: 'fisioterapeuta', name: 'Fisioterapeuta', category: 'saude-bemestar', icon: '🩺', status: 'active' },
+  { id: 'personal-trainer', name: 'Personal Trainer', category: 'saude-bemestar', icon: '🏋️', status: 'active' },
+  { id: 'distribuidor-suplementos', name: 'Distribuidor de Suplementos', category: 'saude-bemestar', icon: '🌿', status: 'active' },
   
-  // Prioridade 2: Beleza & Cosméticos
-  { id: 'esteticista', name: 'Esteticista', category: 'beleza-cosmeticos', icon: '✨' },
-  { id: 'consultor-beleza', name: 'Consultor de Beleza', category: 'beleza-cosmeticos', icon: '💄' },
-  { id: 'distribuidor-cosmeticos', name: 'Distribuidor de Cosméticos', category: 'beleza-cosmeticos', icon: '🧴' },
-  { id: 'dermatologista', name: 'Dermatologista', category: 'beleza-cosmeticos', icon: '🩺' }
+  // Prioridade 2: Beleza & Cosméticos (EM CONSTRUÇÃO)
+  { id: 'esteticista', name: 'Esteticista', category: 'beleza-cosmeticos', icon: '✨', status: 'coming-soon' },
+  { id: 'consultor-beleza', name: 'Consultor de Beleza', category: 'beleza-cosmeticos', icon: '💄', status: 'coming-soon' },
+  { id: 'distribuidor-cosmeticos', name: 'Distribuidor de Cosméticos', category: 'beleza-cosmeticos', icon: '🧴', status: 'coming-soon' },
+  { id: 'dermatologista', name: 'Dermatologista', category: 'beleza-cosmeticos', icon: '🩺', status: 'coming-soon' }
 ]
 
 
@@ -82,6 +82,13 @@ export default function CreatePage() {
   const [generatedLink, setGeneratedLink] = useState('')
 
   const handleProfessionSelect = (professionId: string) => {
+    const profession = PROFESSIONS.find(p => p.id === professionId)
+    
+    if (profession?.status === 'coming-soon') {
+      alert('Esta área está em construção! Em breve teremos templates específicos para esta profissão.')
+      return
+    }
+    
     setSelectedProfession(professionId)
     setStep(2)
   }
@@ -197,10 +204,22 @@ export default function CreatePage() {
                   <button
                     key={profession.id}
                     onClick={() => handleProfessionSelect(profession.id)}
-                    className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                    className={`p-4 border-2 rounded-lg transition-all text-left relative ${
+                      profession.status === 'coming-soon'
+                        ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                        : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
+                    }`}
+                    disabled={profession.status === 'coming-soon'}
                   >
                     <div className="text-2xl mb-2">{profession.icon}</div>
                     <div className="font-semibold text-gray-900">{profession.name}</div>
+                    {profession.status === 'coming-soon' && (
+                      <div className="absolute top-2 right-2">
+                        <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
+                          Em breve
+                        </span>
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>

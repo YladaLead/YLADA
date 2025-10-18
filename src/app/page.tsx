@@ -68,10 +68,10 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Categories */}
+          {/* Categories - FOCO EM SAÚDE & BEM-ESTAR */}
           <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-              Perfeito para profissionais de:
+              Perfeito para profissionais de Saúde & Bem-estar:
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg p-6 shadow-lg text-center">
@@ -80,19 +80,34 @@ export default function HomePage() {
                 <p className="text-gray-600 text-sm">Quiz de avaliação nutricional</p>
               </div>
               <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+                <div className="text-4xl mb-4">🩺</div>
+                <h3 className="text-lg font-semibold mb-2">Fisioterapeutas</h3>
+                <p className="text-gray-600 text-sm">Quiz de avaliação postural</p>
+              </div>
+              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+                <div className="text-4xl mb-4">🏋️</div>
+                <h3 className="text-lg font-semibold mb-2">Personal Trainers</h3>
+                <p className="text-gray-600 text-sm">Quiz de condicionamento físico</p>
+              </div>
+              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
                 <div className="text-4xl mb-4">🌿</div>
                 <h3 className="text-lg font-semibold mb-2">Distribuidores de Suplementos</h3>
                 <p className="text-gray-600 text-sm">Quiz de produtos e nutracêuticos</p>
               </div>
-              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-                <div className="text-4xl mb-4">✨</div>
-                <h3 className="text-lg font-semibold mb-2">Esteticistas</h3>
-                <p className="text-gray-600 text-sm">Quiz de cuidados com a pele</p>
-              </div>
-              <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-                <div className="text-4xl mb-4">💪</div>
-                <h3 className="text-lg font-semibold mb-2">Coaches de Saúde</h3>
-                <p className="text-gray-600 text-sm">Quiz de bem-estar e fitness</p>
+            </div>
+            
+            {/* Coming Soon Section */}
+            <div className="mt-12 text-center">
+              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg p-6 border border-orange-200">
+                <h3 className="text-xl font-semibold text-orange-800 mb-2">
+                  🚧 Em Construção
+                </h3>
+                <p className="text-orange-700">
+                  Em breve teremos templates específicos para <strong>Beleza & Cosméticos</strong>!
+                </p>
+                <p className="text-sm text-orange-600 mt-2">
+                  Estamos focando primeiro em Saúde & Bem-estar para garantir a melhor qualidade.
+                </p>
               </div>
             </div>
           </div>
