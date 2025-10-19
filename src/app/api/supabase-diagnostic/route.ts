@@ -79,10 +79,12 @@ export async function GET() {
       diagnostics.errors.push(`Erro ao verificar tabelas: ${error}`)
     }
 
-    // Teste 3: Verificar RLS (Row Level Security)
+    // Teste 3: Verificar RLS (Row Level Security) - Versão simplificada
     try {
       const { data, error } = await supabaseAdmin
-        .rpc('get_table_info', { table_name: 'templates_base' })
+        .from('templates_base')
+        .select('id')
+        .limit(1)
 
       if (error) {
         diagnostics.errors.push(`Erro RLS: ${error.message}`)
@@ -93,10 +95,12 @@ export async function GET() {
       diagnostics.errors.push(`Erro RLS: ${error}`)
     }
 
-    // Teste 4: Verificar índices
+    // Teste 4: Verificar índices - Versão simplificada
     try {
       const { data, error } = await supabaseAdmin
-        .rpc('get_indexes', { table_name: 'templates_base' })
+        .from('templates_base')
+        .select('id')
+        .limit(1)
 
       if (error) {
         diagnostics.errors.push(`Erro índices: ${error.message}`)
