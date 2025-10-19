@@ -5,14 +5,61 @@ import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 
-// Templates pré-definidos por segmento
+// Templates pré-definidos por propósito - ORGANOGRAMA ESTRATÉGICO
 const TEMPLATES = {
-  'nutricionista': [
-    { id: 'quiz-avaliacao-nutricional', name: 'Quiz de Avaliação Nutricional', type: 'quiz', description: 'Avalie hábitos alimentares e necessidades nutricionais' },
-    { id: 'calculadora-imc', name: 'Calculadora de IMC', type: 'calculator', description: 'Calcule índice de massa corporal e classificação' },
-    { id: 'plano-alimentar', name: 'Plano Alimentar Personalizado', type: 'form', description: 'Crie plano alimentar baseado em objetivos' },
-    { id: 'diario-alimentar', name: 'Diário Alimentar', type: 'tracker', description: 'Registre refeições e acompanhe progresso' }
-  ],
+  'nutricionista': {
+    // 🎯 ATRACTION - Atração e Engajamento
+    'capturar-leads': [
+      { id: 'quiz-perfil-energia', name: 'Descubra seu tipo de energia', type: 'quiz', description: 'Quiz interativo que gera curiosidade e coleta dados do lead', category: 'atracao' },
+      { id: 'quiz-perfil-saude', name: 'Qual é o seu perfil de saúde?', type: 'quiz', description: 'Mini teste que estimula reflexão e engaja', category: 'atracao' },
+      { id: 'calculadora-equilibrio', name: 'Calcule seu índice de equilíbrio corpo & mente', type: 'calculator', description: 'Resultado rápido e gamificado', category: 'atracao' },
+      { id: 'checklist-rotina', name: '10 sinais de que você precisa mudar sua rotina', type: 'checklist', description: 'Ferramenta leve e compartilhável', category: 'atracao' }
+    ],
+    'engajar-clientes': [
+      { id: 'teste-alimentacao', name: 'Você está realmente se alimentando bem?', type: 'quiz', description: 'Estimula reflexão e engaja seguidores', category: 'atracao' },
+      { id: 'tabela-habitos', name: 'Rotina ideal para perder peso ou ganhar energia', type: 'table', description: 'Conteúdo de valor que pede e-mail/contato', category: 'atracao' },
+      { id: 'planilha-autocuidado', name: 'Planejador semanal de autocuidado', type: 'spreadsheet', description: 'Incentiva salvar e compartilhar', category: 'atracao' }
+    ],
+    
+    // 👥 INDICAÇÃO - Gerar Compartilhamento
+    'gerar-indicacoes': [
+      { id: 'link-indicacao', name: 'Indique e ganhe algo', type: 'link', description: 'Gera rede de contatos entre clientes', category: 'indicacao' },
+      { id: 'quiz-compartilhavel', name: 'Qual desafio combina mais com você?', type: 'quiz', description: 'Estimula envio a amigos', category: 'indicacao' },
+      { id: 'ranking-indicadores', name: 'Top Indicadores da Semana', type: 'ranking', description: 'Estimula competição saudável', category: 'indicacao' },
+      { id: 'planilha-pontos', name: 'Pontue cada indicação e acompanhe seu progresso', type: 'spreadsheet', description: 'Mantém engajamento', category: 'indicacao' },
+      { id: 'cupom-ia', name: 'Crie seu cupom inteligente de compartilhamento', type: 'coupon', description: 'Ferramenta para viralização', category: 'indicacao' },
+      { id: 'tabela-recompensas', name: 'Quanto mais indicações, mais recompensas', type: 'table', description: 'Visualiza vantagens e incentiva engajamento', category: 'indicacao' }
+    ],
+    
+    // 💼 CONVERSÃO - Venda e Monetização
+    'promover-produtos': [
+      { id: 'catalogo-inteligente', name: 'Monte sua rotina ideal de produtos', type: 'catalog', description: 'Sugestão automatizada via IA', category: 'conversao' },
+      { id: 'tabela-comparacao', name: 'Diferença entre produtos / kits', type: 'table', description: 'Clareza para compra', category: 'conversao' },
+      { id: 'quiz-produto-ideal', name: 'Qual produto é ideal para seu objetivo?', type: 'quiz', description: 'Direciona para checkout', category: 'conversao' },
+      { id: 'calculadora-resultados', name: 'Em quantos dias você pode ver resultados?', type: 'calculator', description: 'Gatilho de ação', category: 'conversao' },
+      { id: 'planilha-desafio-21', name: '21 dias de desafio pessoal', type: 'spreadsheet', description: 'Gera recorrência e comunidade', category: 'conversao' }
+    ],
+    'educar-valor': [
+      { id: 'mini-ebook', name: 'Guia rápido de alimentação inteligente', type: 'ebook', description: 'Captura lead + reforça autoridade', category: 'conversao' },
+      { id: 'tabela-educacional', name: 'Composição e função dos alimentos', type: 'table', description: 'Valor técnico', category: 'conversao' },
+      { id: 'checklist-pratico', name: 'Comece bem a semana saudável', type: 'checklist', description: 'Viral e educativo', category: 'conversao' },
+      { id: 'quiz-conhecimento', name: 'Você sabe o que está comendo?', type: 'quiz', description: 'Educativo + divertido', category: 'conversao' },
+      { id: 'linha-tempo', name: 'Evolução da sua saúde ao longo do tempo', type: 'timeline', description: 'Visual e emocional', category: 'conversao' }
+    ],
+    'avaliar-habitos': [
+      { id: 'diagnostico-ia', name: 'Avalie seus hábitos e descubra seu score', type: 'diagnostic', description: 'Ferramenta principal para leads quentes', category: 'conversao' },
+      { id: 'quiz-diagnostico', name: 'Descubra o que está sabotando seus resultados', type: 'quiz', description: 'Detecção + CTA para ajuda', category: 'conversao' },
+      { id: 'planilha-autoavaliacao', name: 'Rotina alimentar e sono', type: 'spreadsheet', description: 'Ferramenta para acompanhamento', category: 'conversao' },
+      { id: 'tabela-pontuacao', name: 'Seu perfil de bem-estar em números', type: 'table', description: 'Gera curiosidade e desejo de melhorar', category: 'conversao' }
+    ],
+    'vender-consultas': [
+      { id: 'agendador-ia', name: 'Reserve sua avaliação com desconto', type: 'scheduler', description: 'Converte direto', category: 'conversao' },
+      { id: 'calculadora-investimento', name: 'Quanto vale transformar sua rotina?', type: 'calculator', description: 'Valor percebido', category: 'conversao' },
+      { id: 'plano-ia-personalizado', name: 'Monte seu plano ideal em 1 minuto', type: 'planner', description: 'Diagnóstico → Checkout', category: 'conversao' },
+      { id: 'simulador-resultados', name: 'Veja como você pode evoluir em 30 dias', type: 'simulator', description: 'Conversão emocional', category: 'conversao' },
+      { id: 'planilha-metas', name: 'Acompanhe seus resultados com seu coach', type: 'spreadsheet', description: 'Gera fidelização', category: 'conversao' }
+    ]
+  },
   'fisioterapeuta': [
     { id: 'quiz-avaliacao-postural', name: 'Quiz de Avaliação Postural', type: 'quiz', description: 'Identifique problemas posturais e dores' },
     { id: 'teste-flexibilidade', name: 'Teste de Flexibilidade', type: 'quiz', description: 'Avalie amplitude de movimento articular' },
@@ -491,36 +538,84 @@ export default function CreatePage() {
                     Escolha um template ou crie personalizado
                   </h2>
                   
-                  {/* Templates Pré-definidos */}
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Templates Recomendados:</h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {TEMPLATES[selectedProfession as keyof typeof TEMPLATES]?.map((template) => (
-                        <button
-                          key={template.id}
-                          onClick={() => handleTemplateSelect(template.id)}
-                          className={`p-4 border-2 rounded-lg text-left transition-all ${
-                            selectedTemplate === template.id
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25'
-                          }`}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div className="text-2xl">
-                              {template.type === 'quiz' ? '❓' : 
-                               template.type === 'calculator' ? '🧮' : 
-                               template.type === 'form' ? '📝' : 
-                               template.type === 'tracker' ? '📊' : '📋'}
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-1">{template.name}</h4>
-                              <p className="text-sm text-gray-600">{template.description}</p>
-                            </div>
+                      {/* Templates Organizados por Propósito */}
+                      <div className="mb-8">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Ferramentas Recomendadas:</h3>
+                        
+                        {selectedProfession === 'nutricionista' && selectedPurpose ? (
+                          // Interface especial para nutricionistas com templates por propósito
+                          <div className="space-y-6">
+                            {TEMPLATES.nutricionista[selectedPurpose as keyof typeof TEMPLATES.nutricionista]?.map((template) => (
+                              <button
+                                key={template.id}
+                                onClick={() => handleTemplateSelect(template.id)}
+                                className={`w-full p-4 border-2 rounded-xl text-left transition-all ${
+                                  selectedTemplate === template.id
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25'
+                                }`}
+                              >
+                                <div className="flex items-start space-x-4">
+                                  <div className="text-3xl">
+                                    {template.type === 'quiz' ? '❓' : 
+                                     template.type === 'calculator' ? '🧮' : 
+                                     template.type === 'checklist' ? '✅' : 
+                                     template.type === 'table' ? '📊' : 
+                                     template.type === 'spreadsheet' ? '📈' : 
+                                     template.type === 'link' ? '🔗' : 
+                                     template.type === 'ranking' ? '🏆' : 
+                                     template.type === 'coupon' ? '🎫' : 
+                                     template.type === 'catalog' ? '📚' : 
+                                     template.type === 'ebook' ? '📖' : 
+                                     template.type === 'timeline' ? '⏰' : 
+                                     template.type === 'diagnostic' ? '🔍' : 
+                                     template.type === 'scheduler' ? '📅' : 
+                                     template.type === 'planner' ? '📋' : 
+                                     template.type === 'simulator' ? '🎮' : '📋'}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-gray-900 text-lg mb-1">{template.name}</h4>
+                                    <p className="text-sm text-gray-600 mb-2">{template.description}</p>
+                                    <div className="text-xs text-blue-600 font-medium">
+                                      {template.category === 'atracao' ? '🎯 Atração e Engajamento' : 
+                                       template.category === 'indicacao' ? '👥 Gera Compartilhamento' : 
+                                       template.category === 'conversao' ? '💼 Conversão e Monetização' : ''}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                        ) : (
+                          // Interface padrão para outras profissões
+                          <div className="grid md:grid-cols-2 gap-4">
+                            {TEMPLATES[selectedProfession as keyof typeof TEMPLATES]?.map((template) => (
+                              <button
+                                key={template.id}
+                                onClick={() => handleTemplateSelect(template.id)}
+                                className={`p-4 border-2 rounded-lg text-left transition-all ${
+                                  selectedTemplate === template.id
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25'
+                                }`}
+                              >
+                                <div className="flex items-start space-x-3">
+                                  <div className="text-2xl">
+                                    {template.type === 'quiz' ? '❓' : 
+                                     template.type === 'calculator' ? '🧮' : 
+                                     template.type === 'form' ? '📝' : 
+                                     template.type === 'tracker' ? '📊' : '📋'}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-gray-900 mb-1">{template.name}</h4>
+                                    <p className="text-sm text-gray-600">{template.description}</p>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
                   {/* Opção Personalizada */}
                   <div className="border-t pt-6">
