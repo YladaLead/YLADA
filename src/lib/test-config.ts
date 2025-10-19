@@ -24,7 +24,7 @@ export function testEnvironmentVariables() {
 // Teste de conexão Supabase
 export async function testSupabaseConnection() {
   try {
-    const { supabaseAdmin } = await import('./supabase')
+    const { supabaseAdmin } = await import('./supabase-fixed')
     
     const { data, error } = await supabaseAdmin
       .from('templates_base')

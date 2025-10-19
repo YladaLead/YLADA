@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { UserProfile, AssistantResponse } from '@/lib/openai-assistant'
+import { yladaAssistant, UserProfile, AssistantResponse } from '@/lib/openai-assistant'
 
 interface Message {
   id: string
@@ -28,7 +28,7 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
   const [isTyping, setIsTyping] = useState(false)
   const [userProfile, setUserProfile] = useState<UserProfile>({})
   const [currentStep, setCurrentStep] = useState(1)
-  const [isInitialized, setIsInitialized] = useState(true) // Sempre inicializado
+  const [isInitialized, setIsInitialized] = useState(false)
   const [threadId, setThreadId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -40,8 +40,39 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
     scrollToBottom()
   }, [messages])
 
+  // Inicializar thread da OpenAI Assistant
+  useEffect(() => {
+    const initializeAssistant = async () => {
+      try {
+        // Primeiro, testar configuração
+        const configResponse = await fetch('/api/test-config')
+        const configData = await configResponse.json()
+        
+        if (!configData.success) {
+          console.warn('⚠️ Configuração incompleta:', configData.message)
+          setIsInitialized(true) // Continua mesmo com configuração incompleta
+          return
+        }
+
+        const response = await fetch('/api/ylada-assistant')
+        if (response.ok) {
+          const data = await response.json()
+          setThreadId(data.threadId)
+        }
+        setIsInitialized(true)
+      } catch (error) {
+        console.error('Erro ao inicializar assistant:', error)
+        setIsInitialized(true) // Continua mesmo com erro
+      }
+    }
+
+    if (!isInitialized) {
+      initializeAssistant()
+    }
+  }, [isInitialized])
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return
+    if (!inputValue.trim() || !isInitialized) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -105,7 +136,7 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
         }, 1000)
       }
 
-      // Salvar dados de aprendizado (sem Supabase no frontend)
+      // Salvar dados de aprendizado
       try {
         await fetch('/api/ylada-learning', {
           method: 'POST',
@@ -140,6 +171,11 @@ Me conte: qual é sua profissão ou área de atuação?`,
     } finally {
       setIsTyping(false)
     }
+  }
+
+  // Função para gerar sugestões usando a OpenAI Assistant
+  const generateToolSuggestions = (profile: UserProfile): string => {
+    return yladaAssistant.generateToolSuggestions(profile)
   }
 
   // Função para enviar feedback
@@ -260,10 +296,10 @@ Me conte: qual é sua profissão ou área de atuação?`,
           />
           <button
             onClick={handleSendMessage}
-            disabled={!inputValue.trim() || isTyping}
+            disabled={!inputValue.trim() || isTyping || !isInitialized}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isTyping ? 'Pensando...' : 'Enviar'}
+            {!isInitialized ? 'Inicializando...' : isTyping ? 'Pensando...' : 'Enviar'}
           </button>
         </div>
       </div>
