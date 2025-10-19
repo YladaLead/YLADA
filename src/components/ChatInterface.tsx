@@ -33,6 +33,74 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Gerar sugestões específicas baseadas no perfil completo
+  const generateSpecificSuggestions = (profession: string, specialization: string, objective: string): string => {
+    if (profession === 'nutricionista') {
+      if (specialization === 'emagrecimento') {
+        return `
+1️⃣ **Quiz "Descubra seu Perfil Metabólico"** - identifica tipo metabólico para emagrecimento personalizado
+2️⃣ **Calculadora "Seu Déficit Calórico Ideal"** - calcula déficit perfeito para perda de peso sustentável
+3️⃣ **Diagnóstico "Avalie sua Relação com a Comida"** - identifica padrões alimentares e gatilhos
+4️⃣ **Checklist "Plano de Emagrecimento em 30 Dias"** - guia passo a passo para mudança de hábitos
+5️⃣ **Simulador "Seu Peso Ideal"** - projeta resultados baseados no estilo de vida atual`
+      } else if (specialization === 'nutrição esportiva') {
+        return `
+1️⃣ **Quiz "Seu Perfil de Performance"** - identifica necessidades nutricionais para esporte
+2️⃣ **Calculadora "Suas Necessidades Proteicas"** - calcula proteína ideal para objetivos
+3️⃣ **Diagnóstico "Recuperação e Hidratação"** - avalia estratégias de recuperação
+4️⃣ **Planner "Nutrição Pré/Pós Treino"** - planeja refeições para performance
+5️⃣ **Ranking "Seu Nível de Hidratação"** - avalia e melhora hidratação esportiva`
+      } else if (specialization === 'comportamento alimentar') {
+        return `
+1️⃣ **Quiz "Seu Perfil Comportamental"** - identifica padrões e gatilhos alimentares
+2️⃣ **Diagnóstico "Relação com a Comida"** - avalia saúde emocional e alimentar
+3️⃣ **Checklist "Mindful Eating"** - guia para comer com consciência
+4️⃣ **Simulador "Seus Gatilhos Alimentares"** - identifica situações de risco
+5️⃣ **Planner "Refeições Conscientes"** - planeja refeições com foco no bem-estar`
+      }
+    } else if (profession === 'personal trainer') {
+      if (specialization === 'musculação') {
+        return `
+1️⃣ **Quiz "Seu Perfil de Força"** - identifica nível e objetivos de musculação
+2️⃣ **Calculadora "Volume de Treino Ideal"** - calcula séries e repetições personalizadas
+3️⃣ **Diagnóstico "Recuperação Muscular"** - avalia tempo de descanso ideal
+4️⃣ **Planner "Periodização"** - planeja ciclos de treino para hipertrofia
+5️⃣ **Ranking "Seu Progresso"** - acompanha evolução de força e massa`
+      } else if (specialization === 'funcional e mobilidade') {
+        return `
+1️⃣ **Quiz "Seu Nível de Mobilidade"** - identifica limitações e potencial
+2️⃣ **Diagnóstico "Movimento Funcional"** - avalia padrões de movimento
+3️⃣ **Checklist "Rotina de Mobilidade"** - guia para melhorar flexibilidade
+4️⃣ **Desafio "7 Dias de Movimento"** - desafio para incorporar movimento
+5️⃣ **Planner "Treino Funcional"** - planeja exercícios funcionais`
+      }
+    } else if (profession === 'coach') {
+      if (specialization === 'life coaching') {
+        return `
+1️⃣ **Quiz "Seu Perfil de Desenvolvimento"** - identifica áreas de crescimento
+2️⃣ **Diagnóstico "Mapa da Clareza Mental"** - avalia clareza de objetivos
+3️⃣ **Checklist "Transformação em 30 Dias"** - guia para mudanças pessoais
+4️⃣ **Planner "Metas Inteligentes"** - planeja objetivos alcançáveis
+5️⃣ **Simulador "Seu Futuro Ideal"** - projeta vida desejada`
+      } else if (specialization === 'executive coaching') {
+        return `
+1️⃣ **Quiz "Seu Perfil de Liderança"** - identifica estilo de liderança
+2️⃣ **Diagnóstico "Competências Executivas"** - avalia habilidades de gestão
+3️⃣ **Checklist "Liderança Eficaz"** - guia para melhorar liderança
+4️⃣ **Planner "Desenvolvimento Executivo"** - planeja crescimento profissional
+5️⃣ **Ranking "Performance de Equipe"** - avalia e melhora performance`
+      }
+    }
+    
+    // Fallback genérico
+    return `
+1️⃣ **Quiz Personalizado** - identifica necessidades específicas
+2️⃣ **Calculadora Inteligente** - calcula métricas importantes
+3️⃣ **Diagnóstico Completo** - avalia situação atual
+4️⃣ **Checklist de Ação** - guia passo a passo
+5️⃣ **Planner Personalizado** - planeja estratégias específicas`
+  }
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -79,12 +147,12 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
         
         setMessages(prev => [...prev, assistantMessage])
         
-        // Se a resposta indica conclusão, chamar onComplete
-        if (data.complete && data.profile) {
-          setTimeout(() => {
-            onComplete(data.profile)
-          }, 2000)
-        }
+        // NÃO chamar onComplete automaticamente - aguardar escolha do usuário
+        // if (data.complete && data.profile) {
+        //   setTimeout(() => {
+        //     onComplete(data.profile)
+        //   }, 2000)
+        // }
         
         setIsTyping(false)
         return
@@ -136,13 +204,62 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
       }
     }
     
+    // Detectar especialização
+    let detectedSpecialization = userProfile.especializacao || ''
+    if (!detectedSpecialization) {
+      if (input.includes('emagrecimento') || input.includes('perda de peso') || input.includes('emagrecer')) {
+        detectedSpecialization = 'emagrecimento'
+      } else if (input.includes('esportiva') || input.includes('atleta') || input.includes('performance')) {
+        detectedSpecialization = 'nutrição esportiva'
+      } else if (input.includes('materno') || input.includes('gestação') || input.includes('infantil')) {
+        detectedSpecialization = 'materno-infantil'
+      } else if (input.includes('comportamento') || input.includes('relação') || input.includes('comida')) {
+        detectedSpecialization = 'comportamento alimentar'
+      } else if (input.includes('clínica') || input.includes('doença') || input.includes('condição')) {
+        detectedSpecialization = 'nutrição clínica'
+      } else if (input.includes('musculação') || input.includes('hipertrofia') || input.includes('força')) {
+        detectedSpecialization = 'musculação'
+      } else if (input.includes('cardio') || input.includes('condicionamento') || input.includes('resistência')) {
+        detectedSpecialization = 'cardio e condicionamento'
+      } else if (input.includes('reabilitação') || input.includes('lesão') || input.includes('recuperação')) {
+        detectedSpecialization = 'reabilitação'
+      } else if (input.includes('funcional') || input.includes('mobilidade') || input.includes('movimento')) {
+        detectedSpecialization = 'funcional e mobilidade'
+      } else if (input.includes('life coaching') || input.includes('desenvolvimento pessoal')) {
+        detectedSpecialization = 'life coaching'
+      } else if (input.includes('executive') || input.includes('liderança') || input.includes('carreira')) {
+        detectedSpecialization = 'executive coaching'
+      } else if (input.includes('financeiro') || input.includes('dinheiro') || input.includes('investimento')) {
+        detectedSpecialization = 'coaching financeiro'
+      } else if (input.includes('mindfulness') || input.includes('bem-estar mental')) {
+        detectedSpecialization = 'mindfulness'
+      }
+    }
+    
+    // Detectar público-alvo
+    let detectedAudience = userProfile.publico_alvo || ''
+    if (!detectedAudience) {
+      if (input.includes('iniciante') || input.includes('começando') || input.includes('novato')) {
+        detectedAudience = 'iniciantes'
+      } else if (input.includes('intermediário') || input.includes('experiência') || input.includes('médio')) {
+        detectedAudience = 'intermediários'
+      } else if (input.includes('avançado') || input.includes('otimização') || input.includes('expert')) {
+        detectedAudience = 'avançados'
+      } else if (input.includes('todos') || input.includes('misto') || input.includes('geral')) {
+        detectedAudience = 'todos os níveis'
+      }
+    }
+    
     // Detectar escolha de ferramenta específica
     let selectedTool = ''
-    if (input.includes('quiz') || input.includes('perfil metabólico') || input.includes('perfil nutricional')) {
+    if (input.includes('quiz') || input.includes('perfil metabólico') || input.includes('perfil nutricional') || 
+        input.includes('1') || input.includes('primeira') || input.includes('primeiro')) {
       selectedTool = 'quiz'
-    } else if (input.includes('calculadora') || input.includes('déficit calórico') || input.includes('treino ideal')) {
+    } else if (input.includes('calculadora') || input.includes('déficit calórico') || input.includes('treino ideal') ||
+               input.includes('2') || input.includes('segunda') || input.includes('segundo')) {
       selectedTool = 'calculadora'
-    } else if (input.includes('diagnóstico') || input.includes('relação com a comida') || input.includes('clareza mental')) {
+    } else if (input.includes('diagnóstico') || input.includes('relação com a comida') || input.includes('clareza mental') ||
+               input.includes('3') || input.includes('terceira') || input.includes('terceiro')) {
       selectedTool = 'diagnostico'
     } else if (input.includes('desafio') || input.includes('7 dias') || input.includes('foco total')) {
       selectedTool = 'desafio'
@@ -152,20 +269,44 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
       selectedTool = 'ranking'
     }
     
+    // Detectar confirmação do usuário
+    let userConfirmation = ''
+    if (input.includes('sim') || input.includes('confirmo') || input.includes('criar') || input.includes('vamos')) {
+      userConfirmation = 'sim'
+    } else if (input.includes('não') || input.includes('nao') || input.includes('cancelar')) {
+      userConfirmation = 'não'
+    }
+    
+    // Detectar escolha de CTA
+    let selectedCTA = ''
+    if (input.includes('formulário') || input.includes('formulario') || input.includes('contato') || input.includes('1')) {
+      selectedCTA = 'formulario'
+    } else if (input.includes('whatsapp') || input.includes('zap') || input.includes('2')) {
+      selectedCTA = 'whatsapp'
+    } else if (input.includes('agendamento') || input.includes('agenda') || input.includes('3')) {
+      selectedCTA = 'agendamento'
+    } else if (input.includes('site') || input.includes('página') || input.includes('pagina') || input.includes('4')) {
+      selectedCTA = 'site'
+    } else if (input.includes('email') || input.includes('5')) {
+      selectedCTA = 'email'
+    }
+    
     // Atualizar perfil com novas informações detectadas
-    if (detectedProfession || detectedObjective) {
+    if (detectedProfession || detectedObjective || detectedSpecialization || detectedAudience) {
       setUserProfile(prev => ({
         ...prev,
         ...(detectedProfession && { profissao: detectedProfession }),
-        ...(detectedObjective && { objetivo_principal: detectedObjective })
+        ...(detectedObjective && { objetivo_principal: detectedObjective }),
+        ...(detectedSpecialization && { especializacao: detectedSpecialization }),
+        ...(detectedAudience && { publico_alvo: detectedAudience })
       }))
     }
     
     let fallbackContent = ''
     
     // Gerar resposta baseada no que foi detectado
-    if (detectedProfession && detectedObjective && selectedTool) {
-      // Usuário escolheu uma ferramenta específica - criar agora!
+    if (detectedProfession && detectedObjective && selectedTool && userConfirmation === 'sim' && selectedCTA) {
+      // Usuário confirmou e escolheu CTA - criar ferramenta agora!
       fallbackContent = `Perfeito! Vou criar sua **${selectedTool}** personalizada para ${detectedProfession}!
 
 🚀 **Gerando sua ferramenta...**
@@ -177,50 +318,144 @@ ${selectedTool === 'quiz' ? '🧩 Criando Quiz personalizado com perguntas intel
   selectedTool === 'checklist' ? '📋 Criando Checklist com tarefas específicas...' :
   '📈 Criando Ranking com métricas personalizadas...'}
 
+${selectedCTA === 'formulario' ? '📝 Adicionando formulário de contato...' :
+  selectedCTA === 'whatsapp' ? '💬 Configurando botão do WhatsApp...' :
+  selectedCTA === 'agendamento' ? '📅 Integrando sistema de agendamento...' :
+  selectedCTA === 'site' ? '🌐 Configurando redirecionamento para site...' :
+  '📧 Configurando captura de email...'}
+
 Aguarde alguns segundos... ⏳`
 
       // Criar ferramenta com a escolha específica
       const newProfile = {
         profissao: detectedProfession,
         objetivo_principal: detectedObjective,
-        especializacao: 'geral',
-        publico_alvo: 'novos clientes',
+        especializacao: detectedSpecialization || 'geral',
+        publico_alvo: detectedAudience || 'novos clientes',
+        tipo_ferramenta: selectedTool,
+        cta_tipo: selectedCTA
+      }
+      
+      setUserProfile(newProfile)
+      
+      // Criar após delay apenas quando usuário confirma e escolhe CTA
+      setTimeout(() => {
+        onComplete(newProfile)
+      }, 3000)
+      
+    } else if (detectedProfession && detectedObjective && selectedTool && userConfirmation === 'sim') {
+      // Usuário confirmou - agora escolher CTA
+      fallbackContent = `Ótimo! Agora preciso saber: **o que você quer que aconteça quando alguém completar sua ferramenta?**
+
+🎯 **Escolha seu Call-to-Action (CTA):**
+
+1️⃣ **📝 Formulário de Contato** - coleta dados e permite contato direto
+2️⃣ **💬 WhatsApp** - redireciona para conversa no WhatsApp
+3️⃣ **📅 Agendamento** - permite agendar consulta/sessão
+4️⃣ **🌐 Site/Página** - redireciona para seu site ou landing page
+5️⃣ **📧 Captura de Email** - coleta email para newsletter/lista
+
+**Qual dessas opções você prefere?**
+
+Digite o **número** (1, 2, 3, 4, 5) ou o **nome** da opção.
+
+💡 **Dica:** Formulário e WhatsApp são os mais eficazes para conversão!`
+      
+    } else if (detectedProfession && detectedObjective && selectedTool) {
+      // Usuário escolheu uma ferramenta específica - confirmar antes de criar
+      fallbackContent = `Perfeito! Você escolheu criar um **${selectedTool}** para ${detectedProfession}!
+
+🎯 **Confirmação Final:**
+
+**Ferramenta:** ${selectedTool}
+**Profissão:** ${detectedProfession}
+**Objetivo:** ${detectedObjective}
+${detectedSpecialization ? `**Especialização:** ${detectedSpecialization}` : ''}
+${detectedAudience ? `**Público:** ${detectedAudience}` : ''}
+
+**Você confirma que quer criar esta ferramenta?**
+
+Digite **"sim"** para criar ou **"não"** para escolher outra opção.
+
+🚀 **Em 60 segundos você terá sua ferramenta pronta!**`
+
+      // NÃO criar automaticamente - aguardar confirmação
+      const newProfile = {
+        profissao: detectedProfession,
+        objetivo_principal: detectedObjective,
+        especializacao: detectedSpecialization || 'geral',
+        publico_alvo: detectedAudience || 'novos clientes',
         tipo_ferramenta: selectedTool
       }
       
       setUserProfile(newProfile)
       
-      // Criar após delay
-      setTimeout(() => {
-        onComplete(newProfile)
-      }, 3000)
+    } else if (detectedProfession && detectedObjective && detectedSpecialization) {
+      // Temos informações completas - gerar sugestões específicas
+      fallbackContent = `Excelente! Agora tenho o perfil completo:
+
+👩‍⚕️ **Profissão:** ${detectedProfession}
+🎯 **Objetivo:** ${detectedObjective}
+🔬 **Especialização:** ${detectedSpecialization}
+${detectedAudience ? `👥 **Público:** ${detectedAudience}` : ''}
+
+🎯 **Aqui estão as ferramentas PERFEITAS para você:**
+
+${this.generateSpecificSuggestions(detectedProfession, detectedSpecialization, detectedObjective)}
+
+**Qual dessas ferramentas você gostaria de criar primeiro?**
+
+Você pode:
+• Digitar o **nome** da ferramenta
+• Digitar o **número** da opção (1, 2, 3, 4, 5)
+• Digitar **"primeira"**, **"segunda"**, etc.
+• Ou me conte **sua própria ideia**! 💡
+
+Escolha uma e eu criarei para você! 🚀`
       
     } else if (detectedProfession && detectedObjective) {
-      // Usuário forneceu profissão e objetivo - mostrar opções
+      // Usuário forneceu profissão e objetivo - fazer perguntas consultivas
       fallbackContent = `Perfeito! Entendi que você é **${detectedProfession}** e quer **${detectedObjective}**.
 
-🎯 **Aqui estão as melhores ferramentas para você:**
+🎯 **Para criar a ferramenta PERFEITA para você, preciso entender melhor:**
 
+**1. Qual é sua especialização?**
 ${detectedProfession === 'nutricionista' ? `
-🧩 **Quiz "Descubra seu Perfil Metabólico"** - ideal para atrair leads qualificados
-🧮 **Calculadora "Seu Déficit Calórico Ideal"** - excelente para engajamento
-📊 **Diagnóstico "Avalie sua Relação com a Comida"** - perfeito para conversão
+• 🥗 **Emagrecimento** - perda de peso e composição corporal
+• 🏃 **Nutrição Esportiva** - performance e recuperação
+• 👶 **Nutrição Materno-Infantil** - gestação e primeira infância
+• 🧠 **Comportamento Alimentar** - relação com a comida
+• 🏥 **Nutrição Clínica** - doenças e condições específicas
 ` : detectedProfession === 'personal trainer' ? `
-🏋️ **Desafio "7 Dias de Foco Total"** - ideal para engajamento
-📈 **Ranking "Seu Nível de Fitness"** - excelente para gamificação
-🧮 **Calculadora "Seu Treino Ideal"** - perfeito para personalização
+• 💪 **Musculação** - hipertrofia e força
+• 🏃 **Cardio e Condicionamento** - resistência e saúde
+• 👩‍🦽 **Reabilitação** - recuperação de lesões
+• 🧘 **Funcional e Mobilidade** - movimento e equilíbrio
+• 🏆 **Performance Esportiva** - atletas e competições
 ` : detectedProfession === 'coach' ? `
-🧠 **Diagnóstico "Mapa da Clareza Mental"** - ideal para autoconhecimento
-📋 **Checklist "Transformação em 30 Dias"** - excelente para engajamento
-🎯 **Quiz "Seu Perfil de Liderança"** - perfeito para desenvolvimento
+• 🧠 **Life Coaching** - desenvolvimento pessoal
+• 💼 **Executive Coaching** - liderança e carreira
+• 💰 **Financeiro** - educação financeira
+• 🏃 **Performance** - metas e produtividade
+• 🧘 **Mindfulness** - bem-estar mental
 ` : `
-🧩 **Quiz Personalizado** - ideal para ${detectedObjective}
-📊 **Diagnóstico Especializado** - excelente para engajamento
-🧮 **Calculadora Inteligente** - perfeito para conversão
+• 🎯 **Especialização específica** - me conte sua área
+• 💡 **Sua ideia** - o que você tem em mente?
 `}
 
-**Qual dessas ferramentas você gostaria de criar primeiro?** 
-Digite o nome da ferramenta ou número da opção! 🚀`
+**2. Qual seu público principal?**
+• 👥 **Iniciantes** - pessoas começando na área
+• 🎯 **Intermediários** - já têm alguma experiência
+• 🏆 **Avançados** - buscam otimização
+• 🌟 **Todos os níveis** - público misto
+
+**3. Como você prefere se comunicar?**
+• 📱 **Digital** - redes sociais, WhatsApp
+• 🏢 **Presencial** - consultório, clínica
+• 📚 **Educativo** - workshops, cursos
+• 🛒 **Vendas** - produtos, serviços
+
+**Me conte sobre sua especialização e público para eu sugerir as melhores ferramentas!** 🚀`
 
       // Atualizar perfil mas NÃO finalizar automaticamente
       const newProfile = {
@@ -248,8 +483,41 @@ Agora me conte: **qual é seu objetivo principal** com essa ferramenta?
 **Qual desses objetivos mais se alinha com o que você quer criar hoje?**`
       
     } else if (detectedObjective && !detectedProfession) {
-      // Só detectou objetivo - perguntar profissão
-      fallbackContent = `Perfeito! Entendi que você quer **${detectedObjective}**.
+      // Só detectou objetivo - mas pode já ter profissão no perfil
+      if (userProfile.profissao) {
+        // Já tem profissão no perfil - ir direto para perguntas consultivas
+        fallbackContent = `Perfeito! Entendi que você é **${userProfile.profissao}** e quer **${detectedObjective}**.
+
+🎯 **Para criar a ferramenta PERFEITA para você, preciso entender melhor:**
+
+**1. Qual é sua especialização?**
+${userProfile.profissao === 'nutricionista' ? `
+• 🥗 **Emagrecimento** - perda de peso e composição corporal
+• 🏃 **Nutrição Esportiva** - performance e recuperação
+• 👶 **Nutrição Materno-Infantil** - gestação e primeira infância
+• 🧠 **Comportamento Alimentar** - relação com a comida
+• 🏥 **Nutrição Clínica** - doenças e condições específicas
+` : userProfile.profissao === 'personal trainer' ? `
+• 💪 **Musculação** - hipertrofia e força
+• 🏃 **Cardio e Condicionamento** - resistência e saúde
+• 👩‍🦽 **Reabilitação** - recuperação de lesões
+• 🧘 **Funcional e Mobilidade** - movimento e equilíbrio
+• 🏆 **Performance Esportiva** - atletas e competições
+` : `
+• 🎯 **Especialização específica** - me conte sua área
+• 💡 **Sua ideia** - o que você tem em mente?
+`}
+
+**2. Qual seu público principal?**
+• 👥 **Iniciantes** - pessoas começando na área
+• 🎯 **Intermediários** - já têm alguma experiência
+• 🏆 **Avançados** - buscam otimização
+• 🌟 **Todos os níveis** - público misto
+
+**Me conte sobre sua especialização e público para eu sugerir as melhores ferramentas!** 🚀`
+      } else {
+        // Não tem profissão - perguntar profissão
+        fallbackContent = `Perfeito! Entendi que você quer **${detectedObjective}**.
 
 Agora me conte: **qual é sua profissão ou área de atuação?**
 
@@ -261,6 +529,7 @@ Agora me conte: **qual é sua profissão ou área de atuação?**
 • ✨ **Outro** - me conte sua profissão específica
 
 **Qual é sua área de atuação?**`
+      }
       
     } else {
       // Não detectou nada específico - pergunta mais direta
