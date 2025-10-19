@@ -1,4 +1,4 @@
--- Script para corrigir problemas detectados no Supabase
+-- Script CORRIGIDO para resolver problemas Supabase
 -- Execute este script no Supabase SQL Editor
 
 -- 1. Criar tabela translation_quality se não existir
@@ -85,30 +85,15 @@ CREATE INDEX IF NOT EXISTS idx_ai_translations_cache_language ON ai_translations
 ALTER TABLE translation_quality ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_translations_cache ENABLE ROW LEVEL SECURITY;
 
--- 7. Criar políticas RLS básicas (permitir tudo por enquanto)
--- Usar IF NOT EXISTS para evitar erros de duplicação
-DO $$
-BEGIN
-  -- Política para translation_quality
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies 
-    WHERE tablename = 'translation_quality' 
-    AND policyname = 'Allow all operations on translation_quality'
-  ) THEN
-    CREATE POLICY "Allow all operations on translation_quality" ON translation_quality
-      FOR ALL USING (true);
-  END IF;
+-- 7. Remover políticas existentes e criar novas (evita erro de duplicação)
+DROP POLICY IF EXISTS "Allow all operations on translation_quality" ON translation_quality;
+DROP POLICY IF EXISTS "Allow all operations on ai_translations_cache" ON ai_translations_cache;
 
-  -- Política para ai_translations_cache
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies 
-    WHERE tablename = 'ai_translations_cache' 
-    AND policyname = 'Allow all operations on ai_translations_cache'
-  ) THEN
-    CREATE POLICY "Allow all operations on ai_translations_cache" ON ai_translations_cache
-      FOR ALL USING (true);
-  END IF;
-END $$;
+CREATE POLICY "Allow all operations on translation_quality" ON translation_quality
+  FOR ALL USING (true);
+
+CREATE POLICY "Allow all operations on ai_translations_cache" ON ai_translations_cache
+  FOR ALL USING (true);
 
 -- 8. Verificar se tudo foi criado corretamente
 SELECT 'translation_quality' as table_name, COUNT(*) as row_count FROM translation_quality
@@ -118,3 +103,6 @@ SELECT 'ai_translations_cache' as table_name, COUNT(*) as row_count FROM ai_tran
 -- 9. Testar as funções
 SELECT * FROM get_table_info('translation_quality') LIMIT 5;
 SELECT * FROM get_indexes('translation_quality') LIMIT 5;
+
+-- 10. Mensagem de sucesso
+SELECT '✅ Script executado com sucesso! Todas as tabelas e funções foram criadas.' as status;
