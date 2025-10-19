@@ -4,7 +4,8 @@
 -- =====================================================
 
 -- 1. Criar estrutura básica
-\i schema-complete.sql
+-- NOTA: Execute primeiro o schema-fixed.sql no Supabase SQL Editor
+-- Este arquivo é apenas para verificação
 
 -- 2. Verificar se tudo foi criado
 SELECT 
