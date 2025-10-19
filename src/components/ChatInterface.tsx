@@ -44,6 +44,16 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
   useEffect(() => {
     const initializeAssistant = async () => {
       try {
+        // Primeiro, testar configuração
+        const configResponse = await fetch('/api/test-config')
+        const configData = await configResponse.json()
+        
+        if (!configData.success) {
+          console.warn('⚠️ Configuração incompleta:', configData.message)
+          setIsInitialized(true) // Continua mesmo com configuração incompleta
+          return
+        }
+
         const response = await fetch('/api/ylada-assistant')
         if (response.ok) {
           const data = await response.json()
@@ -147,11 +157,13 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error)
       
-      // Resposta de fallback
+      // Resposta de fallback mais inteligente
       const fallbackMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'Desculpe, estou com uma pequena dificuldade técnica. Vamos continuar nossa conversa! Me conte mais sobre sua profissão.',
+        content: `Desculpe, estou com uma pequena dificuldade técnica. Mas posso te ajudar mesmo assim! 
+
+Me conte: qual é sua profissão ou área de atuação?`,
         timestamp: new Date()
       }
       
