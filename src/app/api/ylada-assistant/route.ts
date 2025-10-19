@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { yladaAssistant } from '@/lib/openai-assistant'
+import { yladaAssistant } from '@/lib/openai-assistant-specialized'
 
 export async function POST(request: NextRequest) {
   try {

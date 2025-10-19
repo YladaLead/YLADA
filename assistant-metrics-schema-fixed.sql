@@ -1,4 +1,4 @@
--- Tabela para métricas dos assistentes
+-- Tabela para métricas dos assistentes (versão simplificada)
 CREATE TABLE IF NOT EXISTS assistant_metrics (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id),
@@ -22,23 +22,14 @@ CREATE INDEX IF NOT EXISTS idx_assistant_metrics_intent ON assistant_metrics(int
 ALTER TABLE assistant_metrics ENABLE ROW LEVEL SECURITY;
 
 -- Política para inserção (qualquer usuário pode inserir suas próprias métricas)
+DROP POLICY IF EXISTS "Allow insert own metrics" ON assistant_metrics;
 CREATE POLICY "Allow insert own metrics" ON assistant_metrics
   FOR INSERT WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
 
 -- Política para leitura (usuários podem ver suas próprias métricas)
+DROP POLICY IF EXISTS "Allow read own metrics" ON assistant_metrics;
 CREATE POLICY "Allow read own metrics" ON assistant_metrics
   FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
-
--- Política para administradores (podem ver todas as métricas)
--- Nota: Removida referência à coluna 'role' que não existe
--- CREATE POLICY "Allow admin read all metrics" ON assistant_metrics
---   FOR SELECT USING (
---     EXISTS (
---       SELECT 1 FROM user_profiles 
---       WHERE user_profiles.user_id = auth.uid() 
---       AND user_profiles.role = 'admin'
---     )
---   );
 
 -- Função para obter estatísticas de uso dos assistentes
 CREATE OR REPLACE FUNCTION get_assistant_usage_stats(days INTEGER DEFAULT 7)
@@ -130,3 +121,4 @@ COMMENT ON COLUMN assistant_metrics.latency_ms IS 'Latência da resposta em mili
 COMMENT ON COLUMN assistant_metrics.intent IS 'Intenção detectada da mensagem do usuário';
 COMMENT ON COLUMN assistant_metrics.escalated IS 'Se houve escalação entre assistentes';
 COMMENT ON COLUMN assistant_metrics.message_length IS 'Comprimento da mensagem do usuário';
+

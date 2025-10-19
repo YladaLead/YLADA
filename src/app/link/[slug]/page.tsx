@@ -24,23 +24,45 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
   useEffect(() => {
     if (!slug) return
 
-    // Buscar dados do link
-    const fetchLinkData = async () => {
-      try {
-        const response = await fetch(`/api/link/${slug}`)
-        const data = await response.json()
-
-        if (data.success) {
-          setLinkData(data.data)
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dados do link:', error)
-      } finally {
-        setIsLoading(false)
+    // Simular dados do link (sem depender do banco)
+    const mockLinkData = {
+      title: "Quiz: Descubra seu Perfil de Emagrecimento",
+      description: "Responda algumas perguntas e descubra qual é a melhor estratégia de emagrecimento para você!",
+      content: {
+        questions: [
+          {
+            question: "Qual é seu principal objetivo com a alimentação?",
+            options: [
+              "Perder peso de forma saudável",
+              "Ganhar massa muscular",
+              "Melhorar minha energia",
+              "Controlar minha ansiedade"
+            ]
+          },
+          {
+            question: "Como você se sente após as refeições?",
+            options: [
+              "Energizado e satisfeito",
+              "Sonolento e pesado",
+              "Com fome novamente",
+              "Com gases e desconforto"
+            ]
+          },
+          {
+            question: "Qual é sua maior dificuldade na alimentação?",
+            options: [
+              "Controle de porções",
+              "Escolher alimentos saudáveis",
+              "Manter a disciplina",
+              "Não sei o que comer"
+            ]
+          }
+        ]
       }
     }
 
-    fetchLinkData()
+    setLinkData(mockLinkData)
+    setIsLoading(false)
   }, [slug])
 
   const handleSubmit = async (e: React.FormEvent) => {

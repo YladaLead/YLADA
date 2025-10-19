@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react';
-import Image from 'next/image';
 
 interface YLADALogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -18,17 +17,17 @@ export default function YLADALogo({
 }: YLADALogoProps) {
   
   const sizeClasses = {
-    sm: { width: 120, height: 32 },
-    md: { width: 150, height: 40 }, 
-    lg: { width: 200, height: 56 },
-    xl: { width: 250, height: 64 }
+    sm: 'h-8',
+    md: 'h-10', 
+    lg: 'h-12',
+    xl: 'h-16'
   }
   
   const iconSizeClasses = {
-    sm: { width: 32, height: 32 },
-    md: { width: 40, height: 40 }, 
-    lg: { width: 56, height: 56 },
-    xl: { width: 64, height: 64 }
+    sm: 'h-8 w-8',
+    md: 'h-10 w-10', 
+    lg: 'h-12 w-12',
+    xl: 'h-16 w-16'
   }
 
   // Logo paths - usando os logos YLADA existentes
@@ -42,30 +41,20 @@ export default function YLADALogo({
   // For icon-only variant, don't show text
   if (variant === 'iconOnly') {
     return (
-      <Image
+      <img
         src={logoPaths.iconOnly}
         alt="YLADA"
-        width={iconSizeClasses[size].width}
-        height={iconSizeClasses[size].height}
-        className={className}
-        priority
-        quality={100}
-        unoptimized={false}
+        className={`${iconSizeClasses[size]} ${className}`}
       />
     )
   }
 
   return (
     <div className={`flex items-center ${className}`}>
-      <Image
+      <img
         src={logoPaths[variant]}
         alt="YLADA - Your Lead Advanced Data Assistant"
-        width={responsive ? 200 : sizeClasses[size].width}
-        height={responsive ? 56 : sizeClasses[size].height}
-        className={responsive ? 'h-10 md:h-12 lg:h-14 w-auto' : 'w-auto'}
-        priority
-        quality={100}
-        unoptimized={false}
+        className={`${responsive ? 'h-10 md:h-12 lg:h-14 w-auto' : sizeClasses[size]} w-auto`}
       />
     </div>
   )

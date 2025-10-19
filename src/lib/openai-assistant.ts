@@ -43,9 +43,9 @@ export class YLADAAssistant {
   private threadId?: string
 
   constructor() {
-    this.chatAssistantId = process.env.OPENAI_ASSISTANT_CHAT_ID || ''
-    this.creatorAssistantId = process.env.OPENAI_ASSISTANT_CREATOR_ID || ''
-    this.expertAssistantId = process.env.OPENAI_ASSISTANT_EXPERT_ID || ''
+    this.chatAssistantId = process.env.OPENAI_ASSISTANT_CHAT_ID || 'asst_default_chat'
+    this.creatorAssistantId = process.env.OPENAI_ASSISTANT_CREATOR_ID || 'asst_default_creator'
+    this.expertAssistantId = process.env.OPENAI_ASSISTANT_EXPERT_ID || 'asst_default_expert'
   }
 
   // Criar thread para nova conversa
@@ -94,6 +94,12 @@ export class YLADAAssistant {
           content: fullMessage
         })
 
+        // Verificar se os IDs dos assistentes são válidos antes de tentar usar
+        if (assistantId.includes('asst_default_') || !assistantId.startsWith('asst_')) {
+          console.warn(`⚠️ ID do assistente inválido: ${assistantId}. Usando fallback local.`)
+          throw new Error('Assistente não configurado - usando fallback local')
+        }
+
         // Executar assistant com fallback
         let run
         try {
@@ -104,13 +110,18 @@ export class YLADAAssistant {
           console.warn(`⚠️ Erro com ${assistantType}, tentando fallback...`)
           
           // Fallback: se creator falhar, usar expert
-          if (assistantId === this.creatorAssistantId) {
-            run = await openai.beta.threads.runs.create(this.threadId!, {
-              assistant_id: this.expertAssistantId
-            })
-            console.log('🔄 Fallback para Expert executado')
+          if (assistantId === this.creatorAssistantId && this.expertAssistantId !== 'asst_default_expert') {
+            try {
+              run = await openai.beta.threads.runs.create(this.threadId!, {
+                assistant_id: this.expertAssistantId
+              })
+              console.log('🔄 Fallback para Expert executado')
+            } catch (expertError) {
+              console.warn('⚠️ Expert também falhou, usando fallback local')
+              throw new Error('Todos os assistentes falharam - usando fallback local')
+            }
           } else {
-            throw error
+            throw new Error('Assistente não disponível - usando fallback local')
           }
         }
 
@@ -289,43 +300,111 @@ export class YLADAAssistant {
   private getFallbackResponse(message: string, profile?: UserProfile): AssistantResponse {
     const input = message.toLowerCase()
     
-    // Detectar profissão
-    if (input.includes('nutricionista') || input.includes('nutrição')) {
-      return {
-        message: `Perfeito! E qual é o foco principal do seu trabalho? (Exemplo: emagrecimento, estética facial, saúde intestinal, performance esportiva…)`,
-        profile: { profissao: 'Nutricionista' },
-        nextStep: 2
-      }
+    // Detectar profissão e objetivo de uma vez
+    let detectedProfession = ''
+    let detectedObjective = ''
+    
+    // Detectar profissões
+    if (input.includes('nutricionista') || input.includes('nutrição') || input.includes('nutricao')) {
+      detectedProfession = 'nutricionista'
+    } else if (input.includes('personal trainer') || input.includes('educador físico') || input.includes('personal')) {
+      detectedProfession = 'personal trainer'
+    } else if (input.includes('fisioterapeuta') || input.includes('fisio')) {
+      detectedProfession = 'fisioterapeuta'
+    } else if (input.includes('coach') || input.includes('mentor')) {
+      detectedProfession = 'coach'
+    } else if (input.includes('esteticista') || input.includes('estética')) {
+      detectedProfession = 'esteticista'
     }
     
-    if (input.includes('esteticista') || input.includes('estética')) {
-      return {
-        message: `Ótimo! E qual é sua especialização? (Exemplo: facial, corporal, depilação, tratamentos estéticos…)`,
-        profile: { profissao: 'Esteticista' },
-        nextStep: 2
-      }
+    // Detectar objetivos
+    if (input.includes('atrair') || input.includes('novos clientes') || input.includes('leads')) {
+      detectedObjective = 'atrair novos clientes'
+    } else if (input.includes('vender') || input.includes('produtos') || input.includes('vendas')) {
+      detectedObjective = 'vender produtos/serviços'
+    } else if (input.includes('engajar') || input.includes('fidelizar') || input.includes('manter')) {
+      detectedObjective = 'engajar clientes atuais'
+    } else if (input.includes('educar') || input.includes('conhecimento') || input.includes('autoridade')) {
+      detectedObjective = 'educar e gerar valor'
     }
     
-    if (input.includes('personal trainer') || input.includes('educador físico')) {
+    // Resposta baseada no que foi detectado
+    if (detectedProfession && detectedObjective) {
       return {
-        message: `Excelente! E qual é seu foco? (Exemplo: emagrecimento, hipertrofia, funcional, reabilitação…)`,
-        profile: { profissao: 'Personal Trainer' },
-        nextStep: 2
+        message: `Perfeito! Entendi que você é **${detectedProfession}** e quer **${detectedObjective}**.
+
+🎯 **Aqui estão as melhores ferramentas para você:**
+
+${detectedProfession === 'nutricionista' ? `
+🧩 **Quiz "Descubra seu Perfil Metabólico"** - ideal para atrair leads qualificados
+🧮 **Calculadora "Seu Déficit Calórico Ideal"** - excelente para engajamento
+📊 **Diagnóstico "Avalie sua Relação com a Comida"** - perfeito para conversão
+` : detectedProfession === 'personal trainer' ? `
+🏋️ **Desafio "7 Dias de Foco Total"** - ideal para engajamento
+📈 **Ranking "Seu Nível de Fitness"** - excelente para gamificação
+🧮 **Calculadora "Seu Treino Ideal"** - perfeito para personalização
+` : detectedProfession === 'coach' ? `
+🧠 **Diagnóstico "Mapa da Clareza Mental"** - ideal para autoconhecimento
+📋 **Checklist "Transformação em 30 Dias"** - excelente para engajamento
+🎯 **Quiz "Seu Perfil de Liderança"** - perfeito para desenvolvimento
+` : `
+🧩 **Quiz Personalizado** - ideal para ${detectedObjective}
+📊 **Diagnóstico Especializado** - excelente para engajamento
+🧮 **Calculadora Inteligente** - perfeito para conversão
+`}
+
+**Qual dessas ferramentas você gostaria de criar primeiro?** 🚀`,
+        profile: { 
+          profissao: detectedProfession, 
+          objetivo_principal: detectedObjective 
+        },
+        nextStep: 5,
+        complete: true
       }
-    }
-    
-    if (input.includes('coach') || input.includes('mentor')) {
+    } else if (detectedProfession) {
       return {
-        message: `Perfeito! E qual é sua área de coaching? (Exemplo: vida, carreira, relacionamentos, saúde mental…)`,
-        profile: { profissao: 'Coach' },
+        message: `Ótimo! Vejo que você é **${detectedProfession}**.
+
+Agora me conte: **qual é seu objetivo principal** com essa ferramenta?
+
+• 🎯 **Atrair novos clientes** - pessoas interessadas em seus serviços
+• 🤝 **Engajar clientes atuais** - manter relacionamento e fidelidade  
+• 🌟 **Gerar indicações** - transformar clientes em promotores
+• 🛒 **Vender produtos/serviços** - aumentar vendas e conversão
+• 📘 **Educar e gerar valor** - mostrar autoridade e conhecimento
+
+**Qual desses objetivos mais se alinha com o que você quer criar hoje?**`,
+        profile: { profissao: detectedProfession },
+        nextStep: 3
+      }
+    } else if (detectedObjective) {
+      return {
+        message: `Perfeito! Entendi que você quer **${detectedObjective}**.
+
+Agora me conte: **qual é sua profissão ou área de atuação?**
+
+• 🥗 **Nutricionista** - especialista em alimentação e saúde
+• 🏋️ **Personal Trainer** - especialista em exercícios e fitness
+• 🩺 **Fisioterapeuta** - especialista em reabilitação e movimento
+• 🧠 **Coach** - especialista em desenvolvimento pessoal
+• 💆 **Esteticista** - especialista em beleza e bem-estar
+• ✨ **Outro** - me conte sua profissão específica
+
+**Qual é sua área de atuação?**`,
+        profile: { objetivo_principal: detectedObjective },
         nextStep: 2
       }
     }
 
     // Resposta genérica
     return {
-      message: `Entendi! E qual é o foco principal do seu trabalho? Me conte um pouco mais sobre sua especialização.`,
-      nextStep: 2
+      message: `Entendi! Para criar a ferramenta perfeita para você, preciso saber:
+
+**1. Qual é sua profissão?** (ex: nutricionista, personal trainer, coach...)
+**2. Qual seu objetivo principal?** (atrair clientes, vender produtos, gerar leads...)
+
+Pode responder tudo de uma vez! Assim eu crio algo personalizado para suas necessidades específicas. 🎯`,
+      nextStep: 1
     }
   }
 
