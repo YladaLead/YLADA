@@ -1,16 +1,18 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import { yladaAssistant, UserProfile, AssistantResponse } from '@/lib/openai-assistant'
 
 interface Message {
   id: string
   type: 'user' | 'assistant'
   content: string
   timestamp: Date
+  feedback?: 'positive' | 'negative' | 'neutral'
 }
 
 interface ChatInterfaceProps {
-  onComplete: (profile: any) => void
+  onComplete: (profile: UserProfile) => void
 }
 
 export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
@@ -24,8 +26,10 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
   ])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const [userProfile, setUserProfile] = useState<any>({})
+  const [userProfile, setUserProfile] = useState<UserProfile>({})
   const [currentStep, setCurrentStep] = useState(1)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [threadId, setThreadId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -36,8 +40,29 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
     scrollToBottom()
   }, [messages])
 
+  // Inicializar thread da OpenAI Assistant
+  useEffect(() => {
+    const initializeAssistant = async () => {
+      try {
+        const response = await fetch('/api/ylada-assistant')
+        if (response.ok) {
+          const data = await response.json()
+          setThreadId(data.threadId)
+        }
+        setIsInitialized(true)
+      } catch (error) {
+        console.error('Erro ao inicializar assistant:', error)
+        setIsInitialized(true) // Continua mesmo com erro
+      }
+    }
+
+    if (!isInitialized) {
+      initializeAssistant()
+    }
+  }, [isInitialized])
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return
+    if (!inputValue.trim() || !isInitialized) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -50,9 +75,25 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
     setInputValue('')
     setIsTyping(true)
 
-    // Simular resposta da IA baseada no passo atual
-    setTimeout(() => {
-      const assistantResponse = generateAssistantResponse(inputValue, currentStep, userProfile)
+    try {
+      // Enviar mensagem para OpenAI Assistant via API
+      const response = await fetch('/api/ylada-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: inputValue,
+          userProfile,
+          threadId
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro na API')
+      }
+
+      const assistantResponse: AssistantResponse = await response.json()
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -62,181 +103,96 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
       }
 
       setMessages(prev => [...prev, assistantMessage])
-      setUserProfile(prev => ({ ...prev, ...assistantResponse.profile }))
       
+      // Atualizar threadId se fornecido
+      if (assistantResponse.threadId) {
+        setThreadId(assistantResponse.threadId)
+      }
+      
+      // Atualizar perfil do usuário
+      if (assistantResponse.profile) {
+        setUserProfile(prev => ({ ...prev, ...assistantResponse.profile }))
+      }
+      
+      // Atualizar passo atual
       if (assistantResponse.nextStep) {
         setCurrentStep(assistantResponse.nextStep)
       }
       
+      // Finalizar se completo
       if (assistantResponse.complete) {
         setTimeout(() => {
           onComplete(userProfile)
         }, 1000)
       }
+
+      // Salvar dados de aprendizado
+      try {
+        await fetch('/api/ylada-learning', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userInput: inputValue,
+            userProfile,
+            assistantResponse,
+            userFeedback: 'neutral'
+          })
+        })
+      } catch (error) {
+        console.error('Erro ao salvar dados de aprendizado:', error)
+      }
       
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error)
+      
+      // Resposta de fallback
+      const fallbackMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: 'Desculpe, estou com uma pequena dificuldade técnica. Vamos continuar nossa conversa! Me conte mais sobre sua profissão.',
+        timestamp: new Date()
+      }
+      
+      setMessages(prev => [...prev, fallbackMessage])
+    } finally {
       setIsTyping(false)
-    }, 1500)
-  }
-
-  const generateAssistantResponse = (userInput: string, step: number, profile: any) => {
-    const input = userInput.toLowerCase()
-    
-    switch (step) {
-      case 1: // Profissão - Baseado no prompt da YLADA
-        const profession = userInput
-        return {
-          message: `Perfeito! E qual é o foco principal do seu trabalho? (Exemplo: emagrecimento, estética facial, educação financeira, marketing digital, produtividade, saúde emocional…)`,
-          profile: { profissao: profession },
-          nextStep: 2
-        }
-
-      case 2: // Especialização
-        return {
-          message: `Ótimo! E com quem você quer se conectar mais agora?
-👩‍💼 Clientes novos
-💆 Clientes atuais
-💌 Indicações e amigos
-💰 Pessoas prontas para comprar
-🎓 Alunos ou participantes`,
-          profile: { especializacao: userInput },
-          nextStep: 3
-        }
-
-      case 3: // Público-alvo
-        return {
-          message: `Entendi! E qual é o objetivo desta ferramenta?
-🎯 Atrair novos leads
-🤝 Engajar clientes atuais
-🌟 Gerar indicações
-🛒 Vender produtos / programas
-📘 Educar e gerar valor
-🔍 Diagnosticar necessidades
-💼 Vender consultas, aulas ou mentorias`,
-          profile: { publico_alvo: userInput },
-          nextStep: 4
-        }
-
-      case 4: // Objetivo
-        return {
-          message: `Excelente! Qual tipo de ferramenta você gostaria de criar?
-🧩 Quiz
-🧮 Calculadora
-🧾 Checklist
-📊 Planilha
-💌 Link de Indicação
-🏆 Ranking
-🎟️ Cupom
-📚 E-book
-🧠 Diagnóstico IA
-📅 Agendador
-⚡ Simulador
-🧭 Teste de Perfil
-📘 Guia Educacional`,
-          profile: { objetivo_principal: userInput },
-          nextStep: 5
-        }
-
-      case 5: // Tipo de ferramenta
-        return {
-          message: `Perfeito! Você prefere algo mais **profissional e técnico** ou mais **leve e divertido**?`,
-          profile: { tipo_ferramenta: userInput },
-          nextStep: 6
-        }
-
-      case 6: // Tom e estilo - Gerar sugestões baseadas no prompt
-        const suggestions = generateToolSuggestions({ ...profile, preferencias_ia: { tom: userInput } })
-        return {
-          message: suggestions,
-          profile: { preferencias_ia: { tom: userInput, use_emojis: true } },
-          nextStep: 7
-        }
-
-      case 7: // Sugestões e finalização
-        if (input.includes('gerar') || input.includes('link') || input.includes('criar')) {
-          return {
-            message: `🎯 Perfeito! Vou gerar sua ferramenta agora!
-
-✅ **${getSuggestedToolName(profile)}**
-
-🔗 Link sendo criado...
-🎨 Capa visual sendo gerada...
-
-Sua ferramenta estará pronta em segundos!`,
-            profile: { selectedTool: userInput },
-            complete: true
-          }
-        }
-        return {
-          message: `Quer que eu gere o link e a capa visual da ferramenta sugerida? 🎨`,
-          profile: {},
-          nextStep: 7
-        }
-
-      default:
-        return {
-          message: 'Como posso te ajudar a criar sua próxima ferramenta de geração de leads?',
-          profile: {},
-          nextStep: step
-        }
     }
   }
 
-  // Gerar sugestões baseadas no perfil - Baseado no prompt da YLADA
-  const generateToolSuggestions = (profile: any): string => {
-    const { profissao, especializacao, objetivo_principal, tipo_ferramenta } = profile
-    
-    let suggestions = `🎯 Sugestões para você:\n\n`
-    
-    // Lógica de sugestões baseada no prompt da YLADA
-    if (profissao?.toLowerCase().includes('nutricionista')) {
-      suggestions += `✅ **Quiz "Descubra seu Perfil Metabólico"** — ideal para ${objetivo_principal} com ${profile.publico_alvo}.\n`
-      suggestions += `✅ **Calculadora "Seu Índice de Energia"** — excelente para gerar leads qualificados.\n`
-    } else if (profissao?.toLowerCase().includes('esteticista')) {
-      suggestions += `✅ **Simulador "Monte seu Tratamento Ideal"** — ideal para ${objetivo_principal}.\n`
-      suggestions += `✅ **Catálogo "Transforme sua Pele em 30 Dias"** — excelente para conversão.\n`
-    } else if (profissao?.toLowerCase().includes('personal trainer')) {
-      suggestions += `✅ **Desafio "7 Dias de Foco Total"** — ideal para engajamento.\n`
-      suggestions += `✅ **Ranking "Seu Nível de Fitness"** — excelente para gamificação.\n`
-    } else if (profissao?.toLowerCase().includes('coach')) {
-      suggestions += `✅ **Diagnóstico "Mapa da Clareza Mental"** — ideal para ${objetivo_principal}.\n`
-      suggestions += `✅ **E-book "Guia de Transformação"** — excelente para gerar valor.\n`
-    } else {
-      suggestions += `✅ **${tipo_ferramenta} "${getSuggestedToolName(profile)}"** — ideal para ${objetivo_principal}.\n`
-      suggestions += `✅ **Checklist "Guia de Sucesso"** — excelente para gerar valor.\n`
-    }
-    
-    suggestions += `\nQuer que eu gere o link e a capa visual da primeira? 🎨`
-    
-    return suggestions
+  // Função para gerar sugestões usando a OpenAI Assistant
+  const generateToolSuggestions = (profile: UserProfile): string => {
+    return yladaAssistant.generateToolSuggestions(profile)
   }
 
-  // Gerar nome da ferramenta baseado no perfil - Baseado no prompt da YLADA
-  const getSuggestedToolName = (profile: any): string => {
-    const { profissao, especializacao, tipo_ferramenta } = profile
-    
-    if (profissao?.toLowerCase().includes('nutricionista')) {
-      return 'Descubra seu Perfil Metabólico'
-    } else if (profissao?.toLowerCase().includes('esteticista')) {
-      return 'Monte seu Tratamento Ideal'
-    } else if (profissao?.toLowerCase().includes('personal trainer')) {
-      return 'Desafio dos 7 Dias de Foco'
-    } else if (profissao?.toLowerCase().includes('coach')) {
-      return 'Mapa da Clareza Mental'
-    } else {
-      return `${tipo_ferramenta} de ${especializacao}`
-    }
-  }
+  // Função para enviar feedback
+  const sendFeedback = async (messageId: string, feedback: 'positive' | 'negative') => {
+    try {
+      await fetch('/api/ylada-learning', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userInput: 'feedback',
+          userProfile,
+          assistantResponse: { messageId },
+          userFeedback: feedback
+        })
+      })
 
-  const getRecommendedTools = (profession: string, objective: string) => {
-    const tools = {
-      'capturar-leads': ['❓ Quiz de Perfil de Energia', '🧮 Calculadora de Equilíbrio', '✅ Checklist de Rotina'],
-      'gerar-indicacoes': ['🔗 Link de Indicação', '🏆 Ranking de Indicadores', '🎫 Cupom Inteligente'],
-      'vender-servicos': ['📅 Agendador Inteligente', '🎮 Simulador de Resultados', '📋 Plano Personalizado'],
-      'educar-valor': ['📖 Mini E-book', '📊 Tabela Educacional', '✅ Checklist Prático'],
-      'avaliar-habitos': ['🔍 Diagnóstico IA', '📈 Planilha de Autoavaliação', '📊 Tabela de Pontuação']
+      // Atualizar mensagem com feedback
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, feedback }
+          : msg
+      ))
+
+      console.log(`📚 Feedback ${feedback} enviado para mensagem ${messageId}`)
+    } catch (error) {
+      console.error('Erro ao enviar feedback:', error)
     }
-    
-    return tools[objective as keyof typeof tools]?.map(tool => `• ${tool}`).join('\n') || '• Ferramentas personalizadas'
   }
 
   return (
@@ -267,9 +223,34 @@ Sua ferramenta estará pronta em segundos!`,
               }`}
             >
               <p className="text-sm whitespace-pre-line">{message.content}</p>
-              <p className="text-xs opacity-70 mt-1">
-                {message.timestamp.toLocaleTimeString()}
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs opacity-70">
+                  {message.timestamp.toLocaleTimeString()}
+                </p>
+                {message.type === 'assistant' && !message.feedback && (
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => sendFeedback(message.id, 'positive')}
+                      className="text-xs text-green-600 hover:text-green-800 transition-colors"
+                      title="Feedback positivo"
+                    >
+                      👍
+                    </button>
+                    <button
+                      onClick={() => sendFeedback(message.id, 'negative')}
+                      className="text-xs text-red-600 hover:text-red-800 transition-colors"
+                      title="Feedback negativo"
+                    >
+                      👎
+                    </button>
+                  </div>
+                )}
+                {message.feedback && (
+                  <span className="text-xs text-gray-500">
+                    {message.feedback === 'positive' ? '👍' : '👎'} Obrigado!
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         ))}
@@ -303,10 +284,10 @@ Sua ferramenta estará pronta em segundos!`,
           />
           <button
             onClick={handleSendMessage}
-            disabled={!inputValue.trim() || isTyping}
+            disabled={!inputValue.trim() || isTyping || !isInitialized}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Enviar
+            {!isInitialized ? 'Inicializando...' : isTyping ? 'Pensando...' : 'Enviar'}
           </button>
         </div>
       </div>

@@ -4,14 +4,15 @@ import { useState } from 'react'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import ChatInterface from '@/components/ChatInterface'
+import { UserProfile } from '@/lib/openai-assistant'
 import Link from 'next/link'
 
 export default function CreatePage() {
   const [isCompleted, setIsCompleted] = useState(false)
   const [generatedLink, setGeneratedLink] = useState('')
-  const [userProfile, setUserProfile] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
 
-  const handleChatComplete = async (profile: any) => {
+  const handleChatComplete = async (profile: UserProfile) => {
     setUserProfile(profile)
     
     // Simular geração de link
@@ -22,8 +23,8 @@ export default function CreatePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: `Criar ferramenta para ${profile.profession} com objetivo de ${profile.objective}`,
-          profession: profile.profession,
+          prompt: `Criar ferramenta para ${profile.profissao} com objetivo de ${profile.objetivo_principal}`,
+          profession: profile.profissao,
           category: 'saude-bemestar',
           type: 'quiz',
           profile: profile
@@ -98,10 +99,10 @@ export default function CreatePage() {
                   <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
                     <h3 className="font-semibold text-gray-900 mb-2">Seu Perfil:</h3>
                     <div className="text-sm text-gray-600 space-y-1">
-                      <p><strong>Profissão:</strong> {userProfile.profession}</p>
-                      <p><strong>Especialização:</strong> {userProfile.specialization}</p>
-                      <p><strong>Público:</strong> {userProfile.targetAudience}</p>
-                      <p><strong>Objetivo:</strong> {userProfile.objective}</p>
+                      <p><strong>Profissão:</strong> {userProfile.profissao}</p>
+                      <p><strong>Especialização:</strong> {userProfile.especializacao}</p>
+                      <p><strong>Público:</strong> {userProfile.publico_alvo}</p>
+                      <p><strong>Objetivo:</strong> {userProfile.objetivo_principal}</p>
                     </div>
                   </div>
                 )}
