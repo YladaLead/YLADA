@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 import { yladaCache } from './ylada-cache'
 import { yladaLearning } from './ylada-learning'
+import { AssistantMonitoring, measureLatency } from './assistant-monitoring'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -36,11 +37,15 @@ export interface AssistantResponse {
 }
 
 export class YLADAAssistant {
-  private assistantId: string
+  private chatAssistantId: string
+  private creatorAssistantId: string
+  private expertAssistantId: string
   private threadId?: string
 
   constructor() {
-    this.assistantId = process.env.OPENAI_ASSISTANT_ID || ''
+    this.chatAssistantId = process.env.OPENAI_ASSISTANT_CHAT_ID || ''
+    this.creatorAssistantId = process.env.OPENAI_ASSISTANT_CREATOR_ID || ''
+    this.expertAssistantId = process.env.OPENAI_ASSISTANT_EXPERT_ID || ''
   }
 
   // Criar thread para nova conversa
@@ -69,54 +74,94 @@ export class YLADAAssistant {
         await this.createThread()
       }
 
-      // Preparar contexto do usuário
-      const contextMessage = this.buildContextMessage(userProfile)
-      const fullMessage = contextMessage ? `${contextMessage}\n\n${message}` : message
-
-      // Adicionar mensagem ao thread
-      await openai.beta.threads.messages.create(this.threadId!, {
-        role: 'user',
-        content: fullMessage
-      })
-
-      // Executar assistant
-      const run = await openai.beta.threads.runs.create(this.threadId!, {
-        assistant_id: this.assistantId
-      })
-
-      // Aguardar resposta
-      let runStatus = await openai.beta.threads.runs.retrieve(this.threadId!, run.id)
+      // Determinar qual assistente usar
+      const assistantId = this.determineAssistant(message, userProfile)
+      const assistantType = this.getAssistantType(assistantId)
+      const assistantUsed = this.getAssistantUsed(assistantId)
+      const intent = AssistantMonitoring.detectIntent(message, userProfile)
       
-      while (runStatus.status === 'queued' || runStatus.status === 'in_progress') {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        runStatus = await openai.beta.threads.runs.retrieve(this.threadId!, run.id)
-      }
+      console.log(`🤖 Usando ${assistantType} para esta mensagem (intent: ${intent})`)
 
-      if (runStatus.status === 'completed') {
-        // Buscar mensagens do thread
-        const messages = await openai.beta.threads.messages.list(this.threadId!)
-        const lastMessage = messages.data[0]
-        
-        if (lastMessage && lastMessage.content[0].type === 'text') {
-          const response = lastMessage.content[0].text.value
-          const parsedResponse = this.parseAssistantResponse(response, userProfile)
+      // Medir latência da operação
+      const { result: response, latency } = await measureLatency(async () => {
+        // Preparar contexto do usuário
+        const contextMessage = this.buildContextMessage(userProfile)
+        const fullMessage = contextMessage ? `${contextMessage}\n\n${message}` : message
+
+        // Adicionar mensagem ao thread
+        await openai.beta.threads.messages.create(this.threadId!, {
+          role: 'user',
+          content: fullMessage
+        })
+
+        // Executar assistant com fallback
+        let run
+        try {
+          run = await openai.beta.threads.runs.create(this.threadId!, {
+            assistant_id: assistantId
+          })
+        } catch (error) {
+          console.warn(`⚠️ Erro com ${assistantType}, tentando fallback...`)
           
-          // Salvar no cache para próximas vezes
-          await yladaCache.saveCachedResponse(message, userProfile || {}, parsedResponse)
-          
-          // Salvar dados de aprendizado
-          await yladaLearning.saveLearningData(
-            message,
-            userProfile || {},
-            parsedResponse,
-            'neutral'
-          )
-          
-          return parsedResponse
+          // Fallback: se creator falhar, usar expert
+          if (assistantId === this.creatorAssistantId) {
+            run = await openai.beta.threads.runs.create(this.threadId!, {
+              assistant_id: this.expertAssistantId
+            })
+            console.log('🔄 Fallback para Expert executado')
+          } else {
+            throw error
+          }
         }
-      }
 
-      throw new Error('Falha ao obter resposta da assistant')
+        // Aguardar resposta
+        let runStatus = await openai.beta.threads.runs.retrieve(this.threadId!, run.id)
+        
+        while (runStatus.status === 'queued' || runStatus.status === 'in_progress') {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          runStatus = await openai.beta.threads.runs.retrieve(this.threadId!, run.id)
+        }
+
+        if (runStatus.status === 'completed') {
+          // Buscar mensagens do thread
+          const messages = await openai.beta.threads.messages.list(this.threadId!)
+          const lastMessage = messages.data[0]
+          
+          if (lastMessage && lastMessage.content[0].type === 'text') {
+            const responseText = lastMessage.content[0].text.value
+            const parsedResponse = this.parseAssistantResponse(responseText, userProfile)
+            
+            // Salvar no cache para próximas vezes
+            await yladaCache.saveCachedResponse(message, userProfile || {}, parsedResponse)
+            
+            // Salvar dados de aprendizado
+            await yladaLearning.saveLearningData(
+              message,
+              userProfile || {},
+              parsedResponse,
+              'neutral'
+            )
+            
+            return parsedResponse
+          }
+        }
+
+        throw new Error('Falha ao obter resposta da assistant')
+      })
+
+      // Salvar métricas de monitoramento
+      await AssistantMonitoring.saveMetrics({
+        assistant_used: assistantUsed,
+        tokens_in: AssistantMonitoring.estimateTokens(message),
+        tokens_out: AssistantMonitoring.estimateTokens(response.message),
+        latency_ms: latency,
+        intent,
+        escalated: assistantId !== this.determineAssistant(message, userProfile),
+        message_length: message.length,
+        timestamp: new Date()
+      })
+
+      return response
 
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error)
@@ -124,6 +169,64 @@ export class YLADAAssistant {
       // Fallback para resposta local se OpenAI falhar
       return this.getFallbackResponse(message, userProfile)
     }
+  }
+
+  // Determinar qual assistente usar baseado no contexto
+  private determineAssistant(message: string, userProfile?: UserProfile): string {
+    const messageLength = message.length
+    const messageLower = message.toLowerCase()
+    
+    // Detectar intenção de criação de template
+    const isTemplateGeneration = messageLower.includes('criar') || 
+                                 messageLower.includes('gerar') || 
+                                 messageLower.includes('quiz') || 
+                                 messageLower.includes('calculadora') || 
+                                 messageLower.includes('checklist') || 
+                                 messageLower.includes('planilha') ||
+                                 messageLower.includes('diagnóstico') ||
+                                 messageLower.includes('simulador') ||
+                                 messageLower.includes('catálogo')
+    
+    // Detectar casos Enterprise/complexos
+    const isEnterpriseCase = messageLength > 1200 || 
+                            messageLower.includes('enterprise') ||
+                            messageLower.includes('empresa') ||
+                            messageLower.includes('contrato') ||
+                            messageLower.includes('política') ||
+                            messageLower.includes('integração') ||
+                            messageLower.includes('b2b') ||
+                            messageLower.includes('multi-etapas')
+    
+    // Detectar escalação do chat para creator
+    const isEscalationToCreator = userProfile?.objetivo_principal?.toLowerCase().includes('criar') ||
+                                  userProfile?.tipo_ferramenta ||
+                                  messageLower.includes('ferramenta') ||
+                                  messageLower.includes('template')
+    
+    // Lógica de roteamento
+    if (isEnterpriseCase) {
+      return this.expertAssistantId
+    } else if (isTemplateGeneration || isEscalationToCreator) {
+      return this.creatorAssistantId
+    } else {
+      return this.chatAssistantId
+    }
+  }
+
+  // Obter tipo do assistente usado para métricas
+  private getAssistantUsed(assistantId: string): 'chat' | 'creator' | 'expert' {
+    if (assistantId === this.chatAssistantId) return 'chat'
+    if (assistantId === this.creatorAssistantId) return 'creator'
+    if (assistantId === this.expertAssistantId) return 'expert'
+    return 'chat' // fallback
+  }
+
+  // Obter tipo do assistente para logs
+  private getAssistantType(assistantId: string): string {
+    if (assistantId === this.chatAssistantId) return 'Chat (GPT-4o mini)'
+    if (assistantId === this.creatorAssistantId) return 'Creator (GPT-4o)'
+    if (assistantId === this.expertAssistantId) return 'Expert (GPT-4)'
+    return 'Unknown'
   }
 
   // Construir mensagem de contexto baseada no perfil
