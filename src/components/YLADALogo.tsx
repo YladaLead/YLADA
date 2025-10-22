@@ -17,10 +17,10 @@ export default function YLADALogo({
 }: YLADALogoProps) {
   
   const sizeClasses = {
-    sm: 'h-8',
-    md: 'h-10', 
-    lg: 'h-12',
-    xl: 'h-16'
+    sm: 'h-12',
+    md: 'h-16', 
+    lg: 'h-20',
+    xl: 'h-24'
   }
   
   const iconSizeClasses = {
@@ -54,7 +54,7 @@ export default function YLADALogo({
       <img
         src={logoPaths[variant]}
         alt="YLADA - Your Lead Advanced Data Assistant"
-        className={`${responsive ? 'h-10 md:h-12 lg:h-14 w-auto' : sizeClasses[size]} w-auto`}
+        className={`${responsive ? 'h-18 sm:h-20 lg:h-24 w-auto' : sizeClasses[size]} w-auto`}
       />
     </div>
   )
