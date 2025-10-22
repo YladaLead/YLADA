@@ -33,18 +33,4 @@ export const supabaseAdmin = (() => {
     })
   }
   return supabaseAdminInstance
-})()() => {
-  if (!supabaseAdminInstance) {
-    supabaseAdminInstance = createClient(
-      supabaseUrl,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    )
-  }
-  return supabaseAdminInstance
 })()

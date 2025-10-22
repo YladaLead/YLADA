@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase-fixed'
+import { supabaseAdmin } from '@/lib/supabase'
 import { yladaCache } from './ylada-cache'
 
 export interface LearningData {

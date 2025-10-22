@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase-fixed'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export interface CacheEntry {
   id: string

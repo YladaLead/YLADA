@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './supabase-fixed'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export interface AssistantMetrics {
   user_id?: string
