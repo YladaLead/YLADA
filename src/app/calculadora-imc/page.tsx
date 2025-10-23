@@ -194,30 +194,14 @@ export default function CalculadoraIMC() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Sexo *
                   </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      onClick={() => setData({...data, sexo: 'masculino'})}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        data.sexo === 'masculino' 
-                          ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      <span className="text-2xl mb-2 block">👨</span>
-                      Masculino
-                    </button>
-                    <button
-                      onClick={() => setData({...data, sexo: 'feminino'})}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        data.sexo === 'feminino' 
-                          ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      <span className="text-2xl mb-2 block">👩</span>
-                      Feminino
-                    </button>
-                  </div>
+                  <select
+                    value={data.sexo}
+                    onChange={(e) => setData({...data, sexo: e.target.value as 'masculino' | 'feminino'})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  >
+                    <option value="masculino">👨 Masculino</option>
+                    <option value="feminino">👩 Feminino</option>
+                  </select>
                 </div>
 
                 {/* Atividade Física */}
@@ -225,30 +209,16 @@ export default function CalculadoraIMC() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nível de Atividade Física *
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { id: 'sedentario', label: 'Sedentário', icon: '🛋️', desc: 'Pouco exercício' },
-                      { id: 'leve', label: 'Leve', icon: '🚶', desc: '1-3x/semana' },
-                      { id: 'moderado', label: 'Moderado', icon: '🏃', desc: '3-5x/semana' },
-                      { id: 'intenso', label: 'Intenso', icon: '💪', desc: '6-7x/semana' }
-                    ].map((opcao) => (
-                      <button
-                        key={opcao.id}
-                        onClick={() => setData({...data, atividadeFisica: opcao.id as any})}
-                        className={`p-3 rounded-lg border-2 transition-all text-left ${
-                          data.atividadeFisica === opcao.id 
-                            ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        <span className="text-lg mr-2">{opcao.icon}</span>
-                        <div>
-                          <div className="font-medium">{opcao.label}</div>
-                          <div className="text-xs text-gray-600">{opcao.desc}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  <select
+                    value={data.atividadeFisica}
+                    onChange={(e) => setData({...data, atividadeFisica: e.target.value as any})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  >
+                    <option value="sedentario">🛋️ Sedentário - Pouco ou nenhum exercício</option>
+                    <option value="leve">🚶 Leve - Exercícios leves 1-3x/semana</option>
+                    <option value="moderado">🏃 Moderado - Exercícios moderados 3-5x/semana</option>
+                    <option value="intenso">💪 Intenso - Exercícios intensos 6-7x/semana</option>
+                  </select>
                 </div>
               </div>
 
