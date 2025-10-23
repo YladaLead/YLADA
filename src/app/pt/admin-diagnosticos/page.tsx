@@ -3298,62 +3298,62 @@ const diagnosticosCompletos = {
   'calculadora-proteina': {
     nutri: {
       baixaProteina: [
-        '📋 Avaliação proteica completa para correção',
-        '🥗 Plano alimentar rico em proteínas',
-        '💊 Suplementação proteica específica',
+        '📋 Plano proteico para correção de deficiência',
+        '🥗 Estratégias para aumentar consumo de proteínas',
+        '💊 Suplementação proteica para ganho de massa',
         '📅 Acompanhamento proteico semanal'
       ],
       proteinaNormal: [
-        '📋 Manutenção do equilíbrio proteico',
-        '🥗 Plano alimentar para otimização proteica',
+        '📋 Otimização da distribuição proteica diária',
+        '🥗 Plano alimentar para manutenção muscular',
         '💊 Suplementação proteica preventiva',
-        '📅 Consultas de manutenção proteica'
+        '📅 Consultas de manutenção quinzenais'
       ],
       altaProteina: [
-        '📋 Otimização avançada da proteína',
-        '🥗 Plano alimentar para performance proteica',
-        '💊 Suplementação proteica de alta qualidade',
-        '📅 Acompanhamento especializado proteico'
+        '📋 Manutenção da alta ingestão proteica',
+        '🥗 Plano alimentar para atletas de alta performance',
+        '💊 Suplementação proteica especializada',
+        '📅 Acompanhamento especializado mensal'
       ]
     },
     sales: {
       baixaProteina: [
-        '💊 Whey Protein para correção proteica',
-        '🥗 Proteínas vegetais para aumento',
-        '💪 Suplementos proteicos específicos',
-        '📞 Consultoria especializada em proteínas'
+        '💊 Whey Protein para correção imediata',
+        '🥗 Proteínas vegetais de alta qualidade',
+        '💪 Suplementos proteicos para iniciantes',
+        '📞 Consultoria especializada em ganho de massa'
       ],
       proteinaNormal: [
-        '💊 Proteínas para manutenção',
-        '🥗 Proteínas para equilíbrio',
-        '💪 Suplementos proteicos preventivos',
-        '📞 Consultoria preventiva proteica'
+        '💊 Proteínas para manutenção muscular',
+        '🥗 Suplementos proteicos específicos',
+        '💪 Produtos para performance moderada',
+        '📞 Consultoria para praticantes regulares'
       ],
       altaProteina: [
-        '💊 Proteínas de alta qualidade',
-        '🥗 Proteínas para otimização',
-        '💪 Suplementos proteicos avançados',
-        '📞 Consultoria especializada em performance proteica'
+        '💊 Proteínas premium para atletas',
+        '🥗 Suplementos proteicos de alta performance',
+        '💪 Produtos para atletas de elite',
+        '📞 Consultoria especializada em esportes'
       ]
     },
     coach: {
       baixaProteina: [
-        '🧘‍♀️ Programa intensivo de correção proteica',
-        '💪 Treinos para aumento de massa muscular',
-        '🍎 Coaching nutricional proteico',
-        '📅 Acompanhamento semanal proteico'
+        '🧘‍♀️ Programa de reeducação proteica básica',
+        '💪 Exercícios leves com foco na proteína',
+        '🍎 Coaching para mudança de hábitos proteicos',
+        '📅 Programa de 30 dias para correção'
       ],
       proteinaNormal: [
-        '🧘‍♀️ Programa de manutenção proteica',
-        '💪 Treinos para equilíbrio muscular',
-        '🍎 Coaching de hábitos proteicos',
-        '📅 Acompanhamento mensal proteico'
+        '🧘‍♀️ Programa de otimização proteica',
+        '💪 Exercícios moderados com proteína adequada',
+        '🍎 Coaching para melhoria da performance',
+        '📅 Programa de 60 dias para evolução'
       ],
       altaProteina: [
-        '🧘‍♀️ Programa de otimização proteica avançada',
-        '💪 Treinos para performance muscular',
-        '🍎 Coaching proteico de alta performance',
-        '📅 Acompanhamento especializado proteico'
+        '🧘‍♀️ Programa de manutenção proteica avançada',
+        '💪 Exercícios intensos com proteína otimizada',
+        '🍎 Coaching para atletas de alta performance',
+        '📅 Programa de acompanhamento contínuo'
       ]
     }
   },
@@ -3426,21 +3426,21 @@ const diagnosticosCompletos = {
   'calculadora-calorias': {
     nutri: {
       deficitCalorico: [
-        '📋 Plano calórico para redução de peso',
-        '🥗 Plano alimentar hipocalórico',
-        '💊 Suplementos para controle do apetite',
+        '📋 Plano calórico estratégico para emagrecimento',
+        '🥗 Estratégias para déficit calórico sustentável',
+        '💊 Suplementos para preservação muscular',
         '📅 Acompanhamento calórico semanal'
       ],
       manutencaoCalorica: [
-        '📋 Manutenção do equilíbrio calórico',
-        '🥗 Plano alimentar para manutenção',
-        '💊 Suplementos preventivos calóricos',
-        '📅 Consultas de manutenção calórica'
+        '📋 Manutenção do equilíbrio energético',
+        '🥗 Plano alimentar para peso estável',
+        '💊 Suplementos para manutenção da saúde',
+        '📅 Consultas de manutenção quinzenais'
       ],
       superavitCalorico: [
-        '📋 Plano calórico para ganho de peso',
-        '🥗 Plano alimentar hipercalórico',
-        '💊 Suplementos para aumento calórico',
+        '📋 Plano calórico para ganho de peso saudável',
+        '🥗 Estratégias para superávit calórico controlado',
+        '💊 Suplementos para ganho de massa muscular',
         '📅 Acompanhamento calórico especializado'
       ]
     },
@@ -3452,36 +3452,36 @@ const diagnosticosCompletos = {
         '📞 Consultoria especializada em emagrecimento'
       ],
       manutencaoCalorica: [
-        '💊 Multivitamínicos para manutenção',
-        '🥗 Proteínas para equilíbrio calórico',
-        '💪 Suplementos preventivos',
-        '📞 Consultoria preventiva calórica'
+        '💊 Multivitamínicos para manutenção energética',
+        '🥗 Suplementos para equilíbrio nutricional',
+        '💪 Produtos para manutenção da saúde',
+        '📞 Consultoria para manutenção do peso'
       ],
       superavitCalorico: [
-        '💊 Suplementos hipercalóricos',
-        '🥗 Proteínas para ganho de peso',
-        '💪 Suplementos para aumento calórico',
-        '📞 Consultoria especializada em ganho de peso'
+        '💊 Suplementos hipercalóricos para ganho',
+        '🥗 Proteínas para aumento de massa',
+        '💪 Produtos para ganho de peso saudável',
+        '📞 Consultoria especializada em ganho de massa'
       ]
     },
     coach: {
       deficitCalorico: [
-        '🧘‍♀️ Programa de redução calórica',
-        '💪 Treinos para queima calórica',
-        '🍎 Coaching nutricional para emagrecimento',
-        '📅 Acompanhamento semanal de redução'
+        '🧘‍♀️ Programa de reeducação calórica para emagrecimento',
+        '💪 Exercícios para queima calórica eficiente',
+        '🍎 Coaching para mudança de hábitos alimentares',
+        '📅 Programa de 30 dias para redução'
       ],
       manutencaoCalorica: [
-        '🧘‍♀️ Programa de manutenção calórica',
-        '💪 Treinos para equilíbrio calórico',
-        '🍎 Coaching de hábitos calóricos',
-        '📅 Acompanhamento mensal calórico'
+        '🧘‍♀️ Programa de manutenção energética',
+        '💪 Exercícios para equilíbrio calórico',
+        '🍎 Coaching para manutenção do peso',
+        '📅 Programa de 60 dias para estabilização'
       ],
       superavitCalorico: [
-        '🧘‍♀️ Programa de ganho calórico',
-        '💪 Treinos para ganho de peso',
-        '🍎 Coaching nutricional para ganho',
-        '📅 Acompanhamento especializado calórico'
+        '🧘‍♀️ Programa de ganho de peso saudável',
+        '💪 Exercícios para aumento de massa muscular',
+        '🍎 Coaching para ganho de peso controlado',
+        '📅 Programa de 90 dias para ganho'
       ]
     }
   },
