@@ -54,7 +54,7 @@ export default function YLADALogo({
       <img
         src={logoPaths[variant]}
         alt="YLADA - Your Lead Advanced Data Assistant"
-        className={`${responsive ? 'h-18 sm:h-20 lg:h-24 w-auto' : sizeClasses[size]} w-auto`}
+        className={`${responsive ? 'h-16 sm:h-20 lg:h-24 w-auto' : sizeClasses[size]} w-auto`}
       />
     </div>
   )

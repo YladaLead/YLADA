@@ -162,12 +162,12 @@ export default function TemplatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-300 bg-white/95 backdrop-blur-md shadow-lg">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
           <Link href="/">
-            <YLADALogo size="xl" responsive={true} />
+            <YLADALogo size="md" responsive={true} />
           </Link>
           <LanguageSelector />
         </div>
@@ -176,33 +176,33 @@ export default function TemplatesPage() {
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         <div className="text-center max-w-6xl mx-auto mb-16">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
             Templates que{' '}
-            <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+            <span className="text-blue-600">
               Servem Antes de Vender
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Cada template foi criado para agregar valor real ao seu cliente, 
             gerando gratidão e aumentando suas conversões em até{' '}
-            <span className="text-yellow-400 font-bold">340%</span>.
+            <span className="text-blue-600 font-bold">340%</span>.
           </p>
         </div>
 
         {/* Filtros */}
-        <div className="bg-gray-800 rounded-2xl p-6 mb-12 border border-gray-700">
-          <h2 className="text-xl font-bold text-white mb-6 text-center">Filtros Inteligentes</h2>
+        <div className="bg-gray-50 rounded-xl p-6 mb-12 border border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Filtros Inteligentes</h2>
           <div className="grid sm:grid-cols-3 gap-4">
             
             {/* Filtro por Profissão */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Profissão
               </label>
               <select
                 value={selectedProfession}
                 onChange={(e) => setSelectedProfession(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos os Profissionais</option>
                 <option value="nutricionista">Nutricionistas</option>
@@ -213,13 +213,13 @@ export default function TemplatesPage() {
 
             {/* Filtro por Tipo */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tipo de Template
               </label>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos os Tipos</option>
                 <option value="quiz">Quizzes</option>
@@ -231,13 +231,13 @@ export default function TemplatesPage() {
 
             {/* Filtro por Idioma */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Idioma
               </label>
               <select
                 value={selectedLanguage}
                 onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="pt">🇧🇷 Português</option>
                 <option value="en">🇺🇸 English</option>
@@ -248,10 +248,10 @@ export default function TemplatesPage() {
           
           {/* Resultados do Filtro */}
           <div className="mt-6 text-center">
-            <p className="text-gray-300">
-              Mostrando <span className="text-green-400 font-bold">{filteredTemplates.length}</span> templates para{' '}
-              <span className="text-blue-400 font-bold">{getProfessionLabel(selectedProfession)}</span> -{' '}
-              <span className="text-yellow-400 font-bold">{getTypeLabel(selectedType)}</span>
+            <p className="text-gray-600">
+              Mostrando <span className="text-blue-600 font-bold">{filteredTemplates.length}</span> templates para{' '}
+              <span className="text-blue-600 font-bold">{getProfessionLabel(selectedProfession)}</span> -{' '}
+              <span className="text-blue-600 font-bold">{getTypeLabel(selectedType)}</span>
             </p>
           </div>
         </div>
@@ -259,33 +259,33 @@ export default function TemplatesPage() {
         {/* Templates Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16">
           {filteredTemplates.map((template) => (
-            <div key={template.id} className="bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-700 hover:border-green-500 group">
-              <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${getTypeColor(template.type)} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform`}>
-                <span className="text-2xl sm:text-3xl">{getTypeIcon(template.type)}</span>
+            <div key={template.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 group">
+              <div className={`w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform`}>
+                <span className="text-xl">{getTypeIcon(template.type)}</span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 text-center">
+              <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">
                 {template.name[selectedLanguage] || template.name.pt}
               </h3>
-              <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-6">
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
                 {template.description[selectedLanguage] || template.description.pt}
               </p>
               
               {/* Badges */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs rounded-full border border-green-500/30">
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200">
                   {getProfessionLabel(template.profession)}
                 </span>
-                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full border border-blue-500/30">
+                <span className="px-2 py-1 bg-gray-50 text-gray-700 text-xs rounded-full border border-gray-200">
                   {getTypeLabel(template.type)}
                 </span>
-                <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-full border border-yellow-500/30">
+                <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">
                   {template.usage_count.toLocaleString()} usos
                 </span>
               </div>
 
               <Link 
                 href={`/template/${template.id}`}
-                className={`w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r ${getTypeColor(template.type)} text-white font-semibold rounded-xl hover:opacity-90 transition-all duration-300`}
+                className={`w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300`}
               >
                 Ver Template
               </Link>
@@ -296,9 +296,9 @@ export default function TemplatesPage() {
         {/* Mensagem quando não há resultados */}
         {filteredTemplates.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-bold text-white mb-4">Nenhum template encontrado</h3>
-            <p className="text-gray-300 mb-6">
+            <div className="text-5xl mb-4">🔍</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Nenhum template encontrado</h3>
+            <p className="text-gray-600 mb-6">
               Tente ajustar os filtros para encontrar templates que atendam suas necessidades.
             </p>
             <button
@@ -306,7 +306,7 @@ export default function TemplatesPage() {
                 setSelectedProfession('todos')
                 setSelectedType('todos')
               }}
-              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
             >
               Limpar Filtros
             </button>
@@ -314,30 +314,30 @@ export default function TemplatesPage() {
         )}
 
         {/* CTA Section */}
-        <div className="text-center bg-gray-800 rounded-3xl p-8 sm:p-12 border border-gray-700">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+        <div className="text-center bg-gray-50 rounded-xl p-8 border border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
             Pronto para{' '}
-            <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+            <span className="text-blue-600">
               Servir Antes de Vender
             </span>?
           </h2>
-          <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-gray-600 text-base mb-6 max-w-2xl mx-auto">
             Comece a usar templates que realmente agregam valor aos seus clientes 
             e aumentam suas conversões em até 340%.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               href="/dashboard"
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-lg font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
             >
-              <span className="mr-3 text-xl">🚀</span>
+              <span className="mr-2 text-lg">🚀</span>
               Começar Agora
             </Link>
             <Link 
               href="/curso"
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-lg font-bold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 text-base font-medium rounded-lg hover:bg-gray-200 transition-all duration-300"
             >
-              <span className="mr-3 text-xl">📚</span>
+              <span className="mr-2 text-lg">📚</span>
               Aprender a Filosofia
             </Link>
           </div>
@@ -345,16 +345,16 @@ export default function TemplatesPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-300 bg-white/95 backdrop-blur-md mt-20">
-        <div className="container mx-auto px-4 py-12">
+      <footer className="border-t border-gray-200 bg-white mt-16">
+        <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <div className="mb-6">
-              <YLADALogo size="xl" />
+            <div className="mb-4">
+              <YLADALogo size="lg" />
             </div>
-            <p className="text-gray-600 text-lg mb-4">
+            <p className="text-gray-600 text-sm mb-3">
               Templates que servem antes de vender
             </p>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-xs">
               &copy; 2024 YLADA. Todos os direitos reservados.
             </p>
           </div>
