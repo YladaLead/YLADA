@@ -280,6 +280,352 @@ const diagnosticosCompletos = {
     }
   },
 
+  // 11. MINI E-BOOK EDUCATIVO
+  'mini-ebook': {
+    nutri: {
+      baixoConhecimento: [
+        '📋 E-book completo sobre nutrição básica',
+        '🥗 Guia prático de alimentação saudável',
+        '💊 Informações sobre suplementação',
+        '📅 Consulta nutricional educativa'
+      ],
+      conhecimentoModerado: [
+        '📋 E-book sobre nutrição avançada',
+        '🥗 Guia de otimização nutricional',
+        '💊 Suplementação específica por objetivo',
+        '📅 Consulta nutricional especializada'
+      ],
+      altoConhecimento: [
+        '📋 E-book sobre nutrição de alta performance',
+        '🥗 Guia de nutrição esportiva',
+        '💊 Suplementação de elite',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      baixoConhecimento: [
+        '💊 E-book sobre suplementos básicos',
+        '🥗 Guia de produtos nutricionais',
+        '💪 Informações sobre suplementação',
+        '📞 Consultoria educativa em suplementos'
+      ],
+      conhecimentoModerado: [
+        '💊 E-book sobre suplementos avançados',
+        '🥗 Guia de produtos especializados',
+        '💪 Suplementação por objetivo',
+        '📞 Consultoria especializada em produtos'
+      ],
+      altoConhecimento: [
+        '💊 E-book sobre suplementos de elite',
+        '🥗 Guia de produtos de alta performance',
+        '💪 Suplementação profissional',
+        '📞 Consultoria premium em suplementos'
+      ]
+    },
+    coach: {
+      baixoConhecimento: [
+        '🧘‍♀️ E-book sobre bem-estar básico',
+        '💪 Guia de exercícios fundamentais',
+        '🍎 Coaching nutricional educativo',
+        '📅 Programa de transformação inicial'
+      ],
+      conhecimentoModerado: [
+        '🧘‍♀️ E-book sobre bem-estar avançado',
+        '💪 Guia de treinos especializados',
+        '🍎 Coaching nutricional específico',
+        '📅 Programa de transformação intermediário'
+      ],
+      altoConhecimento: [
+        '🧘‍♀️ E-book sobre bem-estar de elite',
+        '💪 Guia de treinos de alta performance',
+        '🍎 Coaching nutricional profissional',
+        '📅 Programa de transformação avançado'
+      ]
+    }
+  },
+
+  // 12. GUIA NUTRACÊUTICO
+  'guia-nutraceutico': {
+    nutri: {
+      baixoInteresse: [
+        '📋 Guia básico de nutracêuticos',
+        '🥗 Informações sobre alimentos funcionais',
+        '💊 Suplementação preventiva',
+        '📅 Consulta nutricional preventiva'
+      ],
+      interesseModerado: [
+        '📋 Guia avançado de nutracêuticos',
+        '🥗 Alimentos funcionais específicos',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      altoInteresse: [
+        '📋 Guia especializado em nutracêuticos',
+        '🥗 Alimentos funcionais de alta qualidade',
+        '💊 Suplementação de precisão',
+        '📅 Consulta nutricional de alta performance'
+      ]
+    },
+    sales: {
+      baixoInteresse: [
+        '💊 Guia básico de produtos nutracêuticos',
+        '🥗 Produtos funcionais essenciais',
+        '💪 Suplementação preventiva',
+        '📞 Consultoria básica em nutracêuticos'
+      ],
+      interesseModerado: [
+        '💊 Guia avançado de nutracêuticos',
+        '🥗 Produtos funcionais específicos',
+        '💪 Suplementação direcionada',
+        '📞 Consultoria especializada em produtos'
+      ],
+      altoInteresse: [
+        '💊 Guia premium de nutracêuticos',
+        '🥗 Produtos funcionais de elite',
+        '💪 Suplementação de precisão',
+        '📞 Consultoria premium em nutracêuticos'
+      ]
+    },
+    coach: {
+      baixoInteresse: [
+        '🧘‍♀️ Guia básico de bem-estar natural',
+        '💪 Exercícios com foco em saúde',
+        '🍎 Coaching nutricional preventivo',
+        '📅 Programa de bem-estar inicial'
+      ],
+      interesseModerado: [
+        '🧘‍♀️ Guia avançado de bem-estar natural',
+        '💪 Treinos com foco em performance',
+        '🍎 Coaching nutricional específico',
+        '📅 Programa de bem-estar intermediário'
+      ],
+      altoInteresse: [
+        '🧘‍♀️ Guia especializado em bem-estar natural',
+        '💪 Treinos de alta performance natural',
+        '🍎 Coaching nutricional profissional',
+        '📅 Programa de bem-estar avançado'
+      ]
+    }
+  },
+
+  // 13. GUIA PROTEICO
+  'guia-proteico': {
+    nutri: {
+      baixaProteina: [
+        '📋 Guia completo de proteínas',
+        '🥗 Plano alimentar rico em proteínas',
+        '💊 Suplementação proteica específica',
+        '📅 Consulta nutricional proteica'
+      ],
+      proteinaModerada: [
+        '📋 Guia de otimização proteica',
+        '🥗 Plano alimentar balanceado',
+        '💊 Suplementação proteica preventiva',
+        '📅 Consulta nutricional especializada'
+      ],
+      altaProteina: [
+        '📋 Guia de performance proteica',
+        '🥗 Plano alimentar de alta qualidade',
+        '💊 Suplementação proteica avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      baixaProteina: [
+        '💊 Guia completo de suplementos proteicos',
+        '🥗 Produtos proteicos essenciais',
+        '💪 Suplementação proteica básica',
+        '📞 Consultoria especializada em proteínas'
+      ],
+      proteinaModerada: [
+        '💊 Guia de otimização proteica',
+        '🥗 Produtos proteicos balanceados',
+        '💪 Suplementação proteica moderada',
+        '📞 Consultoria preventiva proteica'
+      ],
+      altaProteina: [
+        '💊 Guia de performance proteica',
+        '🥗 Produtos proteicos de alta qualidade',
+        '💪 Suplementação proteica avançada',
+        '📞 Consultoria premium em proteínas'
+      ]
+    },
+    coach: {
+      baixaProteina: [
+        '🧘‍♀️ Guia de treinos para ganho muscular',
+        '💪 Exercícios focados em massa muscular',
+        '🍎 Coaching nutricional proteico',
+        '📅 Programa de ganho muscular'
+      ],
+      proteinaModerada: [
+        '🧘‍♀️ Guia de treinos balanceados',
+        '💪 Exercícios para manutenção muscular',
+        '🍎 Coaching nutricional equilibrado',
+        '📅 Programa de manutenção muscular'
+      ],
+      altaProteina: [
+        '🧘‍♀️ Guia de treinos de alta performance',
+        '💪 Exercícios para performance muscular',
+        '🍎 Coaching nutricional de elite',
+        '📅 Programa de performance muscular'
+      ]
+    }
+  },
+
+  // 14. TABELA COMPARATIVA
+  'tabela-comparativa': {
+    nutri: [
+      '📋 Análise comparativa de produtos',
+      '🥗 Recomendações baseadas em evidências',
+      '💊 Suplementação personalizada',
+      '📅 Consulta nutricional comparativa'
+    ],
+    sales: [
+      '💊 Comparativo detalhado de produtos',
+      '🥗 Produtos recomendados por categoria',
+      '💪 Suplementação direcionada',
+      '📞 Consultoria comparativa em produtos'
+    ],
+    coach: [
+      '🧘‍♀️ Comparativo de estratégias de treino',
+      '💪 Exercícios recomendados por objetivo',
+      '🍎 Coaching nutricional comparativo',
+      '📅 Programa de treino personalizado'
+    ]
+  },
+
+  // 15. TABELA DE SUBSTITUIÇÕES
+  'tabela-substituicoes': {
+    nutri: [
+      '📋 Guia completo de substituições alimentares',
+      '🥗 Alternativas nutritivas por categoria',
+      '💊 Suplementação para substituições',
+      '📅 Consulta nutricional de substituições'
+    ],
+    sales: [
+      '💊 Guia de produtos substitutos',
+      '🥗 Alternativas por categoria de produto',
+      '💪 Suplementação para substituições',
+      '📞 Consultoria em produtos substitutos'
+    ],
+    coach: [
+      '🧘‍♀️ Guia de exercícios substitutos',
+      '💪 Alternativas de treino por objetivo',
+      '🍎 Coaching nutricional de substituições',
+      '📅 Programa de treino adaptado'
+    ]
+  },
+
+  // 16. TABELA DE SINTOMAS
+  'tabela-sintomas': {
+    nutri: [
+      '📋 Análise nutricional de sintomas',
+      '🥗 Plano alimentar para correção',
+      '💊 Suplementação para sintomas específicos',
+      '📅 Consulta nutricional terapêutica'
+    ],
+    sales: [
+      '💊 Produtos para sintomas específicos',
+      '🥗 Suplementação direcionada',
+      '💪 Produtos de apoio terapêutico',
+      '📞 Consultoria em produtos terapêuticos'
+    ],
+    coach: [
+      '🧘‍♀️ Programa de bem-estar para sintomas',
+      '💪 Exercícios adaptados para sintomas',
+      '🍎 Coaching nutricional terapêutico',
+      '📅 Programa de transformação terapêutica'
+    ]
+  },
+
+  // 17. PLANO ALIMENTAR BASE
+  'plano-alimentar-base': {
+    nutri: [
+      '📋 Plano alimentar personalizado',
+      '🥗 Cardápio baseado em necessidades',
+      '💊 Suplementação complementar',
+      '📅 Acompanhamento nutricional semanal'
+    ],
+    sales: [
+      '💊 Produtos complementares ao plano',
+      '🥗 Suplementação para o plano alimentar',
+      '💪 Produtos de apoio nutricional',
+      '📞 Consultoria em produtos complementares'
+    ],
+    coach: [
+      '🧘‍♀️ Programa de transformação alimentar',
+      '💪 Exercícios complementares ao plano',
+      '🍎 Coaching nutricional do plano',
+      '📅 Acompanhamento do plano alimentar'
+    ]
+  },
+
+  // 18. PLANNER DE REFEIÇÕES
+  'planner-refeicoes': {
+    nutri: [
+      '📋 Planner personalizado de refeições',
+      '🥗 Organização semanal de cardápio',
+      '💊 Suplementação integrada ao planner',
+      '📅 Acompanhamento do planner semanal'
+    ],
+    sales: [
+      '💊 Produtos para o planner de refeições',
+      '🥗 Suplementação integrada',
+      '💪 Produtos de apoio ao planner',
+      '📞 Consultoria em produtos do planner'
+    ],
+    coach: [
+      '🧘‍♀️ Programa de organização alimentar',
+      '💪 Exercícios integrados ao planner',
+      '🍎 Coaching do planner alimentar',
+      '📅 Acompanhamento do planner'
+    ]
+  },
+
+  // 19. RASTREADOR ALIMENTAR
+  'rastreador-alimentar': {
+    nutri: [
+      '📋 Análise do rastreamento alimentar',
+      '🥗 Correções baseadas no rastreamento',
+      '💊 Suplementação baseada no padrão',
+      '📅 Consulta nutricional de análise'
+    ],
+    sales: [
+      '💊 Produtos baseados no rastreamento',
+      '🥗 Suplementação personalizada',
+      '💪 Produtos para correção de padrões',
+      '📞 Consultoria baseada no rastreamento'
+    ],
+    coach: [
+      '🧘‍♀️ Programa baseado no rastreamento',
+      '💪 Exercícios para correção de padrões',
+      '🍎 Coaching nutricional de análise',
+      '📅 Acompanhamento de correção'
+    ]
+  },
+
+  // 20. DIÁRIO ALIMENTAR
+  'diario-alimentar': {
+    nutri: [
+      '📋 Análise do diário alimentar',
+      '🥗 Plano de correção alimentar',
+      '💊 Suplementação baseada no diário',
+      '📅 Consulta nutricional de análise'
+    ],
+    sales: [
+      '💊 Produtos para correção alimentar',
+      '🥗 Suplementação baseada no diário',
+      '💪 Produtos de apoio alimentar',
+      '📞 Consultoria baseada no diário'
+    ],
+    coach: [
+      '🧘‍♀️ Programa de correção alimentar',
+      '💪 Exercícios para mudança de hábitos',
+      '🍎 Coaching nutricional de transformação',
+      '📅 Acompanhamento de mudança'
+    ]
+  },
+
   // 4. QUIZ DE PERFIL NUTRICIONAL
   'quiz-perfil-nutricional': {
     nutri: {
@@ -782,6 +1128,56 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'baixa-toxicidade', label: 'Baixa Toxicidade', range: '0-3 sinais', color: 'green' },
       { id: 'toxicidade-moderada', label: 'Toxicidade Moderada', range: '4-6 sinais', color: 'yellow' },
       { id: 'alta-toxicidade', label: 'Alta Toxicidade', range: '7+ sinais', color: 'red' }
+    ],
+    'mini-ebook': [
+      { id: 'baixo-conhecimento', label: 'Baixo Conhecimento', range: '0-40 pontos', color: 'red' },
+      { id: 'conhecimento-moderado', label: 'Conhecimento Moderado', range: '41-70 pontos', color: 'yellow' },
+      { id: 'alto-conhecimento', label: 'Alto Conhecimento', range: '71-100 pontos', color: 'green' }
+    ],
+    'guia-nutraceutico': [
+      { id: 'baixo-interesse', label: 'Baixo Interesse', range: '0-40 pontos', color: 'red' },
+      { id: 'interesse-moderado', label: 'Interesse Moderado', range: '41-70 pontos', color: 'yellow' },
+      { id: 'alto-interesse', label: 'Alto Interesse', range: '71-100 pontos', color: 'green' }
+    ],
+    'guia-proteico': [
+      { id: 'baixa-proteina', label: 'Baixa Proteína', range: '< 0.8g/kg', color: 'blue' },
+      { id: 'proteina-moderada', label: 'Proteína Moderada', range: '0.8-1.2g/kg', color: 'green' },
+      { id: 'alta-proteina', label: 'Alta Proteína', range: '> 1.2g/kg', color: 'yellow' }
+    ],
+    'tabela-comparativa': [
+      { id: 'comparacao-basica', label: 'Comparação Básica', range: 'Produtos essenciais', color: 'blue' },
+      { id: 'comparacao-avancada', label: 'Comparação Avançada', range: 'Produtos especializados', color: 'green' },
+      { id: 'comparacao-premium', label: 'Comparação Premium', range: 'Produtos de elite', color: 'yellow' }
+    ],
+    'tabela-substituicoes': [
+      { id: 'substituicoes-basicas', label: 'Substituições Básicas', range: 'Alternativas simples', color: 'blue' },
+      { id: 'substituicoes-avancadas', label: 'Substituições Avançadas', range: 'Alternativas especializadas', color: 'green' },
+      { id: 'substituicoes-premium', label: 'Substituições Premium', range: 'Alternativas de elite', color: 'yellow' }
+    ],
+    'tabela-sintomas': [
+      { id: 'sintomas-leves', label: 'Sintomas Leves', range: '1-3 sintomas', color: 'green' },
+      { id: 'sintomas-moderados', label: 'Sintomas Moderados', range: '4-6 sintomas', color: 'yellow' },
+      { id: 'sintomas-graves', label: 'Sintomas Graves', range: '7+ sintomas', color: 'red' }
+    ],
+    'plano-alimentar-base': [
+      { id: 'plano-basico', label: 'Plano Básico', range: 'Alimentação equilibrada', color: 'blue' },
+      { id: 'plano-avancado', label: 'Plano Avançado', range: 'Alimentação especializada', color: 'green' },
+      { id: 'plano-premium', label: 'Plano Premium', range: 'Alimentação de elite', color: 'yellow' }
+    ],
+    'planner-refeicoes': [
+      { id: 'planner-simples', label: 'Planner Simples', range: 'Organização básica', color: 'blue' },
+      { id: 'planner-avancado', label: 'Planner Avançado', range: 'Organização especializada', color: 'green' },
+      { id: 'planner-premium', label: 'Planner Premium', range: 'Organização de elite', color: 'yellow' }
+    ],
+    'rastreador-alimentar': [
+      { id: 'rastreamento-basico', label: 'Rastreamento Básico', range: 'Padrões simples', color: 'blue' },
+      { id: 'rastreamento-avancado', label: 'Rastreamento Avançado', range: 'Padrões complexos', color: 'green' },
+      { id: 'rastreamento-premium', label: 'Rastreamento Premium', range: 'Padrões de elite', color: 'yellow' }
+    ],
+    'diario-alimentar': [
+      { id: 'diario-basico', label: 'Diário Básico', range: 'Registro simples', color: 'blue' },
+      { id: 'diario-avancado', label: 'Diário Avançado', range: 'Registro detalhado', color: 'green' },
+      { id: 'diario-premium', label: 'Diário Premium', range: 'Registro profissional', color: 'yellow' }
     ]
   }
   
