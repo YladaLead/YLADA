@@ -3362,22 +3362,22 @@ const diagnosticosCompletos = {
   'calculadora-agua': {
     nutri: {
       baixaHidratacao: [
-        '📋 Avaliação hidratacional completa',
-        '🥗 Plano alimentar rico em líquidos',
-        '💊 Suplementos eletrolíticos',
-        '📅 Acompanhamento hidratacional semanal'
+        '📋 Plano hidratacional para correção imediata',
+        '🥗 Estratégias para aumentar consumo de líquidos',
+        '💊 Suplementos eletrolíticos para reposição',
+        '📅 Acompanhamento hidratacional diário'
       ],
       hidratacaoModerada: [
-        '📋 Otimização da hidratação',
-        '🥗 Plano alimentar para manutenção hidratacional',
+        '📋 Otimização da hidratação para melhor performance',
+        '🥗 Plano alimentar rico em frutas e vegetais',
         '💊 Suplementos de apoio hidratacional',
-        '📅 Consultas de manutenção hidratacional'
+        '📅 Consultas de manutenção quinzenais'
       ],
       altaHidratacao: [
         '📋 Manutenção da hidratação otimizada',
         '🥗 Plano alimentar para sustentação hidratacional',
-        '💊 Suplementos preventivos hidratacionais',
-        '📅 Acompanhamento preventivo hidratacional'
+        '💊 Suplementos preventivos para atletas',
+        '📅 Acompanhamento preventivo mensal'
       ]
     },
     sales: {
