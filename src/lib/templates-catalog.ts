@@ -45,6 +45,25 @@ export const TEMPLATES_CATALOG: Template[] = [
 
   // QUIZES INTERATIVOS (2-6)
   {
+    id: 'quiz-interativo',
+    name: 'Quiz Interativo - Descubra seu Tipo de Metabolismo',
+    description: 'Identifique seu tipo metabólico através de perguntas estratégicas',
+    objective: 'attract-contacts',
+    category: 'quiz',
+    profession: 'universal',
+    disclaimer: 'required',
+    estimatedTime: '3-5 minutos',
+    difficulty: 'easy',
+    scientificBasis: ['OMS - Metabolismo basal', 'FDA - Avaliação nutricional'],
+    ctaText: 'Ver resultado completo',
+    captureData: true,
+    icon: '🎯',
+    color: 'green',
+    status: 'ready',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
     id: 'quiz-metabolismo',
     name: 'Quiz Interativo - Descubra seu Tipo de Metabolismo',
     description: 'Identifique seu tipo metabólico através de perguntas estratégicas',

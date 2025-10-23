@@ -3933,8 +3933,8 @@ const profissoes = [
 
 export default function AdminDiagnosticos() {
   const [profissaoSelecionada, setProfissaoSelecionada] = useState<'nutri' | 'sales' | 'coach'>('nutri')
-  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('calculadora-imc')
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('baixoPeso')
+  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('quiz-interativo')
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('metabolismo-lento')
 
   // Filtrar ferramentas por profissão
   const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
@@ -4090,6 +4090,56 @@ export default function AdminDiagnosticos() {
               ))}
             </div>
 
+            {/* Seção de Fluxo/Flow */}
+            {ferramentaSelecionada === 'quiz-interativo' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🔄 Fluxo do Quiz Interativo
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-2">📋 Etapa 1: Perguntas Interativas</h4>
+                    <div className="space-y-2 text-sm text-blue-800">
+                      <p><strong>1.</strong> Como você se sente pela manhã?</p>
+                      <p><strong>2.</strong> Como está seu apetite pela manhã?</p>
+                      <p><strong>3.</strong> Em que horário prefere fazer exercícios?</p>
+                      <p><strong>4.</strong> Como você descreve sua digestão?</p>
+                      <p><strong>5.</strong> Como você se sente com relação à temperatura?</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-2">📊 Etapa 2: Sistema de Pontuação</h4>
+                    <div className="space-y-2 text-sm text-green-800">
+                      <p><strong>•</strong> Cada pergunta tem 3 opções (1, 2 ou 3 pontos)</p>
+                      <p><strong>•</strong> Total máximo: 15 pontos</p>
+                      <p><strong>•</strong> Classificação automática por faixa de pontos</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-2">🎯 Etapa 3: Resultados por Profissão</h4>
+                    <div className="space-y-2 text-sm text-purple-800">
+                      <p><strong>•</strong> <span className="text-blue-600">Metabolismo Lento (5-7 pts):</span> Recomendações para aceleração</p>
+                      <p><strong>•</strong> <span className="text-green-600">Metabolismo Normal (8-11 pts):</span> Recomendações para manutenção</p>
+                      <p><strong>•</strong> <span className="text-yellow-600">Metabolismo Rápido (12-15 pts):</span> Recomendações para estabilização</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-2">📱 Experiência do Usuário</h4>
+                    <div className="space-y-2 text-sm text-orange-800">
+                      <p><strong>•</strong> Interface responsiva e intuitiva</p>
+                      <p><strong>•</strong> Barra de progresso visual</p>
+                      <p><strong>•</strong> Confirmação antes do resultado</p>
+                      <p><strong>•</strong> Resultados personalizados por profissão</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Informações Adicionais */}
             <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-blue-50 p-4 rounded-lg">
@@ -4121,16 +4171,6 @@ export default function AdminDiagnosticos() {
                 </p>
               </div>
             </div>
-          </div>
-
-          {/* Navegação */}
-          <div className="mt-8 flex justify-center">
-            <Link 
-              href={`/template/${ferramentaSelecionada}`}
-              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
-            >
-              🧪 Testar {ferramentasYLADA.find(f => f.id === ferramentaSelecionada)?.nome}
-            </Link>
           </div>
         </div>
       </main>
