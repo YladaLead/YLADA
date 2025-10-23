@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import YLADALogo from '../../../components/YLADALogo'
 
@@ -3951,6 +3951,13 @@ export default function AdminDiagnosticos() {
   // Obter categorias dinâmicas baseadas na ferramenta
   const categoriasAtuais = getCategoriasPorFerramenta(ferramentaSelecionada)
 
+  // Atualizar categoria automaticamente quando a ferramenta muda
+  useEffect(() => {
+    if (categoriasAtuais.length > 0) {
+      setCategoriaSelecionada(categoriasAtuais[0].id)
+    }
+  }, [ferramentaSelecionada])
+
   // Obter diagnósticos dinâmicos baseados na ferramenta e profissão
   const diagnosticosAtuais = (diagnosticosCompletos as any)[ferramentaSelecionada]?.[profissaoSelecionada]?.[categoriaSelecionada] || []
 
@@ -4119,10 +4126,10 @@ export default function AdminDiagnosticos() {
           {/* Navegação */}
           <div className="mt-8 flex justify-center">
             <Link 
-              href="/calculadora-imc"
+              href={`/template/${ferramentaSelecionada}`}
               className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
             >
-              🧪 Testar Calculadora de IMC
+              🧪 Testar {ferramentasYLADA.find(f => f.id === ferramentaSelecionada)?.nome}
             </Link>
           </div>
         </div>
