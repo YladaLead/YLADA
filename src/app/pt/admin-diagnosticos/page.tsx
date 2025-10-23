@@ -156,62 +156,98 @@ const diagnosticosCompletos = {
   'quiz-interativo': {
     nutri: {
       metabolismoLento: [
-        '📋 Seu metabolismo está pedindo um olhar profissional',
-        '🍎 Pequenas correções nutricionais e ajustes nos horários das refeições podem acelerar o metabolismo naturalmente',
-        '⏰ Com um acompanhamento personalizado, você pode ver resultados em até 15 dias',
-        '✅ CTA: Quero uma avaliação nutricional personalizada'
+        '📋 DIAGNÓSTICO: Seu metabolismo está em modo de economia energética',
+        '🔍 CAUSA RAIZ: Falta de nutrientes essenciais e horários irregulares de refeições',
+        '⚡ AÇÃO IMEDIATA: Comece com 3 refeições principais nos mesmos horários todos os dias',
+        '📅 PLANO 7 DIAS: Reequilíbrio metabólico com proteína em todas as refeições',
+        '💊 SUPLEMENTAÇÃO: Magnésio (200mg) e B12 para energia celular',
+        '🍎 ALIMENTAÇÃO: Aumente proteína magra e gorduras boas (abacate, oleaginosas)',
+        '📞 ACOMPANHAMENTO: Retorno em 15 dias para ajustes',
+        '✅ CTA: Agendar avaliação nutricional completa'
       ],
       metabolismoEquilibrado: [
-        '📋 Seu metabolismo está estável, mas com espaço para otimização',
-        '🍏 Um plano nutricional de precisão pode melhorar absorção, reduzir fadiga e manter o equilíbrio natural do corpo',
-        '📅 CTA: Quero meu plano personalizado com nutricionista',
-        '🎯 Gatilhos: autoridade + aprimoramento'
+        '📋 DIAGNÓSTICO: Seu metabolismo está estável com potencial de otimização',
+        '🔍 CAUSA RAIZ: Boa base metabólica, mas pode melhorar absorção e eficiência',
+        '⚡ AÇÃO IMEDIATA: Mantenha rotina atual e adicione micronutrientes',
+        '📅 PLANO 7 DIAS: Otimização com alimentos funcionais e timing nutricional',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico e ômega-3 para performance',
+        '🍎 ALIMENTAÇÃO: Varie cores no prato e inclua alimentos antioxidantes',
+        '📞 ACOMPANHAMENTO: Retorno em 30 dias para avaliação',
+        '✅ CTA: Quero meu plano de otimização personalizado'
       ],
       metabolismoAcelerado: [
-        '📋 Seu metabolismo rápido pode estar pedindo nutrientes estabilizadores',
-        '🥦 Uma dieta com equilíbrio entre proteína, gordura e carboidrato ajuda a evitar oscilações de energia e compulsão alimentar',
-        '📞 CTA: Quero ajustar minha alimentação com ajuda profissional',
-        '🎯 Gatilhos: equilíbrio, segurança, autocuidado'
+        '📋 DIAGNÓSTICO: Seu metabolismo rápido precisa de estabilização',
+        '🔍 CAUSA RAIZ: Alta queima calórica pode causar desequilíbrios e fadiga',
+        '⚡ AÇÃO IMEDIATA: Aumente frequência de refeições (5-6x/dia)',
+        '📅 PLANO 7 DIAS: Estabilização com carboidratos complexos e proteína',
+        '💊 SUPLEMENTAÇÃO: Creatina e glutamina para recuperação muscular',
+        '🍎 ALIMENTAÇÃO: Carboidratos complexos + proteína para sustentar energia',
+        '📞 ACOMPANHAMENTO: Retorno em 20 dias para ajustes',
+        '✅ CTA: Quero estabilizar meu metabolismo com ajuda profissional'
       ]
     },
     sales: {
       metabolismoLento: [
-        '💊 Seu corpo mostra sinais claros de carência de nutrientes essenciais',
-        '⚡ Quando faltam vitaminas e minerais, o metabolismo entra em \"modo de economia\"',
-        '💬 CTA: Quero ver os suplementos ideais para o meu tipo de metabolismo',
-        '🎯 Gatilhos: personalização, autoridade científica, praticidade'
+        '💊 DIAGNÓSTICO: Seu corpo mostra sinais claros de carência de nutrientes essenciais',
+        '🔍 CAUSA RAIZ: Quando faltam vitaminas e minerais, o metabolismo entra em "modo de economia"',
+        '⚡ AÇÃO IMEDIATA: Suplementação básica com multivitamínico e magnésio',
+        '📅 PLANO 7 DIAS: Kit metabólico com B12, ferro e zinco para energia',
+        '💊 SUPLEMENTAÇÃO: Complexo B + Magnésio + Ferro para acelerar metabolismo',
+        '🍎 ALIMENTAÇÃO: Alimentos ricos em ferro e vitamina C para absorção',
+        '📞 ACOMPANHAMENTO: Retorno em 15 dias para avaliar resposta',
+        '✅ CTA: Quero ver os suplementos ideais para o meu tipo de metabolismo'
       ],
       metabolismoEquilibrado: [
-        '💊 Seu metabolismo está bom, mas pode ganhar performance com suporte nutricional específico',
-        '⚡ Suplementos certos potencializam absorção, energia e foco, evitando desequilíbrios',
-        '⚡ CTA: Ver suplementos que mantêm o equilíbrio metabólico',
-        '🎯 Gatilhos: manutenção, performance, conveniência'
+        '💊 DIAGNÓSTICO: Seu metabolismo está bom, mas pode ganhar performance com suporte nutricional específico',
+        '🔍 CAUSA RAIZ: Boa base metabólica, mas precisa de micronutrientes para otimização',
+        '⚡ AÇÃO IMEDIATA: Suplementação preventiva com multivitamínico premium',
+        '📅 PLANO 7 DIAS: Kit de performance com ômega-3 e probióticos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos para manutenção',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, adicione alimentos funcionais',
+        '📞 ACOMPANHAMENTO: Retorno em 30 dias para avaliação de performance',
+        '✅ CTA: Ver suplementos que mantêm o equilíbrio metabólico'
       ],
       metabolismoAcelerado: [
-        '💊 Seu corpo está acelerado e precisa de apoio antioxidante e restaurador',
-        '⚡ Alguns nutracêuticos ajudam a reduzir estresse oxidativo e manter foco, sem perder vitalidade',
-        '💊 CTA: Ver suplementos para estabilidade e foco',
-        '🎯 Gatilhos: equilíbrio, desempenho, prevenção'
+        '💊 DIAGNÓSTICO: Seu corpo está acelerado e precisa de apoio antioxidante e restaurador',
+        '🔍 CAUSA RAIZ: Alta queima metabólica gera estresse oxidativo e desgaste celular',
+        '⚡ AÇÃO IMEDIATA: Suplementação antioxidante com vitamina C e E',
+        '📅 PLANO 7 DIAS: Kit estabilizador com creatina e glutamina',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Creatina + Glutamina para recuperação',
+        '🍎 ALIMENTAÇÃO: Aumente carboidratos complexos para sustentar energia',
+        '📞 ACOMPANHAMENTO: Retorno em 20 dias para ajuste de dosagens',
+        '✅ CTA: Ver suplementos para estabilidade e foco'
       ]
     },
     coach: {
       metabolismoLento: [
-        '🌱 Seu metabolismo está em modo lento, e isso reflete diretamente na sua energia e disposição mental',
-        '🌿 A primeira mudança não é no prato — é na rotina. Vamos ajustar sono, hidratação e movimento com um plano simples de 7 dias',
-        '🌿 CTA: Quero começar o desafio de 7 dias',
-        '🎯 Gatilhos: empoderamento, leveza, pertencimento'
+        '🌱 DIAGNÓSTICO: Seu metabolismo está em modo lento, afetando energia e disposição mental',
+        '🔍 CAUSA RAIZ: Rotina desequilibrada impacta sono, hidratação e movimento',
+        '⚡ AÇÃO IMEDIATA: Ajuste horário de sono e hidratação matinal',
+        '📅 PLANO 7 DIAS: Desafio de reequilíbrio com sono + água + movimento leve',
+        '💊 SUPLEMENTAÇÃO: Magnésio para relaxamento e melatonina natural',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares, não apenas no que comer',
+        '📞 ACOMPANHAMENTO: Check-in diário por 7 dias',
+        '✅ CTA: Quero começar o desafio de 7 dias'
       ],
       metabolismoEquilibrado: [
-        '🌼 Você está equilibrado — mas é provável que sua rotina precise de ajustes estratégicos para manter essa constância',
-        '🌿 O Desafio de 7 Dias vai te ajudar a fortalecer seus hábitos e manter o foco no que realmente importa',
-        '🌿 CTA: Quero reforçar minha rotina saudável',
-        '🎯 Gatilhos: evolução contínua, comunidade, comprometimento'
+        '🌼 DIAGNÓSTICO: Você está equilibrado, mas precisa de ajustes estratégicos para manter constância',
+        '🔍 CAUSA RAIZ: Boa base, mas rotina pode ser otimizada para sustentabilidade',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de fortalecimento de hábitos existentes',
+        '💊 SUPLEMENTAÇÃO: Probióticos e adaptógenos para sustentabilidade',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar',
+        '📞 ACOMPANHAMENTO: Check-in semanal por 30 dias',
+        '✅ CTA: Quero reforçar minha rotina saudável'
       ],
       metabolismoAcelerado: [
-        '🔆 Você é naturalmente ativo(a), mas talvez esteja acelerando demais',
-        '🌿 Vamos usar técnicas de respiração, foco e alimentação consciente para ajudar seu corpo a manter ritmo e paz interna',
-        '🌿 CTA: Quero aprender a equilibrar minha energia',
-        '🎯 Gatilhos: autoconsciência, estabilidade, leveza'
+        '🔆 DIAGNÓSTICO: Você é naturalmente ativo(a), mas pode estar acelerando demais',
+        '🔍 CAUSA RAIZ: Alta energia pode gerar estresse e desequilíbrio energético',
+        '⚡ AÇÃO IMEDIATA: Pratique técnicas de respiração e mindfulness',
+        '📅 PLANO 7 DIAS: Desafio de equilíbrio com meditação + alimentação consciente',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos (ashwagandha) para estabilidade',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e horários regulares',
+        '📞 ACOMPANHAMENTO: Check-in diário por 14 dias',
+        '✅ CTA: Quero aprender a equilibrar minha energia'
       ]
     }
   },
