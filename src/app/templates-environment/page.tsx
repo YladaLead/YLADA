@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
-import { useTranslations } from '@/hooks/useTranslations'
 import { TEMPLATES_CATALOG, Template, getTemplatesByObjective, getTemplatesByProfession, searchTemplates } from '@/lib/templates-catalog'
 
 export default function TemplatesEnvironment() {
-  const { t } = useTranslations()
   const [selectedObjective, setSelectedObjective] = useState('all')
   const [selectedProfession, setSelectedProfession] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
