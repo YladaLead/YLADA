@@ -3950,10 +3950,23 @@ const profissoes = [
 ]
 
 export default function AdminDiagnosticos() {
+  const [profissaoSelecionada, setProfissaoSelecionada] = useState<'nutri' | 'sales' | 'coach'>('nutri')
   const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('quiz-interativo')
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('metabolismoLento')
 
-  // Obter categorias dinâmicas baseadas na ferramenta selecionada
+  // Filtrar ferramentas por profissão
+  const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
+    if (profissaoSelecionada === 'nutri') {
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico'].includes(ferramenta.categoria)
+    } else if (profissaoSelecionada === 'sales') {
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Recrutamento', 'Duplicação', 'Gestão', 'Fidelização', 'Retenção', 'Relacionamento'].includes(ferramenta.categoria)
+    } else if (profissaoSelecionada === 'coach') {
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico'].includes(ferramenta.categoria)
+    }
+    return true
+  })
+
+  // Obter categorias dinâmicas baseadas na ferramenta
   const categoriasAtuais = getCategoriasPorFerramenta(ferramentaSelecionada)
 
   // Atualizar categoria automaticamente quando a ferramenta muda
@@ -3963,8 +3976,8 @@ export default function AdminDiagnosticos() {
     }
   }, [ferramentaSelecionada])
 
-  // Obter diagnósticos dinâmicos baseados na ferramenta e categoria (usando nutri como exemplo)
-  const diagnosticosAtuais = (diagnosticosCompletos as any)[ferramentaSelecionada]?.nutri?.[categoriaSelecionada] || []
+  // Obter diagnósticos dinâmicos baseados na ferramenta e profissão
+  const diagnosticosAtuais = (diagnosticosCompletos as any)[ferramentaSelecionada]?.[profissaoSelecionada]?.[categoriaSelecionada] || []
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -4337,30 +4350,6 @@ export default function AdminDiagnosticos() {
                     <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Diagnóstico rápido (dor e aspiração)</p>
                   </div>
 
-                  {/* Sistema de Pontuação */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">📊 Sistema de Pontuação</h4>
-                    <div className="mb-3 text-sm text-gray-600">
-                      <p><strong>A = 1 ponto | B = 2 pontos | C = 3 pontos</strong></p>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="text-center p-3 bg-blue-100 rounded-lg">
-                        <div className="font-semibold text-blue-900">Metabolismo Lento</div>
-                        <div className="text-blue-700">6-9 pontos</div>
-                        <div className="text-xs text-blue-600 mt-1">Dificuldade em eliminar toxinas</div>
-                      </div>
-                      <div className="text-center p-3 bg-green-100 rounded-lg">
-                        <div className="font-semibold text-green-900">Metabolismo Equilibrado</div>
-                        <div className="text-green-700">10-13 pontos</div>
-                        <div className="text-xs text-green-600 mt-1">Boa resposta metabólica</div>
-                      </div>
-                      <div className="text-center p-3 bg-yellow-100 rounded-lg">
-                        <div className="font-semibold text-yellow-900">Metabolismo Acelerado</div>
-                        <div className="text-yellow-700">14-18 pontos</div>
-                        <div className="text-xs text-yellow-600 mt-1">Alta queima, instabilidade</div>
-                      </div>
-                    </div>
-                  </div>
 
                   {/* CTAs por Profissão */}
                   <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
@@ -4387,37 +4376,6 @@ export default function AdminDiagnosticos() {
               </div>
             )}
 
-            {/* Informações Adicionais */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-900 mb-2">📊 Categoria</h3>
-                <p className="text-blue-800 text-sm">
-                  {categoriasAtuais.find(c => c.id === categoriaSelecionada)?.label} 
-                  ({categoriasAtuais.find(c => c.id === categoriaSelecionada)?.range})
-                </p>
-              </div>
-              
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-green-900 mb-2">👨‍⚕️ Profissão</h3>
-                <p className="text-green-800 text-sm">
-                  {profissoes.find(p => p.id === profissaoSelecionada)?.label}
-                </p>
-              </div>
-
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-purple-900 mb-2">🛠️ Ferramenta</h3>
-                <p className="text-purple-800 text-sm">
-                  {ferramentasYLADA.find(f => f.id === ferramentaSelecionada)?.nome}
-                </p>
-              </div>
-              
-              <div className="bg-orange-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-orange-900 mb-2">📝 Total</h3>
-                <p className="text-orange-800 text-sm">
-                  {diagnosticosAtuais.length} recomendações específicas
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </main>
