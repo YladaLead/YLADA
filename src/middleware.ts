@@ -4,11 +4,23 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   
+  // Rotas que não precisam de prefixo de idioma
+  const excludedRoutes = [
+    '/templates-environment',
+    '/template/',
+    '/api/',
+    '/_next/',
+    '/favicon.ico'
+  ]
+  
+  // Verificar se é uma rota excluída
+  const isExcludedRoute = excludedRoutes.some(route => pathname.startsWith(route))
+  
   // Verificar se já tem idioma na URL
   const hasLanguage = pathname.startsWith('/pt') || pathname.startsWith('/en') || pathname.startsWith('/es')
   
-  // Se não tem idioma e não é uma rota de API ou arquivo estático
-  if (!hasLanguage && !pathname.startsWith('/api') && !pathname.includes('.')) {
+  // Se não tem idioma e não é uma rota excluída
+  if (!hasLanguage && !isExcludedRoute && !pathname.includes('.')) {
     // Detectar idioma preferido do usuário
     const acceptLanguage = request.headers.get('accept-language') || ''
     let preferredLang = 'pt' // padrão
