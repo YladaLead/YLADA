@@ -22,32 +22,32 @@ export default function HomePage() {
         <div className="text-center max-w-5xl mx-auto">
 
           {/* Badge de Filosofia */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-8 border border-blue-200">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-6 border border-blue-200">
             🧭 {t.main.badge}
           </div>
 
           {/* Título Principal - Filosofia Universal */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
             {t.main.title}
           </h1>
           
           {/* Subtítulo - Propósito Universal */}
-          <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             {t.main.subtitle}
           </p>
 
           {/* CTA Principal - Chamada Universal */}
-          <div className="space-y-6 mb-16">
+          <div className="space-y-4 mb-12">
             <Link 
               href="/pt/como-funciona"
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              <span className="mr-3 text-lg">🚀</span>
+              <span className="mr-2 text-base">🚀</span>
               {t.main.cta}
             </Link>
             
             {/* Credibilidade Universal */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-sm text-gray-500">
               <div className="flex items-center">
                 <span className="text-blue-500 mr-2">✅</span>
                 <span className="text-gray-700 font-medium">{t.main.credibility.professionals}</span>
@@ -64,7 +64,7 @@ export default function HomePage() {
           </div>
 
           {/* Benefícios - 3 Pilares da Filosofia YLADA */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-xl text-blue-600">⚡</span>
