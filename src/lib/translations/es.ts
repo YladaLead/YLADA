@@ -46,10 +46,10 @@ export const esTranslations: Translations = {
     noResultsDescription: 'Intenta ajustar los filtros o buscar otros términos',
     cta: 'Crear Plantilla Personalizada',
     objectives: {
-      captureLeads: 'Capturar Leads',
-      increaseSales: 'Aumentar Ventas',
-      engageClients: 'Comprometer Clientes',
-      educateAudience: 'Educar Audiencia',
+      attractContacts: 'Atraer Nuevos Contactos',
+      convertSales: 'Convertir en Ventas',
+      engageClients: 'Fidelizar y Comprometer Clientes',
+      generateAuthority: 'Generar Valor y Autoridad',
       all: 'Todos los Objetivos'
     },
     professions: {

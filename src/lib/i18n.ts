@@ -65,10 +65,10 @@ export interface Translations {
     noResultsDescription: string;
     cta: string;
     objectives: {
-      captureLeads: string;
-      increaseSales: string;
+      attractContacts: string;
+      convertSales: string;
       engageClients: string;
-      educateAudience: string;
+      generateAuthority: string;
       all: string;
     };
     professions: {

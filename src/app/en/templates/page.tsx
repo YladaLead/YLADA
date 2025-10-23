@@ -170,10 +170,10 @@ export default function TemplatesPageEN() {
                 className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">{t.templates.objectives.all}</option>
-                <option value="capture-leads">{t.templates.objectives.captureLeads}</option>
-                <option value="increase-sales">{t.templates.objectives.increaseSales}</option>
+                <option value="attract-contacts">{t.templates.objectives.attractContacts}</option>
+                <option value="convert-sales">{t.templates.objectives.convertSales}</option>
                 <option value="engage-clients">{t.templates.objectives.engageClients}</option>
-                <option value="educate-audience">{t.templates.objectives.educateAudience}</option>
+                <option value="generate-authority">{t.templates.objectives.generateAuthority}</option>
               </select>
             </div>
 

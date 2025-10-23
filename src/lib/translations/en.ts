@@ -46,10 +46,10 @@ export const enTranslations: Translations = {
     noResultsDescription: 'Try adjusting the filters or searching for other terms',
     cta: 'Create Custom Template',
     objectives: {
-      captureLeads: 'Capture Leads',
-      increaseSales: 'Increase Sales',
-      engageClients: 'Engage Clients',
-      educateAudience: 'Educate Audience',
+      attractContacts: 'Attract New Contacts',
+      convertSales: 'Convert to Sales',
+      engageClients: 'Retain and Engage Clients',
+      generateAuthority: 'Generate Value and Authority',
       all: 'All Objectives'
     },
     professions: {

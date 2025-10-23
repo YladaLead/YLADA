@@ -36,7 +36,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capture-leads',
+      objective: 'attract-contacts',
       title: { pt: 'Descubra seu Perfil Nutricional Ideal', en: 'Discover Your Ideal Nutritional Profile', es: 'Descubre tu Perfil Nutricional Ideal' },
       usage_count: 1247
     },
@@ -49,7 +49,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capture-leads',
+      objective: 'attract-contacts',
       title: { pt: 'Calcule seu IMC e Peso Ideal', en: 'Calculate Your BMI and Ideal Weight', es: 'Calcula tu IMC y Peso Ideal' },
       usage_count: 892
     },
@@ -62,7 +62,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capture-leads',
+      objective: 'attract-contacts',
       title: { pt: 'Sua Dieta Personalizada', en: 'Your Personalized Diet', es: 'Tu Dieta Personalizada' },
       usage_count: 634
     },
@@ -75,7 +75,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'increase-sales',
+      objective: 'convert-sales',
       title: { pt: 'Seus Suplementos Ideais', en: 'Your Ideal Supplements', es: 'Tus Suplementos Ideales' },
       usage_count: 445
     },
@@ -88,7 +88,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'increase-sales',
+      objective: 'convert-sales',
       title: { pt: 'Descubra Seus Suplementos Ideais', en: 'Discover Your Ideal Supplements', es: 'Descubre tus Suplementos Ideales' },
       usage_count: 321
     },
@@ -101,7 +101,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capture-leads',
+      objective: 'attract-contacts',
       title: { pt: 'Suas Necessidades Calóricas', en: 'Your Caloric Needs', es: 'Tus Necesidades Calóricas' },
       usage_count: 567
     },
@@ -127,7 +127,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'educate-audience',
+      objective: 'generate-authority',
       title: { pt: 'Suplementação Inteligente', en: 'Smart Supplementation', es: 'Suplementación Inteligente' },
       usage_count: 189
     }
@@ -159,30 +159,30 @@ export default function TemplatesPage() {
   const getObjectiveLabel = (objective: string) => {
     const labels = {
       todos: { pt: 'Todos os Objetivos', en: 'All Objectives', es: 'Todos los Objetivos' },
-      'capture-leads': { pt: 'Captar Leads', en: 'Capture Leads', es: 'Capturar Leads' },
-      'increase-sales': { pt: 'Aumentar Vendas', en: 'Increase Sales', es: 'Aumentar Ventas' },
-      'engage-clients': { pt: 'Engajar Clientes', en: 'Engage Clients', es: 'Comprometer Clientes' },
-      'educate-audience': { pt: 'Educar Público', en: 'Educate Audience', es: 'Educar Audiencia' }
+      'attract-contacts': { pt: 'Atrair Novos Contatos', en: 'Attract New Contacts', es: 'Atraer Nuevos Contactos' },
+      'convert-sales': { pt: 'Converter em Vendas', en: 'Convert to Sales', es: 'Convertir en Ventas' },
+      'engage-clients': { pt: 'Fidelizar e Engajar Clientes', en: 'Retain and Engage Clients', es: 'Fidelizar y Comprometer Clientes' },
+      'generate-authority': { pt: 'Gerar Valor e Autoridade', en: 'Generate Value and Authority', es: 'Generar Valor y Autoridad' }
     }
     return labels[objective as keyof typeof labels]?.[selectedLanguage as keyof typeof labels.todos] || objective
   }
 
   const getObjectiveIcon = (objective: string) => {
     const icons = {
-      'capture-leads': '🎯',
-      'increase-sales': '💰',
+      'attract-contacts': '🎯',
+      'convert-sales': '💰',
       'engage-clients': '🤝',
-      'educate-audience': '📚'
+      'generate-authority': '📚'
     }
     return icons[objective as keyof typeof icons] || '📄'
   }
 
   const getObjectiveColor = (objective: string) => {
     const colors = {
-      'capture-leads': 'from-green-500 to-green-600',
-      'increase-sales': 'from-blue-500 to-blue-600',
+      'attract-contacts': 'from-green-500 to-green-600',
+      'convert-sales': 'from-blue-500 to-blue-600',
       'engage-clients': 'from-purple-500 to-purple-600',
-      'educate-audience': 'from-yellow-500 to-yellow-600'
+      'generate-authority': 'from-yellow-500 to-yellow-600'
     }
     return colors[objective as keyof typeof colors] || 'from-gray-500 to-gray-600'
   }
@@ -248,10 +248,10 @@ export default function TemplatesPage() {
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos os Objetivos</option>
-                <option value="capture-leads">Captar Leads</option>
-                <option value="increase-sales">Aumentar Vendas</option>
-                <option value="engage-clients">Engajar Clientes</option>
-                <option value="educate-audience">Educar Público</option>
+                <option value="attract-contacts">Atrair Novos Contatos</option>
+                <option value="convert-sales">Converter em Vendas</option>
+                <option value="engage-clients">Fidelizar e Engajar Clientes</option>
+                <option value="generate-authority">Gerar Valor e Autoridade</option>
               </select>
             </div>
 
