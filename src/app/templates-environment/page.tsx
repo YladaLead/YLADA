@@ -242,12 +242,21 @@ export default function TemplatesEnvironment() {
                 </span>
               </div>
 
-              <Link 
-                href={`/template/${template.id}`}
-                className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
-              >
-                {template.status === 'published' ? 'Usar Template' : 'Ver Detalhes'}
-              </Link>
+              {template.id === 'calculadora-imc' ? (
+                <Link 
+                  href="/calculadora-imc"
+                  className="w-full inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-all duration-300"
+                >
+                  🚀 Usar Agora
+                </Link>
+              ) : (
+                <Link 
+                  href={`/template/${template.id}`}
+                  className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
+                >
+                  {template.status === 'published' ? 'Usar Template' : 'Ver Detalhes'}
+                </Link>
+              )}
             </div>
           ))}
         </div>

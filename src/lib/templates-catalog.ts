@@ -22,7 +22,28 @@ export interface Template {
 
 // Lista completa dos 60 templates
 export const TEMPLATES_CATALOG: Template[] = [
-  // QUIZES INTERATIVOS (1-5)
+  // CALCULADORA DE IMC (PRIMEIRA OPÇÃO)
+  {
+    id: 'calculadora-imc',
+    name: 'Calculadora de IMC Inteligente',
+    description: 'Calcule seu IMC com interpretação personalizada por sexo e nível de atividade física',
+    objective: 'attract-contacts',
+    category: 'calculator',
+    profession: 'universal',
+    disclaimer: 'required',
+    estimatedTime: '2-3 minutos',
+    difficulty: 'easy',
+    scientificBasis: ['OMS - Classificação IMC', 'FDA - Avaliação corporal', 'ANVISA - Padrões brasileiros'],
+    ctaText: 'Ver resultado completo',
+    captureData: true,
+    icon: '📊',
+    color: 'blue',
+    status: 'ready',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+
+  // QUIZES INTERATIVOS (2-6)
   {
     id: 'quiz-metabolismo',
     name: 'Quiz Interativo - Descubra seu Tipo de Metabolismo',
@@ -119,26 +140,7 @@ export const TEMPLATES_CATALOG: Template[] = [
     updatedAt: new Date()
   },
 
-  // CALCULADORAS (6-9)
-  {
-    id: 'calculadora-imc',
-    name: 'Calculadora de IMC Inteligente',
-    description: 'Calcule seu IMC com interpretação e recomendações',
-    objective: 'attract-contacts',
-    category: 'calculator',
-    profession: 'universal',
-    disclaimer: 'required',
-    estimatedTime: '1-2 minutos',
-    difficulty: 'easy',
-    scientificBasis: ['OMS - Classificação IMC', 'FDA - Avaliação corporal'],
-    ctaText: 'Descubra sua faixa ideal',
-    captureData: true,
-    icon: '📊',
-    color: 'blue',
-    status: 'draft',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
+  // CALCULADORAS (7-10)
   {
     id: 'calculadora-proteina',
     name: 'Calculadora de Proteína Diária',
