@@ -3950,23 +3950,10 @@ const profissoes = [
 ]
 
 export default function AdminDiagnosticos() {
-  const [profissaoSelecionada, setProfissaoSelecionada] = useState<'nutri' | 'sales' | 'coach'>('nutri')
   const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('quiz-interativo')
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('metabolismo-lento')
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('metabolismoLento')
 
-  // Filtrar ferramentas por profissão
-  const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
-    if (profissaoSelecionada === 'nutri') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico'].includes(ferramenta.categoria)
-    } else if (profissaoSelecionada === 'sales') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Recrutamento', 'Duplicação', 'Gestão', 'Fidelização', 'Retenção', 'Relacionamento'].includes(ferramenta.categoria)
-    } else if (profissaoSelecionada === 'coach') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico'].includes(ferramenta.categoria)
-    }
-    return true
-  })
-
-  // Obter categorias dinâmicas baseadas na ferramenta
+  // Obter categorias dinâmicas baseadas na ferramenta selecionada
   const categoriasAtuais = getCategoriasPorFerramenta(ferramentaSelecionada)
 
   // Atualizar categoria automaticamente quando a ferramenta muda
@@ -3976,8 +3963,8 @@ export default function AdminDiagnosticos() {
     }
   }, [ferramentaSelecionada])
 
-  // Obter diagnósticos dinâmicos baseados na ferramenta e profissão
-  const diagnosticosAtuais = (diagnosticosCompletos as any)[ferramentaSelecionada]?.[profissaoSelecionada]?.[categoriaSelecionada] || []
+  // Obter diagnósticos dinâmicos baseados na ferramenta e categoria (usando nutri como exemplo)
+  const diagnosticosAtuais = (diagnosticosCompletos as any)[ferramentaSelecionada]?.nutri?.[categoriaSelecionada] || []
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -4000,10 +3987,10 @@ export default function AdminDiagnosticos() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              📊 Diagnósticos por Profissão
+              📊 Área Administrativa - Diagnósticos
             </h1>
             <p className="text-gray-600">
-              Visualize todas as respostas padrão da Calculadora de IMC por profissão e categoria
+              Análise completa de ferramentas, fluxos e diagnósticos profissionais
             </p>
           </div>
 
