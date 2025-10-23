@@ -4108,6 +4108,113 @@ export default function AdminDiagnosticos() {
               ))}
             </div>
 
+            {/* Seção de CTAs Pré-sugeridos */}
+            {ferramentaSelecionada === 'quiz-interativo' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎯 CTAs Pré-sugeridos - Quiz Interativo
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">METABOLISMO LENTO</p>
+                        <p className="text-sm text-gray-700">"Seu metabolismo pode mudar em 30 dias. Agende uma avaliação nutricional gratuita."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero minha avaliação com o(a) nutricionista</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">METABOLISMO EQUILIBRADO</p>
+                        <p className="text-sm text-gray-700">"Otimize seu metabolismo com um plano nutricional personalizado."</p>
+                        <p className="text-xs text-green-600 mt-1">📅 Quero meu plano de otimização</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">METABOLISMO ACELERADO</p>
+                        <p className="text-sm text-gray-700">"Estabilize seu metabolismo rápido com orientação profissional."</p>
+                        <p className="text-xs text-green-600 mt-1">⚖️ Quero equilibrar meu metabolismo</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">METABOLISMO LENTO</p>
+                        <p className="text-sm text-gray-700">"Veja quais suplementos podem acelerar seu metabolismo naturalmente."</p>
+                        <p className="text-xs text-blue-600 mt-1">💊 Quero ver os suplementos ideais</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">METABOLISMO EQUILIBRADO</p>
+                        <p className="text-sm text-gray-700">"Mantenha seu equilíbrio metabólico com suplementos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">⚡ Ver suplementos de manutenção</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">METABOLISMO ACELERADO</p>
+                        <p className="text-sm text-gray-700">"Estabilize sua energia com suplementos antioxidantes."</p>
+                        <p className="text-xs text-blue-600 mt-1">🛡️ Ver suplementos estabilizadores</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">METABOLISMO LENTO</p>
+                        <p className="text-sm text-gray-700">"Entre no Desafio de 7 Dias e acelere seu metabolismo naturalmente."</p>
+                        <p className="text-xs text-purple-600 mt-1">🌱 Quero começar o desafio</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">METABOLISMO EQUILIBRADO</p>
+                        <p className="text-sm text-gray-700">"Fortalça seus hábitos saudáveis com nosso programa de 30 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">💪 Quero reforçar minha rotina</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">METABOLISMO ACELERADO</p>
+                        <p className="text-sm text-gray-700">"Aprenda técnicas de equilíbrio energético e mindfulness."</p>
+                        <p className="text-xs text-purple-600 mt-1">🧘‍♀️ Quero equilibrar minha energia</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada tipo de metabolismo</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Seção de Preview do Quiz */}
             {ferramentaSelecionada === 'quiz-interativo' && (
               <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
