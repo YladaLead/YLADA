@@ -156,62 +156,62 @@ const diagnosticosCompletos = {
   'quiz-interativo': {
     nutri: {
       metabolismoLento: [
-        '📋 Avaliação metabólica completa',
-        '🥗 Plano alimentar para acelerar metabolismo',
-        '💊 Suplementos termogênicos naturais',
-        '📅 Acompanhamento metabólico semanal'
+        '📋 Seu metabolismo está pedindo um olhar profissional',
+        '🍎 Pequenas correções nutricionais e ajustes nos horários das refeições podem acelerar o metabolismo naturalmente',
+        '⏰ Com um acompanhamento personalizado, você pode ver resultados em até 15 dias',
+        '✅ CTA: Quero uma avaliação nutricional personalizada'
       ],
-      metabolismoNormal: [
-        '📋 Manutenção do metabolismo equilibrado',
-        '🥗 Otimização nutricional para performance',
-        '💊 Suplementos de apoio metabólico',
-        '📅 Consultas de manutenção mensais'
+      metabolismoEquilibrado: [
+        '📋 Seu metabolismo está estável, mas com espaço para otimização',
+        '🍏 Um plano nutricional de precisão pode melhorar absorção, reduzir fadiga e manter o equilíbrio natural do corpo',
+        '📅 CTA: Quero meu plano personalizado com nutricionista',
+        '🎯 Gatilhos: autoridade + aprimoramento'
       ],
-      metabolismoRapido: [
-        '📋 Controle metabólico para estabilização',
-        '🥗 Plano alimentar para sustentação energética',
-        '💊 Suplementos para equilíbrio metabólico',
-        '📅 Acompanhamento nutricional especializado'
+      metabolismoAcelerado: [
+        '📋 Seu metabolismo rápido pode estar pedindo nutrientes estabilizadores',
+        '🥦 Uma dieta com equilíbrio entre proteína, gordura e carboidrato ajuda a evitar oscilações de energia e compulsão alimentar',
+        '📞 CTA: Quero ajustar minha alimentação com ajuda profissional',
+        '🎯 Gatilhos: equilíbrio, segurança, autocuidado'
       ]
     },
     sales: {
       metabolismoLento: [
-        '💊 Termogênicos para aceleração metabólica',
-        '🥗 Proteínas para preservação muscular',
-        '💪 Suplementos para queima de gordura',
-        '📞 Consultoria de suplementação metabólica'
+        '💊 Seu corpo mostra sinais claros de carência de nutrientes essenciais',
+        '⚡ Quando faltam vitaminas e minerais, o metabolismo entra em \"modo de economia\"',
+        '💬 CTA: Quero ver os suplementos ideais para o meu tipo de metabolismo',
+        '🎯 Gatilhos: personalização, autoridade científica, praticidade'
       ],
-      metabolismoNormal: [
-        '💊 Multivitamínicos para suporte metabólico',
-        '🥗 Proteínas para manutenção muscular',
-        '💪 Suplementos de performance',
-        '📞 Consultoria preventiva de suplementação'
+      metabolismoEquilibrado: [
+        '💊 Seu metabolismo está bom, mas pode ganhar performance com suporte nutricional específico',
+        '⚡ Suplementos certos potencializam absorção, energia e foco, evitando desequilíbrios',
+        '⚡ CTA: Ver suplementos que mantêm o equilíbrio metabólico',
+        '🎯 Gatilhos: manutenção, performance, conveniência'
       ],
-      metabolismoRapido: [
-        '💊 Suplementos para estabilização metabólica',
-        '🥗 Proteínas para sustentação muscular',
-        '💪 Suplementos de recuperação',
-        '📞 Consultoria especializada em metabolismo'
+      metabolismoAcelerado: [
+        '💊 Seu corpo está acelerado e precisa de apoio antioxidante e restaurador',
+        '⚡ Alguns nutracêuticos ajudam a reduzir estresse oxidativo e manter foco, sem perder vitalidade',
+        '💊 CTA: Ver suplementos para estabilidade e foco',
+        '🎯 Gatilhos: equilíbrio, desempenho, prevenção'
       ]
     },
     coach: {
       metabolismoLento: [
-        '🧘‍♀️ Programa de aceleração metabólica',
-        '💪 Treinos HIIT para metabolismo',
-        '🍎 Coaching nutricional metabólico',
-        '📅 Acompanhamento de transformação metabólica'
+        '🌱 Seu metabolismo está em modo lento, e isso reflete diretamente na sua energia e disposição mental',
+        '🌿 A primeira mudança não é no prato — é na rotina. Vamos ajustar sono, hidratação e movimento com um plano simples de 7 dias',
+        '🌿 CTA: Quero começar o desafio de 7 dias',
+        '🎯 Gatilhos: empoderamento, leveza, pertencimento'
       ],
-      metabolismoNormal: [
-        '🧘‍♀️ Programa de otimização metabólica',
-        '💪 Treinos para manutenção metabólica',
-        '🍎 Coaching de hábitos metabólicos',
-        '📅 Acompanhamento de performance metabólica'
+      metabolismoEquilibrado: [
+        '🌼 Você está equilibrado — mas é provável que sua rotina precise de ajustes estratégicos para manter essa constância',
+        '🌿 O Desafio de 7 Dias vai te ajudar a fortalecer seus hábitos e manter o foco no que realmente importa',
+        '🌿 CTA: Quero reforçar minha rotina saudável',
+        '🎯 Gatilhos: evolução contínua, comunidade, comprometimento'
       ],
-      metabolismoRapido: [
-        '🧘‍♀️ Programa de estabilização metabólica',
-        '💪 Treinos para sustentação energética',
-        '🍎 Coaching de equilíbrio metabólico',
-        '📅 Acompanhamento especializado metabólico'
+      metabolismoAcelerado: [
+        '🔆 Você é naturalmente ativo(a), mas talvez esteja acelerando demais',
+        '🌿 Vamos usar técnicas de respiração, foco e alimentação consciente para ajudar seu corpo a manter ritmo e paz interna',
+        '🌿 CTA: Quero aprender a equilibrar minha energia',
+        '🎯 Gatilhos: autoconsciência, estabilidade, leveza'
       ]
     }
   },
@@ -3625,9 +3625,9 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'obesidade', label: 'Obesidade', range: '≥ 30.0', color: 'red' }
     ],
     'quiz-interativo': [
-      { id: 'metabolismo-lento', label: 'Metabolismo Lento', range: '0-30 pontos', color: 'blue' },
-      { id: 'metabolismo-normal', label: 'Metabolismo Normal', range: '31-60 pontos', color: 'green' },
-      { id: 'metabolismo-rapido', label: 'Metabolismo Rápido', range: '61-100 pontos', color: 'yellow' }
+      { id: 'metabolismo-lento', label: 'Metabolismo Lento', range: '6-9 pontos', color: 'blue' },
+      { id: 'metabolismo-equilibrado', label: 'Metabolismo Equilibrado', range: '10-13 pontos', color: 'green' },
+      { id: 'metabolismo-acelerado', label: 'Metabolismo Acelerado', range: '14-18 pontos', color: 'yellow' }
     ],
     'quiz-bem-estar': [
       { id: 'baixo-bem-estar', label: 'Baixo Bem-estar', range: '0-40 pontos', color: 'red' },
@@ -4094,120 +4094,180 @@ export default function AdminDiagnosticos() {
             {ferramentaSelecionada === 'quiz-interativo' && (
               <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  🎯 Preview do Quiz Interativo - Como o Usuário Vai Vivenciar
+                  🎯 Preview do Quiz Interativo - "Descubra seu Tipo de Metabolismo"
                 </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🔍 Descubra Seu Tipo de Metabolismo em 60 Segundos</h4>
+                  <p className="text-gray-700 mb-3">Entenda por que seu corpo reage de um jeito único à alimentação, energia e suplementos — e descubra o melhor caminho para ter mais resultados.</p>
+                  <p className="text-blue-600 font-semibold">🚀 Leva menos de 1 minuto e pode mudar a forma como você cuida do seu corpo.</p>
+                </div>
                 
                 <div className="space-y-6">
                   {/* Pergunta 1 */}
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-3">1. Como você se sente pela manhã?</h4>
+                    <h4 className="font-semibold text-blue-900 mb-3">🕐 1. Como é seu nível de energia ao longo do dia?</h4>
                     <div className="space-y-2">
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
-                        <input type="radio" name="energia-manha" className="mr-3" />
-                        <span className="text-gray-700">Muito energizado e pronto para o dia</span>
+                        <input type="radio" name="energia-dia" className="mr-3" />
+                        <span className="text-gray-700">(A) Vivo cansado, mesmo dormindo bem</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
-                        <input type="radio" name="energia-manha" className="mr-3" />
-                        <span className="text-gray-700">Normal, preciso de um café para despertar</span>
+                        <input type="radio" name="energia-dia" className="mr-3" />
+                        <span className="text-gray-700">(B) Tenho altos e baixos</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
-                        <input type="radio" name="energia-manha" className="mr-3" />
-                        <span className="text-gray-700">Cansado, preciso de tempo para despertar</span>
+                        <input type="radio" name="energia-dia" className="mr-3" />
+                        <span className="text-gray-700">(C) Energia constante o dia inteiro</span>
                       </label>
                     </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Autopercepção e comparação</p>
                   </div>
 
                   {/* Pergunta 2 */}
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-green-900 mb-3">2. Como está seu apetite pela manhã?</h4>
+                    <h4 className="font-semibold text-green-900 mb-3">🍽️ 2. Como costuma ser sua fome?</h4>
                     <div className="space-y-2">
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
-                        <input type="radio" name="apetite-manha" className="mr-3" />
-                        <span className="text-gray-700">Muito forte, preciso comer logo</span>
+                        <input type="radio" name="fome" className="mr-3" />
+                        <span className="text-gray-700">(A) Forte, com vontade de comer o tempo todo</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
-                        <input type="radio" name="apetite-manha" className="mr-3" />
-                        <span className="text-gray-700">Moderado, posso esperar um pouco</span>
+                        <input type="radio" name="fome" className="mr-3" />
+                        <span className="text-gray-700">(B) Varia conforme o dia</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
-                        <input type="radio" name="apetite-manha" className="mr-3" />
-                        <span className="text-gray-700">Fraco, quase não sinto fome</span>
+                        <input type="radio" name="fome" className="mr-3" />
+                        <span className="text-gray-700">(C) Como de forma leve, sem exagerar</span>
                       </label>
                     </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Identificação emocional com comportamento alimentar</p>
                   </div>
 
                   {/* Pergunta 3 */}
                   <div className="bg-purple-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-purple-900 mb-3">3. Em que horário você prefere fazer exercícios?</h4>
+                    <h4 className="font-semibold text-purple-900 mb-3">💧 3. Quanta água você costuma beber por dia?</h4>
                     <div className="space-y-2">
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
-                        <input type="radio" name="preferencia-horario" className="mr-3" />
-                        <span className="text-gray-700">Manhã (6h-10h)</span>
+                        <input type="radio" name="agua" className="mr-3" />
+                        <span className="text-gray-700">(A) Quase nenhuma</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
-                        <input type="radio" name="preferencia-horario" className="mr-3" />
-                        <span className="text-gray-700">Tarde (14h-18h)</span>
+                        <input type="radio" name="agua" className="mr-3" />
+                        <span className="text-gray-700">(B) Mais ou menos 1 litro</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
-                        <input type="radio" name="preferencia-horario" className="mr-3" />
-                        <span className="text-gray-700">Noite (18h-22h)</span>
+                        <input type="radio" name="agua" className="mr-3" />
+                        <span className="text-gray-700">(C) Sempre carrego minha garrafinha</span>
                       </label>
                     </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Contraste e consciência de hábito</p>
                   </div>
 
                   {/* Pergunta 4 */}
                   <div className="bg-orange-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-orange-900 mb-3">4. Como você descreve sua digestão?</h4>
+                    <h4 className="font-semibold text-orange-900 mb-3">💤 4. Como anda a qualidade do seu sono?</h4>
                     <div className="space-y-2">
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
-                        <input type="radio" name="digestao" className="mr-3" />
-                        <span className="text-gray-700">Rápida, sinto fome em 2-3 horas</span>
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(A) Péssima, acordo cansado</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
-                        <input type="radio" name="digestao" className="mr-3" />
-                        <span className="text-gray-700">Normal, sinto fome em 4-5 horas</span>
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(B) Regular, depende do dia</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
-                        <input type="radio" name="digestao" className="mr-3" />
-                        <span className="text-gray-700">Lenta, fico satisfeito por 6+ horas</span>
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(C) Durmo bem e acordo disposto</span>
                       </label>
                     </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Reflexão + padrão de saúde percebida</p>
                   </div>
 
                   {/* Pergunta 5 */}
                   <div className="bg-red-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-red-900 mb-3">5. Como você se sente com relação à temperatura?</h4>
+                    <h4 className="font-semibold text-red-900 mb-3">🏃‍♂️ 5. Você pratica atividade física com qual frequência?</h4>
                     <div className="space-y-2">
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
-                        <input type="radio" name="temperatura" className="mr-3" />
-                        <span className="text-gray-700">Sempre com calor, suor facilmente</span>
+                        <input type="radio" name="exercicio" className="mr-3" />
+                        <span className="text-gray-700">(A) Quase nunca</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
-                        <input type="radio" name="temperatura" className="mr-3" />
-                        <span className="text-gray-700">Temperatura normal</span>
+                        <input type="radio" name="exercicio" className="mr-3" />
+                        <span className="text-gray-700">(B) 2 a 3 vezes por semana</span>
                       </label>
                       <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
-                        <input type="radio" name="temperatura" className="mr-3" />
-                        <span className="text-gray-700">Sempre com frio, mãos e pés gelados</span>
+                        <input type="radio" name="exercicio" className="mr-3" />
+                        <span className="text-gray-700">(C) Quase todos os dias</span>
                       </label>
                     </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Comparação e autoavaliação social</p>
+                  </div>
+
+                  {/* Pergunta 6 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">⚖️ 6. Qual dessas opções melhor descreve você?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="peso" className="mr-3" />
+                        <span className="text-gray-700">(A) Tenho dificuldade em perder peso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="peso" className="mr-3" />
+                        <span className="text-gray-700">(B) Mantenho o peso com esforço</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="peso" className="mr-3" />
+                        <span className="text-gray-700">(C) Emagreço facilmente</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Diagnóstico rápido (dor e aspiração)</p>
                   </div>
 
                   {/* Sistema de Pontuação */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-3">📊 Sistema de Pontuação</h4>
+                    <div className="mb-3 text-sm text-gray-600">
+                      <p><strong>A = 1 ponto | B = 2 pontos | C = 3 pontos</strong></p>
+                    </div>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="text-center p-3 bg-blue-100 rounded-lg">
                         <div className="font-semibold text-blue-900">Metabolismo Lento</div>
-                        <div className="text-blue-700">5-7 pontos</div>
+                        <div className="text-blue-700">6-9 pontos</div>
+                        <div className="text-xs text-blue-600 mt-1">Dificuldade em eliminar toxinas</div>
                       </div>
                       <div className="text-center p-3 bg-green-100 rounded-lg">
-                        <div className="font-semibold text-green-900">Metabolismo Normal</div>
-                        <div className="text-green-700">8-11 pontos</div>
+                        <div className="font-semibold text-green-900">Metabolismo Equilibrado</div>
+                        <div className="text-green-700">10-13 pontos</div>
+                        <div className="text-xs text-green-600 mt-1">Boa resposta metabólica</div>
                       </div>
                       <div className="text-center p-3 bg-yellow-100 rounded-lg">
-                        <div className="font-semibold text-yellow-900">Metabolismo Rápido</div>
-                        <div className="text-yellow-700">12-15 pontos</div>
+                        <div className="font-semibold text-yellow-900">Metabolismo Acelerado</div>
+                        <div className="text-yellow-700">14-18 pontos</div>
+                        <div className="text-xs text-yellow-600 mt-1">Alta queima, instabilidade</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CTAs por Profissão */}
+                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">🎯 CTAs Personalizados por Profissão</h4>
+                    <div className="space-y-3">
+                      <div className="bg-white p-3 rounded-lg border-l-4 border-green-500">
+                        <h5 className="font-semibold text-green-900">🧬 Para NUTRICIONISTAS</h5>
+                        <p className="text-sm text-gray-700">"Seu metabolismo pode mudar em 30 dias. Agende uma avaliação nutricional gratuita."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero minha avaliação com o(a) nutricionista</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border-l-4 border-purple-500">
+                        <h5 className="font-semibold text-purple-900">🌿 Para COACHS DE BEM-ESTAR</h5>
+                        <p className="text-sm text-gray-700">"Entre no Desafio de 7 Dias do Bem-Estar e comece sua transformação."</p>
+                        <p className="text-xs text-purple-600 mt-1">🌿 Quero entrar no desafio agora</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border-l-4 border-blue-500">
+                        <h5 className="font-semibold text-blue-900">💊 Para CONSULTORES NUTRA</h5>
+                        <p className="text-sm text-gray-700">"Veja quais suplementos naturais podem acelerar seus resultados."</p>
+                        <p className="text-xs text-blue-600 mt-1">💬 Falar com o(a) consultor e ver produtos indicados</p>
                       </div>
                     </div>
                   </div>
