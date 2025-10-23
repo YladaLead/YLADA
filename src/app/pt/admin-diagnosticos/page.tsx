@@ -4351,27 +4351,6 @@ export default function AdminDiagnosticos() {
                   </div>
 
 
-                  {/* CTAs por Profissão */}
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">🎯 CTAs Personalizados por Profissão</h4>
-                    <div className="space-y-3">
-                      <div className="bg-white p-3 rounded-lg border-l-4 border-green-500">
-                        <h5 className="font-semibold text-green-900">🧬 Para NUTRICIONISTAS</h5>
-                        <p className="text-sm text-gray-700">"Seu metabolismo pode mudar em 30 dias. Agende uma avaliação nutricional gratuita."</p>
-                        <p className="text-xs text-green-600 mt-1">✅ Quero minha avaliação com o(a) nutricionista</p>
-                      </div>
-                      <div className="bg-white p-3 rounded-lg border-l-4 border-purple-500">
-                        <h5 className="font-semibold text-purple-900">🌿 Para COACHS DE BEM-ESTAR</h5>
-                        <p className="text-sm text-gray-700">"Entre no Desafio de 7 Dias do Bem-Estar e comece sua transformação."</p>
-                        <p className="text-xs text-purple-600 mt-1">🌿 Quero entrar no desafio agora</p>
-                      </div>
-                      <div className="bg-white p-3 rounded-lg border-l-4 border-blue-500">
-                        <h5 className="font-semibold text-blue-900">💊 Para CONSULTORES NUTRA</h5>
-                        <p className="text-sm text-gray-700">"Veja quais suplementos naturais podem acelerar seus resultados."</p>
-                        <p className="text-xs text-blue-600 mt-1">💬 Falar com o(a) consultor e ver produtos indicados</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
