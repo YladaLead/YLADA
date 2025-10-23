@@ -2504,6 +2504,604 @@ const diagnosticosCompletos = {
     ]
   },
 
+  // 51. TEMPLATE DE RECOMPENSA / CASHBACK
+  'template-recompensa-cashback': {
+    nutri: {
+      recompensaBasica: [
+        '📋 Sistema básico de recompensa nutricional',
+        '🥗 Pontos por consultas nutricionais',
+        '💊 Cashback em suplementação',
+        '📅 Programa básico de fidelidade'
+      ],
+      recompensaModerada: [
+        '📋 Sistema moderado de recompensa nutricional',
+        '🥗 Pontos por planos alimentares',
+        '💊 Cashback direcionado em suplementação',
+        '📅 Programa moderado de fidelidade'
+      ],
+      recompensaAvancada: [
+        '📋 Sistema avançado de recompensa nutricional',
+        '🥗 Pontos por acompanhamento nutricional',
+        '💊 Cashback avançado em suplementação',
+        '📅 Programa avançado de fidelidade'
+      ]
+    },
+    sales: {
+      recompensaBasica: [
+        '💊 Sistema básico de recompensa de produtos',
+        '🥗 Pontos por compras de suplementos',
+        '💪 Cashback básico em produtos',
+        '📞 Programa básico de fidelidade'
+      ],
+      recompensaModerada: [
+        '💊 Sistema moderado de recompensa de produtos',
+        '🥗 Pontos por consultoria',
+        '💪 Cashback moderado em produtos',
+        '📞 Programa moderado de fidelidade'
+      ],
+      recompensaAvancada: [
+        '💊 Sistema avançado de recompensa de produtos',
+        '🥗 Pontos por indicações',
+        '💪 Cashback avançado em produtos',
+        '📞 Programa avançado de fidelidade'
+      ]
+    },
+    coach: {
+      recompensaBasica: [
+        '🧘‍♀️ Sistema básico de recompensa de bem-estar',
+        '💪 Pontos por exercícios',
+        '🍎 Cashback básico em coaching',
+        '📅 Programa básico de fidelidade'
+      ],
+      recompensaModerada: [
+        '🧘‍♀️ Sistema moderado de recompensa de bem-estar',
+        '💪 Pontos por programas',
+        '🍎 Cashback moderado em coaching',
+        '📅 Programa moderado de fidelidade'
+      ],
+      recompensaAvancada: [
+        '🧘‍♀️ Sistema avançado de recompensa de bem-estar',
+        '💪 Pontos por transformações',
+        '🍎 Cashback avançado em coaching',
+        '📅 Programa avançado de fidelidade'
+      ]
+    }
+  },
+
+  // 52. TEMPLATE DE AGRADECIMENTO
+  'template-agradecimento': {
+    nutri: {
+      agradecimentoBasico: [
+        '📋 Agradecimento básico nutricional',
+        '🥗 Mensagem simples de gratidão',
+        '💊 Obrigado pela confiança',
+        '📅 Agradecimento básico'
+      ],
+      agradecimentoModerado: [
+        '📋 Agradecimento moderado nutricional',
+        '🥗 Mensagem específica de gratidão',
+        '💊 Obrigado pela parceria',
+        '📅 Agradecimento moderado'
+      ],
+      agradecimentoAvancado: [
+        '📋 Agradecimento avançado nutricional',
+        '🥗 Mensagem complexa de gratidão',
+        '💊 Obrigado pela transformação',
+        '📅 Agradecimento avançado'
+      ]
+    },
+    sales: {
+      agradecimentoBasico: [
+        '💊 Agradecimento básico de produtos',
+        '🥗 Mensagem simples de gratidão',
+        '💪 Obrigado pela compra',
+        '📞 Agradecimento básico'
+      ],
+      agradecimentoModerado: [
+        '💊 Agradecimento moderado de produtos',
+        '🥗 Mensagem específica de gratidão',
+        '💪 Obrigado pela indicação',
+        '📞 Agradecimento moderado'
+      ],
+      agradecimentoAvancado: [
+        '💊 Agradecimento avançado de produtos',
+        '🥗 Mensagem complexa de gratidão',
+        '💪 Obrigado pela parceria',
+        '📞 Agradecimento avançado'
+      ]
+    },
+    coach: {
+      agradecimentoBasico: [
+        '🧘‍♀️ Agradecimento básico de bem-estar',
+        '💪 Mensagem simples de gratidão',
+        '🍎 Obrigado pela confiança',
+        '📅 Agradecimento básico'
+      ],
+      agradecimentoModerado: [
+        '🧘‍♀️ Agradecimento moderado de bem-estar',
+        '💪 Mensagem específica de gratidão',
+        '🍎 Obrigado pela dedicação',
+        '📅 Agradecimento moderado'
+      ],
+      agradecimentoAvancado: [
+        '🧘‍♀️ Agradecimento avançado de bem-estar',
+        '💪 Mensagem complexa de gratidão',
+        '🍎 Obrigado pela transformação',
+        '📅 Agradecimento avançado'
+      ]
+    }
+  },
+
+  // 53. TEMPLATE DE PLANO SEMANAL DE CONTEÚDO
+  'template-plano-semanal-conteudo': {
+    nutri: {
+      conteudoBasico: [
+        '📋 Plano básico semanal de conteúdo nutricional',
+        '🥗 Conteúdo simples sobre alimentação',
+        '💊 Posts básicos sobre suplementação',
+        '📅 Cronograma básico semanal'
+      ],
+      conteudoModerado: [
+        '📋 Plano moderado semanal de conteúdo nutricional',
+        '🥗 Conteúdo específico sobre alimentação',
+        '💊 Posts direcionados sobre suplementação',
+        '📅 Cronograma moderado semanal'
+      ],
+      conteudoAvancado: [
+        '📋 Plano avançado semanal de conteúdo nutricional',
+        '🥗 Conteúdo complexo sobre alimentação',
+        '💊 Posts avançados sobre suplementação',
+        '📅 Cronograma avançado semanal'
+      ]
+    },
+    sales: {
+      conteudoBasico: [
+        '💊 Plano básico semanal de conteúdo de produtos',
+        '🥗 Conteúdo simples sobre suplementos',
+        '💪 Posts básicos sobre produtos',
+        '📞 Cronograma básico semanal'
+      ],
+      conteudoModerado: [
+        '💊 Plano moderado semanal de conteúdo de produtos',
+        '🥗 Conteúdo específico sobre suplementos',
+        '💪 Posts direcionados sobre produtos',
+        '📞 Cronograma moderado semanal'
+      ],
+      conteudoAvancado: [
+        '💊 Plano avançado semanal de conteúdo de produtos',
+        '🥗 Conteúdo complexo sobre suplementos',
+        '💪 Posts avançados sobre produtos',
+        '📞 Cronograma avançado semanal'
+      ]
+    },
+    coach: {
+      conteudoBasico: [
+        '🧘‍♀️ Plano básico semanal de conteúdo de bem-estar',
+        '💪 Conteúdo simples sobre exercícios',
+        '🍎 Posts básicos sobre coaching',
+        '📅 Cronograma básico semanal'
+      ],
+      conteudoModerado: [
+        '🧘‍♀️ Plano moderado semanal de conteúdo de bem-estar',
+        '💪 Conteúdo específico sobre exercícios',
+        '🍎 Posts direcionados sobre coaching',
+        '📅 Cronograma moderado semanal'
+      ],
+      conteudoAvancado: [
+        '🧘‍♀️ Plano avançado semanal de conteúdo de bem-estar',
+        '💪 Conteúdo complexo sobre exercícios',
+        '🍎 Posts avançados sobre coaching',
+        '📅 Cronograma avançado semanal'
+      ]
+    }
+  },
+
+  // 54. TEMPLATE DE REELS EDUCATIVO
+  'template-reels-educativo': {
+    nutri: {
+      reelsBasico: [
+        '📋 Reels básico educativo nutricional',
+        '🥗 Educação simples sobre alimentação',
+        '💊 Informações básicas sobre suplementação',
+        '📅 Conteúdo básico educativo'
+      ],
+      reelsModerado: [
+        '📋 Reels moderado educativo nutricional',
+        '🥗 Educação específica sobre alimentação',
+        '💊 Informações direcionadas sobre suplementação',
+        '📅 Conteúdo moderado educativo'
+      ],
+      reelsAvancado: [
+        '📋 Reels avançado educativo nutricional',
+        '🥗 Educação complexa sobre alimentação',
+        '💊 Informações avançadas sobre suplementação',
+        '📅 Conteúdo avançado educativo'
+      ]
+    },
+    sales: {
+      reelsBasico: [
+        '💊 Reels básico educativo de produtos',
+        '🥗 Educação simples sobre suplementos',
+        '💪 Informações básicas sobre produtos',
+        '📞 Conteúdo básico educativo'
+      ],
+      reelsModerado: [
+        '💊 Reels moderado educativo de produtos',
+        '🥗 Educação específica sobre suplementos',
+        '💪 Informações direcionadas sobre produtos',
+        '📞 Conteúdo moderado educativo'
+      ],
+      reelsAvancado: [
+        '💊 Reels avançado educativo de produtos',
+        '🥗 Educação complexa sobre suplementos',
+        '💪 Informações avançadas sobre produtos',
+        '📞 Conteúdo avançado educativo'
+      ]
+    },
+    coach: {
+      reelsBasico: [
+        '🧘‍♀️ Reels básico educativo de bem-estar',
+        '💪 Educação simples sobre exercícios',
+        '🍎 Informações básicas sobre coaching',
+        '📅 Conteúdo básico educativo'
+      ],
+      reelsModerado: [
+        '🧘‍♀️ Reels moderado educativo de bem-estar',
+        '💪 Educação específica sobre exercícios',
+        '🍎 Informações direcionadas sobre coaching',
+        '📅 Conteúdo moderado educativo'
+      ],
+      reelsAvancado: [
+        '🧘‍♀️ Reels avançado educativo de bem-estar',
+        '💪 Educação complexa sobre exercícios',
+        '🍎 Informações avançadas sobre coaching',
+        '📅 Conteúdo avançado educativo'
+      ]
+    }
+  },
+
+  // 55. TEMPLATE DE CONTEÚDO DE AUTORIDADE
+  'template-conteudo-autoridade': {
+    nutri: {
+      autoridadeBasica: [
+        '📋 Conteúdo básico de autoridade nutricional',
+        '🥗 Autoridade simples em alimentação',
+        '💊 Credibilidade básica em suplementação',
+        '📅 Posicionamento básico nutricional'
+      ],
+      autoridadeModerada: [
+        '📋 Conteúdo moderado de autoridade nutricional',
+        '🥗 Autoridade específica em alimentação',
+        '💊 Credibilidade direcionada em suplementação',
+        '📅 Posicionamento moderado nutricional'
+      ],
+      autoridadeAvancada: [
+        '📋 Conteúdo avançado de autoridade nutricional',
+        '🥗 Autoridade complexa em alimentação',
+        '💊 Credibilidade avançada em suplementação',
+        '📅 Posicionamento avançado nutricional'
+      ]
+    },
+    sales: {
+      autoridadeBasica: [
+        '💊 Conteúdo básico de autoridade de produtos',
+        '🥗 Autoridade simples em suplementos',
+        '💪 Credibilidade básica em produtos',
+        '📞 Posicionamento básico'
+      ],
+      autoridadeModerada: [
+        '💊 Conteúdo moderado de autoridade de produtos',
+        '🥗 Autoridade específica em suplementos',
+        '💪 Credibilidade direcionada em produtos',
+        '📞 Posicionamento moderado'
+      ],
+      autoridadeAvancada: [
+        '💊 Conteúdo avançado de autoridade de produtos',
+        '🥗 Autoridade complexa em suplementos',
+        '💪 Credibilidade avançada em produtos',
+        '📞 Posicionamento avançado'
+      ]
+    },
+    coach: {
+      autoridadeBasica: [
+        '🧘‍♀️ Conteúdo básico de autoridade de bem-estar',
+        '💪 Autoridade simples em exercícios',
+        '🍎 Credibilidade básica em coaching',
+        '📅 Posicionamento básico'
+      ],
+      autoridadeModerada: [
+        '🧘‍♀️ Conteúdo moderado de autoridade de bem-estar',
+        '💪 Autoridade específica em exercícios',
+        '🍎 Credibilidade direcionada em coaching',
+        '📅 Posicionamento moderado'
+      ],
+      autoridadeAvancada: [
+        '🧘‍♀️ Conteúdo avançado de autoridade de bem-estar',
+        '💪 Autoridade complexa em exercícios',
+        '🍎 Credibilidade avançada em coaching',
+        '📅 Posicionamento avançado'
+      ]
+    }
+  },
+
+  // 56. TEMPLATE DE TESTEMUNHO VISUAL
+  'template-testemunho-visual': {
+    nutri: {
+      testemunhoBasico: [
+        '📋 Testemunho básico visual nutricional',
+        '🥗 Depoimento simples sobre alimentação',
+        '💊 Resultado básico com suplementação',
+        '📅 Transformação básica nutricional'
+      ],
+      testemunhoModerado: [
+        '📋 Testemunho moderado visual nutricional',
+        '🥗 Depoimento específico sobre alimentação',
+        '💊 Resultado direcionado com suplementação',
+        '📅 Transformação moderada nutricional'
+      ],
+      testemunhoAvancado: [
+        '📋 Testemunho avançado visual nutricional',
+        '🥗 Depoimento complexo sobre alimentação',
+        '💊 Resultado avançado com suplementação',
+        '📅 Transformação avançada nutricional'
+      ]
+    },
+    sales: {
+      testemunhoBasico: [
+        '💊 Testemunho básico visual de produtos',
+        '🥗 Depoimento simples sobre suplementos',
+        '💪 Resultado básico com produtos',
+        '📞 Transformação básica'
+      ],
+      testemunhoModerado: [
+        '💊 Testemunho moderado visual de produtos',
+        '🥗 Depoimento específico sobre suplementos',
+        '💪 Resultado direcionado com produtos',
+        '📞 Transformação moderada'
+      ],
+      testemunhoAvancado: [
+        '💊 Testemunho avançado visual de produtos',
+        '🥗 Depoimento complexo sobre suplementos',
+        '💪 Resultado avançado com produtos',
+        '📞 Transformação avançada'
+      ]
+    },
+    coach: {
+      testemunhoBasico: [
+        '🧘‍♀️ Testemunho básico visual de bem-estar',
+        '💪 Depoimento simples sobre exercícios',
+        '🍎 Resultado básico com coaching',
+        '📅 Transformação básica'
+      ],
+      testemunhoModerado: [
+        '🧘‍♀️ Testemunho moderado visual de bem-estar',
+        '💪 Depoimento específico sobre exercícios',
+        '🍎 Resultado direcionado com coaching',
+        '📅 Transformação moderada'
+      ],
+      testemunhoAvancado: [
+        '🧘‍♀️ Testemunho avançado visual de bem-estar',
+        '💪 Depoimento complexo sobre exercícios',
+        '🍎 Resultado avançado com coaching',
+        '📅 Transformação avançada'
+      ]
+    }
+  },
+
+  // 57. TEMPLATE DE CALENDÁRIO DE POSTAGENS
+  'template-calendario-postagens': {
+    nutri: {
+      calendarioBasico: [
+        '📋 Calendário básico de postagens nutricionais',
+        '🥗 Cronograma simples de alimentação',
+        '💊 Posts básicos sobre suplementação',
+        '📅 Agenda básica nutricional'
+      ],
+      calendarioModerado: [
+        '📋 Calendário moderado de postagens nutricionais',
+        '🥗 Cronograma específico de alimentação',
+        '💊 Posts direcionados sobre suplementação',
+        '📅 Agenda moderada nutricional'
+      ],
+      calendarioAvancado: [
+        '📋 Calendário avançado de postagens nutricionais',
+        '🥗 Cronograma complexo de alimentação',
+        '💊 Posts avançados sobre suplementação',
+        '📅 Agenda avançada nutricional'
+      ]
+    },
+    sales: {
+      calendarioBasico: [
+        '💊 Calendário básico de postagens de produtos',
+        '🥗 Cronograma simples de suplementos',
+        '💪 Posts básicos sobre produtos',
+        '📞 Agenda básica'
+      ],
+      calendarioModerado: [
+        '💊 Calendário moderado de postagens de produtos',
+        '🥗 Cronograma específico de suplementos',
+        '💪 Posts direcionados sobre produtos',
+        '📞 Agenda moderada'
+      ],
+      calendarioAvancado: [
+        '💊 Calendário avançado de postagens de produtos',
+        '🥗 Cronograma complexo de suplementos',
+        '💪 Posts avançados sobre produtos',
+        '📞 Agenda avançada'
+      ]
+    },
+    coach: {
+      calendarioBasico: [
+        '🧘‍♀️ Calendário básico de postagens de bem-estar',
+        '💪 Cronograma simples de exercícios',
+        '🍎 Posts básicos sobre coaching',
+        '📅 Agenda básica'
+      ],
+      calendarioModerado: [
+        '🧘‍♀️ Calendário moderado de postagens de bem-estar',
+        '💪 Cronograma específico de exercícios',
+        '🍎 Posts direcionados sobre coaching',
+        '📅 Agenda moderada'
+      ],
+      calendarioAvancado: [
+        '🧘‍♀️ Calendário avançado de postagens de bem-estar',
+        '💪 Cronograma complexo de exercícios',
+        '🍎 Posts avançados sobre coaching',
+        '📅 Agenda avançada'
+      ]
+    }
+  },
+
+  // 58. TEMPLATE DE ESTRATÉGIA DE LANÇAMENTO
+  'template-estrategia-lancamento': {
+    nutri: {
+      lancamentoBasico: [
+        '📋 Estratégia básica de lançamento nutricional',
+        '🥗 Lançamento simples de produtos',
+        '💊 Estratégia básica de suplementação',
+        '📅 Plano básico de lançamento'
+      ],
+      lancamentoModerado: [
+        '📋 Estratégia moderada de lançamento nutricional',
+        '🥗 Lançamento específico de produtos',
+        '💊 Estratégia direcionada de suplementação',
+        '📅 Plano moderado de lançamento'
+      ],
+      lancamentoAvancado: [
+        '📋 Estratégia avançada de lançamento nutricional',
+        '🥗 Lançamento complexo de produtos',
+        '💊 Estratégia avançada de suplementação',
+        '📅 Plano avançado de lançamento'
+      ]
+    },
+    sales: {
+      lancamentoBasico: [
+        '💊 Estratégia básica de lançamento de produtos',
+        '🥗 Lançamento simples de suplementos',
+        '💪 Estratégia básica de produtos',
+        '📞 Plano básico de lançamento'
+      ],
+      lancamentoModerado: [
+        '💊 Estratégia moderada de lançamento de produtos',
+        '🥗 Lançamento específico de suplementos',
+        '💪 Estratégia direcionada de produtos',
+        '📞 Plano moderado de lançamento'
+      ],
+      lancamentoAvancado: [
+        '💊 Estratégia avançada de lançamento de produtos',
+        '🥗 Lançamento complexo de suplementos',
+        '💪 Estratégia avançada de produtos',
+        '📞 Plano avançado de lançamento'
+      ]
+    },
+    coach: {
+      lancamentoBasico: [
+        '🧘‍♀️ Estratégia básica de lançamento de bem-estar',
+        '💪 Lançamento simples de programas',
+        '🍎 Estratégia básica de coaching',
+        '📅 Plano básico de lançamento'
+      ],
+      lancamentoModerado: [
+        '🧘‍♀️ Estratégia moderada de lançamento de bem-estar',
+        '💪 Lançamento específico de programas',
+        '🍎 Estratégia direcionada de coaching',
+        '📅 Plano moderado de lançamento'
+      ],
+      lancamentoAvancado: [
+        '🧘‍♀️ Estratégia avançada de lançamento de bem-estar',
+        '💪 Lançamento complexo de programas',
+        '🍎 Estratégia avançada de coaching',
+        '📅 Plano avançado de lançamento'
+      ]
+    }
+  },
+
+  // 59. TEMPLATE DE JORNADA DO CLIENTE
+  'template-jornada-cliente': {
+    nutri: {
+      jornadaBasica: [
+        '📋 Jornada básica do cliente nutricional',
+        '🥗 Experiência simples de alimentação',
+        '💊 Processo básico de suplementação',
+        '📅 Acompanhamento básico nutricional'
+      ],
+      jornadaModerada: [
+        '📋 Jornada moderada do cliente nutricional',
+        '🥗 Experiência específica de alimentação',
+        '💊 Processo direcionado de suplementação',
+        '📅 Acompanhamento moderado nutricional'
+      ],
+      jornadaAvancada: [
+        '📋 Jornada avançada do cliente nutricional',
+        '🥗 Experiência complexa de alimentação',
+        '💊 Processo avançado de suplementação',
+        '📅 Acompanhamento avançado nutricional'
+      ]
+    },
+    sales: {
+      jornadaBasica: [
+        '💊 Jornada básica do cliente de produtos',
+        '🥗 Experiência simples de suplementos',
+        '💪 Processo básico de produtos',
+        '📞 Acompanhamento básico'
+      ],
+      jornadaModerada: [
+        '💊 Jornada moderada do cliente de produtos',
+        '🥗 Experiência específica de suplementos',
+        '💪 Processo direcionado de produtos',
+        '📞 Acompanhamento moderado'
+      ],
+      jornadaAvancada: [
+        '💊 Jornada avançada do cliente de produtos',
+        '🥗 Experiência complexa de suplementos',
+        '💪 Processo avançado de produtos',
+        '📞 Acompanhamento avançado'
+      ]
+    },
+    coach: {
+      jornadaBasica: [
+        '🧘‍♀️ Jornada básica do cliente de bem-estar',
+        '💪 Experiência simples de exercícios',
+        '🍎 Processo básico de coaching',
+        '📅 Acompanhamento básico'
+      ],
+      jornadaModerada: [
+        '🧘‍♀️ Jornada moderada do cliente de bem-estar',
+        '💪 Experiência específica de exercícios',
+        '🍎 Processo direcionado de coaching',
+        '📅 Acompanhamento moderado'
+      ],
+      jornadaAvancada: [
+        '🧘‍♀️ Jornada avançada do cliente de bem-estar',
+        '💪 Experiência complexa de exercícios',
+        '🍎 Processo avançado de coaching',
+        '📅 Acompanhamento avançado'
+      ]
+    }
+  },
+
+  // 60. TEMPLATE DE JORNADA DO CLIENTE (FINAL)
+  'template-jornada-cliente-final': {
+    nutri: [
+      '📋 Jornada completa do cliente nutricional',
+      '🥗 Experiência total de transformação',
+      '💊 Processo completo de suplementação',
+      '📅 Acompanhamento integral nutricional'
+    ],
+    sales: [
+      '💊 Jornada completa do cliente de produtos',
+      '🥗 Experiência total de transformação',
+      '💪 Processo completo de produtos',
+      '📞 Acompanhamento integral'
+    ],
+    coach: [
+      '🧘‍♀️ Jornada completa do cliente de bem-estar',
+      '💪 Experiência total de transformação',
+      '🍎 Processo completo de coaching',
+      '📅 Acompanhamento integral'
+    ]
+  },
+
   // 4. QUIZ DE PERFIL NUTRICIONAL
   'quiz-perfil-nutricional': {
     nutri: {
@@ -3204,6 +3802,54 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
     ],
     'template-aniversario': [
       { id: 'aniversario-especial', label: 'Aniversário Especial', range: 'Mensagem especial', color: 'purple' }
+    ],
+    'template-recompensa-cashback': [
+      { id: 'recompensa-basica', label: 'Recompensa Básica', range: 'Sistema simples', color: 'blue' },
+      { id: 'recompensa-moderada', label: 'Recompensa Moderada', range: 'Sistema específico', color: 'green' },
+      { id: 'recompensa-avancada', label: 'Recompensa Avançada', range: 'Sistema complexo', color: 'yellow' }
+    ],
+    'template-agradecimento': [
+      { id: 'agradecimento-basico', label: 'Agradecimento Básico', range: 'Mensagem simples', color: 'blue' },
+      { id: 'agradecimento-moderado', label: 'Agradecimento Moderado', range: 'Mensagem específica', color: 'green' },
+      { id: 'agradecimento-avancado', label: 'Agradecimento Avançado', range: 'Mensagem complexa', color: 'yellow' }
+    ],
+    'template-plano-semanal-conteudo': [
+      { id: 'conteudo-basico', label: 'Conteúdo Básico', range: 'Plano simples', color: 'blue' },
+      { id: 'conteudo-moderado', label: 'Conteúdo Moderado', range: 'Plano específico', color: 'green' },
+      { id: 'conteudo-avancado', label: 'Conteúdo Avançado', range: 'Plano complexo', color: 'yellow' }
+    ],
+    'template-reels-educativo': [
+      { id: 'reels-basico', label: 'Reels Básico', range: 'Educativo simples', color: 'blue' },
+      { id: 'reels-moderado', label: 'Reels Moderado', range: 'Educativo específico', color: 'green' },
+      { id: 'reels-avancado', label: 'Reels Avançado', range: 'Educativo complexo', color: 'yellow' }
+    ],
+    'template-conteudo-autoridade': [
+      { id: 'autoridade-basica', label: 'Autoridade Básica', range: 'Conteúdo simples', color: 'blue' },
+      { id: 'autoridade-moderada', label: 'Autoridade Moderada', range: 'Conteúdo específico', color: 'green' },
+      { id: 'autoridade-avancada', label: 'Autoridade Avançada', range: 'Conteúdo complexo', color: 'yellow' }
+    ],
+    'template-testemunho-visual': [
+      { id: 'testemunho-basico', label: 'Testemunho Básico', range: 'Visual simples', color: 'blue' },
+      { id: 'testemunho-moderado', label: 'Testemunho Moderado', range: 'Visual específico', color: 'green' },
+      { id: 'testemunho-avancado', label: 'Testemunho Avançado', range: 'Visual complexo', color: 'yellow' }
+    ],
+    'template-calendario-postagens': [
+      { id: 'calendario-basico', label: 'Calendário Básico', range: 'Postagens simples', color: 'blue' },
+      { id: 'calendario-moderado', label: 'Calendário Moderado', range: 'Postagens específicas', color: 'green' },
+      { id: 'calendario-avancado', label: 'Calendário Avançado', range: 'Postagens complexas', color: 'yellow' }
+    ],
+    'template-estrategia-lancamento': [
+      { id: 'lancamento-basico', label: 'Lançamento Básico', range: 'Estratégia simples', color: 'blue' },
+      { id: 'lancamento-moderado', label: 'Lançamento Moderado', range: 'Estratégia específica', color: 'green' },
+      { id: 'lancamento-avancado', label: 'Lançamento Avançado', range: 'Estratégia complexa', color: 'yellow' }
+    ],
+    'template-jornada-cliente': [
+      { id: 'jornada-basica', label: 'Jornada Básica', range: 'Experiência simples', color: 'blue' },
+      { id: 'jornada-moderada', label: 'Jornada Moderada', range: 'Experiência específica', color: 'green' },
+      { id: 'jornada-avancada', label: 'Jornada Avançada', range: 'Experiência complexa', color: 'yellow' }
+    ],
+    'template-jornada-cliente-final': [
+      { id: 'jornada-completa', label: 'Jornada Completa', range: 'Experiência total', color: 'purple' }
     ]
   }
   
