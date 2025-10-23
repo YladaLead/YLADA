@@ -25,11 +25,11 @@ export const esTranslations: Translations = {
       description: 'Crea herramientas inteligentes para tus clientes y transforma consultas en resultados medibles.'
     },
     sales: {
-      title: 'Soy Vendedor(a) de Suplementos',
+      title: 'Soy Vendedor(a)',
       description: 'Acelera tus ventas con herramientas que califican leads y aumentan conversiones.'
     },
     coach: {
-      title: 'Soy Coach',
+      title: 'Soy Coach de Bienestar',
       description: 'Involucra a tus clientes con herramientas interactivas que aceleran el proceso de transformación.'
     }
   },
@@ -55,7 +55,7 @@ export const esTranslations: Translations = {
     professions: {
       nutri: 'Nutricionista',
       sales: 'Vendedor',
-      coach: 'Coach',
+      coach: 'Coach de Bienestar',
       all: 'Todas las Profesiones'
     }
   },

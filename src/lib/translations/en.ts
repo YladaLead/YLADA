@@ -25,11 +25,11 @@ export const enTranslations: Translations = {
       description: 'Create intelligent tools for your clients and transform consultations into measurable results.'
     },
     sales: {
-      title: 'I am a Supplement Sales Rep',
+      title: 'I am a Seller',
       description: 'Accelerate your sales with tools that qualify leads and increase conversions.'
     },
     coach: {
-      title: 'I am a Coach',
+      title: 'I am a Wellness Coach',
       description: 'Engage your clients with interactive tools that accelerate the transformation process.'
     }
   },
@@ -54,8 +54,8 @@ export const enTranslations: Translations = {
     },
     professions: {
       nutri: 'Nutritionist',
-      sales: 'Sales Rep',
-      coach: 'Coach',
+      sales: 'Seller',
+      coach: 'Wellness Coach',
       all: 'All Professions'
     }
   },
