@@ -53,7 +53,7 @@ export default function YLADALogo({
     <img
       src={logoPaths[variant]}
       alt="YLADA - Your Lead Advanced Data Assistant"
-      className={`${responsive ? 'h-30 sm:h-36 lg:h-42 w-auto' : sizeClasses[size]} w-auto object-contain ${className}`}
+        className={`${responsive ? 'h-16 sm:h-24 lg:h-28 w-auto' : sizeClasses[size]} w-auto object-contain ${className}`}
     />
   )
 }

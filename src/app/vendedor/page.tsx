@@ -6,7 +6,7 @@ export default function VendedorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-300 bg-white/95 backdrop-blur-md shadow-lg h-16 flex items-center">
+      <header className="sticky top-0 z-50 border-b border-gray-300 bg-white/95 backdrop-blur-md shadow-lg h-12 sm:h-16 flex items-center">
         <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
           <Link href="/">
             <YLADALogo size="xl" responsive={true} />

@@ -6,7 +6,7 @@ export default function EscolhaPerfilPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 flex items-center">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-12 sm:h-16 flex items-center">
         <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
           <Link href="/">
             <YLADALogo size="md" responsive={true} />

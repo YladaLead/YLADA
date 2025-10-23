@@ -21,7 +21,7 @@ interface Template {
 
 export default function TemplatesPage() {
   const [selectedProfession, setSelectedProfession] = useState('todos')
-  const [selectedType, setSelectedType] = useState('todos')
+  const [selectedObjective, setSelectedObjective] = useState('todos')
   const [selectedLanguage, setSelectedLanguage] = useState('pt')
   const [templates, setTemplates] = useState<Template[]>([])
 
@@ -36,7 +36,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capturar-leads',
+      objective: 'capture-leads',
       title: { pt: 'Descubra seu Perfil Nutricional Ideal', en: 'Discover Your Ideal Nutritional Profile', es: 'Descubre tu Perfil Nutricional Ideal' },
       usage_count: 1247
     },
@@ -49,7 +49,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capturar-leads',
+      objective: 'capture-leads',
       title: { pt: 'Calcule seu IMC e Peso Ideal', en: 'Calculate Your BMI and Ideal Weight', es: 'Calcula tu IMC y Peso Ideal' },
       usage_count: 892
     },
@@ -62,7 +62,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capturar-leads',
+      objective: 'capture-leads',
       title: { pt: 'Sua Dieta Personalizada', en: 'Your Personalized Diet', es: 'Tu Dieta Personalizada' },
       usage_count: 634
     },
@@ -75,7 +75,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'vender-suplementos',
+      objective: 'increase-sales',
       title: { pt: 'Seus Suplementos Ideais', en: 'Your Ideal Supplements', es: 'Tus Suplementos Ideales' },
       usage_count: 445
     },
@@ -88,7 +88,7 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'vender-suplementos',
+      objective: 'increase-sales',
       title: { pt: 'Descubra Seus Suplementos Ideais', en: 'Discover Your Ideal Supplements', es: 'Descubre tus Suplementos Ideales' },
       usage_count: 321
     },
@@ -101,9 +101,35 @@ export default function TemplatesPage() {
       specialization: 'todos',
       language: 'pt',
       country: 'BR',
-      objective: 'capturar-leads',
+      objective: 'capture-leads',
       title: { pt: 'Suas Necessidades Calóricas', en: 'Your Caloric Needs', es: 'Tus Necesidades Calóricas' },
       usage_count: 567
+    },
+    {
+      id: '7',
+      name: { pt: 'Quiz: Qual seu Estilo de Vida?', en: 'Quiz: What\'s Your Lifestyle?', es: 'Quiz: ¿Cuál es tu Estilo de Vida?' },
+      description: { pt: 'Descubra o estilo de vida ideal para seus objetivos de saúde', en: 'Discover the ideal lifestyle for your health goals', es: 'Descubre el estilo de vida ideal para tus objetivos de salud' },
+      type: 'quiz',
+      profession: 'todos',
+      specialization: 'todos',
+      language: 'pt',
+      country: 'BR',
+      objective: 'engage-clients',
+      title: { pt: 'Seu Estilo de Vida Ideal', en: 'Your Ideal Lifestyle', es: 'Tu Estilo de Vida Ideal' },
+      usage_count: 234
+    },
+    {
+      id: '8',
+      name: { pt: 'Guia Completo de Suplementação', en: 'Complete Supplementation Guide', es: 'Guía Completa de Suplementación' },
+      description: { pt: 'E-book educativo sobre suplementação inteligente', en: 'Educational e-book on smart supplementation', es: 'E-book educativo sobre suplementación inteligente' },
+      type: 'ebook',
+      profession: 'todos',
+      specialization: 'todos',
+      language: 'pt',
+      country: 'BR',
+      objective: 'educate-audience',
+      title: { pt: 'Suplementação Inteligente', en: 'Smart Supplementation', es: 'Suplementación Inteligente' },
+      usage_count: 189
     }
   ]
 
@@ -114,10 +140,10 @@ export default function TemplatesPage() {
   // Filtrar templates baseado nos filtros selecionados
   const filteredTemplates = templates.filter(template => {
     const professionMatch = selectedProfession === 'todos' || template.profession === selectedProfession || template.profession === 'todos'
-    const typeMatch = selectedType === 'todos' || template.type === selectedType
+    const objectiveMatch = selectedObjective === 'todos' || template.objective === selectedObjective
     const languageMatch = template.language === selectedLanguage
     
-    return professionMatch && typeMatch && languageMatch
+    return professionMatch && objectiveMatch && languageMatch
   })
 
   const getProfessionLabel = (profession: string) => {
@@ -130,41 +156,41 @@ export default function TemplatesPage() {
     return labels[profession as keyof typeof labels]?.[selectedLanguage as keyof typeof labels.todos] || profession
   }
 
-  const getTypeLabel = (type: string) => {
+  const getObjectiveLabel = (objective: string) => {
     const labels = {
-      todos: { pt: 'Todos os Tipos', en: 'All Types', es: 'Todos los Tipos' },
-      quiz: { pt: 'Quizzes', en: 'Quizzes', es: 'Cuestionarios' },
-      calculadora: { pt: 'Calculadoras', en: 'Calculators', es: 'Calculadoras' },
-      planilha: { pt: 'Planilhas', en: 'Spreadsheets', es: 'Hojas de Cálculo' },
-      catalogo: { pt: 'Catálogos', en: 'Catalogs', es: 'Catálogos' }
+      todos: { pt: 'Todos os Objetivos', en: 'All Objectives', es: 'Todos los Objetivos' },
+      'capture-leads': { pt: 'Captar Leads', en: 'Capture Leads', es: 'Capturar Leads' },
+      'increase-sales': { pt: 'Aumentar Vendas', en: 'Increase Sales', es: 'Aumentar Ventas' },
+      'engage-clients': { pt: 'Engajar Clientes', en: 'Engage Clients', es: 'Comprometer Clientes' },
+      'educate-audience': { pt: 'Educar Público', en: 'Educate Audience', es: 'Educar Audiencia' }
     }
-    return labels[type as keyof typeof labels]?.[selectedLanguage as keyof typeof labels.todos] || type
+    return labels[objective as keyof typeof labels]?.[selectedLanguage as keyof typeof labels.todos] || objective
   }
 
-  const getTypeIcon = (type: string) => {
+  const getObjectiveIcon = (objective: string) => {
     const icons = {
-      quiz: '🧠',
-      calculadora: '📊',
-      planilha: '📋',
-      catalogo: '💊'
+      'capture-leads': '🎯',
+      'increase-sales': '💰',
+      'engage-clients': '🤝',
+      'educate-audience': '📚'
     }
-    return icons[type as keyof typeof icons] || '📄'
+    return icons[objective as keyof typeof icons] || '📄'
   }
 
-  const getTypeColor = (type: string) => {
+  const getObjectiveColor = (objective: string) => {
     const colors = {
-      quiz: 'from-green-500 to-green-600',
-      calculadora: 'from-blue-500 to-blue-600',
-      planilha: 'from-yellow-500 to-yellow-600',
-      catalogo: 'from-purple-500 to-purple-600'
+      'capture-leads': 'from-green-500 to-green-600',
+      'increase-sales': 'from-blue-500 to-blue-600',
+      'engage-clients': 'from-purple-500 to-purple-600',
+      'educate-audience': 'from-yellow-500 to-yellow-600'
     }
-    return colors[type as keyof typeof colors] || 'from-gray-500 to-gray-600'
+    return colors[objective as keyof typeof colors] || 'from-gray-500 to-gray-600'
   }
 
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 flex items-center">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-12 sm:h-16 flex items-center">
         <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
           <Link href="/">
             <YLADALogo size="md" responsive={true} />
@@ -211,21 +237,21 @@ export default function TemplatesPage() {
               </select>
             </div>
 
-            {/* Filtro por Tipo */}
+            {/* Filtro por Objetivo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Template
+                Objetivo
               </label>
               <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
+                value={selectedObjective}
+                onChange={(e) => setSelectedObjective(e.target.value)}
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="todos">Todos os Tipos</option>
-                <option value="quiz">Quizzes</option>
-                <option value="calculadora">Calculadoras</option>
-                <option value="planilha">Planilhas</option>
-                <option value="catalogo">Catálogos</option>
+                <option value="todos">Todos os Objetivos</option>
+                <option value="capture-leads">Captar Leads</option>
+                <option value="increase-sales">Aumentar Vendas</option>
+                <option value="engage-clients">Engajar Clientes</option>
+                <option value="educate-audience">Educar Público</option>
               </select>
             </div>
 
@@ -251,7 +277,7 @@ export default function TemplatesPage() {
             <p className="text-gray-600">
               Mostrando <span className="text-blue-600 font-bold">{filteredTemplates.length}</span> templates para{' '}
               <span className="text-blue-600 font-bold">{getProfessionLabel(selectedProfession)}</span> -{' '}
-              <span className="text-blue-600 font-bold">{getTypeLabel(selectedType)}</span>
+              <span className="text-blue-600 font-bold">{getObjectiveLabel(selectedObjective)}</span>
             </p>
           </div>
         </div>
@@ -261,7 +287,7 @@ export default function TemplatesPage() {
           {filteredTemplates.map((template) => (
             <div key={template.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 group">
               <div className={`w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform`}>
-                <span className="text-xl">{getTypeIcon(template.type)}</span>
+                <span className="text-xl">{getObjectiveIcon(template.objective)}</span>
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">
                 {template.name[selectedLanguage] || template.name.pt}
@@ -276,7 +302,7 @@ export default function TemplatesPage() {
                   {getProfessionLabel(template.profession)}
                 </span>
                 <span className="px-2 py-1 bg-gray-50 text-gray-700 text-xs rounded-full border border-gray-200">
-                  {getTypeLabel(template.type)}
+                  {getObjectiveLabel(template.objective)}
                 </span>
                 <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">
                   {template.usage_count.toLocaleString()} usos
@@ -304,7 +330,7 @@ export default function TemplatesPage() {
             <button
               onClick={() => {
                 setSelectedProfession('todos')
-                setSelectedType('todos')
+                setSelectedObjective('todos')
               }}
               className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
             >
