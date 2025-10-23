@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||
     pathname.startsWith('/calculadora-imc') ||
+    pathname.startsWith('/admin-diagnosticos') ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.includes('.') ||

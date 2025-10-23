@@ -32,7 +32,7 @@ export default function VendedorPage() {
 
           {/* Badge Específico */}
           <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-semibold mb-8 shadow-lg">
-            💊 Especialmente para Vendedores
+            💊 Especialmente para Consultores Nutra
           </div>
 
           {/* Título Principal */}

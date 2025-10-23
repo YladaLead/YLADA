@@ -44,8 +44,8 @@ export default function TemplatesEnvironment() {
     const labels = {
       'universal': 'Universal',
       'nutri': 'Nutricionista',
-      'sales': 'Vendedor',
-      'coach': 'Coach',
+      'sales': 'Consultor Nutra',
+      'coach': 'Coach de Bem-estar',
       'all': 'Todas as Profissões'
     }
     return labels[profession as keyof typeof labels] || profession
@@ -158,8 +158,8 @@ export default function TemplatesEnvironment() {
                 <option value="all">Todas as Profissões</option>
                 <option value="universal">Universal</option>
                 <option value="nutri">Nutricionista</option>
-                <option value="sales">Vendedor</option>
-                <option value="coach">Coach</option>
+                <option value="sales">Consultor Nutra</option>
+                <option value="coach">Coach de Bem-estar</option>
               </select>
             </div>
 

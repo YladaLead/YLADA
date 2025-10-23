@@ -64,9 +64,9 @@ export default function EscolhaPerfilPage() {
               </div>
             </Link>
 
-            {/* Vendedor */}
+            {/* Consultor Nutra */}
             <Link 
-              href="/pt/sales"
+              href="/pt/consultor"
               className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="text-center">
@@ -82,7 +82,7 @@ export default function EscolhaPerfilPage() {
               </div>
             </Link>
 
-            {/* Coach */}
+            {/* Coach de Bem-estar */}
             <Link 
               href="/pt/coach"
               className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-purple-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 sm:col-span-2 lg:col-span-1"

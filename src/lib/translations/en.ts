@@ -25,7 +25,7 @@ export const enTranslations: Translations = {
       description: 'Create intelligent tools for your clients and transform consultations into measurable results.'
     },
     sales: {
-      title: 'I am a Seller',
+      title: 'I am a Nutra Consultant',
       description: 'Accelerate your sales with tools that qualify leads and increase conversions.'
     },
     coach: {
@@ -54,7 +54,7 @@ export const enTranslations: Translations = {
     },
     professions: {
       nutri: 'Nutritionist',
-      sales: 'Seller',
+      sales: 'Nutra Consultant',
       coach: 'Wellness Coach',
       all: 'All Professions'
     }

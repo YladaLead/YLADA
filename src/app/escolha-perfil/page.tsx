@@ -64,13 +64,13 @@ export default function EscolhaPerfilPage() {
               </div>
             </Link>
 
-            {/* Vendedor */}
+            {/* Consultor Nutra */}
             <Link 
-              href="/vendedor"
+              href="/consultor"
               className="group bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-blue-300 hover:-translate-y-1"
             >
               <div className="text-5xl mb-4 group-hover:scale-105 transition-transform duration-300">💊</div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Sou Vendedor(a)</h3>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Sou Consultor Nutra</h3>
               <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                 Conecte produtos com pessoas certas usando ferramentas de engajamento e conversão.
               </p>
@@ -79,13 +79,13 @@ export default function EscolhaPerfilPage() {
               </div>
             </Link>
 
-            {/* Coach */}
+            {/* Coach de Bem-estar */}
             <Link 
               href="/coach"
               className="group bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-purple-300 hover:-translate-y-1"
             >
               <div className="text-5xl mb-4 group-hover:scale-105 transition-transform duration-300">🧘‍♀️</div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Sou Coach</h3>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Sou Coach de Bem-estar</h3>
               <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                 Engaje e transforme vidas com ferramentas personalizadas de bem-estar e desenvolvimento.
               </p>
