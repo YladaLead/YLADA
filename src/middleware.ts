@@ -4,39 +4,34 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   
-  // Rotas que não precisam de prefixo de idioma
-  const excludedRoutes = [
-    '/templates-environment',
-    '/template/',
-    '/api/',
-    '/_next/',
-    '/favicon.ico'
-  ]
+  // Debug: log da rota
+  console.log('Middleware - Rota:', pathname)
   
-  // Verificar se é uma rota excluída
-  const isExcludedRoute = excludedRoutes.some(route => pathname.startsWith(route))
+  // Rotas que NUNCA devem ser redirecionadas
+  if (
+    pathname.startsWith('/templates-environment') ||
+    pathname.startsWith('/template/') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname.includes('.') ||
+    pathname === '/favicon.ico'
+  ) {
+    console.log('Middleware - Rota excluída:', pathname)
+    return NextResponse.next()
+  }
   
   // Verificar se já tem idioma na URL
   const hasLanguage = pathname.startsWith('/pt') || pathname.startsWith('/en') || pathname.startsWith('/es')
   
-  // Se não tem idioma e não é uma rota excluída
-  if (!hasLanguage && !isExcludedRoute && !pathname.includes('.')) {
-    // Detectar idioma preferido do usuário
-    const acceptLanguage = request.headers.get('accept-language') || ''
-    let preferredLang = 'pt' // padrão
-    
-    if (acceptLanguage.includes('en')) {
-      preferredLang = 'en'
-    } else if (acceptLanguage.includes('es')) {
-      preferredLang = 'es'
-    }
-    
-    // Redirecionar para a versão com idioma
+  // Se não tem idioma, redirecionar para português
+  if (!hasLanguage) {
+    console.log('Middleware - Redirecionando para /pt:', pathname)
     const url = request.nextUrl.clone()
-    url.pathname = `/${preferredLang}${pathname}`
+    url.pathname = `/pt${pathname}`
     return NextResponse.redirect(url)
   }
   
+  console.log('Middleware - Permitindo:', pathname)
   return NextResponse.next()
 }
 
