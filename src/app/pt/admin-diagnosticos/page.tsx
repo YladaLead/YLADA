@@ -1906,6 +1906,604 @@ const diagnosticosCompletos = {
     }
   },
 
+  // 41. SIMULADOR DE GANHO
+  'simulador-ganho': {
+    nutri: {
+      ganhoBasico: [
+        '📋 Simulação básica de ganho nutricional',
+        '🥗 Plano alimentar para ganho simples',
+        '💊 Suplementação básica para ganho',
+        '📅 Consulta nutricional para ganho'
+      ],
+      ganhoModerado: [
+        '📋 Simulação moderada de ganho nutricional',
+        '🥗 Plano alimentar para ganho específico',
+        '💊 Suplementação direcionada para ganho',
+        '📅 Consulta nutricional especializada para ganho'
+      ],
+      ganhoAvancado: [
+        '📋 Simulação avançada de ganho nutricional',
+        '🥗 Plano alimentar para ganho complexo',
+        '💊 Suplementação avançada para ganho',
+        '📅 Consulta nutricional de performance para ganho'
+      ]
+    },
+    sales: {
+      ganhoBasico: [
+        '💊 Produtos básicos para ganho',
+        '🥗 Suplementação preventiva para ganho',
+        '💪 Produtos de apoio básico para ganho',
+        '📞 Consultoria básica para ganho'
+      ],
+      ganhoModerado: [
+        '💊 Produtos moderados para ganho',
+        '🥗 Suplementação direcionada para ganho',
+        '💪 Produtos de apoio moderado para ganho',
+        '📞 Consultoria moderada para ganho'
+      ],
+      ganhoAvancado: [
+        '💊 Produtos avançados para ganho',
+        '🥗 Suplementação avançada para ganho',
+        '💪 Produtos de apoio avançado para ganho',
+        '📞 Consultoria avançada para ganho'
+      ]
+    },
+    coach: {
+      ganhoBasico: [
+        '🧘‍♀️ Programa básico para ganho',
+        '💪 Exercícios básicos para ganho',
+        '🍎 Coaching nutricional básico para ganho',
+        '📅 Programa básico para ganho'
+      ],
+      ganhoModerado: [
+        '🧘‍♀️ Programa moderado para ganho',
+        '💪 Exercícios moderados para ganho',
+        '🍎 Coaching nutricional moderado para ganho',
+        '📅 Programa moderado para ganho'
+      ],
+      ganhoAvancado: [
+        '🧘‍♀️ Programa avançado para ganho',
+        '💪 Exercícios avançados para ganho',
+        '🍎 Coaching nutricional avançado para ganho',
+        '📅 Programa avançado para ganho'
+      ]
+    }
+  },
+
+  // 42. TEMPLATE DE OPORTUNIDADE
+  'template-oportunidade': {
+    nutri: {
+      oportunidadeBasica: [
+        '📋 Oportunidade básica nutricional',
+        '🥗 Plano alimentar básico',
+        '💊 Suplementação básica',
+        '📅 Consulta nutricional básica'
+      ],
+      oportunidadeModerada: [
+        '📋 Oportunidade moderada nutricional',
+        '🥗 Plano alimentar específico',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      oportunidadeAvancada: [
+        '📋 Oportunidade avançada nutricional',
+        '🥗 Plano alimentar complexo',
+        '💊 Suplementação avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      oportunidadeBasica: [
+        '💊 Oportunidade básica de produtos',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos básicos',
+        '📞 Consultoria básica'
+      ],
+      oportunidadeModerada: [
+        '💊 Oportunidade moderada de produtos',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos específicos',
+        '📞 Consultoria moderada'
+      ],
+      oportunidadeAvancada: [
+        '💊 Oportunidade avançada de produtos',
+        '🥗 Suplementação avançada',
+        '💪 Produtos complexos',
+        '📞 Consultoria avançada'
+      ]
+    },
+    coach: {
+      oportunidadeBasica: [
+        '🧘‍♀️ Oportunidade básica de bem-estar',
+        '💪 Exercícios básicos',
+        '🍎 Coaching básico',
+        '📅 Programa básico'
+      ],
+      oportunidadeModerada: [
+        '🧘‍♀️ Oportunidade moderada de bem-estar',
+        '💪 Exercícios específicos',
+        '🍎 Coaching direcionado',
+        '📅 Programa moderado'
+      ],
+      oportunidadeAvancada: [
+        '🧘‍♀️ Oportunidade avançada de bem-estar',
+        '💪 Exercícios complexos',
+        '🍎 Coaching avançado',
+        '📅 Programa avançado'
+      ]
+    }
+  },
+
+  // 43. TEMPLATE DE APRESENTAÇÃO DE NEGÓCIO
+  'template-apresentacao-negocio': {
+    nutri: {
+      apresentacaoBasica: [
+        '📋 Apresentação básica do negócio nutricional',
+        '🥗 Plano alimentar básico',
+        '💊 Suplementação básica',
+        '📅 Consulta nutricional básica'
+      ],
+      apresentacaoModerada: [
+        '📋 Apresentação moderada do negócio nutricional',
+        '🥗 Plano alimentar específico',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      apresentacaoAvancada: [
+        '📋 Apresentação avançada do negócio nutricional',
+        '🥗 Plano alimentar complexo',
+        '💊 Suplementação avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      apresentacaoBasica: [
+        '💊 Apresentação básica do negócio de produtos',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos básicos',
+        '📞 Consultoria básica'
+      ],
+      apresentacaoModerada: [
+        '💊 Apresentação moderada do negócio de produtos',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos específicos',
+        '📞 Consultoria moderada'
+      ],
+      apresentacaoAvancada: [
+        '💊 Apresentação avançada do negócio de produtos',
+        '🥗 Suplementação avançada',
+        '💪 Produtos complexos',
+        '📞 Consultoria avançada'
+      ]
+    },
+    coach: {
+      apresentacaoBasica: [
+        '🧘‍♀️ Apresentação básica do negócio de bem-estar',
+        '💪 Exercícios básicos',
+        '🍎 Coaching básico',
+        '📅 Programa básico'
+      ],
+      apresentacaoModerada: [
+        '🧘‍♀️ Apresentação moderada do negócio de bem-estar',
+        '💪 Exercícios específicos',
+        '🍎 Coaching direcionado',
+        '📅 Programa moderado'
+      ],
+      apresentacaoAvancada: [
+        '🧘‍♀️ Apresentação avançada do negócio de bem-estar',
+        '💪 Exercícios complexos',
+        '🍎 Coaching avançado',
+        '📅 Programa avançado'
+      ]
+    }
+  },
+
+  // 44. TEMPLATE DE SCRIPT DE CONVITE
+  'template-script-convite': {
+    nutri: {
+      conviteBasico: [
+        '📋 Script básico de convite nutricional',
+        '🥗 Convite simples para consulta',
+        '💊 Convite básico para suplementação',
+        '📅 Convite básico nutricional'
+      ],
+      conviteModerado: [
+        '📋 Script moderado de convite nutricional',
+        '🥗 Convite específico para consulta',
+        '💊 Convite direcionado para suplementação',
+        '📅 Convite moderado nutricional'
+      ],
+      conviteAvancado: [
+        '📋 Script avançado de convite nutricional',
+        '🥗 Convite complexo para consulta',
+        '💊 Convite avançado para suplementação',
+        '📅 Convite avançado nutricional'
+      ]
+    },
+    sales: {
+      conviteBasico: [
+        '💊 Script básico de convite para produtos',
+        '🥗 Convite simples para suplementos',
+        '💪 Convite básico para produtos',
+        '📞 Convite básico'
+      ],
+      conviteModerado: [
+        '💊 Script moderado de convite para produtos',
+        '🥗 Convite específico para suplementos',
+        '💪 Convite direcionado para produtos',
+        '📞 Convite moderado'
+      ],
+      conviteAvancado: [
+        '💊 Script avançado de convite para produtos',
+        '🥗 Convite complexo para suplementos',
+        '💪 Convite avançado para produtos',
+        '📞 Convite avançado'
+      ]
+    },
+    coach: {
+      conviteBasico: [
+        '🧘‍♀️ Script básico de convite para bem-estar',
+        '💪 Convite simples para exercícios',
+        '🍎 Convite básico para coaching',
+        '📅 Convite básico'
+      ],
+      conviteModerado: [
+        '🧘‍♀️ Script moderado de convite para bem-estar',
+        '💪 Convite específico para exercícios',
+        '🍎 Convite direcionado para coaching',
+        '📅 Convite moderado'
+      ],
+      conviteAvancado: [
+        '🧘‍♀️ Script avançado de convite para bem-estar',
+        '💪 Convite complexo para exercícios',
+        '🍎 Convite avançado para coaching',
+        '📅 Convite avançado'
+      ]
+    }
+  },
+
+  // 45. TEMPLATE DE ONBOARDING DE PARCEIRO
+  'template-onboarding-parceiro': {
+    nutri: {
+      onboardingBasico: [
+        '📋 Onboarding básico de parceiro nutricional',
+        '🥗 Treinamento básico nutricional',
+        '💊 Suplementação básica para parceiros',
+        '📅 Consulta nutricional básica para parceiros'
+      ],
+      onboardingModerado: [
+        '📋 Onboarding moderado de parceiro nutricional',
+        '🥗 Treinamento específico nutricional',
+        '💊 Suplementação direcionada para parceiros',
+        '📅 Consulta nutricional especializada para parceiros'
+      ],
+      onboardingAvancado: [
+        '📋 Onboarding avançado de parceiro nutricional',
+        '🥗 Treinamento complexo nutricional',
+        '💊 Suplementação avançada para parceiros',
+        '📅 Consulta nutricional de performance para parceiros'
+      ]
+    },
+    sales: {
+      onboardingBasico: [
+        '💊 Onboarding básico de parceiro de produtos',
+        '🥗 Treinamento básico de produtos',
+        '💪 Produtos básicos para parceiros',
+        '📞 Consultoria básica para parceiros'
+      ],
+      onboardingModerado: [
+        '💊 Onboarding moderado de parceiro de produtos',
+        '🥗 Treinamento específico de produtos',
+        '💪 Produtos específicos para parceiros',
+        '📞 Consultoria moderada para parceiros'
+      ],
+      onboardingAvancado: [
+        '💊 Onboarding avançado de parceiro de produtos',
+        '🥗 Treinamento complexo de produtos',
+        '💪 Produtos complexos para parceiros',
+        '📞 Consultoria avançada para parceiros'
+      ]
+    },
+    coach: {
+      onboardingBasico: [
+        '🧘‍♀️ Onboarding básico de parceiro de bem-estar',
+        '💪 Treinamento básico de exercícios',
+        '🍎 Coaching básico para parceiros',
+        '📅 Programa básico para parceiros'
+      ],
+      onboardingModerado: [
+        '🧘‍♀️ Onboarding moderado de parceiro de bem-estar',
+        '💪 Treinamento específico de exercícios',
+        '🍎 Coaching direcionado para parceiros',
+        '📅 Programa moderado para parceiros'
+      ],
+      onboardingAvancado: [
+        '🧘‍♀️ Onboarding avançado de parceiro de bem-estar',
+        '💪 Treinamento complexo de exercícios',
+        '🍎 Coaching avançado para parceiros',
+        '📅 Programa avançado para parceiros'
+      ]
+    }
+  },
+
+  // 46. TEMPLATE DE PLANO DE AÇÃO DA EQUIPE
+  'template-plano-acao-equipe': {
+    nutri: {
+      planoBasico: [
+        '📋 Plano básico de ação da equipe nutricional',
+        '🥗 Ações básicas nutricionais',
+        '💊 Suplementação básica da equipe',
+        '📅 Consulta nutricional básica da equipe'
+      ],
+      planoModerado: [
+        '📋 Plano moderado de ação da equipe nutricional',
+        '🥗 Ações específicas nutricionais',
+        '💊 Suplementação direcionada da equipe',
+        '📅 Consulta nutricional especializada da equipe'
+      ],
+      planoAvancado: [
+        '📋 Plano avançado de ação da equipe nutricional',
+        '🥗 Ações complexas nutricionais',
+        '💊 Suplementação avançada da equipe',
+        '📅 Consulta nutricional de performance da equipe'
+      ]
+    },
+    sales: {
+      planoBasico: [
+        '💊 Plano básico de ação da equipe de produtos',
+        '🥗 Ações básicas de produtos',
+        '💪 Produtos básicos da equipe',
+        '📞 Consultoria básica da equipe'
+      ],
+      planoModerado: [
+        '💊 Plano moderado de ação da equipe de produtos',
+        '🥗 Ações específicas de produtos',
+        '💪 Produtos específicos da equipe',
+        '📞 Consultoria moderada da equipe'
+      ],
+      planoAvancado: [
+        '💊 Plano avançado de ação da equipe de produtos',
+        '🥗 Ações complexas de produtos',
+        '💪 Produtos complexos da equipe',
+        '📞 Consultoria avançada da equipe'
+      ]
+    },
+    coach: {
+      planoBasico: [
+        '🧘‍♀️ Plano básico de ação da equipe de bem-estar',
+        '💪 Ações básicas de exercícios',
+        '🍎 Coaching básico da equipe',
+        '📅 Programa básico da equipe'
+      ],
+      planoModerado: [
+        '🧘‍♀️ Plano moderado de ação da equipe de bem-estar',
+        '💪 Ações específicas de exercícios',
+        '🍎 Coaching direcionado da equipe',
+        '📅 Programa moderado da equipe'
+      ],
+      planoAvancado: [
+        '🧘‍♀️ Plano avançado de ação da equipe de bem-estar',
+        '💪 Ações complexas de exercícios',
+        '🍎 Coaching avançado da equipe',
+        '📅 Programa avançado da equipe'
+      ]
+    }
+  },
+
+  // 47. TEMPLATE DE FEEDBACK DE CLIENTE
+  'template-feedback-cliente': {
+    nutri: {
+      feedbackBasico: [
+        '📋 Feedback básico de cliente nutricional',
+        '🥗 Avaliação básica nutricional',
+        '💊 Suplementação básica baseada no feedback',
+        '📅 Consulta nutricional básica baseada no feedback'
+      ],
+      feedbackModerado: [
+        '📋 Feedback moderado de cliente nutricional',
+        '🥗 Avaliação específica nutricional',
+        '💊 Suplementação direcionada baseada no feedback',
+        '📅 Consulta nutricional especializada baseada no feedback'
+      ],
+      feedbackAvancado: [
+        '📋 Feedback avançado de cliente nutricional',
+        '🥗 Avaliação complexa nutricional',
+        '💊 Suplementação avançada baseada no feedback',
+        '📅 Consulta nutricional de performance baseada no feedback'
+      ]
+    },
+    sales: {
+      feedbackBasico: [
+        '💊 Feedback básico de cliente de produtos',
+        '🥗 Avaliação básica de produtos',
+        '💪 Produtos básicos baseados no feedback',
+        '📞 Consultoria básica baseada no feedback'
+      ],
+      feedbackModerado: [
+        '💊 Feedback moderado de cliente de produtos',
+        '🥗 Avaliação específica de produtos',
+        '💪 Produtos específicos baseados no feedback',
+        '📞 Consultoria moderada baseada no feedback'
+      ],
+      feedbackAvancado: [
+        '💊 Feedback avançado de cliente de produtos',
+        '🥗 Avaliação complexa de produtos',
+        '💪 Produtos complexos baseados no feedback',
+        '📞 Consultoria avançada baseada no feedback'
+      ]
+    },
+    coach: {
+      feedbackBasico: [
+        '🧘‍♀️ Feedback básico de cliente de bem-estar',
+        '💪 Avaliação básica de exercícios',
+        '🍎 Coaching básico baseado no feedback',
+        '📅 Programa básico baseado no feedback'
+      ],
+      feedbackModerado: [
+        '🧘‍♀️ Feedback moderado de cliente de bem-estar',
+        '💪 Avaliação específica de exercícios',
+        '🍎 Coaching direcionado baseado no feedback',
+        '📅 Programa moderado baseado no feedback'
+      ],
+      feedbackAvancado: [
+        '🧘‍♀️ Feedback avançado de cliente de bem-estar',
+        '💪 Avaliação complexa de exercícios',
+        '🍎 Coaching avançado baseado no feedback',
+        '📅 Programa avançado baseado no feedback'
+      ]
+    }
+  },
+
+  // 48. TEMPLATE DE MENSAGEM PÓS-COMPRA
+  'template-mensagem-pos-compra': {
+    nutri: {
+      mensagemBasica: [
+        '📋 Mensagem básica pós-compra nutricional',
+        '🥗 Orientações básicas nutricionais',
+        '💊 Suplementação básica pós-compra',
+        '📅 Consulta nutricional básica pós-compra'
+      ],
+      mensagemModerada: [
+        '📋 Mensagem moderada pós-compra nutricional',
+        '🥗 Orientações específicas nutricionais',
+        '💊 Suplementação direcionada pós-compra',
+        '📅 Consulta nutricional especializada pós-compra'
+      ],
+      mensagemAvancada: [
+        '📋 Mensagem avançada pós-compra nutricional',
+        '🥗 Orientações complexas nutricionais',
+        '💊 Suplementação avançada pós-compra',
+        '📅 Consulta nutricional de performance pós-compra'
+      ]
+    },
+    sales: {
+      mensagemBasica: [
+        '💊 Mensagem básica pós-compra de produtos',
+        '🥗 Orientações básicas de produtos',
+        '💪 Produtos básicos pós-compra',
+        '📞 Consultoria básica pós-compra'
+      ],
+      mensagemModerada: [
+        '💊 Mensagem moderada pós-compra de produtos',
+        '🥗 Orientações específicas de produtos',
+        '💪 Produtos específicos pós-compra',
+        '📞 Consultoria moderada pós-compra'
+      ],
+      mensagemAvancada: [
+        '💊 Mensagem avançada pós-compra de produtos',
+        '🥗 Orientações complexas de produtos',
+        '💪 Produtos complexos pós-compra',
+        '📞 Consultoria avançada pós-compra'
+      ]
+    },
+    coach: {
+      mensagemBasica: [
+        '🧘‍♀️ Mensagem básica pós-compra de bem-estar',
+        '💪 Orientações básicas de exercícios',
+        '🍎 Coaching básico pós-compra',
+        '📅 Programa básico pós-compra'
+      ],
+      mensagemModerada: [
+        '🧘‍♀️ Mensagem moderada pós-compra de bem-estar',
+        '💪 Orientações específicas de exercícios',
+        '🍎 Coaching direcionado pós-compra',
+        '📅 Programa moderado pós-compra'
+      ],
+      mensagemAvancada: [
+        '🧘‍♀️ Mensagem avançada pós-compra de bem-estar',
+        '💪 Orientações complexas de exercícios',
+        '🍎 Coaching avançado pós-compra',
+        '📅 Programa avançado pós-compra'
+      ]
+    }
+  },
+
+  // 49. TEMPLATE DE E-MAIL DE REPOSIÇÃO
+  'template-email-reposicao': {
+    nutri: {
+      reposicaoBasica: [
+        '📋 E-mail básico de reposição nutricional',
+        '🥗 Reposição básica nutricional',
+        '💊 Suplementação básica de reposição',
+        '📅 Consulta nutricional básica de reposição'
+      ],
+      reposicaoModerada: [
+        '📋 E-mail moderado de reposição nutricional',
+        '🥗 Reposição específica nutricional',
+        '💊 Suplementação direcionada de reposição',
+        '📅 Consulta nutricional especializada de reposição'
+      ],
+      reposicaoAvancada: [
+        '📋 E-mail avançado de reposição nutricional',
+        '🥗 Reposição complexa nutricional',
+        '💊 Suplementação avançada de reposição',
+        '📅 Consulta nutricional de performance de reposição'
+      ]
+    },
+    sales: {
+      reposicaoBasica: [
+        '💊 E-mail básico de reposição de produtos',
+        '🥗 Reposição básica de produtos',
+        '💪 Produtos básicos de reposição',
+        '📞 Consultoria básica de reposição'
+      ],
+      reposicaoModerada: [
+        '💊 E-mail moderado de reposição de produtos',
+        '🥗 Reposição específica de produtos',
+        '💪 Produtos específicos de reposição',
+        '📞 Consultoria moderada de reposição'
+      ],
+      reposicaoAvancada: [
+        '💊 E-mail avançado de reposição de produtos',
+        '🥗 Reposição complexa de produtos',
+        '💪 Produtos complexos de reposição',
+        '📞 Consultoria avançada de reposição'
+      ]
+    },
+    coach: {
+      reposicaoBasica: [
+        '🧘‍♀️ E-mail básico de reposição de bem-estar',
+        '💪 Reposição básica de exercícios',
+        '🍎 Coaching básico de reposição',
+        '📅 Programa básico de reposição'
+      ],
+      reposicaoModerada: [
+        '🧘‍♀️ E-mail moderado de reposição de bem-estar',
+        '💪 Reposição específica de exercícios',
+        '🍎 Coaching direcionado de reposição',
+        '📅 Programa moderado de reposição'
+      ],
+      reposicaoAvancada: [
+        '🧘‍♀️ E-mail avançado de reposição de bem-estar',
+        '💪 Reposição complexa de exercícios',
+        '🍎 Coaching avançado de reposição',
+        '📅 Programa avançado de reposição'
+      ]
+    }
+  },
+
+  // 50. TEMPLATE DE ANIVERSÁRIO
+  'template-aniversario': {
+    nutri: [
+      '📋 Mensagem de aniversário nutricional',
+      '🥗 Ofertas especiais nutricionais',
+      '💊 Suplementação especial de aniversário',
+      '📅 Consulta nutricional especial de aniversário'
+    ],
+    sales: [
+      '💊 Mensagem de aniversário de produtos',
+      '🥗 Ofertas especiais de produtos',
+      '💪 Produtos especiais de aniversário',
+      '📞 Consultoria especial de aniversário'
+    ],
+    coach: [
+      '🧘‍♀️ Mensagem de aniversário de bem-estar',
+      '💪 Ofertas especiais de exercícios',
+      '🍎 Coaching especial de aniversário',
+      '📅 Programa especial de aniversário'
+    ]
+  },
+
   // 4. QUIZ DE PERFIL NUTRICIONAL
   'quiz-perfil-nutricional': {
     nutri: {
@@ -2558,6 +3156,54 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'catalogo-basico', label: 'Catálogo Básico', range: 'Digital simples', color: 'blue' },
       { id: 'catalogo-moderado', label: 'Catálogo Moderado', range: 'Digital específico', color: 'green' },
       { id: 'catalogo-avancado', label: 'Catálogo Avançado', range: 'Digital complexo', color: 'yellow' }
+    ],
+    'simulador-ganho': [
+      { id: 'ganho-basico', label: 'Ganho Básico', range: 'Simulação simples', color: 'blue' },
+      { id: 'ganho-moderado', label: 'Ganho Moderado', range: 'Simulação específica', color: 'green' },
+      { id: 'ganho-avancado', label: 'Ganho Avançado', range: 'Simulação complexa', color: 'yellow' }
+    ],
+    'template-oportunidade': [
+      { id: 'oportunidade-basica', label: 'Oportunidade Básica', range: 'Oportunidade simples', color: 'blue' },
+      { id: 'oportunidade-moderada', label: 'Oportunidade Moderada', range: 'Oportunidade específica', color: 'green' },
+      { id: 'oportunidade-avancada', label: 'Oportunidade Avançada', range: 'Oportunidade complexa', color: 'yellow' }
+    ],
+    'template-apresentacao-negocio': [
+      { id: 'apresentacao-basica', label: 'Apresentação Básica', range: 'Apresentação simples', color: 'blue' },
+      { id: 'apresentacao-moderada', label: 'Apresentação Moderada', range: 'Apresentação específica', color: 'green' },
+      { id: 'apresentacao-avancada', label: 'Apresentação Avançada', range: 'Apresentação complexa', color: 'yellow' }
+    ],
+    'template-script-convite': [
+      { id: 'convite-basico', label: 'Convite Básico', range: 'Script simples', color: 'blue' },
+      { id: 'convite-moderado', label: 'Convite Moderado', range: 'Script específico', color: 'green' },
+      { id: 'convite-avancado', label: 'Convite Avançado', range: 'Script complexo', color: 'yellow' }
+    ],
+    'template-onboarding-parceiro': [
+      { id: 'onboarding-basico', label: 'Onboarding Básico', range: 'Onboarding simples', color: 'blue' },
+      { id: 'onboarding-moderado', label: 'Onboarding Moderado', range: 'Onboarding específico', color: 'green' },
+      { id: 'onboarding-avancado', label: 'Onboarding Avançado', range: 'Onboarding complexo', color: 'yellow' }
+    ],
+    'template-plano-acao-equipe': [
+      { id: 'plano-basico', label: 'Plano Básico', range: 'Plano simples', color: 'blue' },
+      { id: 'plano-moderado', label: 'Plano Moderado', range: 'Plano específico', color: 'green' },
+      { id: 'plano-avancado', label: 'Plano Avançado', range: 'Plano complexo', color: 'yellow' }
+    ],
+    'template-feedback-cliente': [
+      { id: 'feedback-basico', label: 'Feedback Básico', range: 'Feedback simples', color: 'blue' },
+      { id: 'feedback-moderado', label: 'Feedback Moderado', range: 'Feedback específico', color: 'green' },
+      { id: 'feedback-avancado', label: 'Feedback Avançado', range: 'Feedback complexo', color: 'yellow' }
+    ],
+    'template-mensagem-pos-compra': [
+      { id: 'mensagem-basica', label: 'Mensagem Básica', range: 'Mensagem simples', color: 'blue' },
+      { id: 'mensagem-moderada', label: 'Mensagem Moderada', range: 'Mensagem específica', color: 'green' },
+      { id: 'mensagem-avancada', label: 'Mensagem Avançada', range: 'Mensagem complexa', color: 'yellow' }
+    ],
+    'template-email-reposicao': [
+      { id: 'reposicao-basica', label: 'Reposição Básica', range: 'E-mail simples', color: 'blue' },
+      { id: 'reposicao-moderada', label: 'Reposição Moderada', range: 'E-mail específico', color: 'green' },
+      { id: 'reposicao-avancada', label: 'Reposição Avançada', range: 'E-mail complexo', color: 'yellow' }
+    ],
+    'template-aniversario': [
+      { id: 'aniversario-especial', label: 'Aniversário Especial', range: 'Mensagem especial', color: 'purple' }
     ]
   }
   
