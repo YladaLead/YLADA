@@ -234,66 +234,84 @@ const diagnosticosCompletos = {
     }
   },
 
-  // 3. QUIZ DE BEM-ESTAR
+  // 2. QUIZ DE BEM-ESTAR
   'quiz-bem-estar': {
     nutri: {
-      baixoBemEstar: [
-        '📋 Avaliação completa de bem-estar nutricional',
-        '🥗 Plano alimentar para melhoria do humor',
-        '💊 Suplementos para equilíbrio emocional',
-        '📅 Acompanhamento nutricional terapêutico'
+      bemEstarBaixo: [
+        '📋 DIAGNÓSTICO: Seu bem-estar está comprometido por desequilíbrios nutricionais',
+        '🔍 CAUSA RAIZ: Deficiências nutricionais afetam energia, humor e qualidade de vida',
+        '⚡ AÇÃO IMEDIATA: Inicie suplementação básica com multivitamínico e magnésio',
+        '📅 PLANO 7 DIAS: Reequilíbrio nutricional com alimentos ricos em vitaminas B',
+        '💊 SUPLEMENTAÇÃO: Complexo B + Magnésio + Ômega-3 para bem-estar geral',
+        '🍎 ALIMENTAÇÃO: Aumente frutas, verduras e grãos integrais para energia sustentada'
       ],
       bemEstarModerado: [
-        '📋 Otimização nutricional para bem-estar',
-        '🥗 Plano alimentar para manutenção do humor',
-        '💊 Suplementos de apoio emocional',
-        '📅 Consultas de manutenção do bem-estar'
+        '📋 DIAGNÓSTICO: Seu bem-estar está bom, mas pode ser otimizado com ajustes nutricionais',
+        '🔍 CAUSA RAIZ: Boa base nutricional, mas precisa de micronutrientes específicos',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione alimentos funcionais',
+        '📅 PLANO 7 DIAS: Otimização com superalimentos e timing nutricional',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico premium + Probióticos para manutenção',
+        '🍎 ALIMENTAÇÃO: Varie cores no prato e inclua alimentos antioxidantes'
       ],
-      altoBemEstar: [
-        '📋 Manutenção nutricional do bem-estar',
-        '🥗 Plano alimentar para sustentação energética',
-        '💊 Suplementos preventivos de bem-estar',
-        '📅 Acompanhamento preventivo nutricional'
+      bemEstarAlto: [
+        '📋 DIAGNÓSTICO: Excelente bem-estar! Mantenha com nutrição preventiva',
+        '🔍 CAUSA RAIZ: Ótima base nutricional, foco em sustentabilidade e prevenção',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione nutrição esportiva',
+        '📅 PLANO 7 DIAS: Manutenção com alimentos anti-inflamatórios',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos para performance',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione alimentos funcionais premium'
       ]
     },
     sales: {
-      baixoBemEstar: [
-        '💊 Suplementos para equilíbrio emocional',
-        '🥗 Proteínas para estabilização do humor',
-        '💪 Suplementos para energia e disposição',
-        '📞 Consultoria de suplementação para bem-estar'
+      bemEstarBaixo: [
+        '💊 DIAGNÓSTICO: Seu corpo mostra sinais claros de carência nutricional',
+        '🔍 CAUSA RAIZ: Quando faltam nutrientes essenciais, o bem-estar geral é comprometido',
+        '⚡ AÇÃO IMEDIATA: Kit básico de bem-estar com multivitamínico e magnésio',
+        '📅 PLANO 7 DIAS: Kit energético com B12, ferro e vitamina D',
+        '💊 SUPLEMENTAÇÃO: Complexo B + Magnésio + Ferro para energia e humor',
+        '🍎 ALIMENTAÇÃO: Alimentos ricos em triptofano para produção de serotonina'
       ],
       bemEstarModerado: [
-        '💊 Multivitamínicos para suporte emocional',
-        '🥗 Proteínas para manutenção energética',
-        '💪 Suplementos de performance mental',
-        '📞 Consultoria preventiva de bem-estar'
+        '💊 DIAGNÓSTICO: Seu bem-estar está bom, mas pode ganhar com suporte nutricional',
+        '🔍 CAUSA RAIZ: Boa base, mas precisa de micronutrientes para otimização',
+        '⚡ AÇÃO IMEDIATA: Suplementação preventiva com multivitamínico premium',
+        '📅 PLANO 7 DIAS: Kit de performance com ômega-3 e probióticos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos para manutenção',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, adicione alimentos funcionais'
       ],
-      altoBemEstar: [
-        '💊 Suplementos para sustentação do bem-estar',
-        '🥗 Proteínas para otimização energética',
-        '💪 Suplementos de manutenção',
-        '📞 Consultoria especializada em bem-estar'
+      bemEstarAlto: [
+        '💊 DIAGNÓSTICO: Excelente bem-estar! Mantenha com nutrição preventiva premium',
+        '🔍 CAUSA RAIZ: Ótima base nutricional, foco em sustentabilidade',
+        '⚡ AÇÃO IMEDIATA: Suplementação antioxidante com vitamina C e E',
+        '📅 PLANO 7 DIAS: Kit estabilizador com creatina e glutamina',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos + Nutrição esportiva',
+        '🍎 ALIMENTAÇÃO: Alimentos anti-inflamatórios e funcionais premium'
       ]
     },
     coach: {
-      baixoBemEstar: [
-        '🧘‍♀️ Programa intensivo de bem-estar',
-        '💪 Treinos para melhoria do humor',
-        '🍎 Coaching nutricional terapêutico',
-        '📅 Acompanhamento semanal de transformação'
+      bemEstarBaixo: [
+        '🌱 DIAGNÓSTICO: Seu bem-estar está comprometido por desequilíbrios no estilo de vida',
+        '🔍 CAUSA RAIZ: Rotina desequilibrada afeta sono, alimentação e movimento',
+        '⚡ AÇÃO IMEDIATA: Ajuste horário de sono e hidratação matinal',
+        '📅 PLANO 7 DIAS: Desafio de reequilíbrio com sono + água + movimento leve',
+        '💊 SUPLEMENTAÇÃO: Magnésio para relaxamento e melatonina natural',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares e alimentos energéticos'
       ],
       bemEstarModerado: [
-        '🧘‍♀️ Programa de otimização do bem-estar',
-        '💪 Treinos para manutenção energética',
-        '🍎 Coaching de hábitos de bem-estar',
-        '📅 Acompanhamento mensal de progresso'
+        '🌼 DIAGNÓSTICO: Você está equilibrado, mas precisa de ajustes estratégicos',
+        '🔍 CAUSA RAIZ: Boa base, mas rotina pode ser otimizada para sustentabilidade',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de fortalecimento de hábitos existentes',
+        '💊 SUPLEMENTAÇÃO: Probióticos e adaptógenos para sustentabilidade',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
-      altoBemEstar: [
-        '🧘‍♀️ Programa de sustentação do bem-estar',
-        '💪 Treinos para manutenção da performance',
-        '🍎 Coaching preventivo de bem-estar',
-        '📅 Acompanhamento preventivo especializado'
+      bemEstarAlto: [
+        '🔆 DIAGNÓSTICO: Excelente bem-estar! Você é um exemplo de equilíbrio',
+        '🔍 CAUSA RAIZ: Ótima base de hábitos, foco em manutenção e evolução',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione práticas avançadas',
+        '📅 PLANO 7 DIAS: Desafio de evolução com meditação + alimentação consciente',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos (ashwagandha) para estabilidade',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e horários regulares mantidos'
       ]
     }
   },
@@ -3648,9 +3666,9 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'metabolismoAcelerado', label: 'Metabolismo Acelerado', range: '14-18 pontos', color: 'yellow' }
     ],
     'quiz-bem-estar': [
-      { id: 'baixo-bem-estar', label: 'Baixo Bem-estar', range: '0-40 pontos', color: 'red' },
-      { id: 'bem-estar-moderado', label: 'Bem-estar Moderado', range: '41-70 pontos', color: 'yellow' },
-      { id: 'alto-bem-estar', label: 'Alto Bem-estar', range: '71-100 pontos', color: 'green' }
+      { id: 'bemEstarBaixo', label: 'Bem-estar Baixo', range: '5-8 pontos', color: 'red' },
+      { id: 'bemEstarModerado', label: 'Bem-estar Moderado', range: '9-12 pontos', color: 'yellow' },
+      { id: 'bemEstarAlto', label: 'Bem-estar Alto', range: '13-15 pontos', color: 'green' }
     ],
     'quiz-perfil-nutricional': [
       { id: 'perfil-deficiente', label: 'Perfil Deficiente', range: '0-30 pontos', color: 'red' },
@@ -4351,6 +4369,256 @@ export default function AdminDiagnosticos() {
                   </div>
 
 
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Quiz de Bem-estar */}
+            {ferramentaSelecionada === 'quiz-bem-estar' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🧘‍♀️ CTAs Pré-sugeridos - Quiz de Bem-estar
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BEM-ESTAR BAIXO</p>
+                        <p className="text-sm text-gray-700">"Transforme seu bem-estar com nutrição terapêutica."</p>
+                        <p className="text-xs text-green-600 mt-1">🌱 Quero minha consulta nutricional</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BEM-ESTAR MODERADO</p>
+                        <p className="text-sm text-gray-700">"Otimize seu bem-estar com plano nutricional personalizado."</p>
+                        <p className="text-xs text-green-600 mt-1">📅 Quero meu plano de otimização</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BEM-ESTAR ALTO</p>
+                        <p className="text-sm text-gray-700">"Mantenha seu excelente bem-estar com nutrição preventiva."</p>
+                        <p className="text-xs text-green-600 mt-1">💎 Quero nutrição preventiva</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BEM-ESTAR BAIXO</p>
+                        <p className="text-sm text-gray-700">"Veja quais suplementos podem melhorar seu bem-estar."</p>
+                        <p className="text-xs text-blue-600 mt-1">💊 Quero ver os suplementos ideais</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BEM-ESTAR MODERADO</p>
+                        <p className="text-sm text-gray-700">"Mantenha seu bem-estar com suplementos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">⚡ Ver suplementos de manutenção</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BEM-ESTAR ALTO</p>
+                        <p className="text-sm text-gray-700">"Sustente seu bem-estar com nutrição premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🌟 Ver suplementos premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BEM-ESTAR BAIXO</p>
+                        <p className="text-sm text-gray-700">"Entre no Programa de Transformação do Bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🌱 Quero começar a transformação</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BEM-ESTAR MODERADO</p>
+                        <p className="text-sm text-gray-700">"Fortalça seus hábitos com nosso programa de 30 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">💪 Quero reforçar minha rotina</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BEM-ESTAR ALTO</p>
+                        <p className="text-sm text-gray-700">"Evolua para o próximo nível de bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero evoluir meu bem-estar</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de bem-estar</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Quiz de Bem-estar */}
+            {ferramentaSelecionada === 'quiz-bem-estar' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🧘‍♀️ Preview do Quiz de Bem-estar - "Descubra seu Nível de Bem-estar"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🌟 Descubra Seu Nível de Bem-estar em 2 Minutos</h4>
+                  <p className="text-gray-700 mb-3">Avalie como está sua energia, humor, sono e qualidade de vida — e descubra estratégias personalizadas para elevar seu bem-estar.</p>
+                  <p className="text-green-600 font-semibold">✨ Uma avaliação completa que pode transformar sua rotina.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🌅 1. Como você se sente ao acordar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="acordar" className="mr-3" />
+                        <span className="text-gray-700">(A) Cansado, preciso de café para funcionar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="acordar" className="mr-3" />
+                        <span className="text-gray-700">(B) Normal, mas preciso de um tempo para despertar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="acordar" className="mr-3" />
+                        <span className="text-gray-700">(C) Energizado e pronto para o dia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Autopercepção matinal</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">😴 2. Como está a qualidade do seu sono?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(A) Dificuldade para dormir ou acordar várias vezes</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(B) Sono regular, mas não sempre reparador</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(C) Durmo bem e acordo descansado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Qualidade de recuperação</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">😊 3. Como está seu humor geral?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="humor" className="mr-3" />
+                        <span className="text-gray-700">(A) Frequentemente irritado ou triste</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="humor" className="mr-3" />
+                        <span className="text-gray-700">(B) Humor instável, depende do dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="humor" className="mr-3" />
+                        <span className="text-gray-700">(C) Geralmente positivo e estável</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Estado emocional</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">⚡ 4. Como está seu nível de energia ao longo do dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="energia" className="mr-3" />
+                        <span className="text-gray-700">(A) Baixo, me sinto sempre cansado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="energia" className="mr-3" />
+                        <span className="text-gray-700">(B) Variável, tenho altos e baixos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="energia" className="mr-3" />
+                        <span className="text-gray-700">(C) Alto e constante durante o dia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Vitalidade e disposição</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🏃‍♀️ 5. Como está sua disposição para atividades físicas?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="atividade" className="mr-3" />
+                        <span className="text-gray-700">(A) Sem energia para exercícios</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="atividade" className="mr-3" />
+                        <span className="text-gray-700">(B) Faço exercícios ocasionalmente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="atividade" className="mr-3" />
+                        <span className="text-gray-700">(C) Pratico atividades físicas regularmente</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Motivação e movimento</p>
+                  </div>
+
+                  {/* Sistema de Pontuação */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Sistema de Pontuação</h4>
+                    <div className="mb-3 text-sm text-gray-600">
+                      <p><strong>A = 1 ponto | B = 2 pontos | C = 3 pontos</strong></p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center p-3 bg-red-100 rounded-lg">
+                        <div className="font-semibold text-red-900">Bem-estar Baixo</div>
+                        <div className="text-red-700">5-8 pontos</div>
+                        <div className="text-xs text-red-600 mt-1">Precisa de atenção</div>
+                      </div>
+                      <div className="text-center p-3 bg-yellow-100 rounded-lg">
+                        <div className="font-semibold text-yellow-900">Bem-estar Moderado</div>
+                        <div className="text-yellow-700">9-12 pontos</div>
+                        <div className="text-xs text-yellow-600 mt-1">Bom, pode melhorar</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-100 rounded-lg">
+                        <div className="font-semibold text-green-900">Bem-estar Alto</div>
+                        <div className="text-green-700">13-15 pontos</div>
+                        <div className="text-xs text-green-600 mt-1">Excelente!</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
