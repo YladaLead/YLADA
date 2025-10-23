@@ -161,9 +161,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Comece com 3 refeições principais nos mesmos horários todos os dias',
         '📅 PLANO 7 DIAS: Reequilíbrio metabólico com proteína em todas as refeições',
         '💊 SUPLEMENTAÇÃO: Magnésio (200mg) e B12 para energia celular',
-        '🍎 ALIMENTAÇÃO: Aumente proteína magra e gorduras boas (abacate, oleaginosas)',
-        '📞 ACOMPANHAMENTO: Retorno em 15 dias para ajustes',
-        '✅ CTA: Agendar avaliação nutricional completa'
+        '🍎 ALIMENTAÇÃO: Aumente proteína magra e gorduras boas (abacate, oleaginosas)'
       ],
       metabolismoEquilibrado: [
         '📋 DIAGNÓSTICO: Seu metabolismo está estável com potencial de otimização',
@@ -171,9 +169,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Mantenha rotina atual e adicione micronutrientes',
         '📅 PLANO 7 DIAS: Otimização com alimentos funcionais e timing nutricional',
         '💊 SUPLEMENTAÇÃO: Multivitamínico e ômega-3 para performance',
-        '🍎 ALIMENTAÇÃO: Varie cores no prato e inclua alimentos antioxidantes',
-        '📞 ACOMPANHAMENTO: Retorno em 30 dias para avaliação',
-        '✅ CTA: Quero meu plano de otimização personalizado'
+        '🍎 ALIMENTAÇÃO: Varie cores no prato e inclua alimentos antioxidantes'
       ],
       metabolismoAcelerado: [
         '📋 DIAGNÓSTICO: Seu metabolismo rápido precisa de estabilização',
@@ -181,9 +177,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Aumente frequência de refeições (5-6x/dia)',
         '📅 PLANO 7 DIAS: Estabilização com carboidratos complexos e proteína',
         '💊 SUPLEMENTAÇÃO: Creatina e glutamina para recuperação muscular',
-        '🍎 ALIMENTAÇÃO: Carboidratos complexos + proteína para sustentar energia',
-        '📞 ACOMPANHAMENTO: Retorno em 20 dias para ajustes',
-        '✅ CTA: Quero estabilizar meu metabolismo com ajuda profissional'
+        '🍎 ALIMENTAÇÃO: Carboidratos complexos + proteína para sustentar energia'
       ]
     },
     sales: {
@@ -193,9 +187,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Suplementação básica com multivitamínico e magnésio',
         '📅 PLANO 7 DIAS: Kit metabólico com B12, ferro e zinco para energia',
         '💊 SUPLEMENTAÇÃO: Complexo B + Magnésio + Ferro para acelerar metabolismo',
-        '🍎 ALIMENTAÇÃO: Alimentos ricos em ferro e vitamina C para absorção',
-        '📞 ACOMPANHAMENTO: Retorno em 15 dias para avaliar resposta',
-        '✅ CTA: Quero ver os suplementos ideais para o meu tipo de metabolismo'
+        '🍎 ALIMENTAÇÃO: Alimentos ricos em ferro e vitamina C para absorção'
       ],
       metabolismoEquilibrado: [
         '💊 DIAGNÓSTICO: Seu metabolismo está bom, mas pode ganhar performance com suporte nutricional específico',
@@ -203,9 +195,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Suplementação preventiva com multivitamínico premium',
         '📅 PLANO 7 DIAS: Kit de performance com ômega-3 e probióticos',
         '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos para manutenção',
-        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, adicione alimentos funcionais',
-        '📞 ACOMPANHAMENTO: Retorno em 30 dias para avaliação de performance',
-        '✅ CTA: Ver suplementos que mantêm o equilíbrio metabólico'
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, adicione alimentos funcionais'
       ],
       metabolismoAcelerado: [
         '💊 DIAGNÓSTICO: Seu corpo está acelerado e precisa de apoio antioxidante e restaurador',
@@ -213,9 +203,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Suplementação antioxidante com vitamina C e E',
         '📅 PLANO 7 DIAS: Kit estabilizador com creatina e glutamina',
         '💊 SUPLEMENTAÇÃO: Antioxidantes + Creatina + Glutamina para recuperação',
-        '🍎 ALIMENTAÇÃO: Aumente carboidratos complexos para sustentar energia',
-        '📞 ACOMPANHAMENTO: Retorno em 20 dias para ajuste de dosagens',
-        '✅ CTA: Ver suplementos para estabilidade e foco'
+        '🍎 ALIMENTAÇÃO: Aumente carboidratos complexos para sustentar energia'
       ]
     },
     coach: {
@@ -225,9 +213,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Ajuste horário de sono e hidratação matinal',
         '📅 PLANO 7 DIAS: Desafio de reequilíbrio com sono + água + movimento leve',
         '💊 SUPLEMENTAÇÃO: Magnésio para relaxamento e melatonina natural',
-        '🍎 ALIMENTAÇÃO: Foque em horários regulares, não apenas no que comer',
-        '📞 ACOMPANHAMENTO: Check-in diário por 7 dias',
-        '✅ CTA: Quero começar o desafio de 7 dias'
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares, não apenas no que comer'
       ],
       metabolismoEquilibrado: [
         '🌼 DIAGNÓSTICO: Você está equilibrado, mas precisa de ajustes estratégicos para manter constância',
@@ -235,9 +221,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
         '📅 PLANO 7 DIAS: Desafio de fortalecimento de hábitos existentes',
         '💊 SUPLEMENTAÇÃO: Probióticos e adaptógenos para sustentabilidade',
-        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar',
-        '📞 ACOMPANHAMENTO: Check-in semanal por 30 dias',
-        '✅ CTA: Quero reforçar minha rotina saudável'
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
       metabolismoAcelerado: [
         '🔆 DIAGNÓSTICO: Você é naturalmente ativo(a), mas pode estar acelerando demais',
@@ -245,9 +229,7 @@ const diagnosticosCompletos = {
         '⚡ AÇÃO IMEDIATA: Pratique técnicas de respiração e mindfulness',
         '📅 PLANO 7 DIAS: Desafio de equilíbrio com meditação + alimentação consciente',
         '💊 SUPLEMENTAÇÃO: Adaptógenos (ashwagandha) para estabilidade',
-        '🍎 ALIMENTAÇÃO: Alimentação consciente e horários regulares',
-        '📞 ACOMPANHAMENTO: Check-in diário por 14 dias',
-        '✅ CTA: Quero aprender a equilibrar minha energia'
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e horários regulares'
       ]
     }
   },
