@@ -626,6 +626,646 @@ const diagnosticosCompletos = {
     ]
   },
 
+  // 21. TABELA DE METAS SEMANAIS
+  'tabela-metas-semanais': {
+    nutri: {
+      metasBasicas: [
+        '📋 Definição de metas nutricionais básicas',
+        '🥗 Plano alimentar para metas simples',
+        '💊 Suplementação básica para metas',
+        '📅 Acompanhamento semanal de metas'
+      ],
+      metasModeradas: [
+        '📋 Definição de metas nutricionais moderadas',
+        '🥗 Plano alimentar para metas específicas',
+        '💊 Suplementação direcionada para metas',
+        '📅 Acompanhamento quinzenal de metas'
+      ],
+      metasAvancadas: [
+        '📋 Definição de metas nutricionais avançadas',
+        '🥗 Plano alimentar para metas complexas',
+        '💊 Suplementação avançada para metas',
+        '📅 Acompanhamento semanal intensivo de metas'
+      ]
+    },
+    sales: {
+      metasBasicas: [
+        '💊 Produtos básicos para metas simples',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em metas'
+      ],
+      metasModeradas: [
+        '💊 Produtos moderados para metas específicas',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em metas'
+      ],
+      metasAvancadas: [
+        '💊 Produtos avançados para metas complexas',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em metas'
+      ]
+    },
+    coach: {
+      metasBasicas: [
+        '🧘‍♀️ Programa básico de metas',
+        '💪 Exercícios para metas simples',
+        '🍎 Coaching nutricional básico',
+        '📅 Acompanhamento básico de metas'
+      ],
+      metasModeradas: [
+        '🧘‍♀️ Programa moderado de metas',
+        '💪 Exercícios para metas específicas',
+        '🍎 Coaching nutricional moderado',
+        '📅 Acompanhamento moderado de metas'
+      ],
+      metasAvancadas: [
+        '🧘‍♀️ Programa avançado de metas',
+        '💪 Exercícios para metas complexas',
+        '🍎 Coaching nutricional avançado',
+        '📅 Acompanhamento avançado de metas'
+      ]
+    }
+  },
+
+  // 22. TEMPLATE DE DESAFIO 7 DIAS
+  'template-desafio-7dias': {
+    nutri: {
+      desafioBasico: [
+        '📋 Desafio nutricional básico de 7 dias',
+        '🥗 Plano alimentar simples para desafio',
+        '💊 Suplementação básica para desafio',
+        '📅 Acompanhamento diário do desafio'
+      ],
+      desafioModerado: [
+        '📋 Desafio nutricional moderado de 7 dias',
+        '🥗 Plano alimentar específico para desafio',
+        '💊 Suplementação direcionada para desafio',
+        '📅 Acompanhamento intensivo do desafio'
+      ],
+      desafioAvancado: [
+        '📋 Desafio nutricional avançado de 7 dias',
+        '🥗 Plano alimentar complexo para desafio',
+        '💊 Suplementação avançada para desafio',
+        '📅 Acompanhamento especializado do desafio'
+      ]
+    },
+    sales: {
+      desafioBasico: [
+        '💊 Produtos básicos para desafio de 7 dias',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em desafios'
+      ],
+      desafioModerado: [
+        '💊 Produtos moderados para desafio específico',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em desafios'
+      ],
+      desafioAvancado: [
+        '💊 Produtos avançados para desafio complexo',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em desafios'
+      ]
+    },
+    coach: {
+      desafioBasico: [
+        '🧘‍♀️ Programa básico de desafio de 7 dias',
+        '💪 Exercícios básicos para desafio',
+        '🍎 Coaching nutricional básico',
+        '📅 Acompanhamento básico do desafio'
+      ],
+      desafioModerado: [
+        '🧘‍♀️ Programa moderado de desafio',
+        '💪 Exercícios moderados para desafio',
+        '🍎 Coaching nutricional moderado',
+        '📅 Acompanhamento moderado do desafio'
+      ],
+      desafioAvancado: [
+        '🧘‍♀️ Programa avançado de desafio',
+        '💪 Exercícios avançados para desafio',
+        '🍎 Coaching nutricional avançado',
+        '📅 Acompanhamento avançado do desafio'
+      ]
+    }
+  },
+
+  // 23. TEMPLATE DE DESAFIO 21 DIAS
+  'template-desafio-21dias': {
+    nutri: {
+      desafioBasico: [
+        '📋 Desafio nutricional básico de 21 dias',
+        '🥗 Plano alimentar simples para desafio',
+        '💊 Suplementação básica para desafio',
+        '📅 Acompanhamento semanal do desafio'
+      ],
+      desafioModerado: [
+        '📋 Desafio nutricional moderado de 21 dias',
+        '🥗 Plano alimentar específico para desafio',
+        '💊 Suplementação direcionada para desafio',
+        '📅 Acompanhamento quinzenal do desafio'
+      ],
+      desafioAvancado: [
+        '📋 Desafio nutricional avançado de 21 dias',
+        '🥗 Plano alimentar complexo para desafio',
+        '💊 Suplementação avançada para desafio',
+        '📅 Acompanhamento semanal intensivo do desafio'
+      ]
+    },
+    sales: {
+      desafioBasico: [
+        '💊 Produtos básicos para desafio de 21 dias',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em desafios'
+      ],
+      desafioModerado: [
+        '💊 Produtos moderados para desafio específico',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em desafios'
+      ],
+      desafioAvancado: [
+        '💊 Produtos avançados para desafio complexo',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em desafios'
+      ]
+    },
+    coach: {
+      desafioBasico: [
+        '🧘‍♀️ Programa básico de desafio de 21 dias',
+        '💪 Exercícios básicos para desafio',
+        '🍎 Coaching nutricional básico',
+        '📅 Acompanhamento básico do desafio'
+      ],
+      desafioModerado: [
+        '🧘‍♀️ Programa moderado de desafio',
+        '💪 Exercícios moderados para desafio',
+        '🍎 Coaching nutricional moderado',
+        '📅 Acompanhamento moderado do desafio'
+      ],
+      desafioAvancado: [
+        '🧘‍♀️ Programa avançado de desafio',
+        '💪 Exercícios avançados para desafio',
+        '🍎 Coaching nutricional avançado',
+        '📅 Acompanhamento avançado do desafio'
+      ]
+    }
+  },
+
+  // 24. GUIA DE HIDRATAÇÃO
+  'guia-hidratacao': {
+    nutri: {
+      baixaHidratacao: [
+        '📋 Guia completo de hidratação',
+        '🥗 Plano alimentar rico em líquidos',
+        '💊 Suplementos eletrolíticos',
+        '📅 Acompanhamento hidratacional semanal'
+      ],
+      hidratacaoModerada: [
+        '📋 Guia de otimização da hidratação',
+        '🥗 Plano alimentar para manutenção hidratacional',
+        '💊 Suplementos de apoio hidratacional',
+        '📅 Consultas de manutenção hidratacional'
+      ],
+      altaHidratacao: [
+        '📋 Guia de manutenção da hidratação otimizada',
+        '🥗 Plano alimentar para sustentação hidratacional',
+        '💊 Suplementos preventivos hidratacionais',
+        '📅 Acompanhamento preventivo hidratacional'
+      ]
+    },
+    sales: {
+      baixaHidratacao: [
+        '💊 Eletrólitos para correção hidratacional',
+        '🥗 Suplementos hidratacionais',
+        '💪 Suplementos para reposição hídrica',
+        '📞 Consultoria especializada em hidratação'
+      ],
+      hidratacaoModerada: [
+        '💊 Eletrólitos para manutenção',
+        '🥗 Suplementos hidratacionais moderados',
+        '💪 Suplementos de apoio hidratacional',
+        '📞 Consultoria preventiva hidratacional'
+      ],
+      altaHidratacao: [
+        '💊 Eletrólitos para otimização',
+        '🥗 Suplementos hidratacionais avançados',
+        '💪 Suplementos de manutenção hidratacional',
+        '📞 Consultoria especializada hidratacional'
+      ]
+    },
+    coach: {
+      baixaHidratacao: [
+        '🧘‍♀️ Programa intensivo de hidratação',
+        '💪 Treinos adaptados para hidratação',
+        '🍎 Coaching nutricional hidratacional',
+        '📅 Acompanhamento semanal hidratacional'
+      ],
+      hidratacaoModerada: [
+        '🧘‍♀️ Programa de otimização hidratacional',
+        '💪 Treinos para manutenção hidratacional',
+        '🍎 Coaching de hábitos hidratacionais',
+        '📅 Acompanhamento mensal hidratacional'
+      ],
+      altaHidratacao: [
+        '🧘‍♀️ Programa de sustentação hidratacional',
+        '💪 Treinos para manutenção da hidratação',
+        '🍎 Coaching preventivo hidratacional',
+        '📅 Acompanhamento preventivo hidratacional'
+      ]
+    }
+  },
+
+  // 25. INFOGRÁFICO EDUCATIVO
+  'infografico-educativo': {
+    nutri: {
+      conhecimentoBasico: [
+        '📋 Infográfico sobre nutrição básica',
+        '🥗 Informações visuais sobre alimentação',
+        '💊 Suplementação educativa',
+        '📅 Consulta nutricional educativa'
+      ],
+      conhecimentoModerado: [
+        '📋 Infográfico sobre nutrição moderada',
+        '🥗 Informações visuais especializadas',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      conhecimentoAvancado: [
+        '📋 Infográfico sobre nutrição avançada',
+        '🥗 Informações visuais de alta qualidade',
+        '💊 Suplementação avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      conhecimentoBasico: [
+        '💊 Infográfico sobre suplementos básicos',
+        '🥗 Informações visuais sobre produtos',
+        '💪 Suplementação educativa',
+        '📞 Consultoria educativa em suplementos'
+      ],
+      conhecimentoModerado: [
+        '💊 Infográfico sobre suplementos moderados',
+        '🥗 Informações visuais especializadas',
+        '💪 Suplementação direcionada',
+        '📞 Consultoria especializada em produtos'
+      ],
+      conhecimentoAvancado: [
+        '💊 Infográfico sobre suplementos avançados',
+        '🥗 Informações visuais de alta qualidade',
+        '💪 Suplementação avançada',
+        '📞 Consultoria premium em suplementos'
+      ]
+    },
+    coach: {
+      conhecimentoBasico: [
+        '🧘‍♀️ Infográfico sobre bem-estar básico',
+        '💪 Informações visuais sobre exercícios',
+        '🍎 Coaching nutricional educativo',
+        '📅 Programa educativo de transformação'
+      ],
+      conhecimentoModerado: [
+        '🧘‍♀️ Infográfico sobre bem-estar moderado',
+        '💪 Informações visuais especializadas',
+        '🍎 Coaching nutricional específico',
+        '📅 Programa especializado de transformação'
+      ],
+      conhecimentoAvancado: [
+        '🧘‍♀️ Infográfico sobre bem-estar avançado',
+        '💪 Informações visuais de alta qualidade',
+        '🍎 Coaching nutricional profissional',
+        '📅 Programa profissional de transformação'
+      ]
+    }
+  },
+
+  // 26. TEMPLATE DE RECEITAS
+  'template-receitas': {
+    nutri: {
+      receitasBasicas: [
+        '📋 Receitas básicas e nutritivas',
+        '🥗 Plano alimentar com receitas simples',
+        '💊 Suplementação básica',
+        '📅 Consulta nutricional com receitas'
+      ],
+      receitasModeradas: [
+        '📋 Receitas moderadas e especializadas',
+        '🥗 Plano alimentar com receitas específicas',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      receitasAvancadas: [
+        '📋 Receitas avançadas e de alta qualidade',
+        '🥗 Plano alimentar com receitas complexas',
+        '💊 Suplementação avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      receitasBasicas: [
+        '💊 Produtos básicos para receitas',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em receitas'
+      ],
+      receitasModeradas: [
+        '💊 Produtos moderados para receitas',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em receitas'
+      ],
+      receitasAvancadas: [
+        '💊 Produtos avançados para receitas',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em receitas'
+      ]
+    },
+    coach: {
+      receitasBasicas: [
+        '🧘‍♀️ Programa básico com receitas',
+        '💪 Exercícios básicos',
+        '🍎 Coaching nutricional básico',
+        '📅 Programa básico de transformação'
+      ],
+      receitasModeradas: [
+        '🧘‍♀️ Programa moderado com receitas',
+        '💪 Exercícios moderados',
+        '🍎 Coaching nutricional moderado',
+        '📅 Programa moderado de transformação'
+      ],
+      receitasAvancadas: [
+        '🧘‍♀️ Programa avançado com receitas',
+        '💪 Exercícios avançados',
+        '🍎 Coaching nutricional avançado',
+        '📅 Programa avançado de transformação'
+      ]
+    }
+  },
+
+  // 27. CARDÁPIO DETOX
+  'cardapio-detox': {
+    nutri: {
+      detoxBasico: [
+        '📋 Cardápio detox básico',
+        '🥗 Plano alimentar detox simples',
+        '💊 Suplementos detox básicos',
+        '📅 Acompanhamento detox semanal'
+      ],
+      detoxModerado: [
+        '📋 Cardápio detox moderado',
+        '🥗 Plano alimentar detox específico',
+        '💊 Suplementos detox moderados',
+        '📅 Acompanhamento detox quinzenal'
+      ],
+      detoxAvancado: [
+        '📋 Cardápio detox avançado',
+        '🥗 Plano alimentar detox complexo',
+        '💊 Suplementos detox avançados',
+        '📅 Acompanhamento detox semanal intensivo'
+      ]
+    },
+    sales: {
+      detoxBasico: [
+        '💊 Produtos detox básicos',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em detox'
+      ],
+      detoxModerado: [
+        '💊 Produtos detox moderados',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em detox'
+      ],
+      detoxAvancado: [
+        '💊 Produtos detox avançados',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em detox'
+      ]
+    },
+    coach: {
+      detoxBasico: [
+        '🧘‍♀️ Programa básico de detox',
+        '💪 Exercícios básicos para detox',
+        '🍎 Coaching nutricional básico',
+        '📅 Programa básico de detox'
+      ],
+      detoxModerado: [
+        '🧘‍♀️ Programa moderado de detox',
+        '💪 Exercícios moderados para detox',
+        '🍎 Coaching nutricional moderado',
+        '📅 Programa moderado de detox'
+      ],
+      detoxAvancado: [
+        '🧘‍♀️ Programa avançado de detox',
+        '💪 Exercícios avançados para detox',
+        '🍎 Coaching nutricional avançado',
+        '📅 Programa avançado de detox'
+      ]
+    }
+  },
+
+  // 28. SIMULADOR DE RESULTADOS
+  'simulador-resultados': {
+    nutri: {
+      resultadosBasicos: [
+        '📋 Simulação de resultados básicos',
+        '🥗 Plano alimentar para resultados simples',
+        '💊 Suplementação básica',
+        '📅 Consulta nutricional para resultados'
+      ],
+      resultadosModerados: [
+        '📋 Simulação de resultados moderados',
+        '🥗 Plano alimentar para resultados específicos',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      resultadosAvancados: [
+        '📋 Simulação de resultados avançados',
+        '🥗 Plano alimentar para resultados complexos',
+        '💊 Suplementação avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      resultadosBasicos: [
+        '💊 Produtos para resultados básicos',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em resultados'
+      ],
+      resultadosModerados: [
+        '💊 Produtos para resultados moderados',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em resultados'
+      ],
+      resultadosAvancados: [
+        '💊 Produtos para resultados avançados',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em resultados'
+      ]
+    },
+    coach: {
+      resultadosBasicos: [
+        '🧘‍♀️ Programa básico para resultados',
+        '💪 Exercícios básicos',
+        '🍎 Coaching nutricional básico',
+        '📅 Programa básico de resultados'
+      ],
+      resultadosModerados: [
+        '🧘‍♀️ Programa moderado para resultados',
+        '💪 Exercícios moderados',
+        '🍎 Coaching nutricional moderado',
+        '📅 Programa moderado de resultados'
+      ],
+      resultadosAvancados: [
+        '🧘‍♀️ Programa avançado para resultados',
+        '💪 Exercícios avançados',
+        '🍎 Coaching nutricional avançado',
+        '📅 Programa avançado de resultados'
+      ]
+    }
+  },
+
+  // 29. TEMPLATE DE AVALIAÇÃO INICIAL
+  'template-avaliacao-inicial': {
+    nutri: {
+      avaliacaoBasica: [
+        '📋 Avaliação nutricional básica',
+        '🥗 Plano alimentar simples',
+        '💊 Suplementação básica',
+        '📅 Consulta nutricional inicial'
+      ],
+      avaliacaoModerada: [
+        '📋 Avaliação nutricional moderada',
+        '🥗 Plano alimentar específico',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      avaliacaoAvancada: [
+        '📋 Avaliação nutricional avançada',
+        '🥗 Plano alimentar complexo',
+        '💊 Suplementação avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      avaliacaoBasica: [
+        '💊 Produtos básicos para avaliação',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em avaliação'
+      ],
+      avaliacaoModerada: [
+        '💊 Produtos moderados para avaliação',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em avaliação'
+      ],
+      avaliacaoAvancada: [
+        '💊 Produtos avançados para avaliação',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em avaliação'
+      ]
+    },
+    coach: {
+      avaliacaoBasica: [
+        '🧘‍♀️ Programa básico de avaliação',
+        '💪 Exercícios básicos',
+        '🍎 Coaching nutricional básico',
+        '📅 Programa básico de avaliação'
+      ],
+      avaliacaoModerada: [
+        '🧘‍♀️ Programa moderado de avaliação',
+        '💪 Exercícios moderados',
+        '🍎 Coaching nutricional moderado',
+        '📅 Programa moderado de avaliação'
+      ],
+      avaliacaoAvancada: [
+        '🧘‍♀️ Programa avançado de avaliação',
+        '💪 Exercícios avançados',
+        '🍎 Coaching nutricional avançado',
+        '📅 Programa avançado de avaliação'
+      ]
+    }
+  },
+
+  // 30. FORMULÁRIO DE RECOMENDAÇÃO
+  'formulario-recomendacao': {
+    nutri: {
+      recomendacaoBasica: [
+        '📋 Recomendações nutricionais básicas',
+        '🥗 Plano alimentar simples',
+        '💊 Suplementação básica',
+        '📅 Consulta nutricional básica'
+      ],
+      recomendacaoModerada: [
+        '📋 Recomendações nutricionais moderadas',
+        '🥗 Plano alimentar específico',
+        '💊 Suplementação direcionada',
+        '📅 Consulta nutricional especializada'
+      ],
+      recomendacaoAvancada: [
+        '📋 Recomendações nutricionais avançadas',
+        '🥗 Plano alimentar complexo',
+        '💊 Suplementação avançada',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      recomendacaoBasica: [
+        '💊 Produtos básicos recomendados',
+        '🥗 Suplementação preventiva',
+        '💪 Produtos de apoio básico',
+        '📞 Consultoria básica em recomendações'
+      ],
+      recomendacaoModerada: [
+        '💊 Produtos moderados recomendados',
+        '🥗 Suplementação direcionada',
+        '💪 Produtos de apoio moderado',
+        '📞 Consultoria moderada em recomendações'
+      ],
+      recomendacaoAvancada: [
+        '💊 Produtos avançados recomendados',
+        '🥗 Suplementação avançada',
+        '💪 Produtos de apoio avançado',
+        '📞 Consultoria avançada em recomendações'
+      ]
+    },
+    coach: {
+      recomendacaoBasica: [
+        '🧘‍♀️ Programa básico recomendado',
+        '💪 Exercícios básicos',
+        '🍎 Coaching nutricional básico',
+        '📅 Programa básico recomendado'
+      ],
+      recomendacaoModerada: [
+        '🧘‍♀️ Programa moderado recomendado',
+        '💪 Exercícios moderados',
+        '🍎 Coaching nutricional moderado',
+        '📅 Programa moderado recomendado'
+      ],
+      recomendacaoAvancada: [
+        '🧘‍♀️ Programa avançado recomendado',
+        '💪 Exercícios avançados',
+        '🍎 Coaching nutricional avançado',
+        '📅 Programa avançado recomendado'
+      ]
+    }
+  },
+
   // 4. QUIZ DE PERFIL NUTRICIONAL
   'quiz-perfil-nutricional': {
     nutri: {
@@ -1178,6 +1818,56 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'diario-basico', label: 'Diário Básico', range: 'Registro simples', color: 'blue' },
       { id: 'diario-avancado', label: 'Diário Avançado', range: 'Registro detalhado', color: 'green' },
       { id: 'diario-premium', label: 'Diário Premium', range: 'Registro profissional', color: 'yellow' }
+    ],
+    'tabela-metas-semanais': [
+      { id: 'metas-basicas', label: 'Metas Básicas', range: 'Objetivos simples', color: 'blue' },
+      { id: 'metas-moderadas', label: 'Metas Moderadas', range: 'Objetivos específicos', color: 'green' },
+      { id: 'metas-avancadas', label: 'Metas Avançadas', range: 'Objetivos complexos', color: 'yellow' }
+    ],
+    'template-desafio-7dias': [
+      { id: 'desafio-basico', label: 'Desafio Básico', range: '7 dias simples', color: 'blue' },
+      { id: 'desafio-moderado', label: 'Desafio Moderado', range: '7 dias específicos', color: 'green' },
+      { id: 'desafio-avancado', label: 'Desafio Avançado', range: '7 dias complexos', color: 'yellow' }
+    ],
+    'template-desafio-21dias': [
+      { id: 'desafio-basico', label: 'Desafio Básico', range: '21 dias simples', color: 'blue' },
+      { id: 'desafio-moderado', label: 'Desafio Moderado', range: '21 dias específicos', color: 'green' },
+      { id: 'desafio-avancado', label: 'Desafio Avançado', range: '21 dias complexos', color: 'yellow' }
+    ],
+    'guia-hidratacao': [
+      { id: 'baixa-hidratacao', label: 'Baixa Hidratação', range: '< 2L/dia', color: 'red' },
+      { id: 'hidratacao-moderada', label: 'Hidratação Moderada', range: '2-3L/dia', color: 'yellow' },
+      { id: 'alta-hidratacao', label: 'Alta Hidratação', range: '> 3L/dia', color: 'green' }
+    ],
+    'infografico-educativo': [
+      { id: 'conhecimento-basico', label: 'Conhecimento Básico', range: '0-40 pontos', color: 'red' },
+      { id: 'conhecimento-moderado', label: 'Conhecimento Moderado', range: '41-70 pontos', color: 'yellow' },
+      { id: 'conhecimento-avancado', label: 'Conhecimento Avançado', range: '71-100 pontos', color: 'green' }
+    ],
+    'template-receitas': [
+      { id: 'receitas-basicas', label: 'Receitas Básicas', range: 'Receitas simples', color: 'blue' },
+      { id: 'receitas-moderadas', label: 'Receitas Moderadas', range: 'Receitas específicas', color: 'green' },
+      { id: 'receitas-avancadas', label: 'Receitas Avançadas', range: 'Receitas complexas', color: 'yellow' }
+    ],
+    'cardapio-detox': [
+      { id: 'detox-basico', label: 'Detox Básico', range: 'Detox simples', color: 'blue' },
+      { id: 'detox-moderado', label: 'Detox Moderado', range: 'Detox específico', color: 'green' },
+      { id: 'detox-avancado', label: 'Detox Avançado', range: 'Detox complexo', color: 'yellow' }
+    ],
+    'simulador-resultados': [
+      { id: 'resultados-basicos', label: 'Resultados Básicos', range: 'Resultados simples', color: 'blue' },
+      { id: 'resultados-moderados', label: 'Resultados Moderados', range: 'Resultados específicos', color: 'green' },
+      { id: 'resultados-avancados', label: 'Resultados Avançados', range: 'Resultados complexos', color: 'yellow' }
+    ],
+    'template-avaliacao-inicial': [
+      { id: 'avaliacao-basica', label: 'Avaliação Básica', range: 'Avaliação simples', color: 'blue' },
+      { id: 'avaliacao-moderada', label: 'Avaliação Moderada', range: 'Avaliação específica', color: 'green' },
+      { id: 'avaliacao-avancada', label: 'Avaliação Avançada', range: 'Avaliação complexa', color: 'yellow' }
+    ],
+    'formulario-recomendacao': [
+      { id: 'recomendacao-basica', label: 'Recomendação Básica', range: 'Recomendações simples', color: 'blue' },
+      { id: 'recomendacao-moderada', label: 'Recomendação Moderada', range: 'Recomendações específicas', color: 'green' },
+      { id: 'recomendacao-avancada', label: 'Recomendação Avançada', range: 'Recomendações complexas', color: 'yellow' }
     ]
   }
   
