@@ -3625,9 +3625,9 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'obesidade', label: 'Obesidade', range: '≥ 30.0', color: 'red' }
     ],
     'quiz-interativo': [
-      { id: 'metabolismo-lento', label: 'Metabolismo Lento', range: '6-9 pontos', color: 'blue' },
-      { id: 'metabolismo-equilibrado', label: 'Metabolismo Equilibrado', range: '10-13 pontos', color: 'green' },
-      { id: 'metabolismo-acelerado', label: 'Metabolismo Acelerado', range: '14-18 pontos', color: 'yellow' }
+      { id: 'metabolismoLento', label: 'Metabolismo Lento', range: '6-9 pontos', color: 'blue' },
+      { id: 'metabolismoEquilibrado', label: 'Metabolismo Equilibrado', range: '10-13 pontos', color: 'green' },
+      { id: 'metabolismoAcelerado', label: 'Metabolismo Acelerado', range: '14-18 pontos', color: 'yellow' }
     ],
     'quiz-bem-estar': [
       { id: 'baixo-bem-estar', label: 'Baixo Bem-estar', range: '0-40 pontos', color: 'red' },
