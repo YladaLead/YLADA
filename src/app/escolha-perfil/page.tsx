@@ -6,8 +6,8 @@ export default function EscolhaPerfilPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 flex items-center">
+        <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
           <Link href="/">
             <YLADALogo size="md" responsive={true} />
           </Link>
@@ -16,7 +16,7 @@ export default function EscolhaPerfilPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+      <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
         <div className="text-center max-w-6xl mx-auto">
 
           {/* Breadcrumb */}
@@ -157,7 +157,7 @@ export default function EscolhaPerfilPage() {
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-16">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
+          <div className="flex flex-col items-center justify-center">
             <div className="mb-4">
               <YLADALogo size="lg" />
             </div>

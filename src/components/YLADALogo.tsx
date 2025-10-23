@@ -50,12 +50,10 @@ export default function YLADALogo({
   }
 
   return (
-    <div className={`flex items-center ${className}`}>
-      <img
-        src={logoPaths[variant]}
-        alt="YLADA - Your Lead Advanced Data Assistant"
-        className={`${responsive ? 'h-16 sm:h-20 lg:h-24 w-auto' : sizeClasses[size]} w-auto`}
-      />
-    </div>
+    <img
+      src={logoPaths[variant]}
+      alt="YLADA - Your Lead Advanced Data Assistant"
+      className={`${responsive ? 'h-30 sm:h-36 lg:h-42 w-auto' : sizeClasses[size]} w-auto object-contain ${className}`}
+    />
   )
 }

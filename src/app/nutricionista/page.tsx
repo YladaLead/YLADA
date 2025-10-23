@@ -6,8 +6,8 @@ export default function NutricionistaPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-300 bg-white/95 backdrop-blur-md shadow-lg">
-        <div className="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-gray-300 bg-white/95 backdrop-blur-md shadow-lg h-16 flex items-center">
+        <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
           <Link href="/">
             <YLADALogo size="xl" responsive={true} />
           </Link>
@@ -16,7 +16,7 @@ export default function NutricionistaPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+      <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
         <div className="text-center max-w-6xl mx-auto">
 
           {/* Breadcrumb */}
@@ -192,7 +192,7 @@ export default function NutricionistaPage() {
       {/* Footer */}
       <footer className="border-t border-gray-300 bg-white/95 backdrop-blur-md mt-20">
         <div className="container mx-auto px-4 py-12">
-          <div className="text-center">
+          <div className="flex flex-col items-center justify-center">
             <div className="mb-6">
               <YLADALogo size="xl" />
             </div>
