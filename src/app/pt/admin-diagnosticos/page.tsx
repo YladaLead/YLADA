@@ -68,85 +68,664 @@ const ferramentasYLADA = [
   { id: 'template-jornada-cliente', nome: 'Template de Jornada do Cliente', categoria: 'Estratégico', objetivo: 'Estratégico', icon: '🗺️' }
 ]
 
-// Dados dos diagnósticos por profissão e categoria de IMC (exemplo para Calculadora de IMC)
-const diagnosticosPorProfissao = {
-  nutri: {
-    baixoPeso: [
-      '📋 Avaliação nutricional completa para ganho de peso saudável',
-      '🥗 Plano alimentar hipercalórico e nutritivo',
-      '💊 Suplementação para aumento de massa muscular',
-      '📅 Acompanhamento nutricional semanal'
-    ],
-    pesoNormal: [
-      '📋 Manutenção do peso com alimentação equilibrada',
-      '🥗 Plano alimentar para otimização da saúde',
-      '💪 Estratégias para ganho de massa muscular',
-      '📅 Consultas de manutenção mensais'
-    ],
-    sobrepeso: [
-      '📋 Plano alimentar para redução de peso',
-      '🥗 Reeducação alimentar e mudança de hábitos',
-      '💊 Suplementação para controle do apetite',
-      '📅 Acompanhamento nutricional quinzenal'
-    ],
-    obesidade: [
-      '📋 Plano alimentar para redução de peso',
-      '🥗 Reeducação alimentar completa',
-      '💊 Suplementação para controle metabólico',
-      '📅 Acompanhamento nutricional semanal intensivo'
-    ]
+// Sistema completo de diagnósticos por profissão e ferramenta
+const diagnosticosCompletos = {
+  // 1. CALCULADORA DE IMC
+  'calculadora-imc': {
+    nutri: {
+      baixoPeso: [
+        '📋 Avaliação nutricional completa para ganho de peso saudável',
+        '🥗 Plano alimentar hipercalórico e nutritivo',
+        '💊 Suplementação para aumento de massa muscular',
+        '📅 Acompanhamento nutricional semanal'
+      ],
+      pesoNormal: [
+        '📋 Manutenção do peso com alimentação equilibrada',
+        '🥗 Plano alimentar para otimização da saúde',
+        '💪 Estratégias para ganho de massa muscular',
+        '📅 Consultas de manutenção mensais'
+      ],
+      sobrepeso: [
+        '📋 Plano alimentar para redução de peso',
+        '🥗 Reeducação alimentar e mudança de hábitos',
+        '💊 Suplementação para controle do apetite',
+        '📅 Acompanhamento nutricional quinzenal'
+      ],
+      obesidade: [
+        '📋 Plano alimentar para redução de peso',
+        '🥗 Reeducação alimentar completa',
+        '💊 Suplementação para controle metabólico',
+        '📅 Acompanhamento nutricional semanal intensivo'
+      ]
+    },
+    sales: {
+      baixoPeso: [
+        '💊 Whey Protein para ganho de massa muscular',
+        '🍯 Maltodextrina para aumento calórico',
+        '🥛 Mass Gainer para ganho de peso',
+        '📞 Consultoria personalizada de suplementação'
+      ],
+      pesoNormal: [
+        '💊 Multivitamínicos para otimização da saúde',
+        '🥗 Proteínas para manutenção muscular',
+        '💪 Creatina para performance física',
+        '📞 Consultoria de suplementação preventiva'
+      ],
+      sobrepeso: [
+        '💊 Termogênicos para aceleração metabólica',
+        '🥗 Proteínas para preservação muscular',
+        '💪 L-Carnitina para queima de gordura',
+        '📞 Consultoria de suplementação para emagrecimento'
+      ],
+      obesidade: [
+        '💊 Suplementos para controle metabólico',
+        '🥗 Proteínas para preservação muscular',
+        '💪 Suplementos para redução de apetite',
+        '📞 Consultoria especializada em suplementação'
+      ]
+    },
+    coach: {
+      baixoPeso: [
+        '🧘‍♀️ Programa de ganho de peso saudável',
+        '💪 Treinos para aumento de massa muscular',
+        '🍎 Coaching nutricional para ganho de peso',
+        '📅 Acompanhamento semanal de transformação'
+      ],
+      pesoNormal: [
+        '🧘‍♀️ Programa de otimização da saúde',
+        '💪 Treinos para manutenção e performance',
+        '🍎 Coaching de hábitos saudáveis',
+        '📅 Acompanhamento mensal de bem-estar'
+      ],
+      sobrepeso: [
+        '🧘‍♀️ Programa de transformação corporal',
+        '💪 Treinos para redução de peso',
+        '🍎 Coaching de mudança de hábitos',
+        '📅 Acompanhamento quinzenal de progresso'
+      ],
+      obesidade: [
+        '🧘‍♀️ Programa intensivo de transformação',
+        '💪 Treinos adaptados para início da jornada',
+        '🍎 Coaching completo de mudança de vida',
+        '📅 Acompanhamento semanal intensivo'
+      ]
+    }
   },
-  sales: {
-    baixoPeso: [
-      '💊 Whey Protein para ganho de massa muscular',
-      '🍯 Maltodextrina para aumento calórico',
-      '🥛 Mass Gainer para ganho de peso',
-      '📞 Consultoria personalizada de suplementação'
-    ],
-    pesoNormal: [
-      '💊 Multivitamínicos para otimização da saúde',
-      '🥗 Proteínas para manutenção muscular',
-      '💪 Creatina para performance física',
-      '📞 Consultoria de suplementação preventiva'
-    ],
-    sobrepeso: [
-      '💊 Termogênicos para aceleração metabólica',
-      '🥗 Proteínas para preservação muscular',
-      '💪 L-Carnitina para queima de gordura',
-      '📞 Consultoria de suplementação para emagrecimento'
-    ],
-    obesidade: [
-      '💊 Suplementos para controle metabólico',
-      '🥗 Proteínas para preservação muscular',
-      '💪 Suplementos para redução de apetite',
-      '📞 Consultoria especializada em suplementação'
-    ]
+
+  // 2. QUIZ INTERATIVO (Metabolismo)
+  'quiz-interativo': {
+    nutri: {
+      metabolismoLento: [
+        '📋 Avaliação metabólica completa',
+        '🥗 Plano alimentar para acelerar metabolismo',
+        '💊 Suplementos termogênicos naturais',
+        '📅 Acompanhamento metabólico semanal'
+      ],
+      metabolismoNormal: [
+        '📋 Manutenção do metabolismo equilibrado',
+        '🥗 Otimização nutricional para performance',
+        '💊 Suplementos de apoio metabólico',
+        '📅 Consultas de manutenção mensais'
+      ],
+      metabolismoRapido: [
+        '📋 Controle metabólico para estabilização',
+        '🥗 Plano alimentar para sustentação energética',
+        '💊 Suplementos para equilíbrio metabólico',
+        '📅 Acompanhamento nutricional especializado'
+      ]
+    },
+    sales: {
+      metabolismoLento: [
+        '💊 Termogênicos para aceleração metabólica',
+        '🥗 Proteínas para preservação muscular',
+        '💪 Suplementos para queima de gordura',
+        '📞 Consultoria de suplementação metabólica'
+      ],
+      metabolismoNormal: [
+        '💊 Multivitamínicos para suporte metabólico',
+        '🥗 Proteínas para manutenção muscular',
+        '💪 Suplementos de performance',
+        '📞 Consultoria preventiva de suplementação'
+      ],
+      metabolismoRapido: [
+        '💊 Suplementos para estabilização metabólica',
+        '🥗 Proteínas para sustentação muscular',
+        '💪 Suplementos de recuperação',
+        '📞 Consultoria especializada em metabolismo'
+      ]
+    },
+    coach: {
+      metabolismoLento: [
+        '🧘‍♀️ Programa de aceleração metabólica',
+        '💪 Treinos HIIT para metabolismo',
+        '🍎 Coaching nutricional metabólico',
+        '📅 Acompanhamento de transformação metabólica'
+      ],
+      metabolismoNormal: [
+        '🧘‍♀️ Programa de otimização metabólica',
+        '💪 Treinos para manutenção metabólica',
+        '🍎 Coaching de hábitos metabólicos',
+        '📅 Acompanhamento de performance metabólica'
+      ],
+      metabolismoRapido: [
+        '🧘‍♀️ Programa de estabilização metabólica',
+        '💪 Treinos para sustentação energética',
+        '🍎 Coaching de equilíbrio metabólico',
+        '📅 Acompanhamento especializado metabólico'
+      ]
+    }
   },
-  coach: {
-    baixoPeso: [
-      '🧘‍♀️ Programa de ganho de peso saudável',
-      '💪 Treinos para aumento de massa muscular',
-      '🍎 Coaching nutricional para ganho de peso',
-      '📅 Acompanhamento semanal de transformação'
-    ],
-    pesoNormal: [
-      '🧘‍♀️ Programa de otimização da saúde',
-      '💪 Treinos para manutenção e performance',
-      '🍎 Coaching de hábitos saudáveis',
-      '📅 Acompanhamento mensal de bem-estar'
-    ],
-    sobrepeso: [
-      '🧘‍♀️ Programa de transformação corporal',
-      '💪 Treinos para redução de peso',
-      '🍎 Coaching de mudança de hábitos',
-      '📅 Acompanhamento quinzenal de progresso'
-    ],
-    obesidade: [
-      '🧘‍♀️ Programa intensivo de transformação',
-      '💪 Treinos adaptados para início da jornada',
-      '🍎 Coaching completo de mudança de vida',
-      '📅 Acompanhamento semanal intensivo'
-    ]
+
+  // 3. QUIZ DE BEM-ESTAR
+  'quiz-bem-estar': {
+    nutri: {
+      baixoBemEstar: [
+        '📋 Avaliação completa de bem-estar nutricional',
+        '🥗 Plano alimentar para melhoria do humor',
+        '💊 Suplementos para equilíbrio emocional',
+        '📅 Acompanhamento nutricional terapêutico'
+      ],
+      bemEstarModerado: [
+        '📋 Otimização nutricional para bem-estar',
+        '🥗 Plano alimentar para manutenção do humor',
+        '💊 Suplementos de apoio emocional',
+        '📅 Consultas de manutenção do bem-estar'
+      ],
+      altoBemEstar: [
+        '📋 Manutenção nutricional do bem-estar',
+        '🥗 Plano alimentar para sustentação energética',
+        '💊 Suplementos preventivos de bem-estar',
+        '📅 Acompanhamento preventivo nutricional'
+      ]
+    },
+    sales: {
+      baixoBemEstar: [
+        '💊 Suplementos para equilíbrio emocional',
+        '🥗 Proteínas para estabilização do humor',
+        '💪 Suplementos para energia e disposição',
+        '📞 Consultoria de suplementação para bem-estar'
+      ],
+      bemEstarModerado: [
+        '💊 Multivitamínicos para suporte emocional',
+        '🥗 Proteínas para manutenção energética',
+        '💪 Suplementos de performance mental',
+        '📞 Consultoria preventiva de bem-estar'
+      ],
+      altoBemEstar: [
+        '💊 Suplementos para sustentação do bem-estar',
+        '🥗 Proteínas para otimização energética',
+        '💪 Suplementos de manutenção',
+        '📞 Consultoria especializada em bem-estar'
+      ]
+    },
+    coach: {
+      baixoBemEstar: [
+        '🧘‍♀️ Programa intensivo de bem-estar',
+        '💪 Treinos para melhoria do humor',
+        '🍎 Coaching nutricional terapêutico',
+        '📅 Acompanhamento semanal de transformação'
+      ],
+      bemEstarModerado: [
+        '🧘‍♀️ Programa de otimização do bem-estar',
+        '💪 Treinos para manutenção energética',
+        '🍎 Coaching de hábitos de bem-estar',
+        '📅 Acompanhamento mensal de progresso'
+      ],
+      altoBemEstar: [
+        '🧘‍♀️ Programa de sustentação do bem-estar',
+        '💪 Treinos para manutenção da performance',
+        '🍎 Coaching preventivo de bem-estar',
+        '📅 Acompanhamento preventivo especializado'
+      ]
+    }
+  },
+
+  // 4. QUIZ DE PERFIL NUTRICIONAL
+  'quiz-perfil-nutricional': {
+    nutri: {
+      perfilDeficiente: [
+        '📋 Avaliação nutricional completa para correção de deficiências',
+        '🥗 Plano alimentar para reposição nutricional',
+        '💊 Suplementação específica para deficiências',
+        '📅 Acompanhamento nutricional intensivo semanal'
+      ],
+      perfilEquilibrado: [
+        '📋 Manutenção do equilíbrio nutricional',
+        '🥗 Plano alimentar para otimização nutricional',
+        '💊 Suplementação preventiva',
+        '📅 Consultas de manutenção mensais'
+      ],
+      perfilOtimizado: [
+        '📋 Otimização avançada do perfil nutricional',
+        '🥗 Plano alimentar para performance nutricional',
+        '💊 Suplementação de alta performance',
+        '📅 Acompanhamento especializado nutricional'
+      ]
+    },
+    sales: {
+      perfilDeficiente: [
+        '💊 Multivitamínicos para correção de deficiências',
+        '🥗 Proteínas para reposição nutricional',
+        '💪 Suplementos específicos para deficiências',
+        '📞 Consultoria especializada em deficiências nutricionais'
+      ],
+      perfilEquilibrado: [
+        '💊 Multivitamínicos para manutenção',
+        '🥗 Proteínas para equilíbrio nutricional',
+        '💪 Suplementos preventivos',
+        '📞 Consultoria preventiva de suplementação'
+      ],
+      perfilOtimizado: [
+        '💊 Suplementos de alta performance nutricional',
+        '🥗 Proteínas para otimização',
+        '💪 Suplementos avançados',
+        '📞 Consultoria especializada em performance nutricional'
+      ]
+    },
+    coach: {
+      perfilDeficiente: [
+        '🧘‍♀️ Programa intensivo de correção nutricional',
+        '💪 Treinos adaptados para deficiências',
+        '🍎 Coaching nutricional terapêutico',
+        '📅 Acompanhamento semanal de correção'
+      ],
+      perfilEquilibrado: [
+        '🧘‍♀️ Programa de manutenção nutricional',
+        '💪 Treinos para equilíbrio nutricional',
+        '🍎 Coaching de hábitos nutricionais',
+        '📅 Acompanhamento mensal de manutenção'
+      ],
+      perfilOtimizado: [
+        '🧘‍♀️ Programa de otimização nutricional avançada',
+        '💪 Treinos para performance nutricional',
+        '🍎 Coaching nutricional de alta performance',
+        '📅 Acompanhamento especializado nutricional'
+      ]
+    }
+  },
+
+  // 5. QUIZ DETOX
+  'quiz-detox': {
+    nutri: {
+      baixaToxicidade: [
+        '📋 Manutenção da saúde detox natural',
+        '🥗 Plano alimentar para sustentação detox',
+        '💊 Suplementos de apoio detox',
+        '📅 Consultas de manutenção detox mensais'
+      ],
+      toxicidadeModerada: [
+        '📋 Plano detox moderado para redução de toxinas',
+        '🥗 Plano alimentar detox específico',
+        '💊 Suplementos detox específicos',
+        '📅 Acompanhamento detox quinzenal'
+      ],
+      altaToxicidade: [
+        '📋 Plano detox intensivo para eliminação de toxinas',
+        '🥗 Plano alimentar detox completo',
+        '💊 Suplementos detox intensivos',
+        '📅 Acompanhamento detox semanal intensivo'
+      ]
+    },
+    sales: {
+      baixaToxicidade: [
+        '💊 Suplementos de manutenção detox',
+        '🥗 Proteínas para sustentação detox',
+        '💪 Suplementos de apoio detox',
+        '📞 Consultoria preventiva detox'
+      ],
+      toxicidadeModerada: [
+        '💊 Suplementos detox moderados',
+        '🥗 Proteínas para apoio detox',
+        '💪 Suplementos específicos detox',
+        '📞 Consultoria detox moderada'
+      ],
+      altaToxicidade: [
+        '💊 Suplementos detox intensivos',
+        '🥗 Proteínas para suporte detox',
+        '💪 Suplementos detox avançados',
+        '📞 Consultoria especializada detox'
+      ]
+    },
+    coach: {
+      baixaToxicidade: [
+        '🧘‍♀️ Programa de manutenção detox',
+        '💪 Treinos para sustentação detox',
+        '🍎 Coaching nutricional detox preventivo',
+        '📅 Acompanhamento mensal detox'
+      ],
+      toxicidadeModerada: [
+        '🧘‍♀️ Programa detox moderado',
+        '💪 Treinos para apoio detox',
+        '🍎 Coaching nutricional detox',
+        '📅 Acompanhamento quinzenal detox'
+      ],
+      altaToxicidade: [
+        '🧘‍♀️ Programa detox intensivo',
+        '💪 Treinos para suporte detox',
+        '🍎 Coaching nutricional detox intensivo',
+        '📅 Acompanhamento semanal detox'
+      ]
+    }
+  },
+
+  // 6. QUIZ ENERGÉTICO
+  'quiz-energetico': {
+    nutri: {
+      baixaEnergia: [
+        '📋 Avaliação energética completa',
+        '🥗 Plano alimentar para aumento de energia',
+        '💊 Suplementos energéticos naturais',
+        '📅 Acompanhamento energético semanal'
+      ],
+      energiaModerada: [
+        '📋 Otimização energética nutricional',
+        '🥗 Plano alimentar para manutenção energética',
+        '💊 Suplementos de apoio energético',
+        '📅 Consultas de manutenção energética'
+      ],
+      altaEnergia: [
+        '📋 Manutenção da alta energia',
+        '🥗 Plano alimentar para sustentação energética',
+        '💊 Suplementos preventivos energéticos',
+        '📅 Acompanhamento preventivo energético'
+      ]
+    },
+    sales: {
+      baixaEnergia: [
+        '💊 Suplementos energéticos para aumento',
+        '🥗 Proteínas para energia',
+        '💪 Suplementos para disposição',
+        '📞 Consultoria energética especializada'
+      ],
+      energiaModerada: [
+        '💊 Suplementos energéticos moderados',
+        '🥗 Proteínas para manutenção energética',
+        '💪 Suplementos de apoio energético',
+        '📞 Consultoria preventiva energética'
+      ],
+      altaEnergia: [
+        '💊 Suplementos para sustentação energética',
+        '🥗 Proteínas para otimização energética',
+        '💪 Suplementos de manutenção energética',
+        '📞 Consultoria especializada energética'
+      ]
+    },
+    coach: {
+      baixaEnergia: [
+        '🧘‍♀️ Programa intensivo de aumento energético',
+        '💪 Treinos para aumento de energia',
+        '🍎 Coaching nutricional energético',
+        '📅 Acompanhamento semanal energético'
+      ],
+      energiaModerada: [
+        '🧘‍♀️ Programa de otimização energética',
+        '💪 Treinos para manutenção energética',
+        '🍎 Coaching de hábitos energéticos',
+        '📅 Acompanhamento mensal energético'
+      ],
+      altaEnergia: [
+        '🧘‍♀️ Programa de sustentação energética',
+        '💪 Treinos para manutenção da energia',
+        '🍎 Coaching preventivo energético',
+        '📅 Acompanhamento preventivo energético'
+      ]
+    }
+  },
+
+  // 7. CALCULADORA DE PROTEÍNA
+  'calculadora-proteina': {
+    nutri: {
+      baixaProteina: [
+        '📋 Avaliação proteica completa para correção',
+        '🥗 Plano alimentar rico em proteínas',
+        '💊 Suplementação proteica específica',
+        '📅 Acompanhamento proteico semanal'
+      ],
+      proteinaNormal: [
+        '📋 Manutenção do equilíbrio proteico',
+        '🥗 Plano alimentar para otimização proteica',
+        '💊 Suplementação proteica preventiva',
+        '📅 Consultas de manutenção proteica'
+      ],
+      altaProteina: [
+        '📋 Otimização avançada da proteína',
+        '🥗 Plano alimentar para performance proteica',
+        '💊 Suplementação proteica de alta qualidade',
+        '📅 Acompanhamento especializado proteico'
+      ]
+    },
+    sales: {
+      baixaProteina: [
+        '💊 Whey Protein para correção proteica',
+        '🥗 Proteínas vegetais para aumento',
+        '💪 Suplementos proteicos específicos',
+        '📞 Consultoria especializada em proteínas'
+      ],
+      proteinaNormal: [
+        '💊 Proteínas para manutenção',
+        '🥗 Proteínas para equilíbrio',
+        '💪 Suplementos proteicos preventivos',
+        '📞 Consultoria preventiva proteica'
+      ],
+      altaProteina: [
+        '💊 Proteínas de alta qualidade',
+        '🥗 Proteínas para otimização',
+        '💪 Suplementos proteicos avançados',
+        '📞 Consultoria especializada em performance proteica'
+      ]
+    },
+    coach: {
+      baixaProteina: [
+        '🧘‍♀️ Programa intensivo de correção proteica',
+        '💪 Treinos para aumento de massa muscular',
+        '🍎 Coaching nutricional proteico',
+        '📅 Acompanhamento semanal proteico'
+      ],
+      proteinaNormal: [
+        '🧘‍♀️ Programa de manutenção proteica',
+        '💪 Treinos para equilíbrio muscular',
+        '🍎 Coaching de hábitos proteicos',
+        '📅 Acompanhamento mensal proteico'
+      ],
+      altaProteina: [
+        '🧘‍♀️ Programa de otimização proteica avançada',
+        '💪 Treinos para performance muscular',
+        '🍎 Coaching proteico de alta performance',
+        '📅 Acompanhamento especializado proteico'
+      ]
+    }
+  },
+
+  // 8. CALCULADORA DE ÁGUA
+  'calculadora-agua': {
+    nutri: {
+      baixaHidratacao: [
+        '📋 Avaliação hidratacional completa',
+        '🥗 Plano alimentar rico em líquidos',
+        '💊 Suplementos eletrolíticos',
+        '📅 Acompanhamento hidratacional semanal'
+      ],
+      hidratacaoModerada: [
+        '📋 Otimização da hidratação',
+        '🥗 Plano alimentar para manutenção hidratacional',
+        '💊 Suplementos de apoio hidratacional',
+        '📅 Consultas de manutenção hidratacional'
+      ],
+      altaHidratacao: [
+        '📋 Manutenção da hidratação otimizada',
+        '🥗 Plano alimentar para sustentação hidratacional',
+        '💊 Suplementos preventivos hidratacionais',
+        '📅 Acompanhamento preventivo hidratacional'
+      ]
+    },
+    sales: {
+      baixaHidratacao: [
+        '💊 Eletrólitos para correção hidratacional',
+        '🥗 Suplementos hidratacionais',
+        '💪 Suplementos para reposição hídrica',
+        '📞 Consultoria especializada em hidratação'
+      ],
+      hidratacaoModerada: [
+        '💊 Eletrólitos para manutenção',
+        '🥗 Suplementos hidratacionais moderados',
+        '💪 Suplementos de apoio hidratacional',
+        '📞 Consultoria preventiva hidratacional'
+      ],
+      altaHidratacao: [
+        '💊 Eletrólitos para otimização',
+        '🥗 Suplementos hidratacionais avançados',
+        '💪 Suplementos de manutenção hidratacional',
+        '📞 Consultoria especializada hidratacional'
+      ]
+    },
+    coach: {
+      baixaHidratacao: [
+        '🧘‍♀️ Programa intensivo de hidratação',
+        '💪 Treinos adaptados para hidratação',
+        '🍎 Coaching nutricional hidratacional',
+        '📅 Acompanhamento semanal hidratacional'
+      ],
+      hidratacaoModerada: [
+        '🧘‍♀️ Programa de otimização hidratacional',
+        '💪 Treinos para manutenção hidratacional',
+        '🍎 Coaching de hábitos hidratacionais',
+        '📅 Acompanhamento mensal hidratacional'
+      ],
+      altaHidratacao: [
+        '🧘‍♀️ Programa de sustentação hidratacional',
+        '💪 Treinos para manutenção da hidratação',
+        '🍎 Coaching preventivo hidratacional',
+        '📅 Acompanhamento preventivo hidratacional'
+      ]
+    }
+  },
+
+  // 9. CALCULADORA DE CALORIAS
+  'calculadora-calorias': {
+    nutri: {
+      deficitCalorico: [
+        '📋 Plano calórico para redução de peso',
+        '🥗 Plano alimentar hipocalórico',
+        '💊 Suplementos para controle do apetite',
+        '📅 Acompanhamento calórico semanal'
+      ],
+      manutencaoCalorica: [
+        '📋 Manutenção do equilíbrio calórico',
+        '🥗 Plano alimentar para manutenção',
+        '💊 Suplementos preventivos calóricos',
+        '📅 Consultas de manutenção calórica'
+      ],
+      superavitCalorico: [
+        '📋 Plano calórico para ganho de peso',
+        '🥗 Plano alimentar hipercalórico',
+        '💊 Suplementos para aumento calórico',
+        '📅 Acompanhamento calórico especializado'
+      ]
+    },
+    sales: {
+      deficitCalorico: [
+        '💊 Termogênicos para queima calórica',
+        '🥗 Proteínas para preservação muscular',
+        '💪 Suplementos para controle do apetite',
+        '📞 Consultoria especializada em emagrecimento'
+      ],
+      manutencaoCalorica: [
+        '💊 Multivitamínicos para manutenção',
+        '🥗 Proteínas para equilíbrio calórico',
+        '💪 Suplementos preventivos',
+        '📞 Consultoria preventiva calórica'
+      ],
+      superavitCalorico: [
+        '💊 Suplementos hipercalóricos',
+        '🥗 Proteínas para ganho de peso',
+        '💪 Suplementos para aumento calórico',
+        '📞 Consultoria especializada em ganho de peso'
+      ]
+    },
+    coach: {
+      deficitCalorico: [
+        '🧘‍♀️ Programa de redução calórica',
+        '💪 Treinos para queima calórica',
+        '🍎 Coaching nutricional para emagrecimento',
+        '📅 Acompanhamento semanal de redução'
+      ],
+      manutencaoCalorica: [
+        '🧘‍♀️ Programa de manutenção calórica',
+        '💪 Treinos para equilíbrio calórico',
+        '🍎 Coaching de hábitos calóricos',
+        '📅 Acompanhamento mensal calórico'
+      ],
+      superavitCalorico: [
+        '🧘‍♀️ Programa de ganho calórico',
+        '💪 Treinos para ganho de peso',
+        '🍎 Coaching nutricional para ganho',
+        '📅 Acompanhamento especializado calórico'
+      ]
+    }
+  },
+
+  // 10. CHECKLIST DETOX
+  'checklist-detox': {
+    nutri: {
+      baixaToxicidade: [
+        '📋 Manutenção da saúde detox natural',
+        '🥗 Plano alimentar para sustentação detox',
+        '💊 Suplementos de apoio detox',
+        '📅 Consultas de manutenção detox mensais'
+      ],
+      toxicidadeModerada: [
+        '📋 Plano detox moderado para redução',
+        '🥗 Plano alimentar detox específico',
+        '💊 Suplementos detox específicos',
+        '📅 Acompanhamento detox quinzenal'
+      ],
+      altaToxicidade: [
+        '📋 Plano detox intensivo para eliminação',
+        '🥗 Plano alimentar detox completo',
+        '💊 Suplementos detox intensivos',
+        '📅 Acompanhamento detox semanal intensivo'
+      ]
+    },
+    sales: {
+      baixaToxicidade: [
+        '💊 Suplementos de manutenção detox',
+        '🥗 Proteínas para sustentação detox',
+        '💪 Suplementos de apoio detox',
+        '📞 Consultoria preventiva detox'
+      ],
+      toxicidadeModerada: [
+        '💊 Suplementos detox moderados',
+        '🥗 Proteínas para apoio detox',
+        '💪 Suplementos específicos detox',
+        '📞 Consultoria detox moderada'
+      ],
+      altaToxicidade: [
+        '💊 Suplementos detox intensivos',
+        '🥗 Proteínas para suporte detox',
+        '💪 Suplementos detox avançados',
+        '📞 Consultoria especializada detox'
+      ]
+    },
+    coach: {
+      baixaToxicidade: [
+        '🧘‍♀️ Programa de manutenção detox',
+        '💪 Treinos para sustentação detox',
+        '🍎 Coaching nutricional detox preventivo',
+        '📅 Acompanhamento mensal detox'
+      ],
+      toxicidadeModerada: [
+        '🧘‍♀️ Programa detox moderado',
+        '💪 Treinos para apoio detox',
+        '🍎 Coaching nutricional detox',
+        '📅 Acompanhamento quinzenal detox'
+      ],
+      altaToxicidade: [
+        '🧘‍♀️ Programa detox intensivo',
+        '💪 Treinos para suporte detox',
+        '🍎 Coaching nutricional detox intensivo',
+        '📅 Acompanhamento semanal detox'
+      ]
+    }
   }
 }
 
@@ -164,20 +743,45 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'metabolismo-normal', label: 'Metabolismo Normal', range: '31-60 pontos', color: 'green' },
       { id: 'metabolismo-rapido', label: 'Metabolismo Rápido', range: '61-100 pontos', color: 'yellow' }
     ],
-    'calculadora-proteina': [
-      { id: 'baixa-proteina', label: 'Baixa Proteína', range: '< 0.8g/kg', color: 'blue' },
-      { id: 'proteina-normal', label: 'Proteína Normal', range: '0.8-1.2g/kg', color: 'green' },
-      { id: 'alta-proteina', label: 'Alta Proteína', range: '> 1.2g/kg', color: 'yellow' }
+    'quiz-bem-estar': [
+      { id: 'baixo-bem-estar', label: 'Baixo Bem-estar', range: '0-40 pontos', color: 'red' },
+      { id: 'bem-estar-moderado', label: 'Bem-estar Moderado', range: '41-70 pontos', color: 'yellow' },
+      { id: 'alto-bem-estar', label: 'Alto Bem-estar', range: '71-100 pontos', color: 'green' }
+    ],
+    'quiz-perfil-nutricional': [
+      { id: 'perfil-deficiente', label: 'Perfil Deficiente', range: '0-30 pontos', color: 'red' },
+      { id: 'perfil-equilibrado', label: 'Perfil Equilibrado', range: '31-70 pontos', color: 'green' },
+      { id: 'perfil-otimizado', label: 'Perfil Otimizado', range: '71-100 pontos', color: 'blue' }
     ],
     'quiz-detox': [
       { id: 'baixa-toxicidade', label: 'Baixa Toxicidade', range: '0-3 sinais', color: 'green' },
       { id: 'toxicidade-moderada', label: 'Toxicidade Moderada', range: '4-6 sinais', color: 'yellow' },
       { id: 'alta-toxicidade', label: 'Alta Toxicidade', range: '7+ sinais', color: 'red' }
     ],
+    'quiz-energetico': [
+      { id: 'baixa-energia', label: 'Baixa Energia', range: '0-30 pontos', color: 'red' },
+      { id: 'energia-moderada', label: 'Energia Moderada', range: '31-70 pontos', color: 'yellow' },
+      { id: 'alta-energia', label: 'Alta Energia', range: '71-100 pontos', color: 'green' }
+    ],
+    'calculadora-proteina': [
+      { id: 'baixa-proteina', label: 'Baixa Proteína', range: '< 0.8g/kg', color: 'blue' },
+      { id: 'proteina-normal', label: 'Proteína Normal', range: '0.8-1.2g/kg', color: 'green' },
+      { id: 'alta-proteina', label: 'Alta Proteína', range: '> 1.2g/kg', color: 'yellow' }
+    ],
+    'calculadora-agua': [
+      { id: 'baixa-hidratacao', label: 'Baixa Hidratação', range: '< 2L/dia', color: 'red' },
+      { id: 'hidratacao-moderada', label: 'Hidratação Moderada', range: '2-3L/dia', color: 'yellow' },
+      { id: 'alta-hidratacao', label: 'Alta Hidratação', range: '> 3L/dia', color: 'green' }
+    ],
     'calculadora-calorias': [
       { id: 'deficit-calorico', label: 'Déficit Calórico', range: 'Perda de peso', color: 'blue' },
       { id: 'manutencao-calorica', label: 'Manutenção', range: 'Peso estável', color: 'green' },
       { id: 'superavit-calorico', label: 'Superávit Calórico', range: 'Ganho de peso', color: 'yellow' }
+    ],
+    'checklist-detox': [
+      { id: 'baixa-toxicidade', label: 'Baixa Toxicidade', range: '0-3 sinais', color: 'green' },
+      { id: 'toxicidade-moderada', label: 'Toxicidade Moderada', range: '4-6 sinais', color: 'yellow' },
+      { id: 'alta-toxicidade', label: 'Alta Toxicidade', range: '7+ sinais', color: 'red' }
     ]
   }
   
@@ -210,7 +814,8 @@ export default function AdminDiagnosticos() {
   // Obter categorias dinâmicas baseadas na ferramenta
   const categoriasAtuais = getCategoriasPorFerramenta(ferramentaSelecionada)
 
-  const diagnosticosAtuais = diagnosticosPorProfissao[profissaoSelecionada][categoriaSelecionada as keyof typeof diagnosticosPorProfissao['nutri']]
+  // Obter diagnósticos dinâmicos baseados na ferramenta e profissão
+  const diagnosticosAtuais = (diagnosticosCompletos as any)[ferramentaSelecionada]?.[profissaoSelecionada]?.[categoriaSelecionada] || []
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -329,7 +934,7 @@ export default function AdminDiagnosticos() {
 
             {/* Lista de Diagnósticos */}
             <div className="space-y-3">
-              {diagnosticosAtuais.map((diagnostico, index) => (
+                {diagnosticosAtuais.map((diagnostico: string, index: number) => (
                 <div key={index} className="flex items-start p-4 bg-gray-50 rounded-lg">
                   <span className="text-gray-500 mr-3 mt-1 font-bold">
                     {index + 1}.
