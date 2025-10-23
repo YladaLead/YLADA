@@ -3486,7 +3486,71 @@ const diagnosticosCompletos = {
     }
   },
 
-  // 10. CHECKLIST DETOX
+  // 10. CHECKLIST ALIMENTAR
+  'checklist-alimentar': {
+    nutri: {
+      alimentacaoDeficiente: [
+        '📋 Avaliação nutricional completa para correção de hábitos',
+        '🥗 Plano alimentar para melhoria da qualidade nutricional',
+        '💊 Suplementação para correção de deficiências',
+        '📅 Acompanhamento nutricional semanal'
+      ],
+      alimentacaoModerada: [
+        '📋 Avaliação nutricional para otimização de hábitos',
+        '🥗 Plano alimentar para melhoria específica',
+        '💊 Suplementação direcionada',
+        '📅 Acompanhamento nutricional quinzenal'
+      ],
+      alimentacaoEquilibrada: [
+        '📋 Manutenção dos bons hábitos alimentares',
+        '🥗 Plano alimentar para otimização da saúde',
+        '💊 Suplementação preventiva',
+        '📅 Consultas de manutenção mensais'
+      ]
+    },
+    sales: {
+      alimentacaoDeficiente: [
+        '💊 Produtos para correção de deficiências nutricionais',
+        '🥗 Suplementos multivitamínicos completos',
+        '💪 Produtos de apoio nutricional básico',
+        '📞 Consultoria nutricional para iniciantes'
+      ],
+      alimentacaoModerada: [
+        '💊 Produtos para otimização nutricional',
+        '🥗 Suplementos direcionados',
+        '💪 Produtos de apoio nutricional moderado',
+        '📞 Consultoria nutricional intermediária'
+      ],
+      alimentacaoEquilibrada: [
+        '💊 Produtos para manutenção da saúde',
+        '🥗 Suplementos preventivos',
+        '💪 Produtos de apoio nutricional avançado',
+        '📞 Consultoria nutricional para manutenção'
+      ]
+    },
+    coach: {
+      alimentacaoDeficiente: [
+        '🧘‍♀️ Programa de reeducação alimentar básica',
+        '💪 Exercícios leves para iniciantes',
+        '🍎 Coaching nutricional para mudança de hábitos',
+        '📅 Programa de 90 dias para transformação'
+      ],
+      alimentacaoModerada: [
+        '🧘‍♀️ Programa de otimização alimentar',
+        '💪 Exercícios moderados',
+        '🍎 Coaching nutricional para melhoria',
+        '📅 Programa de 60 dias para evolução'
+      ],
+      alimentacaoEquilibrada: [
+        '🧘‍♀️ Programa de manutenção de bem-estar',
+        '💪 Exercícios avançados',
+        '🍎 Coaching nutricional para performance',
+        '📅 Programa de acompanhamento contínuo'
+      ]
+    }
+  },
+
+  // 11. CHECKLIST DETOX
   'checklist-detox': {
     nutri: {
       baixaToxicidade: [
@@ -3599,6 +3663,11 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'deficit-calorico', label: 'Déficit Calórico', range: 'Perda de peso', color: 'blue' },
       { id: 'manutencao-calorica', label: 'Manutenção', range: 'Peso estável', color: 'green' },
       { id: 'superavit-calorico', label: 'Superávit Calórico', range: 'Ganho de peso', color: 'yellow' }
+    ],
+    'checklist-alimentar': [
+      { id: 'alimentacao-deficiente', label: 'Alimentação Deficiente', range: '0-40 pontos', color: 'red' },
+      { id: 'alimentacao-moderada', label: 'Alimentação Moderada', range: '41-70 pontos', color: 'yellow' },
+      { id: 'alimentacao-equilibrada', label: 'Alimentação Equilibrada', range: '71-100 pontos', color: 'green' }
     ],
     'checklist-detox': [
       { id: 'baixa-toxicidade', label: 'Baixa Toxicidade', range: '0-3 sinais', color: 'green' },
