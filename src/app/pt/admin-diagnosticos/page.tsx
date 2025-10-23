@@ -1266,6 +1266,646 @@ const diagnosticosCompletos = {
     }
   },
 
+  // 31. TEMPLATE DE ACOMPANHAMENTO SEMANAL
+  'template-acompanhamento-semanal': {
+    nutri: {
+      acompanhamentoBasico: [
+        '📋 Acompanhamento nutricional semanal básico',
+        '🥗 Plano alimentar semanal simples',
+        '💊 Suplementação básica semanal',
+        '📅 Consulta nutricional semanal'
+      ],
+      acompanhamentoModerado: [
+        '📋 Acompanhamento nutricional semanal moderado',
+        '🥗 Plano alimentar semanal específico',
+        '💊 Suplementação direcionada semanal',
+        '📅 Consulta nutricional especializada semanal'
+      ],
+      acompanhamentoAvancado: [
+        '📋 Acompanhamento nutricional semanal avançado',
+        '🥗 Plano alimentar semanal complexo',
+        '💊 Suplementação avançada semanal',
+        '📅 Consulta nutricional de performance semanal'
+      ]
+    },
+    sales: {
+      acompanhamentoBasico: [
+        '💊 Produtos básicos para acompanhamento semanal',
+        '🥗 Suplementação preventiva semanal',
+        '💪 Produtos de apoio básico semanal',
+        '📞 Consultoria básica semanal'
+      ],
+      acompanhamentoModerado: [
+        '💊 Produtos moderados para acompanhamento semanal',
+        '🥗 Suplementação direcionada semanal',
+        '💪 Produtos de apoio moderado semanal',
+        '📞 Consultoria moderada semanal'
+      ],
+      acompanhamentoAvancado: [
+        '💊 Produtos avançados para acompanhamento semanal',
+        '🥗 Suplementação avançada semanal',
+        '💪 Produtos de apoio avançado semanal',
+        '📞 Consultoria avançada semanal'
+      ]
+    },
+    coach: {
+      acompanhamentoBasico: [
+        '🧘‍♀️ Programa básico de acompanhamento semanal',
+        '💪 Exercícios básicos semanais',
+        '🍎 Coaching nutricional básico semanal',
+        '📅 Programa básico semanal'
+      ],
+      acompanhamentoModerado: [
+        '🧘‍♀️ Programa moderado de acompanhamento semanal',
+        '💪 Exercícios moderados semanais',
+        '🍎 Coaching nutricional moderado semanal',
+        '📅 Programa moderado semanal'
+      ],
+      acompanhamentoAvancado: [
+        '🧘‍♀️ Programa avançado de acompanhamento semanal',
+        '💪 Exercícios avançados semanais',
+        '🍎 Coaching nutricional avançado semanal',
+        '📅 Programa avançado semanal'
+      ]
+    }
+  },
+
+  // 32. TEMPLATE DE CHECK-IN MENSAL
+  'template-checkin-mensal': {
+    nutri: {
+      checkinBasico: [
+        '📋 Check-in nutricional mensal básico',
+        '🥗 Plano alimentar mensal simples',
+        '💊 Suplementação básica mensal',
+        '📅 Consulta nutricional mensal'
+      ],
+      checkinModerado: [
+        '📋 Check-in nutricional mensal moderado',
+        '🥗 Plano alimentar mensal específico',
+        '💊 Suplementação direcionada mensal',
+        '📅 Consulta nutricional especializada mensal'
+      ],
+      checkinAvancado: [
+        '📋 Check-in nutricional mensal avançado',
+        '🥗 Plano alimentar mensal complexo',
+        '💊 Suplementação avançada mensal',
+        '📅 Consulta nutricional de performance mensal'
+      ]
+    },
+    sales: {
+      checkinBasico: [
+        '💊 Produtos básicos para check-in mensal',
+        '🥗 Suplementação preventiva mensal',
+        '💪 Produtos de apoio básico mensal',
+        '📞 Consultoria básica mensal'
+      ],
+      checkinModerado: [
+        '💊 Produtos moderados para check-in mensal',
+        '🥗 Suplementação direcionada mensal',
+        '💪 Produtos de apoio moderado mensal',
+        '📞 Consultoria moderada mensal'
+      ],
+      checkinAvancado: [
+        '💊 Produtos avançados para check-in mensal',
+        '🥗 Suplementação avançada mensal',
+        '💪 Produtos de apoio avançado mensal',
+        '📞 Consultoria avançada mensal'
+      ]
+    },
+    coach: {
+      checkinBasico: [
+        '🧘‍♀️ Programa básico de check-in mensal',
+        '💪 Exercícios básicos mensais',
+        '🍎 Coaching nutricional básico mensal',
+        '📅 Programa básico mensal'
+      ],
+      checkinModerado: [
+        '🧘‍♀️ Programa moderado de check-in mensal',
+        '💪 Exercícios moderados mensais',
+        '🍎 Coaching nutricional moderado mensal',
+        '📅 Programa moderado mensal'
+      ],
+      checkinAvancado: [
+        '🧘‍♀️ Programa avançado de check-in mensal',
+        '💪 Exercícios avançados mensais',
+        '🍎 Coaching nutricional avançado mensal',
+        '📅 Programa avançado mensal'
+      ]
+    }
+  },
+
+  // 33. FICHA DE CLIENTE
+  'ficha-cliente': {
+    nutri: {
+      fichaBasica: [
+        '📋 Ficha nutricional básica do cliente',
+        '🥗 Plano alimentar simples personalizado',
+        '💊 Suplementação básica personalizada',
+        '📅 Consulta nutricional personalizada'
+      ],
+      fichaModerada: [
+        '📋 Ficha nutricional moderada do cliente',
+        '🥗 Plano alimentar específico personalizado',
+        '💊 Suplementação direcionada personalizada',
+        '📅 Consulta nutricional especializada personalizada'
+      ],
+      fichaAvancada: [
+        '📋 Ficha nutricional avançada do cliente',
+        '🥗 Plano alimentar complexo personalizado',
+        '💊 Suplementação avançada personalizada',
+        '📅 Consulta nutricional de performance personalizada'
+      ]
+    },
+    sales: {
+      fichaBasica: [
+        '💊 Produtos básicos personalizados para cliente',
+        '🥗 Suplementação preventiva personalizada',
+        '💪 Produtos de apoio básico personalizado',
+        '📞 Consultoria básica personalizada'
+      ],
+      fichaModerada: [
+        '💊 Produtos moderados personalizados para cliente',
+        '🥗 Suplementação direcionada personalizada',
+        '💪 Produtos de apoio moderado personalizado',
+        '📞 Consultoria moderada personalizada'
+      ],
+      fichaAvancada: [
+        '💊 Produtos avançados personalizados para cliente',
+        '🥗 Suplementação avançada personalizada',
+        '💪 Produtos de apoio avançado personalizado',
+        '📞 Consultoria avançada personalizada'
+      ]
+    },
+    coach: {
+      fichaBasica: [
+        '🧘‍♀️ Programa básico personalizado para cliente',
+        '💪 Exercícios básicos personalizados',
+        '🍎 Coaching nutricional básico personalizado',
+        '📅 Programa básico personalizado'
+      ],
+      fichaModerada: [
+        '🧘‍♀️ Programa moderado personalizado para cliente',
+        '💪 Exercícios moderados personalizados',
+        '🍎 Coaching nutricional moderado personalizado',
+        '📅 Programa moderado personalizado'
+      ],
+      fichaAvancada: [
+        '🧘‍♀️ Programa avançado personalizado para cliente',
+        '💪 Exercícios avançados personalizados',
+        '🍎 Coaching nutricional avançado personalizado',
+        '📅 Programa avançado personalizado'
+      ]
+    }
+  },
+
+  // 34. TEMPLATE DE PROGRESSO VISUAL
+  'template-progresso-visual': {
+    nutri: {
+      progressoBasico: [
+        '📋 Acompanhamento visual básico do progresso',
+        '🥗 Plano alimentar com progresso visual',
+        '💊 Suplementação com acompanhamento visual',
+        '📅 Consulta nutricional com progresso visual'
+      ],
+      progressoModerado: [
+        '📋 Acompanhamento visual moderado do progresso',
+        '🥗 Plano alimentar específico com progresso visual',
+        '💊 Suplementação direcionada com acompanhamento visual',
+        '📅 Consulta nutricional especializada com progresso visual'
+      ],
+      progressoAvancado: [
+        '📋 Acompanhamento visual avançado do progresso',
+        '🥗 Plano alimentar complexo com progresso visual',
+        '💊 Suplementação avançada com acompanhamento visual',
+        '📅 Consulta nutricional de performance com progresso visual'
+      ]
+    },
+    sales: {
+      progressoBasico: [
+        '💊 Produtos básicos com acompanhamento visual',
+        '🥗 Suplementação preventiva com progresso visual',
+        '💪 Produtos de apoio básico com acompanhamento visual',
+        '📞 Consultoria básica com progresso visual'
+      ],
+      progressoModerado: [
+        '💊 Produtos moderados com acompanhamento visual',
+        '🥗 Suplementação direcionada com progresso visual',
+        '💪 Produtos de apoio moderado com acompanhamento visual',
+        '📞 Consultoria moderada com progresso visual'
+      ],
+      progressoAvancado: [
+        '💊 Produtos avançados com acompanhamento visual',
+        '🥗 Suplementação avançada com progresso visual',
+        '💪 Produtos de apoio avançado com acompanhamento visual',
+        '📞 Consultoria avançada com progresso visual'
+      ]
+    },
+    coach: {
+      progressoBasico: [
+        '🧘‍♀️ Programa básico com acompanhamento visual',
+        '💪 Exercícios básicos com progresso visual',
+        '🍎 Coaching nutricional básico com acompanhamento visual',
+        '📅 Programa básico com progresso visual'
+      ],
+      progressoModerado: [
+        '🧘‍♀️ Programa moderado com acompanhamento visual',
+        '💪 Exercícios moderados com progresso visual',
+        '🍎 Coaching nutricional moderado com acompanhamento visual',
+        '📅 Programa moderado com progresso visual'
+      ],
+      progressoAvancado: [
+        '🧘‍♀️ Programa avançado com acompanhamento visual',
+        '💪 Exercícios avançados com progresso visual',
+        '🍎 Coaching nutricional avançado com acompanhamento visual',
+        '📅 Programa avançado com progresso visual'
+      ]
+    }
+  },
+
+  // 35. TEMPLATE DE STORY INTERATIVO
+  'template-story-interativo': {
+    nutri: {
+      storyBasico: [
+        '📋 Story interativo básico sobre nutrição',
+        '🥗 Conteúdo visual simples sobre alimentação',
+        '💊 Informações básicas sobre suplementação',
+        '📅 Engajamento básico nutricional'
+      ],
+      storyModerado: [
+        '📋 Story interativo moderado sobre nutrição',
+        '🥗 Conteúdo visual específico sobre alimentação',
+        '💊 Informações direcionadas sobre suplementação',
+        '📅 Engajamento moderado nutricional'
+      ],
+      storyAvancado: [
+        '📋 Story interativo avançado sobre nutrição',
+        '🥗 Conteúdo visual complexo sobre alimentação',
+        '💊 Informações avançadas sobre suplementação',
+        '📅 Engajamento avançado nutricional'
+      ]
+    },
+    sales: {
+      storyBasico: [
+        '💊 Story interativo básico sobre produtos',
+        '🥗 Conteúdo visual simples sobre suplementos',
+        '💪 Informações básicas sobre produtos',
+        '📞 Engajamento básico em produtos'
+      ],
+      storyModerado: [
+        '💊 Story interativo moderado sobre produtos',
+        '🥗 Conteúdo visual específico sobre suplementos',
+        '💪 Informações direcionadas sobre produtos',
+        '📞 Engajamento moderado em produtos'
+      ],
+      storyAvancado: [
+        '💊 Story interativo avançado sobre produtos',
+        '🥗 Conteúdo visual complexo sobre suplementos',
+        '💪 Informações avançadas sobre produtos',
+        '📞 Engajamento avançado em produtos'
+      ]
+    },
+    coach: {
+      storyBasico: [
+        '🧘‍♀️ Story interativo básico sobre bem-estar',
+        '💪 Conteúdo visual simples sobre exercícios',
+        '🍎 Informações básicas sobre coaching',
+        '📅 Engajamento básico em bem-estar'
+      ],
+      storyModerado: [
+        '🧘‍♀️ Story interativo moderado sobre bem-estar',
+        '💪 Conteúdo visual específico sobre exercícios',
+        '🍎 Informações direcionadas sobre coaching',
+        '📅 Engajamento moderado em bem-estar'
+      ],
+      storyAvancado: [
+        '🧘‍♀️ Story interativo avançado sobre bem-estar',
+        '💪 Conteúdo visual complexo sobre exercícios',
+        '🍎 Informações avançadas sobre coaching',
+        '📅 Engajamento avançado em bem-estar'
+      ]
+    }
+  },
+
+  // 36. POST DE CURIOSIDADES
+  'post-curiosidades': {
+    nutri: {
+      curiosidadeBasica: [
+        '📋 Post básico com curiosidades nutricionais',
+        '🥗 Conteúdo simples sobre alimentação',
+        '💊 Informações básicas sobre nutrição',
+        '📅 Engajamento básico nutricional'
+      ],
+      curiosidadeModerada: [
+        '📋 Post moderado com curiosidades nutricionais',
+        '🥗 Conteúdo específico sobre alimentação',
+        '💊 Informações direcionadas sobre nutrição',
+        '📅 Engajamento moderado nutricional'
+      ],
+      curiosidadeAvancada: [
+        '📋 Post avançado com curiosidades nutricionais',
+        '🥗 Conteúdo complexo sobre alimentação',
+        '💊 Informações avançadas sobre nutrição',
+        '📅 Engajamento avançado nutricional'
+      ]
+    },
+    sales: {
+      curiosidadeBasica: [
+        '💊 Post básico com curiosidades sobre produtos',
+        '🥗 Conteúdo simples sobre suplementos',
+        '💪 Informações básicas sobre produtos',
+        '📞 Engajamento básico em produtos'
+      ],
+      curiosidadeModerada: [
+        '💊 Post moderado com curiosidades sobre produtos',
+        '🥗 Conteúdo específico sobre suplementos',
+        '💪 Informações direcionadas sobre produtos',
+        '📞 Engajamento moderado em produtos'
+      ],
+      curiosidadeAvancada: [
+        '💊 Post avançado com curiosidades sobre produtos',
+        '🥗 Conteúdo complexo sobre suplementos',
+        '💪 Informações avançadas sobre produtos',
+        '📞 Engajamento avançado em produtos'
+      ]
+    },
+    coach: {
+      curiosidadeBasica: [
+        '🧘‍♀️ Post básico com curiosidades sobre bem-estar',
+        '💪 Conteúdo simples sobre exercícios',
+        '🍎 Informações básicas sobre coaching',
+        '📅 Engajamento básico em bem-estar'
+      ],
+      curiosidadeModerada: [
+        '🧘‍♀️ Post moderado com curiosidades sobre bem-estar',
+        '💪 Conteúdo específico sobre exercícios',
+        '🍎 Informações direcionadas sobre coaching',
+        '📅 Engajamento moderado em bem-estar'
+      ],
+      curiosidadeAvancada: [
+        '🧘‍♀️ Post avançado com curiosidades sobre bem-estar',
+        '💪 Conteúdo complexo sobre exercícios',
+        '🍎 Informações avançadas sobre coaching',
+        '📅 Engajamento avançado em bem-estar'
+      ]
+    }
+  },
+
+  // 37. TEMPLATE DE POST COM DICA
+  'template-post-dica': {
+    nutri: {
+      dicaBasica: [
+        '📋 Post básico com dicas nutricionais',
+        '🥗 Dicas simples sobre alimentação',
+        '💊 Dicas básicas sobre suplementação',
+        '📅 Engajamento básico nutricional'
+      ],
+      dicaModerada: [
+        '📋 Post moderado com dicas nutricionais',
+        '🥗 Dicas específicas sobre alimentação',
+        '💊 Dicas direcionadas sobre suplementação',
+        '📅 Engajamento moderado nutricional'
+      ],
+      dicaAvancada: [
+        '📋 Post avançado com dicas nutricionais',
+        '🥗 Dicas complexas sobre alimentação',
+        '💊 Dicas avançadas sobre suplementação',
+        '📅 Engajamento avançado nutricional'
+      ]
+    },
+    sales: {
+      dicaBasica: [
+        '💊 Post básico com dicas sobre produtos',
+        '🥗 Dicas simples sobre suplementos',
+        '💪 Dicas básicas sobre produtos',
+        '📞 Engajamento básico em produtos'
+      ],
+      dicaModerada: [
+        '💊 Post moderado com dicas sobre produtos',
+        '🥗 Dicas específicas sobre suplementos',
+        '💪 Dicas direcionadas sobre produtos',
+        '📞 Engajamento moderado em produtos'
+      ],
+      dicaAvancada: [
+        '💊 Post avançado com dicas sobre produtos',
+        '🥗 Dicas complexas sobre suplementos',
+        '💪 Dicas avançadas sobre produtos',
+        '📞 Engajamento avançado em produtos'
+      ]
+    },
+    coach: {
+      dicaBasica: [
+        '🧘‍♀️ Post básico com dicas sobre bem-estar',
+        '💪 Dicas simples sobre exercícios',
+        '🍎 Dicas básicas sobre coaching',
+        '📅 Engajamento básico em bem-estar'
+      ],
+      dicaModerada: [
+        '🧘‍♀️ Post moderado com dicas sobre bem-estar',
+        '💪 Dicas específicas sobre exercícios',
+        '🍎 Dicas direcionadas sobre coaching',
+        '📅 Engajamento moderado em bem-estar'
+      ],
+      dicaAvancada: [
+        '🧘‍♀️ Post avançado com dicas sobre bem-estar',
+        '💪 Dicas complexas sobre exercícios',
+        '🍎 Dicas avançadas sobre coaching',
+        '📅 Engajamento avançado em bem-estar'
+      ]
+    }
+  },
+
+  // 38. TEMPLATE DE REELS ROTEIRIZADO
+  'template-reels-roteirizado': {
+    nutri: {
+      reelsBasico: [
+        '📋 Reels básico roteirizado sobre nutrição',
+        '🥗 Roteiro simples sobre alimentação',
+        '💊 Conteúdo básico sobre suplementação',
+        '📅 Engajamento básico nutricional'
+      ],
+      reelsModerado: [
+        '📋 Reels moderado roteirizado sobre nutrição',
+        '🥗 Roteiro específico sobre alimentação',
+        '💊 Conteúdo direcionado sobre suplementação',
+        '📅 Engajamento moderado nutricional'
+      ],
+      reelsAvancado: [
+        '📋 Reels avançado roteirizado sobre nutrição',
+        '🥗 Roteiro complexo sobre alimentação',
+        '💊 Conteúdo avançado sobre suplementação',
+        '📅 Engajamento avançado nutricional'
+      ]
+    },
+    sales: {
+      reelsBasico: [
+        '💊 Reels básico roteirizado sobre produtos',
+        '🥗 Roteiro simples sobre suplementos',
+        '💪 Conteúdo básico sobre produtos',
+        '📞 Engajamento básico em produtos'
+      ],
+      reelsModerado: [
+        '💊 Reels moderado roteirizado sobre produtos',
+        '🥗 Roteiro específico sobre suplementos',
+        '💪 Conteúdo direcionado sobre produtos',
+        '📞 Engajamento moderado em produtos'
+      ],
+      reelsAvancado: [
+        '💊 Reels avançado roteirizado sobre produtos',
+        '🥗 Roteiro complexo sobre suplementos',
+        '💪 Conteúdo avançado sobre produtos',
+        '📞 Engajamento avançado em produtos'
+      ]
+    },
+    coach: {
+      reelsBasico: [
+        '🧘‍♀️ Reels básico roteirizado sobre bem-estar',
+        '💪 Roteiro simples sobre exercícios',
+        '🍎 Conteúdo básico sobre coaching',
+        '📅 Engajamento básico em bem-estar'
+      ],
+      reelsModerado: [
+        '🧘‍♀️ Reels moderado roteirizado sobre bem-estar',
+        '💪 Roteiro específico sobre exercícios',
+        '🍎 Conteúdo direcionado sobre coaching',
+        '📅 Engajamento moderado em bem-estar'
+      ],
+      reelsAvancado: [
+        '🧘‍♀️ Reels avançado roteirizado sobre bem-estar',
+        '💪 Roteiro complexo sobre exercícios',
+        '🍎 Conteúdo avançado sobre coaching',
+        '📅 Engajamento avançado em bem-estar'
+      ]
+    }
+  },
+
+  // 39. TEMPLATE DE ARTIGO CURTO
+  'template-artigo-curto': {
+    nutri: {
+      artigoBasico: [
+        '📋 Artigo curto básico sobre nutrição',
+        '🥗 Conteúdo simples sobre alimentação',
+        '💊 Informações básicas sobre suplementação',
+        '📅 Engajamento básico nutricional'
+      ],
+      artigoModerado: [
+        '📋 Artigo curto moderado sobre nutrição',
+        '🥗 Conteúdo específico sobre alimentação',
+        '💊 Informações direcionadas sobre suplementação',
+        '📅 Engajamento moderado nutricional'
+      ],
+      artigoAvancado: [
+        '📋 Artigo curto avançado sobre nutrição',
+        '🥗 Conteúdo complexo sobre alimentação',
+        '💊 Informações avançadas sobre suplementação',
+        '📅 Engajamento avançado nutricional'
+      ]
+    },
+    sales: {
+      artigoBasico: [
+        '💊 Artigo curto básico sobre produtos',
+        '🥗 Conteúdo simples sobre suplementos',
+        '💪 Informações básicas sobre produtos',
+        '📞 Engajamento básico em produtos'
+      ],
+      artigoModerado: [
+        '💊 Artigo curto moderado sobre produtos',
+        '🥗 Conteúdo específico sobre suplementos',
+        '💪 Informações direcionadas sobre produtos',
+        '📞 Engajamento moderado em produtos'
+      ],
+      artigoAvancado: [
+        '💊 Artigo curto avançado sobre produtos',
+        '🥗 Conteúdo complexo sobre suplementos',
+        '💪 Informações avançadas sobre produtos',
+        '📞 Engajamento avançado em produtos'
+      ]
+    },
+    coach: {
+      artigoBasico: [
+        '🧘‍♀️ Artigo curto básico sobre bem-estar',
+        '💪 Conteúdo simples sobre exercícios',
+        '🍎 Informações básicas sobre coaching',
+        '📅 Engajamento básico em bem-estar'
+      ],
+      artigoModerado: [
+        '🧘‍♀️ Artigo curto moderado sobre bem-estar',
+        '💪 Conteúdo específico sobre exercícios',
+        '🍎 Informações direcionadas sobre coaching',
+        '📅 Engajamento moderado em bem-estar'
+      ],
+      artigoAvancado: [
+        '🧘‍♀️ Artigo curto avançado sobre bem-estar',
+        '💪 Conteúdo complexo sobre exercícios',
+        '🍎 Informações avançadas sobre coaching',
+        '📅 Engajamento avançado em bem-estar'
+      ]
+    }
+  },
+
+  // 40. TEMPLATE DE CATÁLOGO DIGITAL
+  'template-catalogo-digital': {
+    nutri: {
+      catalogoBasico: [
+        '📋 Catálogo digital básico nutricional',
+        '🥗 Produtos básicos de alimentação',
+        '💊 Suplementos básicos',
+        '📅 Consulta nutricional básica'
+      ],
+      catalogoModerado: [
+        '📋 Catálogo digital moderado nutricional',
+        '🥗 Produtos específicos de alimentação',
+        '💊 Suplementos direcionados',
+        '📅 Consulta nutricional especializada'
+      ],
+      catalogoAvancado: [
+        '📋 Catálogo digital avançado nutricional',
+        '🥗 Produtos complexos de alimentação',
+        '💊 Suplementos avançados',
+        '📅 Consulta nutricional de performance'
+      ]
+    },
+    sales: {
+      catalogoBasico: [
+        '💊 Catálogo digital básico de produtos',
+        '🥗 Suplementos básicos',
+        '💪 Produtos básicos',
+        '📞 Consultoria básica em produtos'
+      ],
+      catalogoModerado: [
+        '💊 Catálogo digital moderado de produtos',
+        '🥗 Suplementos direcionados',
+        '💪 Produtos específicos',
+        '📞 Consultoria moderada em produtos'
+      ],
+      catalogoAvancado: [
+        '💊 Catálogo digital avançado de produtos',
+        '🥗 Suplementos avançados',
+        '💪 Produtos complexos',
+        '📞 Consultoria avançada em produtos'
+      ]
+    },
+    coach: {
+      catalogoBasico: [
+        '🧘‍♀️ Catálogo digital básico de bem-estar',
+        '💪 Exercícios básicos',
+        '🍎 Coaching básico',
+        '📅 Programa básico de bem-estar'
+      ],
+      catalogoModerado: [
+        '🧘‍♀️ Catálogo digital moderado de bem-estar',
+        '💪 Exercícios específicos',
+        '🍎 Coaching direcionado',
+        '📅 Programa moderado de bem-estar'
+      ],
+      catalogoAvancado: [
+        '🧘‍♀️ Catálogo digital avançado de bem-estar',
+        '💪 Exercícios complexos',
+        '🍎 Coaching avançado',
+        '📅 Programa avançado de bem-estar'
+      ]
+    }
+  },
+
   // 4. QUIZ DE PERFIL NUTRICIONAL
   'quiz-perfil-nutricional': {
     nutri: {
@@ -1868,6 +2508,56 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'recomendacao-basica', label: 'Recomendação Básica', range: 'Recomendações simples', color: 'blue' },
       { id: 'recomendacao-moderada', label: 'Recomendação Moderada', range: 'Recomendações específicas', color: 'green' },
       { id: 'recomendacao-avancada', label: 'Recomendação Avançada', range: 'Recomendações complexas', color: 'yellow' }
+    ],
+    'template-acompanhamento-semanal': [
+      { id: 'acompanhamento-basico', label: 'Acompanhamento Básico', range: 'Semanal simples', color: 'blue' },
+      { id: 'acompanhamento-moderado', label: 'Acompanhamento Moderado', range: 'Semanal específico', color: 'green' },
+      { id: 'acompanhamento-avancado', label: 'Acompanhamento Avançado', range: 'Semanal complexo', color: 'yellow' }
+    ],
+    'template-checkin-mensal': [
+      { id: 'checkin-basico', label: 'Check-in Básico', range: 'Mensal simples', color: 'blue' },
+      { id: 'checkin-moderado', label: 'Check-in Moderado', range: 'Mensal específico', color: 'green' },
+      { id: 'checkin-avancado', label: 'Check-in Avançado', range: 'Mensal complexo', color: 'yellow' }
+    ],
+    'ficha-cliente': [
+      { id: 'ficha-basica', label: 'Ficha Básica', range: 'Cliente simples', color: 'blue' },
+      { id: 'ficha-moderada', label: 'Ficha Moderada', range: 'Cliente específico', color: 'green' },
+      { id: 'ficha-avancada', label: 'Ficha Avançada', range: 'Cliente complexo', color: 'yellow' }
+    ],
+    'template-progresso-visual': [
+      { id: 'progresso-basico', label: 'Progresso Básico', range: 'Visual simples', color: 'blue' },
+      { id: 'progresso-moderado', label: 'Progresso Moderado', range: 'Visual específico', color: 'green' },
+      { id: 'progresso-avancado', label: 'Progresso Avançado', range: 'Visual complexo', color: 'yellow' }
+    ],
+    'template-story-interativo': [
+      { id: 'story-basico', label: 'Story Básico', range: 'Interativo simples', color: 'blue' },
+      { id: 'story-moderado', label: 'Story Moderado', range: 'Interativo específico', color: 'green' },
+      { id: 'story-avancado', label: 'Story Avançado', range: 'Interativo complexo', color: 'yellow' }
+    ],
+    'post-curiosidades': [
+      { id: 'curiosidade-basica', label: 'Curiosidade Básica', range: 'Post simples', color: 'blue' },
+      { id: 'curiosidade-moderada', label: 'Curiosidade Moderada', range: 'Post específico', color: 'green' },
+      { id: 'curiosidade-avancada', label: 'Curiosidade Avançada', range: 'Post complexo', color: 'yellow' }
+    ],
+    'template-post-dica': [
+      { id: 'dica-basica', label: 'Dica Básica', range: 'Post simples', color: 'blue' },
+      { id: 'dica-moderada', label: 'Dica Moderada', range: 'Post específico', color: 'green' },
+      { id: 'dica-avancada', label: 'Dica Avançada', range: 'Post complexo', color: 'yellow' }
+    ],
+    'template-reels-roteirizado': [
+      { id: 'reels-basico', label: 'Reels Básico', range: 'Roteiro simples', color: 'blue' },
+      { id: 'reels-moderado', label: 'Reels Moderado', range: 'Roteiro específico', color: 'green' },
+      { id: 'reels-avancado', label: 'Reels Avançado', range: 'Roteiro complexo', color: 'yellow' }
+    ],
+    'template-artigo-curto': [
+      { id: 'artigo-basico', label: 'Artigo Básico', range: 'Artigo simples', color: 'blue' },
+      { id: 'artigo-moderado', label: 'Artigo Moderado', range: 'Artigo específico', color: 'green' },
+      { id: 'artigo-avancado', label: 'Artigo Avançado', range: 'Artigo complexo', color: 'yellow' }
+    ],
+    'template-catalogo-digital': [
+      { id: 'catalogo-basico', label: 'Catálogo Básico', range: 'Digital simples', color: 'blue' },
+      { id: 'catalogo-moderado', label: 'Catálogo Moderado', range: 'Digital específico', color: 'green' },
+      { id: 'catalogo-avancado', label: 'Catálogo Avançado', range: 'Digital complexo', color: 'yellow' }
     ]
   }
   
