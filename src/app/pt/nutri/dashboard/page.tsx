@@ -135,9 +135,12 @@ export default function NutriDashboard() {
               >
                 🎯 Criar Quiz Personalizado
               </Link>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <Link 
+                href="/pt/nutri/ferramentas/nova"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 Nova Ferramenta
-              </button>
+              </Link>
             </div>
           </div>
         </div>
