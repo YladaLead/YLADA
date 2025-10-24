@@ -61,6 +61,8 @@ interface QuizPersonalizado {
 
 export default function QuizPersonalizadoPage() {
   const [etapaAtual, setEtapaAtual] = useState(1)
+  const [perguntaPreviewAtual, setPerguntaPreviewAtual] = useState(0)
+  const [paginaPreviewAtual, setPaginaPreviewAtual] = useState(0)
   // Função para calcular total de páginas do preview
   const calcularTotalPaginas = () => {
     let total = 1 // Página inicial
