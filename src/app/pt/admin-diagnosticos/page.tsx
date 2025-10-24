@@ -2865,62 +2865,80 @@ const diagnosticosCompletos = {
   'template-oportunidade': {
     nutri: {
       oportunidadeBasica: [
-        '📋 Oportunidade básica nutricional',
-        '🥗 Plano alimentar básico',
-        '💊 Suplementação básica',
-        '📅 Consulta nutricional básica'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade básico para apresentar oportunidades nutricionais',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades básicas de crescimento através de nutrição',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade básico com apresentações simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades nutricionais básicas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentar oportunidades através de consultas e planos básicos'
       ],
       oportunidadeModerada: [
-        '📋 Oportunidade moderada nutricional',
-        '🥗 Plano alimentar específico',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade moderado para apresentar oportunidades especializadas',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades específicas de crescimento através de nutrição especializada',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade moderado com apresentações específicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades nutricionais especializadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare apresentar oportunidades através de consultas especializadas e planos personalizados'
       ],
       oportunidadeAvancada: [
-        '📋 Oportunidade avançada nutricional',
-        '🥗 Plano alimentar complexo',
-        '💊 Suplementação avançada',
-        '📅 Consulta nutricional de performance'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade avançado para apresentar oportunidades premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades complexas de crescimento através de nutrição premium',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade avançado com apresentações complexas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades nutricionais premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare apresentar oportunidades através de consultas premium e planos complexos'
       ]
     },
     sales: {
       oportunidadeBasica: [
-        '💊 Oportunidade básica de produtos',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos básicos',
-        '📞 Consultoria básica'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade básico para apresentar oportunidades de vendas',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades básicas de crescimento através de vendas',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade básico com apresentações simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades de vendas básicas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Proteína + Ômega-3 básicos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentar oportunidades através de vendas de produtos básicos'
       ],
       oportunidadeModerada: [
-        '💊 Oportunidade moderada de produtos',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos específicos',
-        '📞 Consultoria moderada'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade moderado para apresentar oportunidades especializadas',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades específicas de crescimento através de vendas especializadas',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade moderado com apresentações específicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades de vendas especializadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare apresentar oportunidades através de vendas de produtos especializados'
       ],
       oportunidadeAvancada: [
-        '💊 Oportunidade avançada de produtos',
-        '🥗 Suplementação avançada',
-        '💪 Produtos complexos',
-        '📞 Consultoria avançada'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade avançado para apresentar oportunidades premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades complexas de crescimento através de vendas premium',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade avançado com apresentações complexas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades de vendas premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare apresentar oportunidades através de vendas de produtos premium'
       ]
     },
     coach: {
       oportunidadeBasica: [
-        '🧘‍♀️ Oportunidade básica de bem-estar',
-        '💪 Exercícios básicos',
-        '🍎 Coaching básico',
-        '📅 Programa básico'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade básico para apresentar oportunidades de bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades básicas de crescimento através de bem-estar',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade básico com apresentações simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades de bem-estar básicas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentar oportunidades através de programas básicos e consultorias simples'
       ],
       oportunidadeModerada: [
-        '🧘‍♀️ Oportunidade moderada de bem-estar',
-        '💪 Exercícios específicos',
-        '🍎 Coaching direcionado',
-        '📅 Programa moderado'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade moderado para apresentar oportunidades especializadas',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades específicas de crescimento através de bem-estar especializado',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade moderado com apresentações específicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades de bem-estar especializadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare apresentar oportunidades através de programas especializados e consultorias moderadas'
       ],
       oportunidadeAvancada: [
-        '🧘‍♀️ Oportunidade avançada de bem-estar',
-        '💪 Exercícios complexos',
-        '🍎 Coaching avançado',
-        '📅 Programa avançado'
+        '🚀 DIAGNÓSTICO: Você precisa de template de oportunidade avançado para apresentar oportunidades premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar oportunidades complexas de crescimento através de bem-estar premium',
+        '⚡ AÇÃO IMEDIATA: Implemente template de oportunidade avançado com apresentações complexas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de oportunidades de bem-estar premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare apresentar oportunidades através de programas premium e consultorias avançadas'
       ]
     }
   },
@@ -2929,62 +2947,80 @@ const diagnosticosCompletos = {
   'template-apresentacao-negocio': {
     nutri: {
       apresentacaoBasica: [
-        '📋 Apresentação básica do negócio nutricional',
-        '🥗 Plano alimentar básico',
-        '💊 Suplementação básica',
-        '📅 Consulta nutricional básica'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação básico para mostrar seu negócio nutricional',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar serviços nutricionais básicos de forma profissional e estruturada',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação básico com estrutura simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio nutricional básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentar consultas e planos alimentares básicos'
       ],
       apresentacaoModerada: [
-        '📋 Apresentação moderada do negócio nutricional',
-        '🥗 Plano alimentar específico',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação moderado para mostrar seu negócio nutricional especializado',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar serviços nutricionais especializados com diferenciação profissional',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação moderado com estrutura específica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio nutricional especializado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare apresentar consultas especializadas e planos personalizados'
       ],
       apresentacaoAvancada: [
-        '📋 Apresentação avançada do negócio nutricional',
-        '🥗 Plano alimentar complexo',
-        '💊 Suplementação avançada',
-        '📅 Consulta nutricional de performance'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação avançado para mostrar seu negócio nutricional premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar serviços nutricionais premium com máxima profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação avançado com estrutura complexa por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio nutricional premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos de alta performance + Nootrópicos + Peptídeos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentar consultas premium e planos complexos'
       ]
     },
     sales: {
       apresentacaoBasica: [
-        '💊 Apresentação básica do negócio de produtos',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos básicos',
-        '📞 Consultoria básica'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação básico para mostrar seu negócio de suplementos',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar produtos de suplementação básicos de forma profissional',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação básico com catálogo simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio de suplementos básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentar produtos e consultorias básicas'
       ],
       apresentacaoModerada: [
-        '💊 Apresentação moderada do negócio de produtos',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos específicos',
-        '📞 Consultoria moderada'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação moderado para mostrar seu negócio de suplementos especializado',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar produtos de suplementação especializados com diferenciação',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação moderado com catálogo específico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio de suplementos especializado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare apresentar produtos especializados e consultorias moderadas'
       ],
       apresentacaoAvancada: [
-        '💊 Apresentação avançada do negócio de produtos',
-        '🥗 Suplementação avançada',
-        '💪 Produtos complexos',
-        '📞 Consultoria avançada'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação avançado para mostrar seu negócio de suplementos premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar produtos de suplementação premium com máxima profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação avançado com catálogo complexo por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio de suplementos premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare apresentar produtos premium e consultorias avançadas'
       ]
     },
     coach: {
       apresentacaoBasica: [
-        '🧘‍♀️ Apresentação básica do negócio de bem-estar',
-        '💪 Exercícios básicos',
-        '🍎 Coaching básico',
-        '📅 Programa básico'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação básico para mostrar seu negócio de bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar programas de bem-estar básicos de forma profissional',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação básico com estrutura simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio de bem-estar básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentar programas e consultorias básicas'
       ],
       apresentacaoModerada: [
-        '🧘‍♀️ Apresentação moderada do negócio de bem-estar',
-        '💪 Exercícios específicos',
-        '🍎 Coaching direcionado',
-        '📅 Programa moderado'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação moderado para mostrar seu negócio de bem-estar especializado',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar programas de bem-estar especializados com diferenciação',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação moderado com estrutura específica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio de bem-estar especializado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare apresentar programas especializados e consultorias moderadas'
       ],
       apresentacaoAvancada: [
-        '🧘‍♀️ Apresentação avançada do negócio de bem-estar',
-        '💪 Exercícios complexos',
-        '🍎 Coaching avançado',
-        '📅 Programa avançado'
+        '📊 DIAGNÓSTICO: Você precisa de template de apresentação avançado para mostrar seu negócio de bem-estar premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar programas de bem-estar premium com máxima profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente template de apresentação avançado com estrutura complexa por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de negócio de bem-estar premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare apresentar programas premium e consultorias avançadas'
       ]
     }
   },
@@ -2993,62 +3029,80 @@ const diagnosticosCompletos = {
   'template-script-convite': {
     nutri: {
       conviteBasico: [
-        '📋 Script básico de convite nutricional',
-        '🥗 Convite simples para consulta',
-        '💊 Convite básico para suplementação',
-        '📅 Convite básico nutricional'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite básico para atrair clientes nutricionais',
+        '🔍 CAUSA RAIZ: Necessidade de scripts simples para convidar clientes para consultas nutricionais básicas',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite básico com linguagem simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite nutricional básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em convidar para consultas e planos alimentares básicos'
       ],
       conviteModerado: [
-        '📋 Script moderado de convite nutricional',
-        '🥗 Convite específico para consulta',
-        '💊 Convite direcionado para suplementação',
-        '📅 Convite moderado nutricional'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite moderado para atrair clientes nutricionais especializados',
+        '🔍 CAUSA RAIZ: Necessidade de scripts específicos para convidar clientes para consultas nutricionais especializadas',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite moderado com linguagem específica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite nutricional especializado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare convidar para consultas especializadas e planos personalizados'
       ],
       conviteAvancado: [
-        '📋 Script avançado de convite nutricional',
-        '🥗 Convite complexo para consulta',
-        '💊 Convite avançado para suplementação',
-        '📅 Convite avançado nutricional'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite avançado para atrair clientes nutricionais premium',
+        '🔍 CAUSA RAIZ: Necessidade de scripts complexos para convidar clientes para consultas nutricionais premium',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite avançado com linguagem complexa por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite nutricional premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos de alta performance + Nootrópicos + Peptídeos',
+        '🍎 ALIMENTAÇÃO: Foque em convidar para consultas premium e planos complexos'
       ]
     },
     sales: {
       conviteBasico: [
-        '💊 Script básico de convite para produtos',
-        '🥗 Convite simples para suplementos',
-        '💪 Convite básico para produtos',
-        '📞 Convite básico'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite básico para atrair clientes de suplementos',
+        '🔍 CAUSA RAIZ: Necessidade de scripts simples para convidar clientes para produtos de suplementação básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite básico com linguagem simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite para produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em convidar para produtos e consultorias básicas'
       ],
       conviteModerado: [
-        '💊 Script moderado de convite para produtos',
-        '🥗 Convite específico para suplementos',
-        '💪 Convite direcionado para produtos',
-        '📞 Convite moderado'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite moderado para atrair clientes de suplementos especializados',
+        '🔍 CAUSA RAIZ: Necessidade de scripts específicos para convidar clientes para produtos de suplementação especializados',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite moderado com linguagem específica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite para produtos especializados',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare convidar para produtos especializados e consultorias moderadas'
       ],
       conviteAvancado: [
-        '💊 Script avançado de convite para produtos',
-        '🥗 Convite complexo para suplementos',
-        '💪 Convite avançado para produtos',
-        '📞 Convite avançado'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite avançado para atrair clientes de suplementos premium',
+        '🔍 CAUSA RAIZ: Necessidade de scripts complexos para convidar clientes para produtos de suplementação premium',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite avançado com linguagem complexa por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite para produtos premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare convidar para produtos premium e consultorias avançadas'
       ]
     },
     coach: {
       conviteBasico: [
-        '🧘‍♀️ Script básico de convite para bem-estar',
-        '💪 Convite simples para exercícios',
-        '🍎 Convite básico para coaching',
-        '📅 Convite básico'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite básico para atrair clientes de bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de scripts simples para convidar clientes para programas de bem-estar básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite básico com linguagem simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite para programas básicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em convidar para programas e consultorias básicas'
       ],
       conviteModerado: [
-        '🧘‍♀️ Script moderado de convite para bem-estar',
-        '💪 Convite específico para exercícios',
-        '🍎 Convite direcionado para coaching',
-        '📅 Convite moderado'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite moderado para atrair clientes de bem-estar especializados',
+        '🔍 CAUSA RAIZ: Necessidade de scripts específicos para convidar clientes para programas de bem-estar especializados',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite moderado com linguagem específica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite para programas especializados',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare convidar para programas especializados e consultorias moderadas'
       ],
       conviteAvancado: [
-        '🧘‍♀️ Script avançado de convite para bem-estar',
-        '💪 Convite complexo para exercícios',
-        '🍎 Convite avançado para coaching',
-        '📅 Convite avançado'
+        '💬 DIAGNÓSTICO: Você precisa de script de convite avançado para atrair clientes de bem-estar premium',
+        '🔍 CAUSA RAIZ: Necessidade de scripts complexos para convidar clientes para programas de bem-estar premium',
+        '⚡ AÇÃO IMEDIATA: Implemente script de convite avançado com linguagem complexa por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de convite para programas premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare convidar para programas premium e consultorias avançadas'
       ]
     }
   },
@@ -4875,14 +4929,14 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'oportunidade-avancada', label: 'Oportunidade Avançada', range: 'Oportunidade complexa', color: 'yellow' }
     ],
     'template-apresentacao-negocio': [
-      { id: 'apresentacao-basica', label: 'Apresentação Básica', range: 'Apresentação simples', color: 'blue' },
-      { id: 'apresentacao-moderada', label: 'Apresentação Moderada', range: 'Apresentação específica', color: 'green' },
-      { id: 'apresentacao-avancada', label: 'Apresentação Avançada', range: 'Apresentação complexa', color: 'yellow' }
+      { id: 'apresentacaoBasica', label: 'Apresentação Básica', range: 'Apresentação simples', color: 'blue' },
+      { id: 'apresentacaoModerada', label: 'Apresentação Moderada', range: 'Apresentação específica', color: 'green' },
+      { id: 'apresentacaoAvancada', label: 'Apresentação Avançada', range: 'Apresentação complexa', color: 'yellow' }
     ],
     'template-script-convite': [
-      { id: 'convite-basico', label: 'Convite Básico', range: 'Script simples', color: 'blue' },
-      { id: 'convite-moderado', label: 'Convite Moderado', range: 'Script específico', color: 'green' },
-      { id: 'convite-avancado', label: 'Convite Avançado', range: 'Script complexo', color: 'yellow' }
+      { id: 'conviteBasico', label: 'Convite Básico', range: 'Script simples', color: 'blue' },
+      { id: 'conviteModerado', label: 'Convite Moderado', range: 'Script específico', color: 'green' },
+      { id: 'conviteAvancado', label: 'Convite Avançado', range: 'Script complexo', color: 'yellow' }
     ],
     'template-onboarding-parceiro': [
       { id: 'onboarding-basico', label: 'Onboarding Básico', range: 'Onboarding simples', color: 'blue' },
@@ -4973,8 +5027,8 @@ const profissoes = [
 
 export default function AdminDiagnosticos() {
   const [profissaoSelecionada, setProfissaoSelecionada] = useState<'nutri' | 'sales' | 'coach'>('nutri')
-  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('simulador-ganho')
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('ganhoModerado')
+  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('template-script-convite')
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('conviteModerado')
 
   // Filtrar ferramentas por profissão
   const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
@@ -9694,6 +9748,327 @@ export default function AdminDiagnosticos() {
                     <div>
                       <p className="font-semibold text-gray-800 mb-1">💰 Adaptação por Resultado:</p>
                       <p>CTA específico para cada nível de simulação de ganhos</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Oportunidade */}
+            {ferramentaSelecionada === 'template-oportunidade' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🚀 CTAs Pré-sugeridos - Template de Oportunidade
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">OPORTUNIDADE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades básicas de crescimento através de nutrição."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero oportunidade básica</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">OPORTUNIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades especializadas de crescimento através de nutrição."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero oportunidade moderada</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">OPORTUNIDADE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades premium de crescimento através de nutrição."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero oportunidade avançada</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-indigo-500">
+                    <h4 className="font-semibold text-indigo-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-indigo-50 p-3 rounded-lg">
+                        <p className="text-xs text-indigo-600 font-semibold mb-1">OPORTUNIDADE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades básicas de crescimento através de vendas."</p>
+                        <p className="text-xs text-indigo-600 mt-1">🚀 Quero oportunidade básica</p>
+                      </div>
+                      <div className="bg-indigo-50 p-3 rounded-lg">
+                        <p className="text-xs text-indigo-600 font-semibold mb-1">OPORTUNIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades especializadas de crescimento através de vendas."</p>
+                        <p className="text-xs text-indigo-600 mt-1">✅ Quero oportunidade moderada</p>
+                      </div>
+                      <div className="bg-indigo-50 p-3 rounded-lg">
+                        <p className="text-xs text-indigo-600 font-semibold mb-1">OPORTUNIDADE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades premium de crescimento através de vendas."</p>
+                        <p className="text-xs text-indigo-600 mt-1">🚀 Quero oportunidade avançada</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">OPORTUNIDADE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades básicas de crescimento através de bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero oportunidade básica</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">OPORTUNIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades especializadas de crescimento através de bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero oportunidade moderada</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">OPORTUNIDADE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Descubra oportunidades premium de crescimento através de bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero oportunidade avançada</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    🚀 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🚀 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🚀 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de oportunidade</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CTAs Pré-sugeridos - Template de Apresentação de Negócio */}
+            {ferramentaSelecionada === 'template-apresentacao-negocio' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 CTAs Pré-sugeridos - Template de Apresentação de Negócio
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">APRESENTAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação básica para mostrar seus serviços nutricionais."</p>
+                        <p className="text-xs text-blue-600 mt-1">📊 Quero apresentação básica</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">APRESENTAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação especializada para mostrar seus serviços nutricionais."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero apresentação moderada</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">APRESENTAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação premium para mostrar seus serviços nutricionais."</p>
+                        <p className="text-xs text-blue-600 mt-1">📊 Quero apresentação avançada</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">APRESENTAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação básica para mostrar seus produtos de suplementação."</p>
+                        <p className="text-xs text-purple-600 mt-1">📊 Quero apresentação básica</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">APRESENTAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação especializada para mostrar seus produtos de suplementação."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero apresentação moderada</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">APRESENTAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação premium para mostrar seus produtos de suplementação."</p>
+                        <p className="text-xs text-purple-600 mt-1">📊 Quero apresentação avançada</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-indigo-500">
+                    <h4 className="font-semibold text-indigo-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-indigo-50 p-3 rounded-lg">
+                        <p className="text-xs text-indigo-600 font-semibold mb-1">APRESENTAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação básica para mostrar seus programas de bem-estar."</p>
+                        <p className="text-xs text-indigo-600 mt-1">📊 Quero apresentação básica</p>
+                      </div>
+                      <div className="bg-indigo-50 p-3 rounded-lg">
+                        <p className="text-xs text-indigo-600 font-semibold mb-1">APRESENTAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação especializada para mostrar seus programas de bem-estar."</p>
+                        <p className="text-xs text-indigo-600 mt-1">✅ Quero apresentação moderada</p>
+                      </div>
+                      <div className="bg-indigo-50 p-3 rounded-lg">
+                        <p className="text-xs text-indigo-600 font-semibold mb-1">APRESENTAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba apresentação premium para mostrar seus programas de bem-estar."</p>
+                        <p className="text-xs text-indigo-600 mt-1">📊 Quero apresentação avançada</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    📊 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de apresentação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CTAs Pré-sugeridos - Template de Script de Convite */}
+            {ferramentaSelecionada === 'template-script-convite' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💬 CTAs Pré-sugeridos - Template de Script de Convite
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CONVITE BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba script básico para convidar clientes nutricionais."</p>
+                        <p className="text-xs text-green-600 mt-1">💬 Quero script básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CONVITE MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba script especializado para convidar clientes nutricionais."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero script moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CONVITE AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba script premium para convidar clientes nutricionais."</p>
+                        <p className="text-xs text-green-600 mt-1">💬 Quero script avançado</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-teal-500">
+                    <h4 className="font-semibold text-teal-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-teal-50 p-3 rounded-lg">
+                        <p className="text-xs text-teal-600 font-semibold mb-1">CONVITE BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba script básico para convidar clientes de suplementos."</p>
+                        <p className="text-xs text-teal-600 mt-1">💬 Quero script básico</p>
+                      </div>
+                      <div className="bg-teal-50 p-3 rounded-lg">
+                        <p className="text-xs text-teal-600 font-semibold mb-1">CONVITE MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba script especializado para convidar clientes de suplementos."</p>
+                        <p className="text-xs text-teal-600 mt-1">✅ Quero script moderado</p>
+                      </div>
+                      <div className="bg-teal-50 p-3 rounded-lg">
+                        <p className="text-xs text-teal-600 font-semibold mb-1">CONVITE AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba script premium para convidar clientes de suplementos."</p>
+                        <p className="text-xs text-teal-600 mt-1">💬 Quero script avançado</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
+                    <h4 className="font-semibold text-emerald-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-emerald-50 p-3 rounded-lg">
+                        <p className="text-xs text-emerald-600 font-semibold mb-1">CONVITE BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba script básico para convidar clientes de bem-estar."</p>
+                        <p className="text-xs text-emerald-600 mt-1">💬 Quero script básico</p>
+                      </div>
+                      <div className="bg-emerald-50 p-3 rounded-lg">
+                        <p className="text-xs text-emerald-600 font-semibold mb-1">CONVITE MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba script especializado para convidar clientes de bem-estar."</p>
+                        <p className="text-xs text-emerald-600 mt-1">✅ Quero script moderado</p>
+                      </div>
+                      <div className="bg-emerald-50 p-3 rounded-lg">
+                        <p className="text-xs text-emerald-600 font-semibold mb-1">CONVITE AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba script premium para convidar clientes de bem-estar."</p>
+                        <p className="text-xs text-emerald-600 mt-1">💬 Quero script avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💬 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">💬 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">💬 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de convite</p>
                     </div>
                     <div>
                       <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
@@ -15973,6 +16348,544 @@ export default function AdminDiagnosticos() {
                     <p>• <strong>Duração:</strong> Simulação evolui com novas metas e objetivos</p>
                   </div>
                   <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Oportunidade */}
+            {ferramentaSelecionada === 'template-oportunidade' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎯 Preview do Template de Oportunidade - "Apresente oportunidades de negócio"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎯 Apresente Oportunidades de Negócio</h4>
+                  <p className="text-gray-700 mb-3">Crie apresentações envolventes que mostram oportunidades de negócio, parcerias e colaborações de forma profissional e atrativa para nutricionistas, consultores e coaches.</p>
+                  <p className="text-purple-600 font-semibold">🎯 Apresentação de oportunidades que pode transformar sua rede profissional em 7 dias.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🎯 1. Que tipo de oportunidade você quer apresentar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Parceria comercial</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Colaboração profissional</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Programa de afiliados</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Franquia/licenciamento</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Identificação de interesse</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎯 2. Qual seu público-alvo?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="publico-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Nutricionistas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="publico-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Consultores Nutra</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="publico-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Coaches de Bem-estar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="publico-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Todos os profissionais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Segmentação específica</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🎯 3. Qual o valor da oportunidade?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="valor-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Até R$ 500/mês</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="valor-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">R$ 500-2.000/mês</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="valor-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">R$ 2.000-5.000/mês</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="valor-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">R$ 5.000+/mês</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Aspiração financeira</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🎯 4. Que benefícios você oferece?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="beneficios-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Suporte técnico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="beneficios-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Material de marketing</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="beneficios-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Treinamento completo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="beneficios-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Todos os benefícios</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Valor agregado</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🎯 5. Qual seu nível de experiência?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="experiencia-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Iniciante (0-2 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="experiencia-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Intermediário (3-5 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="experiencia-oportunidade" className="mr-3" />
+                        <span className="text-gray-700">Avançado (6+ anos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Credibilidade profissional</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🎯 Resultado do Template de Oportunidade</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-purple-600 mb-2">Oportunidade Moderada</div>
+                      <div className="text-lg font-semibold text-indigo-600">Parceria Especializada</div>
+                      <div className="text-sm text-gray-600">Template de oportunidade moderada personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">R$ 2.500</div>
+                        <div className="text-sm text-gray-600">Potencial mensal</div>
+                      </div>
+                      <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                        <div className="text-2xl font-bold text-indigo-600">15%</div>
+                        <div className="text-sm text-gray-600">Comissão média</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">3-6</div>
+                        <div className="text-sm text-gray-600">Meses ROI</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estratégia Recomendada:</strong> Parceria comercial com nutricionistas especializados</p>
+                      <p>• <strong>Prazo:</strong> 3-6 meses para estabelecer parcerias</p>
+                      <p>• <strong>Investimento:</strong> 5-8 horas por semana</p>
+                      <p>• <strong>ROI:</strong> 2:1 em 6 meses</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Apresentação Profissional:</strong> Tipo de oportunidade, público-alvo, valor, benefícios, experiência</p>
+                    <p>• <strong>Análise:</strong> Critérios de oportunidade profissional, evidências de mercado, feedback de profissionais</p>
+                    <p>• <strong>Personalização:</strong> Apresentação específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Apresentação evolui com novas oportunidades e parcerias</p>
+                  </div>
+                  <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Apresentação de Negócio */}
+            {ferramentaSelecionada === 'template-apresentacao-negocio' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 Preview do Template de Apresentação de Negócio - "Apresente seu negócio profissionalmente"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📊 Apresente Seu Negócio Profissionalmente</h4>
+                  <p className="text-gray-700 mb-3">Crie apresentações profissionais que mostram seus serviços, produtos e programas de forma estruturada e atrativa para clientes e parceiros.</p>
+                  <p className="text-blue-600 font-semibold">📊 Apresentação profissional que pode transformar sua imagem em 7 dias.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📊 1. Qual tipo de negócio você quer apresentar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-negocio" className="mr-3" />
+                        <span className="text-gray-700">Serviços nutricionais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-negocio" className="mr-3" />
+                        <span className="text-gray-700">Produtos de suplementação</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-negocio" className="mr-3" />
+                        <span className="text-gray-700">Programas de bem-estar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-negocio" className="mr-3" />
+                        <span className="text-gray-700">Consultoria especializada</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Identificação de nicho</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📊 2. Qual seu nível de profissionalização?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="nivel-profissionalizacao" className="mr-3" />
+                        <span className="text-gray-700">Iniciante (0-2 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="nivel-profissionalizacao" className="mr-3" />
+                        <span className="text-gray-700">Intermediário (3-5 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="nivel-profissionalizacao" className="mr-3" />
+                        <span className="text-gray-700">Avançado (6+ anos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade profissional</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">📊 3. Que elementos você quer incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="elementos-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Serviços e preços</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="elementos-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Resultados e depoimentos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="elementos-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Diferenciais e metodologia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="elementos-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Todos os elementos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Completude profissional</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">📊 4. Qual seu público-alvo?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="publico-alvo-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Clientes finais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="publico-alvo-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Parceiros comerciais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="publico-alvo-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Investidores</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="publico-alvo-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Todos os públicos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Segmentação estratégica</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">📊 5. Qual formato você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="formato-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Apresentação em slides</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="formato-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Documento PDF</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="formato-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Página web</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="formato-apresentacao" className="mr-3" />
+                        <span className="text-gray-700">Vídeo apresentação</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Formato ideal</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Template de Apresentação de Negócio</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">Apresentação Moderada</div>
+                      <div className="text-lg font-semibold text-purple-600">Profissional Especializada</div>
+                      <div className="text-sm text-gray-600">Template de apresentação moderada personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">15</div>
+                        <div className="text-sm text-gray-600">Slides/Páginas</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">5</div>
+                        <div className="text-sm text-gray-600">Seções principais</div>
+                      </div>
+                      <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                        <div className="text-2xl font-bold text-indigo-600">3-5</div>
+                        <div className="text-sm text-gray-600">Dias para criar</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estratégia Recomendada:</strong> Apresentação especializada com foco em diferenciais</p>
+                      <p>• <strong>Prazo:</strong> 3-5 dias para criar apresentação completa</p>
+                      <p>• <strong>Investimento:</strong> 4-6 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 40% na taxa de conversão</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Apresentação Profissional:</strong> Tipo de negócio, nível de profissionalização, elementos, público-alvo, formato</p>
+                    <p>• <strong>Análise:</strong> Critérios de apresentação profissional, evidências de mercado, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Apresentação específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Apresentação evolui com novos serviços e resultados</p>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Script de Convite */}
+            {ferramentaSelecionada === 'template-script-convite' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💬 Preview do Template de Script de Convite - "Convide clientes com scripts persuasivos"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">💬 Convide Clientes com Scripts Persuasivos</h4>
+                  <p className="text-gray-700 mb-3">Crie scripts de convite persuasivos que atraem clientes para seus serviços, produtos e programas de forma natural e eficaz.</p>
+                  <p className="text-green-600 font-semibold">💬 Scripts de convite que podem aumentar suas conversões em 7 dias.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">💬 1. Que tipo de convite você quer criar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-convite" className="mr-3" />
+                        <span className="text-gray-700">Convite para consulta</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-convite" className="mr-3" />
+                        <span className="text-gray-700">Convite para produto</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-convite" className="mr-3" />
+                        <span className="text-gray-700">Convite para programa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-convite" className="mr-3" />
+                        <span className="text-gray-700">Convite para evento</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Identificação de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">💬 2. Qual seu tom de comunicação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-comunicacao" className="mr-3" />
+                        <span className="text-gray-700">Profissional e formal</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-comunicacao" className="mr-3" />
+                        <span className="text-gray-700">Amigável e próximo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-comunicacao" className="mr-3" />
+                        <span className="text-gray-700">Motivacional e inspirador</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-comunicacao" className="mr-3" />
+                        <span className="text-gray-700">Direto e objetivo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Identificação de personalidade</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">💬 3. Que benefício você quer destacar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="beneficio-destaque" className="mr-3" />
+                        <span className="text-gray-700">Resultados rápidos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="beneficio-destaque" className="mr-3" />
+                        <span className="text-gray-700">Transformação completa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="beneficio-destaque" className="mr-3" />
+                        <span className="text-gray-700">Suporte personalizado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="beneficio-destaque" className="mr-3" />
+                        <span className="text-gray-700">Método comprovado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Aspiração de resultado</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">💬 4. Qual urgência você quer criar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="urgencia-convite" className="mr-3" />
+                        <span className="text-gray-700">Oferta limitada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="urgencia-convite" className="mr-3" />
+                        <span className="text-gray-700">Vagas limitadas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="urgencia-convite" className="mr-3" />
+                        <span className="text-gray-700">Prazo específico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="urgencia-convite" className="mr-3" />
+                        <span className="text-gray-700">Sem urgência</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Escassez e urgência</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-lime-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-lime-900 mb-3">💬 5. Que call-to-action você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="cta-convite" className="mr-3" />
+                        <span className="text-gray-700">"Agende sua consulta"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="cta-convite" className="mr-3" />
+                        <span className="text-gray-700">"Saiba mais"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="cta-convite" className="mr-3" />
+                        <span className="text-gray-700">"Comece agora"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="cta-convite" className="mr-3" />
+                        <span className="text-gray-700">"Transforme sua vida"</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-lime-600 mt-2">🧠 Gatilho: Ação específica</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">💬 Resultado do Template de Script de Convite</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-green-600 mb-2">Script Moderado</div>
+                      <div className="text-lg font-semibold text-teal-600">Persuasivo Especializado</div>
+                      <div className="text-sm text-gray-600">Template de script moderado personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">3-5</div>
+                        <div className="text-sm text-gray-600">Parágrafos</div>
+                      </div>
+                      <div className="text-center p-3 bg-teal-50 rounded-lg">
+                        <div className="text-2xl font-bold text-teal-600">150-300</div>
+                        <div className="text-sm text-gray-600">Palavras</div>
+                      </div>
+                      <div className="text-center p-3 bg-emerald-50 rounded-lg">
+                        <div className="text-2xl font-bold text-emerald-600">1-2</div>
+                        <div className="text-sm text-gray-600">Minutos para ler</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estratégia Recomendada:</strong> Script especializado com foco em benefícios específicos</p>
+                      <p>• <strong>Prazo:</strong> 1-2 dias para criar script completo</p>
+                      <p>• <strong>Investimento:</strong> 2-3 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 60% na taxa de resposta</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Script Persuasivo:</strong> Tipo de convite, tom de comunicação, benefício, urgência, call-to-action</p>
+                    <p>• <strong>Análise:</strong> Critérios de persuasão, evidências de conversão, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Script específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Script evolui com novos resultados e feedback</p>
+                  </div>
+                  <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
                 </div>
               </div>
             )}
