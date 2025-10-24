@@ -2779,66 +2779,84 @@ const diagnosticosCompletos = {
     }
   },
 
-  // 41. SIMULADOR DE GANHO
+  // 51. SIMULADOR DE GANHO
   'simulador-ganho': {
     nutri: {
       ganhoBasico: [
-        '📋 Simulação básica de ganho nutricional',
-        '🥗 Plano alimentar para ganho simples',
-        '💊 Suplementação básica para ganho',
-        '📅 Consulta nutricional para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho básico para mostrar potencial de crescimento',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de serviços nutricionais básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho básico com cálculos simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos básicos através de nutrição',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em demonstrar ganhos através de consultas e planos básicos'
       ],
       ganhoModerado: [
-        '📋 Simulação moderada de ganho nutricional',
-        '🥗 Plano alimentar para ganho específico',
-        '💊 Suplementação direcionada para ganho',
-        '📅 Consulta nutricional especializada para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho moderado para mostrar potencial de crescimento especializado',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de serviços nutricionais especializados',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho moderado com cálculos específicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos moderados através de nutrição especializada',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare demonstrar ganhos através de consultas especializadas e planos personalizados'
       ],
       ganhoAvancado: [
-        '📋 Simulação avançada de ganho nutricional',
-        '🥗 Plano alimentar para ganho complexo',
-        '💊 Suplementação avançada para ganho',
-        '📅 Consulta nutricional de performance para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho avançado para mostrar potencial de crescimento premium',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de serviços nutricionais premium',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho avançado com cálculos complexos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos avançados através de nutrição premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare demonstrar ganhos através de consultas premium e planos complexos'
       ]
     },
     sales: {
       ganhoBasico: [
-        '💊 Produtos básicos para ganho',
-        '🥗 Suplementação preventiva para ganho',
-        '💪 Produtos de apoio básico para ganho',
-        '📞 Consultoria básica para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho básico para mostrar potencial de crescimento em vendas',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de vendas de produtos básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho básico com cálculos simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos básicos através de vendas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Proteína + Ômega-3 básicos',
+        '🍎 ALIMENTAÇÃO: Foque em demonstrar ganhos através de vendas de produtos básicos'
       ],
       ganhoModerado: [
-        '💊 Produtos moderados para ganho',
-        '🥗 Suplementação direcionada para ganho',
-        '💪 Produtos de apoio moderado para ganho',
-        '📞 Consultoria moderada para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho moderado para mostrar potencial de crescimento em vendas especializadas',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de vendas de produtos especializados',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho moderado com cálculos específicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos moderados através de vendas especializadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare demonstrar ganhos através de vendas de produtos especializados'
       ],
       ganhoAvancado: [
-        '💊 Produtos avançados para ganho',
-        '🥗 Suplementação avançada para ganho',
-        '💪 Produtos de apoio avançado para ganho',
-        '📞 Consultoria avançada para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho avançado para mostrar potencial de crescimento em vendas premium',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de vendas de produtos premium',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho avançado com cálculos complexos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos avançados através de vendas premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare demonstrar ganhos através de vendas de produtos premium'
       ]
     },
     coach: {
       ganhoBasico: [
-        '🧘‍♀️ Programa básico para ganho',
-        '💪 Exercícios básicos para ganho',
-        '🍎 Coaching nutricional básico para ganho',
-        '📅 Programa básico para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho básico para mostrar potencial de crescimento em bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de programas de bem-estar básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho básico com cálculos simples por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos básicos através de bem-estar',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em demonstrar ganhos através de programas básicos e consultorias simples'
       ],
       ganhoModerado: [
-        '🧘‍♀️ Programa moderado para ganho',
-        '💪 Exercícios moderados para ganho',
-        '🍎 Coaching nutricional moderado para ganho',
-        '📅 Programa moderado para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho moderado para mostrar potencial de crescimento em bem-estar especializado',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de programas de bem-estar especializados',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho moderado com cálculos específicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos moderados através de bem-estar especializado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare demonstrar ganhos através de programas especializados e consultorias moderadas'
       ],
       ganhoAvancado: [
-        '🧘‍♀️ Programa avançado para ganho',
-        '💪 Exercícios avançados para ganho',
-        '🍎 Coaching nutricional avançado para ganho',
-        '📅 Programa avançado para ganho'
+        '💰 DIAGNÓSTICO: Você precisa de simulador de ganho avançado para mostrar potencial de crescimento em bem-estar premium',
+        '🔍 CAUSA RAIZ: Necessidade de demonstrar potencial de ganhos através de programas de bem-estar premium',
+        '⚡ AÇÃO IMEDIATA: Implemente simulador de ganho avançado com cálculos complexos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de demonstração de ganhos avançados através de bem-estar premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Protocolos específicos',
+        '🍎 ALIMENTAÇÃO: Compare demonstrar ganhos através de programas premium e consultorias avançadas'
       ]
     }
   },
@@ -4955,8 +4973,8 @@ const profissoes = [
 
 export default function AdminDiagnosticos() {
   const [profissaoSelecionada, setProfissaoSelecionada] = useState<'nutri' | 'sales' | 'coach'>('nutri')
-  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('template-catalogo-digital')
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('catalogoModerado')
+  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('simulador-ganho')
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('ganhoModerado')
 
   // Filtrar ferramentas por profissão
   const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
@@ -9569,6 +9587,113 @@ export default function AdminDiagnosticos() {
                     <div>
                       <p className="font-semibold text-gray-800 mb-1">📱 Adaptação por Resultado:</p>
                       <p>CTA específico para cada nível de apresentação de serviços/produtos através de catálogo digital</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Simulador de Ganho */}
+            {ferramentaSelecionada === 'simulador-ganho' && (
+              <div className="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💰 CTAs Pré-sugeridos - Simulador de Ganho
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-yellow-500">
+                    <h4 className="font-semibold text-yellow-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <p className="text-xs text-yellow-600 font-semibold mb-1">GANHO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de serviços nutricionais básicos."</p>
+                        <p className="text-xs text-yellow-600 mt-1">💰 Quero simular ganhos básicos</p>
+                      </div>
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <p className="text-xs text-yellow-600 font-semibold mb-1">GANHO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de serviços especializados."</p>
+                        <p className="text-xs text-yellow-600 mt-1">✅ Quero simular ganhos moderados</p>
+                      </div>
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <p className="text-xs text-yellow-600 font-semibold mb-1">GANHO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de serviços premium."</p>
+                        <p className="text-xs text-yellow-600 mt-1">🚀 Quero simular ganhos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-orange-500">
+                    <h4 className="font-semibold text-orange-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <p className="text-xs text-orange-600 font-semibold mb-1">GANHO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de vendas de produtos básicos."</p>
+                        <p className="text-xs text-orange-600 mt-1">💰 Quero simular ganhos básicos</p>
+                      </div>
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <p className="text-xs text-orange-600 font-semibold mb-1">GANHO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de vendas especializadas."</p>
+                        <p className="text-xs text-orange-600 mt-1">✅ Quero simular ganhos moderados</p>
+                      </div>
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <p className="text-xs text-orange-600 font-semibold mb-1">GANHO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de vendas premium."</p>
+                        <p className="text-xs text-orange-600 mt-1">🚀 Quero simular ganhos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-red-500">
+                    <h4 className="font-semibold text-red-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-xs text-red-600 font-semibold mb-1">GANHO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de programas básicos."</p>
+                        <p className="text-xs text-red-600 mt-1">💰 Quero simular ganhos básicos</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-xs text-red-600 font-semibold mb-1">GANHO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de programas especializados."</p>
+                        <p className="text-xs text-red-600 mt-1">✅ Quero simular ganhos moderados</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-xs text-red-600 font-semibold mb-1">GANHO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Simule seus ganhos potenciais através de programas premium."</p>
+                        <p className="text-xs text-red-600 mt-1">🚀 Quero simular ganhos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💰 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">💰 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">💰 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de simulação de ganhos</p>
                     </div>
                     <div>
                       <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
@@ -15685,6 +15810,169 @@ export default function AdminDiagnosticos() {
                     </div>
                     <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Simulador de Ganho */}
+            {ferramentaSelecionada === 'simulador-ganho' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💰 Preview do Simulador de Ganho - "Simule seus ganhos potenciais"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">💰 Simule seus Ganhos Potenciais</h4>
+                  <p className="text-gray-700 mb-3">Descubra quanto você pode ganhar através de diferentes estratégias de crescimento profissional. Simule cenários realistas baseados em dados do mercado.</p>
+                  <p className="text-yellow-600 font-semibold">💰 Simulação de ganhos que pode transformar sua perspectiva financeira em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">💰 1. Qual sua experiência atual?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="experiencia-simulador" className="mr-3" />
+                        <span className="text-gray-700">Iniciante (0-2 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="experiencia-simulador" className="mr-3" />
+                        <span className="text-gray-700">Intermediário (2-5 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="experiencia-simulador" className="mr-3" />
+                        <span className="text-gray-700">Avançado (5+ anos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Autopercepção profissional</p>
+                  </div>
+          
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">📊 2. Quantos clientes você atende por mês?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="clientes-mes" className="mr-3" />
+                        <span className="text-gray-700">1-10 clientes</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="clientes-mes" className="mr-3" />
+                        <span className="text-gray-700">11-30 clientes</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="clientes-mes" className="mr-3" />
+                        <span className="text-gray-700">31+ clientes</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de volume</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">💵 3. Qual sua receita mensal atual?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="receita-mensal" className="mr-3" />
+                        <span className="text-gray-700">R$ 0 - R$ 3.000</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="receita-mensal" className="mr-3" />
+                        <span className="text-gray-700">R$ 3.001 - R$ 8.000</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="receita-mensal" className="mr-3" />
+                        <span className="text-gray-700">R$ 8.001+</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência financeira</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🎯 4. Qual seu objetivo de crescimento?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="objetivo-crescimento" className="mr-3" />
+                        <span className="text-gray-700">Aumentar número de clientes</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="objetivo-crescimento" className="mr-3" />
+                        <span className="text-gray-700">Aumentar valor por cliente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="objetivo-crescimento" className="mr-3" />
+                        <span className="text-gray-700">Diversificar serviços</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Aspiração profissional</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">⏰ 5. Quanto tempo você tem para investir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tempo-investimento" className="mr-3" />
+                        <span className="text-gray-700">1-5 horas por semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tempo-investimento" className="mr-3" />
+                        <span className="text-gray-700">6-15 horas por semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tempo-investimento" className="mr-3" />
+                        <span className="text-gray-700">16+ horas por semana</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Disponibilidade realista</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">💰 Resultado do Simulador de Ganho</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-yellow-600 mb-2">Ganho Moderado</div>
+                      <div className="text-lg font-semibold text-orange-600">Potencial de R$ 8.500/mês</div>
+                      <div className="text-sm text-gray-600">Simulação baseada em seus dados</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                        <div className="text-2xl font-bold text-yellow-600">R$ 5.200</div>
+                        <div className="text-sm text-gray-600">Receita Atual</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">R$ 8.500</div>
+                        <div className="text-sm text-gray-600">Potencial 6 meses</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">+63%</div>
+                        <div className="text-sm text-gray-600">Crescimento</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estratégia Recomendada:</strong> Aumentar valor por cliente através de serviços especializados</p>
+                      <p>• <strong>Prazo:</strong> 6 meses para atingir o potencial</p>
+                      <p>• <strong>Investimento:</strong> 8-12 horas por semana</p>
+                      <p>• <strong>ROI:</strong> 3:1 em 6 meses</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-yellow-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Simulação Baseada em Dados:</strong> Experiência, clientes, receita, objetivo, tempo disponível</p>
+                    <p>• <strong>Análise:</strong> Critérios de crescimento profissional, evidências de mercado, feedback de profissionais</p>
+                    <p>• <strong>Personalização:</strong> Simulação específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Simulação evolui com novas metas e objetivos</p>
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
                 </div>
               </div>
             )}
