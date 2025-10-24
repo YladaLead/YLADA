@@ -4,68 +4,74 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import YLADALogo from '../../../components/YLADALogo'
 
-// Lista das 60 ferramentas YLADA (Catálogo Completo)
+// Lista das 38 ferramentas YLADA (MVP - Foco em Coleta de Leads)
 const ferramentasYLADA = [
+  // QUIZES INTERATIVOS (5)
   { id: 'quiz-interativo', nome: 'Quiz Interativo', categoria: 'Atrair Leads', objetivo: 'Atrair leads frios', icon: '🎯' },
   { id: 'quiz-bem-estar', nome: 'Quiz de Bem-Estar', categoria: 'Engajamento', objetivo: 'Engajamento', icon: '🧘‍♀️' },
   { id: 'quiz-perfil-nutricional', nome: 'Quiz de Perfil Nutricional', categoria: 'Diagnóstico', objetivo: 'Diagnóstico inicial', icon: '🥗' },
   { id: 'quiz-detox', nome: 'Quiz Detox', categoria: 'Captação', objetivo: 'Captação + curiosidade', icon: '🧽' },
   { id: 'quiz-energetico', nome: 'Quiz Energético', categoria: 'Segmentação', objetivo: 'Segmentação', icon: '⚡' },
+  
+  // CALCULADORAS (4)
   { id: 'calculadora-imc', nome: 'Calculadora de IMC', categoria: 'Avaliação', objetivo: 'Avaliação corporal', icon: '📊' },
   { id: 'calculadora-proteina', nome: 'Calculadora de Proteína', categoria: 'Nutrição', objetivo: 'Recomendação nutricional', icon: '🥩' },
   { id: 'calculadora-agua', nome: 'Calculadora de Água', categoria: 'Engajamento', objetivo: 'Engajamento leve', icon: '💧' },
   { id: 'calculadora-calorias', nome: 'Calculadora de Calorias', categoria: 'Diagnóstico', objetivo: 'Diagnóstico', icon: '🔥' },
+  
+  // CHECKLISTS (2)
   { id: 'checklist-detox', nome: 'Checklist Detox', categoria: 'Educação', objetivo: 'Educação rápida', icon: '📋' },
   { id: 'checklist-alimentar', nome: 'Checklist Alimentar', categoria: 'Avaliação', objetivo: 'Avaliação de hábitos', icon: '🍽️' },
+  
+  // CONTEÚDO EDUCATIVO (6)
   { id: 'mini-ebook', nome: 'Mini E-book Educativo', categoria: 'Autoridade', objetivo: 'Autoridade', icon: '📚' },
   { id: 'guia-nutraceutico', nome: 'Guia Nutracêutico', categoria: 'Atração', objetivo: 'Atração de interesse', icon: '💊' },
   { id: 'guia-proteico', nome: 'Guia Proteico', categoria: 'Especialização', objetivo: 'Especialização', icon: '🥛' },
   { id: 'tabela-comparativa', nome: 'Tabela Comparativa', categoria: 'Conversão', objetivo: 'Conversão', icon: '📊' },
   { id: 'tabela-substituicoes', nome: 'Tabela de Substituições', categoria: 'Valor', objetivo: 'Valor agregado', icon: '🔄' },
   { id: 'tabela-sintomas', nome: 'Tabela de Sintomas', categoria: 'Diagnóstico', objetivo: 'Diagnóstico leve', icon: '🩺' },
+  
+  // PLANOS E ORGANIZAÇÃO (5)
   { id: 'plano-alimentar-base', nome: 'Plano Alimentar Base', categoria: 'Valor', objetivo: 'Valor prático', icon: '📅' },
   { id: 'planner-refeicoes', nome: 'Planner de Refeições', categoria: 'Organização', objetivo: 'Organização', icon: '🗓️' },
   { id: 'rastreador-alimentar', nome: 'Rastreador Alimentar', categoria: 'Acompanhamento', objetivo: 'Acompanhamento', icon: '📈' },
   { id: 'diario-alimentar', nome: 'Diário Alimentar', categoria: 'Engajamento', objetivo: 'Engajamento', icon: '📝' },
   { id: 'tabela-metas-semanais', nome: 'Tabela de Metas Semanais', categoria: 'Motivação', objetivo: 'Motivação', icon: '🎯' },
-  { id: 'template-desafio-7dias', nome: 'Template de Desafio 7 Dias', categoria: 'Gamificação', objetivo: 'Gamificação', icon: '🏆' },
-  { id: 'template-desafio-21dias', nome: 'Template de Desafio 21 Dias', categoria: 'Comprometimento', objetivo: 'Comprometimento', icon: '📅' },
+  
+  // DESAFIOS (2)
+  { id: 'template-desafio-7dias', nome: 'Desafio 7 Dias', categoria: 'Gamificação', objetivo: 'Gamificação', icon: '🏆' },
+  { id: 'template-desafio-21dias', nome: 'Desafio 21 Dias', categoria: 'Comprometimento', objetivo: 'Comprometimento', icon: '📅' },
+  
+  // GUIAS ESPECÍFICOS (2)
   { id: 'guia-hidratacao', nome: 'Guia de Hidratação', categoria: 'Educação', objetivo: 'Educação visual', icon: '💧' },
   { id: 'infografico-educativo', nome: 'Infográfico Educativo', categoria: 'Autoridade', objetivo: 'Autoridade', icon: '📊' },
-  { id: 'template-receitas', nome: 'Template de Receitas', categoria: 'Valor', objetivo: 'Valor prático', icon: '👨‍🍳' },
+  
+  // RECEITAS E CARDÁPIOS (2)
+  { id: 'template-receitas', nome: 'Receitas', categoria: 'Valor', objetivo: 'Valor prático', icon: '👨‍🍳' },
   { id: 'cardapio-detox', nome: 'Cardápio Detox', categoria: 'Conversão', objetivo: 'Conversão indireta', icon: '🥗' },
+  
+  // SIMULADORES (1)
   { id: 'simulador-resultados', nome: 'Simulador de Resultados', categoria: 'Curiosidade', objetivo: 'Curiosidade', icon: '🔮' },
-  { id: 'template-avaliacao-inicial', nome: 'Template de Avaliação Inicial', categoria: 'Captação', objetivo: 'Captação', icon: '📋' },
+  
+  // FORMULÁRIOS (2)
+  { id: 'template-avaliacao-inicial', nome: 'Avaliação Inicial', categoria: 'Captação', objetivo: 'Captação', icon: '📋' },
   { id: 'formulario-recomendacao', nome: 'Formulário de Recomendação', categoria: 'Diagnóstico', objetivo: 'Diagnóstico rápido', icon: '📝' },
-  { id: 'template-acompanhamento-semanal', nome: 'Template de Acompanhamento Semanal', categoria: 'Fidelização', objetivo: 'Fidelização', icon: '📊' },
-  { id: 'template-checkin-mensal', nome: 'Template de Check-in Mensal', categoria: 'Fidelização', objetivo: 'Fidelização', icon: '📅' },
-  { id: 'ficha-cliente', nome: 'Ficha de Cliente', categoria: 'Profissionalização', objetivo: 'Profissionalização', icon: '📋' },
-  { id: 'template-progresso-visual', nome: 'Template de Progresso Visual', categoria: 'Engajamento', objetivo: 'Engajamento', icon: '📈' },
-  { id: 'template-story-interativo', nome: 'Template de Story Interativo', categoria: 'Engajamento', objetivo: 'Engajamento nas redes', icon: '📱' },
+  
+  // CONTEÚDO PARA REDES SOCIAIS (5)
+  { id: 'template-story-interativo', nome: 'Story Interativo', categoria: 'Engajamento', objetivo: 'Engajamento nas redes', icon: '📱' },
   { id: 'post-curiosidades', nome: 'Post de Curiosidades', categoria: 'Autoridade', objetivo: 'Autoridade', icon: '💡' },
-  { id: 'template-post-dica', nome: 'Template de Post com Dica', categoria: 'Conteúdo', objetivo: 'Conteúdo recorrente', icon: '📝' },
-  { id: 'template-reels-roteirizado', nome: 'Template de Reels Roteirizado', categoria: 'Atração', objetivo: 'Atração visual', icon: '🎬' },
-  { id: 'template-artigo-curto', nome: 'Template de Artigo Curto', categoria: 'Autoridade', objetivo: 'Autoridade escrita', icon: '📄' },
-  { id: 'template-catalogo-digital', nome: 'Template de Catálogo Digital', categoria: 'Conversão', objetivo: 'Conversão direta', icon: '📱' },
+  { id: 'template-post-dica', nome: 'Post com Dica', categoria: 'Conteúdo', objetivo: 'Conteúdo recorrente', icon: '📝' },
+  { id: 'template-reels-roteirizado', nome: 'Reels Roteirizado', categoria: 'Atração', objetivo: 'Atração visual', icon: '🎬' },
+  { id: 'template-artigo-curto', nome: 'Artigo Curto', categoria: 'Autoridade', objetivo: 'Autoridade escrita', icon: '📄' },
+  
+  // CATÁLOGOS (1)
+  { id: 'template-catalogo-digital', nome: 'Catálogo Digital', categoria: 'Conversão', objetivo: 'Conversão direta', icon: '📱' },
+  
+  // SIMULADORES ESPECÍFICOS (1)
   { id: 'simulador-ganho', nome: 'Simulador de Ganho', categoria: 'Recrutamento', objetivo: 'Recrutamento', icon: '💰' },
-  { id: 'template-oportunidade', nome: 'Template de Oportunidade', categoria: 'Recrutamento', objetivo: 'Recrutamento', icon: '🚀' },
-  { id: 'template-apresentacao-negocio', nome: 'Template de Apresentação de Negócio', categoria: 'Recrutamento', objetivo: 'Recrutamento', icon: '📊' },
-  { id: 'template-script-convite', nome: 'Template de Script de Convite', categoria: 'Duplicação', objetivo: 'Duplicação', icon: '💬' },
-  { id: 'template-onboarding-parceiro', nome: 'Template de Onboarding de Parceiro', categoria: 'Recrutamento', objetivo: 'Recrutamento', icon: '👥' },
-  { id: 'template-plano-acao-equipe', nome: 'Template de Plano de Ação da Equipe', categoria: 'Gestão', objetivo: 'Gestão', icon: '📋' },
-  { id: 'template-feedback-cliente', nome: 'Template de Feedback de Cliente', categoria: 'Fidelização', objetivo: 'Fidelização', icon: '⭐' },
-  { id: 'template-mensagem-pos-compra', nome: 'Template de Mensagem Pós-Compra', categoria: 'Retenção', objetivo: 'Retenção', icon: '🎉' },
-  { id: 'template-email-reposicao', nome: 'Template de E-mail de Reposição', categoria: 'Fidelização', objetivo: 'Fidelização', icon: '📧' },
-  { id: 'template-aniversario', nome: 'Template de Aniversário', categoria: 'Relacionamento', objetivo: 'Relacionamento', icon: '🎂' },
-  { id: 'template-recompensa-cashback', nome: 'Template de Recompensa / Cashback', categoria: 'Fidelização', objetivo: 'Fidelização', icon: '🎁' },
-  { id: 'template-agradecimento', nome: 'Template de Agradecimento', categoria: 'Relacionamento', objetivo: 'Relacionamento', icon: '🙏' },
-  { id: 'template-plano-semanal-conteudo', nome: 'Template de Plano Semanal de Conteúdo', categoria: 'Organização', objetivo: 'Organização', icon: '📅' },
-  { id: 'template-reels-educativo', nome: 'Template de Reels Educativo', categoria: 'Engajamento', objetivo: 'Engajamento', icon: '🎓' },
-  { id: 'template-conteudo-autoridade', nome: 'Template de Conteúdo de Autoridade', categoria: 'Branding', objetivo: 'Branding', icon: '👑' },
-  { id: 'template-testemunho-visual', nome: 'Template de Testemunho Visual', categoria: 'Prova Social', objetivo: 'Prova social', icon: '💬' },
-  { id: 'template-calendario-postagens', nome: 'Template de Calendário de Postagens', categoria: 'Organização', objetivo: 'Organização', icon: '📅' },
-  { id: 'template-estrategia-lancamento', nome: 'Template de Estratégia de Lançamento', categoria: 'Negócio', objetivo: 'Negócio', icon: '🚀' },
-  { id: 'template-jornada-cliente', nome: 'Template de Jornada do Cliente', categoria: 'Estratégico', objetivo: 'Estratégico', icon: '🗺️' }
+  
+  // DIAGNÓSTICOS ESPECÍFICOS (1)
+  { id: 'template-diagnostico-parasitose', nome: 'Diagnóstico de Parasitose', categoria: 'Diagnóstico', objetivo: 'Diagnóstico específico', icon: '🦠' }
 ]
 
 // Sistema completo de diagnósticos por profissão e ferramenta
@@ -2861,6 +2867,88 @@ const diagnosticosCompletos = {
     }
   },
 
+  // 38. TEMPLATE DE DIAGNÓSTICO DE PARASITOSE
+  'template-diagnostico-parasitose': {
+    nutri: {
+      parasitoseBasica: [
+        '🦠 DIAGNÓSTICO: Você precisa de diagnóstico básico de parasitose para identificar infecções comuns',
+        '🔍 CAUSA RAIZ: Parasitas podem causar deficiências nutricionais e problemas digestivos',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo básico de diagnóstico de parasitose por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de avaliação e tratamento básico de parasitose',
+        '💊 SUPLEMENTAÇÃO: Probióticos + Multivitamínico + Ômega-3 para fortalecer sistema imunológico',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos antiparasitários (alho, cúrcuma, gengibre)'
+      ],
+      parasitoseModerada: [
+        '🦠 DIAGNÓSTICO: Você precisa de diagnóstico moderado de parasitose para casos específicos',
+        '🔍 CAUSA RAIZ: Parasitas específicos requerem protocolos de tratamento direcionados',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo moderado de diagnóstico de parasitose por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de avaliação e tratamento moderado de parasitose',
+        '💊 SUPLEMENTAÇÃO: Probióticos específicos + Suplementos antiparasitários + Imunomoduladores',
+        '🍎 ALIMENTAÇÃO: Foque em protocolo alimentar antiparasitário específico'
+      ],
+      parasitoseAvancada: [
+        '🦠 DIAGNÓSTICO: Você precisa de diagnóstico avançado de parasitose para casos complexos',
+        '🔍 CAUSA RAIZ: Parasitas complexos requerem protocolos avançados de tratamento',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo avançado de diagnóstico de parasitose por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de avaliação e tratamento avançado de parasitose',
+        '💊 SUPLEMENTAÇÃO: Protocolo completo antiparasitário + Nutracêuticos + Imunoterapia',
+        '🍎 ALIMENTAÇÃO: Foque em protocolo alimentar terapêutico antiparasitário'
+      ]
+    },
+    sales: {
+      parasitoseBasica: [
+        '🦠 DIAGNÓSTICO: Você precisa de produtos básicos para tratamento de parasitose',
+        '🔍 CAUSA RAIZ: Produtos antiparasitários básicos são essenciais para saúde digestiva',
+        '⚡ AÇÃO IMEDIATA: Implemente linha básica de produtos antiparasitários por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de vendas de produtos antiparasitários básicos',
+        '💊 SUPLEMENTAÇÃO: Probióticos + Multivitamínico + Ômega-3 para fortalecer sistema imunológico',
+        '🍎 ALIMENTAÇÃO: Foque em produtos alimentares antiparasitários básicos'
+      ],
+      parasitoseModerada: [
+        '🦠 DIAGNÓSTICO: Você precisa de produtos moderados para tratamento específico de parasitose',
+        '🔍 CAUSA RAIZ: Produtos específicos aumentam eficácia do tratamento antiparasitário',
+        '⚡ AÇÃO IMEDIATA: Implemente linha moderada de produtos antiparasitários por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de vendas de produtos antiparasitários moderados',
+        '💊 SUPLEMENTAÇÃO: Probióticos específicos + Suplementos antiparasitários + Imunomoduladores',
+        '🍎 ALIMENTAÇÃO: Foque em produtos alimentares antiparasitários específicos'
+      ],
+      parasitoseAvancada: [
+        '🦠 DIAGNÓSTICO: Você precisa de produtos avançados para tratamento complexo de parasitose',
+        '🔍 CAUSA RAIZ: Produtos avançados oferecem tratamento completo antiparasitário',
+        '⚡ AÇÃO IMEDIATA: Implemente linha avançada de produtos antiparasitários por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de vendas de produtos antiparasitários avançados',
+        '💊 SUPLEMENTAÇÃO: Protocolo completo antiparasitário + Nutracêuticos + Imunoterapia',
+        '🍎 ALIMENTAÇÃO: Foque em produtos alimentares terapêuticos antiparasitários'
+      ]
+    },
+    coach: {
+      parasitoseBasica: [
+        '🦠 DIAGNÓSTICO: Você precisa de protocolo básico de bem-estar para parasitose',
+        '🔍 CAUSA RAIZ: Parasitas afetam bem-estar geral e qualidade de vida',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo básico de bem-estar para parasitose por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de bem-estar e qualidade de vida antiparasitário',
+        '💊 SUPLEMENTAÇÃO: Probióticos + Multivitamínico + Ômega-3 para fortalecer sistema imunológico',
+        '🍎 ALIMENTAÇÃO: Foque em alimentação saudável antiparasitária básica'
+      ],
+      parasitoseModerada: [
+        '🦠 DIAGNÓSTICO: Você precisa de protocolo moderado de bem-estar para parasitose específica',
+        '🔍 CAUSA RAIZ: Parasitas específicos requerem protocolos de bem-estar direcionados',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo moderado de bem-estar para parasitose por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de bem-estar e qualidade de vida antiparasitário moderado',
+        '💊 SUPLEMENTAÇÃO: Probióticos específicos + Suplementos antiparasitários + Imunomoduladores',
+        '🍎 ALIMENTAÇÃO: Foque em alimentação funcional antiparasitária específica'
+      ],
+      parasitoseAvancada: [
+        '🦠 DIAGNÓSTICO: Você precisa de protocolo avançado de bem-estar para parasitose complexa',
+        '🔍 CAUSA RAIZ: Parasitas complexos requerem protocolos avançados de bem-estar',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo avançado de bem-estar para parasitose por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de bem-estar e qualidade de vida antiparasitário avançado',
+        '💊 SUPLEMENTAÇÃO: Protocolo completo antiparasitário + Nutracêuticos + Imunoterapia',
+        '🍎 ALIMENTAÇÃO: Foque em alimentação terapêutica antiparasitária avançada'
+      ]
+    }
+  },
+
   // 42. TEMPLATE DE OPORTUNIDADE
   'template-oportunidade': {
     nutri: {
@@ -3773,62 +3861,80 @@ const diagnosticosCompletos = {
   'template-testemunho-visual': {
     nutri: {
       testemunhoBasico: [
-        '📋 Testemunho básico visual nutricional',
-        '🥗 Depoimento simples sobre alimentação',
-        '💊 Resultado básico com suplementação',
-        '📅 Transformação básica nutricional'
+        '📋 DIAGNÓSTICO: Testemunho visual básico aumenta credibilidade inicial',
+        '🔍 CAUSA RAIZ: Prova social visual é essencial para conversão',
+        '⚡ AÇÃO IMEDIATA: Colete depoimentos em vídeo curtos (30-60s)',
+        '📅 PLANO 7 DIAS: Estratégia de coleta com 5-10 testemunhos visuais',
+        '💊 SUPLEMENTAÇÃO: Use incentivos (desconto/brinde) para coletar depoimentos',
+        '🍎 ALIMENTAÇÃO: Publique testemunhos estrategicamente nas redes sociais'
       ],
       testemunhoModerado: [
-        '📋 Testemunho moderado visual nutricional',
-        '🥗 Depoimento específico sobre alimentação',
-        '💊 Resultado direcionado com suplementação',
-        '📅 Transformação moderada nutricional'
+        '📋 DIAGNÓSTICO: Testemunho visual moderado com resultados específicos',
+        '🔍 CAUSA RAIZ: Depoimentos detalhados aumentam conversão em 160%',
+        '⚡ AÇÃO IMEDIATA: Crie roteiro para testemunhos estruturados',
+        '📅 PLANO 7 DIAS: Campanha de coleta com antes/depois visual',
+        '💊 SUPLEMENTAÇÃO: Ofereça reconhecimento público como incentivo',
+        '🍎 ALIMENTAÇÃO: Use testemunhos em landing pages e e-mails'
       ],
       testemunhoAvancado: [
-        '📋 Testemunho avançado visual nutricional',
-        '🥗 Depoimento complexo sobre alimentação',
-        '💊 Resultado avançado com suplementação',
-        '📅 Transformação avançada nutricional'
+        '📋 DIAGNÓSTICO: Testemunho visual avançado com jornada completa',
+        '🔍 CAUSA RAIZ: História completa do cliente gera conexão emocional',
+        '⚡ AÇÃO IMEDIATA: Produza vídeos profissionais de transformação',
+        '📅 PLANO 7 DIAS: Sistema completo de coleta e produção visual',
+        '💊 SUPLEMENTAÇÃO: Crie banco de testemunhos categorizados',
+        '🍎 ALIMENTAÇÃO: Use testemunhos em todos os canais de marketing'
       ]
     },
     sales: {
       testemunhoBasico: [
-        '💊 Testemunho básico visual de produtos',
-        '🥗 Depoimento simples sobre suplementos',
-        '💪 Resultado básico com produtos',
-        '📞 Transformação básica'
+        '📋 DIAGNÓSTICO: Testemunho visual básico de produto aumenta vendas',
+        '🔍 CAUSA RAIZ: Clientes confiam mais em depoimentos reais',
+        '⚡ AÇÃO IMEDIATA: Colete vídeos curtos de clientes satisfeitos',
+        '📅 PLANO 7 DIAS: Campanha de coleta com 5-10 testemunhos',
+        '💊 SUPLEMENTAÇÃO: Ofereça desconto na próxima compra',
+        '🍎 ALIMENTAÇÃO: Publique testemunhos em materiais de venda'
       ],
       testemunhoModerado: [
-        '💊 Testemunho moderado visual de produtos',
-        '🥗 Depoimento específico sobre suplementos',
-        '💪 Resultado direcionado com produtos',
-        '📞 Transformação moderada'
+        '📋 DIAGNÓSTICO: Testemunho visual moderado com resultados claros',
+        '🔍 CAUSA RAIZ: Antes/depois aumenta percepção de valor',
+        '⚡ AÇÃO IMEDIATA: Crie template de testemunho estruturado',
+        '📅 PLANO 7 DIAS: Sistema de coleta com incentivos',
+        '💊 SUPLEMENTAÇÃO: Ofereça produto gratuito por testemunho',
+        '🍎 ALIMENTAÇÃO: Use em apresentações e catálogos'
       ],
       testemunhoAvancado: [
-        '💊 Testemunho avançado visual de produtos',
-        '🥗 Depoimento complexo sobre suplementos',
-        '💪 Resultado avançado com produtos',
-        '📞 Transformação avançada'
+        '📋 DIAGNÓSTICO: Testemunho visual avançado com jornada completa',
+        '🔍 CAUSA RAIZ: História completa gera confiança máxima',
+        '⚡ AÇÃO IMEDIATA: Produza vídeos profissionais de transformação',
+        '📅 PLANO 7 DIAS: Banco completo de testemunhos categorizados',
+        '💊 SUPLEMENTAÇÃO: Crie programa VIP de embaixadores',
+        '🍎 ALIMENTAÇÃO: Use em todos os materiais de marketing'
       ]
     },
     coach: {
       testemunhoBasico: [
-        '🧘‍♀️ Testemunho básico visual de bem-estar',
-        '💪 Depoimento simples sobre exercícios',
-        '🍎 Resultado básico com coaching',
-        '📅 Transformação básica'
+        '📋 DIAGNÓSTICO: Testemunho visual básico inspira novos alunos',
+        '🔍 CAUSA RAIZ: Ver resultados reais motiva ação imediata',
+        '⚡ AÇÃO IMEDIATA: Colete vídeos curtos de transformação',
+        '📅 PLANO 7 DIAS: Estratégia de coleta com 5-10 depoimentos',
+        '💊 SUPLEMENTAÇÃO: Ofereça aula gratuita por testemunho',
+        '🍎 ALIMENTAÇÃO: Publique nas redes sociais estrategicamente'
       ],
       testemunhoModerado: [
-        '🧘‍♀️ Testemunho moderado visual de bem-estar',
-        '💪 Depoimento específico sobre exercícios',
-        '🍎 Resultado direcionado com coaching',
-        '📅 Transformação moderada'
+        '📋 DIAGNÓSTICO: Testemunho visual moderado com jornada emocional',
+        '🔍 CAUSA RAIZ: História pessoal gera identificação',
+        '⚡ AÇÃO IMEDIATA: Crie roteiro de testemunho estruturado',
+        '📅 PLANO 7 DIAS: Campanha de coleta com antes/depois',
+        '💊 SUPLEMENTAÇÃO: Ofereça desconto em programas',
+        '🍎 ALIMENTAÇÃO: Use em landing pages e e-mails'
       ],
       testemunhoAvancado: [
-        '🧘‍♀️ Testemunho avançado visual de bem-estar',
-        '💪 Depoimento complexo sobre exercícios',
-        '🍎 Resultado avançado com coaching',
-        '📅 Transformação avançada'
+        '📋 DIAGNÓSTICO: Testemunho visual avançado com transformação completa',
+        '🔍 CAUSA RAIZ: Jornada completa inspira e converte',
+        '⚡ AÇÃO IMEDIATA: Produza documentários de transformação',
+        '📅 PLANO 7 DIAS: Sistema completo de coleta e produção',
+        '💊 SUPLEMENTAÇÃO: Crie programa de embaixadores',
+        '🍎 ALIMENTAÇÃO: Use em todos os canais de marketing'
       ]
     }
   },
@@ -3901,62 +4007,80 @@ const diagnosticosCompletos = {
   'template-estrategia-lancamento': {
     nutri: {
       lancamentoBasico: [
-        '📋 Estratégia básica de lançamento nutricional',
-        '🥗 Lançamento simples de produtos',
-        '💊 Estratégia básica de suplementação',
-        '📅 Plano básico de lançamento'
+        '📋 DIAGNÓSTICO: Estratégia básica de lançamento aumenta vendas iniciais',
+        '🔍 CAUSA RAIZ: Lançamento estruturado cria buzz e urgência',
+        '⚡ AÇÃO IMEDIATA: Defina data, oferta e canais de divulgação',
+        '📅 PLANO 7 DIAS: Pré-lançamento com aquecimento de audiência',
+        '💊 SUPLEMENTAÇÃO: Use desconto por tempo limitado (20-30%)',
+        '🍎 ALIMENTAÇÃO: Divulgue em e-mail e redes sociais'
       ],
       lancamentoModerado: [
-        '📋 Estratégia moderada de lançamento nutricional',
-        '🥗 Lançamento específico de produtos',
-        '💊 Estratégia direcionada de suplementação',
-        '📅 Plano moderado de lançamento'
+        '📋 DIAGNÓSTICO: Estratégia moderada com funil de pré-lançamento',
+        '🔍 CAUSA RAIZ: Aquecimento prévio aumenta conversão em 200%',
+        '⚡ AÇÃO IMEDIATA: Crie sequência de 3-5 e-mails de aquecimento',
+        '📅 PLANO 7 DIAS: Funil completo: teaser → aquecimento → lançamento',
+        '💊 SUPLEMENTAÇÃO: Use bônus exclusivos + garantia estendida',
+        '🍎 ALIMENTAÇÃO: Use múltiplos canais (e-mail, redes, influenciadores)'
       ],
       lancamentoAvancado: [
-        '📋 Estratégia avançada de lançamento nutricional',
-        '🥗 Lançamento complexo de produtos',
-        '💊 Estratégia avançada de suplementação',
-        '📅 Plano avançado de lançamento'
+        '📋 DIAGNÓSTICO: Estratégia avançada com lançamento orquestrado',
+        '🔍 CAUSA RAIZ: Lançamento bem planejado aumenta vendas em 300%',
+        '⚡ AÇÃO IMEDIATA: Crie cronograma completo de 21 dias',
+        '📅 PLANO 7 DIAS: Sistema completo: pré-pré → pré → lançamento → pós',
+        '💊 SUPLEMENTAÇÃO: Use escassez real + prova social + urgência',
+        '🍎 ALIMENTAÇÃO: Orquestre todos os canais + afiliados + mídia paga'
       ]
     },
     sales: {
       lancamentoBasico: [
-        '💊 Estratégia básica de lançamento de produtos',
-        '🥗 Lançamento simples de suplementos',
-        '💪 Estratégia básica de produtos',
-        '📞 Plano básico de lançamento'
+        '📋 DIAGNÓSTICO: Lançamento básico de produto com ofertas atrativas',
+        '🔍 CAUSA RAIZ: Oferta limitada cria urgência de compra',
+        '⚡ AÇÃO IMEDIATA: Defina oferta especial de lançamento',
+        '📅 PLANO 7 DIAS: Campanha de lançamento com desconto',
+        '💊 SUPLEMENTAÇÃO: Use kits promocionais e brindes',
+        '🍎 ALIMENTAÇÃO: Divulgue para base de clientes'
       ],
       lancamentoModerado: [
-        '💊 Estratégia moderada de lançamento de produtos',
-        '🥗 Lançamento específico de suplementos',
-        '💪 Estratégia direcionada de produtos',
-        '📞 Plano moderado de lançamento'
+        '📋 DIAGNÓSTICO: Lançamento moderado com estratégia de pré-venda',
+        '🔍 CAUSA RAIZ: Pré-venda valida demanda e gera caixa',
+        '⚡ AÇÃO IMEDIATA: Crie oferta de pré-venda exclusiva',
+        '📅 PLANO 7 DIAS: Funil de pré-venda → lançamento oficial',
+        '💊 SUPLEMENTAÇÃO: Use desconto progressivo + bônus',
+        '🍎 ALIMENTAÇÃO: Use WhatsApp + redes + e-mail marketing'
       ],
       lancamentoAvancado: [
-        '💊 Estratégia avançada de lançamento de produtos',
-        '🥗 Lançamento complexo de suplementos',
-        '💪 Estratégia avançada de produtos',
-        '📞 Plano avançado de lançamento'
+        '📋 DIAGNÓSTICO: Lançamento avançado com sistema completo',
+        '🔍 CAUSA RAIZ: Lançamento profissional maximiza resultados',
+        '⚡ AÇÃO IMEDIATA: Monte equipe e cronograma detalhado',
+        '📅 PLANO 7 DIAS: Sistema completo com múltiplas fases',
+        '💊 SUPLEMENTAÇÃO: Use escassez + prova social + garantia',
+        '🍎 ALIMENTAÇÃO: Campanha integrada em todos os canais'
       ]
     },
     coach: {
       lancamentoBasico: [
-        '🧘‍♀️ Estratégia básica de lançamento de bem-estar',
-        '💪 Lançamento simples de programas',
-        '🍎 Estratégia básica de coaching',
-        '📅 Plano básico de lançamento'
+        '📋 DIAGNÓSTICO: Lançamento básico de programa inspira inscrições',
+        '🔍 CAUSA RAIZ: Oferta limitada motiva ação imediata',
+        '⚡ AÇÃO IMEDIATA: Defina oferta e benefícios do programa',
+        '📅 PLANO 7 DIAS: Campanha de lançamento com depoimentos',
+        '💊 SUPLEMENTAÇÃO: Use desconto early bird',
+        '🍎 ALIMENTAÇÃO: Divulgue nas redes com conteúdo de valor'
       ],
       lancamentoModerado: [
-        '🧘‍♀️ Estratégia moderada de lançamento de bem-estar',
-        '💪 Lançamento específico de programas',
-        '🍎 Estratégia direcionada de coaching',
-        '📅 Plano moderado de lançamento'
+        '📋 DIAGNÓSTICO: Lançamento moderado com webinar de aquecimento',
+        '🔍 CAUSA RAIZ: Webinar gratuito aquece e converte',
+        '⚡ AÇÃO IMEDIATA: Crie webinar gratuito com oferta no final',
+        '📅 PLANO 7 DIAS: Sequência: convite → webinar → oferta → carrinho',
+        '💊 SUPLEMENTAÇÃO: Use bônus exclusivos + garantia',
+        '🍎 ALIMENTAÇÃO: Use e-mail + redes + anúncios'
       ],
       lancamentoAvancado: [
-        '🧘‍♀️ Estratégia avançada de lançamento de bem-estar',
-        '💪 Lançamento complexo de programas',
-        '🍎 Estratégia avançada de coaching',
-        '📅 Plano avançado de lançamento'
+        '📋 DIAGNÓSTICO: Lançamento avançado com funil completo',
+        '🔍 CAUSA RAIZ: Funil bem construído maximiza conversão',
+        '⚡ AÇÃO IMEDIATA: Monte funil completo de lançamento',
+        '📅 PLANO 7 DIAS: Sistema: lead magnet → série → webinar → oferta',
+        '💊 SUPLEMENTAÇÃO: Use escassez real + prova social',
+        '🍎 ALIMENTAÇÃO: Campanha integrada multicanal'
       ]
     }
   },
@@ -3965,62 +4089,80 @@ const diagnosticosCompletos = {
   'template-jornada-cliente': {
     nutri: {
       jornadaBasica: [
-        '📋 Jornada básica do cliente nutricional',
-        '🥗 Experiência simples de alimentação',
-        '💊 Processo básico de suplementação',
-        '📅 Acompanhamento básico nutricional'
+        '📋 DIAGNÓSTICO: Jornada básica mapeada identifica pontos de melhoria',
+        '🔍 CAUSA RAIZ: Entender jornada aumenta satisfação em 100%',
+        '⚡ AÇÃO IMEDIATA: Mapeie touchpoints principais do cliente',
+        '📅 PLANO 7 DIAS: Identifique 3-5 pontos críticos da jornada',
+        '💊 SUPLEMENTAÇÃO: Documente experiência atual do cliente',
+        '🍎 ALIMENTAÇÃO: Implemente melhorias nos pontos críticos'
       ],
       jornadaModerada: [
-        '📋 Jornada moderada do cliente nutricional',
-        '🥗 Experiência específica de alimentação',
-        '💊 Processo direcionado de suplementação',
-        '📅 Acompanhamento moderado nutricional'
+        '📋 DIAGNÓSTICO: Jornada moderada com análise de métricas',
+        '🔍 CAUSA RAIZ: Métricas mostram onde perder/ganhar clientes',
+        '⚡ AÇÃO IMEDIATA: Defina KPIs para cada etapa da jornada',
+        '📅 PLANO 7 DIAS: Mapeamento completo com métricas',
+        '💊 SUPLEMENTAÇÃO: Implemente rastreamento de cada touchpoint',
+        '🍎 ALIMENTAÇÃO: Otimize etapas com maior fricção'
       ],
       jornadaAvancada: [
-        '📋 Jornada avançada do cliente nutricional',
-        '🥗 Experiência complexa de alimentação',
-        '💊 Processo avançado de suplementação',
-        '📅 Acompanhamento avançado nutricional'
+        '📋 DIAGNÓSTICO: Jornada avançada com otimização contínua',
+        '🔍 CAUSA RAIZ: Jornada otimizada aumenta LTV em 180%',
+        '⚡ AÇÃO IMEDIATA: Monte dashboard de jornada do cliente',
+        '📅 PLANO 7 DIAS: Sistema completo com automações',
+        '💊 SUPLEMENTAÇÃO: Implemente CRM com jornada mapeada',
+        '🍎 ALIMENTAÇÃO: Otimize continuamente baseado em dados'
       ]
     },
     sales: {
       jornadaBasica: [
-        '💊 Jornada básica do cliente de produtos',
-        '🥗 Experiência simples de suplementos',
-        '💪 Processo básico de produtos',
-        '📞 Acompanhamento básico'
+        '📋 DIAGNÓSTICO: Jornada básica do cliente aumenta conversão',
+        '🔍 CAUSA RAIZ: Entender jornada de compra otimiza vendas',
+        '⚡ AÇÃO IMEDIATA: Mapeie etapas: descoberta → compra → pós-venda',
+        '📅 PLANO 7 DIAS: Identifique obstáculos em cada etapa',
+        '💊 SUPLEMENTAÇÃO: Documente objeções e soluções',
+        '🍎 ALIMENTAÇÃO: Melhore pontos com maior abandono'
       ],
       jornadaModerada: [
-        '💊 Jornada moderada do cliente de produtos',
-        '🥗 Experiência específica de suplementos',
-        '💪 Processo direcionado de produtos',
-        '📞 Acompanhamento moderado'
+        '📋 DIAGNÓSTICO: Jornada moderada com funil de vendas otimizado',
+        '🔍 CAUSA RAIZ: Funil bem mapeado aumenta conversão em 150%',
+        '⚡ AÇÃO IMEDIATA: Crie funil completo com métricas',
+        '📅 PLANO 7 DIAS: Mapeie jornada com taxas de conversão',
+        '💊 SUPLEMENTAÇÃO: Implemente recuperação de carrinho',
+        '🍎 ALIMENTAÇÃO: Otimize cada etapa do funil'
       ],
       jornadaAvancada: [
-        '💊 Jornada avançada do cliente de produtos',
-        '🥗 Experiência complexa de suplementos',
-        '💪 Processo avançado de produtos',
-        '📞 Acompanhamento avançado'
+        '📋 DIAGNÓSTICO: Jornada avançada com automação completa',
+        '🔍 CAUSA RAIZ: Automação de jornada maximiza resultados',
+        '⚡ AÇÃO IMEDIATA: Monte sistema completo de automação',
+        '📅 PLANO 7 DIAS: Jornada automatizada com segmentação',
+        '💊 SUPLEMENTAÇÃO: Use CRM + automação de marketing',
+        '🍎 ALIMENTAÇÃO: Personalize jornada para cada perfil'
       ]
     },
     coach: {
       jornadaBasica: [
-        '🧘‍♀️ Jornada básica do cliente de bem-estar',
-        '💪 Experiência simples de exercícios',
-        '🍎 Processo básico de coaching',
-        '📅 Acompanhamento básico'
+        '📋 DIAGNÓSTICO: Jornada básica mapeada melhora experiência',
+        '🔍 CAUSA RAIZ: Cliente satisfeito se torna promotor',
+        '⚡ AÇÃO IMEDIATA: Mapeie jornada: interesse → inscrição → programa',
+        '📅 PLANO 7 DIAS: Identifique momentos de encantamento',
+        '💊 SUPLEMENTAÇÃO: Documente feedback em cada etapa',
+        '🍎 ALIMENTAÇÃO: Melhore experiência nos pontos críticos'
       ],
       jornadaModerada: [
-        '🧘‍♀️ Jornada moderada do cliente de bem-estar',
-        '💪 Experiência específica de exercícios',
-        '🍎 Processo direcionado de coaching',
-        '📅 Acompanhamento moderado'
+        '📋 DIAGNÓSTICO: Jornada moderada com touchpoints emocionais',
+        '🔍 CAUSA RAIZ: Conexão emocional aumenta retenção',
+        '⚡ AÇÃO IMEDIATA: Mapeie momentos emocionais da jornada',
+        '📅 PLANO 7 DIAS: Jornada com pontos de conexão',
+        '💊 SUPLEMENTAÇÃO: Crie rituais em cada etapa',
+        '🍎 ALIMENTAÇÃO: Personalize experiência emocional'
       ],
       jornadaAvancada: [
-        '🧘‍♀️ Jornada avançada do cliente de bem-estar',
-        '💪 Experiência complexa de exercícios',
-        '🍎 Processo avançado de coaching',
-        '📅 Acompanhamento avançado'
+        '📋 DIAGNÓSTICO: Jornada avançada com experiência transformadora',
+        '🔍 CAUSA RAIZ: Jornada memorável cria evangelizadores',
+        '⚡ AÇÃO IMEDIATA: Monte jornada transformadora completa',
+        '📅 PLANO 7 DIAS: Sistema de experiência extraordinária',
+        '💊 SUPLEMENTAÇÃO: Crie momentos WOW em cada etapa',
+        '🍎 ALIMENTAÇÃO: Construa jornada que transforma vidas'
       ]
     }
   },
@@ -4923,6 +5065,11 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'ganho-moderado', label: 'Ganho Moderado', range: 'Simulação específica', color: 'green' },
       { id: 'ganho-avancado', label: 'Ganho Avançado', range: 'Simulação complexa', color: 'yellow' }
     ],
+    'template-diagnostico-parasitose': [
+      { id: 'parasitose-basica', label: 'Parasitose Básica', range: 'Diagnóstico simples', color: 'blue' },
+      { id: 'parasitose-moderada', label: 'Parasitose Moderada', range: 'Diagnóstico específico', color: 'green' },
+      { id: 'parasitose-avancada', label: 'Parasitose Avançada', range: 'Diagnóstico complexo', color: 'red' }
+    ],
     'template-oportunidade': [
       { id: 'oportunidade-basica', label: 'Oportunidade Básica', range: 'Oportunidade simples', color: 'blue' },
       { id: 'oportunidade-moderada', label: 'Oportunidade Moderada', range: 'Oportunidade específica', color: 'green' },
@@ -5033,11 +5180,11 @@ export default function AdminDiagnosticos() {
   // Filtrar ferramentas por profissão
   const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
     if (profissaoSelecionada === 'nutri') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico'].includes(ferramenta.categoria)
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Viralização'].includes(ferramenta.categoria)
     } else if (profissaoSelecionada === 'sales') {
       return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Recrutamento', 'Duplicação', 'Gestão', 'Fidelização', 'Retenção', 'Relacionamento'].includes(ferramenta.categoria)
     } else if (profissaoSelecionada === 'coach') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico'].includes(ferramenta.categoria)
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Viralização'].includes(ferramenta.categoria)
     }
     return true
   })
@@ -5076,10 +5223,10 @@ export default function AdminDiagnosticos() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              📊 Área Administrativa - Diagnósticos
+              🎯 YLADA - 38 Ferramentas de Coleta de Leads
             </h1>
             <p className="text-gray-600">
-              Análise completa de ferramentas, fluxos e diagnósticos profissionais
+              Ferramentas focadas em gerar conexão real entre profissionais e clientes
             </p>
           </div>
 
@@ -9756,6 +9903,89 @@ export default function AdminDiagnosticos() {
                     <div>
                       <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
                       <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Diagnóstico de Parasitose */}
+            {ferramentaSelecionada === 'template-diagnostico-parasitose' && (
+              <div className="mt-8 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🦠 CTAs Pré-sugeridos - Template de Diagnóstico de Parasitose
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-red-500">
+                    <h4 className="font-semibold text-red-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-xs text-red-600 font-semibold mb-1">PARASITOSE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Identifique e trate parasitoses comuns através da nutrição."</p>
+                        <p className="text-xs text-red-600 mt-1">🦠 Quero diagnóstico básico</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-xs text-red-600 font-semibold mb-1">PARASITOSE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Diagnóstico específico de parasitoses com protocolos direcionados."</p>
+                        <p className="text-xs text-red-600 mt-1">🦠 Quero diagnóstico moderado</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded-lg">
+                        <p className="text-xs text-red-600 font-semibold mb-1">PARASITOSE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Protocolo avançado para parasitoses complexas."</p>
+                        <p className="text-xs text-red-600 mt-1">🦠 Quero diagnóstico avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Vendedor */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-orange-500">
+                    <h4 className="font-semibold text-orange-900 mb-3 flex items-center">
+                      💼 VENDEDOR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <p className="text-xs text-orange-600 font-semibold mb-1">PARASITOSE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Produtos básicos para tratamento de parasitoses comuns."</p>
+                        <p className="text-xs text-orange-600 mt-1">🦠 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <p className="text-xs text-orange-600 font-semibold mb-1">PARASITOSE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Produtos específicos para parasitoses direcionadas."</p>
+                        <p className="text-xs text-orange-600 mt-1">🦠 Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <p className="text-xs text-orange-600 font-semibold mb-1">PARASITOSE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Protocolo completo para parasitoses complexas."</p>
+                        <p className="text-xs text-orange-600 mt-1">🦠 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-yellow-500">
+                    <h4 className="font-semibold text-yellow-900 mb-3 flex items-center">
+                      🏃‍♀️ COACH
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <p className="text-xs text-yellow-600 font-semibold mb-1">PARASITOSE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Protocolo básico de bem-estar para parasitoses."</p>
+                        <p className="text-xs text-yellow-600 mt-1">🦠 Quero protocolo básico</p>
+                      </div>
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <p className="text-xs text-yellow-600 font-semibold mb-1">PARASITOSE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Protocolo moderado para parasitoses específicas."</p>
+                        <p className="text-xs text-yellow-600 mt-1">🦠 Quero protocolo moderado</p>
+                      </div>
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <p className="text-xs text-yellow-600 font-semibold mb-1">PARASITOSE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Protocolo avançado para parasitoses complexas."</p>
+                        <p className="text-xs text-yellow-600 mt-1">🦠 Quero protocolo avançado</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -16352,6 +16582,155 @@ export default function AdminDiagnosticos() {
               </div>
             )}
 
+            {/* Preview Template de Diagnóstico de Parasitose */}
+            {ferramentaSelecionada === 'template-diagnostico-parasitose' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🦠 Preview do Template de Diagnóstico de Parasitose - "Identifique e trate parasitoses"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🦠 Identifique e Trate Parasitoses</h4>
+                  <p className="text-gray-700 mb-3">Diagnóstico completo de parasitoses que podem afetar sua saúde digestiva e bem-estar geral. Identifique sintomas, causas e tratamentos específicos para cada tipo de parasitose.</p>
+                  <p className="text-red-600 font-semibold">🦠 Diagnóstico que pode identificar parasitoses em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🦠 1. Quais sintomas você apresenta?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="sintomas-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Problemas digestivos (diarreia, constipação)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="sintomas-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Fadiga e cansaço excessivo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="sintomas-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Perda de peso inexplicável</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🦠 2. Qual sua exposição a riscos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="exposicao-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Alimentação inadequada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="exposicao-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Contato com animais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="exposicao-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Viagens recentes</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">🦠 3. Qual seu histórico de saúde?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="historico-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Sistema imunológico forte</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="historico-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Sistema imunológico moderado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="historico-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Sistema imunológico comprometido</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🦠 4. Qual sua idade?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="idade-parasitose" className="mr-3" />
+                        <span className="text-gray-700">18-30 anos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="idade-parasitose" className="mr-3" />
+                        <span className="text-gray-700">31-50 anos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="idade-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Acima de 50 anos</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🦠 5. Qual seu estilo de vida?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="estilo-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Sedentário</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="estilo-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Moderadamente ativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="estilo-parasitose" className="mr-3" />
+                        <span className="text-gray-700">Muito ativo</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="mt-8 bg-gradient-to-r from-red-100 to-orange-100 p-6 rounded-lg">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3">🦠 Seu Diagnóstico de Parasitose</h4>
+                  <div className="bg-white p-4 rounded-lg border-2 border-red-200">
+                    <p className="text-lg text-gray-800 mb-2"><strong>Risco Moderado de Parasitose</strong></p>
+                    <p className="text-sm text-gray-600 mb-3">Baseado nas suas respostas, você apresenta sinais que podem indicar presença de parasitas. Recomendamos avaliação específica e protocolo de tratamento.</p>
+                    <p className="text-sm text-red-600 font-semibold">🦠 Protocolo de 7 dias para diagnóstico e tratamento</p>
+                  </div>
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-red-600 mb-1">65%</div>
+                      <div className="text-xs text-gray-600">Probabilidade de parasitose</div>
+                    </div>
+                    <div className="bg-white p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-orange-600 mb-1">7 dias</div>
+                      <div className="text-xs text-gray-600">Para diagnóstico completo</div>
+                    </div>
+                    <div className="bg-white p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-yellow-600 mb-1">90%</div>
+                      <div className="text-xs text-gray-600">Eficácia do tratamento</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informações Importantes */}
+                <div className="mt-6 bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2">📊 Informações Importantes</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• Parasitoses afetam 2 bilhões de pessoas mundialmente</li>
+                    <li>• Diagnóstico precoce aumenta eficácia do tratamento em 90%</li>
+                    <li>• Protocolos nutricionais específicos fortalecem sistema imunológico</li>
+                    <li>• Tratamento adequado melhora qualidade de vida significativamente</li>
+                  </ul>
+                  <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Prevenção e saúde</p>
+                </div>
+              </div>
+            )}
+
             {/* Preview Template de Oportunidade */}
             {ferramentaSelecionada === 'template-oportunidade' && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -16886,6 +17265,2736 @@ export default function AdminDiagnosticos() {
                     <p>• <strong>Duração:</strong> Script evolui com novos resultados e feedback</p>
                   </div>
                   <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Onboarding de Parceiro */}
+            {ferramentaSelecionada === 'template-onboarding-parceiro' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  👥 Preview do Template de Onboarding de Parceiro - "Recrute parceiros com onboarding estruturado"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">👥 Recrute Parceiros com Onboarding Estruturado</h4>
+                  <p className="text-gray-700 mb-3">Crie um processo de onboarding completo que transforma interessados em parceiros engajados e produtivos.</p>
+                  <p className="text-blue-600 font-semibold">👥 Onboarding estruturado que pode aumentar retenção de parceiros em 80%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">👥 1. Que tipo de parceiro você quer recrutar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Distribuidor</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Revendedor</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Afiliado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Consultor</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Identificação de perfil</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">👥 2. Qual nível de experiência?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="nivel-experiencia" className="mr-3" />
+                        <span className="text-gray-700">Iniciante</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="nivel-experiencia" className="mr-3" />
+                        <span className="text-gray-700">Intermediário</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="nivel-experiencia" className="mr-3" />
+                        <span className="text-gray-700">Avançado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="nivel-experiencia" className="mr-3" />
+                        <span className="text-gray-700">Expert</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Personalização de conteúdo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">👥 3. Que benefício você oferece?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="beneficio-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Comissão alta</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="beneficio-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Suporte completo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="beneficio-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Produto de qualidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="beneficio-parceiro" className="mr-3" />
+                        <span className="text-gray-700">Treinamento gratuito</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Aspiração de ganho</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">👥 4. Que duração de onboarding?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="duracao-onboarding" className="mr-3" />
+                        <span className="text-gray-700">1 semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="duracao-onboarding" className="mr-3" />
+                        <span className="text-gray-700">2 semanas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="duracao-onboarding" className="mr-3" />
+                        <span className="text-gray-700">1 mês</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="duracao-onboarding" className="mr-3" />
+                        <span className="text-gray-700">3 meses</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Compromisso gradual</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-slate-900 mb-3">👥 5. Que tipo de suporte você oferece?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-suporte" className="mr-3" />
+                        <span className="text-gray-700">Material de apoio</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-suporte" className="mr-3" />
+                        <span className="text-gray-700">Treinamento online</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-suporte" className="mr-3" />
+                        <span className="text-gray-700">Mentoria individual</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-suporte" className="mr-3" />
+                        <span className="text-gray-700">Suporte técnico</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Segurança e apoio</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">👥 Resultado do Template de Onboarding de Parceiro</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">Onboarding Completo</div>
+                      <div className="text-lg font-semibold text-indigo-600">Estrutura Profissional</div>
+                      <div className="text-sm text-gray-600">Template de onboarding estruturado personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">7-14</div>
+                        <div className="text-sm text-gray-600">Dias de duração</div>
+                      </div>
+                      <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                        <div className="text-2xl font-bold text-indigo-600">5-8</div>
+                        <div className="text-sm text-gray-600">Etapas</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">80%</div>
+                        <div className="text-sm text-gray-600">Taxa de retenção</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Onboarding completo com foco em capacitação e engajamento</p>
+                      <p>• <strong>Prazo:</strong> 3-5 dias para criar estrutura completa</p>
+                      <p>• <strong>Investimento:</strong> 4-6 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 80% na retenção de parceiros</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Onboarding Estruturado:</strong> Tipo de parceiro, nível de experiência, benefícios, duração, suporte</p>
+                    <p>• <strong>Análise:</strong> Critérios de onboarding eficaz, evidências de retenção, feedback de parceiros</p>
+                    <p>• <strong>Personalização:</strong> Estrutura específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Onboarding evolui com novos produtos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Plano de Ação da Equipe */}
+            {ferramentaSelecionada === 'template-plano-acao-equipe' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📋 Preview do Template de Plano de Ação da Equipe - "Gerencie equipes com planos estruturados"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📋 Gerencie Equipes com Planos Estruturados</h4>
+                  <p className="text-gray-700 mb-3">Crie planos de ação detalhados que organizam tarefas, responsabilidades e metas da sua equipe de forma eficiente.</p>
+                  <p className="text-orange-600 font-semibold">📋 Planos estruturados que podem aumentar produtividade da equipe em 70%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">📋 1. Que tipo de plano você quer criar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-plano" className="mr-3" />
+                        <span className="text-gray-700">Plano semanal</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-plano" className="mr-3" />
+                        <span className="text-gray-700">Plano mensal</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-plano" className="mr-3" />
+                        <span className="text-gray-700">Plano trimestral</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-plano" className="mr-3" />
+                        <span className="text-gray-700">Plano anual</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Identificação de período</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">📋 2. Qual tamanho da sua equipe?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tamanho-equipe" className="mr-3" />
+                        <span className="text-gray-700">2-5 pessoas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tamanho-equipe" className="mr-3" />
+                        <span className="text-gray-700">6-10 pessoas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tamanho-equipe" className="mr-3" />
+                        <span className="text-gray-700">11-20 pessoas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tamanho-equipe" className="mr-3" />
+                        <span className="text-gray-700">20+ pessoas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Escala de complexidade</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">📋 3. Que área você quer focar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="area-foco" className="mr-3" />
+                        <span className="text-gray-700">Vendas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="area-foco" className="mr-3" />
+                        <span className="text-gray-700">Marketing</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="area-foco" className="mr-3" />
+                        <span className="text-gray-700">Operações</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="area-foco" className="mr-3" />
+                        <span className="text-gray-700">Desenvolvimento</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Especialização</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-rose-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-rose-900 mb-3">📋 4. Que tipo de metas você tem?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="tipo-metas" className="mr-3" />
+                        <span className="text-gray-700">Metas de vendas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="tipo-metas" className="mr-3" />
+                        <span className="text-gray-700">Metas de crescimento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="tipo-metas" className="mr-3" />
+                        <span className="text-gray-700">Metas de qualidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="tipo-metas" className="mr-3" />
+                        <span className="text-gray-700">Metas de eficiência</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-rose-600 mt-2">🧠 Gatilho: Objetivo específico</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">📋 5. Que nível de detalhamento você precisa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="nivel-detalhamento" className="mr-3" />
+                        <span className="text-gray-700">Básico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="nivel-detalhamento" className="mr-3" />
+                        <span className="text-gray-700">Moderado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="nivel-detalhamento" className="mr-3" />
+                        <span className="text-gray-700">Detalhado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="nivel-detalhamento" className="mr-3" />
+                        <span className="text-gray-700">Completo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Profundidade de análise</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">📋 Resultado do Template de Plano de Ação da Equipe</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-orange-600 mb-2">Plano Estruturado</div>
+                      <div className="text-lg font-semibold text-red-600">Gestão Profissional</div>
+                      <div className="text-sm text-gray-600">Template de plano de ação estruturado personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">5-10</div>
+                        <div className="text-sm text-gray-600">Tarefas principais</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">3-7</div>
+                        <div className="text-sm text-gray-600">Responsáveis</div>
+                      </div>
+                      <div className="text-center p-3 bg-pink-50 rounded-lg">
+                        <div className="text-2xl font-bold text-pink-600">70%</div>
+                        <div className="text-sm text-gray-600">Aumento produtividade</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Plano detalhado com foco em organização e produtividade</p>
+                      <p>• <strong>Prazo:</strong> 2-4 dias para criar plano completo</p>
+                      <p>• <strong>Investimento:</strong> 3-5 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 70% na produtividade da equipe</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-orange-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Plano de Ação:</strong> Tipo de plano, tamanho da equipe, área de foco, metas, detalhamento</p>
+                    <p>• <strong>Análise:</strong> Critérios de gestão eficaz, evidências de produtividade, feedback da equipe</p>
+                    <p>• <strong>Personalização:</strong> Plano específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Plano evolui com novos objetivos e resultados</p>
+                  </div>
+                  <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Feedback de Cliente */}
+            {ferramentaSelecionada === 'template-feedback-cliente' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  ⭐ Preview do Template de Feedback de Cliente - "Colete feedback e melhore seus serviços"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">⭐ Colete Feedback e Melhore seus Serviços</h4>
+                  <p className="text-gray-700 mb-3">Crie sistemas de feedback eficazes que coletam informações valiosas dos clientes para melhorar continuamente seus serviços.</p>
+                  <p className="text-yellow-600 font-semibold">⭐ Sistema de feedback que pode aumentar satisfação do cliente em 85%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">⭐ 1. Que tipo de feedback você quer coletar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Satisfação geral</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Qualidade do produto</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Atendimento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Experiência completa</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Identificação de foco</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">⭐ 2. Quando você quer coletar o feedback?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="momento-feedback" className="mr-3" />
+                        <span className="text-gray-700">Imediatamente após compra</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="momento-feedback" className="mr-3" />
+                        <span className="text-gray-700">Após 7 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="momento-feedback" className="mr-3" />
+                        <span className="text-gray-700">Após 30 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="momento-feedback" className="mr-3" />
+                        <span className="text-gray-700">Periódico</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Timing estratégico</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">⭐ 3. Que formato você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="formato-feedback" className="mr-3" />
+                        <span className="text-gray-700">Questionário online</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="formato-feedback" className="mr-3" />
+                        <span className="text-gray-700">Avaliação por estrelas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="formato-feedback" className="mr-3" />
+                        <span className="text-gray-700">Depoimento em vídeo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="formato-feedback" className="mr-3" />
+                        <span className="text-gray-700">Entrevista telefônica</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Facilidade de participação</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">⭐ 4. Que incentivo você oferece?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="incentivo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Desconto na próxima compra</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="incentivo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Produto gratuito</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="incentivo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Pontos de fidelidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="incentivo-feedback" className="mr-3" />
+                        <span className="text-gray-700">Sem incentivo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Motivação para participar</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">⭐ 5. Como você quer usar o feedback?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="uso-feedback" className="mr-3" />
+                        <span className="text-gray-700">Melhorar produtos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="uso-feedback" className="mr-3" />
+                        <span className="text-gray-700">Treinar equipe</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="uso-feedback" className="mr-3" />
+                        <span className="text-gray-700">Marketing social</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="uso-feedback" className="mr-3" />
+                        <span className="text-gray-700">Relatórios internos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Propósito específico</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">⭐ Resultado do Template de Feedback de Cliente</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-yellow-600 mb-2">Sistema de Feedback</div>
+                      <div className="text-lg font-semibold text-amber-600">Coleta Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de feedback estruturado personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                        <div className="text-2xl font-bold text-yellow-600">85%</div>
+                        <div className="text-sm text-gray-600">Taxa de satisfação</div>
+                      </div>
+                      <div className="text-center p-3 bg-amber-50 rounded-lg">
+                        <div className="text-2xl font-bold text-amber-600">60%</div>
+                        <div className="text-sm text-gray-600">Taxa de resposta</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">4.5</div>
+                        <div className="text-sm text-gray-600">Nota média</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Sistema completo com foco em coleta e análise</p>
+                      <p>• <strong>Prazo:</strong> 2-3 dias para criar sistema completo</p>
+                      <p>• <strong>Investimento:</strong> 3-4 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 85% na satisfação do cliente</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-yellow-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Sistema de Feedback:</strong> Tipo de feedback, momento, formato, incentivo, uso</p>
+                    <p>• <strong>Análise:</strong> Critérios de coleta eficaz, evidências de satisfação, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Sistema específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Sistema evolui com novos produtos e serviços</p>
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Mensagem Pós-Compra */}
+            {ferramentaSelecionada === 'template-mensagem-pos-compra' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎉 Preview do Template de Mensagem Pós-Compra - "Retenha clientes com mensagens estratégicas"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎉 Retenha Clientes com Mensagens Estratégicas</h4>
+                  <p className="text-gray-700 mb-3">Crie mensagens pós-compra que reforçam a decisão do cliente e aumentam a retenção e fidelização.</p>
+                  <p className="text-green-600 font-semibold">🎉 Mensagens estratégicas que podem aumentar retenção em 90%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🎉 1. Que tipo de produto foi comprado?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-produto" className="mr-3" />
+                        <span className="text-gray-700">Produto físico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-produto" className="mr-3" />
+                        <span className="text-gray-700">Produto digital</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-produto" className="mr-3" />
+                        <span className="text-gray-700">Serviço</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-produto" className="mr-3" />
+                        <span className="text-gray-700">Curso/Programa</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Personalização por produto</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">🎉 2. Quando enviar a mensagem?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="timing-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Imediatamente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="timing-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Após 1 hora</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="timing-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Após 24 horas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="timing-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Após 3 dias</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Timing estratégico</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🎉 3. Que tom você quer usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Celebrativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Agradecido</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Informativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Motivacional</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Conexão emocional</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🎉 4. Que informação incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Instruções de uso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Suporte disponível</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Próximos passos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Benefícios esperados</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Valor agregado</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🎉 5. Que call-to-action incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="cta-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Deixar avaliação</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="cta-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Compartilhar resultado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="cta-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Indicar para amigos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="cta-mensagem" className="mr-3" />
+                        <span className="text-gray-700">Comprar produto relacionado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Ação específica</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🎉 Resultado do Template de Mensagem Pós-Compra</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-green-600 mb-2">Mensagem Estratégica</div>
+                      <div className="text-lg font-semibold text-emerald-600">Retenção Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de mensagem pós-compra personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">90%</div>
+                        <div className="text-sm text-gray-600">Taxa de retenção</div>
+                      </div>
+                      <div className="text-center p-3 bg-emerald-50 rounded-lg">
+                        <div className="text-2xl font-bold text-emerald-600">75%</div>
+                        <div className="text-sm text-gray-600">Taxa de engajamento</div>
+                      </div>
+                      <div className="text-center p-3 bg-teal-50 rounded-lg">
+                        <div className="text-2xl font-bold text-teal-600">60%</div>
+                        <div className="text-sm text-gray-600">Taxa de recompra</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Mensagem completa com foco em retenção e fidelização</p>
+                      <p>• <strong>Prazo:</strong> 1-2 dias para criar mensagem completa</p>
+                      <p>• <strong>Investimento:</strong> 2-3 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 90% na retenção de clientes</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Mensagem Pós-Compra:</strong> Tipo de produto, timing, tom, informações, call-to-action</p>
+                    <p>• <strong>Análise:</strong> Critérios de retenção eficaz, evidências de fidelização, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Mensagem específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Mensagem evolui com novos produtos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de E-mail de Reposição */}
+            {ferramentaSelecionada === 'template-email-reposicao' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📧 Preview do Template de E-mail de Reposição - "Reative clientes com e-mails estratégicos"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📧 Reative Clientes com E-mails Estratégicos</h4>
+                  <p className="text-gray-700 mb-3">Crie campanhas de e-mail de reposição que reativam clientes inativos e aumentam o engajamento.</p>
+                  <p className="text-purple-600 font-semibold">📧 E-mails estratégicos que podem reativar 40% dos clientes inativos.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📧 1. Há quanto tempo o cliente está inativo?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tempo-inativo" className="mr-3" />
+                        <span className="text-gray-700">30 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tempo-inativo" className="mr-3" />
+                        <span className="text-gray-700">60 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tempo-inativo" className="mr-3" />
+                        <span className="text-gray-700">90 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tempo-inativo" className="mr-3" />
+                        <span className="text-gray-700">6 meses+</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Urgência de reativação</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">📧 2. Que tipo de oferta você quer fazer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-oferta" className="mr-3" />
+                        <span className="text-gray-700">Desconto especial</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-oferta" className="mr-3" />
+                        <span className="text-gray-700">Frete grátis</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-oferta" className="mr-3" />
+                        <span className="text-gray-700">Produto novo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-oferta" className="mr-3" />
+                        <span className="text-gray-700">Sem oferta</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Incentivo de retorno</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">📧 3. Que tom você quer usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tom-email" className="mr-3" />
+                        <span className="text-gray-700">Saudosista</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tom-email" className="mr-3" />
+                        <span className="text-gray-700">Preocupado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tom-email" className="mr-3" />
+                        <span className="text-gray-700">Entusiasmado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tom-email" className="mr-3" />
+                        <span className="text-gray-700">Direto</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Conexão emocional</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📧 4. Que informação incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="info-email" className="mr-3" />
+                        <span className="text-gray-700">Novidades da marca</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="info-email" className="mr-3" />
+                        <span className="text-gray-700">Última compra</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="info-email" className="mr-3" />
+                        <span className="text-gray-700">Benefícios perdidos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="info-email" className="mr-3" />
+                        <span className="text-gray-700">Testemunhos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Valor perdido</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-slate-900 mb-3">📧 5. Que call-to-action usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-email" className="mr-3" />
+                        <span className="text-gray-700">"Volte para nós"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-email" className="mr-3" />
+                        <span className="text-gray-700">"Não perca mais"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-email" className="mr-3" />
+                        <span className="text-gray-700">"Aproveite agora"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-email" className="mr-3" />
+                        <span className="text-gray-700">"Renove sua experiência"</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Ação específica</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">📧 Resultado do Template de E-mail de Reposição</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-purple-600 mb-2">E-mail Estratégico</div>
+                      <div className="text-lg font-semibold text-violet-600">Reativação Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de e-mail de reposição personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">40%</div>
+                        <div className="text-sm text-gray-600">Taxa de reativação</div>
+                      </div>
+                      <div className="text-center p-3 bg-violet-50 rounded-lg">
+                        <div className="text-2xl font-bold text-violet-600">25%</div>
+                        <div className="text-sm text-gray-600">Taxa de abertura</div>
+                      </div>
+                      <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                        <div className="text-2xl font-bold text-indigo-600">15%</div>
+                        <div className="text-sm text-gray-600">Taxa de clique</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> E-mail completo com foco em reativação e engajamento</p>
+                      <p>• <strong>Prazo:</strong> 2-3 dias para criar campanha completa</p>
+                      <p>• <strong>Investimento:</strong> 3-4 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Reativação de 40% dos clientes inativos</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>E-mail de Reposição:</strong> Tempo inativo, tipo de oferta, tom, informações, call-to-action</p>
+                    <p>• <strong>Análise:</strong> Critérios de reativação eficaz, evidências de engajamento, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> E-mail específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> E-mail evolui com novos produtos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Recompensa / Cashback */}
+            {ferramentaSelecionada === 'template-recompensa-cashback' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎁 Preview do Template de Recompensa / Cashback - "Fidelize clientes com recompensas estratégicas"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎁 Fidelize Clientes com Recompensas Estratégicas</h4>
+                  <p className="text-gray-700 mb-3">Crie programas de recompensa e cashback que incentivam compras recorrentes e aumentam a fidelização dos clientes.</p>
+                  <p className="text-pink-600 font-semibold">🎁 Programa de recompensas que pode aumentar fidelização em 95%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🎁 1. Que tipo de recompensa você quer oferecer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="tipo-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Cashback em dinheiro</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="tipo-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Pontos de fidelidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="tipo-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Descontos progressivos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="tipo-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Produtos gratuitos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Valor percebido</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-rose-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-rose-900 mb-3">🎁 2. Qual valor da recompensa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="valor-recompensa" className="mr-3" />
+                        <span className="text-gray-700">5% do valor</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="valor-recompensa" className="mr-3" />
+                        <span className="text-gray-700">10% do valor</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="valor-recompensa" className="mr-3" />
+                        <span className="text-gray-700">15% do valor</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="valor-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Valor fixo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-rose-600 mt-2">🧠 Gatilho: Quantidade específica</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🎁 3. Quando liberar a recompensa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="timing-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Imediatamente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="timing-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Após 30 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="timing-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Após 90 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="timing-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Acumulativo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Antecipação de benefício</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🎁 4. Que condições para ganhar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="condicoes-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Compra mínima</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="condicoes-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Frequência de compra</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="condicoes-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Indicação de amigos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="condicoes-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Sem condições</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Facilidade de obtenção</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">🎁 5. Como comunicar o programa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="comunicacao-recompensa" className="mr-3" />
+                        <span className="text-gray-700">E-mail marketing</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="comunicacao-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Redes sociais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="comunicacao-recompensa" className="mr-3" />
+                        <span className="text-gray-700">Site/app</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="comunicacao-recompensa" className="mr-3" />
+                        <span className="text-gray-700">WhatsApp</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Canal preferido</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🎁 Resultado do Template de Recompensa / Cashback</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-pink-600 mb-2">Programa de Recompensas</div>
+                      <div className="text-lg font-semibold text-rose-600">Fidelização Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de programa de recompensas personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-pink-50 rounded-lg">
+                        <div className="text-2xl font-bold text-pink-600">95%</div>
+                        <div className="text-sm text-gray-600">Taxa de fidelização</div>
+                      </div>
+                      <div className="text-center p-3 bg-rose-50 rounded-lg">
+                        <div className="text-2xl font-bold text-rose-600">70%</div>
+                        <div className="text-sm text-gray-600">Taxa de retenção</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">3.5x</div>
+                        <div className="text-sm text-gray-600">Valor do cliente</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Programa completo com foco em fidelização e retenção</p>
+                      <p>• <strong>Prazo:</strong> 3-5 dias para criar programa completo</p>
+                      <p>• <strong>Investimento:</strong> 4-6 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 95% na fidelização de clientes</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-pink-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-pink-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Programa de Recompensas:</strong> Tipo de recompensa, valor, timing, condições, comunicação</p>
+                    <p>• <strong>Análise:</strong> Critérios de fidelização eficaz, evidências de retenção, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Programa específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Programa evolui com novos produtos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Aniversário */}
+            {ferramentaSelecionada === 'template-aniversario' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎂 Preview do Template de Aniversário - "Celebre clientes com mensagens personalizadas"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎂 Celebre Clientes com Mensagens Personalizadas</h4>
+                  <p className="text-gray-700 mb-3">Crie mensagens de aniversário que fortalecem o relacionamento e aumentam o engajamento dos clientes.</p>
+                  <p className="text-yellow-600 font-semibold">🎂 Mensagens personalizadas que podem aumentar engajamento em 120%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">🎂 1. Que tipo de aniversário celebrar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Aniversário pessoal</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Aniversário de cadastro</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Aniversário da primeira compra</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Todos os tipos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Personalização específica</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🎂 2. Que presente oferecer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="presente-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Desconto especial</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="presente-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Produto gratuito</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="presente-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Frete grátis</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="presente-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Pontos extras</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Valor percebido</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🎂 3. Que tom usar na mensagem?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Carinhoso e próximo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Celebrativo e alegre</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Gratidão e reconhecimento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Profissional e elegante</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Conexão emocional</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🎂 4. Que informação incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="info-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Histórico de compras</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="info-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Benefícios conquistados</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="info-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Novidades da marca</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="info-aniversario" className="mr-3" />
+                        <span className="text-gray-700">Apenas felicitações</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Relevância pessoal</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🎂 5. Que call-to-action incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="cta-aniversario" className="mr-3" />
+                        <span className="text-gray-700">"Aproveite seu presente"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="cta-aniversario" className="mr-3" />
+                        <span className="text-gray-700">"Comemore conosco"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="cta-aniversario" className="mr-3" />
+                        <span className="text-gray-700">"Renove sua experiência"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="cta-aniversario" className="mr-3" />
+                        <span className="text-gray-700">"Continue conosco"</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Ação específica</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🎂 Resultado do Template de Aniversário</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-yellow-600 mb-2">Mensagem Personalizada</div>
+                      <div className="text-lg font-semibold text-orange-600">Celebração Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de mensagem de aniversário personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                        <div className="text-2xl font-bold text-yellow-600">120%</div>
+                        <div className="text-sm text-gray-600">Aumento engajamento</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">85%</div>
+                        <div className="text-sm text-gray-600">Taxa de abertura</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">60%</div>
+                        <div className="text-sm text-gray-600">Taxa de conversão</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Mensagem completa com foco em celebração e engajamento</p>
+                      <p>• <strong>Prazo:</strong> 1-2 dias para criar mensagem completa</p>
+                      <p>• <strong>Investimento:</strong> 2-3 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 120% no engajamento de clientes</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-yellow-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Mensagem de Aniversário:</strong> Tipo de aniversário, presente, tom, informações, call-to-action</p>
+                    <p>• <strong>Análise:</strong> Critérios de celebração eficaz, evidências de engajamento, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Mensagem específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Mensagem evolui com novos produtos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Agradecimento */}
+            {ferramentaSelecionada === 'template-agradecimento' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🙏 Preview do Template de Agradecimento - "Fortaleça relacionamentos com gratidão"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🙏 Fortaleça Relacionamentos com Gratidão</h4>
+                  <p className="text-gray-700 mb-3">Crie mensagens de agradecimento que fortalecem laços emocionais e aumentam a lealdade dos clientes.</p>
+                  <p className="text-green-600 font-semibold">🙏 Mensagens de gratidão que podem aumentar lealdade em 110%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🙏 1. Por que você quer agradecer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="motivo-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Compra realizada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="motivo-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Indicação de cliente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="motivo-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Feedback positivo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="motivo-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Fidelidade contínua</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Reconhecimento específico</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🙏 2. Que tom usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Sincero e caloroso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Profissional e respeitoso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Pessoal e próximo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tom-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Entusiasmado e alegre</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Conexão emocional</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🙏 3. Que informação incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Impacto da ação</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Valor para o negócio</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Histórico de relacionamento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="info-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Apenas gratidão</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Relevância específica</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🙏 4. Que presente oferecer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="presente-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Desconto especial</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="presente-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Produto gratuito</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="presente-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Acesso exclusivo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="presente-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">Sem presente</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Valor agregado</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🙏 5. Que call-to-action incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="cta-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">"Continue conosco"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="cta-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">"Indique para amigos"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="cta-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">"Deixe seu feedback"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="cta-agradecimento" className="mr-3" />
+                        <span className="text-gray-700">"Aproveite seu presente"</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Ação específica</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🙏 Resultado do Template de Agradecimento</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-green-600 mb-2">Mensagem de Gratidão</div>
+                      <div className="text-lg font-semibold text-teal-600">Relacionamento Fortalecido</div>
+                      <div className="text-sm text-gray-600">Template de agradecimento personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">110%</div>
+                        <div className="text-sm text-gray-600">Aumento lealdade</div>
+                      </div>
+                      <div className="text-center p-3 bg-teal-50 rounded-lg">
+                        <div className="text-2xl font-bold text-teal-600">90%</div>
+                        <div className="text-sm text-gray-600">Taxa de abertura</div>
+                      </div>
+                      <div className="text-center p-3 bg-cyan-50 rounded-lg">
+                        <div className="text-2xl font-bold text-cyan-600">75%</div>
+                        <div className="text-sm text-gray-600">Taxa de engajamento</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Mensagem completa com foco em gratidão e relacionamento</p>
+                      <p>• <strong>Prazo:</strong> 1-2 dias para criar mensagem completa</p>
+                      <p>• <strong>Investimento:</strong> 2-3 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 110% na lealdade de clientes</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Mensagem de Agradecimento:</strong> Motivo, tom, informações, presente, call-to-action</p>
+                    <p>• <strong>Análise:</strong> Critérios de gratidão eficaz, evidências de lealdade, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Mensagem específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Mensagem evolui com novos relacionamentos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Plano Semanal de Conteúdo */}
+            {ferramentaSelecionada === 'template-plano-semanal-conteudo' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📅 Preview do Template de Plano Semanal de Conteúdo - "Organize conteúdo com planejamento estratégico"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📅 Organize Conteúdo com Planejamento Estratégico</h4>
+                  <p className="text-gray-700 mb-3">Crie planos semanais de conteúdo que organizam sua estratégia de marketing e aumentam o engajamento.</p>
+                  <p className="text-blue-600 font-semibold">📅 Planejamento estratégico que pode aumentar engajamento em 150%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📅 1. Que tipo de conteúdo você quer planejar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Posts educativos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo promocional</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo de entretenimento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Mix de todos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Identificação de foco</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">📅 2. Quantos posts por semana?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="quantidade-posts" className="mr-3" />
+                        <span className="text-gray-700">3-5 posts</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="quantidade-posts" className="mr-3" />
+                        <span className="text-gray-700">6-10 posts</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="quantidade-posts" className="mr-3" />
+                        <span className="text-gray-700">11-15 posts</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="quantidade-posts" className="mr-3" />
+                        <span className="text-gray-700">15+ posts</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Capacidade de produção</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📅 3. Que plataformas usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="plataformas-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Instagram</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="plataformas-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Facebook</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="plataformas-conteudo" className="mr-3" />
+                        <span className="text-gray-700">LinkedIn</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="plataformas-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Múltiplas plataformas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Alcance específico</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">📅 4. Que horários usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="horarios-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Manhã (8h-12h)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="horarios-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Tarde (12h-18h)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="horarios-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Noite (18h-22h)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="horarios-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Horários variados</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Timing estratégico</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-slate-900 mb-3">📅 5. Que nível de detalhamento?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="detalhamento-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Básico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="detalhamento-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Moderado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="detalhamento-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Detalhado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="detalhamento-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Completo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Profundidade de planejamento</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">📅 Resultado do Template de Plano Semanal de Conteúdo</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">Plano Estratégico</div>
+                      <div className="text-lg font-semibold text-indigo-600">Organização Completa</div>
+                      <div className="text-sm text-gray-600">Template de planejamento semanal personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">150%</div>
+                        <div className="text-sm text-gray-600">Aumento engajamento</div>
+                      </div>
+                      <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                        <div className="text-2xl font-bold text-indigo-600">7</div>
+                        <div className="text-sm text-gray-600">Dias planejados</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">80%</div>
+                        <div className="text-sm text-gray-600">Eficiência produção</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Plano completo com foco em organização e estratégia</p>
+                      <p>• <strong>Prazo:</strong> 2-3 dias para criar plano completo</p>
+                      <p>• <strong>Investimento:</strong> 3-4 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 150% no engajamento de conteúdo</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Plano Semanal:</strong> Tipo de conteúdo, quantidade, plataformas, horários, detalhamento</p>
+                    <p>• <strong>Análise:</strong> Critérios de planejamento eficaz, evidências de engajamento, feedback de audiência</p>
+                    <p>• <strong>Personalização:</strong> Plano específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Plano evolui com novos objetivos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Calendário de Postagens */}
+            {ferramentaSelecionada === 'template-calendario-postagens' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📅 Preview do Template de Calendário de Postagens - "Organize postagens com calendário estratégico"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📅 Organize Postagens com Calendário Estratégico</h4>
+                  <p className="text-gray-700 mb-3">Crie calendários de postagens que organizam sua estratégia de conteúdo e aumentam a consistência nas redes sociais.</p>
+                  <p className="text-emerald-600 font-semibold">📅 Calendário estratégico que pode aumentar consistência em 200%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">📅 1. Que período você quer planejar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="periodo-calendario" className="mr-3" />
+                        <span className="text-gray-700">1 semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="periodo-calendario" className="mr-3" />
+                        <span className="text-gray-700">1 mês</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="periodo-calendario" className="mr-3" />
+                        <span className="text-gray-700">3 meses</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="periodo-calendario" className="mr-3" />
+                        <span className="text-gray-700">6 meses</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Escala de planejamento</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">📅 2. Quantas postagens por dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="frequencia-postagens" className="mr-3" />
+                        <span className="text-gray-700">1 post por dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="frequencia-postagens" className="mr-3" />
+                        <span className="text-gray-700">2-3 posts por dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="frequencia-postagens" className="mr-3" />
+                        <span className="text-gray-700">4-5 posts por dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="frequencia-postagens" className="mr-3" />
+                        <span className="text-gray-700">Mais de 5 posts</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Capacidade de produção</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">📅 3. Que tipo de conteúdo incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tipo-conteudo-calendario" className="mr-3" />
+                        <span className="text-gray-700">Educativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tipo-conteudo-calendario" className="mr-3" />
+                        <span className="text-gray-700">Promocional</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tipo-conteudo-calendario" className="mr-3" />
+                        <span className="text-gray-700">Entretenimento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="tipo-conteudo-calendario" className="mr-3" />
+                        <span className="text-gray-700">Mix equilibrado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Estratégia de conteúdo</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">📅 4. Que plataformas incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="plataformas-calendario" className="mr-3" />
+                        <span className="text-gray-700">Instagram</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="plataformas-calendario" className="mr-3" />
+                        <span className="text-gray-700">Facebook</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="plataformas-calendario" className="mr-3" />
+                        <span className="text-gray-700">LinkedIn</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="plataformas-calendario" className="mr-3" />
+                        <span className="text-gray-700">Todas as plataformas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Alcance multiplataforma</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📅 5. Que nível de automação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="automacao-calendario" className="mr-3" />
+                        <span className="text-gray-700">Manual</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="automacao-calendario" className="mr-3" />
+                        <span className="text-gray-700">Semi-automático</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="automacao-calendario" className="mr-3" />
+                        <span className="text-gray-700">Automático</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="automacao-calendario" className="mr-3" />
+                        <span className="text-gray-700">Inteligente</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Eficiência operacional</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">📅 Resultado do Template de Calendário de Postagens</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-emerald-600 mb-2">Calendário Estratégico</div>
+                      <div className="text-lg font-semibold text-green-600">Organização Completa</div>
+                      <div className="text-sm text-gray-600">Template de calendário de postagens personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-emerald-50 rounded-lg">
+                        <div className="text-2xl font-bold text-emerald-600">200%</div>
+                        <div className="text-sm text-gray-600">Aumento consistência</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">90%</div>
+                        <div className="text-sm text-gray-600">Eficiência produção</div>
+                      </div>
+                      <div className="text-center p-3 bg-teal-50 rounded-lg">
+                        <div className="text-2xl font-bold text-teal-600">150%</div>
+                        <div className="text-sm text-gray-600">Aumento engajamento</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Calendário completo com foco em organização e consistência</p>
+                      <p>• <strong>Prazo:</strong> 3-5 dias para criar calendário completo</p>
+                      <p>• <strong>Investimento:</strong> 4-6 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 200% na consistência de postagens</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-emerald-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Calendário de Postagens:</strong> Período, frequência, tipo de conteúdo, plataformas, automação</p>
+                    <p>• <strong>Análise:</strong> Critérios de organização eficaz, evidências de consistência, feedback de audiência</p>
+                    <p>• <strong>Personalização:</strong> Calendário específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Calendário evolui com novos objetivos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Reels Educativo */}
+            {ferramentaSelecionada === 'template-reels-educativo' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎓 Preview do Template de Reels Educativo - "Eduque com reels estratégicos"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎓 Eduque com Reels Estratégicos</h4>
+                  <p className="text-gray-700 mb-3">Crie reels educativos que transmitem conhecimento de forma envolvente e aumentam o engajamento da audiência.</p>
+                  <p className="text-purple-600 font-semibold">🎓 Reels educativos que podem aumentar engajamento em 180%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🎓 1. Que tema educar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tema-educativo" className="mr-3" />
+                        <span className="text-gray-700">Nutrição e saúde</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tema-educativo" className="mr-3" />
+                        <span className="text-gray-700">Exercícios e fitness</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tema-educativo" className="mr-3" />
+                        <span className="text-gray-700">Bem-estar mental</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tema-educativo" className="mr-3" />
+                        <span className="text-gray-700">Suplementação</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Especialização específica</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">🎓 2. Que formato usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="formato-reels" className="mr-3" />
+                        <span className="text-gray-700">Tutorial passo a passo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="formato-reels" className="mr-3" />
+                        <span className="text-gray-700">Dicas rápidas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="formato-reels" className="mr-3" />
+                        <span className="text-gray-700">Comparação antes/depois</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="formato-reels" className="mr-3" />
+                        <span className="text-gray-700">Mitos vs verdades</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Formato envolvente</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎓 3. Que duração usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="duracao-reels" className="mr-3" />
+                        <span className="text-gray-700">15 segundos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="duracao-reels" className="mr-3" />
+                        <span className="text-gray-700">30 segundos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="duracao-reels" className="mr-3" />
+                        <span className="text-gray-700">60 segundos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="duracao-reels" className="mr-3" />
+                        <span className="text-gray-700">90 segundos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Atenção sustentada</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🎓 4. Que elementos visuais incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="elementos-visuais" className="mr-3" />
+                        <span className="text-gray-700">Texto e gráficos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="elementos-visuais" className="mr-3" />
+                        <span className="text-gray-700">Demonstração prática</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="elementos-visuais" className="mr-3" />
+                        <span className="text-gray-700">Infográficos animados</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="elementos-visuais" className="mr-3" />
+                        <span className="text-gray-700">Mix de elementos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Apelo visual</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-slate-900 mb-3">🎓 5. Que call-to-action usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-reels" className="mr-3" />
+                        <span className="text-gray-700">"Salve para depois"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-reels" className="mr-3" />
+                        <span className="text-gray-700">"Compartilhe com amigos"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-reels" className="mr-3" />
+                        <span className="text-gray-700">"Siga para mais dicas"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="cta-reels" className="mr-3" />
+                        <span className="text-gray-700">"Comente sua experiência"</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Ação específica</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🎓 Resultado do Template de Reels Educativo</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-purple-600 mb-2">Reels Educativo</div>
+                      <div className="text-lg font-semibold text-violet-600">Educação Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de reels educativo personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">180%</div>
+                        <div className="text-sm text-gray-600">Aumento engajamento</div>
+                      </div>
+                      <div className="text-center p-3 bg-violet-50 rounded-lg">
+                        <div className="text-2xl font-bold text-violet-600">85%</div>
+                        <div className="text-sm text-gray-600">Taxa de retenção</div>
+                      </div>
+                      <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                        <div className="text-2xl font-bold text-indigo-600">70%</div>
+                        <div className="text-sm text-gray-600">Taxa de compartilhamento</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Reels completo com foco em educação e engajamento</p>
+                      <p>• <strong>Prazo:</strong> 2-3 dias para criar reels completo</p>
+                      <p>• <strong>Investimento:</strong> 3-4 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 180% no engajamento educativo</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Reels Educativo:</strong> Tema, formato, duração, elementos visuais, call-to-action</p>
+                    <p>• <strong>Análise:</strong> Critérios de educação eficaz, evidências de engajamento, feedback de audiência</p>
+                    <p>• <strong>Personalização:</strong> Reels específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Reels evolui com novos conhecimentos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Conteúdo de Autoridade */}
+            {ferramentaSelecionada === 'template-conteudo-autoridade' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  👑 Preview do Template de Conteúdo de Autoridade - "Construa autoridade com conteúdo estratégico"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">👑 Construa Autoridade com Conteúdo Estratégico</h4>
+                  <p className="text-gray-700 mb-3">Crie conteúdo de autoridade que posiciona você como especialista e aumenta a confiança da audiência.</p>
+                  <p className="text-amber-600 font-semibold">👑 Conteúdo de autoridade que pode aumentar credibilidade em 250%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">👑 1. Que tipo de autoridade construir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="tipo-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Autoridade científica</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="tipo-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Autoridade prática</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="tipo-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Autoridade de experiência</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="tipo-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Autoridade de resultados</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Credibilidade específica</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">👑 2. Que formato usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="formato-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Artigo longo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="formato-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Vídeo explicativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="formato-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Podcast</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="formato-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Webinar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Formato de impacto</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">👑 3. Que evidências incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="evidencias-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Estudos científicos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="evidencias-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Casos de sucesso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="evidencias-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Certificações</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="evidencias-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Testemunhos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Prova social</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">👑 4. Que tom usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Profissional e técnico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Confidente e assertivo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Acessível e didático</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tom-autoridade" className="mr-3" />
+                        <span className="text-gray-700">Inspirador e motivador</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Personalidade de autoridade</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">👑 5. Que call-to-action usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="cta-autoridade" className="mr-3" />
+                        <span className="text-gray-700">"Consulte um especialista"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="cta-autoridade" className="mr-3" />
+                        <span className="text-gray-700">"Saiba mais sobre o assunto"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="cta-autoridade" className="mr-3" />
+                        <span className="text-gray-700">"Siga para mais conteúdo"</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="cta-autoridade" className="mr-3" />
+                        <span className="text-gray-700">"Compartilhe conhecimento"</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Ação específica</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">👑 Resultado do Template de Conteúdo de Autoridade</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-amber-600 mb-2">Conteúdo de Autoridade</div>
+                      <div className="text-lg font-semibold text-yellow-600">Credibilidade Máxima</div>
+                      <div className="text-sm text-gray-600">Template de conteúdo de autoridade personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-amber-50 rounded-lg">
+                        <div className="text-2xl font-bold text-amber-600">250%</div>
+                        <div className="text-sm text-gray-600">Aumento credibilidade</div>
+                      </div>
+                      <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                        <div className="text-2xl font-bold text-yellow-600">95%</div>
+                        <div className="text-sm text-gray-600">Taxa de confiança</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">80%</div>
+                        <div className="text-sm text-gray-600">Taxa de compartilhamento</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Conteúdo completo com foco em autoridade e credibilidade</p>
+                      <p>• <strong>Prazo:</strong> 4-6 dias para criar conteúdo completo</p>
+                      <p>• <strong>Investimento:</strong> 6-8 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 250% na credibilidade de autoridade</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-amber-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Conteúdo de Autoridade:</strong> Tipo de autoridade, formato, evidências, tom, call-to-action</p>
+                    <p>• <strong>Análise:</strong> Critérios de autoridade eficaz, evidências de credibilidade, feedback de audiência</p>
+                    <p>• <strong>Personalização:</strong> Conteúdo específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Conteúdo evolui com novos conhecimentos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Testemunho Visual */}
+            {ferramentaSelecionada === 'template-testemunho-visual' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💬 Preview do Template de Testemunho Visual - "Colete depoimentos visuais impactantes"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">💬 Colete Depoimentos Visuais Impactantes</h4>
+                  <p className="text-gray-700 mb-3">Crie templates para coletar testemunhos visuais que aumentam a credibilidade e conversão dos seus produtos.</p>
+                  <p className="text-emerald-600 font-semibold">💬 Testemunhos visuais que podem aumentar conversão em 160%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">💬 1. Que tipo de testemunho coletar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="tipo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Depoimento em vídeo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="tipo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Foto com resultado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="tipo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Story com experiência</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="tipo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Mix de formatos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Formato envolvente</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">💬 2. Que momento capturar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="momento-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Imediatamente após resultado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="momento-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Após 30 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="momento-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Após 90 dias</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="momento-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Momento espontâneo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Timing emocional</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">💬 3. Que elementos incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="elementos-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Antes e depois</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="elementos-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Processo de uso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="elementos-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Resultado final</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="elementos-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Jornada completa</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Narrativa completa</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">💬 4. Que incentivo oferecer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="incentivo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Desconto especial</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="incentivo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Produto gratuito</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="incentivo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Reconhecimento público</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="incentivo-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Sem incentivo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Motivação específica</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">💬 5. Como usar o testemunho?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="uso-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Marketing nas redes</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="uso-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Site e landing pages</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="uso-testemunho" className="mr-3" />
+                        <span className="text-gray-700">E-mail marketing</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="uso-testemunho" className="mr-3" />
+                        <span className="text-gray-700">Todos os canais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Alcance máximo</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">💬 Resultado do Template de Testemunho Visual</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-emerald-600 mb-2">Testemunho Visual</div>
+                      <div className="text-lg font-semibold text-teal-600">Prova Social Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de testemunho visual personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-emerald-50 rounded-lg">
+                        <div className="text-2xl font-bold text-emerald-600">160%</div>
+                        <div className="text-sm text-gray-600">Aumento conversão</div>
+                      </div>
+                      <div className="text-center p-3 bg-teal-50 rounded-lg">
+                        <div className="text-2xl font-bold text-teal-600">90%</div>
+                        <div className="text-sm text-gray-600">Taxa de credibilidade</div>
+                      </div>
+                      <div className="text-center p-3 bg-cyan-50 rounded-lg">
+                        <div className="text-2xl font-bold text-cyan-600">75%</div>
+                        <div className="text-sm text-gray-600">Taxa de compartilhamento</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Template completo com foco em prova social e credibilidade</p>
+                      <p>• <strong>Prazo:</strong> 2-3 dias para criar template completo</p>
+                      <p>• <strong>Investimento:</strong> 3-4 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 160% na conversão com testemunhos</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-emerald-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Testemunho Visual:</strong> Tipo de testemunho, momento, elementos, incentivo, uso</p>
+                    <p>• <strong>Análise:</strong> Critérios de prova social eficaz, evidências de credibilidade, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Template evolui com novos produtos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Estratégia de Lançamento */}
+            {ferramentaSelecionada === 'template-estrategia-lancamento' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🚀 Preview do Template de Estratégia de Lançamento - "Lance produtos com estratégia completa"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🚀 Lance Produtos com Estratégia Completa</h4>
+                  <p className="text-gray-700 mb-3">Crie estratégias de lançamento que maximizam vendas e criam buzz em torno dos seus produtos.</p>
+                  <p className="text-orange-600 font-semibold">🚀 Estratégia completa que pode aumentar vendas em 300%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🚀 1. Que tipo de produto lançar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-produto-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Produto físico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-produto-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Produto digital</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-produto-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Serviço</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-produto-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Curso/Programa</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Identificação de produto</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🚀 2. Que duração de lançamento?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="duracao-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Lançamento rápido (1 semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="duracao-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Lançamento médio (2-4 semanas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="duracao-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Lançamento longo (1-3 meses)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="duracao-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Lançamento escalonado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Timing estratégico</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🚀 3. Que tipo de audiência?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="audiencia-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Audiência existente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="audiencia-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Nova audiência</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="audiencia-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Audiência mista</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="audiencia-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Audiência segmentada</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Segmentação específica</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🚀 4. Que tipo de oferta?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="oferta-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Desconto por tempo limitado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="oferta-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Bônus exclusivos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="oferta-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Garantia estendida</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="oferta-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Acesso antecipado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Valor percebido</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">🚀 5. Que canais usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="canais-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Redes sociais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="canais-lancamento" className="mr-3" />
+                        <span className="text-gray-700">E-mail marketing</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="canais-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Influenciadores</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="canais-lancamento" className="mr-3" />
+                        <span className="text-gray-700">Mix de canais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Alcance máximo</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🚀 Resultado do Template de Estratégia de Lançamento</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-orange-600 mb-2">Estratégia Completa</div>
+                      <div className="text-lg font-semibold text-red-600">Lançamento Eficaz</div>
+                      <div className="text-sm text-gray-600">Template de estratégia de lançamento personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">300%</div>
+                        <div className="text-sm text-gray-600">Aumento vendas</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">85%</div>
+                        <div className="text-sm text-gray-600">Taxa de conversão</div>
+                      </div>
+                      <div className="text-center p-3 bg-pink-50 rounded-lg">
+                        <div className="text-2xl font-bold text-pink-600">200%</div>
+                        <div className="text-sm text-gray-600">Aumento buzz</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Estratégia completa com foco em vendas e buzz</p>
+                      <p>• <strong>Prazo:</strong> 5-7 dias para criar estratégia completa</p>
+                      <p>• <strong>Investimento:</strong> 8-10 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 300% nas vendas de lançamento</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-orange-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Estratégia de Lançamento:</strong> Tipo de produto, duração, audiência, oferta, canais</p>
+                    <p>• <strong>Análise:</strong> Critérios de lançamento eficaz, evidências de vendas, feedback de mercado</p>
+                    <p>• <strong>Personalização:</strong> Estratégia específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Estratégia evolui com novos produtos e mercado</p>
+                  </div>
+                  <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Template de Jornada do Cliente */}
+            {ferramentaSelecionada === 'template-jornada-cliente' && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🗺️ Preview do Template de Jornada do Cliente - "Mapeie jornada completa do cliente"
+                </h3>
+                
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🗺️ Mapeie Jornada Completa do Cliente</h4>
+                  <p className="text-gray-700 mb-3">Crie mapas de jornada do cliente que identificam pontos de melhoria e aumentam a satisfação.</p>
+                  <p className="text-slate-600 font-semibold">🗺️ Jornada mapeada que pode aumentar satisfação em 180%.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-slate-900 mb-3">🗺️ 1. Que tipo de jornada mapear?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-jornada" className="mr-3" />
+                        <span className="text-gray-700">Jornada de compra</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-jornada" className="mr-3" />
+                        <span className="text-gray-700">Jornada de uso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-jornada" className="mr-3" />
+                        <span className="text-gray-700">Jornada de fidelização</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="tipo-jornada" className="mr-3" />
+                        <span className="text-gray-700">Jornada completa</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Escopo específico</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">🗺️ 2. Que persona focar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
+                        <input type="radio" name="persona-jornada" className="mr-3" />
+                        <span className="text-gray-700">Cliente ideal</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
+                        <input type="radio" name="persona-jornada" className="mr-3" />
+                        <span className="text-gray-700">Cliente novo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
+                        <input type="radio" name="persona-jornada" className="mr-3" />
+                        <span className="text-gray-700">Cliente fiel</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
+                        <input type="radio" name="persona-jornada" className="mr-3" />
+                        <span className="text-gray-700">Múltiplas personas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Segmentação específica</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-zinc-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-zinc-900 mb-3">🗺️ 3. Que touchpoints incluir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-zinc-300">
+                        <input type="radio" name="touchpoints-jornada" className="mr-3" />
+                        <span className="text-gray-700">Touchpoints digitais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-zinc-300">
+                        <input type="radio" name="touchpoints-jornada" className="mr-3" />
+                        <span className="text-gray-700">Touchpoints físicos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-zinc-300">
+                        <input type="radio" name="touchpoints-jornada" className="mr-3" />
+                        <span className="text-gray-700">Touchpoints humanos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-zinc-300">
+                        <input type="radio" name="touchpoints-jornada" className="mr-3" />
+                        <span className="text-gray-700">Todos os touchpoints</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-zinc-600 mt-2">🧠 Gatilho: Cobertura completa</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-neutral-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-neutral-900 mb-3">🗺️ 4. Que métricas acompanhar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-neutral-300">
+                        <input type="radio" name="metricas-jornada" className="mr-3" />
+                        <span className="text-gray-700">Métricas de engajamento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-neutral-300">
+                        <input type="radio" name="metricas-jornada" className="mr-3" />
+                        <span className="text-gray-700">Métricas de conversão</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-neutral-300">
+                        <input type="radio" name="metricas-jornada" className="mr-3" />
+                        <span className="text-gray-700">Métricas de satisfação</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-neutral-300">
+                        <input type="radio" name="metricas-jornada" className="mr-3" />
+                        <span className="text-gray-700">Todas as métricas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-neutral-600 mt-2">🧠 Gatilho: Medição específica</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-stone-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-stone-900 mb-3">🗺️ 5. Que nível de detalhamento?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-stone-300">
+                        <input type="radio" name="detalhamento-jornada" className="mr-3" />
+                        <span className="text-gray-700">Visão geral</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-stone-300">
+                        <input type="radio" name="detalhamento-jornada" className="mr-3" />
+                        <span className="text-gray-700">Detalhado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-stone-300">
+                        <input type="radio" name="detalhamento-jornada" className="mr-3" />
+                        <span className="text-gray-700">Muito detalhado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-stone-300">
+                        <input type="radio" name="detalhamento-jornada" className="mr-3" />
+                        <span className="text-gray-700">Completo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-stone-600 mt-2">🧠 Gatilho: Profundidade de análise</p>
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-3">🗺️ Resultado do Template de Jornada do Cliente</h4>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-center mb-4">
+                      <div className="text-3xl font-bold text-slate-600 mb-2">Jornada Mapeada</div>
+                      <div className="text-lg font-semibold text-gray-600">Estratégia Completa</div>
+                      <div className="text-sm text-gray-600">Template de jornada do cliente personalizado recomendado</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-slate-50 rounded-lg">
+                        <div className="text-2xl font-bold text-slate-600">180%</div>
+                        <div className="text-sm text-gray-600">Aumento satisfação</div>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-600">95%</div>
+                        <div className="text-sm text-gray-600">Taxa de retenção</div>
+                      </div>
+                      <div className="text-center p-3 bg-zinc-50 rounded-lg">
+                        <div className="text-2xl font-bold text-zinc-600">70%</div>
+                        <div className="text-sm text-gray-600">Taxa de conversão</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Estrutura Recomendada:</strong> Jornada completa com foco em satisfação e retenção</p>
+                      <p>• <strong>Prazo:</strong> 4-6 dias para criar jornada completa</p>
+                      <p>• <strong>Investimento:</strong> 6-8 horas de trabalho</p>
+                      <p>• <strong>ROI:</strong> Aumento de 180% na satisfação do cliente</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-slate-900 mb-3">ℹ️ Informações Importantes</h4>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p>• <strong>Jornada do Cliente:</strong> Tipo de jornada, persona, touchpoints, métricas, detalhamento</p>
+                    <p>• <strong>Análise:</strong> Critérios de jornada eficaz, evidências de satisfação, feedback de clientes</p>
+                    <p>• <strong>Personalização:</strong> Jornada específica baseada em suas necessidades</p>
+                    <p>• <strong>Duração:</strong> Jornada evolui com novos produtos e estratégias</p>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
                 </div>
               </div>
             )}
