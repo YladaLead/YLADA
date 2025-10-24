@@ -71,83 +71,108 @@ const ferramentasYLADA = [
 // Sistema completo de diagnósticos por profissão e ferramenta
 const diagnosticosCompletos = {
   // 1. CALCULADORA DE IMC
+  // 6. CALCULADORA DE IMC
   'calculadora-imc': {
     nutri: {
       baixoPeso: [
-        '📋 Avaliação nutricional completa para ganho de peso saudável',
-        '🥗 Plano alimentar hipercalórico e nutritivo',
-        '💊 Suplementação para aumento de massa muscular',
-        '📅 Acompanhamento nutricional semanal'
+        '📋 DIAGNÓSTICO: Seu IMC indica baixo peso, precisa de ganho saudável',
+        '🔍 CAUSA RAIZ: Ingestão calórica insuficiente ou metabolismo acelerado',
+        '⚡ AÇÃO IMEDIATA: Aumente calorias com alimentos densos nutricionalmente',
+        '📅 PLANO 7 DIAS: Protocolo hipercalórico com 6 refeições diárias',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + Mass Gainer + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Aumente carboidratos complexos, proteínas e gorduras saudáveis'
       ],
       pesoNormal: [
-        '📋 Manutenção do peso com alimentação equilibrada',
-        '🥗 Plano alimentar para otimização da saúde',
-        '💪 Estratégias para ganho de massa muscular',
-        '📅 Consultas de manutenção mensais'
+        '📋 DIAGNÓSTICO: Seu IMC está normal, mantenha hábitos saudáveis',
+        '🔍 CAUSA RAIZ: Boa relação peso/altura, continue cuidando da saúde',
+        '⚡ AÇÃO IMEDIATA: Mantenha alimentação equilibrada e exercícios regulares',
+        '📅 PLANO 7 DIAS: Manutenção com alimentação variada e atividade física',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em qualidade nutricional'
       ],
       sobrepeso: [
-        '📋 Plano alimentar para redução de peso',
-        '🥗 Reeducação alimentar e mudança de hábitos',
-        '💊 Suplementação para controle do apetite',
-        '📅 Acompanhamento nutricional quinzenal'
+        '📋 DIAGNÓSTICO: Seu IMC indica sobrepeso, precisa de redução controlada',
+        '🔍 CAUSA RAIZ: Excesso calórico e possível sedentarismo',
+        '⚡ AÇÃO IMEDIATA: Reduza calorias e aumente atividade física',
+        '📅 PLANO 7 DIAS: Déficit calórico moderado com exercícios',
+        '💊 SUPLEMENTAÇÃO: Termogênicos + Proteína + L-Carnitina',
+        '🍎 ALIMENTAÇÃO: Reduza carboidratos simples, aumente proteínas e fibras'
       ],
       obesidade: [
-        '📋 Plano alimentar para redução de peso',
-        '🥗 Reeducação alimentar completa',
-        '💊 Suplementação para controle metabólico',
-        '📅 Acompanhamento nutricional semanal intensivo'
+        '📋 DIAGNÓSTICO: Seu IMC indica obesidade, precisa de intervenção urgente',
+        '🔍 CAUSA RAIZ: Excesso calórico significativo e possível resistência metabólica',
+        '⚡ AÇÃO IMEDIATA: Inicie déficit calórico controlado com acompanhamento',
+        '📅 PLANO 7 DIAS: Protocolo de redução calórica com exercícios adaptados',
+        '💊 SUPLEMENTAÇÃO: Suplementos metabólicos + Proteína + Fibras',
+        '🍎 ALIMENTAÇÃO: Reeducação alimentar completa com alimentos integrais'
       ]
     },
     sales: {
       baixoPeso: [
-        '💊 Whey Protein para ganho de massa muscular',
-        '🍯 Maltodextrina para aumento calórico',
-        '🥛 Mass Gainer para ganho de peso',
-        '📞 Consultoria personalizada de suplementação'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos para ganho de peso',
+        '🔍 CAUSA RAIZ: Baixo peso requer suplementação hipercalórica',
+        '⚡ AÇÃO IMEDIATA: Kit de ganho de peso com suplementos específicos',
+        '📅 PLANO 7 DIAS: Protocolo com Mass Gainer + Whey Protein',
+        '💊 SUPLEMENTAÇÃO: Mass Gainer + Whey Protein + Creatina + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos que potencializam absorção dos suplementos'
       ],
       pesoNormal: [
-        '💊 Multivitamínicos para otimização da saúde',
-        '🥗 Proteínas para manutenção muscular',
-        '💪 Creatina para performance física',
-        '📞 Consultoria de suplementação preventiva'
+        '💊 DIAGNÓSTICO: Seu peso está ideal, use suplementos de manutenção',
+        '🔍 CAUSA RAIZ: Peso normal permite uso de suplementos preventivos',
+        '⚡ AÇÃO IMEDIATA: Kit de manutenção com suplementos básicos',
+        '📅 PLANO 7 DIAS: Kit preventivo com multivitamínico e proteína',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Whey Protein + Ômega-3',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, otimize timing dos suplementos'
       ],
       sobrepeso: [
-        '💊 Termogênicos para aceleração metabólica',
-        '🥗 Proteínas para preservação muscular',
-        '💪 L-Carnitina para queima de gordura',
-        '📞 Consultoria de suplementação para emagrecimento'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos para redução de peso',
+        '🔍 CAUSA RAIZ: Sobrepeso requer suplementação termogênica',
+        '⚡ AÇÃO IMEDIATA: Kit de emagrecimento com termogênicos',
+        '📅 PLANO 7 DIAS: Protocolo com termogênicos + proteína',
+        '💊 SUPLEMENTAÇÃO: Termogênicos + Proteína + L-Carnitina + Fibras',
+        '🍎 ALIMENTAÇÃO: Alimentos que potencializam ação dos termogênicos'
       ],
       obesidade: [
-        '💊 Suplementos para controle metabólico',
-        '🥗 Proteínas para preservação muscular',
-        '💪 Suplementos para redução de apetite',
-        '📞 Consultoria especializada em suplementação'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de kit metabólico completo',
+        '🔍 CAUSA RAIZ: Obesidade requer suplementação metabólica intensiva',
+        '⚡ AÇÃO IMEDIATA: Kit metabólico completo com suplementos específicos',
+        '📅 PLANO 7 DIAS: Protocolo metabólico com suplementos especializados',
+        '💊 SUPLEMENTAÇÃO: Kit metabólico + Proteína + Fibras + Probióticos',
+        '🍎 ALIMENTAÇÃO: Dieta específica para potencializar suplementos metabólicos'
       ]
     },
     coach: {
       baixoPeso: [
-        '🧘‍♀️ Programa de ganho de peso saudável',
-        '💪 Treinos para aumento de massa muscular',
-        '🍎 Coaching nutricional para ganho de peso',
-        '📅 Acompanhamento semanal de transformação'
+        '🌱 DIAGNÓSTICO: Seu corpo precisa de estratégias para ganho saudável',
+        '🔍 CAUSA RAIZ: Baixo peso requer mudanças no estilo de vida',
+        '⚡ AÇÃO IMEDIATA: Ajuste hábitos alimentares e adicione exercícios',
+        '📅 PLANO 7 DIAS: Desafio de ganho de peso com hábitos saudáveis',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás energéticos',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares e alimentos nutritivos'
       ],
       pesoNormal: [
-        '🧘‍♀️ Programa de otimização da saúde',
-        '💪 Treinos para manutenção e performance',
-        '🍎 Coaching de hábitos saudáveis',
-        '📅 Acompanhamento mensal de bem-estar'
+        '🌼 DIAGNÓSTICO: Seu peso está ideal, mantenha hábitos saudáveis',
+        '🔍 CAUSA RAIZ: Peso normal permite foco em otimização',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de manutenção com hábitos saudáveis',
+        '💊 SUPLEMENTAÇÃO: Chás funcionais + Probióticos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
       sobrepeso: [
-        '🧘‍♀️ Programa de transformação corporal',
-        '💪 Treinos para redução de peso',
-        '🍎 Coaching de mudança de hábitos',
-        '📅 Acompanhamento quinzenal de progresso'
+        '🌿 DIAGNÓSTICO: Seu corpo precisa de estratégias para redução de peso',
+        '🔍 CAUSA RAIZ: Sobrepeso requer mudanças no estilo de vida',
+        '⚡ AÇÃO IMEDIATA: Ajuste hábitos alimentares e aumente atividade física',
+        '📅 PLANO 7 DIAS: Desafio de transformação com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Chás termogênicos + Probióticos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente com foco em redução calórica'
       ],
       obesidade: [
-        '🧘‍♀️ Programa intensivo de transformação',
-        '💪 Treinos adaptados para início da jornada',
-        '🍎 Coaching completo de mudança de vida',
-        '📅 Acompanhamento semanal intensivo'
+        '🔥 DIAGNÓSTICO: Seu corpo precisa de transformação completa urgente',
+        '🔍 CAUSA RAIZ: Obesidade requer mudanças radicais no estilo de vida',
+        '⚡ AÇÃO IMEDIATA: Inicie transformação completa com protocolo estruturado',
+        '📅 PLANO 7 DIAS: Desafio de transformação com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Protocolo completo com suplementos naturais',
+        '🍎 ALIMENTAÇÃO: Transformação alimentar completa com foco metabólico'
       ]
     }
   },
@@ -317,987 +342,1654 @@ const diagnosticosCompletos = {
   },
 
   // 11. MINI E-BOOK EDUCATIVO
+  // 12. MINI E-BOOK EDUCATIVO
   'mini-ebook': {
     nutri: {
       baixoConhecimento: [
-        '📋 E-book completo sobre nutrição básica',
-        '🥗 Guia prático de alimentação saudável',
-        '💊 Informações sobre suplementação',
-        '📅 Consulta nutricional educativa'
+        '📚 DIAGNÓSTICO: Seu conhecimento nutricional precisa de base sólida',
+        '🔍 CAUSA RAIZ: Falta de conhecimento básico sobre nutrição e alimentação',
+        '⚡ AÇÃO IMEDIATA: Estude fundamentos nutricionais por 30 dias',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo nutricional básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ferro + Vitamina D + Probióticos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos in natura e evite processados'
       ],
       conhecimentoModerado: [
-        '📋 E-book sobre nutrição avançada',
-        '🥗 Guia de otimização nutricional',
-        '💊 Suplementação específica por objetivo',
-        '📅 Consulta nutricional especializada'
+        '📚 DIAGNÓSTICO: Seu conhecimento nutricional está moderado, precisa de aprofundamento',
+        '🔍 CAUSA RAIZ: Conhecimento básico presente, mas falta especialização',
+        '⚡ AÇÃO IMEDIATA: Aprofunde conhecimentos específicos por 30 dias',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo nutricional avançado',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Magnésio + Probióticos',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade dos alimentos e adicione superalimentos'
       ],
       altoConhecimento: [
-        '📋 E-book sobre nutrição de alta performance',
-        '🥗 Guia de nutrição esportiva',
-        '💊 Suplementação de elite',
-        '📅 Consulta nutricional de performance'
+        '📚 DIAGNÓSTICO: Seu conhecimento nutricional está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Bom conhecimento nutricional permite foco em evolução',
+        '⚡ AÇÃO IMEDIATA: Mantenha conhecimento atual e evolua para especialização',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo nutricional especializado',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Antioxidantes + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em alimentos funcionais e densidade nutricional'
       ]
     },
     sales: {
       baixoConhecimento: [
-        '💊 E-book sobre suplementos básicos',
-        '🥗 Guia de produtos nutricionais',
-        '💪 Informações sobre suplementação',
-        '📞 Consultoria educativa em suplementos'
+        '💊 DIAGNÓSTICO: Seu conhecimento sobre suplementos precisa de base sólida',
+        '🔍 CAUSA RAIZ: Falta de conhecimento básico sobre suplementação',
+        '⚡ AÇÃO IMEDIATA: Estude fundamentos de suplementação por 30 dias',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo sobre suplementos básicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ferro + Vitamina D + Probióticos + Magnésio',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar suplementos'
       ],
       conhecimentoModerado: [
-        '💊 E-book sobre suplementos avançados',
-        '🥗 Guia de produtos especializados',
-        '💪 Suplementação por objetivo',
-        '📞 Consultoria especializada em produtos'
+        '💊 DIAGNÓSTICO: Seu conhecimento sobre suplementos está moderado, precisa de aprofundamento',
+        '🔍 CAUSA RAIZ: Conhecimento básico presente, mas falta especialização',
+        '⚡ AÇÃO IMEDIATA: Aprofunde conhecimentos específicos sobre suplementação',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo sobre suplementos avançados',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Magnésio + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar suplementos'
       ],
       altoConhecimento: [
-        '💊 E-book sobre suplementos de elite',
-        '🥗 Guia de produtos de alta performance',
-        '💪 Suplementação profissional',
-        '📞 Consultoria premium em suplementos'
+        '💊 DIAGNÓSTICO: Seu conhecimento sobre suplementos está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Bom conhecimento sobre suplementação permite foco em evolução',
+        '⚡ AÇÃO IMEDIATA: Mantenha conhecimento atual e evolua para especialização',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo sobre suplementos especializados',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Antioxidantes + Adaptógenos + Probióticos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar suplementos preventivos'
       ]
     },
     coach: {
       baixoConhecimento: [
-        '🧘‍♀️ E-book sobre bem-estar básico',
-        '💪 Guia de exercícios fundamentais',
-        '🍎 Coaching nutricional educativo',
-        '📅 Programa de transformação inicial'
+        '🌱 DIAGNÓSTICO: Seu conhecimento sobre bem-estar precisa de base sólida',
+        '🔍 CAUSA RAIZ: Falta de conhecimento básico sobre bem-estar e saúde',
+        '⚡ AÇÃO IMEDIATA: Estude fundamentos de bem-estar por 30 dias',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo sobre bem-estar básico',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás funcionais básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos in natura e horários regulares'
       ],
       conhecimentoModerado: [
-        '🧘‍♀️ E-book sobre bem-estar avançado',
-        '💪 Guia de treinos especializados',
-        '🍎 Coaching nutricional específico',
-        '📅 Programa de transformação intermediário'
+        '🌼 DIAGNÓSTICO: Seu conhecimento sobre bem-estar está moderado, precisa de aprofundamento',
+        '🔍 CAUSA RAIZ: Conhecimento básico presente, mas falta especialização',
+        '⚡ AÇÃO IMEDIATA: Aprofunde conhecimentos específicos sobre bem-estar',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo sobre bem-estar avançado',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás funcionais específicos',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade dos alimentos e adicione superalimentos'
       ],
       altoConhecimento: [
-        '🧘‍♀️ E-book sobre bem-estar de elite',
-        '💪 Guia de treinos de alta performance',
-        '🍎 Coaching nutricional profissional',
-        '📅 Programa de transformação avançado'
+        '🔆 DIAGNÓSTICO: Seu conhecimento sobre bem-estar está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Bom conhecimento sobre bem-estar permite foco em evolução',
+        '⚡ AÇÃO IMEDIATA: Mantenha conhecimento atual e evolua para especialização',
+        '📅 PLANO 7 DIAS: Leitura diária de conteúdo sobre bem-estar especializado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar evolução',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 12. GUIA NUTRACÊUTICO
+  // 13. GUIA NUTRACÊUTICO
   'guia-nutraceutico': {
     nutri: {
       baixoInteresse: [
-        '📋 Guia básico de nutracêuticos',
-        '🥗 Informações sobre alimentos funcionais',
-        '💊 Suplementação preventiva',
-        '📅 Consulta nutricional preventiva'
+        '💊 DIAGNÓSTICO: Seu interesse em nutracêuticos precisa ser despertado',
+        '🔍 CAUSA RAIZ: Falta de conhecimento sobre benefícios dos nutracêuticos',
+        '⚡ AÇÃO IMEDIATA: Introduza nutracêuticos básicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de introdução com nutracêuticos essenciais',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos + Vitamina D',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos funcionais básicos e evite processados'
       ],
       interesseModerado: [
-        '📋 Guia avançado de nutracêuticos',
-        '🥗 Alimentos funcionais específicos',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '💊 DIAGNÓSTICO: Seu interesse em nutracêuticos está moderado, precisa de aprofundamento',
+        '🔍 CAUSA RAIZ: Interesse básico presente, mas falta especialização',
+        '⚡ AÇÃO IMEDIATA: Aprofunde uso de nutracêuticos específicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de aprofundamento com nutracêuticos direcionados',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Magnésio + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade dos alimentos e adicione superalimentos funcionais'
       ],
       altoInteresse: [
-        '📋 Guia especializado em nutracêuticos',
-        '🥗 Alimentos funcionais de alta qualidade',
-        '💊 Suplementação de precisão',
-        '📅 Consulta nutricional de alta performance'
+        '💊 DIAGNÓSTICO: Seu interesse em nutracêuticos está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Alto interesse em nutracêuticos permite foco em evolução',
+        '⚡ AÇÃO IMEDIATA: Mantenha interesse atual e evolua para nutracêuticos de precisão',
+        '📅 PLANO 7 DIAS: Protocolo de evolução com nutracêuticos especializados',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Antioxidantes + Adaptógenos + Probióticos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em alimentos funcionais e densidade nutricional'
       ]
     },
     sales: {
       baixoInteresse: [
-        '💊 Guia básico de produtos nutracêuticos',
-        '🥗 Produtos funcionais essenciais',
-        '💪 Suplementação preventiva',
-        '📞 Consultoria básica em nutracêuticos'
+        '💊 DIAGNÓSTICO: Seu interesse em nutracêuticos precisa ser despertado',
+        '🔍 CAUSA RAIZ: Falta de conhecimento sobre benefícios dos nutracêuticos',
+        '⚡ AÇÃO IMEDIATA: Introduza nutracêuticos básicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de introdução com nutracêuticos essenciais',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos + Vitamina D + Magnésio',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar nutracêuticos'
       ],
       interesseModerado: [
-        '💊 Guia avançado de nutracêuticos',
-        '🥗 Produtos funcionais específicos',
-        '💪 Suplementação direcionada',
-        '📞 Consultoria especializada em produtos'
+        '💊 DIAGNÓSTICO: Seu interesse em nutracêuticos está moderado, precisa de aprofundamento',
+        '🔍 CAUSA RAIZ: Interesse básico presente, mas falta especialização',
+        '⚡ AÇÃO IMEDIATA: Aprofunde uso de nutracêuticos específicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de aprofundamento com nutracêuticos direcionados',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Magnésio + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar nutracêuticos'
       ],
       altoInteresse: [
-        '💊 Guia premium de nutracêuticos',
-        '🥗 Produtos funcionais de elite',
-        '💪 Suplementação de precisão',
-        '📞 Consultoria premium em nutracêuticos'
+        '💊 DIAGNÓSTICO: Seu interesse em nutracêuticos está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Alto interesse em nutracêuticos permite foco em evolução',
+        '⚡ AÇÃO IMEDIATA: Mantenha interesse atual e evolua para nutracêuticos de precisão',
+        '📅 PLANO 7 DIAS: Protocolo de evolução com nutracêuticos especializados',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Antioxidantes + Adaptógenos + Probióticos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar nutracêuticos preventivos'
       ]
     },
     coach: {
       baixoInteresse: [
-        '🧘‍♀️ Guia básico de bem-estar natural',
-        '💪 Exercícios com foco em saúde',
-        '🍎 Coaching nutricional preventivo',
-        '📅 Programa de bem-estar inicial'
+        '🌱 DIAGNÓSTICO: Seu interesse em nutracêuticos precisa ser despertado',
+        '🔍 CAUSA RAIZ: Falta de conhecimento sobre benefícios dos nutracêuticos',
+        '⚡ AÇÃO IMEDIATA: Introduza nutracêuticos básicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de introdução com nutracêuticos essenciais',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás funcionais básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos in natura e horários regulares'
       ],
       interesseModerado: [
-        '🧘‍♀️ Guia avançado de bem-estar natural',
-        '💪 Treinos com foco em performance',
-        '🍎 Coaching nutricional específico',
-        '📅 Programa de bem-estar intermediário'
+        '🌼 DIAGNÓSTICO: Seu interesse em nutracêuticos está moderado, precisa de aprofundamento',
+        '🔍 CAUSA RAIZ: Interesse básico presente, mas falta especialização',
+        '⚡ AÇÃO IMEDIATA: Aprofunde uso de nutracêuticos específicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de aprofundamento com nutracêuticos direcionados',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás funcionais específicos',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade dos alimentos e adicione superalimentos'
       ],
       altoInteresse: [
-        '🧘‍♀️ Guia especializado em bem-estar natural',
-        '💪 Treinos de alta performance natural',
-        '🍎 Coaching nutricional profissional',
-        '📅 Programa de bem-estar avançado'
+        '🔆 DIAGNÓSTICO: Seu interesse em nutracêuticos está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Alto interesse em nutracêuticos permite foco em evolução',
+        '⚡ AÇÃO IMEDIATA: Mantenha interesse atual e evolua para nutracêuticos de precisão',
+        '📅 PLANO 7 DIAS: Protocolo de evolução com nutracêuticos especializados',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar evolução',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 13. GUIA PROTEICO
+  // 14. GUIA PROTEICO
   'guia-proteico': {
     nutri: {
       baixaProteina: [
-        '📋 Guia completo de proteínas',
-        '🥗 Plano alimentar rico em proteínas',
-        '💊 Suplementação proteica específica',
-        '📅 Consulta nutricional proteica'
+        '🥩 DIAGNÓSTICO: Seu consumo de proteína está abaixo do recomendado',
+        '🔍 CAUSA RAIZ: Ingestão insuficiente de proteínas para suas necessidades',
+        '⚡ AÇÃO IMEDIATA: Aumente consumo de proteínas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de aumento proteico com alimentos ricos',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + BCAA + Creatina + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Foque em carnes magras, ovos, peixes e leguminosas'
       ],
       proteinaModerada: [
-        '📋 Guia de otimização proteica',
-        '🥗 Plano alimentar balanceado',
-        '💊 Suplementação proteica preventiva',
-        '📅 Consulta nutricional especializada'
+        '🥩 DIAGNÓSTICO: Seu consumo de proteína está adequado, mantenha e otimize',
+        '🔍 CAUSA RAIZ: Consumo proteico adequado permite foco em otimização',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize qualidade por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de otimização proteica com alimentos de qualidade',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + Ômega-3 + Magnésio + Probióticos',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade das proteínas e adicione superalimentos'
       ],
       altaProteina: [
-        '📋 Guia de performance proteica',
-        '🥗 Plano alimentar de alta qualidade',
-        '💊 Suplementação proteica avançada',
-        '📅 Consulta nutricional de performance'
+        '🥩 DIAGNÓSTICO: Seu consumo de proteína está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Alto consumo proteico permite foco em performance',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e evolua para proteínas de precisão',
+        '📅 PLANO 7 DIAS: Protocolo de evolução proteica com alimentos especializados',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + BCAA + Creatina + Beta-Alanina + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em proteínas de alta qualidade e densidade'
       ]
     },
     sales: {
       baixaProteina: [
-        '💊 Guia completo de suplementos proteicos',
-        '🥗 Produtos proteicos essenciais',
-        '💪 Suplementação proteica básica',
-        '📞 Consultoria especializada em proteínas'
+        '🥩 DIAGNÓSTICO: Seu consumo de proteína está abaixo do recomendado',
+        '🔍 CAUSA RAIZ: Ingestão insuficiente de proteínas para suas necessidades',
+        '⚡ AÇÃO IMEDIATA: Aumente consumo de proteínas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de aumento proteico com suplementos básicos',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + BCAA + Creatina + Multivitamínico + Magnésio',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar aumento proteico'
       ],
       proteinaModerada: [
-        '💊 Guia de otimização proteica',
-        '🥗 Produtos proteicos balanceados',
-        '💪 Suplementação proteica moderada',
-        '📞 Consultoria preventiva proteica'
+        '🥩 DIAGNÓSTICO: Seu consumo de proteína está adequado, mantenha e otimize',
+        '🔍 CAUSA RAIZ: Consumo proteico adequado permite foco em otimização',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize qualidade por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de otimização proteica com suplementos específicos',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + Ômega-3 + Magnésio + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar proteínas'
       ],
       altaProteina: [
-        '💊 Guia de performance proteica',
-        '🥗 Produtos proteicos de alta qualidade',
-        '💪 Suplementação proteica avançada',
-        '📞 Consultoria premium em proteínas'
+        '🥩 DIAGNÓSTICO: Seu consumo de proteína está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Alto consumo proteico permite foco em performance',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e evolua para proteínas de precisão',
+        '📅 PLANO 7 DIAS: Protocolo de evolução proteica com suplementos especializados',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + BCAA + Creatina + Beta-Alanina + Multivitamínico + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar proteínas preventivas'
       ]
     },
     coach: {
       baixaProteina: [
-        '🧘‍♀️ Guia de treinos para ganho muscular',
-        '💪 Exercícios focados em massa muscular',
-        '🍎 Coaching nutricional proteico',
-        '📅 Programa de ganho muscular'
+        '🌱 DIAGNÓSTICO: Seu consumo de proteína está abaixo do recomendado',
+        '🔍 CAUSA RAIZ: Ingestão insuficiente de proteínas para suas necessidades',
+        '⚡ AÇÃO IMEDIATA: Aumente consumo de proteínas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de aumento proteico com alimentos naturais',
+        '💊 SUPLEMENTAÇÃO: Proteínas vegetais e suplementos naturais básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos in natura e horários regulares'
       ],
       proteinaModerada: [
-        '🧘‍♀️ Guia de treinos balanceados',
-        '💪 Exercícios para manutenção muscular',
-        '🍎 Coaching nutricional equilibrado',
-        '📅 Programa de manutenção muscular'
+        '🌼 DIAGNÓSTICO: Seu consumo de proteína está adequado, mantenha e otimize',
+        '🔍 CAUSA RAIZ: Consumo proteico adequado permite foco em otimização',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize qualidade por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de otimização proteica com alimentos específicos',
+        '💊 SUPLEMENTAÇÃO: Proteínas vegetais e suplementos naturais específicos',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade dos alimentos e adicione superalimentos'
       ],
       altaProteina: [
-        '🧘‍♀️ Guia de treinos de alta performance',
-        '💪 Exercícios para performance muscular',
-        '🍎 Coaching nutricional de elite',
-        '📅 Programa de performance muscular'
+        '🔆 DIAGNÓSTICO: Seu consumo de proteína está alto, mantenha e evolua',
+        '🔍 CAUSA RAIZ: Alto consumo proteico permite foco em performance',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e evolua para proteínas de precisão',
+        '📅 PLANO 7 DIAS: Protocolo de evolução proteica com alimentos especializados',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar evolução',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 14. TABELA COMPARATIVA
+  // 15. TABELA COMPARATIVA
   'tabela-comparativa': {
-    nutri: [
-      '📋 Análise comparativa de produtos',
-      '🥗 Recomendações baseadas em evidências',
-      '💊 Suplementação personalizada',
-      '📅 Consulta nutricional comparativa'
-    ],
-    sales: [
-      '💊 Comparativo detalhado de produtos',
-      '🥗 Produtos recomendados por categoria',
-      '💪 Suplementação direcionada',
-      '📞 Consultoria comparativa em produtos'
-    ],
-    coach: [
-      '🧘‍♀️ Comparativo de estratégias de treino',
-      '💪 Exercícios recomendados por objetivo',
-      '🍎 Coaching nutricional comparativo',
-      '📅 Programa de treino personalizado'
-    ]
+    nutri: {
+      comparacaoBasica: [
+        '📊 DIAGNÓSTICO: Você precisa de comparação básica de produtos essenciais',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos básicos',
+        '⚡ AÇÃO IMEDIATA: Compare produtos essenciais por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos básicos e compare opções simples'
+      ],
+      comparacaoAvancada: [
+        '📊 DIAGNÓSTICO: Você precisa de comparação avançada de produtos especializados',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos especializados',
+        '⚡ AÇÃO IMEDIATA: Compare produtos especializados por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos especializados',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      comparacaoPremium: [
+        '📊 DIAGNÓSTICO: Você precisa de comparação premium de produtos de elite',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos de elite',
+        '⚡ AÇÃO IMEDIATA: Compare produtos de elite por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos de elite',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
+      ]
+    },
+    sales: {
+      comparacaoBasica: [
+        '📊 DIAGNÓSTICO: Você precisa de comparação básica de produtos essenciais',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos básicos',
+        '⚡ AÇÃO IMEDIATA: Compare produtos essenciais por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar comparação'
+      ],
+      comparacaoAvancada: [
+        '📊 DIAGNÓSTICO: Você precisa de comparação avançada de produtos especializados',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos especializados',
+        '⚡ AÇÃO IMEDIATA: Compare produtos especializados por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos especializados',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar comparação'
+      ],
+      comparacaoPremium: [
+        '📊 DIAGNÓSTICO: Você precisa de comparação premium de produtos de elite',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos de elite',
+        '⚡ AÇÃO IMEDIATA: Compare produtos de elite por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos de elite',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Fitoquímicos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar comparação premium'
+      ]
+    },
+    coach: {
+      comparacaoBasica: [
+        '🌱 DIAGNÓSTICO: Você precisa de comparação básica de produtos essenciais',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos básicos',
+        '⚡ AÇÃO IMEDIATA: Compare produtos essenciais por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos in natura e compare opções simples'
+      ],
+      comparacaoAvancada: [
+        '🌼 DIAGNÓSTICO: Você precisa de comparação avançada de produtos especializados',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos especializados',
+        '⚡ AÇÃO IMEDIATA: Compare produtos especializados por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos especializados',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      comparacaoPremium: [
+        '🔆 DIAGNÓSTICO: Você precisa de comparação premium de produtos de elite',
+        '🔍 CAUSA RAIZ: Necessidade de entender diferenças entre produtos de elite',
+        '⚡ AÇÃO IMEDIATA: Compare produtos de elite por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de comparação com produtos de elite',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar comparação',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
+      ]
+    }
   },
 
   // 15. TABELA DE SUBSTITUIÇÕES
+  // 16. TABELA DE SUBSTITUIÇÕES
   'tabela-substituicoes': {
-    nutri: [
-      '📋 Guia completo de substituições alimentares',
-      '🥗 Alternativas nutritivas por categoria',
-      '💊 Suplementação para substituições',
-      '📅 Consulta nutricional de substituições'
-    ],
-    sales: [
-      '💊 Guia de produtos substitutos',
-      '🥗 Alternativas por categoria de produto',
-      '💪 Suplementação para substituições',
-      '📞 Consultoria em produtos substitutos'
-    ],
-    coach: [
-      '🧘‍♀️ Guia de exercícios substitutos',
-      '💪 Alternativas de treino por objetivo',
-      '🍎 Coaching nutricional de substituições',
-      '📅 Programa de treino adaptado'
-    ]
+    nutri: {
+      substituicoesBasicas: [
+        '🔄 DIAGNÓSTICO: Você precisa de substituições básicas para alimentos comuns',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas simples para alimentos básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições básicas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com alimentos básicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em substituições simples e acessíveis'
+      ],
+      substituicoesAvancadas: [
+        '🔄 DIAGNÓSTICO: Você precisa de substituições avançadas para alimentos específicos',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas especializadas para alimentos específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições avançadas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com alimentos especializados',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      substituicoesPremium: [
+        '🔄 DIAGNÓSTICO: Você precisa de substituições premium para alimentos de elite',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas de elite para alimentos premium',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com alimentos de elite',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
+      ]
+    },
+    sales: {
+      substituicoesBasicas: [
+        '🔄 DIAGNÓSTICO: Você precisa de substituições básicas para produtos comuns',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas simples para produtos básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições básicas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar substituições'
+      ],
+      substituicoesAvancadas: [
+        '🔄 DIAGNÓSTICO: Você precisa de substituições avançadas para produtos específicos',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas especializadas para produtos específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições avançadas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com produtos especializados',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar substituições'
+      ],
+      substituicoesPremium: [
+        '🔄 DIAGNÓSTICO: Você precisa de substituições premium para produtos de elite',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas de elite para produtos premium',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com produtos de elite',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Fitoquímicos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar substituições premium'
+      ]
+    },
+    coach: {
+      substituicoesBasicas: [
+        '🌱 DIAGNÓSTICO: Você precisa de substituições básicas para alimentos comuns',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas simples para alimentos básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições básicas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com alimentos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em substituições simples e acessíveis'
+      ],
+      substituicoesAvancadas: [
+        '🌼 DIAGNÓSTICO: Você precisa de substituições avançadas para alimentos específicos',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas especializadas para alimentos específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições avançadas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com alimentos especializados',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      substituicoesPremium: [
+        '🔆 DIAGNÓSTICO: Você precisa de substituições premium para alimentos de elite',
+        '🔍 CAUSA RAIZ: Necessidade de alternativas de elite para alimentos premium',
+        '⚡ AÇÃO IMEDIATA: Implemente substituições premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de substituições com alimentos de elite',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar substituições',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
+      ]
+    }
   },
 
   // 16. TABELA DE SINTOMAS
+  // 17. TABELA DE SINTOMAS
   'tabela-sintomas': {
-    nutri: [
-      '📋 Análise nutricional de sintomas',
-      '🥗 Plano alimentar para correção',
-      '💊 Suplementação para sintomas específicos',
-      '📅 Consulta nutricional terapêutica'
-    ],
-    sales: [
-      '💊 Produtos para sintomas específicos',
-      '🥗 Suplementação direcionada',
-      '💪 Produtos de apoio terapêutico',
-      '📞 Consultoria em produtos terapêuticos'
-    ],
-    coach: [
-      '🧘‍♀️ Programa de bem-estar para sintomas',
-      '💪 Exercícios adaptados para sintomas',
-      '🍎 Coaching nutricional terapêutico',
-      '📅 Programa de transformação terapêutica'
-    ]
+    nutri: {
+      sintomasLeves: [
+        '🩺 DIAGNÓSTICO: Você apresenta sintomas leves que podem ser corrigidos com alimentação',
+        '🔍 CAUSA RAIZ: Desequilíbrios nutricionais leves causando sintomas específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente correções nutricionais por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de correção nutricional para sintomas leves',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Probióticos + Ômega-3 básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos específicos para correção dos sintomas'
+      ],
+      sintomasModerados: [
+        '🩺 DIAGNÓSTICO: Você apresenta sintomas moderados que requerem intervenção nutricional',
+        '🔍 CAUSA RAIZ: Desequilíbrios nutricionais moderados causando sintomas persistentes',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo nutricional específico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de correção nutricional para sintomas moderados',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos para correção'
+      ],
+      sintomasGraves: [
+        '🩺 DIAGNÓSTICO: Você apresenta sintomas graves que requerem intervenção nutricional intensiva',
+        '🔍 CAUSA RAIZ: Desequilíbrios nutricionais graves causando sintomas severos',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo nutricional intensivo por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de correção nutricional para sintomas graves',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes + Probióticos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos para correção intensiva'
+      ]
+    },
+    sales: {
+      sintomasLeves: [
+        '🩺 DIAGNÓSTICO: Você apresenta sintomas leves que podem ser corrigidos com produtos específicos',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para sintomas leves',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos específicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para sintomas leves',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar correção dos sintomas'
+      ],
+      sintomasModerados: [
+        '🩺 DIAGNÓSTICO: Você apresenta sintomas moderados que requerem produtos específicos',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para sintomas moderados',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos específicos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para sintomas moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar correção dos sintomas'
+      ],
+      sintomasGraves: [
+        '🩺 DIAGNÓSTICO: Você apresenta sintomas graves que requerem produtos específicos intensivos',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para sintomas graves',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos específicos intensivos por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para sintomas graves',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar correção intensiva dos sintomas'
+      ]
+    },
+    coach: {
+      sintomasLeves: [
+        '🌱 DIAGNÓSTICO: Você apresenta sintomas leves que podem ser corrigidos com mudanças no estilo de vida',
+        '🔍 CAUSA RAIZ: Desequilíbrios no estilo de vida causando sintomas leves',
+        '⚡ AÇÃO IMEDIATA: Implemente mudanças no estilo de vida por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de mudanças no estilo de vida para sintomas leves',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos naturais para correção dos sintomas'
+      ],
+      sintomasModerados: [
+        '🌼 DIAGNÓSTICO: Você apresenta sintomas moderados que requerem mudanças no estilo de vida',
+        '🔍 CAUSA RAIZ: Desequilíbrios no estilo de vida causando sintomas moderados',
+        '⚡ AÇÃO IMEDIATA: Implemente mudanças no estilo de vida por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de mudanças no estilo de vida para sintomas moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos para correção'
+      ],
+      sintomasGraves: [
+        '🔆 DIAGNÓSTICO: Você apresenta sintomas graves que requerem mudanças no estilo de vida intensivas',
+        '🔍 CAUSA RAIZ: Desequilíbrios no estilo de vida causando sintomas graves',
+        '⚡ AÇÃO IMEDIATA: Implemente mudanças no estilo de vida intensivas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de mudanças no estilo de vida para sintomas graves',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar correção',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
+      ]
+    }
   },
 
   // 17. PLANO ALIMENTAR BASE
+  // 18. PLANO ALIMENTAR BASE
   'plano-alimentar-base': {
-    nutri: [
-      '📋 Plano alimentar personalizado',
-      '🥗 Cardápio baseado em necessidades',
-      '💊 Suplementação complementar',
-      '📅 Acompanhamento nutricional semanal'
-    ],
-    sales: [
-      '💊 Produtos complementares ao plano',
-      '🥗 Suplementação para o plano alimentar',
-      '💪 Produtos de apoio nutricional',
-      '📞 Consultoria em produtos complementares'
-    ],
-    coach: [
-      '🧘‍♀️ Programa de transformação alimentar',
-      '💪 Exercícios complementares ao plano',
-      '🍎 Coaching nutricional do plano',
-      '📅 Acompanhamento do plano alimentar'
-    ]
+    nutri: {
+      planoBasico: [
+        '📅 DIAGNÓSTICO: Você precisa de um plano alimentar básico equilibrado',
+        '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar básica e equilibrada',
+        '⚡ AÇÃO IMEDIATA: Implemente plano alimentar básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de alimentação equilibrada básica',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos básicos e equilibrados'
+      ],
+      planoAvancado: [
+        '📅 DIAGNÓSTICO: Você precisa de um plano alimentar avançado especializado',
+        '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar especializada e avançada',
+        '⚡ AÇÃO IMEDIATA: Implemente plano alimentar avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de alimentação especializada avançada',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      planoPremium: [
+        '📅 DIAGNÓSTICO: Você precisa de um plano alimentar premium de elite',
+        '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar de elite e premium',
+        '⚡ AÇÃO IMEDIATA: Implemente plano alimentar premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de alimentação de elite premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
+      ]
+    },
+    sales: {
+      planoBasico: [
+        '📅 DIAGNÓSTICO: Você precisa de produtos para plano alimentar básico',
+        '🔍 CAUSA RAIZ: Necessidade de produtos complementares ao plano básico',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para plano básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para plano básico',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar o plano'
+      ],
+      planoAvancado: [
+        '📅 DIAGNÓSTICO: Você precisa de produtos para plano alimentar avançado',
+        '🔍 CAUSA RAIZ: Necessidade de produtos complementares ao plano avançado',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para plano avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para plano avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar o plano'
+      ],
+      planoPremium: [
+        '📅 DIAGNÓSTICO: Você precisa de produtos para plano alimentar premium',
+        '🔍 CAUSA RAIZ: Necessidade de produtos complementares ao plano premium',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para plano premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para plano premium',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar o plano premium'
+      ]
+    },
+    coach: {
+      planoBasico: [
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para plano alimentar básico',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para plano alimentar básico',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para plano básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para plano básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos naturais para o plano básico'
+      ],
+      planoAvancado: [
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para plano alimentar avançado',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para plano alimentar avançado',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para plano avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para plano avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      planoPremium: [
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para plano alimentar premium',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para plano alimentar premium',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para plano premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para plano premium',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar o plano',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
+      ]
+    }
   },
 
   // 18. PLANNER DE REFEIÇÕES
+  // 19. PLANNER DE REFEIÇÕES
   'planner-refeicoes': {
-    nutri: [
-      '📋 Planner personalizado de refeições',
-      '🥗 Organização semanal de cardápio',
-      '💊 Suplementação integrada ao planner',
-      '📅 Acompanhamento do planner semanal'
-    ],
-    sales: [
-      '💊 Produtos para o planner de refeições',
-      '🥗 Suplementação integrada',
-      '💪 Produtos de apoio ao planner',
-      '📞 Consultoria em produtos do planner'
-    ],
-    coach: [
-      '🧘‍♀️ Programa de organização alimentar',
-      '💪 Exercícios integrados ao planner',
-      '🍎 Coaching do planner alimentar',
-      '📅 Acompanhamento do planner'
-    ]
+    nutri: {
+      plannerSimples: [
+        '🗓️ DIAGNÓSTICO: Você precisa de um planner simples para organizar refeições',
+        '🔍 CAUSA RAIZ: Necessidade de organização básica das refeições',
+        '⚡ AÇÃO IMEDIATA: Implemente planner simples por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de organização básica de refeições',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em organização básica das refeições'
+      ],
+      plannerAvancado: [
+        '🗓️ DIAGNÓSTICO: Você precisa de um planner avançado para organizar refeições',
+        '🔍 CAUSA RAIZ: Necessidade de organização especializada das refeições',
+        '⚡ AÇÃO IMEDIATA: Implemente planner avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de organização especializada de refeições',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      plannerPremium: [
+        '🗓️ DIAGNÓSTICO: Você precisa de um planner premium para organizar refeições',
+        '🔍 CAUSA RAIZ: Necessidade de organização de elite das refeições',
+        '⚡ AÇÃO IMEDIATA: Implemente planner premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de organização de elite de refeições',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
+      ]
+    },
+    sales: {
+      plannerSimples: [
+        '🗓️ DIAGNÓSTICO: Você precisa de produtos para planner simples de refeições',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para organização básica',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para planner simples por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para planner simples',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar o planner'
+      ],
+      plannerAvancado: [
+        '🗓️ DIAGNÓSTICO: Você precisa de produtos para planner avançado de refeições',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para organização especializada',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para planner avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para planner avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar o planner'
+      ],
+      plannerPremium: [
+        '🗓️ DIAGNÓSTICO: Você precisa de produtos para planner premium de refeições',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para organização de elite',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para planner premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para planner premium',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar o planner premium'
+      ]
+    },
+    coach: {
+      plannerSimples: [
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para planner simples de refeições',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para organização básica',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para planner simples por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para planner simples',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em organização básica das refeições'
+      ],
+      plannerAvancado: [
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para planner avançado de refeições',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para organização especializada',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para planner avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para planner avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      plannerPremium: [
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para planner premium de refeições',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para organização de elite',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para planner premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para planner premium',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar o planner',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
+      ]
+    }
   },
 
   // 19. RASTREADOR ALIMENTAR
+  // 20. RASTREADOR ALIMENTAR
   'rastreador-alimentar': {
-    nutri: [
-      '📋 Análise do rastreamento alimentar',
-      '🥗 Correções baseadas no rastreamento',
-      '💊 Suplementação baseada no padrão',
-      '📅 Consulta nutricional de análise'
-    ],
-    sales: [
-      '💊 Produtos baseados no rastreamento',
-      '🥗 Suplementação personalizada',
-      '💪 Produtos para correção de padrões',
-      '📞 Consultoria baseada no rastreamento'
-    ],
-    coach: [
-      '🧘‍♀️ Programa baseado no rastreamento',
-      '💪 Exercícios para correção de padrões',
-      '🍎 Coaching nutricional de análise',
-      '📅 Acompanhamento de correção'
-    ]
+    nutri: {
+      rastreamentoBasico: [
+        '📈 DIAGNÓSTICO: Você precisa de rastreamento básico para identificar padrões alimentares',
+        '🔍 CAUSA RAIZ: Necessidade de identificar padrões alimentares simples',
+        '⚡ AÇÃO IMEDIATA: Implemente rastreamento básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de rastreamento básico de padrões',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em identificar padrões básicos alimentares'
+      ],
+      rastreamentoAvancado: [
+        '📈 DIAGNÓSTICO: Você precisa de rastreamento avançado para identificar padrões complexos',
+        '🔍 CAUSA RAIZ: Necessidade de identificar padrões alimentares complexos',
+        '⚡ AÇÃO IMEDIATA: Implemente rastreamento avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de rastreamento avançado de padrões',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      rastreamentoPremium: [
+        '📈 DIAGNÓSTICO: Você precisa de rastreamento premium para identificar padrões de elite',
+        '🔍 CAUSA RAIZ: Necessidade de identificar padrões alimentares de elite',
+        '⚡ AÇÃO IMEDIATA: Implemente rastreamento premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de rastreamento premium de padrões',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
+      ]
+    },
+    sales: {
+      rastreamentoBasico: [
+        '📈 DIAGNÓSTICO: Você precisa de produtos para rastreamento básico alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para rastreamento básico',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para rastreamento básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para rastreamento básico',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar o rastreamento'
+      ],
+      rastreamentoAvancado: [
+        '📈 DIAGNÓSTICO: Você precisa de produtos para rastreamento avançado alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para rastreamento avançado',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para rastreamento avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para rastreamento avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar o rastreamento'
+      ],
+      rastreamentoPremium: [
+        '📈 DIAGNÓSTICO: Você precisa de produtos para rastreamento premium alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para rastreamento premium',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para rastreamento premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para rastreamento premium',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar o rastreamento premium'
+      ]
+    },
+    coach: {
+      rastreamentoBasico: [
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para rastreamento básico alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para rastreamento básico',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para rastreamento básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para rastreamento básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em rastreamento básico de padrões alimentares'
+      ],
+      rastreamentoAvancado: [
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para rastreamento avançado alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para rastreamento avançado',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para rastreamento avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para rastreamento avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      rastreamentoPremium: [
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para rastreamento premium alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para rastreamento premium',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para rastreamento premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para rastreamento premium',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar o rastreamento',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
+      ]
+    }
   },
 
   // 20. DIÁRIO ALIMENTAR
+  // 21. DIÁRIO ALIMENTAR
   'diario-alimentar': {
-    nutri: [
-      '📋 Análise do diário alimentar',
-      '🥗 Plano de correção alimentar',
-      '💊 Suplementação baseada no diário',
-      '📅 Consulta nutricional de análise'
-    ],
-    sales: [
-      '💊 Produtos para correção alimentar',
-      '🥗 Suplementação baseada no diário',
-      '💪 Produtos de apoio alimentar',
-      '📞 Consultoria baseada no diário'
-    ],
-    coach: [
-      '🧘‍♀️ Programa de correção alimentar',
-      '💪 Exercícios para mudança de hábitos',
-      '🍎 Coaching nutricional de transformação',
-      '📅 Acompanhamento de mudança'
-    ]
+    nutri: {
+      diarioBasico: [
+        '📝 DIAGNÓSTICO: Você precisa de um diário básico para registrar hábitos alimentares',
+        '🔍 CAUSA RAIZ: Necessidade de registro simples de hábitos alimentares',
+        '⚡ AÇÃO IMEDIATA: Implemente diário básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de registro básico de hábitos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em registro básico de hábitos alimentares'
+      ],
+      diarioAvancado: [
+        '📝 DIAGNÓSTICO: Você precisa de um diário avançado para registrar hábitos detalhados',
+        '🔍 CAUSA RAIZ: Necessidade de registro detalhado de hábitos alimentares',
+        '⚡ AÇÃO IMEDIATA: Implemente diário avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de registro avançado de hábitos',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      diarioPremium: [
+        '📝 DIAGNÓSTICO: Você precisa de um diário premium para registro profissional',
+        '🔍 CAUSA RAIZ: Necessidade de registro profissional de hábitos alimentares',
+        '⚡ AÇÃO IMEDIATA: Implemente diário premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de registro premium de hábitos',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
+      ]
+    },
+    sales: {
+      diarioBasico: [
+        '📝 DIAGNÓSTICO: Você precisa de produtos para diário básico alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para registro básico',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para diário básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para diário básico',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar o diário'
+      ],
+      diarioAvancado: [
+        '📝 DIAGNÓSTICO: Você precisa de produtos para diário avançado alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para registro detalhado',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para diário avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para diário avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar o diário'
+      ],
+      diarioPremium: [
+        '📝 DIAGNÓSTICO: Você precisa de produtos para diário premium alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para registro profissional',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para diário premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para diário premium',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar o diário premium'
+      ]
+    },
+    coach: {
+      diarioBasico: [
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para diário básico alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para registro básico',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para diário básico por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para diário básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em registro básico de hábitos alimentares'
+      ],
+      diarioAvancado: [
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para diário avançado alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para registro detalhado',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para diário avançado por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para diário avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
+      ],
+      diarioPremium: [
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para diário premium alimentar',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para registro profissional',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para diário premium por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para diário premium',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar o diário',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
+      ]
+    }
   },
 
   // 21. TABELA DE METAS SEMANAIS
+  // 22. TABELA DE METAS SEMANAIS
   'tabela-metas-semanais': {
     nutri: {
       metasBasicas: [
-        '📋 Definição de metas nutricionais básicas',
-        '🥗 Plano alimentar para metas simples',
-        '💊 Suplementação básica para metas',
-        '📅 Acompanhamento semanal de metas'
+        '🎯 DIAGNÓSTICO: Você precisa de metas básicas para estabelecer objetivos simples',
+        '🔍 CAUSA RAIZ: Necessidade de estabelecer objetivos nutricionais básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente metas básicas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de metas básicas semanais',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em objetivos nutricionais básicos'
       ],
       metasModeradas: [
-        '📋 Definição de metas nutricionais moderadas',
-        '🥗 Plano alimentar para metas específicas',
-        '💊 Suplementação direcionada para metas',
-        '📅 Acompanhamento quinzenal de metas'
+        '🎯 DIAGNÓSTICO: Você precisa de metas moderadas para estabelecer objetivos específicos',
+        '🔍 CAUSA RAIZ: Necessidade de estabelecer objetivos nutricionais específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente metas moderadas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de metas moderadas semanais',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       metasAvancadas: [
-        '📋 Definição de metas nutricionais avançadas',
-        '🥗 Plano alimentar para metas complexas',
-        '💊 Suplementação avançada para metas',
-        '📅 Acompanhamento semanal intensivo de metas'
+        '🎯 DIAGNÓSTICO: Você precisa de metas avançadas para estabelecer objetivos complexos',
+        '🔍 CAUSA RAIZ: Necessidade de estabelecer objetivos nutricionais complexos',
+        '⚡ AÇÃO IMEDIATA: Implemente metas avançadas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de metas avançadas semanais',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
       ]
     },
     sales: {
       metasBasicas: [
-        '💊 Produtos básicos para metas simples',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em metas'
+        '🎯 DIAGNÓSTICO: Você precisa de produtos para metas básicas semanais',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para objetivos básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para metas básicas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para metas básicas',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar as metas'
       ],
       metasModeradas: [
-        '💊 Produtos moderados para metas específicas',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em metas'
+        '🎯 DIAGNÓSTICO: Você precisa de produtos para metas moderadas semanais',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para objetivos específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para metas moderadas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para metas moderadas',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar as metas'
       ],
       metasAvancadas: [
-        '💊 Produtos avançados para metas complexas',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em metas'
+        '🎯 DIAGNÓSTICO: Você precisa de produtos para metas avançadas semanais',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para objetivos complexos',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para metas avançadas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para metas avançadas',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar as metas avançadas'
       ]
     },
     coach: {
       metasBasicas: [
-        '🧘‍♀️ Programa básico de metas',
-        '💪 Exercícios para metas simples',
-        '🍎 Coaching nutricional básico',
-        '📅 Acompanhamento básico de metas'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para metas básicas semanais',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para objetivos básicos',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para metas básicas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para metas básicas',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em objetivos nutricionais básicos'
       ],
       metasModeradas: [
-        '🧘‍♀️ Programa moderado de metas',
-        '💪 Exercícios para metas específicas',
-        '🍎 Coaching nutricional moderado',
-        '📅 Acompanhamento moderado de metas'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para metas moderadas semanais',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para objetivos específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para metas moderadas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para metas moderadas',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       metasAvancadas: [
-        '🧘‍♀️ Programa avançado de metas',
-        '💪 Exercícios para metas complexas',
-        '🍎 Coaching nutricional avançado',
-        '📅 Acompanhamento avançado de metas'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para metas avançadas semanais',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para objetivos complexos',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para metas avançadas por 4 semanas',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para metas avançadas',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar as metas',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 22. TEMPLATE DE DESAFIO 7 DIAS
+  // 23. TEMPLATE DE DESAFIO 7 DIAS
   'template-desafio-7dias': {
     nutri: {
       desafioBasico: [
-        '📋 Desafio nutricional básico de 7 dias',
-        '🥗 Plano alimentar simples para desafio',
-        '💊 Suplementação básica para desafio',
-        '📅 Acompanhamento diário do desafio'
+        '🏆 DIAGNÓSTICO: Você precisa de um desafio básico de 7 dias para iniciar mudanças',
+        '🔍 CAUSA RAIZ: Necessidade de iniciar mudanças nutricionais básicas',
+        '⚡ AÇÃO IMEDIATA: Implemente desafio básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de desafio básico diário',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em mudanças nutricionais básicas'
       ],
       desafioModerado: [
-        '📋 Desafio nutricional moderado de 7 dias',
-        '🥗 Plano alimentar específico para desafio',
-        '💊 Suplementação direcionada para desafio',
-        '📅 Acompanhamento intensivo do desafio'
+        '🏆 DIAGNÓSTICO: Você precisa de um desafio moderado de 7 dias para mudanças específicas',
+        '🔍 CAUSA RAIZ: Necessidade de mudanças nutricionais específicas',
+        '⚡ AÇÃO IMEDIATA: Implemente desafio moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de desafio moderado diário',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       desafioAvancado: [
-        '📋 Desafio nutricional avançado de 7 dias',
-        '🥗 Plano alimentar complexo para desafio',
-        '💊 Suplementação avançada para desafio',
-        '📅 Acompanhamento especializado do desafio'
+        '🏆 DIAGNÓSTICO: Você precisa de um desafio avançado de 7 dias para mudanças complexas',
+        '🔍 CAUSA RAIZ: Necessidade de mudanças nutricionais complexas',
+        '⚡ AÇÃO IMEDIATA: Implemente desafio avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de desafio avançado diário',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
       ]
     },
     sales: {
       desafioBasico: [
-        '💊 Produtos básicos para desafio de 7 dias',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em desafios'
+        '🏆 DIAGNÓSTICO: Você precisa de produtos para desafio básico de 7 dias',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para mudanças básicas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para desafio básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para desafio básico',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar o desafio'
       ],
       desafioModerado: [
-        '💊 Produtos moderados para desafio específico',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em desafios'
+        '🏆 DIAGNÓSTICO: Você precisa de produtos para desafio moderado de 7 dias',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para mudanças específicas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para desafio moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para desafio moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar o desafio'
       ],
       desafioAvancado: [
-        '💊 Produtos avançados para desafio complexo',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em desafios'
+        '🏆 DIAGNÓSTICO: Você precisa de produtos para desafio avançado de 7 dias',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para mudanças complexas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para desafio avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para desafio avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar o desafio avançado'
       ]
     },
     coach: {
       desafioBasico: [
-        '🧘‍♀️ Programa básico de desafio de 7 dias',
-        '💪 Exercícios básicos para desafio',
-        '🍎 Coaching nutricional básico',
-        '📅 Acompanhamento básico do desafio'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para desafio básico de 7 dias',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para mudanças básicas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para desafio básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para desafio básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em mudanças nutricionais básicas'
       ],
       desafioModerado: [
-        '🧘‍♀️ Programa moderado de desafio',
-        '💪 Exercícios moderados para desafio',
-        '🍎 Coaching nutricional moderado',
-        '📅 Acompanhamento moderado do desafio'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para desafio moderado de 7 dias',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para mudanças específicas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para desafio moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para desafio moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       desafioAvancado: [
-        '🧘‍♀️ Programa avançado de desafio',
-        '💪 Exercícios avançados para desafio',
-        '🍎 Coaching nutricional avançado',
-        '📅 Acompanhamento avançado do desafio'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para desafio avançado de 7 dias',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para mudanças complexas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para desafio avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para desafio avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar o desafio',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 23. TEMPLATE DE DESAFIO 21 DIAS
+  // 24. TEMPLATE DE DESAFIO 21 DIAS
   'template-desafio-21dias': {
     nutri: {
       desafioBasico: [
-        '📋 Desafio nutricional básico de 21 dias',
-        '🥗 Plano alimentar simples para desafio',
-        '💊 Suplementação básica para desafio',
-        '📅 Acompanhamento semanal do desafio'
+        '📅 DIAGNÓSTICO: Você precisa de um desafio básico de 21 dias para criar hábitos duradouros',
+        '🔍 CAUSA RAIZ: Necessidade de criar hábitos nutricionais básicos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente desafio básico por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de desafio básico semanal',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em hábitos nutricionais básicos duradouros'
       ],
       desafioModerado: [
-        '📋 Desafio nutricional moderado de 21 dias',
-        '🥗 Plano alimentar específico para desafio',
-        '💊 Suplementação direcionada para desafio',
-        '📅 Acompanhamento quinzenal do desafio'
+        '📅 DIAGNÓSTICO: Você precisa de um desafio moderado de 21 dias para criar hábitos específicos duradouros',
+        '🔍 CAUSA RAIZ: Necessidade de criar hábitos nutricionais específicos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente desafio moderado por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de desafio moderado semanal',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       desafioAvancado: [
-        '📋 Desafio nutricional avançado de 21 dias',
-        '🥗 Plano alimentar complexo para desafio',
-        '💊 Suplementação avançada para desafio',
-        '📅 Acompanhamento semanal intensivo do desafio'
+        '📅 DIAGNÓSTICO: Você precisa de um desafio avançado de 21 dias para criar hábitos complexos duradouros',
+        '🔍 CAUSA RAIZ: Necessidade de criar hábitos nutricionais complexos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente desafio avançado por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de desafio avançado semanal',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
       ]
     },
     sales: {
       desafioBasico: [
-        '💊 Produtos básicos para desafio de 21 dias',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em desafios'
+        '📅 DIAGNÓSTICO: Você precisa de produtos para desafio básico de 21 dias',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para hábitos básicos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para desafio básico por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de produtos para desafio básico',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar o desafio'
       ],
       desafioModerado: [
-        '💊 Produtos moderados para desafio específico',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em desafios'
+        '📅 DIAGNÓSTICO: Você precisa de produtos para desafio moderado de 21 dias',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para hábitos específicos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para desafio moderado por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de produtos para desafio moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos especializados + Suplementos específicos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar o desafio'
       ],
       desafioAvancado: [
-        '💊 Produtos avançados para desafio complexo',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em desafios'
+        '📅 DIAGNÓSTICO: Você precisa de produtos para desafio avançado de 21 dias',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para hábitos complexos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para desafio avançado por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de produtos para desafio avançado',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar o desafio avançado'
       ]
     },
     coach: {
       desafioBasico: [
-        '🧘‍♀️ Programa básico de desafio de 21 dias',
-        '💪 Exercícios básicos para desafio',
-        '🍎 Coaching nutricional básico',
-        '📅 Acompanhamento básico do desafio'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para desafio básico de 21 dias',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para hábitos básicos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para desafio básico por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de coaching para desafio básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em hábitos nutricionais básicos duradouros'
       ],
       desafioModerado: [
-        '🧘‍♀️ Programa moderado de desafio',
-        '💪 Exercícios moderados para desafio',
-        '🍎 Coaching nutricional moderado',
-        '📅 Acompanhamento moderado do desafio'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para desafio moderado de 21 dias',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para hábitos específicos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para desafio moderado por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de coaching para desafio moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       desafioAvancado: [
-        '🧘‍♀️ Programa avançado de desafio',
-        '💪 Exercícios avançados para desafio',
-        '🍎 Coaching nutricional avançado',
-        '📅 Acompanhamento avançado do desafio'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para desafio avançado de 21 dias',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para hábitos complexos duradouros',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para desafio avançado por 21 dias',
+        '📅 PLANO 21 DIAS: Protocolo de coaching para desafio avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar o desafio',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
-  // 24. GUIA DE HIDRATAÇÃO
+  // 25. GUIA DE HIDRATAÇÃO
   'guia-hidratacao': {
     nutri: {
       baixaHidratacao: [
-        '📋 Guia completo de hidratação',
-        '🥗 Plano alimentar rico em líquidos',
-        '💊 Suplementos eletrolíticos',
-        '📅 Acompanhamento hidratacional semanal'
+        '💧 DIAGNÓSTICO: Você precisa de orientações para melhorar sua hidratação diária',
+        '🔍 CAUSA RAIZ: Consumo insuficiente de líquidos (&lt; 2L/dia)',
+        '⚡ AÇÃO IMEDIATA: Implemente estratégias de hidratação adequada',
+        '📅 PLANO 7 DIAS: Protocolo de hidratação progressiva',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos + Sais minerais + Probióticos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos ricos em água e líquidos'
       ],
       hidratacaoModerada: [
-        '📋 Guia de otimização da hidratação',
-        '🥗 Plano alimentar para manutenção hidratacional',
-        '💊 Suplementos de apoio hidratacional',
-        '📅 Consultas de manutenção hidratacional'
+        '💧 DIAGNÓSTICO: Você precisa de otimização da sua hidratação moderada',
+        '🔍 CAUSA RAIZ: Hidratação adequada mas pode ser otimizada (2-3L/dia)',
+        '⚡ AÇÃO IMEDIATA: Implemente estratégias de otimização hidratacional',
+        '📅 PLANO 7 DIAS: Protocolo de manutenção hidratacional',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos específicos + Antioxidantes + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos hidratantes e superalimentos'
       ],
       altaHidratacao: [
-        '📋 Guia de manutenção da hidratação otimizada',
-        '🥗 Plano alimentar para sustentação hidratacional',
-        '💊 Suplementos preventivos hidratacionais',
-        '📅 Acompanhamento preventivo hidratacional'
+        '💧 DIAGNÓSTICO: Você precisa de manutenção da sua hidratação otimizada',
+        '🔍 CAUSA RAIZ: Hidratação excelente que precisa ser mantida (> 3L/dia)',
+        '⚡ AÇÃO IMEDIATA: Implemente estratégias de manutenção hidratacional',
+        '📅 PLANO 7 DIAS: Protocolo de sustentação hidratacional',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
       ]
     },
     sales: {
       baixaHidratacao: [
-        '💊 Eletrólitos para correção hidratacional',
-        '🥗 Suplementos hidratacionais',
-        '💪 Suplementos para reposição hídrica',
-        '📞 Consultoria especializada em hidratação'
+        '💧 DIAGNÓSTICO: Você precisa de produtos para melhorar sua hidratação',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para hidratação adequada',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para hidratação por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para hidratação',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos básicos + Sais minerais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar a hidratação'
       ],
       hidratacaoModerada: [
-        '💊 Eletrólitos para manutenção',
-        '🥗 Suplementos hidratacionais moderados',
-        '💪 Suplementos de apoio hidratacional',
-        '📞 Consultoria preventiva hidratacional'
+        '💧 DIAGNÓSTICO: Você precisa de produtos para otimizar sua hidratação',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para otimização hidratacional',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para otimização por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para otimização',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos específicos + Antioxidantes + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar a hidratação'
       ],
       altaHidratacao: [
-        '💊 Eletrólitos para otimização',
-        '🥗 Suplementos hidratacionais avançados',
-        '💪 Suplementos de manutenção hidratacional',
-        '📞 Consultoria especializada hidratacional'
+        '💧 DIAGNÓSTICO: Você precisa de produtos para manter sua hidratação otimizada',
+        '🔍 CAUSA RAIZ: Necessidade de produtos para manutenção hidratacional',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos para manutenção por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos para manutenção',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar a hidratação otimizada'
       ]
     },
     coach: {
       baixaHidratacao: [
-        '🧘‍♀️ Programa intensivo de hidratação',
-        '💪 Treinos adaptados para hidratação',
-        '🍎 Coaching nutricional hidratacional',
-        '📅 Acompanhamento semanal hidratacional'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching para melhorar sua hidratação',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para hidratação adequada',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para hidratação por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para hidratação',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e eletrólitos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em hábitos hidratacionais básicos'
       ],
       hidratacaoModerada: [
-        '🧘‍♀️ Programa de otimização hidratacional',
-        '💪 Treinos para manutenção hidratacional',
-        '🍎 Coaching de hábitos hidratacionais',
-        '📅 Acompanhamento mensal hidratacional'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching para otimizar sua hidratação',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para otimização hidratacional',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para otimização por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para otimização',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e eletrólitos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos hidratantes e superalimentos'
       ],
       altaHidratacao: [
-        '🧘‍♀️ Programa de sustentação hidratacional',
-        '💪 Treinos para manutenção da hidratação',
-        '🍎 Coaching preventivo hidratacional',
-        '📅 Acompanhamento preventivo hidratacional'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching para manter sua hidratação otimizada',
+        '🔍 CAUSA RAIZ: Necessidade de orientação para manutenção hidratacional',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching para manutenção por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching para manutenção',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar a hidratação',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
-  // 25. INFOGRÁFICO EDUCATIVO
+  // 26. INFOGRÁFICO EDUCATIVO
   'infografico-educativo': {
     nutri: {
       conhecimentoBasico: [
-        '📋 Infográfico sobre nutrição básica',
-        '🥗 Informações visuais sobre alimentação',
-        '💊 Suplementação educativa',
-        '📅 Consulta nutricional educativa'
+        '📊 DIAGNÓSTICO: Você precisa de infográficos educativos básicos sobre nutrição',
+        '🔍 CAUSA RAIZ: Conhecimento básico em nutrição (0-40 pontos)',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos básicos',
+        '📅 PLANO 7 DIAS: Protocolo de educação nutricional básica',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos nutricionais básicos'
       ],
       conhecimentoModerado: [
-        '📋 Infográfico sobre nutrição moderada',
-        '🥗 Informações visuais especializadas',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '📊 DIAGNÓSTICO: Você precisa de infográficos educativos moderados sobre nutrição',
+        '🔍 CAUSA RAIZ: Conhecimento moderado em nutrição (41-70 pontos)',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos moderados',
+        '📅 PLANO 7 DIAS: Protocolo de educação nutricional moderada',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       conhecimentoAvancado: [
-        '📋 Infográfico sobre nutrição avançada',
-        '🥗 Informações visuais de alta qualidade',
-        '💊 Suplementação avançada',
-        '📅 Consulta nutricional de performance'
+        '📊 DIAGNÓSTICO: Você precisa de infográficos educativos avançados sobre nutrição',
+        '🔍 CAUSA RAIZ: Conhecimento avançado em nutrição (71-100 pontos)',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos avançados',
+        '📅 PLANO 7 DIAS: Protocolo de educação nutricional avançada',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet'
       ]
     },
     sales: {
       conhecimentoBasico: [
-        '💊 Infográfico sobre suplementos básicos',
-        '🥗 Informações visuais sobre produtos',
-        '💪 Suplementação educativa',
-        '📞 Consultoria educativa em suplementos'
+        '📊 DIAGNÓSTICO: Você precisa de infográficos educativos básicos sobre suplementos',
+        '🔍 CAUSA RAIZ: Necessidade de educação básica em suplementação',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de educação básica em suplementos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar a educação'
       ],
       conhecimentoModerado: [
-        '💊 Infográfico sobre suplementos moderados',
-        '🥗 Informações visuais especializadas',
-        '💪 Suplementação direcionada',
-        '📞 Consultoria especializada em produtos'
+        '📊 DIAGNÓSTICO: Você precisa de infográficos educativos moderados sobre suplementos',
+        '🔍 CAUSA RAIZ: Necessidade de educação moderada em suplementação',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de educação moderada em suplementos',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar a educação'
       ],
       conhecimentoAvancado: [
-        '💊 Infográfico sobre suplementos avançados',
-        '🥗 Informações visuais de alta qualidade',
-        '💪 Suplementação avançada',
-        '📞 Consultoria premium em suplementos'
+        '📊 DIAGNÓSTICO: Você precisa de infográficos educativos avançados sobre suplementos',
+        '🔍 CAUSA RAIZ: Necessidade de educação avançada em suplementação',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de educação avançada em suplementos',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar a educação avançada'
       ]
     },
     coach: {
       conhecimentoBasico: [
-        '🧘‍♀️ Infográfico sobre bem-estar básico',
-        '💪 Informações visuais sobre exercícios',
-        '🍎 Coaching nutricional educativo',
-        '📅 Programa educativo de transformação'
+        '🌱 DIAGNÓSTICO: Você precisa de infográficos educativos básicos sobre bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de educação básica em bem-estar',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de educação básica em bem-estar',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de bem-estar'
       ],
       conhecimentoModerado: [
-        '🧘‍♀️ Infográfico sobre bem-estar moderado',
-        '💪 Informações visuais especializadas',
-        '🍎 Coaching nutricional específico',
-        '📅 Programa especializado de transformação'
+        '🌼 DIAGNÓSTICO: Você precisa de infográficos educativos moderados sobre bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de educação moderada em bem-estar',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de educação moderada em bem-estar',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos'
       ],
       conhecimentoAvancado: [
-        '🧘‍♀️ Infográfico sobre bem-estar avançado',
-        '💪 Informações visuais de alta qualidade',
-        '🍎 Coaching nutricional profissional',
-        '📅 Programa profissional de transformação'
+        '🔆 DIAGNÓSTICO: Você precisa de infográficos educativos avançados sobre bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de educação avançada em bem-estar',
+        '⚡ AÇÃO IMEDIATA: Implemente infográficos educativos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de educação avançada em bem-estar',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar a educação',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
-  // 26. TEMPLATE DE RECEITAS
+  // 27. TEMPLATE DE RECEITAS
   'template-receitas': {
     nutri: {
       receitasBasicas: [
-        '📋 Receitas básicas e nutritivas',
-        '🥗 Plano alimentar com receitas simples',
-        '💊 Suplementação básica',
-        '📅 Consulta nutricional com receitas'
+        '👨‍🍳 DIAGNÓSTICO: Você precisa de receitas básicas e nutritivas',
+        '🔍 CAUSA RAIZ: Necessidade de receitas simples e práticas',
+        '⚡ AÇÃO IMEDIATA: Implemente receitas básicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de receitas básicas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em ingredientes básicos e nutritivos'
       ],
       receitasModeradas: [
-        '📋 Receitas moderadas e especializadas',
-        '🥗 Plano alimentar com receitas específicas',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '👨‍🍳 DIAGNÓSTICO: Você precisa de receitas moderadas e específicas',
+        '🔍 CAUSA RAIZ: Necessidade de receitas com ingredientes específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente receitas moderadas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de receitas moderadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare ingredientes funcionais e superalimentos'
       ],
       receitasAvancadas: [
-        '📋 Receitas avançadas e de alta qualidade',
-        '🥗 Plano alimentar com receitas complexas',
-        '💊 Suplementação avançada',
-        '📅 Consulta nutricional de performance'
+        '👨‍🍳 DIAGNÓSTICO: Você precisa de receitas avançadas e gourmet',
+        '🔍 CAUSA RAIZ: Necessidade de receitas complexas e sofisticadas',
+        '⚡ AÇÃO IMEDIATA: Implemente receitas avançadas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de receitas avançadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare ingredientes orgânicos e produtos gourmet'
       ]
     },
     sales: {
       receitasBasicas: [
-        '💊 Produtos básicos para receitas',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em receitas'
+        '👨‍🍳 DIAGNÓSTICO: Você precisa de produtos básicos para receitas',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para culinária',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar as receitas'
       ],
       receitasModeradas: [
-        '💊 Produtos moderados para receitas',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em receitas'
+        '👨‍🍳 DIAGNÓSTICO: Você precisa de produtos moderados para receitas',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para culinária',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar as receitas'
       ],
       receitasAvancadas: [
-        '💊 Produtos avançados para receitas',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em receitas'
+        '👨‍🍳 DIAGNÓSTICO: Você precisa de produtos avançados para receitas',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para culinária',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar receitas avançadas'
       ]
     },
     coach: {
       receitasBasicas: [
-        '🧘‍♀️ Programa básico com receitas',
-        '💪 Exercícios básicos',
-        '🍎 Coaching nutricional básico',
-        '📅 Programa básico de transformação'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com receitas',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em culinária',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de culinária'
       ],
       receitasModeradas: [
-        '🧘‍♀️ Programa moderado com receitas',
-        '💪 Exercícios moderados',
-        '🍎 Coaching nutricional moderado',
-        '📅 Programa moderado de transformação'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com receitas',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em culinária',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare ingredientes funcionais e superalimentos'
       ],
       receitasAvancadas: [
-        '🧘‍♀️ Programa avançado com receitas',
-        '💪 Exercícios avançados',
-        '🍎 Coaching nutricional avançado',
-        '📅 Programa avançado de transformação'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com receitas',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em culinária',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar receitas',
+        '🍎 ALIMENTAÇÃO: Culinária consciente e funcional mantida'
       ]
     }
   },
 
-  // 27. CARDÁPIO DETOX
+  // 28. CARDÁPIO DETOX
   'cardapio-detox': {
     nutri: {
       detoxBasico: [
-        '📋 Cardápio detox básico',
-        '🥗 Plano alimentar detox simples',
-        '💊 Suplementos detox básicos',
-        '📅 Acompanhamento detox semanal'
+        '🥗 DIAGNÓSTICO: Você precisa de um cardápio detox básico e nutritivo',
+        '🔍 CAUSA RAIZ: Necessidade de detoxificação simples e eficaz',
+        '⚡ AÇÃO IMEDIATA: Implemente cardápio detox básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de detox básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos detox básicos e nutritivos'
       ],
       detoxModerado: [
-        '📋 Cardápio detox moderado',
-        '🥗 Plano alimentar detox específico',
-        '💊 Suplementos detox moderados',
-        '📅 Acompanhamento detox quinzenal'
+        '🥗 DIAGNÓSTICO: Você precisa de um cardápio detox moderado e específico',
+        '🔍 CAUSA RAIZ: Necessidade de detoxificação com ingredientes específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente cardápio detox moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de detox moderado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos detox'
       ],
       detoxAvancado: [
-        '📋 Cardápio detox avançado',
-        '🥗 Plano alimentar detox complexo',
-        '💊 Suplementos detox avançados',
-        '📅 Acompanhamento detox semanal intensivo'
+        '🥗 DIAGNÓSTICO: Você precisa de um cardápio detox avançado e gourmet',
+        '🔍 CAUSA RAIZ: Necessidade de detoxificação complexa e sofisticada',
+        '⚡ AÇÃO IMEDIATA: Implemente cardápio detox avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de detox avançado',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare alimentos orgânicos e produtos gourmet detox'
       ]
     },
     sales: {
       detoxBasico: [
-        '💊 Produtos detox básicos',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em detox'
+        '🥗 DIAGNÓSTICO: Você precisa de produtos básicos para detox',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para detoxificação',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar o detox'
       ],
       detoxModerado: [
-        '💊 Produtos detox moderados',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em detox'
+        '🥗 DIAGNÓSTICO: Você precisa de produtos moderados para detox',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para detoxificação',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar o detox'
       ],
       detoxAvancado: [
-        '💊 Produtos detox avançados',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em detox'
+        '🥗 DIAGNÓSTICO: Você precisa de produtos avançados para detox',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para detoxificação',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar detox avançado'
       ]
     },
     coach: {
       detoxBasico: [
-        '🧘‍♀️ Programa básico de detox',
-        '💪 Exercícios básicos para detox',
-        '🍎 Coaching nutricional básico',
-        '📅 Programa básico de detox'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com detox',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em detoxificação',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de detox'
       ],
       detoxModerado: [
-        '🧘‍♀️ Programa moderado de detox',
-        '💪 Exercícios moderados para detox',
-        '🍎 Coaching nutricional moderado',
-        '📅 Programa moderado de detox'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com detox',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em detoxificação',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare alimentos funcionais e superalimentos detox'
       ],
       detoxAvancado: [
-        '🧘‍♀️ Programa avançado de detox',
-        '💪 Exercícios avançados para detox',
-        '🍎 Coaching nutricional avançado',
-        '📅 Programa avançado de detox'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com detox',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em detoxificação',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar detox',
+        '🍎 ALIMENTAÇÃO: Detox consciente e funcional mantido'
       ]
     }
   },
 
-  // 28. SIMULADOR DE RESULTADOS
+  // 29. SIMULADOR DE RESULTADOS
   'simulador-resultados': {
     nutri: {
       resultadosBasicos: [
-        '📋 Simulação de resultados básicos',
-        '🥗 Plano alimentar para resultados simples',
-        '💊 Suplementação básica',
-        '📅 Consulta nutricional para resultados'
+        '🔮 DIAGNÓSTICO: Você precisa de simulação de resultados básicos e alcançáveis',
+        '🔍 CAUSA RAIZ: Necessidade de visualização de resultados simples e realistas',
+        '⚡ AÇÃO IMEDIATA: Implemente simulação básica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de simulação básica',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em resultados básicos e sustentáveis'
       ],
       resultadosModerados: [
-        '📋 Simulação de resultados moderados',
-        '🥗 Plano alimentar para resultados específicos',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '🔮 DIAGNÓSTICO: Você precisa de simulação de resultados moderados e específicos',
+        '🔍 CAUSA RAIZ: Necessidade de visualização de resultados com metas específicas',
+        '⚡ AÇÃO IMEDIATA: Implemente simulação moderada por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de simulação moderada',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare resultados funcionais e superalimentos'
       ],
       resultadosAvancados: [
-        '📋 Simulação de resultados avançados',
-        '🥗 Plano alimentar para resultados complexos',
-        '💊 Suplementação avançada',
-        '📅 Consulta nutricional de performance'
+        '🔮 DIAGNÓSTICO: Você precisa de simulação de resultados avançados e complexos',
+        '🔍 CAUSA RAIZ: Necessidade de visualização de resultados sofisticados',
+        '⚡ AÇÃO IMEDIATA: Implemente simulação avançada por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de simulação avançada',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare resultados orgânicos e produtos gourmet'
       ]
     },
     sales: {
       resultadosBasicos: [
-        '💊 Produtos para resultados básicos',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em resultados'
+        '🔮 DIAGNÓSTICO: Você precisa de produtos básicos para resultados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para simulação',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar resultados'
       ],
       resultadosModerados: [
-        '💊 Produtos para resultados moderados',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em resultados'
+        '🔮 DIAGNÓSTICO: Você precisa de produtos moderados para resultados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para simulação',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar resultados'
       ],
       resultadosAvancados: [
-        '💊 Produtos para resultados avançados',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em resultados'
+        '🔮 DIAGNÓSTICO: Você precisa de produtos avançados para resultados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para simulação',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar resultados avançados'
       ]
     },
     coach: {
       resultadosBasicos: [
-        '🧘‍♀️ Programa básico para resultados',
-        '💪 Exercícios básicos',
-        '🍎 Coaching nutricional básico',
-        '📅 Programa básico de resultados'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com simulação de resultados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em simulação',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de resultados'
       ],
       resultadosModerados: [
-        '🧘‍♀️ Programa moderado para resultados',
-        '💪 Exercícios moderados',
-        '🍎 Coaching nutricional moderado',
-        '📅 Programa moderado de resultados'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com simulação de resultados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em simulação',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare resultados funcionais e superalimentos'
       ],
       resultadosAvancados: [
-        '🧘‍♀️ Programa avançado para resultados',
-        '💪 Exercícios avançados',
-        '🍎 Coaching nutricional avançado',
-        '📅 Programa avançado de resultados'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com simulação de resultados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em simulação',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar resultados',
+        '🍎 ALIMENTAÇÃO: Simulação consciente e funcional mantida'
       ]
     }
   },
 
-  // 29. TEMPLATE DE AVALIAÇÃO INICIAL
+  // 30. TEMPLATE DE AVALIAÇÃO INICIAL
   'template-avaliacao-inicial': {
     nutri: {
       avaliacaoBasica: [
-        '📋 Avaliação nutricional básica',
-        '🥗 Plano alimentar simples',
-        '💊 Suplementação básica',
-        '📅 Consulta nutricional inicial'
+        '📋 DIAGNÓSTICO: Você precisa de uma avaliação nutricional básica e completa',
+        '🔍 CAUSA RAIZ: Necessidade de avaliação inicial simples e eficaz',
+        '⚡ AÇÃO IMEDIATA: Implemente avaliação básica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de avaliação básica',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em avaliação básica e sustentável'
       ],
       avaliacaoModerada: [
-        '📋 Avaliação nutricional moderada',
-        '🥗 Plano alimentar específico',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '📋 DIAGNÓSTICO: Você precisa de uma avaliação nutricional moderada e específica',
+        '🔍 CAUSA RAIZ: Necessidade de avaliação inicial com critérios específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente avaliação moderada por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de avaliação moderada',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare avaliação funcional e superalimentos'
       ],
       avaliacaoAvancada: [
-        '📋 Avaliação nutricional avançada',
-        '🥗 Plano alimentar complexo',
-        '💊 Suplementação avançada',
-        '📅 Consulta nutricional de performance'
+        '📋 DIAGNÓSTICO: Você precisa de uma avaliação nutricional avançada e complexa',
+        '🔍 CAUSA RAIZ: Necessidade de avaliação inicial sofisticada e completa',
+        '⚡ AÇÃO IMEDIATA: Implemente avaliação avançada por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de avaliação avançada',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare avaliação orgânica e produtos gourmet'
       ]
     },
     sales: {
       avaliacaoBasica: [
-        '💊 Produtos básicos para avaliação',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em avaliação'
+        '📋 DIAGNÓSTICO: Você precisa de produtos básicos para avaliação',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para avaliação inicial',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar avaliação'
       ],
       avaliacaoModerada: [
-        '💊 Produtos moderados para avaliação',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em avaliação'
+        '📋 DIAGNÓSTICO: Você precisa de produtos moderados para avaliação',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para avaliação inicial',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar avaliação'
       ],
       avaliacaoAvancada: [
-        '💊 Produtos avançados para avaliação',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em avaliação'
+        '📋 DIAGNÓSTICO: Você precisa de produtos avançados para avaliação',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para avaliação inicial',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar avaliação avançada'
       ]
     },
     coach: {
       avaliacaoBasica: [
-        '🧘‍♀️ Programa básico de avaliação',
-        '💪 Exercícios básicos',
-        '🍎 Coaching nutricional básico',
-        '📅 Programa básico de avaliação'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com avaliação',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em avaliação inicial',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de avaliação'
       ],
       avaliacaoModerada: [
-        '🧘‍♀️ Programa moderado de avaliação',
-        '💪 Exercícios moderados',
-        '🍎 Coaching nutricional moderado',
-        '📅 Programa moderado de avaliação'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com avaliação',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em avaliação inicial',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare avaliação funcional e superalimentos'
       ],
       avaliacaoAvancada: [
-        '🧘‍♀️ Programa avançado de avaliação',
-        '💪 Exercícios avançados',
-        '🍎 Coaching nutricional avançado',
-        '📅 Programa avançado de avaliação'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com avaliação',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em avaliação inicial',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar avaliação',
+        '🍎 ALIMENTAÇÃO: Avaliação consciente e funcional mantida'
       ]
     }
   },
 
-  // 30. FORMULÁRIO DE RECOMENDAÇÃO
+  // 31. FORMULÁRIO DE RECOMENDAÇÃO
   'formulario-recomendacao': {
     nutri: {
       recomendacaoBasica: [
-        '📋 Recomendações nutricionais básicas',
-        '🥗 Plano alimentar simples',
-        '💊 Suplementação básica',
-        '📅 Consulta nutricional básica'
+        '📝 DIAGNÓSTICO: Você precisa de recomendações nutricionais básicas e direcionadas',
+        '🔍 CAUSA RAIZ: Necessidade de recomendações simples e eficazes',
+        '⚡ AÇÃO IMEDIATA: Implemente recomendações básicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de recomendações básicas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em recomendações básicas e sustentáveis'
       ],
       recomendacaoModerada: [
-        '📋 Recomendações nutricionais moderadas',
-        '🥗 Plano alimentar específico',
-        '💊 Suplementação direcionada',
-        '📅 Consulta nutricional especializada'
+        '📝 DIAGNÓSTICO: Você precisa de recomendações nutricionais moderadas e específicas',
+        '🔍 CAUSA RAIZ: Necessidade de recomendações com critérios específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente recomendações moderadas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de recomendações moderadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare recomendações funcionais e superalimentos'
       ],
       recomendacaoAvancada: [
-        '📋 Recomendações nutricionais avançadas',
-        '🥗 Plano alimentar complexo',
-        '💊 Suplementação avançada',
-        '📅 Consulta nutricional de performance'
+        '📝 DIAGNÓSTICO: Você precisa de recomendações nutricionais avançadas e complexas',
+        '🔍 CAUSA RAIZ: Necessidade de recomendações sofisticadas e completas',
+        '⚡ AÇÃO IMEDIATA: Implemente recomendações avançadas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de recomendações avançadas',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare recomendações orgânicas e produtos gourmet'
       ]
     },
     sales: {
       recomendacaoBasica: [
-        '💊 Produtos básicos recomendados',
-        '🥗 Suplementação preventiva',
-        '💪 Produtos de apoio básico',
-        '📞 Consultoria básica em recomendações'
+        '📝 DIAGNÓSTICO: Você precisa de produtos básicos para recomendações',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para recomendações direcionadas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar recomendações'
       ],
       recomendacaoModerada: [
-        '💊 Produtos moderados recomendados',
-        '🥗 Suplementação direcionada',
-        '💪 Produtos de apoio moderado',
-        '📞 Consultoria moderada em recomendações'
+        '📝 DIAGNÓSTICO: Você precisa de produtos moderados para recomendações',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para recomendações direcionadas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar recomendações'
       ],
       recomendacaoAvancada: [
-        '💊 Produtos avançados recomendados',
-        '🥗 Suplementação avançada',
-        '💪 Produtos de apoio avançado',
-        '📞 Consultoria avançada em recomendações'
+        '📝 DIAGNÓSTICO: Você precisa de produtos avançados para recomendações',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para recomendações direcionadas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar recomendações avançadas'
       ]
     },
     coach: {
       recomendacaoBasica: [
-        '🧘‍♀️ Programa básico recomendado',
-        '💪 Exercícios básicos',
-        '🍎 Coaching nutricional básico',
-        '📅 Programa básico recomendado'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com recomendações',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em recomendações direcionadas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de recomendações'
       ],
       recomendacaoModerada: [
-        '🧘‍♀️ Programa moderado recomendado',
-        '💪 Exercícios moderados',
-        '🍎 Coaching nutricional moderado',
-        '📅 Programa moderado recomendado'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com recomendações',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em recomendações direcionadas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare recomendações funcionais e superalimentos'
       ],
       recomendacaoAvancada: [
-        '🧘‍♀️ Programa avançado recomendado',
-        '💪 Exercícios avançados',
-        '🍎 Coaching nutricional avançado',
-        '📅 Programa avançado recomendado'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com recomendações',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em recomendações direcionadas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar recomendações',
+        '🍎 ALIMENTAÇÃO: Recomendações conscientes e funcionais mantidas'
       ]
     }
   },
@@ -1431,513 +2123,658 @@ const diagnosticosCompletos = {
   },
 
   // 33. FICHA DE CLIENTE
+  // 32. FICHA DE CLIENTE
   'ficha-cliente': {
     nutri: {
       fichaBasica: [
-        '📋 Ficha nutricional básica do cliente',
-        '🥗 Plano alimentar simples personalizado',
-        '💊 Suplementação básica personalizada',
-        '📅 Consulta nutricional personalizada'
+        '📋 DIAGNÓSTICO: Você precisa de uma ficha nutricional básica e profissional',
+        '🔍 CAUSA RAIZ: Necessidade de profissionalização simples e eficaz',
+        '⚡ AÇÃO IMEDIATA: Implemente ficha básica por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de ficha básica',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em ficha básica e sustentável'
       ],
       fichaModerada: [
-        '📋 Ficha nutricional moderada do cliente',
-        '🥗 Plano alimentar específico personalizado',
-        '💊 Suplementação direcionada personalizada',
-        '📅 Consulta nutricional especializada personalizada'
+        '📋 DIAGNÓSTICO: Você precisa de uma ficha nutricional moderada e específica',
+        '🔍 CAUSA RAIZ: Necessidade de profissionalização com critérios específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente ficha moderada por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de ficha moderada',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare ficha funcional e superalimentos'
       ],
       fichaAvancada: [
-        '📋 Ficha nutricional avançada do cliente',
-        '🥗 Plano alimentar complexo personalizado',
-        '💊 Suplementação avançada personalizada',
-        '📅 Consulta nutricional de performance personalizada'
+        '📋 DIAGNÓSTICO: Você precisa de uma ficha nutricional avançada e complexa',
+        '🔍 CAUSA RAIZ: Necessidade de profissionalização sofisticada e completa',
+        '⚡ AÇÃO IMEDIATA: Implemente ficha avançada por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de ficha avançada',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare ficha orgânica e produtos gourmet'
       ]
     },
     sales: {
       fichaBasica: [
-        '💊 Produtos básicos personalizados para cliente',
-        '🥗 Suplementação preventiva personalizada',
-        '💪 Produtos de apoio básico personalizado',
-        '📞 Consultoria básica personalizada'
+        '📋 DIAGNÓSTICO: Você precisa de produtos básicos para profissionalização',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar profissionalização'
       ],
       fichaModerada: [
-        '💊 Produtos moderados personalizados para cliente',
-        '🥗 Suplementação direcionada personalizada',
-        '💪 Produtos de apoio moderado personalizado',
-        '📞 Consultoria moderada personalizada'
+        '📋 DIAGNÓSTICO: Você precisa de produtos moderados para profissionalização',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar profissionalização'
       ],
       fichaAvancada: [
-        '💊 Produtos avançados personalizados para cliente',
-        '🥗 Suplementação avançada personalizada',
-        '💪 Produtos de apoio avançado personalizado',
-        '📞 Consultoria avançada personalizada'
+        '📋 DIAGNÓSTICO: Você precisa de produtos avançados para profissionalização',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar profissionalização avançada'
       ]
     },
     coach: {
       fichaBasica: [
-        '🧘‍♀️ Programa básico personalizado para cliente',
-        '💪 Exercícios básicos personalizados',
-        '🍎 Coaching nutricional básico personalizado',
-        '📅 Programa básico personalizado'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com profissionalização',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de profissionalização'
       ],
       fichaModerada: [
-        '🧘‍♀️ Programa moderado personalizado para cliente',
-        '💪 Exercícios moderados personalizados',
-        '🍎 Coaching nutricional moderado personalizado',
-        '📅 Programa moderado personalizado'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com profissionalização',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare profissionalização funcional e superalimentos'
       ],
       fichaAvancada: [
-        '🧘‍♀️ Programa avançado personalizado para cliente',
-        '💪 Exercícios avançados personalizados',
-        '🍎 Coaching nutricional avançado personalizado',
-        '📅 Programa avançado personalizado'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com profissionalização',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em profissionalização',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar profissionalização',
+        '🍎 ALIMENTAÇÃO: Profissionalização consciente e funcional mantida'
       ]
     }
   },
 
-  // 34. TEMPLATE DE PROGRESSO VISUAL
+  // 33. TEMPLATE DE PROGRESSO VISUAL
   'template-progresso-visual': {
     nutri: {
       progressoBasico: [
-        '📋 Acompanhamento visual básico do progresso',
-        '🥗 Plano alimentar com progresso visual',
-        '💊 Suplementação com acompanhamento visual',
-        '📅 Consulta nutricional com progresso visual'
+        '📈 DIAGNÓSTICO: Você precisa de acompanhamento visual básico do progresso',
+        '🔍 CAUSA RAIZ: Necessidade de engajamento visual simples e eficaz',
+        '⚡ AÇÃO IMEDIATA: Implemente progresso visual básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de progresso visual básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em progresso visual básico e sustentável'
       ],
       progressoModerado: [
-        '📋 Acompanhamento visual moderado do progresso',
-        '🥗 Plano alimentar específico com progresso visual',
-        '💊 Suplementação direcionada com acompanhamento visual',
-        '📅 Consulta nutricional especializada com progresso visual'
+        '📈 DIAGNÓSTICO: Você precisa de acompanhamento visual moderado do progresso',
+        '🔍 CAUSA RAIZ: Necessidade de engajamento visual com critérios específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente progresso visual moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de progresso visual moderado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare progresso visual funcional e superalimentos'
       ],
       progressoAvancado: [
-        '📋 Acompanhamento visual avançado do progresso',
-        '🥗 Plano alimentar complexo com progresso visual',
-        '💊 Suplementação avançada com acompanhamento visual',
-        '📅 Consulta nutricional de performance com progresso visual'
+        '📈 DIAGNÓSTICO: Você precisa de acompanhamento visual avançado do progresso',
+        '🔍 CAUSA RAIZ: Necessidade de engajamento visual sofisticado e completo',
+        '⚡ AÇÃO IMEDIATA: Implemente progresso visual avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de progresso visual avançado',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare progresso visual orgânico e produtos gourmet'
       ]
     },
     sales: {
       progressoBasico: [
-        '💊 Produtos básicos com acompanhamento visual',
-        '🥗 Suplementação preventiva com progresso visual',
-        '💪 Produtos de apoio básico com acompanhamento visual',
-        '📞 Consultoria básica com progresso visual'
+        '📈 DIAGNÓSTICO: Você precisa de produtos básicos para engajamento visual',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para engajamento visual',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar engajamento visual'
       ],
       progressoModerado: [
-        '💊 Produtos moderados com acompanhamento visual',
-        '🥗 Suplementação direcionada com progresso visual',
-        '💪 Produtos de apoio moderado com acompanhamento visual',
-        '📞 Consultoria moderada com progresso visual'
+        '📈 DIAGNÓSTICO: Você precisa de produtos moderados para engajamento visual',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para engajamento visual',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar engajamento visual'
       ],
       progressoAvancado: [
-        '💊 Produtos avançados com acompanhamento visual',
-        '🥗 Suplementação avançada com progresso visual',
-        '💪 Produtos de apoio avançado com acompanhamento visual',
-        '📞 Consultoria avançada com progresso visual'
+        '📈 DIAGNÓSTICO: Você precisa de produtos avançados para engajamento visual',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para engajamento visual',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar engajamento visual avançado'
       ]
     },
     coach: {
       progressoBasico: [
-        '🧘‍♀️ Programa básico com acompanhamento visual',
-        '💪 Exercícios básicos com progresso visual',
-        '🍎 Coaching nutricional básico com acompanhamento visual',
-        '📅 Programa básico com progresso visual'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com engajamento visual',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em engajamento visual',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de engajamento visual'
       ],
       progressoModerado: [
-        '🧘‍♀️ Programa moderado com acompanhamento visual',
-        '💪 Exercícios moderados com progresso visual',
-        '🍎 Coaching nutricional moderado com acompanhamento visual',
-        '📅 Programa moderado com progresso visual'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com engajamento visual',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em engajamento visual',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare engajamento visual funcional e superalimentos'
       ],
       progressoAvancado: [
-        '🧘‍♀️ Programa avançado com acompanhamento visual',
-        '💪 Exercícios avançados com progresso visual',
-        '🍎 Coaching nutricional avançado com acompanhamento visual',
-        '📅 Programa avançado com progresso visual'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com engajamento visual',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em engajamento visual',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar engajamento visual',
+        '🍎 ALIMENTAÇÃO: Engajamento visual consciente e funcional mantido'
       ]
     }
   },
 
-  // 35. TEMPLATE DE STORY INTERATIVO
+  // 34. TEMPLATE DE STORY INTERATIVO
   'template-story-interativo': {
     nutri: {
       storyBasico: [
-        '📋 Story interativo básico sobre nutrição',
-        '🥗 Conteúdo visual simples sobre alimentação',
-        '💊 Informações básicas sobre suplementação',
-        '📅 Engajamento básico nutricional'
+        '📱 DIAGNÓSTICO: Você precisa de story interativo básico para engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de engajamento simples e eficaz nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente story interativo básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de story interativo básico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em story interativo básico e sustentável'
       ],
       storyModerado: [
-        '📋 Story interativo moderado sobre nutrição',
-        '🥗 Conteúdo visual específico sobre alimentação',
-        '💊 Informações direcionadas sobre suplementação',
-        '📅 Engajamento moderado nutricional'
+        '📱 DIAGNÓSTICO: Você precisa de story interativo moderado para engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de engajamento com critérios específicos nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente story interativo moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de story interativo moderado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare story interativo funcional e superalimentos'
       ],
       storyAvancado: [
-        '📋 Story interativo avançado sobre nutrição',
-        '🥗 Conteúdo visual complexo sobre alimentação',
-        '💊 Informações avançadas sobre suplementação',
-        '📅 Engajamento avançado nutricional'
+        '📱 DIAGNÓSTICO: Você precisa de story interativo avançado para engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de engajamento sofisticado e completo nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente story interativo avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de story interativo avançado',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare story interativo orgânico e produtos gourmet'
       ]
     },
     sales: {
       storyBasico: [
-        '💊 Story interativo básico sobre produtos',
-        '🥗 Conteúdo visual simples sobre suplementos',
-        '💪 Informações básicas sobre produtos',
-        '📞 Engajamento básico em produtos'
+        '📱 DIAGNÓSTICO: Você precisa de produtos básicos para engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para engajamento nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar engajamento nas redes'
       ],
       storyModerado: [
-        '💊 Story interativo moderado sobre produtos',
-        '🥗 Conteúdo visual específico sobre suplementos',
-        '💪 Informações direcionadas sobre produtos',
-        '📞 Engajamento moderado em produtos'
+        '📱 DIAGNÓSTICO: Você precisa de produtos moderados para engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para engajamento nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar engajamento nas redes'
       ],
       storyAvancado: [
-        '💊 Story interativo avançado sobre produtos',
-        '🥗 Conteúdo visual complexo sobre suplementos',
-        '💪 Informações avançadas sobre produtos',
-        '📞 Engajamento avançado em produtos'
+        '📱 DIAGNÓSTICO: Você precisa de produtos avançados para engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para engajamento nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar engajamento nas redes avançado'
       ]
     },
     coach: {
       storyBasico: [
-        '🧘‍♀️ Story interativo básico sobre bem-estar',
-        '💪 Conteúdo visual simples sobre exercícios',
-        '🍎 Informações básicas sobre coaching',
-        '📅 Engajamento básico em bem-estar'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em engajamento nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de engajamento nas redes'
       ],
       storyModerado: [
-        '🧘‍♀️ Story interativo moderado sobre bem-estar',
-        '💪 Conteúdo visual específico sobre exercícios',
-        '🍎 Informações direcionadas sobre coaching',
-        '📅 Engajamento moderado em bem-estar'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em engajamento nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare engajamento nas redes funcional e superalimentos'
       ],
       storyAvancado: [
-        '🧘‍♀️ Story interativo avançado sobre bem-estar',
-        '💪 Conteúdo visual complexo sobre exercícios',
-        '🍎 Informações avançadas sobre coaching',
-        '📅 Engajamento avançado em bem-estar'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com engajamento nas redes',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em engajamento nas redes sociais',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar engajamento nas redes',
+        '🍎 ALIMENTAÇÃO: Engajamento nas redes consciente e funcional mantido'
       ]
     }
   },
 
-  // 36. POST DE CURIOSIDADES
+  // 35. POST DE CURIOSIDADES
   'post-curiosidades': {
     nutri: {
       curiosidadeBasica: [
-        '📋 Post básico com curiosidades nutricionais',
-        '🥗 Conteúdo simples sobre alimentação',
-        '💊 Informações básicas sobre nutrição',
-        '📅 Engajamento básico nutricional'
+        '💡 DIAGNÓSTICO: Você precisa de post básico com curiosidades para autoridade',
+        '🔍 CAUSA RAIZ: Necessidade de autoridade simples e eficaz através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente post básico com curiosidades por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de post básico com curiosidades',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em post básico com curiosidades e sustentável'
       ],
       curiosidadeModerada: [
-        '📋 Post moderado com curiosidades nutricionais',
-        '🥗 Conteúdo específico sobre alimentação',
-        '💊 Informações direcionadas sobre nutrição',
-        '📅 Engajamento moderado nutricional'
+        '💡 DIAGNÓSTICO: Você precisa de post moderado com curiosidades para autoridade',
+        '🔍 CAUSA RAIZ: Necessidade de autoridade com critérios específicos através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente post moderado com curiosidades por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de post moderado com curiosidades',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare post moderado com curiosidades funcional e superalimentos'
       ],
       curiosidadeAvancada: [
-        '📋 Post avançado com curiosidades nutricionais',
-        '🥗 Conteúdo complexo sobre alimentação',
-        '💊 Informações avançadas sobre nutrição',
-        '📅 Engajamento avançado nutricional'
+        '💡 DIAGNÓSTICO: Você precisa de post avançado com curiosidades para autoridade',
+        '🔍 CAUSA RAIZ: Necessidade de autoridade sofisticada e completa através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente post avançado com curiosidades por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de post avançado com curiosidades',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare post avançado com curiosidades orgânico e produtos gourmet'
       ]
     },
     sales: {
       curiosidadeBasica: [
-        '💊 Post básico com curiosidades sobre produtos',
-        '🥗 Conteúdo simples sobre suplementos',
-        '💪 Informações básicas sobre produtos',
-        '📞 Engajamento básico em produtos'
+        '💡 DIAGNÓSTICO: Você precisa de produtos básicos para autoridade através de curiosidades',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para autoridade através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar autoridade através de curiosidades'
       ],
       curiosidadeModerada: [
-        '💊 Post moderado com curiosidades sobre produtos',
-        '🥗 Conteúdo específico sobre suplementos',
-        '💪 Informações direcionadas sobre produtos',
-        '📞 Engajamento moderado em produtos'
+        '💡 DIAGNÓSTICO: Você precisa de produtos moderados para autoridade através de curiosidades',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para autoridade através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar autoridade através de curiosidades'
       ],
       curiosidadeAvancada: [
-        '💊 Post avançado com curiosidades sobre produtos',
-        '🥗 Conteúdo complexo sobre suplementos',
-        '💪 Informações avançadas sobre produtos',
-        '📞 Engajamento avançado em produtos'
+        '💡 DIAGNÓSTICO: Você precisa de produtos avançados para autoridade através de curiosidades',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para autoridade através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar autoridade através de curiosidades avançado'
       ]
     },
     coach: {
       curiosidadeBasica: [
-        '🧘‍♀️ Post básico com curiosidades sobre bem-estar',
-        '💪 Conteúdo simples sobre exercícios',
-        '🍎 Informações básicas sobre coaching',
-        '📅 Engajamento básico em bem-estar'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com autoridade através de curiosidades',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em autoridade através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de autoridade através de curiosidades'
       ],
       curiosidadeModerada: [
-        '🧘‍♀️ Post moderado com curiosidades sobre bem-estar',
-        '💪 Conteúdo específico sobre exercícios',
-        '🍎 Informações direcionadas sobre coaching',
-        '📅 Engajamento moderado em bem-estar'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com autoridade através de curiosidades',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em autoridade através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare autoridade através de curiosidades funcional e superalimentos'
       ],
       curiosidadeAvancada: [
-        '🧘‍♀️ Post avançado com curiosidades sobre bem-estar',
-        '💪 Conteúdo complexo sobre exercícios',
-        '🍎 Informações avançadas sobre coaching',
-        '📅 Engajamento avançado em bem-estar'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com autoridade através de curiosidades',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em autoridade através de curiosidades',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar autoridade através de curiosidades',
+        '🍎 ALIMENTAÇÃO: Autoridade através de curiosidades consciente e funcional mantido'
       ]
     }
   },
 
-  // 37. TEMPLATE DE POST COM DICA
+  // 36. TEMPLATE DE POST COM DICA
   'template-post-dica': {
     nutri: {
       dicaBasica: [
-        '📋 Post básico com dicas nutricionais',
-        '🥗 Dicas simples sobre alimentação',
-        '💊 Dicas básicas sobre suplementação',
-        '📅 Engajamento básico nutricional'
+        '📝 DIAGNÓSTICO: Você precisa de template básico com dicas para conteúdo recorrente',
+        '🔍 CAUSA RAIZ: Necessidade de conteúdo recorrente simples e eficaz através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente template básico com dicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template básico com dicas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em template básico com dicas e sustentável'
       ],
       dicaModerada: [
-        '📋 Post moderado com dicas nutricionais',
-        '🥗 Dicas específicas sobre alimentação',
-        '💊 Dicas direcionadas sobre suplementação',
-        '📅 Engajamento moderado nutricional'
+        '📝 DIAGNÓSTICO: Você precisa de template moderado com dicas para conteúdo recorrente',
+        '🔍 CAUSA RAIZ: Necessidade de conteúdo recorrente com critérios específicos através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente template moderado com dicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template moderado com dicas',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare template moderado com dicas funcional e superalimentos'
       ],
       dicaAvancada: [
-        '📋 Post avançado com dicas nutricionais',
-        '🥗 Dicas complexas sobre alimentação',
-        '💊 Dicas avançadas sobre suplementação',
-        '📅 Engajamento avançado nutricional'
+        '📝 DIAGNÓSTICO: Você precisa de template avançado com dicas para conteúdo recorrente',
+        '🔍 CAUSA RAIZ: Necessidade de conteúdo recorrente sofisticado e completo através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente template avançado com dicas por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template avançado com dicas',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare template avançado com dicas orgânico e produtos gourmet'
       ]
     },
     sales: {
       dicaBasica: [
-        '💊 Post básico com dicas sobre produtos',
-        '🥗 Dicas simples sobre suplementos',
-        '💪 Dicas básicas sobre produtos',
-        '📞 Engajamento básico em produtos'
+        '📝 DIAGNÓSTICO: Você precisa de produtos básicos para conteúdo recorrente através de dicas',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para conteúdo recorrente através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar conteúdo recorrente através de dicas'
       ],
       dicaModerada: [
-        '💊 Post moderado com dicas sobre produtos',
-        '🥗 Dicas específicas sobre suplementos',
-        '💪 Dicas direcionadas sobre produtos',
-        '📞 Engajamento moderado em produtos'
+        '📝 DIAGNÓSTICO: Você precisa de produtos moderados para conteúdo recorrente através de dicas',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para conteúdo recorrente através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar conteúdo recorrente através de dicas'
       ],
       dicaAvancada: [
-        '💊 Post avançado com dicas sobre produtos',
-        '🥗 Dicas complexas sobre suplementos',
-        '💪 Dicas avançadas sobre produtos',
-        '📞 Engajamento avançado em produtos'
+        '📝 DIAGNÓSTICO: Você precisa de produtos avançados para conteúdo recorrente através de dicas',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para conteúdo recorrente através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar conteúdo recorrente através de dicas avançado'
       ]
     },
     coach: {
       dicaBasica: [
-        '🧘‍♀️ Post básico com dicas sobre bem-estar',
-        '💪 Dicas simples sobre exercícios',
-        '🍎 Dicas básicas sobre coaching',
-        '📅 Engajamento básico em bem-estar'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com conteúdo recorrente através de dicas',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em conteúdo recorrente através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de conteúdo recorrente através de dicas'
       ],
       dicaModerada: [
-        '🧘‍♀️ Post moderado com dicas sobre bem-estar',
-        '💪 Dicas específicas sobre exercícios',
-        '🍎 Dicas direcionadas sobre coaching',
-        '📅 Engajamento moderado em bem-estar'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com conteúdo recorrente através de dicas',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em conteúdo recorrente através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare conteúdo recorrente através de dicas funcional e superalimentos'
       ],
       dicaAvancada: [
-        '🧘‍♀️ Post avançado com dicas sobre bem-estar',
-        '💪 Dicas complexas sobre exercícios',
-        '🍎 Dicas avançadas sobre coaching',
-        '📅 Engajamento avançado em bem-estar'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com conteúdo recorrente através de dicas',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em conteúdo recorrente através de dicas',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar conteúdo recorrente através de dicas',
+        '🍎 ALIMENTAÇÃO: Conteúdo recorrente através de dicas consciente e funcional mantido'
       ]
     }
   },
 
-  // 38. TEMPLATE DE REELS ROTEIRIZADO
+  // 37. TEMPLATE DE REELS ROTEIRIZADO
   'template-reels-roteirizado': {
     nutri: {
       reelsBasico: [
-        '📋 Reels básico roteirizado sobre nutrição',
-        '🥗 Roteiro simples sobre alimentação',
-        '💊 Conteúdo básico sobre suplementação',
-        '📅 Engajamento básico nutricional'
+        '🎬 DIAGNÓSTICO: Você precisa de template básico de reels roteirizado para atração visual',
+        '🔍 CAUSA RAIZ: Necessidade de atração visual simples e eficaz através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente template básico de reels roteirizado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template básico de reels roteirizado',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em template básico de reels roteirizado e sustentável'
       ],
       reelsModerado: [
-        '📋 Reels moderado roteirizado sobre nutrição',
-        '🥗 Roteiro específico sobre alimentação',
-        '💊 Conteúdo direcionado sobre suplementação',
-        '📅 Engajamento moderado nutricional'
+        '🎬 DIAGNÓSTICO: Você precisa de template moderado de reels roteirizado para atração visual',
+        '🔍 CAUSA RAIZ: Necessidade de atração visual com critérios específicos através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente template moderado de reels roteirizado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template moderado de reels roteirizado',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare template moderado de reels roteirizado funcional e superalimentos'
       ],
       reelsAvancado: [
-        '📋 Reels avançado roteirizado sobre nutrição',
-        '🥗 Roteiro complexo sobre alimentação',
-        '💊 Conteúdo avançado sobre suplementação',
-        '📅 Engajamento avançado nutricional'
+        '🎬 DIAGNÓSTICO: Você precisa de template avançado de reels roteirizado para atração visual',
+        '🔍 CAUSA RAIZ: Necessidade de atração visual sofisticada e completa através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente template avançado de reels roteirizado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template avançado de reels roteirizado',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare template avançado de reels roteirizado orgânico e produtos gourmet'
       ]
     },
     sales: {
       reelsBasico: [
-        '💊 Reels básico roteirizado sobre produtos',
-        '🥗 Roteiro simples sobre suplementos',
-        '💪 Conteúdo básico sobre produtos',
-        '📞 Engajamento básico em produtos'
+        '🎬 DIAGNÓSTICO: Você precisa de produtos básicos para atração visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para atração visual através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar atração visual através de reels roteirizados'
       ],
       reelsModerado: [
-        '💊 Reels moderado roteirizado sobre produtos',
-        '🥗 Roteiro específico sobre suplementos',
-        '💪 Conteúdo direcionado sobre produtos',
-        '📞 Engajamento moderado em produtos'
+        '🎬 DIAGNÓSTICO: Você precisa de produtos moderados para atração visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para atração visual através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar atração visual através de reels roteirizados'
       ],
       reelsAvancado: [
-        '💊 Reels avançado roteirizado sobre produtos',
-        '🥗 Roteiro complexo sobre suplementos',
-        '💪 Conteúdo avançado sobre produtos',
-        '📞 Engajamento avançado em produtos'
+        '🎬 DIAGNÓSTICO: Você precisa de produtos avançados para atração visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para atração visual através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar atração visual através de reels roteirizados avançado'
       ]
     },
     coach: {
       reelsBasico: [
-        '🧘‍♀️ Reels básico roteirizado sobre bem-estar',
-        '💪 Roteiro simples sobre exercícios',
-        '🍎 Conteúdo básico sobre coaching',
-        '📅 Engajamento básico em bem-estar'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com atração visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em atração visual através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de atração visual através de reels roteirizados'
       ],
       reelsModerado: [
-        '🧘‍♀️ Reels moderado roteirizado sobre bem-estar',
-        '💪 Roteiro específico sobre exercícios',
-        '🍎 Conteúdo direcionado sobre coaching',
-        '📅 Engajamento moderado em bem-estar'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com atração visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em atração visual através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare atração visual através de reels roteirizados funcional e superalimentos'
       ],
       reelsAvancado: [
-        '🧘‍♀️ Reels avançado roteirizado sobre bem-estar',
-        '💪 Roteiro complexo sobre exercícios',
-        '🍎 Conteúdo avançado sobre coaching',
-        '📅 Engajamento avançado em bem-estar'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com atração visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em atração visual através de reels roteirizados',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar atração visual através de reels roteirizados',
+        '🍎 ALIMENTAÇÃO: Atração visual através de reels roteirizados consciente e funcional mantido'
       ]
     }
   },
 
-  // 39. TEMPLATE DE ARTIGO CURTO
+  // 38. TEMPLATE DE ARTIGO CURTO
   'template-artigo-curto': {
     nutri: {
       artigoBasico: [
-        '📋 Artigo curto básico sobre nutrição',
-        '🥗 Conteúdo simples sobre alimentação',
-        '💊 Informações básicas sobre suplementação',
-        '📅 Engajamento básico nutricional'
+        '📄 DIAGNÓSTICO: Você precisa de template básico de artigo curto para autoridade escrita',
+        '🔍 CAUSA RAIZ: Necessidade de autoridade escrita simples e eficaz através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente template básico de artigo curto por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template básico de artigo curto',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em template básico de artigo curto e sustentável'
       ],
       artigoModerado: [
-        '📋 Artigo curto moderado sobre nutrição',
-        '🥗 Conteúdo específico sobre alimentação',
-        '💊 Informações direcionadas sobre suplementação',
-        '📅 Engajamento moderado nutricional'
+        '📄 DIAGNÓSTICO: Você precisa de template moderado de artigo curto para autoridade escrita',
+        '🔍 CAUSA RAIZ: Necessidade de autoridade escrita com critérios específicos através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente template moderado de artigo curto por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template moderado de artigo curto',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare template moderado de artigo curto funcional e superalimentos'
       ],
       artigoAvancado: [
-        '📋 Artigo curto avançado sobre nutrição',
-        '🥗 Conteúdo complexo sobre alimentação',
-        '💊 Informações avançadas sobre suplementação',
-        '📅 Engajamento avançado nutricional'
+        '📄 DIAGNÓSTICO: Você precisa de template avançado de artigo curto para autoridade escrita',
+        '🔍 CAUSA RAIZ: Necessidade de autoridade escrita sofisticada e completa através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente template avançado de artigo curto por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de template avançado de artigo curto',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare template avançado de artigo curto orgânico e produtos gourmet'
       ]
     },
     sales: {
       artigoBasico: [
-        '💊 Artigo curto básico sobre produtos',
-        '🥗 Conteúdo simples sobre suplementos',
-        '💪 Informações básicas sobre produtos',
-        '📞 Engajamento básico em produtos'
+        '📄 DIAGNÓSTICO: Você precisa de produtos básicos para autoridade escrita através de artigos curtos',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para autoridade escrita através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar autoridade escrita através de artigos curtos'
       ],
       artigoModerado: [
-        '💊 Artigo curto moderado sobre produtos',
-        '🥗 Conteúdo específico sobre suplementos',
-        '💪 Informações direcionadas sobre produtos',
-        '📞 Engajamento moderado em produtos'
+        '📄 DIAGNÓSTICO: Você precisa de produtos moderados para autoridade escrita através de artigos curtos',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para autoridade escrita através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar autoridade escrita através de artigos curtos'
       ],
       artigoAvancado: [
-        '💊 Artigo curto avançado sobre produtos',
-        '🥗 Conteúdo complexo sobre suplementos',
-        '💪 Informações avançadas sobre produtos',
-        '📞 Engajamento avançado em produtos'
+        '📄 DIAGNÓSTICO: Você precisa de produtos avançados para autoridade escrita através de artigos curtos',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para autoridade escrita através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar autoridade escrita através de artigos curtos avançado'
       ]
     },
     coach: {
       artigoBasico: [
-        '🧘‍♀️ Artigo curto básico sobre bem-estar',
-        '💪 Conteúdo simples sobre exercícios',
-        '🍎 Informações básicas sobre coaching',
-        '📅 Engajamento básico em bem-estar'
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com autoridade escrita através de artigos curtos',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em autoridade escrita através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching básico',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de autoridade escrita através de artigos curtos'
       ],
       artigoModerado: [
-        '🧘‍♀️ Artigo curto moderado sobre bem-estar',
-        '💪 Conteúdo específico sobre exercícios',
-        '🍎 Informações direcionadas sobre coaching',
-        '📅 Engajamento moderado em bem-estar'
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com autoridade escrita através de artigos curtos',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em autoridade escrita através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare autoridade escrita através de artigos curtos funcional e superalimentos'
       ],
       artigoAvancado: [
-        '🧘‍♀️ Artigo curto avançado sobre bem-estar',
-        '💪 Conteúdo complexo sobre exercícios',
-        '🍎 Informações avançadas sobre coaching',
-        '📅 Engajamento avançado em bem-estar'
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com autoridade escrita através de artigos curtos',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em autoridade escrita através de artigos curtos',
+        '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar autoridade escrita através de artigos curtos',
+        '🍎 ALIMENTAÇÃO: Autoridade escrita através de artigos curtos consciente e funcional mantido'
       ]
     }
   },
 
-  // 40. TEMPLATE DE CATÁLOGO DIGITAL
+  // 39. TEMPLATE DE CATÁLOGO DIGITAL
   'template-catalogo-digital': {
     nutri: {
       catalogoBasico: [
-        '📋 Catálogo digital básico nutricional',
-        '🥗 Produtos básicos de alimentação',
-        '💊 Suplementos básicos',
-        '📅 Consulta nutricional básica'
+        '📱 DIAGNÓSTICO: Você precisa de catálogo digital básico para apresentar seus serviços nutricionais',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar consultas, planos alimentares e serviços básicos de forma profissional',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital básico com seus serviços por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de serviços nutricionais básicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
+        '🍎 ALIMENTAÇÃO: Foque em apresentação de consultas e planos alimentares básicos'
       ],
       catalogoModerado: [
-        '📋 Catálogo digital moderado nutricional',
-        '🥗 Produtos específicos de alimentação',
-        '💊 Suplementos direcionados',
-        '📅 Consulta nutricional especializada'
+        '📱 DIAGNÓSTICO: Você precisa de catálogo digital moderado para apresentar seus serviços nutricionais especializados',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar consultas especializadas, planos personalizados e serviços específicos',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital moderado com serviços especializados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de serviços nutricionais especializados',
+        '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Compare apresentação de consultas especializadas e planos personalizados'
       ],
       catalogoAvancado: [
-        '📋 Catálogo digital avançado nutricional',
-        '🥗 Produtos complexos de alimentação',
-        '💊 Suplementos avançados',
-        '📅 Consulta nutricional de performance'
+        '📱 DIAGNÓSTICO: Você precisa de catálogo digital avançado para apresentar seus serviços nutricionais premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar consultas premium, planos complexos e serviços de alta performance',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital avançado com serviços premium por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de serviços nutricionais premium',
+        '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
+        '🍎 ALIMENTAÇÃO: Compare apresentação de consultas premium e planos de alta performance'
       ]
     },
     sales: {
       catalogoBasico: [
-        '💊 Catálogo digital básico de produtos',
-        '🥗 Suplementos básicos',
-        '💪 Produtos básicos',
-        '📞 Consultoria básica em produtos'
+        '📱 DIAGNÓSTICO: Você precisa de catálogo digital básico para apresentar produtos de suplementação',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar produtos básicos, multivitamínicos e suplementos essenciais',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital básico com produtos essenciais por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de produtos básicos',
+        '💊 SUPLEMENTAÇÃO: Produtos básicos + Multivitamínicos + Suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar apresentação de produtos essenciais'
       ],
       catalogoModerado: [
-        '💊 Catálogo digital moderado de produtos',
-        '🥗 Suplementos direcionados',
-        '💪 Produtos específicos',
-        '📞 Consultoria moderada em produtos'
+        '📱 DIAGNÓSTICO: Você precisa de catálogo digital moderado para apresentar produtos especializados',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar produtos específicos, suplementos direcionados e linhas especializadas',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital moderado com produtos especializados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de produtos especializados',
+        '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar apresentação de produtos especializados'
       ],
       catalogoAvancado: [
-        '💊 Catálogo digital avançado de produtos',
-        '🥗 Suplementos avançados',
-        '💪 Produtos complexos',
-        '📞 Consultoria avançada em produtos'
+        '📱 DIAGNÓSTICO: Você precisa de catálogo digital avançado para apresentar produtos premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar produtos premium, nutracêuticos e linhas de alta qualidade',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital avançado com produtos premium por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de produtos premium',
+        '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar apresentação de produtos premium'
       ]
     },
     coach: {
       catalogoBasico: [
-        '🧘‍♀️ Catálogo digital básico de bem-estar',
-        '💪 Exercícios básicos',
-        '🍎 Coaching básico',
-        '📅 Programa básico de bem-estar'
+        '🌱 DIAGNÓSTICO: Você precisa de catálogo digital básico para apresentar seus programas de bem-estar',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar programas básicos, consultorias e serviços de bem-estar',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital básico com programas básicos por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de programas básicos de bem-estar',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
+        '🍎 ALIMENTAÇÃO: Foque em apresentação de programas básicos de bem-estar'
       ],
       catalogoModerado: [
-        '🧘‍♀️ Catálogo digital moderado de bem-estar',
-        '💪 Exercícios específicos',
-        '🍎 Coaching direcionado',
-        '📅 Programa moderado de bem-estar'
+        '🌼 DIAGNÓSTICO: Você precisa de catálogo digital moderado para apresentar programas especializados',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar programas específicos, consultorias direcionadas e serviços especializados',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital moderado com programas especializados por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de programas especializados',
+        '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
+        '🍎 ALIMENTAÇÃO: Compare apresentação de programas especializados e consultorias direcionadas'
       ],
       catalogoAvancado: [
-        '🧘‍♀️ Catálogo digital avançado de bem-estar',
-        '💪 Exercícios complexos',
-        '🍎 Coaching avançado',
-        '📅 Programa avançado de bem-estar'
+        '🔆 DIAGNÓSTICO: Você precisa de catálogo digital avançado para apresentar programas premium',
+        '🔍 CAUSA RAIZ: Necessidade de apresentar programas premium, consultorias avançadas e serviços de alta performance',
+        '⚡ AÇÃO IMEDIATA: Implemente catálogo digital avançado com programas premium por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo de apresentação de programas premium',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar apresentação de programas premium',
+        '🍎 ALIMENTAÇÃO: Apresentação de programas premium consciente e funcional mantido'
       ]
     }
   },
@@ -3138,514 +3975,663 @@ const diagnosticosCompletos = {
     ]
   },
 
-  // 4. QUIZ DE PERFIL NUTRICIONAL
+  // 3. QUIZ DE PERFIL NUTRICIONAL
   'quiz-perfil-nutricional': {
     nutri: {
-      perfilDeficiente: [
-        '📋 Avaliação nutricional completa para correção de deficiências',
-        '🥗 Plano alimentar para reposição nutricional',
-        '💊 Suplementação específica para deficiências',
-        '📅 Acompanhamento nutricional intensivo semanal'
+      absorcaoBaixa: [
+        '📋 DIAGNÓSTICO: Seu corpo tem dificuldade para absorver nutrientes essenciais',
+        '🔍 CAUSA RAIZ: Problemas digestivos, inflamação intestinal ou deficiências enzimáticas',
+        '⚡ AÇÃO IMEDIATA: Inicie probióticos e enzimas digestivas para melhorar absorção',
+        '📅 PLANO 7 DIAS: Protocolo de reparo intestinal com alimentos anti-inflamatórios',
+        '💊 SUPLEMENTAÇÃO: Probióticos + Enzimas digestivas + Magnésio para absorção',
+        '🍎 ALIMENTAÇÃO: Evite alimentos inflamatórios, aumente fibras prebióticas'
       ],
-      perfilEquilibrado: [
-        '📋 Manutenção do equilíbrio nutricional',
-        '🥗 Plano alimentar para otimização nutricional',
-        '💊 Suplementação preventiva',
-        '📅 Consultas de manutenção mensais'
+      absorcaoModerada: [
+        '📋 DIAGNÓSTICO: Sua absorção nutricional está boa, mas pode ser otimizada',
+        '🔍 CAUSA RAIZ: Boa base digestiva, mas precisa de ajustes para máxima eficiência',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione estratégias de timing',
+        '📅 PLANO 7 DIAS: Otimização com combinações alimentares estratégicas',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Probióticos para manutenção',
+        '🍎 ALIMENTAÇÃO: Combine nutrientes para melhor absorção (ferro + vitamina C)'
       ],
-      perfilOtimizado: [
-        '📋 Otimização avançada do perfil nutricional',
-        '🥗 Plano alimentar para performance nutricional',
-        '💊 Suplementação de alta performance',
-        '📅 Acompanhamento especializado nutricional'
+      absorcaoOtimizada: [
+        '📋 DIAGNÓSTICO: Excelente absorção nutricional! Seu corpo está funcionando perfeitamente',
+        '🔍 CAUSA RAIZ: Sistema digestivo saudável e eficiente',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione nutrição esportiva',
+        '📅 PLANO 7 DIAS: Manutenção com alimentos funcionais premium',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos para performance',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione superalimentos'
       ]
     },
     sales: {
-      perfilDeficiente: [
-        '💊 Multivitamínicos para correção de deficiências',
-        '🥗 Proteínas para reposição nutricional',
-        '💪 Suplementos específicos para deficiências',
-        '📞 Consultoria especializada em deficiências nutricionais'
+      absorcaoBaixa: [
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suporte digestivo para absorver nutrientes',
+        '🔍 CAUSA RAIZ: Sistema digestivo comprometido afeta absorção de suplementos',
+        '⚡ AÇÃO IMEDIATA: Kit digestivo com probióticos e enzimas para melhorar absorção',
+        '📅 PLANO 7 DIAS: Protocolo de reparo com suplementos específicos',
+        '💊 SUPLEMENTAÇÃO: Probióticos + Enzimas + Multivitamínico líquido',
+        '🍎 ALIMENTAÇÃO: Alimentos que melhoram absorção de suplementos'
       ],
-      perfilEquilibrado: [
-        '💊 Multivitamínicos para manutenção',
-        '🥗 Proteínas para equilíbrio nutricional',
-        '💪 Suplementos preventivos',
-        '📞 Consultoria preventiva de suplementação'
+      absorcaoModerada: [
+        '💊 DIAGNÓSTICO: Sua absorção está boa, mas pode maximizar resultados dos suplementos',
+        '🔍 CAUSA RAIZ: Boa base, mas timing e combinações podem ser otimizados',
+        '⚡ AÇÃO IMEDIATA: Ajuste horários e combinações de suplementos',
+        '📅 PLANO 7 DIAS: Kit de otimização com suplementos sinérgicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Probióticos + Enzimas digestivas',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, otimize timing dos suplementos'
       ],
-      perfilOtimizado: [
-        '💊 Suplementos de alta performance nutricional',
-        '🥗 Proteínas para otimização',
-        '💪 Suplementos avançados',
-        '📞 Consultoria especializada em performance nutricional'
+      absorcaoOtimizada: [
+        '💊 DIAGNÓSTICO: Absorção excelente! Você pode usar suplementos de alta performance',
+        '🔍 CAUSA RAIZ: Sistema digestivo eficiente permite absorção máxima',
+        '⚡ AÇÃO IMEDIATA: Adicione suplementos premium e especializados',
+        '📅 PLANO 7 DIAS: Kit de performance com nutrição esportiva',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos + Nutrição esportiva',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais premium para sustentar absorção'
       ]
     },
     coach: {
-      perfilDeficiente: [
-        '🧘‍♀️ Programa intensivo de correção nutricional',
-        '💪 Treinos adaptados para deficiências',
-        '🍎 Coaching nutricional terapêutico',
-        '📅 Acompanhamento semanal de correção'
+      absorcaoBaixa: [
+        '🌱 DIAGNÓSTICO: Seu corpo precisa de estratégias para melhorar absorção nutricional',
+        '🔍 CAUSA RAIZ: Hábitos alimentares e estilo de vida afetam digestão',
+        '⚡ AÇÃO IMEDIATA: Ajuste horários de refeições e mastigação consciente',
+        '📅 PLANO 7 DIAS: Desafio de reparo digestivo com mindfulness alimentar',
+        '💊 SUPLEMENTAÇÃO: Probióticos naturais e chás digestivos',
+        '🍎 ALIMENTAÇÃO: Foque em mastigação lenta e combinações digestivas'
       ],
-      perfilEquilibrado: [
-        '🧘‍♀️ Programa de manutenção nutricional',
-        '💪 Treinos para equilíbrio nutricional',
-        '🍎 Coaching de hábitos nutricionais',
-        '📅 Acompanhamento mensal de manutenção'
+      absorcaoModerada: [
+        '🌼 DIAGNÓSTICO: Boa absorção, mas pode otimizar com ajustes no estilo de vida',
+        '🔍 CAUSA RAIZ: Boa base, mas timing e hábitos podem ser refinados',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de otimização com alimentação consciente',
+        '💊 SUPLEMENTAÇÃO: Probióticos e adaptógenos para sustentabilidade',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
-      perfilOtimizado: [
-        '🧘‍♀️ Programa de otimização nutricional avançada',
-        '💪 Treinos para performance nutricional',
-        '🍎 Coaching nutricional de alta performance',
-        '📅 Acompanhamento especializado nutricional'
+      absorcaoOtimizada: [
+        '🔆 DIAGNÓSTICO: Absorção excelente! Você é um exemplo de saúde digestiva',
+        '🔍 CAUSA RAIZ: Hábitos saudáveis criaram sistema digestivo eficiente',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione práticas avançadas',
+        '📅 PLANO 7 DIAS: Desafio de evolução com nutrição funcional',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para manutenção',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
-  // 5. QUIZ DETOX
+  // 4. QUIZ DETOX
   'quiz-detox': {
     nutri: {
       baixaToxicidade: [
-        '📋 Manutenção da saúde detox natural',
-        '🥗 Plano alimentar para sustentação detox',
-        '💊 Suplementos de apoio detox',
-        '📅 Consultas de manutenção detox mensais'
+        '📋 DIAGNÓSTICO: Seu corpo está com baixa carga tóxica, mantendo boa saúde',
+        '🔍 CAUSA RAIZ: Boa alimentação e estilo de vida saudável mantêm toxinas controladas',
+        '⚡ AÇÃO IMEDIATA: Continue hábitos atuais e adicione alimentos detox preventivos',
+        '📅 PLANO 7 DIAS: Manutenção com alimentos antioxidantes e hidratação',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Probióticos para manutenção',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione chás detox e vegetais verdes'
       ],
       toxicidadeModerada: [
-        '📋 Plano detox moderado para redução de toxinas',
-        '🥗 Plano alimentar detox específico',
-        '💊 Suplementos detox específicos',
-        '📅 Acompanhamento detox quinzenal'
+        '📋 DIAGNÓSTICO: Seu corpo mostra sinais de acúmulo tóxico moderado',
+        '🔍 CAUSA RAIZ: Exposição ambiental e alimentação inadequada aumentam toxinas',
+        '⚡ AÇÃO IMEDIATA: Inicie protocolo detox com alimentos específicos',
+        '📅 PLANO 7 DIAS: Protocolo detox moderado com suco verde e hidratação',
+        '💊 SUPLEMENTAÇÃO: Cardo-mariano + Chlorella + Probióticos',
+        '🍎 ALIMENTAÇÃO: Aumente vegetais crucíferos e evite alimentos processados'
       ],
       altaToxicidade: [
-        '📋 Plano detox intensivo para eliminação de toxinas',
-        '🥗 Plano alimentar detox completo',
-        '💊 Suplementos detox intensivos',
-        '📅 Acompanhamento detox semanal intensivo'
+        '📋 DIAGNÓSTICO: Seu corpo está com alta carga tóxica, precisa de detox urgente',
+        '🔍 CAUSA RAIZ: Exposição excessiva a toxinas e sistema de eliminação comprometido',
+        '⚡ AÇÃO IMEDIATA: Inicie protocolo detox intensivo imediatamente',
+        '📅 PLANO 7 DIAS: Protocolo detox completo com jejum intermitente',
+        '💊 SUPLEMENTAÇÃO: Kit detox completo + Enzimas + Probióticos',
+        '🍎 ALIMENTAÇÃO: Dieta detox rigorosa com alimentos orgânicos e chás'
       ]
     },
     sales: {
       baixaToxicidade: [
-        '💊 Suplementos de manutenção detox',
-        '🥗 Proteínas para sustentação detox',
-        '💪 Suplementos de apoio detox',
-        '📞 Consultoria preventiva detox'
+        '💊 DIAGNÓSTICO: Seu corpo está limpo, mas pode usar suplementos preventivos',
+        '🔍 CAUSA RAIZ: Boa base de saúde permite uso de suplementos de manutenção',
+        '⚡ AÇÃO IMEDIATA: Kit preventivo com antioxidantes e probióticos',
+        '📅 PLANO 7 DIAS: Kit de manutenção com suplementos detox leves',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Probióticos + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, adicione alimentos funcionais'
       ],
       toxicidadeModerada: [
-        '💊 Suplementos detox moderados',
-        '🥗 Proteínas para apoio detox',
-        '💪 Suplementos específicos detox',
-        '📞 Consultoria detox moderada'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos detox específicos',
+        '🔍 CAUSA RAIZ: Acúmulo tóxico moderado requer suplementação direcionada',
+        '⚡ AÇÃO IMEDIATA: Kit detox moderado com suplementos específicos',
+        '📅 PLANO 7 DIAS: Kit detox com cardo-mariano e chlorella',
+        '💊 SUPLEMENTAÇÃO: Cardo-mariano + Chlorella + Probióticos + Enzimas',
+        '🍎 ALIMENTAÇÃO: Alimentos que potencializam ação dos suplementos detox'
       ],
       altaToxicidade: [
-        '💊 Suplementos detox intensivos',
-        '🥗 Proteínas para suporte detox',
-        '💪 Suplementos detox avançados',
-        '📞 Consultoria especializada detox'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de kit detox intensivo urgente',
+        '🔍 CAUSA RAIZ: Alta carga tóxica requer protocolo completo de suplementação',
+        '⚡ AÇÃO IMEDIATA: Kit detox completo com suplementos intensivos',
+        '📅 PLANO 7 DIAS: Protocolo detox completo com suplementos especializados',
+        '💊 SUPLEMENTAÇÃO: Kit detox completo + Enzimas + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Dieta específica para potencializar suplementos detox'
       ]
     },
     coach: {
       baixaToxicidade: [
-        '🧘‍♀️ Programa de manutenção detox',
-        '💪 Treinos para sustentação detox',
-        '🍎 Coaching nutricional detox preventivo',
-        '📅 Acompanhamento mensal detox'
+        '🌱 DIAGNÓSTICO: Seu corpo está saudável, mas pode otimizar com hábitos detox',
+        '🔍 CAUSA RAIZ: Boa base de saúde permite foco em prevenção e otimização',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione práticas detox leves',
+        '📅 PLANO 7 DIAS: Desafio de manutenção com hábitos detox preventivos',
+        '💊 SUPLEMENTAÇÃO: Chás detox e suplementos naturais leves',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
       toxicidadeModerada: [
-        '🧘‍♀️ Programa detox moderado',
-        '💪 Treinos para apoio detox',
-        '🍎 Coaching nutricional detox',
-        '📅 Acompanhamento quinzenal detox'
+        '🌿 DIAGNÓSTICO: Seu corpo precisa de estratégias detox moderadas',
+        '🔍 CAUSA RAIZ: Acúmulo tóxico moderado requer ajustes no estilo de vida',
+        '⚡ AÇÃO IMEDIATA: Ajuste hábitos alimentares e adicione práticas detox',
+        '📅 PLANO 7 DIAS: Desafio detox moderado com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Chás detox + Probióticos naturais + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente com foco em alimentos detox'
       ],
       altaToxicidade: [
-        '🧘‍♀️ Programa detox intensivo',
-        '💪 Treinos para suporte detox',
-        '🍎 Coaching nutricional detox intensivo',
-        '📅 Acompanhamento semanal detox'
+        '🔥 DIAGNÓSTICO: Seu corpo precisa de transformação detox urgente',
+        '🔍 CAUSA RAIZ: Alta carga tóxica requer mudanças radicais no estilo de vida',
+        '⚡ AÇÃO IMEDIATA: Inicie transformação completa com protocolo detox',
+        '📅 PLANO 7 DIAS: Desafio detox intensivo com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Protocolo detox completo com suplementos naturais',
+        '🍎 ALIMENTAÇÃO: Transformação alimentar completa com foco detox'
       ]
     }
   },
 
-  // 6. QUIZ ENERGÉTICO
+  // 5. QUIZ ENERGÉTICO
   'quiz-energetico': {
     nutri: {
-      baixaEnergia: [
-        '📋 Avaliação energética completa',
-        '🥗 Plano alimentar para aumento de energia',
-        '💊 Suplementos energéticos naturais',
-        '📅 Acompanhamento energético semanal'
+      energiaBaixa: [
+        '📋 DIAGNÓSTICO: Seu corpo está com baixa energia natural, precisa de revitalização',
+        '🔍 CAUSA RAIZ: Deficiências nutricionais e desequilíbrios metabólicos afetam produção energética',
+        '⚡ AÇÃO IMEDIATA: Inicie suplementação com ferro, B12 e magnésio para energia celular',
+        '📅 PLANO 7 DIAS: Protocolo energético com carboidratos complexos e proteínas',
+        '💊 SUPLEMENTAÇÃO: Ferro + B12 + Magnésio + CoQ10 para energia mitocondrial',
+        '🍎 ALIMENTAÇÃO: Aumente carboidratos complexos, proteínas e alimentos ricos em ferro'
       ],
       energiaModerada: [
-        '📋 Otimização energética nutricional',
-        '🥗 Plano alimentar para manutenção energética',
-        '💊 Suplementos de apoio energético',
-        '📅 Consultas de manutenção energética'
+        '📋 DIAGNÓSTICO: Sua energia está moderada, mas pode ser otimizada naturalmente',
+        '🔍 CAUSA RAIZ: Boa base energética, mas precisa de ajustes nutricionais específicos',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micronutrientes energéticos',
+        '📅 PLANO 7 DIAS: Otimização energética com timing nutricional estratégico',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos para sustentabilidade',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, otimize horários e combinações alimentares'
       ],
-      altaEnergia: [
-        '📋 Manutenção da alta energia',
-        '🥗 Plano alimentar para sustentação energética',
-        '💊 Suplementos preventivos energéticos',
-        '📅 Acompanhamento preventivo energético'
+      energiaAlta: [
+        '📋 DIAGNÓSTICO: Excelente energia natural! Seu corpo está funcionando perfeitamente',
+        '🔍 CAUSA RAIZ: Sistema energético eficiente e nutrição adequada',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione nutrição esportiva',
+        '📅 PLANO 7 DIAS: Manutenção energética com alimentos funcionais premium',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos + Nutrição esportiva',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione superalimentos e alimentos funcionais'
       ]
     },
     sales: {
-      baixaEnergia: [
-        '💊 Suplementos energéticos para aumento',
-        '🥗 Proteínas para energia',
-        '💪 Suplementos para disposição',
-        '📞 Consultoria energética especializada'
+      energiaBaixa: [
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos energéticos específicos',
+        '🔍 CAUSA RAIZ: Baixa energia afeta performance e qualidade de vida',
+        '⚡ AÇÃO IMEDIATA: Kit energético com ferro, B12 e estimulantes naturais',
+        '📅 PLANO 7 DIAS: Protocolo energético com suplementos sinérgicos',
+        '💊 SUPLEMENTAÇÃO: Ferro + B12 + Ginseng + Cafeína natural',
+        '🍎 ALIMENTAÇÃO: Alimentos que potencializam ação dos suplementos energéticos'
       ],
       energiaModerada: [
-        '💊 Suplementos energéticos moderados',
-        '🥗 Proteínas para manutenção energética',
-        '💪 Suplementos de apoio energético',
-        '📞 Consultoria preventiva energética'
+        '💊 DIAGNÓSTICO: Sua energia está boa, mas pode maximizar com suplementos',
+        '🔍 CAUSA RAIZ: Energia moderada permite uso de suplementos de otimização',
+        '⚡ AÇÃO IMEDIATA: Kit de otimização energética com suplementos específicos',
+        '📅 PLANO 7 DIAS: Kit energético com multivitamínico e estimulantes leves',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ginseng + Rhodiola + Probióticos',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, otimize timing dos suplementos'
       ],
-      altaEnergia: [
-        '💊 Suplementos para sustentação energética',
-        '🥗 Proteínas para otimização energética',
-        '💪 Suplementos de manutenção energética',
-        '📞 Consultoria especializada energética'
+      energiaAlta: [
+        '💊 DIAGNÓSTICO: Energia excelente! Você pode usar suplementos de alta performance',
+        '🔍 CAUSA RAIZ: Alta energia permite uso de suplementos especializados',
+        '⚡ AÇÃO IMEDIATA: Kit de performance com suplementos premium',
+        '📅 PLANO 7 DIAS: Kit energético premium com nutrição esportiva',
+        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos + Nutrição esportiva + Pre-workout',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais premium para sustentar alta energia'
       ]
     },
     coach: {
-      baixaEnergia: [
-        '🧘‍♀️ Programa intensivo de aumento energético',
-        '💪 Treinos para aumento de energia',
-        '🍎 Coaching nutricional energético',
-        '📅 Acompanhamento semanal energético'
+      energiaBaixa: [
+        '🌱 DIAGNÓSTICO: Seu corpo precisa de estratégias para aumentar energia natural',
+        '🔍 CAUSA RAIZ: Hábitos de vida e alimentação afetam produção energética',
+        '⚡ AÇÃO IMEDIATA: Ajuste horários de sono e adicione exercícios leves',
+        '📅 PLANO 7 DIAS: Desafio energético com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Chás energéticos e suplementos naturais leves',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares e alimentos energéticos naturais'
       ],
       energiaModerada: [
-        '🧘‍♀️ Programa de otimização energética',
-        '💪 Treinos para manutenção energética',
-        '🍎 Coaching de hábitos energéticos',
-        '📅 Acompanhamento mensal energético'
+        '🌼 DIAGNÓSTICO: Boa energia, mas pode otimizar com ajustes no estilo de vida',
+        '🔍 CAUSA RAIZ: Boa base energética, mas hábitos podem ser refinados',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de otimização energética com hábitos saudáveis',
+        '💊 SUPLEMENTAÇÃO: Chás energéticos + Probióticos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
-      altaEnergia: [
-        '🧘‍♀️ Programa de sustentação energética',
-        '💪 Treinos para manutenção da energia',
-        '🍎 Coaching preventivo energético',
-        '📅 Acompanhamento preventivo energético'
+      energiaAlta: [
+        '🔆 DIAGNÓSTICO: Energia excelente! Você é um exemplo de vitalidade natural',
+        '🔍 CAUSA RAIZ: Hábitos saudáveis criaram sistema energético eficiente',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione práticas avançadas',
+        '📅 PLANO 7 DIAS: Desafio de evolução energética com práticas avançadas',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para manutenção',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 7. CALCULADORA DE PROTEÍNA
+  // 7. CALCULADORA DE PROTEÍNA
   'calculadora-proteina': {
     nutri: {
       baixaProteina: [
-        '📋 Plano proteico para correção de deficiência',
-        '🥗 Estratégias para aumentar consumo de proteínas',
-        '💊 Suplementação proteica para ganho de massa',
-        '📅 Acompanhamento proteico semanal'
+        '📋 DIAGNÓSTICO: Sua ingestão proteica está abaixo do recomendado',
+        '🔍 CAUSA RAIZ: Consumo insuficiente de alimentos proteicos ou planejamento inadequado',
+        '⚡ AÇÃO IMEDIATA: Aumente proteínas em todas as refeições principais',
+        '📅 PLANO 7 DIAS: Protocolo proteico com 1.2-1.6g/kg de peso corporal',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + Creatina + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Aumente carnes magras, ovos, leguminosas e laticínios'
       ],
       proteinaNormal: [
-        '📋 Otimização da distribuição proteica diária',
-        '🥗 Plano alimentar para manutenção muscular',
-        '💊 Suplementação proteica preventiva',
-        '📅 Consultas de manutenção quinzenais'
+        '📋 DIAGNÓSTICO: Sua ingestão proteica está adequada, mantenha o padrão',
+        '🔍 CAUSA RAIZ: Boa distribuição proteica ao longo do dia',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize timing',
+        '📅 PLANO 7 DIAS: Manutenção com distribuição equilibrada',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em qualidade das proteínas'
       ],
       altaProteina: [
-        '📋 Manutenção da alta ingestão proteica',
-        '🥗 Plano alimentar para atletas de alta performance',
-        '💊 Suplementação proteica especializada',
-        '📅 Acompanhamento especializado mensal'
+        '📋 DIAGNÓSTICO: Excelente ingestão proteica! Ideal para atletas',
+        '🔍 CAUSA RAIZ: Consumo adequado para alta performance e recuperação',
+        '⚡ AÇÃO IMEDIATA: Continue padrão atual e otimize absorção',
+        '📅 PLANO 7 DIAS: Manutenção com proteínas de alta qualidade',
+        '💊 SUPLEMENTAÇÃO: Proteínas premium + Creatina + Aminoácidos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em variedade proteica'
       ]
     },
     sales: {
       baixaProteina: [
-        '💊 Whey Protein para correção imediata',
-        '🥗 Proteínas vegetais de alta qualidade',
-        '💪 Suplementos proteicos para iniciantes',
-        '📞 Consultoria especializada em ganho de massa'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos proteicos específicos',
+        '🔍 CAUSA RAIZ: Baixa ingestão proteica afeta massa muscular e recuperação',
+        '⚡ AÇÃO IMEDIATA: Kit proteico básico com Whey Protein',
+        '📅 PLANO 7 DIAS: Protocolo com Whey Protein + Creatina',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + Creatina + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos que potencializam absorção de proteínas'
       ],
       proteinaNormal: [
-        '💊 Proteínas para manutenção muscular',
-        '🥗 Suplementos proteicos específicos',
-        '💪 Produtos para performance moderada',
-        '📞 Consultoria para praticantes regulares'
+        '💊 DIAGNÓSTICO: Sua proteína está boa, use suplementos de manutenção',
+        '🔍 CAUSA RAIZ: Ingestão adequada permite uso de suplementos preventivos',
+        '⚡ AÇÃO IMEDIATA: Kit de manutenção com proteínas específicas',
+        '📅 PLANO 7 DIAS: Kit preventivo com Whey Protein + Multivitamínico',
+        '💊 SUPLEMENTAÇÃO: Whey Protein + Multivitamínico + Ômega-3',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, otimize timing dos suplementos'
       ],
       altaProteina: [
-        '💊 Proteínas premium para atletas',
-        '🥗 Suplementos proteicos de alta performance',
-        '💪 Produtos para atletas de elite',
-        '📞 Consultoria especializada em esportes'
+        '💊 DIAGNÓSTICO: Excelente proteína! Use suplementos de alta performance',
+        '🔍 CAUSA RAIZ: Alta ingestão proteica permite uso de suplementos premium',
+        '⚡ AÇÃO IMEDIATA: Kit premium com proteínas especializadas',
+        '📅 PLANO 7 DIAS: Kit de performance com proteínas premium',
+        '💊 SUPLEMENTAÇÃO: Proteínas premium + Creatina + Aminoácidos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar alta performance'
       ]
     },
     coach: {
       baixaProteina: [
-        '🧘‍♀️ Programa de reeducação proteica básica',
-        '💪 Exercícios leves com foco na proteína',
-        '🍎 Coaching para mudança de hábitos proteicos',
-        '📅 Programa de 30 dias para correção'
+        '🌱 DIAGNÓSTICO: Seu corpo precisa de estratégias para aumentar proteína',
+        '🔍 CAUSA RAIZ: Baixa ingestão proteica afeta performance e recuperação',
+        '⚡ AÇÃO IMEDIATA: Ajuste hábitos alimentares e adicione exercícios',
+        '📅 PLANO 7 DIAS: Desafio proteico com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás proteicos',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares e alimentos proteicos'
       ],
       proteinaNormal: [
-        '🧘‍♀️ Programa de otimização proteica',
-        '💪 Exercícios moderados com proteína adequada',
-        '🍎 Coaching para melhoria da performance',
-        '📅 Programa de 60 dias para evolução'
+        '🌼 DIAGNÓSTICO: Boa ingestão proteica, mantenha hábitos saudáveis',
+        '🔍 CAUSA RAIZ: Ingestão adequada permite foco em otimização',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de manutenção com hábitos saudáveis',
+        '💊 SUPLEMENTAÇÃO: Chás funcionais + Probióticos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
       altaProteina: [
-        '🧘‍♀️ Programa de manutenção proteica avançada',
-        '💪 Exercícios intensos com proteína otimizada',
-        '🍎 Coaching para atletas de alta performance',
-        '📅 Programa de acompanhamento contínuo'
+        '🔆 DIAGNÓSTICO: Excelente ingestão proteica! Você é um exemplo',
+        '🔍 CAUSA RAIZ: Alta ingestão proteica permite foco em performance',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione práticas avançadas',
+        '📅 PLANO 7 DIAS: Desafio de evolução com práticas avançadas',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para manutenção',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 8. CALCULADORA DE ÁGUA
+  // 8. CALCULADORA DE ÁGUA
   'calculadora-agua': {
     nutri: {
       baixaHidratacao: [
-        '📋 Plano hidratacional para correção imediata',
-        '🥗 Estratégias para aumentar consumo de líquidos',
-        '💊 Suplementos eletrolíticos para reposição',
-        '📅 Acompanhamento hidratacional diário'
+        '📋 DIAGNÓSTICO: Sua hidratação está abaixo do recomendado',
+        '🔍 CAUSA RAIZ: Consumo insuficiente de líquidos ou perda excessiva',
+        '⚡ AÇÃO IMEDIATA: Aumente consumo de água para 2.5-3L por dia',
+        '📅 PLANO 7 DIAS: Protocolo hidratacional com lembretes horários',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos + Magnésio + Probióticos',
+        '🍎 ALIMENTAÇÃO: Aumente frutas aquosas, chás e sopas'
       ],
       hidratacaoModerada: [
-        '📋 Otimização da hidratação para melhor performance',
-        '🥗 Plano alimentar rico em frutas e vegetais',
-        '💊 Suplementos de apoio hidratacional',
-        '📅 Consultas de manutenção quinzenais'
+        '📋 DIAGNÓSTICO: Sua hidratação está adequada, mantenha o padrão',
+        '🔍 CAUSA RAIZ: Boa ingestão hídrica e equilíbrio eletrolítico',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize timing',
+        '📅 PLANO 7 DIAS: Manutenção com distribuição equilibrada',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em qualidade dos líquidos'
       ],
       altaHidratacao: [
-        '📋 Manutenção da hidratação otimizada',
-        '🥗 Plano alimentar para sustentação hidratacional',
-        '💊 Suplementos preventivos para atletas',
-        '📅 Acompanhamento preventivo mensal'
+        '📋 DIAGNÓSTICO: Excelente hidratação! Ideal para atletas',
+        '🔍 CAUSA RAIZ: Consumo adequado para alta performance e recuperação',
+        '⚡ AÇÃO IMEDIATA: Continue padrão atual e otimize eletrólitos',
+        '📅 PLANO 7 DIAS: Manutenção com reposição eletrolítica',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos premium + Magnésio + Aminoácidos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em variedade hidratacional'
       ]
     },
     sales: {
       baixaHidratacao: [
-        '💊 Eletrólitos para correção hidratacional',
-        '🥗 Suplementos hidratacionais',
-        '💪 Suplementos para reposição hídrica',
-        '📞 Consultoria especializada em hidratação'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos hidratacionais',
+        '🔍 CAUSA RAIZ: Baixa hidratação afeta performance e recuperação',
+        '⚡ AÇÃO IMEDIATA: Kit hidratacional básico com eletrólitos',
+        '📅 PLANO 7 DIAS: Protocolo com eletrólitos + magnésio',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos + Magnésio + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos que potencializam absorção hídrica'
       ],
       hidratacaoModerada: [
-        '💊 Eletrólitos para manutenção',
-        '🥗 Suplementos hidratacionais moderados',
-        '💪 Suplementos de apoio hidratacional',
-        '📞 Consultoria preventiva hidratacional'
+        '💊 DIAGNÓSTICO: Sua hidratação está boa, use suplementos preventivos',
+        '🔍 CAUSA RAIZ: Hidratação adequada permite uso de suplementos preventivos',
+        '⚡ AÇÃO IMEDIATA: Kit preventivo com eletrólitos específicos',
+        '📅 PLANO 7 DIAS: Kit preventivo com eletrólitos + multivitamínico',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos + Multivitamínico + Ômega-3',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, otimize timing dos suplementos'
       ],
       altaHidratacao: [
-        '💊 Eletrólitos para otimização',
-        '🥗 Suplementos hidratacionais avançados',
-        '💪 Suplementos de manutenção hidratacional',
-        '📞 Consultoria especializada hidratacional'
+        '💊 DIAGNÓSTICO: Excelente hidratação! Use suplementos de alta performance',
+        '🔍 CAUSA RAIZ: Alta hidratação permite uso de suplementos premium',
+        '⚡ AÇÃO IMEDIATA: Kit premium com eletrólitos especializados',
+        '📅 PLANO 7 DIAS: Kit de performance com eletrólitos premium',
+        '💊 SUPLEMENTAÇÃO: Eletrólitos premium + Magnésio + Aminoácidos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar alta hidratação'
       ]
     },
     coach: {
       baixaHidratacao: [
-        '🧘‍♀️ Programa intensivo de hidratação',
-        '💪 Treinos adaptados para hidratação',
-        '🍎 Coaching nutricional hidratacional',
-        '📅 Acompanhamento semanal hidratacional'
+        '🌱 DIAGNÓSTICO: Seu corpo precisa de estratégias para aumentar hidratação',
+        '🔍 CAUSA RAIZ: Baixa hidratação afeta performance e bem-estar',
+        '⚡ AÇÃO IMEDIATA: Ajuste hábitos hidratacionais e adicione lembretes',
+        '📅 PLANO 7 DIAS: Desafio hidratacional com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás hidratantes',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares e líquidos nutritivos'
       ],
       hidratacaoModerada: [
-        '🧘‍♀️ Programa de otimização hidratacional',
-        '💪 Treinos para manutenção hidratacional',
-        '🍎 Coaching de hábitos hidratacionais',
-        '📅 Acompanhamento mensal hidratacional'
+        '🌼 DIAGNÓSTICO: Boa hidratação, mantenha hábitos saudáveis',
+        '🔍 CAUSA RAIZ: Hidratação adequada permite foco em otimização',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de manutenção com hábitos saudáveis',
+        '💊 SUPLEMENTAÇÃO: Chás funcionais + Probióticos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness hidratacional'
       ],
       altaHidratacao: [
-        '🧘‍♀️ Programa de sustentação hidratacional',
-        '💪 Treinos para manutenção da hidratação',
-        '🍎 Coaching preventivo hidratacional',
-        '📅 Acompanhamento preventivo hidratacional'
+        '🔆 DIAGNÓSTICO: Excelente hidratação! Você é um exemplo',
+        '🔍 CAUSA RAIZ: Alta hidratação permite foco em performance',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione práticas avançadas',
+        '📅 PLANO 7 DIAS: Desafio de evolução com práticas avançadas',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para manutenção',
+        '🍎 ALIMENTAÇÃO: Hidratação consciente e funcional mantida'
       ]
     }
   },
 
   // 9. CALCULADORA DE CALORIAS
+  // 9. CALCULADORA DE CALORIAS
   'calculadora-calorias': {
     nutri: {
       deficitCalorico: [
-        '📋 Plano calórico estratégico para emagrecimento',
-        '🥗 Estratégias para déficit calórico sustentável',
-        '💊 Suplementos para preservação muscular',
-        '📅 Acompanhamento calórico semanal'
+        '📋 DIAGNÓSTICO: Você precisa de déficit calórico para emagrecimento',
+        '🔍 CAUSA RAIZ: Consumo calórico acima do gasto energético diário',
+        '⚡ AÇÃO IMEDIATA: Reduza 300-500 calorias por dia para déficit sustentável',
+        '📅 PLANO 7 DIAS: Protocolo calórico com distribuição equilibrada de macronutrientes',
+        '💊 SUPLEMENTAÇÃO: Termogênicos + Proteína + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Priorize proteínas magras, vegetais e gorduras saudáveis'
       ],
       manutencaoCalorica: [
-        '📋 Manutenção do equilíbrio energético',
-        '🥗 Plano alimentar para peso estável',
-        '💊 Suplementos para manutenção da saúde',
-        '📅 Consultas de manutenção quinzenais'
+        '📋 DIAGNÓSTICO: Sua ingestão calórica está equilibrada, mantenha o padrão',
+        '🔍 CAUSA RAIZ: Consumo calórico adequado para manutenção do peso atual',
+        '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize qualidade nutricional',
+        '📅 PLANO 7 DIAS: Manutenção com foco em qualidade dos alimentos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em variedade e densidade nutricional'
       ],
       superavitCalorico: [
-        '📋 Plano calórico para ganho de peso saudável',
-        '🥗 Estratégias para superávit calórico controlado',
-        '💊 Suplementos para ganho de massa muscular',
-        '📅 Acompanhamento calórico especializado'
+        '📋 DIAGNÓSTICO: Você precisa de superávit calórico para ganho de peso saudável',
+        '🔍 CAUSA RAIZ: Consumo calórico abaixo do necessário para ganho de massa',
+        '⚡ AÇÃO IMEDIATA: Aumente 300-500 calorias por dia com alimentos densos',
+        '📅 PLANO 7 DIAS: Protocolo hipercalórico com distribuição estratégica',
+        '💊 SUPLEMENTAÇÃO: Hipercalórico + Proteína + Creatina + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Aumente carboidratos complexos, gorduras saudáveis e proteínas'
       ]
     },
     sales: {
       deficitCalorico: [
-        '💊 Termogênicos para queima calórica',
-        '🥗 Proteínas para preservação muscular',
-        '💪 Suplementos para controle do apetite',
-        '📞 Consultoria especializada em emagrecimento'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos para queima calórica',
+        '🔍 CAUSA RAIZ: Déficit calórico requer suporte para preservação muscular',
+        '⚡ AÇÃO IMEDIATA: Kit emagrecimento com termogênicos e proteína',
+        '📅 PLANO 7 DIAS: Protocolo com termogênicos + proteína + multivitamínico',
+        '💊 SUPLEMENTAÇÃO: Termogênicos + Proteína + Multivitamínico + Ômega-3',
+        '🍎 ALIMENTAÇÃO: Alimentos termogênicos e proteicos para potencializar resultados'
       ],
       manutencaoCalorica: [
-        '💊 Multivitamínicos para manutenção energética',
-        '🥗 Suplementos para equilíbrio nutricional',
-        '💪 Produtos para manutenção da saúde',
-        '📞 Consultoria para manutenção do peso'
+        '💊 DIAGNÓSTICO: Sua manutenção calórica está boa, use suplementos preventivos',
+        '🔍 CAUSA RAIZ: Equilíbrio calórico permite uso de suplementos preventivos',
+        '⚡ AÇÃO IMEDIATA: Kit preventivo com multivitamínico e antioxidantes',
+        '📅 PLANO 7 DIAS: Kit preventivo com multivitamínico + Ômega-3 + Probióticos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, otimize timing dos suplementos'
       ],
       superavitCalorico: [
-        '💊 Suplementos hipercalóricos para ganho',
-        '🥗 Proteínas para aumento de massa',
-        '💪 Produtos para ganho de peso saudável',
-        '📞 Consultoria especializada em ganho de massa'
+        '💊 DIAGNÓSTICO: Excelente! Use suplementos para ganho de massa muscular',
+        '🔍 CAUSA RAIZ: Superávit calórico permite uso de suplementos para massa',
+        '⚡ AÇÃO IMEDIATA: Kit ganho de massa com hipercalórico e proteína',
+        '📅 PLANO 7 DIAS: Kit massa com hipercalórico + proteína + creatina',
+        '💊 SUPLEMENTAÇÃO: Hipercalórico + Proteína + Creatina + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos hipercalóricos e proteicos para sustentar ganho'
       ]
     },
     coach: {
       deficitCalorico: [
-        '🧘‍♀️ Programa de reeducação calórica para emagrecimento',
-        '💪 Exercícios para queima calórica eficiente',
-        '🍎 Coaching para mudança de hábitos alimentares',
-        '📅 Programa de 30 dias para redução'
+        '🌱 DIAGNÓSTICO: Seu corpo precisa de estratégias para déficit calórico sustentável',
+        '🔍 CAUSA RAIZ: Déficit calórico requer mudanças de hábitos e exercícios',
+        '⚡ AÇÃO IMEDIATA: Ajuste hábitos alimentares e adicione exercícios cardiovasculares',
+        '📅 PLANO 7 DIAS: Desafio de emagrecimento com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás termogênicos',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares e alimentos termogênicos'
       ],
       manutencaoCalorica: [
-        '🧘‍♀️ Programa de manutenção energética',
-        '💪 Exercícios para equilíbrio calórico',
-        '🍎 Coaching para manutenção do peso',
-        '📅 Programa de 60 dias para estabilização'
+        '🌼 DIAGNÓSTICO: Boa manutenção calórica, mantenha hábitos saudáveis',
+        '🔍 CAUSA RAIZ: Equilíbrio calórico permite foco em otimização de hábitos',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Desafio de manutenção com hábitos saudáveis',
+        '💊 SUPLEMENTAÇÃO: Chás funcionais + Probióticos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness alimentar'
       ],
       superavitCalorico: [
-        '🧘‍♀️ Programa de ganho de peso saudável',
-        '💪 Exercícios para aumento de massa muscular',
-        '🍎 Coaching para ganho de peso controlado',
-        '📅 Programa de 90 dias para ganho'
+        '🔆 DIAGNÓSTICO: Excelente! Você está pronto para ganho de massa muscular',
+        '🔍 CAUSA RAIZ: Superávit calórico permite foco em ganho de massa',
+        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione exercícios de força',
+        '📅 PLANO 7 DIAS: Desafio de ganho de massa com práticas avançadas',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar ganho',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e hipercalórica mantida'
       ]
     }
   },
 
   // 10. CHECKLIST ALIMENTAR
+  // 11. CHECKLIST ALIMENTAR
   'checklist-alimentar': {
     nutri: {
       alimentacaoDeficiente: [
-        '📋 Avaliação nutricional completa para correção de hábitos',
-        '🥗 Plano alimentar para melhoria da qualidade nutricional',
-        '💊 Suplementação para correção de deficiências',
-        '📅 Acompanhamento nutricional semanal'
+        '📋 DIAGNÓSTICO: Sua alimentação precisa de correção urgente para melhorar saúde',
+        '🔍 CAUSA RAIZ: Hábitos alimentares inadequados e deficiências nutricionais',
+        '⚡ AÇÃO IMEDIATA: Implemente mudanças alimentares básicas por 30 dias',
+        '📅 PLANO 7 DIAS: Protocolo de reeducação alimentar com alimentos básicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ferro + Vitamina D + Probióticos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos in natura, evite processados e ultraprocessados'
       ],
       alimentacaoModerada: [
-        '📋 Avaliação nutricional para otimização de hábitos',
-        '🥗 Plano alimentar para melhoria específica',
-        '💊 Suplementação direcionada',
-        '📅 Acompanhamento nutricional quinzenal'
+        '📋 DIAGNÓSTICO: Sua alimentação está moderada, precisa de otimização',
+        '🔍 CAUSA RAIZ: Alguns hábitos inadequados e deficiências nutricionais leves',
+        '⚡ AÇÃO IMEDIATA: Otimize hábitos alimentares e corrija deficiências',
+        '📅 PLANO 7 DIAS: Protocolo de otimização alimentar com alimentos específicos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Magnésio + Probióticos',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade dos alimentos e adicione superalimentos'
       ],
       alimentacaoEquilibrada: [
-        '📋 Manutenção dos bons hábitos alimentares',
-        '🥗 Plano alimentar para otimização da saúde',
-        '💊 Suplementação preventiva',
-        '📅 Consultas de manutenção mensais'
+        '📋 DIAGNÓSTICO: Sua alimentação está equilibrada, mantenha e otimize',
+        '🔍 CAUSA RAIZ: Bons hábitos alimentares e adequação nutricional',
+        '⚡ AÇÃO IMEDIATA: Mantenha padrão atual e adicione micro-ajustes',
+        '📅 PLANO 7 DIAS: Protocolo de manutenção com alimentos funcionais',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Antioxidantes + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em alimentos funcionais e densidade nutricional'
       ]
     },
     sales: {
       alimentacaoDeficiente: [
-        '💊 Produtos para correção de deficiências nutricionais',
-        '🥗 Suplementos multivitamínicos completos',
-        '💪 Produtos de apoio nutricional básico',
-        '📞 Consultoria nutricional para iniciantes'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos para correção nutricional',
+        '🔍 CAUSA RAIZ: Alimentação deficiente requer suplementos básicos',
+        '⚡ AÇÃO IMEDIATA: Kit correção com suplementos básicos essenciais',
+        '📅 PLANO 7 DIAS: Kit correção com multivitamínico + ferro + vitamina D',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ferro + Vitamina D + Probióticos + Magnésio',
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar suplementos'
       ],
       alimentacaoModerada: [
-        '💊 Produtos para otimização nutricional',
-        '🥗 Suplementos direcionados',
-        '💪 Produtos de apoio nutricional moderado',
-        '📞 Consultoria nutricional intermediária'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos para otimização nutricional',
+        '🔍 CAUSA RAIZ: Alimentação moderada permite uso de suplementos específicos',
+        '⚡ AÇÃO IMEDIATA: Kit otimização com suplementos específicos',
+        '📅 PLANO 7 DIAS: Kit otimização com multivitamínico + Ômega-3 + Magnésio',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Magnésio + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar suplementos'
       ],
       alimentacaoEquilibrada: [
-        '💊 Produtos para manutenção da saúde',
-        '🥗 Suplementos preventivos',
-        '💪 Produtos de apoio nutricional avançado',
-        '📞 Consultoria nutricional para manutenção'
+        '💊 DIAGNÓSTICO: Seu corpo está bem, use suplementos preventivos',
+        '🔍 CAUSA RAIZ: Alimentação equilibrada permite uso de suplementos preventivos',
+        '⚡ AÇÃO IMEDIATA: Kit preventivo com suplementos avançados',
+        '📅 PLANO 7 DIAS: Kit preventivo com multivitamínico + Ômega-3 + Antioxidantes',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Antioxidantes + Adaptógenos + Probióticos',
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar suplementos preventivos'
       ]
     },
     coach: {
       alimentacaoDeficiente: [
-        '🧘‍♀️ Programa de reeducação alimentar básica',
-        '💪 Exercícios leves para iniciantes',
-        '🍎 Coaching nutricional para mudança de hábitos',
-        '📅 Programa de 90 dias para transformação'
+        '🌱 DIAGNÓSTICO: Seu corpo precisa de reeducação alimentar básica',
+        '🔍 CAUSA RAIZ: Alimentação deficiente requer mudanças fundamentais',
+        '⚡ AÇÃO IMEDIATA: Implemente mudanças básicas e exercícios leves',
+        '📅 PLANO 7 DIAS: Desafio de reeducação alimentar com hábitos básicos',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás funcionais básicos',
+        '🍎 ALIMENTAÇÃO: Foque em alimentos in natura e horários regulares'
       ],
       alimentacaoModerada: [
-        '🧘‍♀️ Programa de otimização alimentar',
-        '💪 Exercícios moderados',
-        '🍎 Coaching nutricional para melhoria',
-        '📅 Programa de 60 dias para evolução'
+        '🌼 DIAGNÓSTICO: Seu corpo precisa de otimização alimentar',
+        '🔍 CAUSA RAIZ: Alimentação moderada permite foco em otimização',
+        '⚡ AÇÃO IMEDIATA: Otimize hábitos atuais e adicione exercícios moderados',
+        '📅 PLANO 7 DIAS: Desafio de otimização alimentar com hábitos específicos',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás funcionais específicos',
+        '🍎 ALIMENTAÇÃO: Melhore qualidade dos alimentos e adicione superalimentos'
       ],
       alimentacaoEquilibrada: [
-        '🧘‍♀️ Programa de manutenção de bem-estar',
-        '💪 Exercícios avançados',
-        '🍎 Coaching nutricional para performance',
-        '📅 Programa de acompanhamento contínuo'
+        '🔆 DIAGNÓSTICO: Seu corpo está bem, mantenha e evolua hábitos',
+        '🔍 CAUSA RAIZ: Alimentação equilibrada permite foco em evolução',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione exercícios avançados',
+        '📅 PLANO 7 DIAS: Desafio de evolução alimentar com práticas avançadas',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar evolução',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e funcional mantida'
       ]
     }
   },
 
   // 11. CHECKLIST DETOX
+  // 10. CHECKLIST DETOX
   'checklist-detox': {
     nutri: {
       baixaToxicidade: [
-        '📋 Manutenção da saúde detox natural',
-        '🥗 Plano alimentar para sustentação detox',
-        '💊 Suplementos de apoio detox',
-        '📅 Consultas de manutenção detox mensais'
+        '📋 DIAGNÓSTICO: Seu corpo está com baixa toxicidade, mantenha hábitos saudáveis',
+        '🔍 CAUSA RAIZ: Boa capacidade de eliminação e hábitos alimentares adequados',
+        '⚡ AÇÃO IMEDIATA: Mantenha rotina atual e otimize alimentos detox',
+        '📅 PLANO 7 DIAS: Manutenção com foco em alimentos detox preventivos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, foque em vegetais crucíferos e chás'
       ],
       toxicidadeModerada: [
-        '📋 Plano detox moderado para redução',
-        '🥗 Plano alimentar detox específico',
-        '💊 Suplementos detox específicos',
-        '📅 Acompanhamento detox quinzenal'
+        '📋 DIAGNÓSTICO: Seu corpo precisa de detox moderado para eliminar toxinas',
+        '🔍 CAUSA RAIZ: Acúmulo moderado de toxinas e capacidade de eliminação reduzida',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo detox moderado por 7 dias',
+        '📅 PLANO 7 DIAS: Protocolo detox com alimentos específicos e hidratação',
+        '💊 SUPLEMENTAÇÃO: Detox + Magnésio + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Aumente vegetais crucíferos, chás detox e água com limão'
       ],
       altaToxicidade: [
-        '📋 Plano detox intensivo para eliminação',
-        '🥗 Plano alimentar detox completo',
-        '💊 Suplementos detox intensivos',
-        '📅 Acompanhamento detox semanal intensivo'
+        '📋 DIAGNÓSTICO: Seu corpo precisa de detox intensivo para eliminar toxinas',
+        '🔍 CAUSA RAIZ: Alto acúmulo de toxinas e capacidade de eliminação comprometida',
+        '⚡ AÇÃO IMEDIATA: Implemente protocolo detox intensivo por 14 dias',
+        '📅 PLANO 7 DIAS: Protocolo detox intensivo com alimentos específicos e suplementos',
+        '💊 SUPLEMENTAÇÃO: Detox intensivo + Magnésio + Probióticos + Antioxidantes + Glutationa',
+        '🍎 ALIMENTAÇÃO: Foque em vegetais crucíferos, chás detox, água com limão e jejum intermitente'
       ]
     },
     sales: {
       baixaToxicidade: [
-        '💊 Suplementos de manutenção detox',
-        '🥗 Proteínas para sustentação detox',
-        '💪 Suplementos de apoio detox',
-        '📞 Consultoria preventiva detox'
+        '💊 DIAGNÓSTICO: Seu corpo está bem, use suplementos preventivos detox',
+        '🔍 CAUSA RAIZ: Baixa toxicidade permite uso de suplementos preventivos',
+        '⚡ AÇÃO IMEDIATA: Kit preventivo com suplementos detox básicos',
+        '📅 PLANO 7 DIAS: Kit preventivo com multivitamínico + Ômega-3 + Probióticos',
+        '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos + Antioxidantes',
+        '🍎 ALIMENTAÇÃO: Mantenha rotina atual, otimize timing dos suplementos'
       ],
       toxicidadeModerada: [
-        '💊 Suplementos detox moderados',
-        '🥗 Proteínas para apoio detox',
-        '💪 Suplementos específicos detox',
-        '📞 Consultoria detox moderada'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos detox moderados',
+        '🔍 CAUSA RAIZ: Toxicidade moderada requer suplementos específicos',
+        '⚡ AÇÃO IMEDIATA: Kit detox moderado com suplementos específicos',
+        '📅 PLANO 7 DIAS: Kit detox com suplementos específicos + multivitamínico',
+        '💊 SUPLEMENTAÇÃO: Detox + Magnésio + Probióticos + Antioxidantes + Multivitamínico',
+        '🍎 ALIMENTAÇÃO: Alimentos detox específicos para potencializar suplementos'
       ],
       altaToxicidade: [
-        '💊 Suplementos detox intensivos',
-        '🥗 Proteínas para suporte detox',
-        '💪 Suplementos detox avançados',
-        '📞 Consultoria especializada detox'
+        '💊 DIAGNÓSTICO: Seu corpo precisa de suplementos detox intensivos',
+        '🔍 CAUSA RAIZ: Alta toxicidade requer suplementos detox avançados',
+        '⚡ AÇÃO IMEDIATA: Kit detox intensivo com suplementos avançados',
+        '📅 PLANO 7 DIAS: Kit detox intensivo com suplementos avançados + multivitamínico',
+        '💊 SUPLEMENTAÇÃO: Detox intensivo + Magnésio + Probióticos + Antioxidantes + Glutationa',
+        '🍎 ALIMENTAÇÃO: Alimentos detox intensivos para sustentar suplementos'
       ]
     },
     coach: {
       baixaToxicidade: [
-        '🧘‍♀️ Programa de manutenção detox',
-        '💪 Treinos para sustentação detox',
-        '🍎 Coaching nutricional detox preventivo',
-        '📅 Acompanhamento mensal detox'
+        '🌱 DIAGNÓSTICO: Seu corpo está bem, mantenha hábitos detox saudáveis',
+        '🔍 CAUSA RAIZ: Baixa toxicidade permite foco em manutenção de hábitos',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione micro-ajustes detox',
+        '📅 PLANO 7 DIAS: Desafio de manutenção com hábitos detox saudáveis',
+        '💊 SUPLEMENTAÇÃO: Chás funcionais + Probióticos + Adaptógenos',
+        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione mindfulness detox'
       ],
       toxicidadeModerada: [
-        '🧘‍♀️ Programa detox moderado',
-        '💪 Treinos para apoio detox',
-        '🍎 Coaching nutricional detox',
-        '📅 Acompanhamento quinzenal detox'
+        '🌼 DIAGNÓSTICO: Seu corpo precisa de estratégias detox moderadas',
+        '🔍 CAUSA RAIZ: Toxicidade moderada requer mudanças de hábitos',
+        '⚡ AÇÃO IMEDIATA: Ajuste hábitos alimentares e adicione exercícios detox',
+        '📅 PLANO 7 DIAS: Desafio detox moderado com mudanças de hábitos',
+        '💊 SUPLEMENTAÇÃO: Suplementos naturais e chás detox específicos',
+        '🍎 ALIMENTAÇÃO: Foque em horários regulares e alimentos detox'
       ],
       altaToxicidade: [
-        '🧘‍♀️ Programa detox intensivo',
-        '💪 Treinos para suporte detox',
-        '🍎 Coaching nutricional detox intensivo',
-        '📅 Acompanhamento semanal detox'
+        '🔆 DIAGNÓSTICO: Seu corpo precisa de estratégias detox intensivas',
+        '🔍 CAUSA RAIZ: Alta toxicidade requer mudanças significativas de hábitos',
+        '⚡ AÇÃO IMEDIATA: Implemente mudanças significativas e exercícios detox',
+        '📅 PLANO 7 DIAS: Desafio detox intensivo com práticas avançadas',
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar detox',
+        '🍎 ALIMENTAÇÃO: Alimentação consciente e detox intensiva mantida'
       ]
     }
   }
@@ -3655,7 +4641,7 @@ const diagnosticosCompletos = {
 const getCategoriasPorFerramenta = (ferramentaId: string) => {
   const categoriasMap: { [key: string]: any[] } = {
     'calculadora-imc': [
-      { id: 'baixoPeso', label: 'Baixo Peso', range: '< 18.5', color: 'blue' },
+      { id: 'baixoPeso', label: 'Baixo Peso', range: '&lt; 18.5', color: 'blue' },
       { id: 'pesoNormal', label: 'Peso Normal', range: '18.5 - 24.9', color: 'green' },
       { id: 'sobrepeso', label: 'Sobrepeso', range: '25.0 - 29.9', color: 'yellow' },
       { id: 'obesidade', label: 'Obesidade', range: '≥ 30.0', color: 'red' }
@@ -3671,144 +4657,144 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'bemEstarAlto', label: 'Bem-estar Alto', range: '13-15 pontos', color: 'green' }
     ],
     'quiz-perfil-nutricional': [
-      { id: 'perfil-deficiente', label: 'Perfil Deficiente', range: '0-30 pontos', color: 'red' },
-      { id: 'perfil-equilibrado', label: 'Perfil Equilibrado', range: '31-70 pontos', color: 'green' },
-      { id: 'perfil-otimizado', label: 'Perfil Otimizado', range: '71-100 pontos', color: 'blue' }
+      { id: 'absorcaoBaixa', label: 'Absorção Baixa', range: '5-8 pontos', color: 'red' },
+      { id: 'absorcaoModerada', label: 'Absorção Moderada', range: '9-12 pontos', color: 'yellow' },
+      { id: 'absorcaoOtimizada', label: 'Absorção Otimizada', range: '13-15 pontos', color: 'green' }
     ],
     'quiz-detox': [
-      { id: 'baixa-toxicidade', label: 'Baixa Toxicidade', range: '0-3 sinais', color: 'green' },
-      { id: 'toxicidade-moderada', label: 'Toxicidade Moderada', range: '4-6 sinais', color: 'yellow' },
-      { id: 'alta-toxicidade', label: 'Alta Toxicidade', range: '7+ sinais', color: 'red' }
+      { id: 'baixaToxicidade', label: 'Baixa Toxicidade', range: '5-8 pontos', color: 'green' },
+      { id: 'toxicidadeModerada', label: 'Toxicidade Moderada', range: '9-12 pontos', color: 'yellow' },
+      { id: 'altaToxicidade', label: 'Alta Toxicidade', range: '13-15 pontos', color: 'red' }
     ],
     'quiz-energetico': [
-      { id: 'baixa-energia', label: 'Baixa Energia', range: '0-30 pontos', color: 'red' },
-      { id: 'energia-moderada', label: 'Energia Moderada', range: '31-70 pontos', color: 'yellow' },
-      { id: 'alta-energia', label: 'Alta Energia', range: '71-100 pontos', color: 'green' }
+      { id: 'energiaBaixa', label: 'Energia Baixa', range: '5-8 pontos', color: 'red' },
+      { id: 'energiaModerada', label: 'Energia Moderada', range: '9-12 pontos', color: 'yellow' },
+      { id: 'energiaAlta', label: 'Energia Alta', range: '13-15 pontos', color: 'green' }
     ],
     'calculadora-proteina': [
-      { id: 'baixa-proteina', label: 'Baixa Proteína', range: '< 0.8g/kg', color: 'blue' },
-      { id: 'proteina-normal', label: 'Proteína Normal', range: '0.8-1.2g/kg', color: 'green' },
-      { id: 'alta-proteina', label: 'Alta Proteína', range: '> 1.2g/kg', color: 'yellow' }
+      { id: 'baixaProteina', label: 'Baixa Proteína', range: '&lt; 0.8g/kg', color: 'red' },
+      { id: 'proteinaNormal', label: 'Proteína Normal', range: '0.8-1.2g/kg', color: 'green' },
+      { id: 'altaProteina', label: 'Alta Proteína', range: '> 1.2g/kg', color: 'blue' }
     ],
     'calculadora-agua': [
-      { id: 'baixa-hidratacao', label: 'Baixa Hidratação', range: '< 2L/dia', color: 'red' },
-      { id: 'hidratacao-moderada', label: 'Hidratação Moderada', range: '2-3L/dia', color: 'yellow' },
-      { id: 'alta-hidratacao', label: 'Alta Hidratação', range: '> 3L/dia', color: 'green' }
+      { id: 'baixaHidratacao', label: 'Baixa Hidratação', range: '&lt; 2L/dia', color: 'red' },
+      { id: 'hidratacaoModerada', label: 'Hidratação Moderada', range: '2-3L/dia', color: 'yellow' },
+      { id: 'altaHidratacao', label: 'Alta Hidratação', range: '> 3L/dia', color: 'green' }
     ],
     'calculadora-calorias': [
-      { id: 'deficit-calorico', label: 'Déficit Calórico', range: 'Perda de peso', color: 'blue' },
-      { id: 'manutencao-calorica', label: 'Manutenção', range: 'Peso estável', color: 'green' },
-      { id: 'superavit-calorico', label: 'Superávit Calórico', range: 'Ganho de peso', color: 'yellow' }
+      { id: 'deficitCalorico', label: 'Déficit Calórico', range: 'Perda de peso', color: 'blue' },
+      { id: 'manutencaoCalorica', label: 'Manutenção', range: 'Peso estável', color: 'green' },
+      { id: 'superavitCalorico', label: 'Superávit Calórico', range: 'Ganho de peso', color: 'yellow' }
     ],
     'checklist-alimentar': [
-      { id: 'alimentacao-deficiente', label: 'Alimentação Deficiente', range: '0-40 pontos', color: 'red' },
-      { id: 'alimentacao-moderada', label: 'Alimentação Moderada', range: '41-70 pontos', color: 'yellow' },
-      { id: 'alimentacao-equilibrada', label: 'Alimentação Equilibrada', range: '71-100 pontos', color: 'green' }
+      { id: 'alimentacaoDeficiente', label: 'Alimentação Deficiente', range: '0-40 pontos', color: 'red' },
+      { id: 'alimentacaoModerada', label: 'Alimentação Moderada', range: '41-70 pontos', color: 'yellow' },
+      { id: 'alimentacaoEquilibrada', label: 'Alimentação Equilibrada', range: '71-100 pontos', color: 'green' }
     ],
     'checklist-detox': [
-      { id: 'baixa-toxicidade', label: 'Baixa Toxicidade', range: '0-3 sinais', color: 'green' },
-      { id: 'toxicidade-moderada', label: 'Toxicidade Moderada', range: '4-6 sinais', color: 'yellow' },
-      { id: 'alta-toxicidade', label: 'Alta Toxicidade', range: '7+ sinais', color: 'red' }
+      { id: 'baixaToxicidade', label: 'Baixa Toxicidade', range: '0-3 sinais', color: 'green' },
+      { id: 'toxicidadeModerada', label: 'Toxicidade Moderada', range: '4-6 sinais', color: 'yellow' },
+      { id: 'altaToxicidade', label: 'Alta Toxicidade', range: '7+ sinais', color: 'red' }
     ],
     'mini-ebook': [
-      { id: 'baixo-conhecimento', label: 'Baixo Conhecimento', range: '0-40 pontos', color: 'red' },
-      { id: 'conhecimento-moderado', label: 'Conhecimento Moderado', range: '41-70 pontos', color: 'yellow' },
-      { id: 'alto-conhecimento', label: 'Alto Conhecimento', range: '71-100 pontos', color: 'green' }
+      { id: 'baixoConhecimento', label: 'Baixo Conhecimento', range: '0-40 pontos', color: 'red' },
+      { id: 'conhecimentoModerado', label: 'Conhecimento Moderado', range: '41-70 pontos', color: 'yellow' },
+      { id: 'altoConhecimento', label: 'Alto Conhecimento', range: '71-100 pontos', color: 'green' }
     ],
     'guia-nutraceutico': [
-      { id: 'baixo-interesse', label: 'Baixo Interesse', range: '0-40 pontos', color: 'red' },
-      { id: 'interesse-moderado', label: 'Interesse Moderado', range: '41-70 pontos', color: 'yellow' },
-      { id: 'alto-interesse', label: 'Alto Interesse', range: '71-100 pontos', color: 'green' }
+      { id: 'baixoInteresse', label: 'Baixo Interesse', range: '0-40 pontos', color: 'red' },
+      { id: 'interesseModerado', label: 'Interesse Moderado', range: '41-70 pontos', color: 'yellow' },
+      { id: 'altoInteresse', label: 'Alto Interesse', range: '71-100 pontos', color: 'green' }
     ],
     'guia-proteico': [
-      { id: 'baixa-proteina', label: 'Baixa Proteína', range: '< 0.8g/kg', color: 'blue' },
-      { id: 'proteina-moderada', label: 'Proteína Moderada', range: '0.8-1.2g/kg', color: 'green' },
-      { id: 'alta-proteina', label: 'Alta Proteína', range: '> 1.2g/kg', color: 'yellow' }
+      { id: 'baixaProteina', label: 'Baixa Proteína', range: '&lt; 0.8g/kg', color: 'red' },
+      { id: 'proteinaModerada', label: 'Proteína Moderada', range: '0.8-1.2g/kg', color: 'green' },
+      { id: 'altaProteina', label: 'Alta Proteína', range: '> 1.2g/kg', color: 'blue' }
     ],
     'tabela-comparativa': [
-      { id: 'comparacao-basica', label: 'Comparação Básica', range: 'Produtos essenciais', color: 'blue' },
-      { id: 'comparacao-avancada', label: 'Comparação Avançada', range: 'Produtos especializados', color: 'green' },
-      { id: 'comparacao-premium', label: 'Comparação Premium', range: 'Produtos de elite', color: 'yellow' }
+      { id: 'comparacaoBasica', label: 'Comparação Básica', range: 'Produtos essenciais', color: 'blue' },
+      { id: 'comparacaoAvancada', label: 'Comparação Avançada', range: 'Produtos especializados', color: 'green' },
+      { id: 'comparacaoPremium', label: 'Comparação Premium', range: 'Produtos de elite', color: 'yellow' }
     ],
     'tabela-substituicoes': [
-      { id: 'substituicoes-basicas', label: 'Substituições Básicas', range: 'Alternativas simples', color: 'blue' },
-      { id: 'substituicoes-avancadas', label: 'Substituições Avançadas', range: 'Alternativas especializadas', color: 'green' },
-      { id: 'substituicoes-premium', label: 'Substituições Premium', range: 'Alternativas de elite', color: 'yellow' }
+      { id: 'substituicoesBasicas', label: 'Substituições Básicas', range: 'Alternativas simples', color: 'blue' },
+      { id: 'substituicoesAvancadas', label: 'Substituições Avançadas', range: 'Alternativas especializadas', color: 'green' },
+      { id: 'substituicoesPremium', label: 'Substituições Premium', range: 'Alternativas de elite', color: 'yellow' }
     ],
     'tabela-sintomas': [
-      { id: 'sintomas-leves', label: 'Sintomas Leves', range: '1-3 sintomas', color: 'green' },
-      { id: 'sintomas-moderados', label: 'Sintomas Moderados', range: '4-6 sintomas', color: 'yellow' },
-      { id: 'sintomas-graves', label: 'Sintomas Graves', range: '7+ sintomas', color: 'red' }
+      { id: 'sintomasLeves', label: 'Sintomas Leves', range: '1-3 sintomas', color: 'green' },
+      { id: 'sintomasModerados', label: 'Sintomas Moderados', range: '4-6 sintomas', color: 'yellow' },
+      { id: 'sintomasGraves', label: 'Sintomas Graves', range: '7+ sintomas', color: 'red' }
     ],
     'plano-alimentar-base': [
-      { id: 'plano-basico', label: 'Plano Básico', range: 'Alimentação equilibrada', color: 'blue' },
-      { id: 'plano-avancado', label: 'Plano Avançado', range: 'Alimentação especializada', color: 'green' },
-      { id: 'plano-premium', label: 'Plano Premium', range: 'Alimentação de elite', color: 'yellow' }
+      { id: 'planoBasico', label: 'Plano Básico', range: 'Alimentação equilibrada', color: 'blue' },
+      { id: 'planoAvancado', label: 'Plano Avançado', range: 'Alimentação especializada', color: 'green' },
+      { id: 'planoPremium', label: 'Plano Premium', range: 'Alimentação de elite', color: 'yellow' }
     ],
     'planner-refeicoes': [
-      { id: 'planner-simples', label: 'Planner Simples', range: 'Organização básica', color: 'blue' },
-      { id: 'planner-avancado', label: 'Planner Avançado', range: 'Organização especializada', color: 'green' },
-      { id: 'planner-premium', label: 'Planner Premium', range: 'Organização de elite', color: 'yellow' }
+      { id: 'plannerSimples', label: 'Planner Simples', range: 'Organização básica', color: 'blue' },
+      { id: 'plannerAvancado', label: 'Planner Avançado', range: 'Organização especializada', color: 'green' },
+      { id: 'plannerPremium', label: 'Planner Premium', range: 'Organização de elite', color: 'yellow' }
     ],
     'rastreador-alimentar': [
-      { id: 'rastreamento-basico', label: 'Rastreamento Básico', range: 'Padrões simples', color: 'blue' },
-      { id: 'rastreamento-avancado', label: 'Rastreamento Avançado', range: 'Padrões complexos', color: 'green' },
-      { id: 'rastreamento-premium', label: 'Rastreamento Premium', range: 'Padrões de elite', color: 'yellow' }
+      { id: 'rastreamentoBasico', label: 'Rastreamento Básico', range: 'Padrões simples', color: 'blue' },
+      { id: 'rastreamentoAvancado', label: 'Rastreamento Avançado', range: 'Padrões complexos', color: 'green' },
+      { id: 'rastreamentoPremium', label: 'Rastreamento Premium', range: 'Padrões de elite', color: 'yellow' }
     ],
     'diario-alimentar': [
-      { id: 'diario-basico', label: 'Diário Básico', range: 'Registro simples', color: 'blue' },
-      { id: 'diario-avancado', label: 'Diário Avançado', range: 'Registro detalhado', color: 'green' },
-      { id: 'diario-premium', label: 'Diário Premium', range: 'Registro profissional', color: 'yellow' }
+      { id: 'diarioBasico', label: 'Diário Básico', range: 'Registro simples', color: 'blue' },
+      { id: 'diarioAvancado', label: 'Diário Avançado', range: 'Registro detalhado', color: 'green' },
+      { id: 'diarioPremium', label: 'Diário Premium', range: 'Registro profissional', color: 'yellow' }
     ],
     'tabela-metas-semanais': [
-      { id: 'metas-basicas', label: 'Metas Básicas', range: 'Objetivos simples', color: 'blue' },
-      { id: 'metas-moderadas', label: 'Metas Moderadas', range: 'Objetivos específicos', color: 'green' },
-      { id: 'metas-avancadas', label: 'Metas Avançadas', range: 'Objetivos complexos', color: 'yellow' }
+      { id: 'metasBasicas', label: 'Metas Básicas', range: 'Objetivos simples', color: 'blue' },
+      { id: 'metasModeradas', label: 'Metas Moderadas', range: 'Objetivos específicos', color: 'green' },
+      { id: 'metasAvancadas', label: 'Metas Avançadas', range: 'Objetivos complexos', color: 'yellow' }
     ],
     'template-desafio-7dias': [
-      { id: 'desafio-basico', label: 'Desafio Básico', range: '7 dias simples', color: 'blue' },
-      { id: 'desafio-moderado', label: 'Desafio Moderado', range: '7 dias específicos', color: 'green' },
-      { id: 'desafio-avancado', label: 'Desafio Avançado', range: '7 dias complexos', color: 'yellow' }
+      { id: 'desafioBasico', label: 'Desafio Básico', range: '7 dias simples', color: 'blue' },
+      { id: 'desafioModerado', label: 'Desafio Moderado', range: '7 dias específicos', color: 'green' },
+      { id: 'desafioAvancado', label: 'Desafio Avançado', range: '7 dias complexos', color: 'yellow' }
     ],
     'template-desafio-21dias': [
-      { id: 'desafio-basico', label: 'Desafio Básico', range: '21 dias simples', color: 'blue' },
-      { id: 'desafio-moderado', label: 'Desafio Moderado', range: '21 dias específicos', color: 'green' },
-      { id: 'desafio-avancado', label: 'Desafio Avançado', range: '21 dias complexos', color: 'yellow' }
+      { id: 'desafioBasico', label: 'Desafio Básico', range: '21 dias simples', color: 'blue' },
+      { id: 'desafioModerado', label: 'Desafio Moderado', range: '21 dias específicos', color: 'green' },
+      { id: 'desafioAvancado', label: 'Desafio Avançado', range: '21 dias complexos', color: 'yellow' }
     ],
     'guia-hidratacao': [
-      { id: 'baixa-hidratacao', label: 'Baixa Hidratação', range: '< 2L/dia', color: 'red' },
-      { id: 'hidratacao-moderada', label: 'Hidratação Moderada', range: '2-3L/dia', color: 'yellow' },
-      { id: 'alta-hidratacao', label: 'Alta Hidratação', range: '> 3L/dia', color: 'green' }
+      { id: 'baixaHidratacao', label: 'Baixa Hidratação', range: '&lt; 2L/dia', color: 'red' },
+      { id: 'hidratacaoModerada', label: 'Hidratação Moderada', range: '2-3L/dia', color: 'yellow' },
+      { id: 'altaHidratacao', label: 'Alta Hidratação', range: '> 3L/dia', color: 'green' }
     ],
     'infografico-educativo': [
-      { id: 'conhecimento-basico', label: 'Conhecimento Básico', range: '0-40 pontos', color: 'red' },
-      { id: 'conhecimento-moderado', label: 'Conhecimento Moderado', range: '41-70 pontos', color: 'yellow' },
-      { id: 'conhecimento-avancado', label: 'Conhecimento Avançado', range: '71-100 pontos', color: 'green' }
+      { id: 'conhecimentoBasico', label: 'Conhecimento Básico', range: '0-40 pontos', color: 'red' },
+      { id: 'conhecimentoModerado', label: 'Conhecimento Moderado', range: '41-70 pontos', color: 'yellow' },
+      { id: 'conhecimentoAvancado', label: 'Conhecimento Avançado', range: '71-100 pontos', color: 'green' }
     ],
     'template-receitas': [
-      { id: 'receitas-basicas', label: 'Receitas Básicas', range: 'Receitas simples', color: 'blue' },
-      { id: 'receitas-moderadas', label: 'Receitas Moderadas', range: 'Receitas específicas', color: 'green' },
-      { id: 'receitas-avancadas', label: 'Receitas Avançadas', range: 'Receitas complexas', color: 'yellow' }
+      { id: 'receitasBasicas', label: 'Receitas Básicas', range: 'Receitas simples', color: 'blue' },
+      { id: 'receitasModeradas', label: 'Receitas Moderadas', range: 'Receitas específicas', color: 'green' },
+      { id: 'receitasAvancadas', label: 'Receitas Avançadas', range: 'Receitas complexas', color: 'yellow' }
     ],
     'cardapio-detox': [
-      { id: 'detox-basico', label: 'Detox Básico', range: 'Detox simples', color: 'blue' },
-      { id: 'detox-moderado', label: 'Detox Moderado', range: 'Detox específico', color: 'green' },
-      { id: 'detox-avancado', label: 'Detox Avançado', range: 'Detox complexo', color: 'yellow' }
+      { id: 'detoxBasico', label: 'Detox Básico', range: 'Detox simples', color: 'blue' },
+      { id: 'detoxModerado', label: 'Detox Moderado', range: 'Detox específico', color: 'green' },
+      { id: 'detoxAvancado', label: 'Detox Avançado', range: 'Detox complexo', color: 'yellow' }
     ],
     'simulador-resultados': [
-      { id: 'resultados-basicos', label: 'Resultados Básicos', range: 'Resultados simples', color: 'blue' },
-      { id: 'resultados-moderados', label: 'Resultados Moderados', range: 'Resultados específicos', color: 'green' },
-      { id: 'resultados-avancados', label: 'Resultados Avançados', range: 'Resultados complexos', color: 'yellow' }
+      { id: 'resultadosBasicos', label: 'Resultados Básicos', range: 'Resultados simples', color: 'blue' },
+      { id: 'resultadosModerados', label: 'Resultados Moderados', range: 'Resultados específicos', color: 'green' },
+      { id: 'resultadosAvancados', label: 'Resultados Avançados', range: 'Resultados complexos', color: 'yellow' }
     ],
     'template-avaliacao-inicial': [
-      { id: 'avaliacao-basica', label: 'Avaliação Básica', range: 'Avaliação simples', color: 'blue' },
-      { id: 'avaliacao-moderada', label: 'Avaliação Moderada', range: 'Avaliação específica', color: 'green' },
-      { id: 'avaliacao-avancada', label: 'Avaliação Avançada', range: 'Avaliação complexa', color: 'yellow' }
+      { id: 'avaliacaoBasica', label: 'Avaliação Básica', range: 'Avaliação simples', color: 'blue' },
+      { id: 'avaliacaoModerada', label: 'Avaliação Moderada', range: 'Avaliação específica', color: 'green' },
+      { id: 'avaliacaoAvancada', label: 'Avaliação Avançada', range: 'Avaliação complexa', color: 'yellow' }
     ],
     'formulario-recomendacao': [
-      { id: 'recomendacao-basica', label: 'Recomendação Básica', range: 'Recomendações simples', color: 'blue' },
-      { id: 'recomendacao-moderada', label: 'Recomendação Moderada', range: 'Recomendações específicas', color: 'green' },
-      { id: 'recomendacao-avancada', label: 'Recomendação Avançada', range: 'Recomendações complexas', color: 'yellow' }
+      { id: 'recomendacaoBasica', label: 'Recomendação Básica', range: 'Recomendações simples', color: 'blue' },
+      { id: 'recomendacaoModerada', label: 'Recomendação Moderada', range: 'Recomendações específicas', color: 'green' },
+      { id: 'recomendacaoAvancada', label: 'Recomendação Avançada', range: 'Recomendações complexas', color: 'yellow' }
     ],
     'template-acompanhamento-semanal': [
       { id: 'acompanhamento-basico', label: 'Acompanhamento Básico', range: 'Semanal simples', color: 'blue' },
@@ -3821,44 +4807,44 @@ const getCategoriasPorFerramenta = (ferramentaId: string) => {
       { id: 'checkin-avancado', label: 'Check-in Avançado', range: 'Mensal complexo', color: 'yellow' }
     ],
     'ficha-cliente': [
-      { id: 'ficha-basica', label: 'Ficha Básica', range: 'Cliente simples', color: 'blue' },
-      { id: 'ficha-moderada', label: 'Ficha Moderada', range: 'Cliente específico', color: 'green' },
-      { id: 'ficha-avancada', label: 'Ficha Avançada', range: 'Cliente complexo', color: 'yellow' }
+      { id: 'fichaBasica', label: 'Ficha Básica', range: 'Cliente simples', color: 'blue' },
+      { id: 'fichaModerada', label: 'Ficha Moderada', range: 'Cliente específico', color: 'green' },
+      { id: 'fichaAvancada', label: 'Ficha Avançada', range: 'Cliente complexo', color: 'yellow' }
     ],
     'template-progresso-visual': [
-      { id: 'progresso-basico', label: 'Progresso Básico', range: 'Visual simples', color: 'blue' },
-      { id: 'progresso-moderado', label: 'Progresso Moderado', range: 'Visual específico', color: 'green' },
-      { id: 'progresso-avancado', label: 'Progresso Avançado', range: 'Visual complexo', color: 'yellow' }
+      { id: 'progressoBasico', label: 'Progresso Básico', range: 'Visual simples', color: 'blue' },
+      { id: 'progressoModerado', label: 'Progresso Moderado', range: 'Visual específico', color: 'green' },
+      { id: 'progressoAvancado', label: 'Progresso Avançado', range: 'Visual complexo', color: 'yellow' }
     ],
     'template-story-interativo': [
-      { id: 'story-basico', label: 'Story Básico', range: 'Interativo simples', color: 'blue' },
-      { id: 'story-moderado', label: 'Story Moderado', range: 'Interativo específico', color: 'green' },
-      { id: 'story-avancado', label: 'Story Avançado', range: 'Interativo complexo', color: 'yellow' }
+      { id: 'storyBasico', label: 'Story Básico', range: 'Interativo simples', color: 'blue' },
+      { id: 'storyModerado', label: 'Story Moderado', range: 'Interativo específico', color: 'green' },
+      { id: 'storyAvancado', label: 'Story Avançado', range: 'Interativo complexo', color: 'yellow' }
     ],
     'post-curiosidades': [
-      { id: 'curiosidade-basica', label: 'Curiosidade Básica', range: 'Post simples', color: 'blue' },
-      { id: 'curiosidade-moderada', label: 'Curiosidade Moderada', range: 'Post específico', color: 'green' },
-      { id: 'curiosidade-avancada', label: 'Curiosidade Avançada', range: 'Post complexo', color: 'yellow' }
+      { id: 'curiosidadeBasica', label: 'Curiosidade Básica', range: 'Post simples', color: 'blue' },
+      { id: 'curiosidadeModerada', label: 'Curiosidade Moderada', range: 'Post específico', color: 'green' },
+      { id: 'curiosidadeAvancada', label: 'Curiosidade Avançada', range: 'Post complexo', color: 'yellow' }
     ],
     'template-post-dica': [
-      { id: 'dica-basica', label: 'Dica Básica', range: 'Post simples', color: 'blue' },
-      { id: 'dica-moderada', label: 'Dica Moderada', range: 'Post específico', color: 'green' },
-      { id: 'dica-avancada', label: 'Dica Avançada', range: 'Post complexo', color: 'yellow' }
+      { id: 'dicaBasica', label: 'Dica Básica', range: 'Post simples', color: 'blue' },
+      { id: 'dicaModerada', label: 'Dica Moderada', range: 'Post específico', color: 'green' },
+      { id: 'dicaAvancada', label: 'Dica Avançada', range: 'Post complexo', color: 'yellow' }
     ],
     'template-reels-roteirizado': [
-      { id: 'reels-basico', label: 'Reels Básico', range: 'Roteiro simples', color: 'blue' },
-      { id: 'reels-moderado', label: 'Reels Moderado', range: 'Roteiro específico', color: 'green' },
-      { id: 'reels-avancado', label: 'Reels Avançado', range: 'Roteiro complexo', color: 'yellow' }
+      { id: 'reelsBasico', label: 'Reels Básico', range: 'Roteiro simples', color: 'blue' },
+      { id: 'reelsModerado', label: 'Reels Moderado', range: 'Roteiro específico', color: 'green' },
+      { id: 'reelsAvancado', label: 'Reels Avançado', range: 'Roteiro complexo', color: 'yellow' }
     ],
     'template-artigo-curto': [
-      { id: 'artigo-basico', label: 'Artigo Básico', range: 'Artigo simples', color: 'blue' },
-      { id: 'artigo-moderado', label: 'Artigo Moderado', range: 'Artigo específico', color: 'green' },
-      { id: 'artigo-avancado', label: 'Artigo Avançado', range: 'Artigo complexo', color: 'yellow' }
+      { id: 'artigoBasico', label: 'Artigo Básico', range: 'Artigo simples', color: 'blue' },
+      { id: 'artigoModerado', label: 'Artigo Moderado', range: 'Artigo específico', color: 'green' },
+      { id: 'artigoAvancado', label: 'Artigo Avançado', range: 'Artigo complexo', color: 'yellow' }
     ],
     'template-catalogo-digital': [
-      { id: 'catalogo-basico', label: 'Catálogo Básico', range: 'Digital simples', color: 'blue' },
-      { id: 'catalogo-moderado', label: 'Catálogo Moderado', range: 'Digital específico', color: 'green' },
-      { id: 'catalogo-avancado', label: 'Catálogo Avançado', range: 'Digital complexo', color: 'yellow' }
+      { id: 'catalogoBasico', label: 'Catálogo Básico', range: 'Digital simples', color: 'blue' },
+      { id: 'catalogoModerado', label: 'Catálogo Moderado', range: 'Digital específico', color: 'green' },
+      { id: 'catalogoAvancado', label: 'Catálogo Avançado', range: 'Digital complexo', color: 'yellow' }
     ],
     'simulador-ganho': [
       { id: 'ganho-basico', label: 'Ganho Básico', range: 'Simulação simples', color: 'blue' },
@@ -3969,8 +4955,8 @@ const profissoes = [
 
 export default function AdminDiagnosticos() {
   const [profissaoSelecionada, setProfissaoSelecionada] = useState<'nutri' | 'sales' | 'coach'>('nutri')
-  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('quiz-interativo')
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('metabolismoLento')
+  const [ferramentaSelecionada, setFerramentaSelecionada] = useState<string>('template-catalogo-digital')
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('catalogoModerado')
 
   // Filtrar ferramentas por profissão
   const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
@@ -4480,6 +5466,113 @@ export default function AdminDiagnosticos() {
               </div>
             )}
 
+            {/* Seção de CTAs Pré-sugeridos - Quiz de Perfil Nutricional */}
+            {ferramentaSelecionada === 'quiz-perfil-nutricional' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-orange-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥗 CTAs Pré-sugeridos - Quiz de Perfil Nutricional
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ABSORÇÃO BAIXA</p>
+                        <p className="text-sm text-gray-700">"Melhore sua absorção nutricional com avaliação especializada."</p>
+                        <p className="text-xs text-green-600 mt-1">🔬 Quero minha avaliação digestiva</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ABSORÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize sua absorção com plano nutricional personalizado."</p>
+                        <p className="text-xs text-green-600 mt-1">⚡ Quero otimizar minha absorção</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ABSORÇÃO OTIMIZADA</p>
+                        <p className="text-sm text-gray-700">"Mantenha sua excelente absorção com nutrição funcional."</p>
+                        <p className="text-xs text-green-600 mt-1">🌟 Quero nutrição funcional</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ABSORÇÃO BAIXA</p>
+                        <p className="text-sm text-gray-700">"Veja quais suplementos melhoram sua absorção digestiva."</p>
+                        <p className="text-xs text-blue-600 mt-1">💊 Quero suplementos digestivos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ABSORÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Maximize absorção com suplementos sinérgicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">⚡ Ver suplementos sinérgicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ABSORÇÃO OTIMIZADA</p>
+                        <p className="text-sm text-gray-700">"Aproveite sua absorção com suplementos premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">💎 Ver suplementos premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ABSORÇÃO BAIXA</p>
+                        <p className="text-sm text-gray-700">"Melhore sua digestão com técnicas de mindfulness alimentar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🌱 Quero melhorar minha digestão</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ABSORÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize absorção com alimentação consciente."</p>
+                        <p className="text-xs text-purple-600 mt-1">🧘‍♀️ Quero alimentação consciente</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ABSORÇÃO OTIMIZADA</p>
+                        <p className="text-sm text-gray-700">"Evolua para nutrição funcional avançada."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero nutrição funcional</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de absorção</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Seção de Preview do Quiz de Bem-estar */}
             {ferramentaSelecionada === 'quiz-bem-estar' && (
               <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -4618,6 +5711,9979 @@ export default function AdminDiagnosticos() {
                         <div className="text-xs text-green-600 mt-1">Excelente!</div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Quiz Detox */}
+            {ferramentaSelecionada === 'quiz-detox' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-red-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🧽 CTAs Pré-sugeridos - Quiz Detox
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Mantenha sua saúde com plano nutricional preventivo."</p>
+                        <p className="text-xs text-green-600 mt-1">🛡️ Quero meu plano preventivo</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">TOXICIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Reduza toxinas com protocolo detox personalizado."</p>
+                        <p className="text-xs text-green-600 mt-1">🧽 Quero meu protocolo detox</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Elimine toxinas urgentemente com detox intensivo."</p>
+                        <p className="text-xs text-green-600 mt-1">🚨 Quero detox urgente</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Mantenha-se limpo com suplementos preventivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🛡️ Ver suplementos preventivos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">TOXICIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Elimine toxinas com kit detox específico."</p>
+                        <p className="text-xs text-blue-600 mt-1">🧽 Ver kit detox moderado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Kit detox intensivo para eliminação urgente."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚨 Ver kit detox intensivo</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Mantenha-se saudável com hábitos detox preventivos."</p>
+                        <p className="text-xs text-purple-600 mt-1">🌱 Quero hábitos preventivos</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">TOXICIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Transforme sua saúde com desafio detox moderado."</p>
+                        <p className="text-xs text-purple-600 mt-1">🧽 Quero desafio detox</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Transformação urgente com protocolo detox completo."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚨 Quero transformação urgente</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de toxicidade</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Quiz Energético */}
+            {ferramentaSelecionada === 'quiz-energetico' && (
+              <div className="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  ⚡ CTAs Pré-sugeridos - Quiz Energético
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ENERGIA BAIXA</p>
+                        <p className="text-sm text-gray-700">"Revitalize sua energia com plano nutricional específico."</p>
+                        <p className="text-xs text-green-600 mt-1">⚡ Quero meu plano energético</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ENERGIA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize sua energia com nutrição estratégica."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero otimizar minha energia</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ENERGIA ALTA</p>
+                        <p className="text-sm text-gray-700">"Mantenha sua excelente energia com nutrição premium."</p>
+                        <p className="text-xs text-green-600 mt-1">🌟 Quero nutrição premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ENERGIA BAIXA</p>
+                        <p className="text-sm text-gray-700">"Aumente sua energia com suplementos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">⚡ Ver suplementos energéticos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ENERGIA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Maximize energia com kit de otimização."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Ver kit de otimização</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ENERGIA ALTA</p>
+                        <p className="text-sm text-gray-700">"Sustente alta energia com suplementos premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🌟 Ver suplementos premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ENERGIA BAIXA</p>
+                        <p className="text-sm text-gray-700">"Transforme sua energia com desafio energético."</p>
+                        <p className="text-xs text-purple-600 mt-1">⚡ Quero desafio energético</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ENERGIA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize energia com hábitos saudáveis."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero otimizar hábitos</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ENERGIA ALTA</p>
+                        <p className="text-sm text-gray-700">"Evolua para práticas energéticas avançadas."</p>
+                        <p className="text-xs text-purple-600 mt-1">🌟 Quero práticas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de energia</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Calculadora de IMC */}
+            {ferramentaSelecionada === 'calculadora-imc' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 CTAs Pré-sugeridos - Calculadora de IMC
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXO PESO</p>
+                        <p className="text-sm text-gray-700">"Ganhe peso de forma saudável com plano nutricional específico."</p>
+                        <p className="text-xs text-green-600 mt-1">📈 Quero meu plano de ganho</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PESO NORMAL</p>
+                        <p className="text-sm text-gray-700">"Mantenha seu peso ideal com nutrição otimizada."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero manter meu peso</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SOBREPESO</p>
+                        <p className="text-sm text-gray-700">"Reduza peso de forma saudável com plano personalizado."</p>
+                        <p className="text-xs text-green-600 mt-1">📉 Quero meu plano de redução</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">OBESIDADE</p>
+                        <p className="text-sm text-gray-700">"Transforme sua saúde com plano nutricional completo."</p>
+                        <p className="text-xs text-green-600 mt-1">🔥 Quero transformação completa</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXO PESO</p>
+                        <p className="text-sm text-gray-700">"Ganhe peso com suplementos hipercalóricos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">📈 Ver suplementos para ganho</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PESO NORMAL</p>
+                        <p className="text-sm text-gray-700">"Mantenha saúde com suplementos preventivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Ver suplementos preventivos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SOBREPESO</p>
+                        <p className="text-sm text-gray-700">"Queime gordura com suplementos termogênicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">📉 Ver suplementos termogênicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">OBESIDADE</p>
+                        <p className="text-sm text-gray-700">"Kit metabólico completo para transformação."</p>
+                        <p className="text-xs text-blue-600 mt-1">🔥 Ver kit metabólico</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXO PESO</p>
+                        <p className="text-sm text-gray-700">"Ganhe peso saudável com desafio de transformação."</p>
+                        <p className="text-xs text-purple-600 mt-1">📈 Quero desafio de ganho</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PESO NORMAL</p>
+                        <p className="text-sm text-gray-700">"Mantenha bem-estar com hábitos saudáveis."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero manter bem-estar</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SOBREPESO</p>
+                        <p className="text-sm text-gray-700">"Transforme seu corpo com desafio de mudança."</p>
+                        <p className="text-xs text-purple-600 mt-1">📉 Quero desafio de transformação</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">OBESIDADE</p>
+                        <p className="text-sm text-gray-700">"Transformação completa com coaching de vida."</p>
+                        <p className="text-xs text-purple-600 mt-1">🔥 Quero transformação completa</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada categoria de IMC</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Calculadora de Proteína */}
+            {ferramentaSelecionada === 'calculadora-proteina' && (
+              <div className="mt-8 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥩 CTAs Pré-sugeridos - Calculadora de Proteína
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Aumente sua proteína com plano nutricional específico."</p>
+                        <p className="text-xs text-green-600 mt-1">🥩 Quero meu plano proteico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PROTEÍNA NORMAL</p>
+                        <p className="text-sm text-gray-700">"Mantenha sua proteína com nutrição otimizada."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero manter minha proteína</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Otimize sua proteína com nutrição premium."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero nutrição premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Aumente proteína com suplementos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🥩 Ver suplementos proteicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PROTEÍNA NORMAL</p>
+                        <p className="text-sm text-gray-700">"Mantenha proteína com suplementos preventivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Ver suplementos preventivos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Sustente alta proteína com suplementos premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Ver suplementos premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Transforme sua proteína com desafio nutricional."</p>
+                        <p className="text-xs text-purple-600 mt-1">🥩 Quero desafio proteico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PROTEÍNA NORMAL</p>
+                        <p className="text-sm text-gray-700">"Mantenha proteína com hábitos saudáveis."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero manter hábitos</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Evolua para práticas proteicas avançadas."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero práticas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de proteína</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Calculadora de Água */}
+            {ferramentaSelecionada === 'calculadora-agua' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💧 CTAs Pré-sugeridos - Calculadora de Água
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Aumente sua hidratação com plano nutricional específico."</p>
+                        <p className="text-xs text-green-600 mt-1">💧 Quero meu plano hidratacional</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">HIDRATAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Mantenha sua hidratação com nutrição otimizada."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero manter minha hidratação</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Otimize sua hidratação com nutrição premium."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero nutrição premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Aumente hidratação com suplementos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">💧 Ver suplementos hidratacionais</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">HIDRATAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Mantenha hidratação com suplementos preventivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Ver suplementos preventivos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Sustente alta hidratação com suplementos premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Ver suplementos premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Transforme sua hidratação com desafio nutricional."</p>
+                        <p className="text-xs text-purple-600 mt-1">💧 Quero desafio hidratacional</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">HIDRATAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Mantenha hidratação com hábitos saudáveis."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero manter hábitos</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Evolua para práticas hidratacionais avançadas."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero práticas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de hidratação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Calculadora de Calorias */}
+            {ferramentaSelecionada === 'calculadora-calorias' && (
+              <div className="mt-8 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🔥 CTAs Pré-sugeridos - Calculadora de Calorias
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DÉFICIT CALÓRICO</p>
+                        <p className="text-sm text-gray-700">"Emagreça com déficit calórico sustentável e plano nutricional."</p>
+                        <p className="text-xs text-green-600 mt-1">🔥 Quero meu plano de emagrecimento</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">MANUTENÇÃO</p>
+                        <p className="text-sm text-gray-700">"Mantenha seu peso com equilíbrio calórico otimizado."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero manter meu peso</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SUPERÁVIT CALÓRICO</p>
+                        <p className="text-sm text-gray-700">"Ganhe massa com superávit calórico estratégico."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero ganhar massa muscular</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DÉFICIT CALÓRICO</p>
+                        <p className="text-sm text-gray-700">"Queime calorias com termogênicos e suplementos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🔥 Ver suplementos termogênicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">MANUTENÇÃO</p>
+                        <p className="text-sm text-gray-700">"Mantenha energia com suplementos preventivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Ver suplementos preventivos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SUPERÁVIT CALÓRICO</p>
+                        <p className="text-sm text-gray-700">"Ganhe massa com suplementos hipercalóricos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Ver suplementos hipercalóricos</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DÉFICIT CALÓRICO</p>
+                        <p className="text-sm text-gray-700">"Transforme sua relação com comida e emagreça."</p>
+                        <p className="text-xs text-purple-600 mt-1">🔥 Quero desafio de emagrecimento</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">MANUTENÇÃO</p>
+                        <p className="text-sm text-gray-700">"Mantenha equilíbrio com hábitos alimentares saudáveis."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero manter hábitos</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SUPERÁVIT CALÓRICO</p>
+                        <p className="text-sm text-gray-700">"Evolua para ganho de massa com práticas avançadas."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero práticas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada objetivo calórico</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Checklist Detox */}
+            {ferramentaSelecionada === 'checklist-detox' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🧽 CTAs Pré-sugeridos - Checklist Detox
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Mantenha sua saúde com plano detox preventivo."</p>
+                        <p className="text-xs text-green-600 mt-1">🧽 Quero meu plano preventivo</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">TOXICIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Elimine toxinas com protocolo detox moderado."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero protocolo detox</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Desintoxique seu corpo com protocolo intensivo."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero detox intensivo</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Mantenha saúde com suplementos detox preventivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🧽 Ver suplementos preventivos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">TOXICIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Elimine toxinas com suplementos detox específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Ver suplementos detox</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Desintoxique com suplementos detox intensivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Ver suplementos intensivos</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Mantenha hábitos detox saudáveis e naturais."</p>
+                        <p className="text-xs text-purple-600 mt-1">🧽 Quero hábitos detox</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">TOXICIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Transforme sua saúde com desafio detox moderado."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero desafio detox</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTA TOXICIDADE</p>
+                        <p className="text-sm text-gray-700">"Evolua para detox intensivo com práticas avançadas."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero práticas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de toxicidade</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Checklist Alimentar */}
+            {ferramentaSelecionada === 'checklist-alimentar' && (
+              <div className="mt-8 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🍽️ CTAs Pré-sugeridos - Checklist Alimentar
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALIMENTAÇÃO DEFICIENTE</p>
+                        <p className="text-sm text-gray-700">"Corrija sua alimentação com plano nutricional completo."</p>
+                        <p className="text-xs text-green-600 mt-1">🍽️ Quero meu plano nutricional</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALIMENTAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize sua alimentação com plano específico."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero otimizar minha alimentação</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALIMENTAÇÃO EQUILIBRADA</p>
+                        <p className="text-sm text-gray-700">"Mantenha sua alimentação com plano preventivo."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero manter minha alimentação</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALIMENTAÇÃO DEFICIENTE</p>
+                        <p className="text-sm text-gray-700">"Corrija deficiências com suplementos básicos essenciais."</p>
+                        <p className="text-xs text-blue-600 mt-1">🍽️ Ver suplementos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALIMENTAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize nutrição com suplementos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Ver suplementos específicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALIMENTAÇÃO EQUILIBRADA</p>
+                        <p className="text-sm text-gray-700">"Mantenha saúde com suplementos preventivos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Ver suplementos preventivos</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALIMENTAÇÃO DEFICIENTE</p>
+                        <p className="text-sm text-gray-700">"Transforme sua alimentação com reeducação básica."</p>
+                        <p className="text-xs text-purple-600 mt-1">🍽️ Quero reeducação alimentar</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALIMENTAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Evolua sua alimentação com otimização específica."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero otimizar hábitos</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALIMENTAÇÃO EQUILIBRADA</p>
+                        <p className="text-sm text-gray-700">"Evolua para alimentação funcional avançada."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero práticas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de alimentação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Mini E-book Educativo */}
+            {ferramentaSelecionada === 'mini-ebook' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📚 CTAs Pré-sugeridos - Mini E-book Educativo
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXO CONHECIMENTO</p>
+                        <p className="text-sm text-gray-700">"Aprenda nutrição básica com e-book completo."</p>
+                        <p className="text-xs text-green-600 mt-1">📚 Quero meu e-book nutricional</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CONHECIMENTO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Aprofunde nutrição com e-book avançado."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero e-book avançado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTO CONHECIMENTO</p>
+                        <p className="text-sm text-gray-700">"Evolua para nutrição de elite com e-book especializado."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero e-book especializado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXO CONHECIMENTO</p>
+                        <p className="text-sm text-gray-700">"Aprenda suplementação básica com e-book completo."</p>
+                        <p className="text-xs text-blue-600 mt-1">📚 Quero e-book de suplementos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CONHECIMENTO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Aprofunde suplementação com e-book avançado."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero e-book avançado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTO CONHECIMENTO</p>
+                        <p className="text-sm text-gray-700">"Evolua para suplementação de elite com e-book especializado."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero e-book especializado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXO CONHECIMENTO</p>
+                        <p className="text-sm text-gray-700">"Aprenda bem-estar básico com e-book completo."</p>
+                        <p className="text-xs text-purple-600 mt-1">📚 Quero e-book de bem-estar</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CONHECIMENTO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Aprofunde bem-estar com e-book avançado."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero e-book avançado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTO CONHECIMENTO</p>
+                        <p className="text-sm text-gray-700">"Evolua para bem-estar de elite com e-book especializado."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero e-book especializado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de conhecimento</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Guia Nutracêutico */}
+            {ferramentaSelecionada === 'guia-nutraceutico' && (
+              <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💊 CTAs Pré-sugeridos - Guia Nutracêutico
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXO INTERESSE</p>
+                        <p className="text-sm text-gray-700">"Desperte seu interesse em nutracêuticos com guia básico."</p>
+                        <p className="text-xs text-green-600 mt-1">💊 Quero meu guia nutracêutico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">INTERESSE MODERADO</p>
+                        <p className="text-sm text-gray-700">"Aprofunde nutracêuticos com guia avançado."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero guia avançado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTO INTERESSE</p>
+                        <p className="text-sm text-gray-700">"Evolua para nutracêuticos de precisão com guia especializado."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero guia especializado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXO INTERESSE</p>
+                        <p className="text-sm text-gray-700">"Desperte interesse em nutracêuticos com guia básico."</p>
+                        <p className="text-xs text-blue-600 mt-1">💊 Quero guia nutracêutico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">INTERESSE MODERADO</p>
+                        <p className="text-sm text-gray-700">"Aprofunde nutracêuticos com guia avançado."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero guia avançado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTO INTERESSE</p>
+                        <p className="text-sm text-gray-700">"Evolua para nutracêuticos de precisão com guia especializado."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero guia especializado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXO INTERESSE</p>
+                        <p className="text-sm text-gray-700">"Desperte interesse em nutracêuticos com guia básico."</p>
+                        <p className="text-xs text-purple-600 mt-1">💊 Quero guia nutracêutico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">INTERESSE MODERADO</p>
+                        <p className="text-sm text-gray-700">"Aprofunde nutracêuticos com guia avançado."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero guia avançado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTO INTERESSE</p>
+                        <p className="text-sm text-gray-700">"Evolua para nutracêuticos de precisão com guia especializado."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero guia especializado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de interesse</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Guia Proteico */}
+            {ferramentaSelecionada === 'guia-proteico' && (
+              <div className="mt-8 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥩 CTAs Pré-sugeridos - Guia Proteico
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Aumente seu consumo de proteínas com guia completo."</p>
+                        <p className="text-xs text-green-600 mt-1">🥩 Quero meu guia proteico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PROTEÍNA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize suas proteínas com guia avançado."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero guia otimizado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Evolua para proteínas de precisão com guia especializado."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero guia especializado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Aumente consumo de proteínas com guia completo."</p>
+                        <p className="text-xs text-blue-600 mt-1">🥩 Quero guia proteico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PROTEÍNA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize proteínas com guia avançado."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero guia otimizado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Evolua para proteínas de precisão com guia especializado."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero guia especializado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Aumente consumo de proteínas com guia completo."</p>
+                        <p className="text-xs text-purple-600 mt-1">🥩 Quero guia proteico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PROTEÍNA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Otimize proteínas com guia avançado."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero guia otimizado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTA PROTEÍNA</p>
+                        <p className="text-sm text-gray-700">"Evolua para proteínas de precisão com guia especializado."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero guia especializado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de consumo proteico</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Tabela Comparativa */}
+            {ferramentaSelecionada === 'tabela-comparativa' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 CTAs Pré-sugeridos - Tabela Comparativa
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">COMPARAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Compare produtos essenciais com análise completa."</p>
+                        <p className="text-xs text-green-600 mt-1">📊 Quero tabela básica</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">COMPARAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Compare produtos especializados com análise detalhada."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero tabela avançada</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">COMPARAÇÃO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Compare produtos de elite com análise premium."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero tabela premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">COMPARAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Compare produtos essenciais com análise completa."</p>
+                        <p className="text-xs text-blue-600 mt-1">📊 Quero tabela básica</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">COMPARAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Compare produtos especializados com análise detalhada."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero tabela avançada</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">COMPARAÇÃO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Compare produtos de elite com análise premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero tabela premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">COMPARAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Compare produtos essenciais com análise completa."</p>
+                        <p className="text-xs text-purple-600 mt-1">📊 Quero tabela básica</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">COMPARAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Compare produtos especializados com análise detalhada."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero tabela avançada</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">COMPARAÇÃO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Compare produtos de elite com análise premium."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero tabela premium</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de comparação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Tabela de Substituições */}
+            {ferramentaSelecionada === 'tabela-substituicoes' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🔄 CTAs Pré-sugeridos - Tabela de Substituições
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SUBSTITUIÇÕES BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Substitua alimentos comuns com alternativas simples."</p>
+                        <p className="text-xs text-green-600 mt-1">🔄 Quero substituições básicas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SUBSTITUIÇÕES AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Substitua alimentos específicos com alternativas especializadas."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero substituições avançadas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SUBSTITUIÇÕES PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Substitua alimentos de elite com alternativas premium."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero substituições premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SUBSTITUIÇÕES BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Substitua produtos comuns com alternativas simples."</p>
+                        <p className="text-xs text-blue-600 mt-1">🔄 Quero substituições básicas</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SUBSTITUIÇÕES AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Substitua produtos específicos com alternativas especializadas."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero substituições avançadas</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SUBSTITUIÇÕES PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Substitua produtos de elite com alternativas premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero substituições premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SUBSTITUIÇÕES BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Substitua alimentos comuns com alternativas simples."</p>
+                        <p className="text-xs text-purple-600 mt-1">🔄 Quero substituições básicas</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SUBSTITUIÇÕES AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Substitua alimentos específicos com alternativas especializadas."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero substituições avançadas</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SUBSTITUIÇÕES PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Substitua alimentos de elite com alternativas premium."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero substituições premium</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de substituição</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Tabela de Sintomas */}
+            {ferramentaSelecionada === 'tabela-sintomas' && (
+              <div className="mt-8 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🩺 CTAs Pré-sugeridos - Tabela de Sintomas
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SINTOMAS LEVES</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas leves com alimentação específica."</p>
+                        <p className="text-xs text-green-600 mt-1">🩺 Quero correção leve</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SINTOMAS MODERADOS</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas moderados com protocolo nutricional."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero correção moderada</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">SINTOMAS GRAVES</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas graves com intervenção nutricional."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero correção intensiva</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SINTOMAS LEVES</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas leves com produtos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🩺 Quero correção leve</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SINTOMAS MODERADOS</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas moderados com produtos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero correção moderada</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">SINTOMAS GRAVES</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas graves com produtos específicos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero correção intensiva</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SINTOMAS LEVES</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas leves com mudanças no estilo de vida."</p>
+                        <p className="text-xs text-purple-600 mt-1">🩺 Quero correção leve</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SINTOMAS MODERADOS</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas moderados com mudanças no estilo de vida."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero correção moderada</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">SINTOMAS GRAVES</p>
+                        <p className="text-sm text-gray-700">"Corrija sintomas graves com mudanças no estilo de vida."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero correção intensiva</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de sintoma</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Plano Alimentar Base */}
+            {ferramentaSelecionada === 'plano-alimentar-base' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📅 CTAs Pré-sugeridos - Plano Alimentar Base
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PLANO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba um plano alimentar básico equilibrado."</p>
+                        <p className="text-xs text-green-600 mt-1">📅 Quero plano básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PLANO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba um plano alimentar avançado especializado."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero plano avançado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PLANO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba um plano alimentar premium de elite."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero plano premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PLANO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para plano alimentar básico."</p>
+                        <p className="text-xs text-blue-600 mt-1">📅 Quero plano básico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PLANO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para plano alimentar avançado."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero plano avançado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PLANO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para plano alimentar premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero plano premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PLANO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para plano alimentar básico."</p>
+                        <p className="text-xs text-purple-600 mt-1">📅 Quero plano básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PLANO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para plano alimentar avançado."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero plano avançado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PLANO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para plano alimentar premium."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero plano premium</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de plano</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Planner de Refeições */}
+            {ferramentaSelecionada === 'planner-refeicoes' && (
+              <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🗓️ CTAs Pré-sugeridos - Planner de Refeições
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PLANNER SIMPLES</p>
+                        <p className="text-sm text-gray-700">"Receba um planner simples para organizar refeições."</p>
+                        <p className="text-xs text-green-600 mt-1">🗓️ Quero planner simples</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PLANNER AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba um planner avançado para organizar refeições."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero planner avançado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PLANNER PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba um planner premium para organizar refeições."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero planner premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PLANNER SIMPLES</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para planner simples de refeições."</p>
+                        <p className="text-xs text-blue-600 mt-1">🗓️ Quero planner simples</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PLANNER AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para planner avançado de refeições."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero planner avançado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PLANNER PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para planner premium de refeições."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero planner premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PLANNER SIMPLES</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para planner simples de refeições."</p>
+                        <p className="text-xs text-purple-600 mt-1">🗓️ Quero planner simples</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PLANNER AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para planner avançado de refeições."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero planner avançado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PLANNER PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para planner premium de refeições."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero planner premium</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de planner</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Rastreador Alimentar */}
+            {ferramentaSelecionada === 'rastreador-alimentar' && (
+              <div className="mt-8 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📈 CTAs Pré-sugeridos - Rastreador Alimentar
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RASTREAMENTO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba rastreamento básico para identificar padrões alimentares."</p>
+                        <p className="text-xs text-green-600 mt-1">📈 Quero rastreamento básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RASTREAMENTO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba rastreamento avançado para identificar padrões complexos."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero rastreamento avançado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RASTREAMENTO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba rastreamento premium para identificar padrões de elite."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero rastreamento premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RASTREAMENTO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para rastreamento básico alimentar."</p>
+                        <p className="text-xs text-blue-600 mt-1">📈 Quero rastreamento básico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RASTREAMENTO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para rastreamento avançado alimentar."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero rastreamento avançado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RASTREAMENTO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para rastreamento premium alimentar."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero rastreamento premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RASTREAMENTO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para rastreamento básico alimentar."</p>
+                        <p className="text-xs text-purple-600 mt-1">📈 Quero rastreamento básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RASTREAMENTO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para rastreamento avançado alimentar."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero rastreamento avançado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RASTREAMENTO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para rastreamento premium alimentar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero rastreamento premium</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de rastreamento</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Diário Alimentar */}
+            {ferramentaSelecionada === 'diario-alimentar' && (
+              <div className="mt-8 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📝 CTAs Pré-sugeridos - Diário Alimentar
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DIÁRIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba um diário básico para registrar hábitos alimentares."</p>
+                        <p className="text-xs text-green-600 mt-1">📝 Quero diário básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DIÁRIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba um diário avançado para registrar hábitos detalhados."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero diário avançado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DIÁRIO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba um diário premium para registro profissional."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero diário premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DIÁRIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para diário básico alimentar."</p>
+                        <p className="text-xs text-blue-600 mt-1">📝 Quero diário básico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DIÁRIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para diário avançado alimentar."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero diário avançado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DIÁRIO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para diário premium alimentar."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero diário premium</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DIÁRIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para diário básico alimentar."</p>
+                        <p className="text-xs text-purple-600 mt-1">📝 Quero diário básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DIÁRIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para diário avançado alimentar."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero diário avançado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DIÁRIO PREMIUM</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para diário premium alimentar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero diário premium</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de diário</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Tabela de Metas Semanais */}
+            {ferramentaSelecionada === 'tabela-metas-semanais' && (
+              <div className="mt-8 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎯 CTAs Pré-sugeridos - Tabela de Metas Semanais
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">METAS BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Receba metas básicas para estabelecer objetivos simples."</p>
+                        <p className="text-xs text-green-600 mt-1">🎯 Quero metas básicas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">METAS MODERADAS</p>
+                        <p className="text-sm text-gray-700">"Receba metas moderadas para estabelecer objetivos específicos."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero metas moderadas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">METAS AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Receba metas avançadas para estabelecer objetivos complexos."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero metas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">METAS BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para metas básicas semanais."</p>
+                        <p className="text-xs text-blue-600 mt-1">🎯 Quero metas básicas</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">METAS MODERADAS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para metas moderadas semanais."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero metas moderadas</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">METAS AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para metas avançadas semanais."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero metas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">METAS BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para metas básicas semanais."</p>
+                        <p className="text-xs text-purple-600 mt-1">🎯 Quero metas básicas</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">METAS MODERADAS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para metas moderadas semanais."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero metas moderadas</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">METAS AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para metas avançadas semanais."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero metas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎯 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de metas</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Desafio 7 Dias */}
+            {ferramentaSelecionada === 'template-desafio-7dias' && (
+              <div className="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🏆 CTAs Pré-sugeridos - Template de Desafio 7 Dias
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DESAFIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba um desafio básico de 7 dias para iniciar mudanças."</p>
+                        <p className="text-xs text-green-600 mt-1">🏆 Quero desafio básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DESAFIO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba um desafio moderado de 7 dias para mudanças específicas."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero desafio moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DESAFIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba um desafio avançado de 7 dias para mudanças complexas."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero desafio avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DESAFIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para desafio básico de 7 dias."</p>
+                        <p className="text-xs text-blue-600 mt-1">🏆 Quero desafio básico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DESAFIO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para desafio moderado de 7 dias."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero desafio moderado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DESAFIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para desafio avançado de 7 dias."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero desafio avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DESAFIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para desafio básico de 7 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">🏆 Quero desafio básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DESAFIO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para desafio moderado de 7 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero desafio moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DESAFIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para desafio avançado de 7 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero desafio avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🏆 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de desafio</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Desafio 21 Dias */}
+            {ferramentaSelecionada === 'template-desafio-21dias' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📅 CTAs Pré-sugeridos - Template de Desafio 21 Dias
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DESAFIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba um desafio básico de 21 dias para criar hábitos duradouros."</p>
+                        <p className="text-xs text-green-600 mt-1">📅 Quero desafio básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DESAFIO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba um desafio moderado de 21 dias para criar hábitos específicos duradouros."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero desafio moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DESAFIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba um desafio avançado de 21 dias para criar hábitos complexos duradouros."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero desafio avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DESAFIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para desafio básico de 21 dias."</p>
+                        <p className="text-xs text-blue-600 mt-1">📅 Quero desafio básico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DESAFIO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para desafio moderado de 21 dias."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero desafio moderado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DESAFIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para desafio avançado de 21 dias."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero desafio avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DESAFIO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para desafio básico de 21 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">📅 Quero desafio básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DESAFIO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para desafio moderado de 21 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero desafio moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DESAFIO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para desafio avançado de 21 dias."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero desafio avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📅 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de desafio</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Guia de Hidratação */}
+            {ferramentaSelecionada === 'guia-hidratacao' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💧 CTAs Pré-sugeridos - Guia de Hidratação
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">BAIXA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Receba orientações para melhorar sua hidratação diária."</p>
+                        <p className="text-xs text-green-600 mt-1">💧 Quero melhorar hidratação</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">HIDRATAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba orientações para otimizar sua hidratação moderada."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero otimizar hidratação</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ALTA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Receba orientações para manter sua hidratação otimizada."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero manter hidratação</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">BAIXA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para melhorar sua hidratação."</p>
+                        <p className="text-xs text-blue-600 mt-1">💧 Quero melhorar hidratação</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">HIDRATAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para otimizar sua hidratação."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero otimizar hidratação</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ALTA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos para manter sua hidratação otimizada."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero manter hidratação</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">BAIXA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para melhorar sua hidratação."</p>
+                        <p className="text-xs text-purple-600 mt-1">💧 Quero melhorar hidratação</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">HIDRATAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para otimizar sua hidratação."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero otimizar hidratação</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ALTA HIDRATAÇÃO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching para manter sua hidratação otimizada."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero manter hidratação</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">💧 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de hidratação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Infográfico Educativo */}
+            {ferramentaSelecionada === 'infografico-educativo' && (
+              <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 CTAs Pré-sugeridos - Infográfico Educativo
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CONHECIMENTO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos básicos sobre nutrição."</p>
+                        <p className="text-xs text-green-600 mt-1">📊 Quero conhecimento básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CONHECIMENTO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos moderados sobre nutrição."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero conhecimento moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CONHECIMENTO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos avançados sobre nutrição."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero conhecimento avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CONHECIMENTO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos básicos sobre suplementos."</p>
+                        <p className="text-xs text-blue-600 mt-1">📊 Quero conhecimento básico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CONHECIMENTO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos moderados sobre suplementos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero conhecimento moderado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CONHECIMENTO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos avançados sobre suplementos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero conhecimento avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CONHECIMENTO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos básicos sobre bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">📊 Quero conhecimento básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CONHECIMENTO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos moderados sobre bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero conhecimento moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CONHECIMENTO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba infográficos educativos avançados sobre bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero conhecimento avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📊 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de conhecimento</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Receitas */}
+            {ferramentaSelecionada === 'template-receitas' && (
+              <div className="mt-8 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  👨‍🍳 CTAs Pré-sugeridos - Template de Receitas
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RECEITAS BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Receba receitas básicas e nutritivas."</p>
+                        <p className="text-xs text-green-600 mt-1">👨‍🍳 Quero receitas básicas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RECEITAS MODERADAS</p>
+                        <p className="text-sm text-gray-700">"Receba receitas moderadas e específicas."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero receitas moderadas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RECEITAS AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Receba receitas avançadas e gourmet."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero receitas avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RECEITAS BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para receitas."</p>
+                        <p className="text-xs text-blue-600 mt-1">👨‍🍳 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RECEITAS MODERADAS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para receitas."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RECEITAS AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para receitas."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RECEITAS BÁSICAS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com receitas."</p>
+                        <p className="text-xs text-purple-600 mt-1">👨‍🍳 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RECEITAS MODERADAS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com receitas."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RECEITAS AVANÇADAS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com receitas."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">👨‍🍳 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">👨‍🍳 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de receita</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Cardápio Detox */}
+            {ferramentaSelecionada === 'cardapio-detox' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥗 CTAs Pré-sugeridos - Cardápio Detox
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DETOX BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba cardápio detox básico e nutritivo."</p>
+                        <p className="text-xs text-green-600 mt-1">🥗 Quero detox básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DETOX MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba cardápio detox moderado e específico."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero detox moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DETOX AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba cardápio detox avançado e gourmet."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero detox avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DETOX BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para detox."</p>
+                        <p className="text-xs text-blue-600 mt-1">🥗 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DETOX MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para detox."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DETOX AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para detox."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DETOX BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com detox."</p>
+                        <p className="text-xs text-purple-600 mt-1">🥗 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DETOX MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com detox."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DETOX AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com detox."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🥗 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🥗 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de detox</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Simulador de Resultados */}
+            {ferramentaSelecionada === 'simulador-resultados' && (
+              <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🔮 CTAs Pré-sugeridos - Simulador de Resultados
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RESULTADOS BÁSICOS</p>
+                        <p className="text-sm text-gray-700">"Simule resultados básicos e alcançáveis."</p>
+                        <p className="text-xs text-green-600 mt-1">🔮 Quero simular resultados básicos</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RESULTADOS MODERADOS</p>
+                        <p className="text-sm text-gray-700">"Simule resultados moderados e específicos."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero simular resultados moderados</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RESULTADOS AVANÇADOS</p>
+                        <p className="text-sm text-gray-700">"Simule resultados avançados e complexos."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero simular resultados avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RESULTADOS BÁSICOS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para resultados."</p>
+                        <p className="text-xs text-blue-600 mt-1">🔮 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RESULTADOS MODERADOS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para resultados."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RESULTADOS AVANÇADOS</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para resultados."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RESULTADOS BÁSICOS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com simulação."</p>
+                        <p className="text-xs text-purple-600 mt-1">🔮 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RESULTADOS MODERADOS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com simulação."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RESULTADOS AVANÇADOS</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com simulação."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔮 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔮 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de simulação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Avaliação Inicial */}
+            {ferramentaSelecionada === 'template-avaliacao-inicial' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📋 CTAs Pré-sugeridos - Template de Avaliação Inicial
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">AVALIAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba avaliação nutricional básica e completa."</p>
+                        <p className="text-xs text-green-600 mt-1">📋 Quero avaliação básica</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">AVALIAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba avaliação nutricional moderada e específica."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero avaliação moderada</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">AVALIAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba avaliação nutricional avançada e complexa."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero avaliação avançada</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">AVALIAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para avaliação."</p>
+                        <p className="text-xs text-blue-600 mt-1">📋 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">AVALIAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para avaliação."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">AVALIAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para avaliação."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">AVALIAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com avaliação."</p>
+                        <p className="text-xs text-purple-600 mt-1">📋 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">AVALIAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com avaliação."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">AVALIAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com avaliação."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📋 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📋 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de avaliação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Formulário de Recomendação */}
+            {ferramentaSelecionada === 'formulario-recomendacao' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📝 CTAs Pré-sugeridos - Formulário de Recomendação
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RECOMENDAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba recomendações nutricionais básicas e direcionadas."</p>
+                        <p className="text-xs text-green-600 mt-1">📝 Quero recomendações básicas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RECOMENDAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba recomendações nutricionais moderadas e específicas."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero recomendações moderadas</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">RECOMENDAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba recomendações nutricionais avançadas e complexas."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero recomendações avançadas</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RECOMENDAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para recomendações."</p>
+                        <p className="text-xs text-blue-600 mt-1">📝 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RECOMENDAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para recomendações."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">RECOMENDAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para recomendações."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RECOMENDAÇÃO BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com recomendações."</p>
+                        <p className="text-xs text-purple-600 mt-1">📝 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RECOMENDAÇÃO MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com recomendações."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">RECOMENDAÇÃO AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com recomendações."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📝 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📝 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de recomendação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Ficha de Cliente */}
+            {ferramentaSelecionada === 'ficha-cliente' && (
+              <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📋 CTAs Pré-sugeridos - Ficha de Cliente
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">FICHA BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba ficha nutricional básica e profissional."</p>
+                        <p className="text-xs text-green-600 mt-1">📋 Quero ficha básica</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">FICHA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba ficha nutricional moderada e específica."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero ficha moderada</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">FICHA AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba ficha nutricional avançada e complexa."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero ficha avançada</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">FICHA BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para profissionalização."</p>
+                        <p className="text-xs text-blue-600 mt-1">📋 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">FICHA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para profissionalização."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">FICHA AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para profissionalização."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">FICHA BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com profissionalização."</p>
+                        <p className="text-xs text-purple-600 mt-1">📋 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">FICHA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com profissionalização."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">FICHA AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com profissionalização."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📋 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📋 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de profissionalização</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Progresso Visual */}
+            {ferramentaSelecionada === 'template-progresso-visual' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📈 CTAs Pré-sugeridos - Template de Progresso Visual
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PROGRESSO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba acompanhamento visual básico do progresso."</p>
+                        <p className="text-xs text-green-600 mt-1">📈 Quero progresso básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PROGRESSO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba acompanhamento visual moderado do progresso."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero progresso moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">PROGRESSO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba acompanhamento visual avançado do progresso."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero progresso avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PROGRESSO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para engajamento visual."</p>
+                        <p className="text-xs text-blue-600 mt-1">📈 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PROGRESSO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para engajamento visual."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">PROGRESSO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para engajamento visual."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PROGRESSO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com engajamento visual."</p>
+                        <p className="text-xs text-purple-600 mt-1">📈 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PROGRESSO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com engajamento visual."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">PROGRESSO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com engajamento visual."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📈 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📈 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de engajamento visual</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Story Interativo */}
+            {ferramentaSelecionada === 'template-story-interativo' && (
+              <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📱 CTAs Pré-sugeridos - Template de Story Interativo
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">STORY BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba story interativo básico para engajamento nas redes."</p>
+                        <p className="text-xs text-green-600 mt-1">📱 Quero story básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">STORY MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba story interativo moderado para engajamento nas redes."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero story moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">STORY AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba story interativo avançado para engajamento nas redes."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero story avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">STORY BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para engajamento nas redes."</p>
+                        <p className="text-xs text-blue-600 mt-1">📱 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">STORY MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para engajamento nas redes."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">STORY AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para engajamento nas redes."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">STORY BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com engajamento nas redes."</p>
+                        <p className="text-xs text-purple-600 mt-1">📱 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">STORY MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com engajamento nas redes."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">STORY AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com engajamento nas redes."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📱 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📱 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de engajamento nas redes</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Post de Curiosidades */}
+            {ferramentaSelecionada === 'post-curiosidades' && (
+              <div className="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💡 CTAs Pré-sugeridos - Post de Curiosidades
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CURIOSIDADE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba post básico com curiosidades para autoridade."</p>
+                        <p className="text-xs text-green-600 mt-1">💡 Quero curiosidade básica</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CURIOSIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba post moderado com curiosidades para autoridade."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero curiosidade moderada</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CURIOSIDADE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba post avançado com curiosidades para autoridade."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero curiosidade avançada</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CURIOSIDADE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para autoridade através de curiosidades."</p>
+                        <p className="text-xs text-blue-600 mt-1">💡 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CURIOSIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para autoridade através de curiosidades."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CURIOSIDADE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para autoridade através de curiosidades."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CURIOSIDADE BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com autoridade através de curiosidades."</p>
+                        <p className="text-xs text-purple-600 mt-1">💡 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CURIOSIDADE MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com autoridade através de curiosidades."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CURIOSIDADE AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com autoridade através de curiosidades."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    💡 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">💡 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">💡 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de autoridade através de curiosidades</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Post com Dica */}
+            {ferramentaSelecionada === 'template-post-dica' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📝 CTAs Pré-sugeridos - Template de Post com Dica
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DICA BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba template básico com dicas para conteúdo recorrente."</p>
+                        <p className="text-xs text-green-600 mt-1">📝 Quero dica básica</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DICA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba template moderado com dicas para conteúdo recorrente."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero dica moderada</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">DICA AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba template avançado com dicas para conteúdo recorrente."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero dica avançada</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DICA BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para conteúdo recorrente através de dicas."</p>
+                        <p className="text-xs text-blue-600 mt-1">📝 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DICA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para conteúdo recorrente através de dicas."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">DICA AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para conteúdo recorrente através de dicas."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DICA BÁSICA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com conteúdo recorrente através de dicas."</p>
+                        <p className="text-xs text-purple-600 mt-1">📝 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DICA MODERADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com conteúdo recorrente através de dicas."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">DICA AVANÇADA</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com conteúdo recorrente através de dicas."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    📝 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📝 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📝 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de conteúdo recorrente através de dicas</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Reels Roteirizado */}
+            {ferramentaSelecionada === 'template-reels-roteirizado' && (
+              <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎬 CTAs Pré-sugeridos - Template de Reels Roteirizado
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">REELS BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba template básico de reels roteirizado para atração visual."</p>
+                        <p className="text-xs text-green-600 mt-1">🎬 Quero reels básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">REELS MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba template moderado de reels roteirizado para atração visual."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero reels moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">REELS AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba template avançado de reels roteirizado para atração visual."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero reels avançado</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">REELS BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para atração visual através de reels roteirizados."</p>
+                        <p className="text-xs text-blue-600 mt-1">🎬 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">REELS MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para atração visual através de reels roteirizados."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">REELS AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para atração visual através de reels roteirizados."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">REELS BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com atração visual através de reels roteirizados."</p>
+                        <p className="text-xs text-purple-600 mt-1">🎬 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">REELS MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com atração visual através de reels roteirizados."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">REELS AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com atração visual através de reels roteirizados."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    🎬 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎬 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🎬 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de atração visual através de reels roteirizados</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Artigo Curto */}
+            {ferramentaSelecionada === 'template-artigo-curto' && (
+              <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📄 CTAs Pré-sugeridos - Template de Artigo Curto
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ARTIGO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba template básico de artigo curto para autoridade escrita."</p>
+                        <p className="text-xs text-green-600 mt-1">📄 Quero artigo básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ARTIGO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba template moderado de artigo curto para autoridade escrita."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero artigo moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">ARTIGO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba template avançado de artigo curto para autoridade escrita."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero artigo avançado</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ARTIGO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para autoridade escrita através de artigos curtos."</p>
+                        <p className="text-xs text-blue-600 mt-1">📄 Quero produtos básicos</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ARTIGO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para autoridade escrita através de artigos curtos."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">ARTIGO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para autoridade escrita através de artigos curtos."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ARTIGO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com autoridade escrita através de artigos curtos."</p>
+                        <p className="text-xs text-purple-600 mt-1">📄 Quero coaching básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ARTIGO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com autoridade escrita através de artigos curtos."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">ARTIGO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com autoridade escrita através de artigos curtos."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    📄 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📄 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📄 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de autoridade escrita através de artigos curtos</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de CTAs Pré-sugeridos - Template de Catálogo Digital */}
+            {ferramentaSelecionada === 'template-catalogo-digital' && (
+              <div className="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📱 CTAs Pré-sugeridos - Template de Catálogo Digital
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Nutricionista */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-green-900 mb-3 flex items-center">
+                      🧬 NUTRICIONISTA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CATÁLOGO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital básico para apresentar seus serviços nutricionais."</p>
+                        <p className="text-xs text-green-600 mt-1">📱 Quero catálogo básico</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CATÁLOGO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital moderado para apresentar serviços especializados."</p>
+                        <p className="text-xs text-green-600 mt-1">✅ Quero catálogo moderado</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <p className="text-xs text-green-600 font-semibold mb-1">CATÁLOGO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital avançado para apresentar serviços premium."</p>
+                        <p className="text-xs text-green-600 mt-1">🚀 Quero catálogo avançado</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Consultor Nutra */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                      💊 CONSULTOR NUTRA
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CATÁLOGO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital básico para apresentar produtos de suplementação."</p>
+                        <p className="text-xs text-blue-600 mt-1">📱 Quero catálogo básico</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CATÁLOGO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital moderado para apresentar produtos especializados."</p>
+                        <p className="text-xs text-blue-600 mt-1">✅ Quero catálogo moderado</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">CATÁLOGO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital avançado para apresentar produtos premium."</p>
+                        <p className="text-xs text-blue-600 mt-1">🚀 Quero catálogo avançado</p>
+                      </div>
+                    </div>
+                  </div>
+          
+                  {/* Coach de Bem-estar */}
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+                      🌿 COACH DE BEM-ESTAR
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CATÁLOGO BÁSICO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital básico para apresentar programas de bem-estar."</p>
+                        <p className="text-xs text-purple-600 mt-1">📱 Quero catálogo básico</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CATÁLOGO MODERADO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital moderado para apresentar programas especializados."</p>
+                        <p className="text-xs text-purple-600 mt-1">✅ Quero catálogo moderado</p>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <p className="text-xs text-purple-600 font-semibold mb-1">CATÁLOGO AVANÇADO</p>
+                        <p className="text-sm text-gray-700">"Receba catálogo digital avançado para apresentar programas premium."</p>
+                        <p className="text-xs text-purple-600 mt-1">🚀 Quero catálogo avançado</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                    📱 Características dos CTAs Pré-sugeridos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📱 Personalização por Profissão:</p>
+                      <p>Linguagem específica para cada área de atuação</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">📱 Adaptação por Resultado:</p>
+                      <p>CTA específico para cada nível de apresentação de serviços/produtos através de catálogo digital</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
+                      <p>Verbo de ação específico em cada CTA</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 mb-1">🔧 Editável:</p>
+                      <p>Profissionais podem personalizar texto, cor e ação</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Quiz de Perfil Nutricional */}
+            {ferramentaSelecionada === 'quiz-perfil-nutricional' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥗 Preview do Quiz de Perfil Nutricional - "Seu corpo está absorvendo bem os nutrientes?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🔬 Descubra Seu Perfil de Absorção Nutricional em 2 Minutos</h4>
+                  <p className="text-gray-700 mb-3">Avalie como seu corpo está processando e absorvendo os nutrientes essenciais — e descubra estratégias personalizadas para otimizar sua digestão e absorção.</p>
+                  <p className="text-green-600 font-semibold">🧬 Uma avaliação que pode revolucionar sua saúde digestiva.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🍽️ 1. Como você se sente após as refeições?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="pos-refeicao" className="mr-3" />
+                        <span className="text-gray-700">(A) Cansado, pesado, com sono</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="pos-refeicao" className="mr-3" />
+                        <span className="text-gray-700">(B) Normal, sem grandes mudanças</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="pos-refeicao" className="mr-3" />
+                        <span className="text-gray-700">(C) Energizado e satisfeito</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Autopercepção digestiva</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">💊 2. Como seu corpo reage aos suplementos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="suplementos" className="mr-3" />
+                        <span className="text-gray-700">(A) Não sinto diferença ou tenho desconforto</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="suplementos" className="mr-3" />
+                        <span className="text-gray-700">(B) Sinto alguns benefícios ocasionais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="suplementos" className="mr-3" />
+                        <span className="text-gray-700">(C) Sinto benefícios claros e consistentes</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Experiência com suplementação</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🚽 3. Como é sua digestão e eliminação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="digestao" className="mr-3" />
+                        <span className="text-gray-700">(A) Irregular, constipação ou diarreia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="digestao" className="mr-3" />
+                        <span className="text-gray-700">(B) Normal, mas às vezes irregular</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="digestao" className="mr-3" />
+                        <span className="text-gray-700">(C) Regular e consistente</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Funcionamento intestinal</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">⚡ 4. Como está sua energia ao longo do dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="energia" className="mr-3" />
+                        <span className="text-gray-700">(A) Baixa, com picos e quedas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="energia" className="mr-3" />
+                        <span className="text-gray-700">(B) Moderada, estável</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="energia" className="mr-3" />
+                        <span className="text-gray-700">(C) Alta e constante</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Nível energético</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🧠 5. Como está sua concentração e clareza mental?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="concentracao" className="mr-3" />
+                        <span className="text-gray-700">(A) Difícil manter foco, mente nebulosa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="concentracao" className="mr-3" />
+                        <span className="text-gray-700">(B) Boa, mas pode melhorar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="concentracao" className="mr-3" />
+                        <span className="text-gray-700">(C) Excelente foco e clareza</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Performance cognitiva</p>
+                  </div>
+
+                  {/* Sistema de Pontuação */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Sistema de Pontuação</h4>
+                    <div className="mb-3 text-sm text-gray-600">
+                      <p><strong>A = 1 ponto | B = 2 pontos | C = 3 pontos</strong></p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center p-3 bg-red-100 rounded-lg">
+                        <div className="font-semibold text-red-900">Absorção Baixa</div>
+                        <div className="text-red-700">5-8 pontos</div>
+                        <div className="text-xs text-red-600 mt-1">Precisa de atenção</div>
+                      </div>
+                      <div className="text-center p-3 bg-yellow-100 rounded-lg">
+                        <div className="font-semibold text-yellow-900">Absorção Moderada</div>
+                        <div className="text-yellow-700">9-12 pontos</div>
+                        <div className="text-xs text-yellow-600 mt-1">Bom, pode melhorar</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-100 rounded-lg">
+                        <div className="font-semibold text-green-900">Absorção Otimizada</div>
+                        <div className="text-green-700">13-15 pontos</div>
+                        <div className="text-xs text-green-600 mt-1">Excelente!</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Quiz Detox */}
+            {ferramentaSelecionada === 'quiz-detox' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🧽 Preview do Quiz Detox - "Seu corpo precisa de detox?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-red-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🧽 Descubra Seu Nível de Toxicidade em 2 Minutos</h4>
+                  <p className="text-gray-700 mb-3">Avalie sinais de acúmulo tóxico no seu corpo — e descubra estratégias personalizadas para eliminar toxinas e revitalizar sua saúde.</p>
+                  <p className="text-green-600 font-semibold">🔥 Uma avaliação que pode transformar sua saúde completamente.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🍽️ 1. Como você se sente após comer alimentos processados?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="alimentos-processados" className="mr-3" />
+                        <span className="text-gray-700">(A) Normal, sem diferença</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="alimentos-processados" className="mr-3" />
+                        <span className="text-gray-700">(B) Leve desconforto ou peso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="alimentos-processados" className="mr-3" />
+                        <span className="text-gray-700">(C) Cansaço, inchaço ou mal-estar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Sensibilidade alimentar</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🌍 2. Como você se sente em ambientes poluídos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="poluicao" className="mr-3" />
+                        <span className="text-gray-700">(A) Normal, sem problemas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="poluicao" className="mr-3" />
+                        <span className="text-gray-700">(B) Leve irritação ou cansaço</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="poluicao" className="mr-3" />
+                        <span className="text-gray-700">(C) Dor de cabeça, irritação ou falta de ar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Sensibilidade ambiental</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">💧 3. Como está sua hidratação e eliminação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="hidratacao" className="mr-3" />
+                        <span className="text-gray-700">(A) Bebo água regularmente e elimino bem</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="hidratacao" className="mr-3" />
+                        <span className="text-gray-700">(B) Bebo água ocasionalmente, eliminação normal</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="hidratacao" className="mr-3" />
+                        <span className="text-gray-700">(C) Pouca água, constipação ou retenção</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Funcionamento renal</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">😴 4. Como está seu sono e recuperação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(A) Durmo bem e acordo renovado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(B) Sono regular, mas às vezes cansado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">(C) Sono ruim, acordo cansado e sem energia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Qualidade do sono</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🧠 5. Como está sua clareza mental e foco?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="clareza-mental" className="mr-3" />
+                        <span className="text-gray-700">(A) Mente clara e foco excelente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="clareza-mental" className="mr-3" />
+                        <span className="text-gray-700">(B) Boa clareza, mas às vezes nebulosa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="clareza-mental" className="mr-3" />
+                        <span className="text-gray-700">(C) Mente nebulosa, difícil manter foco</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Performance cognitiva</p>
+                  </div>
+
+                  {/* Sistema de Pontuação */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Sistema de Pontuação</h4>
+                    <div className="mb-3 text-sm text-gray-600">
+                      <p><strong>A = 1 ponto | B = 2 pontos | C = 3 pontos</strong></p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center p-3 bg-green-100 rounded-lg">
+                        <div className="font-semibold text-green-900">Baixa Toxicidade</div>
+                        <div className="text-green-700">5-8 pontos</div>
+                        <div className="text-xs text-green-600 mt-1">Mantendo saúde</div>
+                      </div>
+                      <div className="text-center p-3 bg-yellow-100 rounded-lg">
+                        <div className="font-semibold text-yellow-900">Toxicidade Moderada</div>
+                        <div className="text-yellow-700">9-12 pontos</div>
+                        <div className="text-xs text-yellow-600 mt-1">Precisa detox</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-100 rounded-lg">
+                        <div className="font-semibold text-red-900">Alta Toxicidade</div>
+                        <div className="text-red-700">13-15 pontos</div>
+                        <div className="text-xs text-red-600 mt-1">Detox urgente!</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Quiz Energético */}
+            {ferramentaSelecionada === 'quiz-energetico' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  ⚡ Preview do Quiz Energético - "Descubra sua energia natural"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">⚡ Descubra Seu Perfil Energético Natural em 2 Minutos</h4>
+                  <p className="text-gray-700 mb-3">Avalie como seu corpo produz e mantém energia naturalmente — e descubra estratégias personalizadas para otimizar sua vitalidade e performance.</p>
+                  <p className="text-yellow-600 font-semibold">🚀 Uma avaliação que pode revolucionar sua energia e disposição.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">🌅 1. Como você se sente ao acordar pela manhã?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="acordar-manha" className="mr-3" />
+                        <span className="text-gray-700">(A) Cansado, preciso de tempo para despertar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="acordar-manha" className="mr-3" />
+                        <span className="text-gray-700">(B) Normal, preciso de um café para despertar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="acordar-manha" className="mr-3" />
+                        <span className="text-gray-700">(C) Energizado e pronto para o dia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Energia matinal</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🍽️ 2. Como sua energia muda após as refeições?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="energia-refeicoes" className="mr-3" />
+                        <span className="text-gray-700">(A) Fico mais cansado e com sono</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="energia-refeicoes" className="mr-3" />
+                        <span className="text-gray-700">(B) Mantenho o mesmo nível de energia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="energia-refeicoes" className="mr-3" />
+                        <span className="text-gray-700">(C) Fico mais energizado e focado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Resposta metabólica</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🏃‍♂️ 3. Como você se sente durante exercícios físicos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">(A) Cansado rapidamente, sem resistência</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">(B) Consigo fazer exercícios moderados</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">(C) Tenho energia para exercícios intensos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Capacidade física</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🧠 4. Como está sua concentração ao longo do dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="concentracao" className="mr-3" />
+                        <span className="text-gray-700">(A) Difícil manter foco, mente nebulosa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="concentracao" className="mr-3" />
+                        <span className="text-gray-700">(B) Boa concentração, mas às vezes cansa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="concentracao" className="mr-3" />
+                        <span className="text-gray-700">(C) Excelente foco e clareza mental</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Performance cognitiva</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🌙 5. Como você se sente no final do dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="final-dia" className="mr-3" />
+                        <span className="text-gray-700">(A) Exausto, sem energia para nada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="final-dia" className="mr-3" />
+                        <span className="text-gray-700">(B) Cansado, mas ainda consigo fazer algumas coisas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="final-dia" className="mr-3" />
+                        <span className="text-gray-700">(C) Ainda com energia para atividades</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Resistência energética</p>
+                  </div>
+
+                  {/* Sistema de Pontuação */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Sistema de Pontuação</h4>
+                    <div className="mb-3 text-sm text-gray-600">
+                      <p><strong>A = 1 ponto | B = 2 pontos | C = 3 pontos</strong></p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center p-3 bg-red-100 rounded-lg">
+                        <div className="font-semibold text-red-900">Energia Baixa</div>
+                        <div className="text-red-700">5-8 pontos</div>
+                        <div className="text-xs text-red-600 mt-1">Precisa revitalizar</div>
+                      </div>
+                      <div className="text-center p-3 bg-yellow-100 rounded-lg">
+                        <div className="font-semibold text-yellow-900">Energia Moderada</div>
+                        <div className="text-yellow-700">9-12 pontos</div>
+                        <div className="text-xs text-yellow-600 mt-1">Pode otimizar</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-100 rounded-lg">
+                        <div className="font-semibold text-green-900">Energia Alta</div>
+                        <div className="text-green-700">13-15 pontos</div>
+                        <div className="text-xs text-green-600 mt-1">Excelente!</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Calculadora de IMC */}
+            {ferramentaSelecionada === 'calculadora-imc' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 Preview da Calculadora de IMC - "Cálculo com resultado visual"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📊 Calcule Seu IMC e Descubra Sua Avaliação Corporal</h4>
+                  <p className="text-gray-700 mb-3">Descubra seu Índice de Massa Corporal com precisão científica — e receba orientações personalizadas baseadas nos padrões da OMS.</p>
+                  <p className="text-blue-600 font-semibold">🎯 Uma avaliação que pode transformar sua saúde e bem-estar.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Formulário de Entrada */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📏 1. Informe seus dados</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Altura (cm)</label>
+                        <input type="number" placeholder="Ex: 175" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                        <input type="number" placeholder="Ex: 70" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Precisão científica</p>
+                  </div>
+
+                  {/* Seleção de Sexo */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">👤 2. Selecione seu sexo</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="sexo" className="mr-3" />
+                        <span className="text-gray-700">👨 Masculino</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="sexo" className="mr-3" />
+                        <span className="text-gray-700">👩 Feminino</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Personalização</p>
+                  </div>
+
+                  {/* Nível de Atividade */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🏃‍♂️ 3. Nível de atividade física (opcional)</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade" className="mr-3" />
+                        <span className="text-gray-700">Sedentário - Pouco ou nenhum exercício</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade" className="mr-3" />
+                        <span className="text-gray-700">Leve - Exercício leve 1-3 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade" className="mr-3" />
+                        <span className="text-gray-700">Moderado - Exercício moderado 3-5 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade" className="mr-3" />
+                        <span className="text-gray-700">Intenso - Exercício intenso 6-7 dias/semana</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Contextualização</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado Visual do IMC</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">IMC: 22.9</div>
+                        <div className="text-lg font-semibold text-green-600">Peso Normal</div>
+                        <div className="text-sm text-gray-600">Faixa: 18.5 - 24.9</div>
+                      </div>
+                      
+                      {/* Barra Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '45%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '35%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '15%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '5%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-4 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Baixo</div>
+                          <div className="text-gray-600">&lt; 18.5</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Normal</div>
+                          <div className="text-gray-600">18.5-24.9</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Sobrepeso</div>
+                          <div className="text-gray-600">25.0-29.9</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Obesidade</div>
+                          <div className="text-gray-600">≥ 30.0</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>IMC</strong> é calculado pela fórmula: Peso ÷ (Altura)²</p>
+                      <p>• <strong>Padrões OMS</strong> para adultos de 18-65 anos</p>
+                      <p>• <strong>Limitações:</strong> Não considera massa muscular ou distribuição de gordura</p>
+                      <p>• <strong>Recomendação:</strong> Consulte um profissional para avaliação completa</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Calculadora de Proteína */}
+            {ferramentaSelecionada === 'calculadora-proteina' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥩 Preview da Calculadora de Proteína - "Quantas proteínas você precisa por dia?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🥩 Calcule Sua Necessidade Diária de Proteína</h4>
+                  <p className="text-gray-700 mb-3">Descubra exatamente quantas proteínas seu corpo precisa por dia — e receba orientações personalizadas baseadas em seu peso, atividade física e objetivos.</p>
+                  <p className="text-red-600 font-semibold">💪 Uma recomendação que pode transformar sua massa muscular e recuperação.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Formulário de Entrada */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">⚖️ 1. Informe seus dados</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                        <input type="number" placeholder="Ex: 70" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Altura (cm)</label>
+                        <input type="number" placeholder="Ex: 175" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Precisão científica</p>
+                  </div>
+
+                  {/* Nível de Atividade */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🏃‍♂️ 2. Nível de atividade física</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade-proteina" className="mr-3" />
+                        <span className="text-gray-700">Sedentário - Pouco ou nenhum exercício</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade-proteina" className="mr-3" />
+                        <span className="text-gray-700">Leve - Exercício leve 1-3 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade-proteina" className="mr-3" />
+                        <span className="text-gray-700">Moderado - Exercício moderado 3-5 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="atividade-proteina" className="mr-3" />
+                        <span className="text-gray-700">Intenso - Exercício intenso 6-7 dias/semana</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Personalização</p>
+                  </div>
+
+                  {/* Objetivos */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🎯 3. Seus objetivos (opcional)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="objetivo-proteina" className="mr-3" />
+                        <span className="text-gray-700">💪 Ganhar massa muscular</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="objetivo-proteina" className="mr-3" />
+                        <span className="text-gray-700">⚖️ Manter peso atual</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="objetivo-proteina" className="mr-3" />
+                        <span className="text-gray-700">🔥 Perder gordura</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="objetivo-proteina" className="mr-3" />
+                        <span className="text-gray-700">🏃‍♂️ Melhorar performance</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Motivação</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado da Calculadora de Proteína</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-red-600 mb-2">112g</div>
+                        <div className="text-lg font-semibold text-green-600">Proteína Diária Recomendada</div>
+                        <div className="text-sm text-gray-600">Baseado em 1.6g/kg para ganho de massa</div>
+                      </div>
+                      
+                      {/* Distribuição Diária */}
+                      <div className="mb-4">
+                        <h5 className="font-semibold text-gray-800 mb-2">📅 Distribuição Diária:</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🌅 Café da manhã:</span>
+                            <span className="font-semibold">28g</span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🍽️ Almoço:</span>
+                            <span className="font-semibold">35g</span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🍽️ Jantar:</span>
+                            <span className="font-semibold">35g</span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🥤 Lanche:</span>
+                            <span className="font-semibold">14g</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '20%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '60%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '20%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Baixa</div>
+                          <div className="text-gray-600">&lt; 0.8g/kg</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Normal</div>
+                          <div className="text-gray-600">0.8-1.2g/kg</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Alta</div>
+                          <div className="text-gray-600">&gt; 1.2g/kg</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Recomendação OMS:</strong> 0.8g/kg para adultos sedentários</p>
+                      <p>• <strong>Atletas:</strong> 1.2-2.0g/kg dependendo da modalidade</p>
+                      <p>• <strong>Distribuição:</strong> Consuma proteína em todas as refeições</p>
+                      <p>• <strong>Qualidade:</strong> Priorize proteínas completas (aminoácidos essenciais)</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Calculadora de Água */}
+            {ferramentaSelecionada === 'calculadora-agua' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💧 Preview da Calculadora de Água - "Quanta água você precisa por dia?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">💧 Calcule Sua Necessidade Diária de Água</h4>
+                  <p className="text-gray-700 mb-3">Descubra exatamente quanta água seu corpo precisa por dia — e receba orientações personalizadas baseadas em seu peso, atividade física e clima.</p>
+                  <p className="text-blue-600 font-semibold">💪 Uma recomendação que pode transformar sua hidratação e performance.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Formulário de Entrada */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">⚖️ 1. Informe seus dados</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                        <input type="number" placeholder="Ex: 70" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Altura (cm)</label>
+                        <input type="number" placeholder="Ex: 175" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Precisão científica</p>
+                  </div>
+
+                  {/* Nível de Atividade */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🏃‍♂️ 2. Nível de atividade física</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="atividade-agua" className="mr-3" />
+                        <span className="text-gray-700">Sedentário - Pouco ou nenhum exercício</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="atividade-agua" className="mr-3" />
+                        <span className="text-gray-700">Leve - Exercício leve 1-3 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="atividade-agua" className="mr-3" />
+                        <span className="text-gray-700">Moderado - Exercício moderado 3-5 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="atividade-agua" className="mr-3" />
+                        <span className="text-gray-700">Intenso - Exercício intenso 6-7 dias/semana</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Personalização</p>
+                  </div>
+
+                  {/* Condições Climáticas */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🌡️ 3. Condições climáticas (opcional)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="clima-agua" className="mr-3" />
+                        <span className="text-gray-700">❄️ Clima frio/temperado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="clima-agua" className="mr-3" />
+                        <span className="text-gray-700">☀️ Clima quente/seco</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="clima-agua" className="mr-3" />
+                        <span className="text-gray-700">🏔️ Altitude elevada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="clima-agua" className="mr-3" />
+                        <span className="text-gray-700">🏖️ Clima úmido</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Contextualização</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado da Calculadora de Água</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">2.8L</div>
+                        <div className="text-lg font-semibold text-green-600">Água Diária Recomendada</div>
+                        <div className="text-sm text-gray-600">Baseado em 40ml/kg para atividade moderada</div>
+                      </div>
+                      
+                      {/* Distribuição Diária */}
+                      <div className="mb-4">
+                        <h5 className="font-semibold text-gray-800 mb-2">📅 Distribuição Diária:</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🌅 Manhã (6h-12h):</span>
+                            <span className="font-semibold">0.8L</span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>☀️ Tarde (12h-18h):</span>
+                            <span className="font-semibold">1.2L</span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🌙 Noite (18h-24h):</span>
+                            <span className="font-semibold">0.8L</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '25%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '50%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '25%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Baixa</div>
+                          <div className="text-gray-600">&lt; 2L/dia</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">2-3L/dia</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Alta</div>
+                          <div className="text-gray-600">&gt; 3L/dia</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Recomendação OMS:</strong> 2.5L para homens e 2L para mulheres</p>
+                      <p>• <strong>Atletas:</strong> 3-4L dependendo da intensidade e duração</p>
+                      <p>• <strong>Distribuição:</strong> Beba água ao longo do dia, não tudo de uma vez</p>
+                      <p>• <strong>Sinais:</strong> Urina clara indica boa hidratação</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Calculadora de Calorias */}
+            {ferramentaSelecionada === 'calculadora-calorias' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🔥 Preview da Calculadora de Calorias - "Quantas calorias você precisa por dia?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🔥 Calcule Sua Necessidade Diária de Calorias</h4>
+                  <p className="text-gray-700 mb-3">Descubra exatamente quantas calorias seu corpo precisa por dia — e receba orientações personalizadas baseadas em seu objetivo: emagrecer, manter ou ganhar peso.</p>
+                  <p className="text-orange-600 font-semibold">💪 Uma recomendação que pode transformar sua composição corporal.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Formulário de Entrada */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">⚖️ 1. Informe seus dados</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                        <input type="number" placeholder="Ex: 70" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Altura (cm)</label>
+                        <input type="number" placeholder="Ex: 175" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Precisão científica</p>
+                  </div>
+
+                  {/* Idade e Sexo */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">👤 2. Idade e sexo</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Idade (anos)</label>
+                        <input type="number" placeholder="Ex: 30" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
+                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                          <option value="">Selecione</option>
+                          <option value="masculino">Masculino</option>
+                          <option value="feminino">Feminino</option>
+                        </select>
+                      </div>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Personalização</p>
+                  </div>
+
+                  {/* Nível de Atividade */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">🏃‍♂️ 3. Nível de atividade física</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="atividade-calorias" className="mr-3" />
+                        <span className="text-gray-700">Sedentário - Pouco ou nenhum exercício</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="atividade-calorias" className="mr-3" />
+                        <span className="text-gray-700">Leve - Exercício leve 1-3 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="atividade-calorias" className="mr-3" />
+                        <span className="text-gray-700">Moderado - Exercício moderado 3-5 dias/semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="atividade-calorias" className="mr-3" />
+                        <span className="text-gray-700">Intenso - Exercício intenso 6-7 dias/semana</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Contextualização</p>
+                  </div>
+
+                  {/* Objetivo */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🎯 4. Seu objetivo</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="objetivo-calorias" className="mr-3" />
+                        <span className="text-gray-700">🔥 Emagrecer - Perder peso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="objetivo-calorias" className="mr-3" />
+                        <span className="text-gray-700">⚖️ Manter - Peso estável</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="objetivo-calorias" className="mr-3" />
+                        <span className="text-gray-700">🚀 Ganhar - Aumentar massa</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Motivação</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado da Calculadora de Calorias</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-orange-600 mb-2">2.200</div>
+                        <div className="text-lg font-semibold text-green-600">Calorias Diárias Recomendadas</div>
+                        <div className="text-sm text-gray-600">Baseado em TMB + atividade física para manutenção</div>
+                      </div>
+                      
+                      {/* Distribuição de Macronutrientes */}
+                      <div className="mb-4">
+                        <h5 className="font-semibold text-gray-800 mb-2">🥗 Distribuição de Macronutrientes:</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🥩 Proteínas (25%):</span>
+                            <span className="font-semibold">550 cal (137g)</span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🍞 Carboidratos (50%):</span>
+                            <span className="font-semibold">1.100 cal (275g)</span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-gray-50 rounded">
+                            <span>🥑 Gorduras (25%):</span>
+                            <span className="font-semibold">550 cal (61g)</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Déficit</div>
+                          <div className="text-gray-600">Perda de peso</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Manutenção</div>
+                          <div className="text-gray-600">Peso estável</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Superávit</div>
+                          <div className="text-gray-600">Ganho de peso</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>TMB:</strong> Taxa Metabólica Basal calculada pela fórmula de Mifflin-St Jeor</p>
+                      <p>• <strong>Déficit:</strong> 300-500 calorias abaixo da manutenção para emagrecimento</p>
+                      <p>• <strong>Superávit:</strong> 300-500 calorias acima da manutenção para ganho de massa</p>
+                      <p>• <strong>Ajuste:</strong> Monitore resultados e ajuste conforme necessário</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Checklist Detox */}
+            {ferramentaSelecionada === 'checklist-detox' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🧽 Preview do Checklist Detox - "Seu corpo precisa de detox?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🧽 Avalie Seu Nível de Toxicidade</h4>
+                  <p className="text-gray-700 mb-3">Descubra se seu corpo está acumulando toxinas e receba orientações personalizadas para desintoxicação baseadas em seus hábitos e sinais corporais.</p>
+                  <p className="text-green-600 font-semibold">💪 Uma avaliação que pode transformar sua saúde e bem-estar.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🍎 1. Como você se sente após as refeições?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="refeicoes-detox" className="mr-3" />
+                        <span className="text-gray-700">Energizado e leve</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="refeicoes-detox" className="mr-3" />
+                        <span className="text-gray-700">Pesado e sonolento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="refeicoes-detox" className="mr-3" />
+                        <span className="text-gray-700">Inchado e desconfortável</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Autoconhecimento</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">💧 2. Como está sua hidratação diária?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="hidratacao-detox" className="mr-3" />
+                        <span className="text-gray-700">Bebo 2-3L de água por dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="hidratacao-detox" className="mr-3" />
+                        <span className="text-gray-700">Bebo 1-2L de água por dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="hidratacao-detox" className="mr-3" />
+                        <span className="text-gray-700">Bebo menos de 1L de água por dia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência hidratacional</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🌱 3. Quantos vegetais você consome por dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="vegetais-detox" className="mr-3" />
+                        <span className="text-gray-700">5+ porções de vegetais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="vegetais-detox" className="mr-3" />
+                        <span className="text-gray-700">3-4 porções de vegetais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="vegetais-detox" className="mr-3" />
+                        <span className="text-gray-700">Menos de 3 porções de vegetais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência nutricional</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">😴 4. Como está sua qualidade do sono?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="sono-detox" className="mr-3" />
+                        <span className="text-gray-700">Durmo bem e acordo descansado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="sono-detox" className="mr-3" />
+                        <span className="text-gray-700">Durmo, mas acordo cansado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="sono-detox" className="mr-3" />
+                        <span className="text-gray-700">Tenho dificuldade para dormir</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência do sono</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-lime-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-lime-900 mb-3">⚡ 5. Como está seu nível de energia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="energia-detox" className="mr-3" />
+                        <span className="text-gray-700">Energia alta e constante</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="energia-detox" className="mr-3" />
+                        <span className="text-gray-700">Energia moderada com altos e baixos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="energia-detox" className="mr-3" />
+                        <span className="text-gray-700">Energia baixa e fadiga constante</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-lime-600 mt-2">🧠 Gatilho: Consciência energética</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Checklist Detox</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-green-600 mb-2">4</div>
+                        <div className="text-lg font-semibold text-yellow-600">Sinais de Toxicidade</div>
+                        <div className="text-sm text-gray-600">Toxicidade Moderada - Protocolo detox recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Baixa</div>
+                          <div className="text-gray-600">0-3 sinais</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">4-6 sinais</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Alta</div>
+                          <div className="text-gray-600">7+ sinais</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Sinais de Toxicidade:</strong> Fadiga, inchaço, problemas digestivos, sono ruim</p>
+                      <p>• <strong>Detox Natural:</strong> Vegetais crucíferos, chás, água com limão, exercícios</p>
+                      <p>• <strong>Suplementos:</strong> Magnésio, Probióticos, Antioxidantes, Glutationa</p>
+                      <p>• <strong>Duração:</strong> Protocolo detox de 7-14 dias conforme necessidade</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Checklist Alimentar */}
+            {ferramentaSelecionada === 'checklist-alimentar' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🍽️ Preview do Checklist Alimentar - "Como está sua alimentação?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🍽️ Avalie Seus Hábitos Alimentares</h4>
+                  <p className="text-gray-700 mb-3">Descubra como está sua alimentação e receba orientações personalizadas para melhorar seus hábitos alimentares baseadas em sua rotina atual.</p>
+                  <p className="text-orange-600 font-semibold">💪 Uma avaliação que pode transformar sua relação com a comida.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🥗 1. Quantas refeições você faz por dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="refeicoes-alimentar" className="mr-3" />
+                        <span className="text-gray-700">5-6 refeições pequenas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="refeicoes-alimentar" className="mr-3" />
+                        <span className="text-gray-700">3-4 refeições principais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="refeicoes-alimentar" className="mr-3" />
+                        <span className="text-gray-700">1-2 refeições por dia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência alimentar</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">🥕 2. Quantos vegetais você consome por dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="vegetais-alimentar" className="mr-3" />
+                        <span className="text-gray-700">5+ porções de vegetais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="vegetais-alimentar" className="mr-3" />
+                        <span className="text-gray-700">3-4 porções de vegetais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="vegetais-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Menos de 3 porções de vegetais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência nutricional</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">🍎 3. Quantas frutas você consome por dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="frutas-alimentar" className="mr-3" />
+                        <span className="text-gray-700">3+ porções de frutas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="frutas-alimentar" className="mr-3" />
+                        <span className="text-gray-700">1-2 porções de frutas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="frutas-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Raramente como frutas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de micronutrientes</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🍔 4. Com que frequência você come alimentos processados?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="processados-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Raramente como processados</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="processados-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Às vezes como processados</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="processados-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Frequentemente como processados</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de qualidade</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">💧 5. Como está sua hidratação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="hidratacao-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Bebo 2-3L de água por dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="hidratacao-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Bebo 1-2L de água por dia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="hidratacao-alimentar" className="mr-3" />
+                        <span className="text-gray-700">Bebo menos de 1L de água por dia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência hidratacional</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Checklist Alimentar</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-orange-600 mb-2">65</div>
+                        <div className="text-lg font-semibold text-yellow-600">Pontos de Alimentação</div>
+                        <div className="text-sm text-gray-600">Alimentação Moderada - Otimização recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Deficiente</div>
+                          <div className="text-gray-600">0-40 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">41-70 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Equilibrada</div>
+                          <div className="text-gray-600">71-100 pontos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Alimentação Saudável:</strong> 5+ vegetais, 3+ frutas, água adequada, alimentos in natura</p>
+                      <p>• <strong>Evite:</strong> Alimentos ultraprocessados, excesso de açúcar e sódio</p>
+                      <p>• <strong>Suplementação:</strong> Multivitamínico, Ômega-3, Probióticos conforme necessidade</p>
+                      <p>• <strong>Duração:</strong> Mudanças alimentares levam 21-90 dias para se tornarem hábitos</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Mini E-book Educativo */}
+            {ferramentaSelecionada === 'mini-ebook' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📚 Preview do Mini E-book Educativo - "Como está seu conhecimento?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📚 Avalie Seu Conhecimento Nutricional</h4>
+                  <p className="text-gray-700 mb-3">Descubra seu nível de conhecimento sobre nutrição e receba orientações personalizadas para evoluir seus conhecimentos baseadas em sua área de interesse.</p>
+                  <p className="text-blue-600 font-semibold">💪 Uma avaliação que pode transformar seu conhecimento nutricional.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📖 1. Qual é seu nível de conhecimento sobre macronutrientes?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="macronutrientes-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço bem carboidratos, proteínas e gorduras</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="macronutrientes-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço o básico sobre macronutrientes</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="macronutrientes-ebook" className="mr-3" />
+                        <span className="text-gray-700">Não sei muito sobre macronutrientes</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência nutricional</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">💊 2. Qual é seu conhecimento sobre suplementação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="suplementacao-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço bem tipos e funções dos suplementos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="suplementacao-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço o básico sobre suplementos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="suplementacao-ebook" className="mr-3" />
+                        <span className="text-gray-700">Não sei muito sobre suplementos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência suplementar</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🥗 3. Qual é seu conhecimento sobre alimentação funcional?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="funcional-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço bem alimentos funcionais e seus benefícios</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="funcional-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço o básico sobre alimentos funcionais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="funcional-ebook" className="mr-3" />
+                        <span className="text-gray-700">Não sei muito sobre alimentos funcionais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência funcional</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🧘‍♀️ 4. Qual é seu conhecimento sobre bem-estar e saúde?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="bem-estar-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço bem pilares do bem-estar e saúde</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="bem-estar-ebook" className="mr-3" />
+                        <span className="text-gray-700">Conheço o básico sobre bem-estar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="bem-estar-ebook" className="mr-3" />
+                        <span className="text-gray-700">Não sei muito sobre bem-estar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de bem-estar</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">📚 5. Com que frequência você busca conhecimento nutricional?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="frequencia-ebook" className="mr-3" />
+                        <span className="text-gray-700">Diariamente busco conhecimento nutricional</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="frequencia-ebook" className="mr-3" />
+                        <span className="text-gray-700">Semanalmente busco conhecimento nutricional</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="frequencia-ebook" className="mr-3" />
+                        <span className="text-gray-700">Raramente busco conhecimento nutricional</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de aprendizado</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Mini E-book Educativo</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">75</div>
+                        <div className="text-lg font-semibold text-green-600">Pontos de Conhecimento</div>
+                        <div className="text-sm text-gray-600">Alto Conhecimento - Evolução recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Baixo</div>
+                          <div className="text-gray-600">0-40 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">41-70 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Alto</div>
+                          <div className="text-gray-600">71-100 pontos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Conhecimento Nutricional:</strong> Macronutrientes, micronutrientes, suplementação, alimentos funcionais</p>
+                      <p>• <strong>Evolução:</strong> Leitura diária, cursos, especializações, prática aplicada</p>
+                      <p>• <strong>Suplementação:</strong> Multivitamínico, Ômega-3, Probióticos conforme conhecimento</p>
+                      <p>• <strong>Duração:</strong> Conhecimento nutricional evolui com prática e estudo contínuo</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Guia Nutracêutico */}
+            {ferramentaSelecionada === 'guia-nutraceutico' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💊 Preview do Guia Nutracêutico - "Qual é seu interesse em nutracêuticos?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">💊 Avalie Seu Interesse em Nutracêuticos</h4>
+                  <p className="text-gray-700 mb-3">Descubra seu nível de interesse em nutracêuticos e receba orientações personalizadas para evoluir seu conhecimento sobre alimentos funcionais e suplementação baseadas em sua área de interesse.</p>
+                  <p className="text-purple-600 font-semibold">💪 Uma avaliação que pode transformar seu interesse em nutracêuticos.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">💊 1. Qual é seu interesse em suplementos nutracêuticos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="suplementos-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho muito interesse em suplementos nutracêuticos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="suplementos-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho interesse moderado em suplementos nutracêuticos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="suplementos-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho pouco interesse em suplementos nutracêuticos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência suplementar</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🥗 2. Qual é seu interesse em alimentos funcionais?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="alimentos-funcionais" className="mr-3" />
+                        <span className="text-gray-700">Tenho muito interesse em alimentos funcionais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="alimentos-funcionais" className="mr-3" />
+                        <span className="text-gray-700">Tenho interesse moderado em alimentos funcionais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="alimentos-funcionais" className="mr-3" />
+                        <span className="text-gray-700">Tenho pouco interesse em alimentos funcionais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência funcional</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🌿 3. Qual é seu interesse em nutracêuticos naturais?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="naturais-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho muito interesse em nutracêuticos naturais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="naturais-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho interesse moderado em nutracêuticos naturais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="naturais-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho pouco interesse em nutracêuticos naturais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência natural</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🧘‍♀️ 4. Qual é seu interesse em nutracêuticos para bem-estar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="bem-estar-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho muito interesse em nutracêuticos para bem-estar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="bem-estar-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho interesse moderado em nutracêuticos para bem-estar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="bem-estar-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Tenho pouco interesse em nutracêuticos para bem-estar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de bem-estar</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">📚 5. Com que frequência você busca informações sobre nutracêuticos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="frequencia-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Diariamente busco informações sobre nutracêuticos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="frequencia-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Semanalmente busco informações sobre nutracêuticos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="frequencia-nutraceutico" className="mr-3" />
+                        <span className="text-gray-700">Raramente busco informações sobre nutracêuticos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de aprendizado</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Guia Nutracêutico</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-purple-600 mb-2">85</div>
+                        <div className="text-lg font-semibold text-green-600">Pontos de Interesse</div>
+                        <div className="text-sm text-gray-600">Alto Interesse - Evolução recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Baixo</div>
+                          <div className="text-gray-600">0-40 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">41-70 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Alto</div>
+                          <div className="text-gray-600">71-100 pontos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Nutracêuticos:</strong> Suplementos, alimentos funcionais, nutracêuticos naturais, bem-estar</p>
+                      <p>• <strong>Evolução:</strong> Leitura diária, cursos, especializações, prática aplicada</p>
+                      <p>• <strong>Suplementação:</strong> Multivitamínico, Ômega-3, Probióticos conforme interesse</p>
+                      <p>• <strong>Duração:</strong> Interesse em nutracêuticos evolui com conhecimento e prática contínua</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Guia Proteico */}
+            {ferramentaSelecionada === 'guia-proteico' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥩 Preview do Guia Proteico - "Qual é seu consumo de proteínas?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🥩 Avalie Seu Consumo de Proteínas</h4>
+                  <p className="text-gray-700 mb-3">Descubra seu nível de consumo de proteínas e receba orientações personalizadas para otimizar sua ingestão proteica baseadas em sua área de interesse.</p>
+                  <p className="text-orange-600 font-semibold">💪 Uma avaliação que pode transformar seu consumo de proteínas.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🥩 1. Qual é seu consumo diário de proteínas?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="consumo-proteina" className="mr-3" />
+                        <span className="text-gray-700">Consumo mais de 1.2g de proteína por kg de peso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="consumo-proteina" className="mr-3" />
+                        <span className="text-gray-700">Consumo entre 0.8-1.2g de proteína por kg de peso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="consumo-proteina" className="mr-3" />
+                        <span className="text-gray-700">Consumo menos de 0.8g de proteína por kg de peso</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência proteica</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🍖 2. Quais são suas principais fontes de proteína?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="fontes-proteina" className="mr-3" />
+                        <span className="text-gray-700">Carnes, ovos, peixes e laticínios</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="fontes-proteina" className="mr-3" />
+                        <span className="text-gray-700">Mix de fontes animais e vegetais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="fontes-proteina" className="mr-3" />
+                        <span className="text-gray-700">Principalmente fontes vegetais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de fontes</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">💪 3. Qual é seu objetivo com o consumo de proteínas?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="objetivo-proteina" className="mr-3" />
+                        <span className="text-gray-700">Ganho de massa muscular e performance</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="objetivo-proteina" className="mr-3" />
+                        <span className="text-gray-700">Manutenção da saúde e bem-estar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="objetivo-proteina" className="mr-3" />
+                        <span className="text-gray-700">Perda de peso e definição</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência de objetivos</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">⏰ 4. Como você distribui as proteínas ao longo do dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="distribuicao-proteina" className="mr-3" />
+                        <span className="text-gray-700">Distribuo uniformemente em todas as refeições</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="distribuicao-proteina" className="mr-3" />
+                        <span className="text-gray-700">Concentro principalmente no almoço e jantar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="distribuicao-proteina" className="mr-3" />
+                        <span className="text-gray-700">Não tenho uma distribuição específica</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de timing</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-lime-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-lime-900 mb-3">📚 5. Com que frequência você busca informações sobre proteínas?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="frequencia-proteina" className="mr-3" />
+                        <span className="text-gray-700">Diariamente busco informações sobre proteínas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="frequencia-proteina" className="mr-3" />
+                        <span className="text-gray-700">Semanalmente busco informações sobre proteínas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="frequencia-proteina" className="mr-3" />
+                        <span className="text-gray-700">Raramente busco informações sobre proteínas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-lime-600 mt-2">🧠 Gatilho: Consciência de aprendizado</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Guia Proteico</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-orange-600 mb-2">1.1g/kg</div>
+                        <div className="text-lg font-semibold text-green-600">Consumo de Proteína</div>
+                        <div className="text-sm text-gray-600">Proteína Moderada - Otimização recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Baixa</div>
+                          <div className="text-gray-600">&lt; 0.8g/kg</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">0.8-1.2g/kg</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Alta</div>
+                          <div className="text-gray-600">&gt; 1.2g/kg</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Consumo de Proteína:</strong> Carnes, ovos, peixes, laticínios, leguminosas, suplementos</p>
+                      <p>• <strong>Otimização:</strong> Distribuição uniforme, qualidade das fontes, timing adequado</p>
+                      <p>• <strong>Suplementação:</strong> Whey Protein, BCAA, Creatina conforme consumo</p>
+                      <p>• <strong>Duração:</strong> Consumo proteico evolui com objetivos e prática contínua</p>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Tabela Comparativa */}
+            {ferramentaSelecionada === 'tabela-comparativa' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 Preview da Tabela Comparativa - "Compare produtos e escolha o melhor"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📊 Compare Produtos e Escolha o Melhor</h4>
+                  <p className="text-gray-700 mb-3">Descubra as diferenças entre produtos e receba orientações personalizadas para fazer a melhor escolha baseadas em sua área de interesse.</p>
+                  <p className="text-blue-600 font-semibold">💡 Uma comparação que pode transformar suas escolhas.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📊 1. Que tipo de produtos você quer comparar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-produto" className="mr-3" />
+                        <span className="text-gray-700">Produtos essenciais (básicos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-produto" className="mr-3" />
+                        <span className="text-gray-700">Produtos especializados (avançados)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-produto" className="mr-3" />
+                        <span className="text-gray-700">Produtos de elite (premium)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de categoria</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🔍 2. Qual é seu objetivo com a comparação?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-comparacao" className="mr-3" />
+                        <span className="text-gray-700">Encontrar o melhor custo-benefício</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-comparacao" className="mr-3" />
+                        <span className="text-gray-700">Identificar a melhor qualidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-comparacao" className="mr-3" />
+                        <span className="text-gray-700">Descobrir a melhor eficácia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">⚖️ 3. Que critérios são mais importantes para você?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="criterios" className="mr-3" />
+                        <span className="text-gray-700">Preço e disponibilidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="criterios" className="mr-3" />
+                        <span className="text-gray-700">Qualidade e composição</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="criterios" className="mr-3" />
+                        <span className="text-gray-700">Eficácia e resultados</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de critérios</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🎯 4. Qual é sua experiência com produtos similares?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="experiencia" className="mr-3" />
+                        <span className="text-gray-700">Pouca experiência, preciso de orientação</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="experiencia" className="mr-3" />
+                        <span className="text-gray-700">Experiência moderada, quero otimizar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="experiencia" className="mr-3" />
+                        <span className="text-gray-700">Muita experiência, quero evoluir</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de experiência</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-sky-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-sky-900 mb-3">📈 5. Com que frequência você faz comparações de produtos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="frequencia-comparacao" className="mr-3" />
+                        <span className="text-gray-700">Sempre comparo antes de comprar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="frequencia-comparacao" className="mr-3" />
+                        <span className="text-gray-700">Comparo ocasionalmente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="frequencia-comparacao" className="mr-3" />
+                        <span className="text-gray-700">Raramente faço comparações</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-sky-600 mt-2">🧠 Gatilho: Consciência de hábito</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado da Tabela Comparativa</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">Comparação Avançada</div>
+                        <div className="text-lg font-semibold text-green-600">Produtos Especializados</div>
+                        <div className="text-sm text-gray-600">Análise detalhada recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básica</div>
+                          <div className="text-gray-600">Essenciais</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Avançada</div>
+                          <div className="text-gray-600">Especializados</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Premium</div>
+                          <div className="text-gray-600">Elite</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Comparação:</strong> Preço, qualidade, eficácia, disponibilidade, composição</p>
+                      <p>• <strong>Análise:</strong> Critérios objetivos, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Melhor opção baseada em seus critérios específicos</p>
+                      <p>• <strong>Duração:</strong> Comparação evolui com novas informações e produtos</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Tabela de Substituições */}
+            {ferramentaSelecionada === 'tabela-substituicoes' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🔄 Preview da Tabela de Substituições - "Substitua alimentos e melhore sua alimentação"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🔄 Substitua Alimentos e Melhore Sua Alimentação</h4>
+                  <p className="text-gray-700 mb-3">Descubra alternativas saudáveis para seus alimentos e receba orientações personalizadas para fazer substituições inteligentes baseadas em sua área de interesse.</p>
+                  <p className="text-green-600 font-semibold">💡 Uma substituição que pode transformar sua alimentação.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🔄 1. Que tipo de alimentos você quer substituir?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-alimento" className="mr-3" />
+                        <span className="text-gray-700">Alimentos comuns (básicos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-alimento" className="mr-3" />
+                        <span className="text-gray-700">Alimentos específicos (avançados)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-alimento" className="mr-3" />
+                        <span className="text-gray-700">Alimentos de elite (premium)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de categoria</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">🥗 2. Qual é seu objetivo com as substituições?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="objetivo-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Melhorar a saúde geral</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="objetivo-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Otimizar nutrientes específicos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="objetivo-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Evoluir para alimentação premium</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">⚖️ 3. Que critérios são mais importantes para você?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="criterios-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Facilidade e praticidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="criterios-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Valor nutricional e qualidade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="criterios-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Sabor e experiência gastronômica</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de critérios</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🎯 4. Qual é sua experiência com substituições alimentares?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="experiencia-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Pouca experiência, preciso de orientação</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="experiencia-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Experiência moderada, quero otimizar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="experiencia-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Muita experiência, quero evoluir</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de experiência</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-sky-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-sky-900 mb-3">📈 5. Com que frequência você faz substituições alimentares?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="frequencia-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Sempre faço substituições</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="frequencia-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Faço substituições ocasionalmente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="frequencia-substituicao" className="mr-3" />
+                        <span className="text-gray-700">Raramente faço substituições</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-sky-600 mt-2">🧠 Gatilho: Consciência de hábito</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado da Tabela de Substituições</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-green-600 mb-2">Substituições Avançadas</div>
+                        <div className="text-lg font-semibold text-emerald-600">Alimentos Especializados</div>
+                        <div className="text-sm text-gray-600">Alternativas especializadas recomendadas</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básicas</div>
+                          <div className="text-gray-600">Simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Avançadas</div>
+                          <div className="text-gray-600">Especializadas</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Premium</div>
+                          <div className="text-gray-600">Elite</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Substituições:</strong> Nutrientes, sabor, textura, facilidade, custo-benefício</p>
+                      <p>• <strong>Análise:</strong> Critérios nutricionais, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Melhor alternativa baseada em seus critérios específicos</p>
+                      <p>• <strong>Duração:</strong> Substituições evoluem com novas informações e produtos</p>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Tabela de Sintomas */}
+            {ferramentaSelecionada === 'tabela-sintomas' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🩺 Preview da Tabela de Sintomas - "Identifique sintomas e receba orientações específicas"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🩺 Identifique Sintomas e Receba Orientações Específicas</h4>
+                  <p className="text-gray-700 mb-3">Descubra a relação entre seus sintomas e receba orientações personalizadas para correção baseadas em sua área de interesse.</p>
+                  <p className="text-red-600 font-semibold">💡 Uma análise que pode transformar sua saúde.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🩺 1. Que tipo de sintomas você está apresentando?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tipo-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Sintomas leves (1-3 sintomas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tipo-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Sintomas moderados (4-6 sintomas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tipo-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Sintomas graves (7+ sintomas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de gravidade</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🔍 2. Qual é a frequência dos seus sintomas?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="frequencia-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Ocasionalmente (raros)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="frequencia-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Frequentemente (regulares)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="frequencia-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Constantemente (persistentes)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência de frequência</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-rose-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-rose-900 mb-3">⚖️ 3. Que tipo de sintomas são mais comuns?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="categoria-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Digestivos (estômago, intestino)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="categoria-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Energéticos (fadiga, cansaço)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="categoria-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Inflamatórios (dores, inchaço)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-rose-600 mt-2">🧠 Gatilho: Consciência de categoria</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🎯 4. Há quanto tempo você apresenta esses sintomas?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="duracao-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Pouco tempo (menos de 1 mês)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="duracao-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Tempo moderado (1-6 meses)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="duracao-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Muito tempo (mais de 6 meses)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de duração</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">📈 5. Que impacto os sintomas têm na sua vida?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="impacto-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Baixo impacto (não afeta muito)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="impacto-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Moderado impacto (afeta algumas atividades)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="impacto-sintoma" className="mr-3" />
+                        <span className="text-gray-700">Alto impacto (afeta muitas atividades)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência de impacto</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado da Tabela de Sintomas</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-red-600 mb-2">Sintomas Moderados</div>
+                        <div className="text-lg font-semibold text-pink-600">4-6 Sintomas</div>
+                        <div className="text-sm text-gray-600">Protocolo nutricional específico recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Leves</div>
+                          <div className="text-gray-600">1-3 sintomas</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderados</div>
+                          <div className="text-gray-600">4-6 sintomas</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Graves</div>
+                          <div className="text-gray-600">7+ sintomas</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Análise:</strong> Frequência, duração, categoria, impacto dos sintomas</p>
+                      <p>• <strong>Diagnóstico:</strong> Critérios nutricionais, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Protocolo específico baseado em seus sintomas</p>
+                      <p>• <strong>Duração:</strong> Correção evolui com novas informações e tratamentos</p>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Plano Alimentar Base */}
+            {ferramentaSelecionada === 'plano-alimentar-base' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📅 Preview do Plano Alimentar Base - "Receba um plano alimentar personalizado"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📅 Receba um Plano Alimentar Personalizado</h4>
+                  <p className="text-gray-700 mb-3">Descubra o plano alimentar ideal para suas necessidades e receba orientações personalizadas baseadas em sua área de interesse.</p>
+                  <p className="text-blue-600 font-semibold">💡 Um plano que pode transformar sua alimentação.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📅 1. Que tipo de plano alimentar você precisa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-plano" className="mr-3" />
+                        <span className="text-gray-700">Plano básico (alimentação equilibrada)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-plano" className="mr-3" />
+                        <span className="text-gray-700">Plano avançado (alimentação especializada)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-plano" className="mr-3" />
+                        <span className="text-gray-700">Plano premium (alimentação de elite)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🎯 2. Qual é seu objetivo principal com o plano?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="objetivo-plano" className="mr-3" />
+                        <span className="text-gray-700">Manter saúde geral</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="objetivo-plano" className="mr-3" />
+                        <span className="text-gray-700">Melhorar performance</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="objetivo-plano" className="mr-3" />
+                        <span className="text-gray-700">Otimizar resultados</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-sky-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-sky-900 mb-3">⚖️ 3. Que tipo de alimentos você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="preferencia-alimentos" className="mr-3" />
+                        <span className="text-gray-700">Alimentos básicos e tradicionais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="preferencia-alimentos" className="mr-3" />
+                        <span className="text-gray-700">Alimentos funcionais e específicos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="preferencia-alimentos" className="mr-3" />
+                        <span className="text-gray-700">Alimentos orgânicos e gourmet</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-sky-600 mt-2">🧠 Gatilho: Consciência de preferência</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎯 4. Com que frequência você pode seguir o plano?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="frequencia-plano" className="mr-3" />
+                        <span className="text-gray-700">Ocasionalmente (alguns dias)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="frequencia-plano" className="mr-3" />
+                        <span className="text-gray-700">Regularmente (maioria dos dias)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="frequencia-plano" className="mr-3" />
+                        <span className="text-gray-700">Rigorosamente (todos os dias)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de comprometimento</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">📈 5. Que nível de personalização você busca?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="personalizacao-plano" className="mr-3" />
+                        <span className="text-gray-700">Personalização básica</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="personalizacao-plano" className="mr-3" />
+                        <span className="text-gray-700">Personalização avançada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="personalizacao-plano" className="mr-3" />
+                        <span className="text-gray-700">Personalização premium</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Consciência de personalização</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Plano Alimentar Base</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">Plano Avançado</div>
+                        <div className="text-lg font-semibold text-cyan-600">Alimentação Especializada</div>
+                        <div className="text-sm text-gray-600">Plano alimentar avançado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Equilibrado</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Especializado</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Premium</div>
+                          <div className="text-gray-600">Elite</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Plano:</strong> Objetivo, preferências, frequência, personalização</p>
+                      <p>• <strong>Análise:</strong> Critérios nutricionais, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Plano específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Plano evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Planner de Refeições */}
+            {ferramentaSelecionada === 'planner-refeicoes' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🗓️ Preview do Planner de Refeições - "Organize suas refeições de forma inteligente"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🗓️ Organize Suas Refeições de Forma Inteligente</h4>
+                  <p className="text-gray-700 mb-3">Descubra o planner ideal para organizar suas refeições e receba orientações personalizadas baseadas em sua área de interesse.</p>
+                  <p className="text-purple-600 font-semibold">💡 Um planner que pode transformar sua organização alimentar.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🗓️ 1. Que tipo de planner você precisa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-planner" className="mr-3" />
+                        <span className="text-gray-700">Planner simples (organização básica)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-planner" className="mr-3" />
+                        <span className="text-gray-700">Planner avançado (organização especializada)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-planner" className="mr-3" />
+                        <span className="text-gray-700">Planner premium (organização de elite)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎯 2. Com que frequência você quer organizar refeições?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="frequencia-planner" className="mr-3" />
+                        <span className="text-gray-700">Diariamente (planejamento diário)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="frequencia-planner" className="mr-3" />
+                        <span className="text-gray-700">Semanalmente (planejamento semanal)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="frequencia-planner" className="mr-3" />
+                        <span className="text-gray-700">Mensalmente (planejamento mensal)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de frequência</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">⚖️ 3. Que tipo de refeições você quer organizar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-refeicoes" className="mr-3" />
+                        <span className="text-gray-700">Refeições básicas (café, almoço, jantar)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-refeicoes" className="mr-3" />
+                        <span className="text-gray-700">Refeições específicas (lanches, suplementos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-refeicoes" className="mr-3" />
+                        <span className="text-gray-700">Refeições gourmet (especiais, ocasiões)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Consciência de tipo</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-slate-900 mb-3">🎯 4. Que nível de detalhamento você busca?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="detalhamento-planner" className="mr-3" />
+                        <span className="text-gray-700">Detalhamento básico (horários, alimentos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="detalhamento-planner" className="mr-3" />
+                        <span className="text-gray-700">Detalhamento avançado (ingredientes, porções)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="detalhamento-planner" className="mr-3" />
+                        <span className="text-gray-700">Detalhamento premium (nutrientes, calorias)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Consciência de detalhamento</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-zinc-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-zinc-900 mb-3">📈 5. Que tipo de organização você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-zinc-300">
+                        <input type="radio" name="organizacao-planner" className="mr-3" />
+                        <span className="text-gray-700">Organização simples (lista básica)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-zinc-300">
+                        <input type="radio" name="organizacao-planner" className="mr-3" />
+                        <span className="text-gray-700">Organização avançada (cronograma detalhado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-zinc-300">
+                        <input type="radio" name="organizacao-planner" className="mr-3" />
+                        <span className="text-gray-700">Organização premium (sistema completo)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-zinc-600 mt-2">🧠 Gatilho: Consciência de organização</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Planner de Refeições</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-purple-600 mb-2">Planner Avançado</div>
+                        <div className="text-lg font-semibold text-indigo-600">Organização Especializada</div>
+                        <div className="text-sm text-gray-600">Planner avançado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Simples</div>
+                          <div className="text-gray-600">Básica</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Especializada</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Premium</div>
+                          <div className="text-gray-600">Elite</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Planner:</strong> Tipo, frequência, refeições, detalhamento, organização</p>
+                      <p>• <strong>Análise:</strong> Critérios nutricionais, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Planner específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Planner evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Rastreador Alimentar */}
+            {ferramentaSelecionada === 'rastreador-alimentar' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📈 Preview do Rastreador Alimentar - "Identifique padrões alimentares e otimize sua nutrição"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📈 Identifique Padrões Alimentares e Otimize Sua Nutrição</h4>
+                  <p className="text-gray-700 mb-3">Descubra o rastreador ideal para identificar padrões alimentares e receba orientações personalizadas baseadas em sua área de interesse.</p>
+                  <p className="text-emerald-600 font-semibold">💡 Um rastreador que pode transformar sua compreensão nutricional.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">📈 1. Que tipo de rastreamento você precisa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="tipo-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Rastreamento básico (padrões simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="tipo-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Rastreamento avançado (padrões complexos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="tipo-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Rastreamento premium (padrões de elite)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🎯 2. Que aspectos você quer rastrear?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="aspectos-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Aspectos básicos (alimentos, horários)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="aspectos-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Aspectos específicos (nutrientes, porções)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="aspectos-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Aspectos avançados (metabolismo, resposta)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de aspectos</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">⚖️ 3. Com que frequência você quer rastrear?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="frequencia-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Ocasionalmente (alguns dias)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="frequencia-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Regularmente (maioria dos dias)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="frequencia-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Rigorosamente (todos os dias)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de frequência</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-sky-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-sky-900 mb-3">🎯 4. Que tipo de análise você busca?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="analise-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Análise básica (padrões simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="analise-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Análise avançada (correlações)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="analise-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Análise premium (insights profundos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-sky-600 mt-2">🧠 Gatilho: Consciência de análise</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📈 5. Que tipo de insights você quer receber?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="insights-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Insights básicos (resumos simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="insights-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Insights avançados (recomendações)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="insights-rastreamento" className="mr-3" />
+                        <span className="text-gray-700">Insights premium (estratégias personalizadas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de insights</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Rastreador Alimentar</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-emerald-600 mb-2">Rastreamento Avançado</div>
+                        <div className="text-lg font-semibold text-teal-600">Padrões Complexos</div>
+                        <div className="text-sm text-gray-600">Rastreamento avançado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Complexos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Premium</div>
+                          <div className="text-gray-600">Elite</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Rastreamento:</strong> Tipo, aspectos, frequência, análise, insights</p>
+                      <p>• <strong>Análise:</strong> Critérios nutricionais, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Rastreador específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Rastreamento evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Diário Alimentar */}
+            {ferramentaSelecionada === 'diario-alimentar' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📝 Preview do Diário Alimentar - "Registre seus hábitos alimentares e transforme sua nutrição"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📝 Registre Seus Hábitos Alimentares e Transforme Sua Nutrição</h4>
+                  <p className="text-gray-700 mb-3">Descubra o diário ideal para registrar seus hábitos alimentares e receba orientações personalizadas baseadas em sua área de interesse.</p>
+                  <p className="text-orange-600 font-semibold">💡 Um diário que pode transformar sua relação com a alimentação.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">📝 1. Que tipo de diário você precisa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-diario" className="mr-3" />
+                        <span className="text-gray-700">Diário básico (registro simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-diario" className="mr-3" />
+                        <span className="text-gray-700">Diário avançado (registro detalhado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="tipo-diario" className="mr-3" />
+                        <span className="text-gray-700">Diário premium (registro profissional)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">🎯 2. Que aspectos você quer registrar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="aspectos-diario" className="mr-3" />
+                        <span className="text-gray-700">Aspectos básicos (alimentos, horários)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="aspectos-diario" className="mr-3" />
+                        <span className="text-gray-700">Aspectos específicos (nutrientes, porções)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="aspectos-diario" className="mr-3" />
+                        <span className="text-gray-700">Aspectos avançados (metabolismo, resposta)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência de aspectos</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">⚖️ 3. Com que frequência você quer registrar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="frequencia-diario" className="mr-3" />
+                        <span className="text-gray-700">Ocasionalmente (alguns dias)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="frequencia-diario" className="mr-3" />
+                        <span className="text-gray-700">Regularmente (maioria dos dias)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="frequencia-diario" className="mr-3" />
+                        <span className="text-gray-700">Rigorosamente (todos os dias)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de frequência</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-lime-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-lime-900 mb-3">🎯 4. Que tipo de análise você busca?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="analise-diario" className="mr-3" />
+                        <span className="text-gray-700">Análise básica (padrões simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="analise-diario" className="mr-3" />
+                        <span className="text-gray-700">Análise avançada (correlações)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="analise-diario" className="mr-3" />
+                        <span className="text-gray-700">Análise premium (insights profundos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-lime-600 mt-2">🧠 Gatilho: Consciência de análise</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">📈 5. Que tipo de insights você quer receber?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="insights-diario" className="mr-3" />
+                        <span className="text-gray-700">Insights básicos (resumos simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="insights-diario" className="mr-3" />
+                        <span className="text-gray-700">Insights avançados (recomendações)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="insights-diario" className="mr-3" />
+                        <span className="text-gray-700">Insights premium (estratégias personalizadas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de insights</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Diário Alimentar</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-orange-600 mb-2">Diário Avançado</div>
+                        <div className="text-lg font-semibold text-amber-600">Registro Detalhado</div>
+                        <div className="text-sm text-gray-600">Diário avançado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Detalhado</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Premium</div>
+                          <div className="text-gray-600">Profissional</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Diário:</strong> Tipo, aspectos, frequência, análise, insights</p>
+                      <p>• <strong>Análise:</strong> Critérios nutricionais, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Diário específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Diário evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Tabela de Metas Semanais */}
+            {ferramentaSelecionada === 'tabela-metas-semanais' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎯 Preview da Tabela de Metas Semanais - "Estabeleça metas semanais e alcance seus objetivos"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎯 Estabeleça Metas Semanais e Alcance Seus Objetivos</h4>
+                  <p className="text-gray-700 mb-3">Descubra a tabela ideal para estabelecer metas semanais e receba orientações personalizadas baseadas em sua área de interesse.</p>
+                  <p className="text-pink-600 font-semibold">💡 Uma tabela que pode transformar sua motivação e resultados.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🎯 1. Que tipo de metas você quer estabelecer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="tipo-metas" className="mr-3" />
+                        <span className="text-gray-700">Metas básicas (objetivos simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="tipo-metas" className="mr-3" />
+                        <span className="text-gray-700">Metas moderadas (objetivos específicos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="tipo-metas" className="mr-3" />
+                        <span className="text-gray-700">Metas avançadas (objetivos complexos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-rose-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-rose-900 mb-3">📅 2. Que período você quer focar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="periodo-metas" className="mr-3" />
+                        <span className="text-gray-700">1 semana (objetivos curtos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="periodo-metas" className="mr-3" />
+                        <span className="text-gray-700">2-4 semanas (objetivos médios)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="periodo-metas" className="mr-3" />
+                        <span className="text-gray-700">1-3 meses (objetivos longos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-rose-600 mt-2">🧠 Gatilho: Consciência de período</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">⚖️ 3. Que área você quer focar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="area-metas" className="mr-3" />
+                        <span className="text-gray-700">Alimentação (hábitos nutricionais)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="area-metas" className="mr-3" />
+                        <span className="text-gray-700">Exercícios (atividade física)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="area-metas" className="mr-3" />
+                        <span className="text-gray-700">Bem-estar (saúde geral)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de área</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🎯 4. Que tipo de acompanhamento você busca?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="acompanhamento-metas" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento básico (semanal)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="acompanhamento-metas" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento moderado (quinzenal)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="acompanhamento-metas" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento intensivo (diário)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de acompanhamento</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">📈 5. Que tipo de resultados você quer alcançar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="resultados-metas" className="mr-3" />
+                        <span className="text-gray-700">Resultados básicos (melhorias simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="resultados-metas" className="mr-3" />
+                        <span className="text-gray-700">Resultados moderados (melhorias específicas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="resultados-metas" className="mr-3" />
+                        <span className="text-gray-700">Resultados avançados (transformações profundas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de resultados</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado da Tabela de Metas Semanais</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-pink-600 mb-2">Metas Moderadas</div>
+                        <div className="text-lg font-semibold text-rose-600">Objetivos Específicos</div>
+                        <div className="text-sm text-gray-600">Tabela de metas moderadas personalizada recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básicas</div>
+                          <div className="text-gray-600">Simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderadas</div>
+                          <div className="text-gray-600">Específicos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançadas</div>
+                          <div className="text-gray-600">Complexos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Metas:</strong> Tipo, período, área, acompanhamento, resultados</p>
+                      <p>• <strong>Análise:</strong> Critérios de motivação, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Tabela específica baseada em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Metas evoluem com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Desafio 7 Dias */}
+            {ferramentaSelecionada === 'template-desafio-7dias' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🏆 Preview do Template de Desafio 7 Dias - "Transforme sua vida em apenas 7 dias"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🏆 Transforme Sua Vida em Apenas 7 Dias</h4>
+                  <p className="text-gray-700 mb-3">Descubra o desafio ideal para transformar sua vida em apenas 7 dias e receba orientações personalizadas baseadas em sua área de interesse.</p>
+                  <p className="text-yellow-600 font-semibold">💡 Um desafio que pode transformar sua vida em uma semana.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">🏆 1. Que tipo de desafio você quer enfrentar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-desafio" className="mr-3" />
+                        <span className="text-gray-700">Desafio básico (mudanças simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-desafio" className="mr-3" />
+                        <span className="text-gray-700">Desafio moderado (mudanças específicas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-desafio" className="mr-3" />
+                        <span className="text-gray-700">Desafio avançado (mudanças complexas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">📅 2. Que área você quer transformar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="area-desafio" className="mr-3" />
+                        <span className="text-gray-700">Alimentação (hábitos nutricionais)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="area-desafio" className="mr-3" />
+                        <span className="text-gray-700">Exercícios (atividade física)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="area-desafio" className="mr-3" />
+                        <span className="text-gray-700">Bem-estar (saúde geral)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de área</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">⚖️ 3. Que tipo de mudança você busca?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="mudanca-desafio" className="mr-3" />
+                        <span className="text-gray-700">Mudança gradual (adaptação lenta)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="mudanca-desafio" className="mr-3" />
+                        <span className="text-gray-700">Mudança moderada (adaptação equilibrada)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="mudanca-desafio" className="mr-3" />
+                        <span className="text-gray-700">Mudança intensa (transformação rápida)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de mudança</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🎯 4. Que tipo de acompanhamento você precisa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="acompanhamento-desafio" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento básico (diário)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="acompanhamento-desafio" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento moderado (2x por dia)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="acompanhamento-desafio" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento intensivo (contínuo)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência de acompanhamento</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📈 5. Que tipo de resultados você quer alcançar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="resultados-desafio" className="mr-3" />
+                        <span className="text-gray-700">Resultados básicos (melhorias simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="resultados-desafio" className="mr-3" />
+                        <span className="text-gray-700">Resultados moderados (melhorias específicas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="resultados-desafio" className="mr-3" />
+                        <span className="text-gray-700">Resultados avançados (transformações profundas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de resultados</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Template de Desafio 7 Dias</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-yellow-600 mb-2">Desafio Moderado</div>
+                        <div className="text-lg font-semibold text-orange-600">Mudanças Específicas</div>
+                        <div className="text-sm text-gray-600">Template de desafio moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Específicos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Complexos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Desafio:</strong> Tipo, área, mudança, acompanhamento, resultados</p>
+                      <p>• <strong>Análise:</strong> Critérios de gamificação, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Desafio evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Desafio 21 Dias */}
+            {ferramentaSelecionada === 'template-desafio-21dias' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📅 Preview do Template de Desafio 21 Dias - "Crie hábitos duradouros em apenas 21 dias"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📅 Crie Hábitos Duradouros em Apenas 21 Dias</h4>
+                  <p className="text-gray-700 mb-3">Descubra o desafio ideal para criar hábitos duradouros em apenas 21 dias e receba orientações personalizadas baseadas em sua área de interesse.</p>
+                  <p className="text-green-600 font-semibold">💡 Um desafio que pode transformar sua vida em 3 semanas.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">📅 1. Que tipo de hábito você quer criar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-habito" className="mr-3" />
+                        <span className="text-gray-700">Hábito básico (rotinas simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-habito" className="mr-3" />
+                        <span className="text-gray-700">Hábito moderado (rotinas específicas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-habito" className="mr-3" />
+                        <span className="text-gray-700">Hábito avançado (rotinas complexas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🔄 2. Que área você quer transformar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="area-habito" className="mr-3" />
+                        <span className="text-gray-700">Alimentação (hábitos nutricionais)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="area-habito" className="mr-3" />
+                        <span className="text-gray-700">Exercícios (atividade física)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="area-habito" className="mr-3" />
+                        <span className="text-gray-700">Bem-estar (saúde geral)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de área</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">⏰ 3. Que tipo de comprometimento você tem?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="comprometimento-habito" className="mr-3" />
+                        <span className="text-gray-700">Comprometimento básico (1x por dia)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="comprometimento-habito" className="mr-3" />
+                        <span className="text-gray-700">Comprometimento moderado (2x por dia)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="comprometimento-habito" className="mr-3" />
+                        <span className="text-gray-700">Comprometimento intensivo (3x por dia)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de comprometimento</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎯 4. Que tipo de acompanhamento você precisa?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="acompanhamento-habito" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento básico (semanal)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="acompanhamento-habito" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento moderado (quinzenal)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="acompanhamento-habito" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento intensivo (diário)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de acompanhamento</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📈 5. Que tipo de resultados você quer alcançar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="resultados-habito" className="mr-3" />
+                        <span className="text-gray-700">Resultados básicos (melhorias simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="resultados-habito" className="mr-3" />
+                        <span className="text-gray-700">Resultados moderados (melhorias específicas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="resultados-habito" className="mr-3" />
+                        <span className="text-gray-700">Resultados avançados (transformações profundas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de resultados</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Template de Desafio 21 Dias</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-green-600 mb-2">Desafio Moderado</div>
+                        <div className="text-lg font-semibold text-teal-600">Hábitos Específicos Duradouros</div>
+                        <div className="text-sm text-gray-600">Template de desafio moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Específicos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Complexos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Desafio:</strong> Tipo, área, comprometimento, acompanhamento, resultados</p>
+                      <p>• <strong>Análise:</strong> Critérios de comprometimento, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Desafio evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Guia de Hidratação */}
+            {ferramentaSelecionada === 'guia-hidratacao' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💧 Preview do Guia de Hidratação - "Descubra seu nível ideal de hidratação"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">💧 Descubra Seu Nível Ideal de Hidratação</h4>
+                  <p className="text-gray-700 mb-3">Avalie sua hidratação atual e receba orientações personalizadas para otimizar seu consumo de líquidos e melhorar sua saúde.</p>
+                  <p className="text-blue-600 font-semibold">💡 Um guia que pode transformar sua hidratação em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">💧 1. Quantos copos de água você bebe por dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="copos-agua" className="mr-3" />
+                        <span className="text-gray-700">Menos de 6 copos (&lt; 1.5L)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="copos-agua" className="mr-3" />
+                        <span className="text-gray-700">6-10 copos (1.5-2.5L)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="copos-agua" className="mr-3" />
+                        <span className="text-gray-700">Mais de 10 copos (&gt; 2.5L)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de consumo</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🥤 2. Que tipos de líquidos você consome?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tipos-liquidos" className="mr-3" />
+                        <span className="text-gray-700">Principalmente água pura</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tipos-liquidos" className="mr-3" />
+                        <span className="text-gray-700">Água + chás + sucos naturais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tipos-liquidos" className="mr-3" />
+                        <span className="text-gray-700">Diversos líquidos incluindo refrigerantes</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de qualidade</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">⚖️ 3. Como você se sente durante o dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="sensacao-dia" className="mr-3" />
+                        <span className="text-gray-700">Frequentemente desidratado/sedento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="sensacao-dia" className="mr-3" />
+                        <span className="text-gray-700">Às vezes desidratado, às vezes hidratado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="sensacao-dia" className="mr-3" />
+                        <span className="text-gray-700">Sempre bem hidratado e energizado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de sintomas</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🏃‍♀️ 4. Qual seu nível de atividade física?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="atividade-fisica" className="mr-3" />
+                        <span className="text-gray-700">Sedentário (pouco movimento)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="atividade-fisica" className="mr-3" />
+                        <span className="text-gray-700">Moderadamente ativo (exercícios leves)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="atividade-fisica" className="mr-3" />
+                        <span className="text-gray-700">Muito ativo (exercícios intensos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de necessidades</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🌡️ 5. Em que ambiente você vive/trabalha?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="ambiente" className="mr-3" />
+                        <span className="text-gray-700">Ambiente com ar condicionado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="ambiente" className="mr-3" />
+                        <span className="text-gray-700">Ambiente natural/temperado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="ambiente" className="mr-3" />
+                        <span className="text-gray-700">Ambiente quente/úmido</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência ambiental</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Guia de Hidratação</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">Hidratação Moderada</div>
+                        <div className="text-lg font-semibold text-cyan-600">2-3L/dia</div>
+                        <div className="text-sm text-gray-600">Guia de otimização hidratacional personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Baixa</div>
+                          <div className="text-gray-600">&lt; 2L/dia</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">2-3L/dia</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Alta</div>
+                          <div className="text-gray-600">&gt; 3L/dia</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Hidratação:</strong> Consumo, tipos, sensações, atividade, ambiente</p>
+                      <p>• <strong>Análise:</strong> Critérios de hidratação, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Guia específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Guia evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Infográfico Educativo */}
+            {ferramentaSelecionada === 'infografico-educativo' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📊 Preview do Infográfico Educativo - "Aprenda de forma visual e eficiente"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📊 Aprenda de Forma Visual e Eficiente</h4>
+                  <p className="text-gray-700 mb-3">Descubra seu nível de conhecimento atual e receba infográficos educativos personalizados para acelerar seu aprendizado.</p>
+                  <p className="text-purple-600 font-semibold">💡 Um infográfico que pode transformar seu conhecimento em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📊 1. Qual seu nível de conhecimento atual?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="nivel-conhecimento" className="mr-3" />
+                        <span className="text-gray-700">Iniciante (conceitos básicos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="nivel-conhecimento" className="mr-3" />
+                        <span className="text-gray-700">Intermediário (conceitos moderados)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="nivel-conhecimento" className="mr-3" />
+                        <span className="text-gray-700">Avançado (conceitos complexos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de nível</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎯 2. Que área você quer aprender?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="area-aprendizado" className="mr-3" />
+                        <span className="text-gray-700">Nutrição básica</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="area-aprendizado" className="mr-3" />
+                        <span className="text-gray-700">Suplementação</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="area-aprendizado" className="mr-3" />
+                        <span className="text-gray-700">Bem-estar geral</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de área</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📚 3. Que tipo de conteúdo você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo visual simples</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo visual moderado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo visual complexo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de preferência</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">⏰ 4. Quanto tempo você tem para aprender?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tempo-aprendizado" className="mr-3" />
+                        <span className="text-gray-700">Pouco tempo (5-10 min/dia)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tempo-aprendizado" className="mr-3" />
+                        <span className="text-gray-700">Tempo moderado (15-30 min/dia)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tempo-aprendizado" className="mr-3" />
+                        <span className="text-gray-700">Muito tempo (30+ min/dia)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de tempo</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🎨 5. Que estilo visual você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="estilo-visual" className="mr-3" />
+                        <span className="text-gray-700">Estilo minimalista</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="estilo-visual" className="mr-3" />
+                        <span className="text-gray-700">Estilo moderado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="estilo-visual" className="mr-3" />
+                        <span className="text-gray-700">Estilo detalhado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de estilo</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📊 Resultado do Infográfico Educativo</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-purple-600 mb-2">Conhecimento Moderado</div>
+                        <div className="text-lg font-semibold text-indigo-600">41-70 pontos</div>
+                        <div className="text-sm text-gray-600">Infográfico educativo moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-red-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-red-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">0-40 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">41-70 pontos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">71-100 pontos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Conhecimento:</strong> Nível, área, conteúdo, tempo, estilo</p>
+                      <p>• <strong>Análise:</strong> Critérios de conhecimento, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Infográfico específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Infográfico evolui com novas informações e objetivos</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Receitas */}
+            {ferramentaSelecionada === 'template-receitas' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  👨‍🍳 Preview do Template de Receitas - "Receitas nutritivas e práticas para você"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">👨‍🍳 Receitas Nutritivas e Práticas para Você</h4>
+                  <p className="text-gray-700 mb-3">Descubra seu perfil culinário e receba receitas personalizadas que se adaptam ao seu estilo de vida e objetivos nutricionais.</p>
+                  <p className="text-orange-600 font-semibold">💡 Receitas que podem transformar sua alimentação em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">👨‍🍳 1. Qual seu nível de experiência na cozinha?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="experiencia-cozinha" className="mr-3" />
+                        <span className="text-gray-700">Iniciante (receitas básicas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="experiencia-cozinha" className="mr-3" />
+                        <span className="text-gray-700">Intermediário (receitas moderadas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="experiencia-cozinha" className="mr-3" />
+                        <span className="text-gray-700">Avançado (receitas complexas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de habilidade</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-red-900 mb-3">🍽️ 2. Que tipo de refeição você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tipo-refeicao" className="mr-3" />
+                        <span className="text-gray-700">Refeições rápidas e práticas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tipo-refeicao" className="mr-3" />
+                        <span className="text-gray-700">Refeições balanceadas e nutritivas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                        <input type="radio" name="tipo-refeicao" className="mr-3" />
+                        <span className="text-gray-700">Refeições gourmet e sofisticadas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de preferência</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">⏰ 3. Quanto tempo você tem para cozinhar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tempo-cozinhar" className="mr-3" />
+                        <span className="text-gray-700">Pouco tempo (15-30 min)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tempo-cozinhar" className="mr-3" />
+                        <span className="text-gray-700">Tempo moderado (30-60 min)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tempo-cozinhar" className="mr-3" />
+                        <span className="text-gray-700">Muito tempo (60+ min)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de tempo</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🥗 4. Que ingredientes você prefere usar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="ingredientes" className="mr-3" />
+                        <span className="text-gray-700">Ingredientes básicos e comuns</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="ingredientes" className="mr-3" />
+                        <span className="text-gray-700">Ingredientes funcionais e específicos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="ingredientes" className="mr-3" />
+                        <span className="text-gray-700">Ingredientes gourmet e premium</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de ingredientes</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">🎯 5. Qual seu objetivo principal?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="objetivo" className="mr-3" />
+                        <span className="text-gray-700">Alimentação saudável básica</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="objetivo" className="mr-3" />
+                        <span className="text-gray-700">Otimização nutricional</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="objetivo" className="mr-3" />
+                        <span className="text-gray-700">Performance e resultados</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">👨‍🍳 Resultado do Template de Receitas</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-orange-600 mb-2">Receitas Moderadas</div>
+                        <div className="text-lg font-semibold text-red-600">Receitas específicas</div>
+                        <div className="text-sm text-gray-600">Template de receitas moderadas personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básicas</div>
+                          <div className="text-gray-600">Receitas simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderadas</div>
+                          <div className="text-gray-600">Receitas específicas</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançadas</div>
+                          <div className="text-gray-600">Receitas complexas</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Receitas:</strong> Experiência, tipo, tempo, ingredientes, objetivo</p>
+                      <p>• <strong>Análise:</strong> Critérios culinários, evidências nutricionais, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Template evolui com novas receitas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Cardápio Detox */}
+            {ferramentaSelecionada === 'cardapio-detox' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🥗 Preview do Cardápio Detox - "Seu corpo precisa de detox?"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🥗 Seu Corpo Precisa de Detox?</h4>
+                  <p className="text-gray-700 mb-3">Descubra seu nível de toxicidade e receba um cardápio detox personalizado que se adapta ao seu estilo de vida e objetivos de saúde.</p>
+                  <p className="text-green-600 font-semibold">💡 Um cardápio que pode transformar sua saúde em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">🥗 1. Como você se sente ao acordar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="acordar" className="mr-3" />
+                        <span className="text-gray-700">Disposto e energizado</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="acordar" className="mr-3" />
+                        <span className="text-gray-700">Cansado e sem energia</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="acordar" className="mr-3" />
+                        <span className="text-gray-700">Muito cansado e pesado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de energia</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🍽️ 2. Que tipo de alimentação você tem?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="alimentacao" className="mr-3" />
+                        <span className="text-gray-700">Alimentação saudável e natural</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="alimentacao" className="mr-3" />
+                        <span className="text-gray-700">Alimentação mista (saudável + industrializada)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="alimentacao" className="mr-3" />
+                        <span className="text-gray-700">Alimentação muito industrializada</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de alimentação</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">💧 3. Quanto você bebe de água por dia?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="agua" className="mr-3" />
+                        <span className="text-gray-700">Mais de 2 litros</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="agua" className="mr-3" />
+                        <span className="text-gray-700">Entre 1-2 litros</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="agua" className="mr-3" />
+                        <span className="text-gray-700">Menos de 1 litro</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência de hidratação</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🏃‍♀️ 4. Qual sua frequência de exercícios?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Exercícios regulares (4+ vezes/semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Exercícios moderados (2-3 vezes/semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Poucos ou nenhum exercício</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de atividade</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-lime-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-lime-900 mb-3">🌿 5. Que tipo de detox você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="tipo-detox" className="mr-3" />
+                        <span className="text-gray-700">Detox suave e gradual</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="tipo-detox" className="mr-3" />
+                        <span className="text-gray-700">Detox moderado e específico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="tipo-detox" className="mr-3" />
+                        <span className="text-gray-700">Detox intensivo e completo</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-lime-600 mt-2">🧠 Gatilho: Consciência de preferência</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">🥗 Resultado do Cardápio Detox</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-green-600 mb-2">Detox Moderado</div>
+                        <div className="text-lg font-semibold text-teal-600">Detox específico</div>
+                        <div className="text-sm text-gray-600">Cardápio detox moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Detox simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Detox específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Detox complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Detox:</strong> Energia, alimentação, hidratação, exercícios, tipo</p>
+                      <p>• <strong>Análise:</strong> Critérios de toxicidade, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Cardápio específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Cardápio evolui com novas necessidades e objetivos</p>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Simulador de Resultados */}
+            {ferramentaSelecionada === 'simulador-resultados' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🔮 Preview do Simulador de Resultados - "Veja seus resultados antes de começar"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🔮 Veja Seus Resultados Antes de Começar</h4>
+                  <p className="text-gray-700 mb-3">Simule seus resultados futuros e visualize como será sua transformação com base em seus objetivos e estilo de vida atual.</p>
+                  <p className="text-purple-600 font-semibold">💡 Uma simulação que pode motivar sua jornada em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🔮 1. Qual seu objetivo principal?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="objetivo-principal" className="mr-3" />
+                        <span className="text-gray-700">Perda de peso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="objetivo-principal" className="mr-3" />
+                        <span className="text-gray-700">Ganho de massa muscular</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="objetivo-principal" className="mr-3" />
+                        <span className="text-gray-700">Melhora da saúde geral</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">⏰ 2. Em quanto tempo você quer ver resultados?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tempo-resultados" className="mr-3" />
+                        <span className="text-gray-700">1-2 semanas (resultados rápidos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tempo-resultados" className="mr-3" />
+                        <span className="text-gray-700">1-2 meses (resultados moderados)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tempo-resultados" className="mr-3" />
+                        <span className="text-gray-700">3-6 meses (resultados duradouros)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de tempo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">💪 3. Qual seu nível de comprometimento?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="comprometimento" className="mr-3" />
+                        <span className="text-gray-700">Alto (mudanças significativas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="comprometimento" className="mr-3" />
+                        <span className="text-gray-700">Moderado (mudanças graduais)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="comprometimento" className="mr-3" />
+                        <span className="text-gray-700">Básico (mudanças simples)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Consciência de comprometimento</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📊 4. Que tipo de acompanhamento você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="acompanhamento" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento básico (semanal)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="acompanhamento" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento moderado (2x/semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="acompanhamento" className="mr-3" />
+                        <span className="text-gray-700">Acompanhamento intensivo (diário)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de acompanhamento</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🎯 5. Que tipo de simulação você quer ver?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tipo-simulacao" className="mr-3" />
+                        <span className="text-gray-700">Simulação básica (resultados simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tipo-simulacao" className="mr-3" />
+                        <span className="text-gray-700">Simulação moderada (resultados específicos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="tipo-simulacao" className="mr-3" />
+                        <span className="text-gray-700">Simulação avançada (resultados complexos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de simulação</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">🔮 Resultado do Simulador de Resultados</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-purple-600 mb-2">Resultados Moderados</div>
+                        <div className="text-lg font-semibold text-indigo-600">Resultados específicos</div>
+                        <div className="text-sm text-gray-600">Simulação de resultados moderados personalizada recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básicos</div>
+                          <div className="text-gray-600">Resultados simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderados</div>
+                          <div className="text-gray-600">Resultados específicos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançados</div>
+                          <div className="text-gray-600">Resultados complexos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Simulação:</strong> Objetivo, tempo, comprometimento, acompanhamento, tipo</p>
+                      <p>• <strong>Análise:</strong> Critérios de resultados, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Simulação específica baseada em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Simulação evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Avaliação Inicial */}
+            {ferramentaSelecionada === 'template-avaliacao-inicial' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📋 Preview do Template de Avaliação Inicial - "Avalie sua saúde de forma completa"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📋 Avalie Sua Saúde de Forma Completa</h4>
+                  <p className="text-gray-700 mb-3">Complete nossa avaliação inicial e descubra como está sua saúde atual, recebendo orientações personalizadas para melhorar seu bem-estar.</p>
+                  <p className="text-blue-600 font-semibold">💡 Uma avaliação que pode transformar sua saúde em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📋 1. Como você avalia sua saúde geral?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="saude-geral" className="mr-3" />
+                        <span className="text-gray-700">Excelente (sem problemas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="saude-geral" className="mr-3" />
+                        <span className="text-gray-700">Boa (alguns sintomas leves)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="saude-geral" className="mr-3" />
+                        <span className="text-gray-700">Regular (vários sintomas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de saúde</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">🍎 2. Como está sua alimentação atual?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="alimentacao-atual" className="mr-3" />
+                        <span className="text-gray-700">Muito saudável e balanceada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="alimentacao-atual" className="mr-3" />
+                        <span className="text-gray-700">Moderadamente saudável</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="alimentacao-atual" className="mr-3" />
+                        <span className="text-gray-700">Precisa melhorar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de alimentação</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">💪 3. Qual sua frequência de exercícios?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Regular (4+ vezes/semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Moderado (2-3 vezes/semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Pouco ou nenhum exercício</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de atividade</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">😴 4. Como está seu sono?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">Excelente (7-8 horas, descansado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">Bom (6-7 horas, às vezes cansado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">Ruim (menos de 6 horas, sempre cansado)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de sono</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-sky-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-sky-900 mb-3">🎯 5. Que tipo de avaliação você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="tipo-avaliacao" className="mr-3" />
+                        <span className="text-gray-700">Avaliação básica (simples e rápida)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="tipo-avaliacao" className="mr-3" />
+                        <span className="text-gray-700">Avaliação moderada (específica e detalhada)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                        <input type="radio" name="tipo-avaliacao" className="mr-3" />
+                        <span className="text-gray-700">Avaliação avançada (completa e complexa)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-sky-600 mt-2">🧠 Gatilho: Consciência de avaliação</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📋 Resultado do Template de Avaliação Inicial</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">Avaliação Moderada</div>
+                        <div className="text-lg font-semibold text-cyan-600">Avaliação específica</div>
+                        <div className="text-sm text-gray-600">Template de avaliação moderada personalizada recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básica</div>
+                          <div className="text-gray-600">Avaliação simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">Avaliação específica</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançada</div>
+                          <div className="text-gray-600">Avaliação complexa</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Avaliação:</strong> Saúde geral, alimentação, exercícios, sono, tipo</p>
+                      <p>• <strong>Análise:</strong> Critérios de avaliação, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Recomendação:</strong> Avaliação específica baseada em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Avaliação evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Formulário de Recomendação */}
+            {ferramentaSelecionada === 'formulario-recomendacao' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📝 Preview do Formulário de Recomendação - "Receba recomendações personalizadas"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📝 Receba Recomendações Personalizadas</h4>
+                  <p className="text-gray-700 mb-3">Complete nosso formulário e receba recomendações específicas baseadas em suas necessidades e objetivos de saúde.</p>
+                  <p className="text-green-600 font-semibold">💡 Recomendações que podem transformar sua saúde em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">📝 1. Qual seu objetivo principal de saúde?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="objetivo-saude" className="mr-3" />
+                        <span className="text-gray-700">Perda de peso</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="objetivo-saude" className="mr-3" />
+                        <span className="text-gray-700">Ganho de massa muscular</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="objetivo-saude" className="mr-3" />
+                        <span className="text-gray-700">Melhora da energia</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">🍎 2. Como você descreveria sua alimentação atual?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="alimentacao-atual" className="mr-3" />
+                        <span className="text-gray-700">Muito saudável e balanceada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="alimentacao-atual" className="mr-3" />
+                        <span className="text-gray-700">Moderadamente saudável</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="alimentacao-atual" className="mr-3" />
+                        <span className="text-gray-700">Precisa melhorar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência de alimentação</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">💪 3. Qual sua frequência de exercícios?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Regular (4+ vezes/semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Moderado (2-3 vezes/semana)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="exercicios" className="mr-3" />
+                        <span className="text-gray-700">Pouco ou nenhum exercício</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de atividade</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">😴 4. Como está seu sono?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">Excelente (7-8 horas, descansado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">Bom (6-7 horas, às vezes cansado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="sono" className="mr-3" />
+                        <span className="text-gray-700">Ruim (menos de 6 horas, sempre cansado)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de sono</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-lime-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-lime-900 mb-3">🎯 5. Que tipo de recomendação você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="tipo-recomendacao" className="mr-3" />
+                        <span className="text-gray-700">Recomendações básicas (simples e rápidas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="tipo-recomendacao" className="mr-3" />
+                        <span className="text-gray-700">Recomendações moderadas (específicas e detalhadas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                        <input type="radio" name="tipo-recomendacao" className="mr-3" />
+                        <span className="text-gray-700">Recomendações avançadas (completas e complexas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-lime-600 mt-2">🧠 Gatilho: Consciência de recomendação</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📝 Resultado do Formulário de Recomendação</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-green-600 mb-2">Recomendação Moderada</div>
+                        <div className="text-lg font-semibold text-emerald-600">Recomendações específicas</div>
+                        <div className="text-sm text-gray-600">Formulário de recomendação moderada personalizada recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básica</div>
+                          <div className="text-gray-600">Recomendações simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">Recomendações específicas</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançada</div>
+                          <div className="text-gray-600">Recomendações complexas</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Recomendação:</strong> Objetivo, alimentação, exercícios, sono, tipo</p>
+                      <p>• <strong>Análise:</strong> Critérios de recomendação, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Recomendação específica baseada em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Recomendação evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview da Ficha de Cliente */}
+            {ferramentaSelecionada === 'ficha-cliente' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📋 Preview da Ficha de Cliente - "Profissionalize seu atendimento"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📋 Profissionalize Seu Atendimento</h4>
+                  <p className="text-gray-700 mb-3">Complete nossa ficha profissional e eleve seu atendimento ao próximo nível com ferramentas específicas para cada tipo de cliente.</p>
+                  <p className="text-purple-600 font-semibold">💡 Profissionalização que pode transformar seu atendimento em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📋 1. Qual seu nível de experiência profissional?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="experiencia-profissional" className="mr-3" />
+                        <span className="text-gray-700">Iniciante (0-2 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="experiencia-profissional" className="mr-3" />
+                        <span className="text-gray-700">Intermediário (3-5 anos)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="experiencia-profissional" className="mr-3" />
+                        <span className="text-gray-700">Avançado (5+ anos)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de experiência</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">👥 2. Que tipo de cliente você atende?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tipo-cliente" className="mr-3" />
+                        <span className="text-gray-700">Clientes básicos (consultas simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tipo-cliente" className="mr-3" />
+                        <span className="text-gray-700">Clientes moderados (consultas específicas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="tipo-cliente" className="mr-3" />
+                        <span className="text-gray-700">Clientes avançados (consultas complexas)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de segmentação</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">📊 3. Como você organiza suas fichas atualmente?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="organizacao-fichas" className="mr-3" />
+                        <span className="text-gray-700">Papel e caneta (manual)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="organizacao-fichas" className="mr-3" />
+                        <span className="text-gray-700">Planilhas básicas (digital simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="organizacao-fichas" className="mr-3" />
+                        <span className="text-gray-700">Sistema profissional (digital avançado)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Consciência de organização</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-slate-900 mb-3">🎯 4. Qual seu objetivo com a profissionalização?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="objetivo-profissionalizacao" className="mr-3" />
+                        <span className="text-gray-700">Melhorar organização básica</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="objetivo-profissionalizacao" className="mr-3" />
+                        <span className="text-gray-700">Aumentar eficiência no atendimento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                        <input type="radio" name="objetivo-profissionalizacao" className="mr-3" />
+                        <span className="text-gray-700">Elevar credibilidade profissional</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">⚡ 5. Que tipo de ficha você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
+                        <input type="radio" name="tipo-ficha" className="mr-3" />
+                        <span className="text-gray-700">Ficha básica (simples e rápida)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
+                        <input type="radio" name="tipo-ficha" className="mr-3" />
+                        <span className="text-gray-700">Ficha moderada (específica e detalhada)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
+                        <input type="radio" name="tipo-ficha" className="mr-3" />
+                        <span className="text-gray-700">Ficha avançada (completa e complexa)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Consciência de ficha</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📋 Resultado da Ficha de Cliente</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-purple-600 mb-2">Ficha Moderada</div>
+                        <div className="text-lg font-semibold text-indigo-600">Cliente específico</div>
+                        <div className="text-sm text-gray-600">Ficha de cliente moderada personalizada recomendada</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básica</div>
+                          <div className="text-gray-600">Cliente simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderada</div>
+                          <div className="text-gray-600">Cliente específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançada</div>
+                          <div className="text-gray-600">Cliente complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Profissionalização:</strong> Experiência, tipo de cliente, organização, objetivo, tipo</p>
+                      <p>• <strong>Análise:</strong> Critérios de profissionalização, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Ficha específica baseada em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Profissionalização evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Progresso Visual */}
+            {ferramentaSelecionada === 'template-progresso-visual' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📈 Preview do Template de Progresso Visual - "Engaje com progresso visual"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📈 Engaje com Progresso Visual</h4>
+                  <p className="text-gray-700 mb-3">Transforme o acompanhamento do seu progresso em uma experiência visual envolvente e motivadora para seus clientes.</p>
+                  <p className="text-blue-600 font-semibold">💡 Engajamento visual que pode transformar sua comunicação em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📈 1. Que tipo de progresso você acompanha?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-progresso" className="mr-3" />
+                        <span className="text-gray-700">Progresso físico (peso, medidas, composição)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-progresso" className="mr-3" />
+                        <span className="text-gray-700">Progresso nutricional (hábitos, energia, bem-estar)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-progresso" className="mr-3" />
+                        <span className="text-gray-700">Progresso comportamental (rotina, disciplina, motivação)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de progresso</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">📊 2. Como você registra o progresso atualmente?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="registro-progresso" className="mr-3" />
+                        <span className="text-gray-700">Apenas números (peso, medidas)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="registro-progresso" className="mr-3" />
+                        <span className="text-gray-700">Números + observações escritas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="registro-progresso" className="mr-3" />
+                        <span className="text-gray-700">Números + fotos + gráficos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de registro</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">🎯 3. Qual seu objetivo com o progresso visual?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="objetivo-progresso" className="mr-3" />
+                        <span className="text-gray-700">Motivar clientes</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="objetivo-progresso" className="mr-3" />
+                        <span className="text-gray-700">Demonstrar resultados</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="objetivo-progresso" className="mr-3" />
+                        <span className="text-gray-700">Aumentar engajamento</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">📱 4. Onde você compartilha o progresso?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="compartilhamento-progresso" className="mr-3" />
+                        <span className="text-gray-700">Apenas consultas presenciais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="compartilhamento-progresso" className="mr-3" />
+                        <span className="text-gray-700">WhatsApp e redes sociais</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="compartilhamento-progresso" className="mr-3" />
+                        <span className="text-gray-700">Plataforma profissional</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência de compartilhamento</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">⚡ 5. Que tipo de template você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template básico (simples e rápido)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template moderado (específico e detalhado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template avançado (completo e complexo)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de template</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📈 Resultado do Template de Progresso Visual</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">Progresso Moderado</div>
+                        <div className="text-lg font-semibold text-cyan-600">Visual específico</div>
+                        <div className="text-sm text-gray-600">Template de progresso visual moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Visual simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Visual específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Visual complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Engajamento Visual:</strong> Tipo de progresso, registro, objetivo, compartilhamento, template</p>
+                      <p>• <strong>Análise:</strong> Critérios de engajamento visual, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Engajamento visual evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Story Interativo */}
+            {ferramentaSelecionada === 'template-story-interativo' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📱 Preview do Template de Story Interativo - "Engaje nas redes sociais"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📱 Engaje nas Redes Sociais</h4>
+                  <p className="text-gray-700 mb-3">Crie stories interativos envolventes que conectam com seu público e aumentam o engajamento nas redes sociais.</p>
+                  <p className="text-purple-600 font-semibold">💡 Engajamento nas redes que pode transformar sua comunicação em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">📱 1. Que tipo de conteúdo você compartilha nas redes?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo educativo (dicas, informações)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo pessoal (rotina, lifestyle)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-conteudo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo promocional (produtos, serviços)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de conteúdo</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🎯 2. Qual seu objetivo principal nas redes?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="objetivo-redes" className="mr-3" />
+                        <span className="text-gray-700">Educar e informar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="objetivo-redes" className="mr-3" />
+                        <span className="text-gray-700">Construir relacionamento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="objetivo-redes" className="mr-3" />
+                        <span className="text-gray-700">Gerar vendas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">📊 3. Como você mede o engajamento atualmente?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="medicao-engajamento" className="mr-3" />
+                        <span className="text-gray-700">Apenas curtidas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="medicao-engajamento" className="mr-3" />
+                        <span className="text-gray-700">Curtidas + comentários</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="medicao-engajamento" className="mr-3" />
+                        <span className="text-gray-700">Métricas completas (alcance, saves, shares)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de métricas</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">🎨 4. Que tipo de interação você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-interacao" className="mr-3" />
+                        <span className="text-gray-700">Perguntas simples (sim/não)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-interacao" className="mr-3" />
+                        <span className="text-gray-700">Enquetes com opções</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="tipo-interacao" className="mr-3" />
+                        <span className="text-gray-700">Interações complexas (quiz, desafios)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Consciência de interação</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-rose-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-rose-900 mb-3">⚡ 5. Que tipo de story você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="tipo-story" className="mr-3" />
+                        <span className="text-gray-700">Story básico (simples e rápido)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="tipo-story" className="mr-3" />
+                        <span className="text-gray-700">Story moderado (específico e detalhado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                        <input type="radio" name="tipo-story" className="mr-3" />
+                        <span className="text-gray-700">Story avançado (completo e complexo)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-rose-600 mt-2">🧠 Gatilho: Consciência de story</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📱 Resultado do Template de Story Interativo</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-purple-600 mb-2">Story Moderado</div>
+                        <div className="text-lg font-semibold text-pink-600">Interativo específico</div>
+                        <div className="text-sm text-gray-600">Template de story interativo moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Interativo simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Interativo específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Interativo complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Engajamento nas Redes:</strong> Tipo de conteúdo, objetivo, medição, interação, story</p>
+                      <p>• <strong>Análise:</strong> Critérios de engajamento nas redes, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Engajamento nas redes evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Post de Curiosidades */}
+            {ferramentaSelecionada === 'post-curiosidades' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  💡 Preview do Post de Curiosidades - "Construa autoridade através de curiosidades"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">💡 Construa Autoridade através de Curiosidades</h4>
+                  <p className="text-gray-700 mb-3">Crie posts envolventes com curiosidades científicas que estabelecem sua autoridade e conectam com seu público.</p>
+                  <p className="text-yellow-600 font-semibold">💡 Autoridade através de curiosidades que pode transformar sua comunicação em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">💡 1. Que tipo de curiosidade você prefere compartilhar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Curiosidades científicas básicas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Curiosidades históricas da nutrição</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                        <input type="radio" name="tipo-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Curiosidades sobre alimentos específicos</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de curiosidade</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 mb-3">🎯 2. Qual seu objetivo com as curiosidades?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="objetivo-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Educar e informar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="objetivo-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Estabelecer autoridade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                        <input type="radio" name="objetivo-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Gerar engajamento</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-amber-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-amber-900 mb-3">📚 3. Que nível de profundidade você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="profundidade-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Curiosidades simples e diretas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="profundidade-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Curiosidades com contexto científico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                        <input type="radio" name="profundidade-curiosidade" className="mr-3" />
+                        <span className="text-gray-700">Curiosidades com estudos e referências</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência de profundidade</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-yellow-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-800 mb-3">🎨 4. Que formato visual você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-400">
+                        <input type="radio" name="formato-visual" className="mr-3" />
+                        <span className="text-gray-700">Post simples com texto</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-400">
+                        <input type="radio" name="formato-visual" className="mr-3" />
+                        <span className="text-gray-700">Post com imagem ilustrativa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-400">
+                        <input type="radio" name="formato-visual" className="mr-3" />
+                        <span className="text-gray-700">Post com infográfico detalhado</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-yellow-700 mt-2">🧠 Gatilho: Consciência de formato</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-orange-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-800 mb-3">⚡ 5. Que tipo de post você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-400">
+                        <input type="radio" name="tipo-post" className="mr-3" />
+                        <span className="text-gray-700">Post básico (simples e rápido)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-400">
+                        <input type="radio" name="tipo-post" className="mr-3" />
+                        <span className="text-gray-700">Post moderado (específico e detalhado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-400">
+                        <input type="radio" name="tipo-post" className="mr-3" />
+                        <span className="text-gray-700">Post avançado (completo e complexo)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-orange-700 mt-2">🧠 Gatilho: Consciência de post</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">💡 Resultado do Post de Curiosidades</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-yellow-600 mb-2">Curiosidade Moderada</div>
+                        <div className="text-lg font-semibold text-orange-600">Post específico</div>
+                        <div className="text-sm text-gray-600">Post de curiosidade moderada personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Post simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Post específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Post complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Autoridade através de Curiosidades:</strong> Tipo de curiosidade, objetivo, profundidade, formato, post</p>
+                      <p>• <strong>Análise:</strong> Critérios de autoridade através de curiosidades, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Post específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Autoridade através de curiosidades evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Post com Dica */}
+            {ferramentaSelecionada === 'template-post-dica' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📝 Preview do Template de Post com Dica - "Crie conteúdo recorrente através de dicas"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📝 Crie Conteúdo Recorrente através de Dicas</h4>
+                  <p className="text-gray-700 mb-3">Desenvolva posts consistentes com dicas práticas que mantêm seu público engajado e estabelecem sua presença digital.</p>
+                  <p className="text-blue-600 font-semibold">📝 Conteúdo recorrente através de dicas que pode transformar sua comunicação em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📝 1. Que tipo de dica você prefere compartilhar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-dica" className="mr-3" />
+                        <span className="text-gray-700">Dicas nutricionais básicas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-dica" className="mr-3" />
+                        <span className="text-gray-700">Dicas de estilo de vida</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-dica" className="mr-3" />
+                        <span className="text-gray-700">Dicas de bem-estar</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de dica</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎯 2. Qual seu objetivo com as dicas?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-dica" className="mr-3" />
+                        <span className="text-gray-700">Educar e informar</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-dica" className="mr-3" />
+                        <span className="text-gray-700">Manter engajamento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-dica" className="mr-3" />
+                        <span className="text-gray-700">Construir autoridade</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-cyan-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-cyan-900 mb-3">📅 3. Com que frequência você quer postar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="frequencia-post" className="mr-3" />
+                        <span className="text-gray-700">Diariamente</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="frequencia-post" className="mr-3" />
+                        <span className="text-gray-700">3x por semana</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                        <input type="radio" name="frequencia-post" className="mr-3" />
+                        <span className="text-gray-700">Semanalmente</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de frequência</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-blue-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-800 mb-3">🎨 4. Que formato visual você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-400">
+                        <input type="radio" name="formato-visual-dica" className="mr-3" />
+                        <span className="text-gray-700">Post simples com texto</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-400">
+                        <input type="radio" name="formato-visual-dica" className="mr-3" />
+                        <span className="text-gray-700">Post com imagem ilustrativa</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-400">
+                        <input type="radio" name="formato-visual-dica" className="mr-3" />
+                        <span className="text-gray-700">Post com carrossel de dicas</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-2">🧠 Gatilho: Consciência de formato</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-800 mb-3">⚡ 5. Que tipo de template você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-400">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template básico (simples e rápido)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-400">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template moderado (específico e detalhado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-400">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template avançado (completo e complexo)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-700 mt-2">🧠 Gatilho: Consciência de template</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📝 Resultado do Template de Post com Dica</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">Dica Moderada</div>
+                        <div className="text-lg font-semibold text-indigo-600">Post específico</div>
+                        <div className="text-sm text-gray-600">Template de dica moderada personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Post simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Post específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Post complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Conteúdo Recorrente através de Dicas:</strong> Tipo de dica, objetivo, frequência, formato, template</p>
+                      <p>• <strong>Análise:</strong> Critérios de conteúdo recorrente através de dicas, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Conteúdo recorrente através de dicas evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Reels Roteirizado */}
+            {ferramentaSelecionada === 'template-reels-roteirizado' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  🎬 Preview do Template de Reels Roteirizado - "Crie atração visual através de reels roteirizados"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎬 Crie Atração Visual através de Reels Roteirizados</h4>
+                  <p className="text-gray-700 mb-3">Desenvolva reels envolventes com roteiros estruturados que capturam atenção e geram engajamento nas redes sociais.</p>
+                  <p className="text-purple-600 font-semibold">🎬 Atração visual através de reels roteirizados que pode transformar sua presença digital em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">🎬 1. Que tipo de conteúdo você quer criar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-conteudo-reels" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo educativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-conteudo-reels" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo de entretenimento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                        <input type="radio" name="tipo-conteudo-reels" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo inspiracional</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência de conteúdo</p>
+                  </div>
+
+                  {/* Pergunta 2 */}
+                  <div className="bg-pink-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-900 mb-3">🎯 2. Qual seu objetivo com os reels?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="objetivo-reels" className="mr-3" />
+                        <span className="text-gray-700">Aumentar seguidores</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="objetivo-reels" className="mr-3" />
+                        <span className="text-gray-700">Gerar engajamento</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                        <input type="radio" name="objetivo-reels" className="mr-3" />
+                        <span className="text-gray-700">Construir autoridade</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+
+                  {/* Pergunta 3 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">📱 3. Que plataforma você quer focar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="plataforma-reels" className="mr-3" />
+                        <span className="text-gray-700">Instagram</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="plataforma-reels" className="mr-3" />
+                        <span className="text-gray-700">TikTok</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="plataforma-reels" className="mr-3" />
+                        <span className="text-gray-700">YouTube Shorts</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Consciência de plataforma</p>
+                  </div>
+
+                  {/* Pergunta 4 */}
+                  <div className="bg-purple-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-800 mb-3">🎨 4. Que estilo visual você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-400">
+                        <input type="radio" name="estilo-visual" className="mr-3" />
+                        <span className="text-gray-700">Minimalista e clean</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-400">
+                        <input type="radio" name="estilo-visual" className="mr-3" />
+                        <span className="text-gray-700">Colorido e vibrante</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-400">
+                        <input type="radio" name="estilo-visual" className="mr-3" />
+                        <span className="text-gray-700">Profissional e elegante</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-purple-700 mt-2">🧠 Gatilho: Consciência de estilo</p>
+                  </div>
+
+                  {/* Pergunta 5 */}
+                  <div className="bg-pink-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-pink-800 mb-3">⚡ 5. Que tipo de roteiro você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-400">
+                        <input type="radio" name="tipo-roteiro" className="mr-3" />
+                        <span className="text-gray-700">Roteiro básico (simples e direto)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-400">
+                        <input type="radio" name="tipo-roteiro" className="mr-3" />
+                        <span className="text-gray-700">Roteiro moderado (estruturado e detalhado)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-400">
+                        <input type="radio" name="tipo-roteiro" className="mr-3" />
+                        <span className="text-gray-700">Roteiro avançado (complexo e completo)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-pink-700 mt-2">🧠 Gatilho: Consciência de roteiro</p>
+                  </div>
+
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">🎬 Resultado do Template de Reels Roteirizado</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-purple-600 mb-2">Reels Moderado</div>
+                        <div className="text-lg font-semibold text-pink-600">Roteiro específico</div>
+                        <div className="text-sm text-gray-600">Template de reels moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Roteiro simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Roteiro específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Roteiro complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+
+                  {/* Informações Adicionais */}
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Atração Visual através de Reels Roteirizados:</strong> Tipo de conteúdo, objetivo, plataforma, estilo visual, roteiro</p>
+                      <p>• <strong>Análise:</strong> Critérios de atração visual através de reels roteirizados, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Atração visual através de reels roteirizados evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Artigo Curto */}
+            {ferramentaSelecionada === 'template-artigo-curto' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📄 Preview do Template de Artigo Curto - "Construa autoridade através de artigos curtos"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📄 Construa Autoridade através de Artigos Curtos</h4>
+                  <p className="text-gray-700 mb-3">Desenvolva artigos envolventes e informativos que estabelecem sua autoridade e conectam com seu público-alvo.</p>
+                  <p className="text-blue-600 font-semibold">📄 Autoridade escrita através de artigos curtos que pode transformar sua presença digital em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">📄 1. Que tipo de conteúdo você quer criar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo-artigo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo educativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo-artigo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo informativo</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                        <input type="radio" name="tipo-conteudo-artigo" className="mr-3" />
+                        <span className="text-gray-700">Conteúdo inspiracional</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de conteúdo</p>
+                  </div>
+          
+                  {/* Pergunta 2 */}
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-900 mb-3">🎯 2. Qual seu objetivo com os artigos?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-artigo" className="mr-3" />
+                        <span className="text-gray-700">Construir autoridade</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-artigo" className="mr-3" />
+                        <span className="text-gray-700">Educar público</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                        <input type="radio" name="objetivo-artigo" className="mr-3" />
+                        <span className="text-gray-700">Gerar engajamento</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+          
+                  {/* Pergunta 3 */}
+                  <div className="bg-violet-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-violet-900 mb-3">📝 3. Que estilo de escrita você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="estilo-escrita" className="mr-3" />
+                        <span className="text-gray-700">Formal e técnico</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="estilo-escrita" className="mr-3" />
+                        <span className="text-gray-700">Conversacional e amigável</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-violet-300">
+                        <input type="radio" name="estilo-escrita" className="mr-3" />
+                        <span className="text-gray-700">Inspiracional e motivacional</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-violet-600 mt-2">🧠 Gatilho: Consciência de estilo</p>
+                  </div>
+          
+                  {/* Pergunta 4 */}
+                  <div className="bg-blue-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-800 mb-3">📊 4. Que tamanho de artigo você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-400">
+                        <input type="radio" name="tamanho-artigo" className="mr-3" />
+                        <span className="text-gray-700">Artigo curto (300-500 palavras)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-400">
+                        <input type="radio" name="tamanho-artigo" className="mr-3" />
+                        <span className="text-gray-700">Artigo médio (500-800 palavras)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-400">
+                        <input type="radio" name="tamanho-artigo" className="mr-3" />
+                        <span className="text-gray-700">Artigo longo (800+ palavras)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-2">🧠 Gatilho: Consciência de tamanho</p>
+                  </div>
+          
+                  {/* Pergunta 5 */}
+                  <div className="bg-indigo-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-800 mb-3">⚡ 5. Que tipo de template você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-400">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template básico (estrutura simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-400">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template moderado (estrutura específica)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-400">
+                        <input type="radio" name="tipo-template" className="mr-3" />
+                        <span className="text-gray-700">Template avançado (estrutura complexa)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-indigo-700 mt-2">🧠 Gatilho: Consciência de template</p>
+                  </div>
+          
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📄 Resultado do Template de Artigo Curto</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">Artigo Moderado</div>
+                        <div className="text-lg font-semibold text-indigo-600">Artigo específico</div>
+                        <div className="text-sm text-gray-600">Template de artigo moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Artigo simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Artigo específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Artigo complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+          
+                  {/* Informações Adicionais */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Autoridade Escrita através de Artigos Curtos:</strong> Tipo de conteúdo, objetivo, estilo de escrita, tamanho, template</p>
+                      <p>• <strong>Análise:</strong> Critérios de autoridade escrita através de artigos curtos, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Autoridade escrita através de artigos curtos evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Seção de Preview do Template de Catálogo Digital */}
+            {ferramentaSelecionada === 'template-catalogo-digital' && (
+              <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  📱 Preview do Template de Catálogo Digital - "Apresente seus serviços/produtos de forma profissional"
+                </h3>
+                
+                {/* Tela de Abertura */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">📱 Apresente seus Serviços/Produtos de forma Profissional</h4>
+                  <p className="text-gray-700 mb-3">Crie catálogos digitais envolventes que apresentam seus serviços nutricionais, produtos de suplementação ou programas de bem-estar de forma profissional e atrativa.</p>
+                  <p className="text-green-600 font-semibold">📱 Apresentação profissional de serviços/produtos através de catálogo digital que pode transformar suas vendas em 7 dias.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Pergunta 1 */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">📱 1. Que tipo de produtos você quer apresentar?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-produtos-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Produtos físicos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-produtos-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Serviços</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                        <input type="radio" name="tipo-produtos-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Produtos digitais</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de produtos</p>
+                  </div>
+          
+                  {/* Pergunta 2 */}
+                  <div className="bg-emerald-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-900 mb-3">🎯 2. Qual seu objetivo com o catálogo?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="objetivo-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Aumentar vendas</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="objetivo-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Mostrar produtos</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                        <input type="radio" name="objetivo-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Educar clientes</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                  </div>
+          
+                  {/* Pergunta 3 */}
+                  <div className="bg-teal-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-teal-900 mb-3">📊 3. Que estilo visual você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="estilo-visual-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Minimalista e clean</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="estilo-visual-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Colorido e vibrante</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                        <input type="radio" name="estilo-visual-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Profissional e elegante</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de estilo</p>
+                  </div>
+          
+                  {/* Pergunta 4 */}
+                  <div className="bg-green-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-800 mb-3">📱 4. Que tipo de interação você quer?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-400">
+                        <input type="radio" name="tipo-interacao" className="mr-3" />
+                        <span className="text-gray-700">Navegação simples</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-400">
+                        <input type="radio" name="tipo-interacao" className="mr-3" />
+                        <span className="text-gray-700">Interação moderada</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-400">
+                        <input type="radio" name="tipo-interacao" className="mr-3" />
+                        <span className="text-gray-700">Interação avançada</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-green-700 mt-2">🧠 Gatilho: Consciência de interação</p>
+                  </div>
+          
+                  {/* Pergunta 5 */}
+                  <div className="bg-emerald-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-emerald-800 mb-3">⚡ 5. Que tipo de template você prefere?</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-400">
+                        <input type="radio" name="tipo-template-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Template básico (estrutura simples)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-400">
+                        <input type="radio" name="tipo-template-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Template moderado (estrutura específica)</span>
+                      </label>
+                      <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-400">
+                        <input type="radio" name="tipo-template-catalogo" className="mr-3" />
+                        <span className="text-gray-700">Template avançado (estrutura complexa)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-emerald-700 mt-2">🧠 Gatilho: Consciência de template</p>
+                  </div>
+          
+                  {/* Resultado Visual */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-3">📱 Resultado do Template de Catálogo Digital</h4>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center mb-4">
+                        <div className="text-3xl font-bold text-green-600 mb-2">Catálogo Moderado</div>
+                        <div className="text-lg font-semibold text-emerald-600">Digital específico</div>
+                        <div className="text-sm text-gray-600">Template de catálogo moderado personalizado recomendado</div>
+                      </div>
+                      
+                      {/* Escala Visual */}
+                      <div className="relative bg-gray-200 rounded-full h-6 mb-4">
+                        <div className="absolute left-0 top-0 h-6 bg-blue-500 rounded-full" style={{width: '30%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-green-500 rounded-full" style={{width: '40%'}}></div>
+                        <div className="absolute left-0 top-0 h-6 bg-yellow-500 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                      
+                      {/* Legendas */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-blue-600 font-semibold">Básico</div>
+                          <div className="text-gray-600">Digital simples</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-green-600 font-semibold">Moderado</div>
+                          <div className="text-gray-600">Digital específico</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
+                          <div className="text-yellow-600 font-semibold">Avançado</div>
+                          <div className="text-gray-600">Digital complexo</div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">🧠 Gatilho: Visualização clara</p>
+                  </div>
+          
+                  {/* Informações Adicionais */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-3">ℹ️ Informações Importantes</h4>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <p>• <strong>Conversão Direta através de Catálogo Digital:</strong> Tipo de produtos, objetivo, estilo visual, interação, template</p>
+                      <p>• <strong>Análise:</strong> Critérios de conversão direta através de catálogo digital, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
+                      <p>• <strong>Duração:</strong> Conversão direta através de catálogo digital evolui com novas metas e objetivos</p>
+                    </div>
+                    <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
                   </div>
                 </div>
               </div>
