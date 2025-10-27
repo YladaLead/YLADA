@@ -63,6 +63,8 @@ export default function QuizPersonalizadoPage() {
   const [etapaAtual, setEtapaAtual] = useState(1)
   const [perguntaPreviewAtual, setPerguntaPreviewAtual] = useState(0)
   const [paginaPreviewAtual, setPaginaPreviewAtual] = useState(0)
+  const [salvando, setSalvando] = useState(false)
+  const [slugQuiz, setSlugQuiz] = useState<string>('')
   // Função para calcular total de páginas do preview
   const calcularTotalPaginas = () => {
     let total = 1 // Página inicial
@@ -120,7 +122,7 @@ export default function QuizPersonalizadoPage() {
           </div>
           
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {pergunta.pergunta}
+            {pergunta.titulo}
           </h2>
           
           {pergunta.tipo === 'multipla' && pergunta.opcoes && (
@@ -356,6 +358,80 @@ export default function QuizPersonalizadoPage() {
   const removerPergunta = (id: string) => {
     const perguntasAtualizadas = quiz.perguntas.filter(p => p.id !== id)
     setQuiz({ ...quiz, perguntas: perguntasAtualizadas })
+  }
+
+  // Função para salvar quiz no banco de dados
+  const salvarQuiz = async () => {
+    setSalvando(true)
+    try {
+      // Gerar slug único
+      const slugBase = quiz.titulo
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+      
+      const slug = `quiz-${slugBase}-${Date.now()}`
+      
+      // Preparar dados para salvar
+      const quizData = {
+        user_id: 'user-temp-001', // TODO: Pegar do contexto de autenticação
+        titulo: quiz.titulo,
+        descricao: quiz.descricao,
+        emoji: quiz.emoji,
+        cores: quiz.cores,
+        configuracoes: quiz.configuracao,
+        entrega: quiz.entrega,
+        slug: slug,
+      }
+
+      // Salvar no banco
+      const response = await fetch('/api/quiz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quizData,
+          perguntas: quiz.perguntas.map(p => ({
+            tipo: p.tipo,
+            titulo: p.titulo,
+            opcoes: p.opcoes || [],
+            obrigatoria: p.obrigatoria,
+          })),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao salvar quiz')
+      }
+
+      // Publicar quiz
+      await fetch(`/api/quiz`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quizId: data.quiz.id,
+          action: 'publish',
+        }),
+      })
+
+      // Atualizar slug
+      setSlugQuiz(slug)
+      
+      alert('Quiz salvo e publicado com sucesso!')
+    } catch (error) {
+      console.error('Erro ao salvar quiz:', error)
+      alert('Erro ao salvar quiz. Tente novamente.')
+    } finally {
+      setSalvando(false)
+    }
   }
 
   return (
@@ -1299,12 +1375,12 @@ export default function QuizPersonalizadoPage() {
                    Aqui está o link que você pode compartilhar:
                  </p>
                  
-                 <div className="bg-gray-50 rounded-lg p-4 mb-6 max-w-md mx-auto">
-                   <p className="text-sm text-gray-500 mb-2">Link do seu quiz:</p>
-                   <code className="text-blue-600 font-mono text-sm break-all">
-                     ylada.app/pt/nutri/seu-nome/quiz-personalizado
-                   </code>
-                 </div>
+                <div className="bg-gray-50 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                  <p className="text-sm text-gray-500 mb-2">Link do seu quiz:</p>
+                  <code className="text-blue-600 font-mono text-sm break-all">
+                    {slugQuiz ? `ylada.app/pt/quiz/${slugQuiz}` : 'Gerando link...'}
+                  </code>
+                </div>
                  
                  <div className="flex justify-center space-x-4">
                    <button
@@ -1313,26 +1389,32 @@ export default function QuizPersonalizadoPage() {
                    >
                      ← Voltar para Editar
                    </button>
-                   <button
-                     onClick={() => {
-                       const linkText = 'ylada.app/pt/nutri/seu-nome/quiz-personalizado'
-                       navigator.clipboard.writeText(linkText).then(() => {
-                         alert('Link copiado para a área de transferência!')
-                       }).catch(() => {
-                         // Fallback para navegadores mais antigos
-                         const textArea = document.createElement('textarea')
-                         textArea.value = linkText
-                         document.body.appendChild(textArea)
-                         textArea.select()
-                         document.execCommand('copy')
-                         document.body.removeChild(textArea)
-                         alert('Link copiado para a área de transferência!')
-                       })
-                     }}
-                     className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-                   >
-                     📋 Copiar Link
-                   </button>
+                  <button
+                    onClick={async () => {
+                      if (slugQuiz) {
+                        const linkText = `ylada.app/pt/quiz/${slugQuiz}`
+                        navigator.clipboard.writeText(linkText).then(() => {
+                          alert('Link copiado para a área de transferência!')
+                        }).catch(() => {
+                          // Fallback para navegadores mais antigos
+                          const textArea = document.createElement('textarea')
+                          textArea.value = linkText
+                          document.body.appendChild(textArea)
+                          textArea.select()
+                          document.execCommand('copy')
+                          document.body.removeChild(textArea)
+                          alert('Link copiado para a área de transferência!')
+                        })
+                      } else {
+                        // Salvar quiz primeiro
+                        await salvarQuiz()
+                      }
+                    }}
+                    disabled={salvando}
+                    className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {salvando ? '⏳ Salvando...' : slugQuiz ? '📋 Copiar Link' : '💾 Salvar e Publicar Quiz'}
+                  </button>
                  </div>
                </div>
               </div>
@@ -1400,7 +1482,7 @@ export default function QuizPersonalizadoPage() {
                 <p className="text-sm text-gray-500">
                   {paginaPreviewAtual === 0 && '📱 Página inicial do quiz'}
                   {paginaPreviewAtual > 0 && paginaPreviewAtual <= quiz.perguntas.length && 
-                   `❓ Pergunta ${paginaPreviewAtual}: ${quiz.perguntas[paginaPreviewAtual - 1]?.pergunta.substring(0, 50)}...`}
+                   `❓ Pergunta ${paginaPreviewAtual}: ${quiz.perguntas[paginaPreviewAtual - 1]?.titulo.substring(0, 50)}...`}
                   {paginaPreviewAtual > quiz.perguntas.length && '🎉 Página de resultado'}
                 </p>
               </div>
