@@ -22,22 +22,22 @@ export default function HomePage() {
         <div className="text-center max-w-5xl mx-auto">
 
           {/* Badge de Filosofia */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-6 border border-blue-200">
+          <div className="inline-flex items-center px-5 py-2.5 rounded-full bg-blue-50 text-blue-700 text-base font-medium mb-8 border border-blue-200">
             🧭 {t.main.badge}
           </div>
 
           {/* Título Principal - Filosofia Universal */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
             {t.main.title}
           </h1>
           
           {/* Subtítulo - Propósito Universal */}
-          <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
             {t.main.subtitle}
           </p>
 
           {/* CTA Principal - Chamada Universal */}
-          <div className="space-y-4 mb-12">
+          <div className="space-y-6 mb-16">
             <Link 
               href="/pt/como-funciona"
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -47,52 +47,52 @@ export default function HomePage() {
             </Link>
             
             {/* Credibilidade Universal */}
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-base text-gray-500 mt-4">
               <div className="flex items-center">
-                <span className="text-blue-500 mr-2">✅</span>
+                <span className="text-2xl mr-3">✅</span>
                 <span className="text-gray-700 font-medium">{t.main.credibility.professionals}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-blue-500 mr-2">🌍</span>
+                <span className="text-2xl mr-3">🌍</span>
                 <span className="text-gray-700 font-medium">{t.main.credibility.global}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-blue-500 mr-2">⚡</span>
+                <span className="text-2xl mr-3">⚡</span>
                 <span className="text-gray-700 font-medium">{t.main.credibility.quickStart}</span>
               </div>
             </div>
           </div>
 
           {/* Benefícios - 3 Pilares da Filosofia YLADA */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl text-blue-600">⚡</span>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+              <div className="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-5">
+                <span className="text-3xl text-blue-600">⚡</span>
               </div>
-              <h3 className="text-lg font-bold mb-3 text-gray-900 text-center">Simplicidade</h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center">
+              <h3 className="text-xl font-bold mb-4 text-gray-900 text-center">Simplicidade</h3>
+              <p className="text-gray-600 text-base leading-relaxed text-center">
                 <span className="text-blue-600 font-semibold">Um link, infinitas possibilidades</span>. 
                 Transforme qualquer ideia em uma ferramenta inteligente em segundos.
               </p>
             </div>
             
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl text-blue-600">🎯</span>
+            <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+              <div className="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-5">
+                <span className="text-3xl text-blue-600">🎯</span>
               </div>
-              <h3 className="text-lg font-bold mb-3 text-gray-900 text-center">Inteligência</h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center">
+              <h3 className="text-xl font-bold mb-4 text-gray-900 text-center">Inteligência</h3>
+              <p className="text-gray-600 text-base leading-relaxed text-center">
                 <span className="text-blue-600 font-semibold">IA que entende seu público</span>. 
                 Cada ferramenta é otimizada para converter visitantes em conexões reais.
               </p>
             </div>
             
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 sm:col-span-2 lg:col-span-1">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl text-blue-600">🌍</span>
+            <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 sm:col-span-2 lg:col-span-1">
+              <div className="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-5">
+                <span className="text-3xl text-blue-600">🌍</span>
               </div>
-              <h3 className="text-lg font-bold mb-3 text-gray-900 text-center">Escalabilidade</h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center">
+              <h3 className="text-xl font-bold mb-4 text-gray-900 text-center">Escalabilidade</h3>
+              <p className="text-gray-600 text-base leading-relaxed text-center">
                 <span className="text-blue-600 font-semibold">Cresça sem limites</span>. 
                 Da primeira conexão ao milhão de usuários, o YLADA escala com você.
               </p>
@@ -112,33 +112,33 @@ export default function HomePage() {
               Descubra como funciona especificamente para você.
             </p>
             
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-3xl mb-3">🥗</div>
-                <h3 className="text-base font-bold mb-2 text-gray-900">Nutricionistas</h3>
-                <p className="text-gray-600 mb-2 text-xs">Transforme consultas em conexões duradouras</p>
-                <div className="text-xs text-blue-600 font-medium">✨ Disponível</div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4">🥗</div>
+                <h3 className="text-lg font-bold mb-3 text-gray-900">Nutricionistas</h3>
+                <p className="text-gray-600 mb-3 text-sm">Transforme consultas em conexões duradouras</p>
+                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
               </div>
               
-              <div className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-3xl mb-3">💊</div>
-                <h3 className="text-base font-bold mb-2 text-gray-900">Vendedores</h3>
-                <p className="text-gray-600 mb-2 text-xs">Conecte produtos com pessoas certas</p>
-                <div className="text-xs text-blue-600 font-medium">✨ Disponível</div>
+              <div className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4">💊</div>
+                <h3 className="text-lg font-bold mb-3 text-gray-900">Vendedores</h3>
+                <p className="text-gray-600 mb-3 text-sm">Conecte produtos com pessoas certas</p>
+                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
               </div>
               
-              <div className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-3xl mb-3">🧘‍♀️</div>
-                <h3 className="text-base font-bold mb-2 text-gray-900">Coaches</h3>
-                <p className="text-gray-600 mb-2 text-xs">Engaje e transforme vidas</p>
-                <div className="text-xs text-blue-600 font-medium">✨ Disponível</div>
+              <div className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4">🧘‍♀️</div>
+                <h3 className="text-lg font-bold mb-3 text-gray-900">Coaches</h3>
+                <p className="text-gray-600 mb-3 text-sm">Engaje e transforme vidas</p>
+                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
               </div>
               
-              <div className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-3xl mb-3">💼</div>
-                <h3 className="text-base font-bold mb-2 text-gray-900">Empreendedores</h3>
-                <p className="text-gray-600 mb-2 text-xs">Escale seu negócio inteligentemente</p>
-                <div className="text-xs text-blue-600 font-medium">✨ Disponível</div>
+              <div className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4">💼</div>
+                <h3 className="text-lg font-bold mb-3 text-gray-900">Empreendedores</h3>
+                <p className="text-gray-600 mb-3 text-sm">Escale seu negócio inteligentemente</p>
+                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
               </div>
             </div>
           </div>
@@ -147,12 +147,12 @@ export default function HomePage() {
           <div className="text-center">
             <Link 
               href="/pt/como-funciona"
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 mb-6"
+              className="inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xl font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 mb-8"
             >
-              <span className="mr-3 text-lg">🚀</span>
+              <span className="mr-3 text-2xl">🚀</span>
               {t.main.cta}
             </Link>
-            <p className="text-gray-500 text-base">
+            <p className="text-gray-500 text-lg">
               Gratuito para começar • Sem compromisso • Resultados em minutos
             </p>
           </div>
