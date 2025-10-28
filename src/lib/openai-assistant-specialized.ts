@@ -34,11 +34,14 @@ export interface AssistantResponse {
 }
 
 export class YLADAAssistant {
-  private specializedAssistantId: string
+  private assistantId: string
   private threadId?: string
 
   constructor() {
-    this.specializedAssistantId = process.env.OPENAI_ASSISTANT_SPECIALIZED_ID || 'asst_Jafki3CmiatIkSiFSXxCEvo4'
+    // Usar apenas um assistente especializado - simplifica e evita conflitos
+    this.assistantId = process.env.OPENAI_ASSISTANT_SPECIALIZED_ID || 
+                       process.env.OPENAI_ASSISTANT_ID || 
+                       'asst_Jafki3CmiatIkSiFSXxCEvo4'
   }
 
   // Criar thread para nova conversa
@@ -63,8 +66,8 @@ export class YLADAAssistant {
       console.log('🤖 Usando YLADA Health Specialized para esta mensagem')
 
       // Verificar se o ID do assistente é válido
-      if (this.specializedAssistantId.includes('asst_default_') || !this.specializedAssistantId.startsWith('asst_')) {
-        console.warn(`⚠️ ID do assistente inválido: ${this.specializedAssistantId}. Usando fallback local.`)
+      if (this.assistantId.includes('asst_default_') || !this.assistantId.startsWith('asst_')) {
+        console.warn(`⚠️ ID do assistente inválido: ${this.assistantId}. Usando fallback local.`)
         throw new Error('Assistente não configurado - usando fallback local')
       }
 
@@ -80,7 +83,7 @@ export class YLADAAssistant {
 
       // Executar assistant especializada
       const run = await openai.beta.threads.runs.create(this.threadId!, {
-        assistant_id: this.specializedAssistantId
+        assistant_id: this.assistantId
       })
 
       // Aguardar resposta

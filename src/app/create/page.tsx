@@ -4,7 +4,7 @@ import { useState } from 'react'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import ChatInterface from '@/components/ChatInterface'
-import { UserProfile } from '@/lib/openai-assistant'
+import { UserProfile } from '@/lib/openai-assistant-specialized'
 import Link from 'next/link'
 
 export default function CreatePage() {
