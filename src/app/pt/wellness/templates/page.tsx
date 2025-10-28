@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Calculator, Target, Heart, Droplets, Activity, Sparkles, FileText, Brain } from 'lucide-react'
+import { Calculator, Target, Heart, Droplets, Activity, Sparkles, FileText, Brain, DollarSign, TrendingUp, Star, Zap, UtensilsCrossed, Search } from 'lucide-react'
 
 interface Template {
   id: string
@@ -87,6 +87,66 @@ export default function WellnessTemplatesPage() {
       category: 'Nutrição',
       link: '/pt/wellness/templates/healthy-eating',
       color: 'bg-emerald-500'
+    },
+    {
+      id: 'ganhos',
+      name: 'Quiz: Ganhos e Prosperidade',
+      description: 'Avalie se o estilo de vida permite ganhar mais',
+      icon: DollarSign,
+      type: 'quiz',
+      category: 'Negócio',
+      link: '/pt/wellness/templates/ganhos',
+      color: 'bg-blue-600'
+    },
+    {
+      id: 'potencial',
+      name: 'Quiz: Potencial e Crescimento',
+      description: 'Descubra se o potencial está sendo bem aproveitado',
+      icon: TrendingUp,
+      type: 'quiz',
+      category: 'Desenvolvimento',
+      link: '/pt/wellness/templates/potencial',
+      color: 'bg-green-600'
+    },
+    {
+      id: 'proposito',
+      name: 'Quiz: Propósito e Equilíbrio',
+      description: 'Descubra se o dia a dia está alinhado com seus sonhos',
+      icon: Star,
+      type: 'quiz',
+      category: 'Desenvolvimento',
+      link: '/pt/wellness/templates/proposito',
+      color: 'bg-purple-600'
+    },
+    {
+      id: 'parasitas',
+      name: 'Quiz: Diagnóstico de Parasitas',
+      description: 'Descubra se você tem parasitas que estão afetando sua saúde',
+      icon: Zap,
+      type: 'quiz',
+      category: 'Saúde',
+      link: '/pt/wellness/templates/parasitas',
+      color: 'bg-red-500'
+    },
+    {
+      id: 'meal-planner',
+      name: 'Planejador de Refeições',
+      description: 'Crie planos alimentares personalizados',
+      icon: UtensilsCrossed,
+      type: 'calculadora',
+      category: 'Nutrição',
+      link: '/pt/wellness/templates/meal-planner',
+      color: 'bg-pink-500'
+    },
+    {
+      id: 'nutrition-assessment',
+      name: 'Avaliação Nutricional',
+      description: 'Questionário completo de hábitos alimentares',
+      icon: Search,
+      type: 'quiz',
+      category: 'Nutrição',
+      link: '/pt/wellness/templates/nutrition-assessment',
+      color: 'bg-indigo-500'
     }
   ])
 
