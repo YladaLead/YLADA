@@ -1,13 +1,11 @@
 -- =====================================================
--- YLADA: INSERIR TODOS OS 13 TEMPLATES
+-- YLADA: INSERIR TODOS OS 13 TEMPLATES (CORRIGIDO)
 -- Execute este arquivo no Supabase SQL Editor
 -- =====================================================
 
 -- =====================================================
--- PARTE 1: CALCULADORAS (4)
--- =====================================================
-
 -- 1. Calculadora IMC
+-- =====================================================
 INSERT INTO templates_nutrition (
   name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
@@ -24,15 +22,16 @@ INSERT INTO templates_nutrition (
   'Olá! Calculei meu IMC através do YLADA e gostaria de saber mais sobre como alcançar meu objetivo. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
+-- =====================================================
 -- 2. Calculadora de Proteína
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Calculadora de Proteína',
   'calculadora',
   'pt',
-  'multi',
   'avaliacao',
   'capturar-leads',
   'Calcule suas necessidades proteicas diárias',
@@ -42,15 +41,16 @@ INSERT INTO templates_nutrition (
   'Olá! Calculei minhas necessidades proteicas diárias através do YLADA. Gostaria de saber mais. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
+-- =====================================================
 -- 3. Calculadora de Hidratação
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Calculadora de Hidratação',
   'calculadora',
   'pt',
-  'multi',
   'avaliacao',
   'capturar-leads',
   'Calcule sua necessidade diária de água',
@@ -60,15 +60,16 @@ INSERT INTO templates_nutrition (
   'Olá! Calculei minha necessidade diária de hidratação através do YLADA. Gostaria de saber mais sobre estratégias de hidratação. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
+-- =====================================================
 -- 4. Composição Corporal
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Composição Corporal',
   'calculadora',
   'pt',
-  'multi',
   'avaliacao',
   'capturar-leads',
   'Avalie sua composição corporal',
@@ -79,18 +80,15 @@ INSERT INTO templates_nutrition (
 ) ON CONFLICT DO NOTHING;
 
 -- =====================================================
--- PARTE 2: QUIZZES DE NEGÓCIO (4)
+-- 5. Quiz: Ganhos e Prosperidade
 -- =====================================================
-
--- 5. Quiz Ganhos e Prosperidade
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Quiz: Ganhos e Prosperidade',
   'quiz',
   'pt',
-  'multi',
   'negocio',
   'capturar-leads',
   'Avalie se seu estilo de vida permite ganhar mais',
@@ -100,15 +98,16 @@ INSERT INTO templates_nutrition (
   'Olá! Completei o Quiz de Ganhos e Prosperidade através do YLADA e gostaria de saber mais sobre como otimizar minha renda. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
--- 6. Quiz Potencial e Crescimento
+-- =====================================================
+-- 6. Quiz: Potencial e Crescimento
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Quiz: Potencial e Crescimento',
   'quiz',
   'pt',
-  'multi',
   'desenvolvimento',
   'capturar-leads',
   'Descubra se seu potencial está sendo bem aproveitado',
@@ -118,15 +117,16 @@ INSERT INTO templates_nutrition (
   'Olá! Completei o Quiz de Potencial e Crescimento através do YLADA e gostaria de conversar sobre estratégias de desenvolvimento. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
--- 7. Quiz Propósito e Equilíbrio
+-- =====================================================
+-- 7. Quiz: Propósito e Equilíbrio
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Quiz: Propósito e Equilíbrio',
   'quiz',
   'pt',
-  'multi',
   'desenvolvimento',
   'capturar-leads',
   'Descubra se seu dia a dia está alinhado com seus sonhos',
@@ -136,15 +136,16 @@ INSERT INTO templates_nutrition (
   'Olá! Completei o Quiz de Propósito e Equilíbrio através do YLADA e gostaria de conversar sobre alinhamento de vida. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
--- 8. Quiz Diagnóstico de Parasitas
+-- =====================================================
+-- 8. Quiz: Diagnóstico de Parasitas
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Quiz: Diagnóstico de Parasitas',
   'quiz',
   'pt',
-  'multi',
   'saude',
   'capturar-leads',
   'Descubra se você tem parasitas que estão afetando sua saúde',
@@ -155,18 +156,15 @@ INSERT INTO templates_nutrition (
 ) ON CONFLICT DO NOTHING;
 
 -- =====================================================
--- PARTE 3: TEMPLATES AVANÇADOS (5)
--- =====================================================
-
 -- 9. Quiz: Alimentação Saudável
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Quiz: Alimentação Saudável',
   'quiz',
   'pt',
-  'multi',
   'nutricao',
   'capturar-leads',
   'Avalie seus hábitos alimentares e receba orientações',
@@ -176,15 +174,16 @@ INSERT INTO templates_nutrition (
   'Olá! Completei o Quiz de Alimentação Saudável através do YLADA e gostaria de saber mais sobre melhorar meus hábitos. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
+-- =====================================================
 -- 10. Tabela: Bem-Estar Diário
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Tabela: Bem-Estar Diário',
   'planilha',
   'pt',
-  'multi',
   'acompanhamento',
   'capturar-leads',
   'Acompanhe suas métricas de bem-estar diárias',
@@ -194,15 +193,16 @@ INSERT INTO templates_nutrition (
   'Olá! Acompanho meu bem-estar diário através do YLADA e gostaria de saber mais sobre otimização. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
+-- =====================================================
 -- 11. Planejador de Refeições
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Planejador de Refeições',
   'calculadora',
   'pt',
-  'multi',
   'nutricao',
   'vender-suplementos',
   'Crie seu plano alimentar personalizado',
@@ -212,15 +212,16 @@ INSERT INTO templates_nutrition (
   'Olá! Solicitei meu plano alimentar personalizado através do YLADA e gostaria de saber mais sobre implementação. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
+-- =====================================================
 -- 12. Avaliação Nutricional
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Avaliação Nutricional Completa',
   'quiz',
   'pt',
-  'multi',
   'nutricao',
   'capturar-leads',
   'Questionário completo de hábitos alimentares',
@@ -230,15 +231,16 @@ INSERT INTO templates_nutrition (
   'Olá! Completei minha Avaliação Nutricional através do YLADA e gostaria de saber mais sobre os resultados. Pode me ajudar?'
 ) ON CONFLICT DO NOTHING;
 
+-- =====================================================
 -- 13. Quiz: Perfil de Bem-Estar
+-- =====================================================
 INSERT INTO templates_nutrition (
-  name, type, language, profession, specialization, objective,
+  name, type, language, specialization, objective,
   title, description, content, cta_text, whatsapp_message, is_active
 ) VALUES (
   'Quiz: Perfil de Bem-Estar',
   'quiz',
   'pt',
-  'multi',
   'bem-estar',
   'capturar-leads',
   'Descubra seu perfil completo de bem-estar',
@@ -252,10 +254,8 @@ INSERT INTO templates_nutrition (
 -- VERIFICAÇÃO FINAL
 -- =====================================================
 SELECT 
-    'Templates inseridos com sucesso!' as info,
-    COUNT(*) as total,
-    'Tipo:' as label,
-    type
+    '✅ Templates inseridos:' as info,
+    COUNT(*) as total
 FROM templates_nutrition
 WHERE name IN (
   'Calculadora IMC',
@@ -271,6 +271,5 @@ WHERE name IN (
   'Planejador de Refeições',
   'Avaliação Nutricional Completa',
   'Quiz: Perfil de Bem-Estar'
-)
-GROUP BY type;
+);
 
