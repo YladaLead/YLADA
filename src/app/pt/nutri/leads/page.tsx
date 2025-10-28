@@ -1,15 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
 
 export default function NutriLeads() {
   const [filtroStatus, setFiltroStatus] = useState('todos')
   const [filtroFerramenta, setFiltroFerramenta] = useState('todas')
   const [busca, setBusca] = useState('')
+  const [leadsDb, setLeadsDb] = useState<any[] | null>(null)
 
-  const leads = [
+  const leads = leadsDb ?? [
     {
       id: 1,
       nome: 'Maria Silva',
@@ -86,6 +88,55 @@ export default function NutriLeads() {
       score: 88
     }
   ]
+
+  // Carregar leads reais do Supabase (fallback para mock)
+  useEffect(() => {
+    const carregarLeads = async () => {
+      try {
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          return
+        }
+
+        // TODO: substituir pelo ID do usuário autenticado
+        const userId = '550e8400-e29b-41d4-a716-446655440000'
+
+        const { data, error } = await supabase
+          .from('leads')
+          .select('id, name, email, phone, created_at, additional_data, template_id')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.warn('Supabase indisponível em leads:', error.message)
+          return
+        }
+
+        if (!data) return
+
+        const leadsMapeados = data.map((l) => ({
+          id: l.id,
+          nome: l.name,
+          email: l.email,
+          telefone: l.phone,
+          idade: l.additional_data?.idade || null,
+          cidade: l.additional_data?.cidade || '-',
+          ferramenta: l.additional_data?.ferramenta || 'Ferramenta',
+          resultado: l.additional_data?.resultado || '-',
+          status: 'novo',
+          data: new Date(l.created_at).toISOString().slice(0, 10),
+          ultimoContato: null,
+          observacoes: l.additional_data?.observacoes || '',
+          score: l.additional_data?.score || 0,
+        }))
+
+        setLeadsDb(leadsMapeados)
+      } catch (e) {
+        console.warn('Falha ao carregar leads do Supabase, usando mock.', e)
+      }
+    }
+
+    carregarLeads()
+  }, [])
 
   const status = ['todos', 'novo', 'contatado', 'convertido', 'perdido']
   const ferramentas = ['todas', 'Quiz Interativo', 'Calculadora de IMC', 'Post de Curiosidades', 'Template Post Dica']

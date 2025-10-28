@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
 
 interface Ferramenta {
   id: string
@@ -78,6 +79,57 @@ export default function FerramentasNutri() {
     totalLeads: 0,
     taxaConversaoMedia: 0
   })
+
+  // Carregar ferramentas reais do Supabase (fallback para mock acima)
+  useEffect(() => {
+    const carregarFerramentas = async () => {
+      try {
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          return
+        }
+
+        // TODO: substituir pelo ID do usuário autenticado
+        const userId = '550e8400-e29b-41d4-a716-446655440000'
+
+        // Buscar ferramentas do usuário a partir de user_templates
+        const { data, error } = await supabase
+          .from('user_templates')
+          .select('id, slug, title, description, views, leads_count, status, created_at, content')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.warn('Supabase indisponível em ferramentas:', error.message)
+          return
+        }
+
+        if (!data || data.length === 0) {
+          return
+        }
+
+        const mapeadas: Ferramenta[] = data.map((t) => ({
+          id: t.id,
+          nome: t.title,
+          categoria: 'Personalizada',
+          objetivo: t.description || 'Ferramenta personalizada',
+          url: `/link/${t.slug}`,
+          status: (t.status as 'ativa' | 'inativa') || 'ativa',
+          leads: t.leads_count ?? 0,
+          visualizacoes: t.views ?? 0,
+          conversao: t.views ? Number(((t.leads_count || 0) / t.views) * 100) : 0,
+          ultimaAtividade: new Date(t.created_at).toISOString().slice(0, 10),
+          cores: { primaria: '#3B82F6', secundaria: '#1E40AF' },
+          criadaEm: new Date(t.created_at).toISOString().slice(0, 10),
+        }))
+
+        setFerramentas(mapeadas)
+      } catch (e) {
+        console.warn('Falha ao carregar ferramentas do Supabase, usando mock.', e)
+      }
+    }
+
+    carregarFerramentas()
+  }, [])
 
   const categorias = [...new Set(ferramentas.map(f => f.categoria))]
 
