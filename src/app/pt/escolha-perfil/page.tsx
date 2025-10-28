@@ -44,7 +44,7 @@ export default function EscolhaPerfilPage() {
           </p>
 
           {/* Cards de Perfil */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-16">
             
             {/* Nutricionista */}
             <Link 
@@ -85,7 +85,7 @@ export default function EscolhaPerfilPage() {
             {/* Coach de Bem-estar */}
             <Link 
               href="/pt/coach"
-              className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-purple-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 sm:col-span-2 lg:col-span-1"
+              className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-purple-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
@@ -96,6 +96,24 @@ export default function EscolhaPerfilPage() {
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {t.profile.coach.description}
+                </p>
+              </div>
+            </Link>
+
+            {/* Consultor de Bem-Estar (Wellness) */}
+            <Link 
+              href="/pt/wellness"
+              className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-teal-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-teal-200 transition-colors">
+                  <span className="text-3xl">💚</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Consultor de Bem-Estar
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Transforme vidas com ferramentas profissionais de avaliação, engajamento e coaching em bem-estar.
                 </p>
               </div>
             </Link>

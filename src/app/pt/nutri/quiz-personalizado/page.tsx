@@ -90,10 +90,6 @@ export default function QuizPersonalizadoPage() {
           <p className="text-gray-600 mb-6">
             {quiz.descricao || 'Descrição do quiz...'}
           </p>
-          <div className="text-sm text-gray-500 mb-6">
-            <p>⏱️ Tempo estimado: {quiz.perguntas.length * 2} minutos</p>
-            <p>📝 {quiz.perguntas.length} perguntas</p>
-          </div>
           <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700">
             Começar Quiz
           </button>
@@ -546,50 +542,41 @@ export default function QuizPersonalizadoPage() {
                     </p>
                   </div>
 
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-200">
-                    <h4 className="font-medium text-blue-900 mb-4 flex items-center">
-                      <span className="text-xl mr-2">🎯</span>
-                      Filosofia YLADA
-                    </h4>
+                </div>
+
+                {/* Filosofia YLADA - Colocada antes do botão */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200 mb-6">
+                  <h4 className="font-medium text-blue-900 mb-3 flex items-center text-sm">
+                    <span className="text-lg mr-2">🎯</span>
+                    Filosofia YLADA
+                  </h4>
+                  
+                  <div className="space-y-3 text-sm text-blue-800">
+                    <div className="bg-white p-2 rounded-lg border border-blue-100">
+                      <p className="text-xs">
+                        Seu quiz deve <strong>educar</strong> e <strong>servir</strong> antes de vender. 
+                        Quanto mais valor você oferecer, mais engajamento e leads qualificados você terá.
+                      </p>
+                    </div>
                     
-                    <div className="space-y-4 text-sm text-blue-800">
-                      <div className="bg-white p-3 rounded-lg border border-blue-100">
-                        <h5 className="font-semibold text-blue-900 mb-2">💡 Princípio Fundamental</h5>
-                        <p>
-                          Seu quiz deve <strong>educar</strong> e <strong>servir</strong> antes de vender. 
-                          Quanto mais valor você oferecer, mais engajamento e leads qualificados você terá.
-                        </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                        <p className="font-semibold text-blue-900 text-xs">📚 Educar</p>
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="bg-white p-3 rounded-lg border border-blue-100">
-                          <h6 className="font-semibold text-blue-900 mb-1">📚 Educar</h6>
-                          <p className="text-xs">Forneça conhecimento real e útil</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg border border-blue-100">
-                          <h6 className="font-semibold text-blue-900 mb-1">🤝 Servir</h6>
-                          <p className="text-xs">Resolva problemas do cliente</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg border border-blue-100">
-                          <h6 className="font-semibold text-blue-900 mb-1">🎯 Engajar</h6>
-                          <p className="text-xs">Crie conexão emocional</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg border border-blue-100">
-                          <h6 className="font-semibold text-blue-900 mb-1">💼 Converter</h6>
-                          <p className="text-xs">Transforme em leads qualificados</p>
-                        </div>
+                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                        <p className="font-semibold text-blue-900 text-xs">🤝 Servir</p>
                       </div>
-                      
-                      <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                        <p className="text-xs text-yellow-800">
-                          <strong>💡 Dica:</strong> Perguntas que educam geram mais confiança e autoridade profissional.
-                        </p>
+                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                        <p className="font-semibold text-blue-900 text-xs">🎯 Engajar</p>
+                      </div>
+                      <div className="bg-white p-2 rounded-lg border border-blue-100">
+                        <p className="font-semibold text-blue-900 text-xs">💼 Converter</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-8 flex justify-end">
+                <div className="flex justify-end">
                   <button
                     onClick={() => setEtapaAtual(2)}
                     disabled={!quiz.titulo.trim()}
