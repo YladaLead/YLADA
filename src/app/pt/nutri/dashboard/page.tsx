@@ -130,16 +130,10 @@ export default function NutriDashboard() {
                 Suporte
               </Link>
               <Link 
-                href="/pt/nutri/quiz-personalizado"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
-              >
-                🎯 Criar Quiz Personalizado
-              </Link>
-              <Link 
                 href="/pt/nutri/ferramentas/nova"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Nova Ferramenta
+                + Nova Ferramenta
               </Link>
             </div>
           </div>
@@ -151,68 +145,60 @@ export default function NutriDashboard() {
         <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-6">Ações Rápidas</h2>
           
-          {/* Quiz Personalizado - Destaque */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl">🎯</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-purple-900">Quiz Personalizado</h3>
-                  <p className="text-sm text-purple-700">Crie quizzes únicos com perguntas dissertativas e alternativas</p>
-                </div>
-              </div>
-              <Link 
-                href="/pt/nutri/quiz-personalizado"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg font-medium"
-              >
-                Criar Agora
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Cards em Grid Responsivo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link 
               href="/pt/nutri/ferramentas/templates"
-              className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              className="flex flex-col items-center justify-center p-4 sm:p-6 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
-              <span className="text-2xl mr-3">🎨</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Templates Prontos</h3>
-                <p className="text-sm text-gray-600">Usar templates testados e otimizados</p>
-              </div>
+              <span className="text-3xl sm:text-4xl mb-3">🎨</span>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Templates</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Prontos para usar</p>
             </Link>
             
             <Link 
               href="/pt/nutri/ferramentas"
-              className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+              className="flex flex-col items-center justify-center p-4 sm:p-6 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
-              <span className="text-2xl mr-3">🛠️</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Minhas Ferramentas</h3>
-                <p className="text-sm text-gray-600">Gerenciar ferramentas ativas</p>
-              </div>
+              <span className="text-3xl sm:text-4xl mb-3">🛠️</span>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Ferramentas</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Minhas ativas</p>
             </Link>
-            
+
+            <Link 
+              href="/pt/nutri/quiz-personalizado"
+              className="flex flex-col items-center justify-center p-4 sm:p-6 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+            >
+              <span className="text-3xl sm:text-4xl mb-3">🎯</span>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Quiz</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Personalizado</p>
+            </Link>
+
+            <Link 
+              href="/pt/nutri/cursos"
+              className="flex flex-col items-center justify-center p-4 sm:p-6 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+            >
+              <span className="text-3xl sm:text-4xl mb-3">📚</span>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Cursos</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Educação</p>
+            </Link>
+
             <Link 
               href="/pt/nutri/leads"
-              className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+              className="flex flex-col items-center justify-center p-4 sm:p-6 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors"
             >
-              <span className="text-2xl mr-3">👥</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Meus Leads</h3>
-                <p className="text-sm text-gray-600">Ver leads capturados</p>
-              </div>
+              <span className="text-3xl sm:text-4xl mb-3">👥</span>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Leads</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Capturados</p>
             </Link>
             
             <Link 
               href="/pt/nutri/relatorios"
-              className="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+              className="flex flex-col items-center justify-center p-4 sm:p-6 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
             >
-              <span className="text-2xl mr-3">📊</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Relatórios</h3>
-                <p className="text-sm text-gray-600">Ver analytics detalhados</p>
-              </div>
+              <span className="text-3xl sm:text-4xl mb-3">📊</span>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Relatórios</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Analytics</p>
             </Link>
             
           </div>

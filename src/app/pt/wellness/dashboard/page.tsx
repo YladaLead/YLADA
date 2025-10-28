@@ -98,48 +98,38 @@ export default function WellnessDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-4 sm:space-y-0">
+            {/* Logo e Info do Usuário */}
+            <div className="flex items-center space-x-4 w-full sm:w-auto">
               <Image
                 src="/logos/ylada-logo-horizontal-vazado.png"
                 alt="YLADA"
-                width={180}
-                height={60}
-                className="h-12 w-auto"
+                width={200}
+                height={70}
+                className="h-14 sm:h-16 w-auto"
               />
-              <div className="h-12 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+              <div className="h-14 sm:h-16 w-px bg-gray-300"></div>
+              <div className="flex-1 sm:flex-none">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                   Dashboard WELLNESS
                 </h1>
-                <div className="flex items-center space-x-4 mt-1">
-                  <p className="text-lg font-medium text-gray-700">{usuarioWellness.nome}</p>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mt-1">
+                  <p className="text-sm sm:text-base font-medium text-gray-700">{usuarioWellness.nome}</p>
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-teal-100 text-teal-800 mt-1 sm:mt-0 w-fit">
                     {usuarioWellness.certificacao}
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            {/* Botão de Suporte */}
+            <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
               <Link 
                 href="/pt/wellness/suporte"
-                className="text-gray-600 hover:text-gray-900 text-sm"
+                className="text-gray-600 hover:text-gray-900 text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Suporte
-              </Link>
-              <Link 
-                href="/pt/wellness/quiz-personalizado"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
-              >
-                🎯 Criar Quiz Personalizado
-              </Link>
-              <Link 
-                href="/pt/wellness/ferramentas/nova"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Nova Ferramenta
+                💬 Suporte
               </Link>
             </div>
           </div>
@@ -147,262 +137,141 @@ export default function WellnessDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Ações Rápidas - Movido para cima */}
-        <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Ações Rápidas</h2>
-          
-          {/* Quiz Personalizado - Destaque */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl">🎯</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-purple-900">Quiz Personalizado</h3>
-                  <p className="text-sm text-purple-700">Crie quizzes únicos com perguntas dissertativas e alternativas</p>
-                </div>
-              </div>
-              <Link 
-                href="/pt/wellness/quiz-personalizado"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg font-medium"
-              >
-                Criar Agora
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Ações Rápidas - Otimizado Mobile First */}
+        <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
+          {/* Cards de Acesso Rápido - Grid Responsivo */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Link 
-              href="/pt/wellness/ferramentas/templates"
-              className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              href="/pt/wellness/templates"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
-              <span className="text-2xl mr-3">🎨</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Templates Prontos</h3>
-                <p className="text-sm text-gray-600">Usar templates testados e otimizados</p>
-              </div>
+              <span className="text-2xl sm:text-3xl mb-2">🎨</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Templates</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Prontos para usar</p>
             </Link>
             
             <Link 
               href="/pt/wellness/ferramentas"
-              className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
-              <span className="text-2xl mr-3">🛠️</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Minhas Ferramentas</h3>
-                <p className="text-sm text-gray-600">Gerenciar ferramentas ativas</p>
-              </div>
+              <span className="text-2xl sm:text-3xl mb-2">🛠️</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Ferramentas</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Minhas ativas</p>
+            </Link>
+
+            <Link 
+              href="/pt/wellness/quiz-personalizado"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+            >
+              <span className="text-2xl sm:text-3xl mb-2">🎯</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Quiz</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Personalizado</p>
             </Link>
             
             <Link 
-              href="/pt/wellness/leads"
-              className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+              href="/pt/wellness/cursos"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
             >
-              <span className="text-2xl mr-3">👥</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Meus Leads</h3>
-                <p className="text-sm text-gray-600">Ver leads capturados</p>
-              </div>
+              <span className="text-2xl sm:text-3xl mb-2">📚</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Cursos</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Educação</p>
             </Link>
-            
+          </div>
+        </div>
+
+        {/* Ferramentas Ativas - Expandido */}
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Ferramentas Ativas</h2>
             <Link 
-              href="/pt/wellness/relatorios"
-              className="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+              href="/pt/wellness/ferramentas" 
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm sm:text-base"
             >
-              <span className="text-2xl mr-3">📊</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Relatórios</h3>
-                <p className="text-sm text-gray-600">Ver analytics detalhados</p>
-              </div>
+              Ver todas →
             </Link>
-            
           </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Ferramentas Ativas</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.ferramentasAtivas}</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🛠️</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">+2 esta semana</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Leads Gerados</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.leadsGerados}</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">📈</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">+15% vs mês anterior</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Conversões</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.conversoes}</p>
-              </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🎯</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">26% taxa de conversão</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Clientes Ativos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.clientesAtivos}</p>
-              </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">👥</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">+3 novos clientes</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Ferramentas Ativas */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Ferramentas Ativas</h2>
-              <Link 
-                href="/pt/wellness/ferramentas" 
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Ver todas
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {ferramentasAtivas.map((ferramenta) => (
-                <div key={ferramenta.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{ferramenta.icon}</span>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{ferramenta.nome}</h3>
-                      <p className="text-sm text-gray-600">{ferramenta.categoria}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{ferramenta.leads} leads</p>
-                    <p className="text-xs text-gray-600">{ferramenta.conversoes} conversões</p>
+          <div className="space-y-3 sm:space-y-4">
+            {ferramentasAtivas.map((ferramenta) => (
+              <div key={ferramenta.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <span className="text-xl sm:text-2xl flex-shrink-0">{ferramenta.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{ferramenta.nome}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">{ferramenta.categoria}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Leads Recentes */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Leads Recentes</h2>
-              <Link 
-                href="/pt/wellness/leads" 
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Ver todos
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {leadsRecentes.map((lead) => (
-                <div key={lead.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{lead.nome}</h3>
-                    <p className="text-sm text-gray-600">{lead.email}</p>
-                    <p className="text-xs text-gray-500">{lead.ferramenta}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      lead.status === 'novo' ? 'bg-blue-100 text-blue-800' :
-                      lead.status === 'contatado' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {lead.status}
-                    </span>
-                    <p className="text-xs text-gray-500 mt-1">{lead.data}</p>
-                  </div>
+                <div className="text-right flex-shrink-0 ml-3">
+                  <p className="text-sm font-medium text-gray-900">{ferramenta.leads} leads</p>
+                  <p className="text-xs text-gray-600">{ferramenta.conversoes} conversões</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Como os Leads são Gerados */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <span className="text-2xl mr-3">📈</span>
-            Como os Leads são Gerados e Medidos
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Área de Cursos */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 sm:p-6 shadow-sm border-2 border-purple-200">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h3 className="font-medium text-gray-900 mb-3">🔄 Processo de Geração de Leads</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">1.</span>
-                  <p><strong>Cliente acessa sua ferramenta</strong> através do link personalizado</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">2.</span>
-                  <p><strong>Interage com a ferramenta</strong> (quiz, calculadora, conteúdo)</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">3.</span>
-                  <p><strong>Fornece dados de contato</strong> para receber o resultado</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">4.</span>
-                  <p><strong>Lead é capturado automaticamente</strong> no seu dashboard</p>
-                </div>
-              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-1 flex items-center">
+                <span className="text-2xl sm:text-3xl mr-3">📚</span>
+                Área de Cursos
+              </h2>
+              <p className="text-sm text-purple-700">Eduque seus clientes e multiplique seus resultados</p>
             </div>
-            <div>
-              <h3 className="font-medium text-gray-900 mb-3">📊 Métricas de Conversão</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <div className="flex justify-between">
-                  <span><strong>Taxa de Conversão:</strong></span>
-                  <span className="text-green-600 font-bold">26%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>Tempo Médio de Conversão:</strong></span>
-                  <span className="text-blue-600 font-bold">3-7 dias</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>Ticket Médio:</strong></span>
-                  <span className="text-purple-600 font-bold">R$ 180</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>ROI das Ferramentas:</strong></span>
-                  <span className="text-orange-600 font-bold">400%</span>
-                </div>
-              </div>
-            </div>
+            <Link 
+              href="/pt/wellness/cursos"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg font-medium text-sm sm:text-base"
+            >
+              Ver Cursos →
+            </Link>
           </div>
-          <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
-            <h4 className="font-medium text-gray-900 mb-2">💡 Dica Importante:</h4>
-            <p className="text-sm text-gray-700">
-              Cada ferramenta funciona 24/7 capturando leads qualificados. Quanto mais ferramentas você ativar, 
-              mais leads receberá. O sistema mede automaticamente todas as interações e conversões.
-            </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-4 border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all">
+              <div className="flex items-start space-x-3">
+                <div className="bg-purple-100 rounded-lg p-2 flex-shrink-0">
+                  <span className="text-2xl">🎯</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Nutrição Básica</h3>
+                  <p className="text-xs text-gray-600 mt-1">Fundamentos de alimentação saudável</p>
+                  <span className="inline-block mt-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                    Ativo
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-4 border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all">
+              <div className="flex items-start space-x-3">
+                <div className="bg-pink-100 rounded-lg p-2 flex-shrink-0">
+                  <span className="text-2xl">💪</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Bem-Estar Integral</h3>
+                  <p className="text-xs text-gray-600 mt-1">Mindset e hábitos saudáveis</p>
+                  <span className="inline-block mt-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                    Ativo
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-4 border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all">
+              <div className="flex items-start space-x-3">
+                <div className="bg-teal-100 rounded-lg p-2 flex-shrink-0">
+                  <span className="text-2xl">🌟</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Transformação Total</h3>
+                  <p className="text-xs text-gray-600 mt-1">Mudança de vida completa</p>
+                  <span className="inline-block mt-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    Em breve
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
