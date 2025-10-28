@@ -64,6 +64,12 @@ ALTER TABLE quiz_perguntas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quiz_respostas ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de segurança
+DROP POLICY IF EXISTS "Users can view own quizzes" ON quizzes;
+DROP POLICY IF EXISTS "Users can insert own quizzes" ON quizzes;
+DROP POLICY IF EXISTS "Users can update own quizzes" ON quizzes;
+DROP POLICY IF EXISTS "Users can delete own quizzes" ON quizzes;
+DROP POLICY IF EXISTS "Anyone can view active quizzes" ON quizzes;
+
 CREATE POLICY "Users can view own quizzes" ON quizzes FOR SELECT 
   USING (auth.uid() = user_id);
   
@@ -80,12 +86,17 @@ CREATE POLICY "Users can delete own quizzes" ON quizzes FOR DELETE
 CREATE POLICY "Anyone can view active quizzes" ON quizzes FOR SELECT 
   USING (status = 'active');
 
+DROP POLICY IF EXISTS "Users can manage own quiz_perguntas" ON quiz_perguntas;
+
 CREATE POLICY "Users can manage own quiz_perguntas" ON quiz_perguntas FOR ALL 
   USING (
     quiz_id IN (SELECT id FROM quizzes WHERE user_id = auth.uid())
   );
 
 -- Qualquer um pode ver e inserir respostas (leads)
+DROP POLICY IF EXISTS "Anyone can insert quiz_respostas" ON quiz_respostas;
+DROP POLICY IF EXISTS "Users can view own quiz responses" ON quiz_respostas;
+
 CREATE POLICY "Anyone can insert quiz_respostas" ON quiz_respostas FOR INSERT 
   WITH CHECK (true);
   

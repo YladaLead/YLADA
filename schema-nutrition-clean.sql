@@ -63,7 +63,10 @@ AND table_name NOT LIKE 'auth.%'  -- Ignorar tabelas de autenticação
 ORDER BY table_name;
 
 -- Se retornar apenas tabelas do sistema (como auth.users), está limpo!
-================
+
+-- =====================================================
+-- 2. CRIAR ESTRUTURA SIMPLES E FOCADA
+-- =====================================================
 
 -- Tabela principal de usuários
 CREATE TABLE users (
