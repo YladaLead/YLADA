@@ -50,17 +50,17 @@ export default function HomePage() {
             </Link>
             
             {/* Credibilidade Universal */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-base text-gray-500 mt-6">
               <div className="flex items-center">
-                <span className="text-blue-500 mr-2">✅</span>
+                <span className="text-3xl mr-3">✅</span>
                 <span className="text-gray-700 font-medium">{t.main.credibility.professionals}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-blue-500 mr-2">🌍</span>
+                <span className="text-3xl mr-3">🌍</span>
                 <span className="text-gray-700 font-medium">{t.main.credibility.global}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-blue-500 mr-2">⚡</span>
+                <span className="text-3xl mr-3">⚡</span>
                 <span className="text-gray-700 font-medium">{t.main.credibility.quickStart}</span>
               </div>
             </div>
@@ -68,34 +68,34 @@ export default function HomePage() {
 
           {/* Benefícios - 3 Pilares da Filosofia YLADA */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl text-blue-600">⚡</span>
+            <div className="bg-white rounded-xl p-6 sm:p-8 lg:p-10 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-5">
+                <span className="text-3xl sm:text-4xl text-blue-600">⚡</span>
               </div>
-              <h3 className="text-lg font-bold mb-3 text-gray-900 text-center">Simplicidade</h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center">
+              <h3 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 text-center">Simplicidade</h3>
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed text-center px-2">
                 <span className="text-blue-600 font-semibold">Um link, infinitas possibilidades</span>. 
                 Transforme qualquer ideia em uma ferramenta inteligente em segundos.
               </p>
             </div>
             
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl text-blue-600">🎯</span>
+            <div className="bg-white rounded-xl p-6 sm:p-8 lg:p-10 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-5">
+                <span className="text-3xl sm:text-4xl text-blue-600">🎯</span>
               </div>
-              <h3 className="text-lg font-bold mb-3 text-gray-900 text-center">Inteligência</h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center">
+              <h3 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 text-center">Inteligência</h3>
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed text-center px-2">
                 <span className="text-blue-600 font-semibold">IA que entende seu público</span>. 
                 Cada ferramenta é otimizada para converter visitantes em conexões reais.
               </p>
             </div>
             
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 sm:col-span-2 lg:col-span-1">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl text-blue-600">🌍</span>
+            <div className="bg-white rounded-xl p-6 sm:p-8 lg:p-10 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 sm:col-span-2 lg:col-span-1">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-5">
+                <span className="text-3xl sm:text-4xl text-blue-600">🌍</span>
               </div>
-              <h3 className="text-lg font-bold mb-3 text-gray-900 text-center">Escalabilidade</h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center">
+              <h3 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 text-center">Escalabilidade</h3>
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed text-center px-2">
                 <span className="text-blue-600 font-semibold">Cresça sem limites</span>. 
                 Da primeira conexão ao milhão de usuários, o YLADA escala com você.
               </p>
