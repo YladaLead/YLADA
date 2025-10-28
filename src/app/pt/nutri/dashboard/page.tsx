@@ -105,18 +105,18 @@ export default function NutriDashboard() {
               <Image
                 src="/logos/ylada-logo-horizontal-vazado.png"
                 alt="YLADA"
-                width={180}
-                height={60}
-                className="h-12 w-auto"
+                width={220}
+                height={70}
+                className="h-14 sm:h-16 w-auto"
               />
-              <div className="h-12 w-px bg-gray-300"></div>
+              <div className="h-14 sm:h-16 w-px bg-gray-300"></div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   Dashboard NUTRI
                 </h1>
-                <div className="flex items-center space-x-4 mt-1">
-                  <p className="text-lg font-medium text-gray-700">{usuarioNutri.nome}</p>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                <div className="flex items-center space-x-4 mt-2">
+                  <p className="text-base sm:text-lg font-medium text-gray-700">{usuarioNutri.nome}</p>
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
                     {usuarioNutri.crn}
                   </span>
                 </div>
