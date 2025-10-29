@@ -133,7 +133,7 @@ export default function NutriDashboard() {
                 href="/pt/nutri/ferramentas/nova"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                + Nova Ferramenta
+                + Criar Link
               </Link>
             </div>
           </div>
@@ -152,17 +152,17 @@ export default function NutriDashboard() {
               className="flex flex-col items-center justify-center p-4 sm:p-6 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <span className="text-3xl sm:text-4xl mb-3">🎨</span>
-              <h3 className="font-medium text-gray-900 text-center mb-1">Templates</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block">Prontos para usar</p>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Ver Templates</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Explorar modelos</p>
             </Link>
             
             <Link 
               href="/pt/nutri/ferramentas"
               className="flex flex-col items-center justify-center p-4 sm:p-6 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
-              <span className="text-3xl sm:text-4xl mb-3">🛠️</span>
-              <h3 className="font-medium text-gray-900 text-center mb-1">Ferramentas</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block">Minhas ativas</p>
+              <span className="text-3xl sm:text-4xl mb-3">🔗</span>
+              <h3 className="font-medium text-gray-900 text-center mb-1">Meus Links</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block">Links criados</p>
             </Link>
 
             <Link 
@@ -209,11 +209,11 @@ export default function NutriDashboard() {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Ferramentas Ativas</p>
+                <p className="text-sm font-medium text-gray-600">Links Ativos</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.ferramentasAtivas}</p>
               </div>
               <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🛠️</span>
+                <span className="text-2xl">🔗</span>
               </div>
             </div>
             <div className="mt-4">
@@ -268,15 +268,15 @@ export default function NutriDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Ferramentas Ativas */}
+          {/* Links Ativos */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Ferramentas Ativas</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Links Ativos</h2>
               <Link 
                 href="/pt/nutri/ferramentas" 
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Ver todas
+                Ver todos
               </Link>
             </div>
             <div className="space-y-4">
@@ -345,11 +345,11 @@ export default function NutriDashboard() {
               <div className="space-y-3 text-sm text-gray-700">
                 <div className="flex items-start space-x-2">
                   <span className="text-blue-600 font-bold">1.</span>
-                  <p><strong>Cliente acessa sua ferramenta</strong> através do link personalizado</p>
+                  <p><strong>Cliente acessa seu link</strong> através do link personalizado</p>
                 </div>
                 <div className="flex items-start space-x-2">
                   <span className="text-blue-600 font-bold">2.</span>
-                  <p><strong>Interage com a ferramenta</strong> (quiz, calculadora, conteúdo)</p>
+                  <p><strong>Interage com o template</strong> (quiz, calculadora, conteúdo)</p>
                 </div>
                 <div className="flex items-start space-x-2">
                   <span className="text-blue-600 font-bold">3.</span>
@@ -377,7 +377,7 @@ export default function NutriDashboard() {
                   <span className="text-purple-600 font-bold">R$ 180</span>
                 </div>
                 <div className="flex justify-between">
-                  <span><strong>ROI das Ferramentas:</strong></span>
+                  <span><strong>ROI dos Links:</strong></span>
                   <span className="text-orange-600 font-bold">400%</span>
                 </div>
               </div>
@@ -386,7 +386,7 @@ export default function NutriDashboard() {
           <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
             <h4 className="font-medium text-gray-900 mb-2">💡 Dica Importante:</h4>
             <p className="text-sm text-gray-700">
-              Cada ferramenta funciona 24/7 capturando leads qualificados. Quanto mais ferramentas você ativar, 
+              Cada link funciona 24/7 capturando leads qualificados. Quanto mais links você criar, 
               mais leads receberá. O sistema mede automaticamente todas as interações e conversões.
             </p>
           </div>

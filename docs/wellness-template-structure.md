@@ -137,3 +137,4 @@ case 'novo-template-slug':
 3. ⏳ Refatorar templates existentes (13)
 4. ⏳ Documentar padrões de cada tipo (Calculadora, Quiz, Planilha)
 
+

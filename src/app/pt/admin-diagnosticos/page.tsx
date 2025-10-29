@@ -187,28 +187,28 @@ const diagnosticosCompletos = {
   'quiz-interativo': {
     nutri: {
       metabolismoLento: [
-        '📋 DIAGNÓSTICO: Seu metabolismo está em modo de economia energética',
-        '🔍 CAUSA RAIZ: Falta de nutrientes essenciais e horários irregulares de refeições',
-        '⚡ AÇÃO IMEDIATA: Comece com 3 refeições principais nos mesmos horários todos os dias',
-        '📅 PLANO 7 DIAS: Reequilíbrio metabólico com proteína em todas as refeições',
-        '💊 SUPLEMENTAÇÃO: Magnésio (200mg) e B12 para energia celular',
-        '🍎 ALIMENTAÇÃO: Aumente proteína magra e gorduras boas (abacate, oleaginosas)'
+        '📋 DIAGNÓSTICO: Sinais de baixa eficiência metabólica que pedem intervenção personalizada',
+        '🔍 CAUSA RAIZ: Possíveis carências nutricionais e ritmos de refeição irregulares podem reduzir energia e disposição',
+        '⚡ AÇÃO IMEDIATA: Busque avaliação para receber um protocolo seguro e adequado ao seu perfil (evite auto-suplementação)',
+        '📅 PLANO 7 DIAS: Horários consistentes e presença de proteína em todas as refeições, com ajustes conforme resposta',
+        '💊 SUPLEMENTAÇÃO: Definida após avaliação; foco em suporte à energia celular conforme necessidade individual',
+        '🍎 ALIMENTAÇÃO: Fortaleça a base com proteínas magras e gorduras boas (ex.: abacate, oleaginosas)'
       ],
       metabolismoEquilibrado: [
         '📋 DIAGNÓSTICO: Seu metabolismo está estável com potencial de otimização',
         '🔍 CAUSA RAIZ: Boa base metabólica, mas pode melhorar absorção e eficiência',
         '⚡ AÇÃO IMEDIATA: Mantenha rotina atual e adicione micronutrientes',
         '📅 PLANO 7 DIAS: Otimização com alimentos funcionais e timing nutricional',
-        '💊 SUPLEMENTAÇÃO: Multivitamínico e ômega-3 para performance',
+        '💊 SUPLEMENTAÇÃO: Vitaminas e minerais',
         '🍎 ALIMENTAÇÃO: Varie cores no prato e inclua alimentos antioxidantes'
       ],
       metabolismoAcelerado: [
-        '📋 DIAGNÓSTICO: Seu metabolismo rápido precisa de estabilização',
-        '🔍 CAUSA RAIZ: Alta queima calórica pode causar desequilíbrios e fadiga',
-        '⚡ AÇÃO IMEDIATA: Aumente frequência de refeições (5-6x/dia)',
-        '📅 PLANO 7 DIAS: Estabilização com carboidratos complexos e proteína',
-        '💊 SUPLEMENTAÇÃO: Creatina e glutamina para recuperação muscular',
-        '🍎 ALIMENTAÇÃO: Carboidratos complexos + proteína para sustentar energia'
+        '📋 DIAGNÓSTICO: Alta queima metabólica que pede estabilização inteligente',
+        '🔍 CAUSA RAIZ: Exigência energética elevada pode gerar desequilíbrios e fadiga',
+        '⚡ AÇÃO IMEDIATA: Considere fracionar refeições (5–6x/dia) e buscar análise para um plano que segure energia de forma consistente',
+        '📅 PLANO 7 DIAS: Ajuste de carboidratos complexos com proteína distribuída ao longo do dia',
+        '💊 SUPLEMENTAÇÃO: Definida após avaliação; foco em recuperação e estabilidade conforme seu perfil',
+        '🍎 ALIMENTAÇÃO: Priorize carboidratos complexos combinados a proteína para sustentar vitalidade'
       ]
     },
     sales: {
@@ -269,28 +269,28 @@ const diagnosticosCompletos = {
   'quiz-bem-estar': {
     nutri: {
       bemEstarBaixo: [
-        '📋 DIAGNÓSTICO: Seu bem-estar está comprometido por desequilíbrios nutricionais',
-        '🔍 CAUSA RAIZ: Deficiências nutricionais afetam energia, humor e qualidade de vida',
-        '⚡ AÇÃO IMEDIATA: Inicie suplementação básica com multivitamínico e magnésio',
-        '📅 PLANO 7 DIAS: Reequilíbrio nutricional com alimentos ricos em vitaminas B',
-        '💊 SUPLEMENTAÇÃO: Complexo B + Magnésio + Ômega-3 para bem-estar geral',
-        '🍎 ALIMENTAÇÃO: Aumente frutas, verduras e grãos integrais para energia sustentada'
+        '📋 DIAGNÓSTICO: Seu bem-estar está comprometido por desequilíbrios nutricionais que precisam de intervenção personalizada',
+        '🔍 CAUSA RAIZ: Deficiências nutricionais podem estar afetando sua energia, humor e qualidade de vida. Uma avaliação completa identifica quais nutrientes estão faltando no seu organismo e como isso impacta sua rotina diária',
+        '⚡ AÇÃO IMEDIATA: Busque uma avaliação nutricional para receber um protocolo de suplementação seguro e adequado ao seu perfil. Evite auto-suplementação — cada organismo responde de forma única',
+        '📅 PLANO 7 DIAS: Um protocolo personalizado de 7 dias, ajustado ao seu perfil metabólico e estilo de vida, com acompanhamento para ajustes conforme sua resposta ao plano',
+        '💊 SUPLEMENTAÇÃO: Uma avaliação completa identifica quais suplementos seu corpo realmente precisa e em doses adequadas. Complexo B, magnésio e ômega-3 são frequentemente indicados, mas apenas após análise detalhada do seu caso',
+        '🍎 ALIMENTAÇÃO: Um plano alimentar personalizado considera suas preferências e objetivos para reequilibrar nutrientes de forma estratégica. Aumente frutas, verduras e grãos integrais enquanto aguarda sua avaliação profissional'
       ],
       bemEstarModerado: [
-        '📋 DIAGNÓSTICO: Seu bem-estar está bom, mas pode ser otimizado com ajustes nutricionais',
-        '🔍 CAUSA RAIZ: Boa base nutricional, mas precisa de micronutrientes específicos',
-        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione alimentos funcionais',
-        '📅 PLANO 7 DIAS: Otimização com superalimentos e timing nutricional',
-        '💊 SUPLEMENTAÇÃO: Multivitamínico premium + Probióticos para manutenção',
-        '🍎 ALIMENTAÇÃO: Varie cores no prato e inclua alimentos antioxidantes'
+        '📋 DIAGNÓSTICO: Seu bem-estar está bom, mas pode ser otimizado com ajustes nutricionais estratégicos e personalizados',
+        '🔍 CAUSA RAIZ: Boa base nutricional, porém pode faltar micronutrientes específicos para elevar seu bem-estar. Uma análise detalhada identifica exatamente o que pode fazer a diferença no seu desempenho e vitalidade',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e considere uma consulta para identificar oportunidades de otimização. Às vezes pequenos ajustes feitos de forma personalizada geram grandes melhorias',
+        '📅 PLANO 7 DIAS: Otimização com alimentos funcionais e estratégias de timing nutricional específicas para seu perfil metabólico e rotina',
+        '💊 SUPLEMENTAÇÃO: Uma avaliação identifica se você precisa de suplementação preventiva. Multivitamínico premium e probióticos costumam ser indicados, mas a dosagem e combinação são personalizadas após análise do seu caso',
+        '🍎 ALIMENTAÇÃO: Varie cores no prato e inclua alimentos antioxidantes. Um plano otimizado considera combinações específicas para maximizar absorção e resultados conforme seu perfil'
       ],
       bemEstarAlto: [
-        '📋 DIAGNÓSTICO: Excelente bem-estar! Mantenha com nutrição preventiva',
-        '🔍 CAUSA RAIZ: Ótima base nutricional, foco em sustentabilidade e prevenção',
-        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione nutrição esportiva',
-        '📅 PLANO 7 DIAS: Manutenção com alimentos anti-inflamatórios',
-        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos para performance',
-        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione alimentos funcionais premium'
+        '📋 DIAGNÓSTICO: Excelente bem-estar! Mantenha com nutrição preventiva e estratégias avançadas de performance',
+        '🔍 CAUSA RAIZ: Ótima base nutricional e hábitos saudáveis estabelecidos. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para níveis ainda superiores',
+        '⚡ AÇÃO IMEDIATA: Continue a rotina atual e considere uma avaliação preventiva para introduzir estratégias nutricionais avançadas que sustentam resultados a longo prazo',
+        '📅 PLANO 7 DIAS: Manutenção com alimentos anti-inflamatórios e protocolo preventivo personalizado para sustentabilidade e prevenção de declínios futuros',
+        '💊 SUPLEMENTAÇÃO: Uma análise preventiva identifica se você se beneficia de antioxidantes e adaptógenos para performance. O protocolo é personalizado conforme seu perfil metabólico atual',
+        '🍎 ALIMENTAÇÃO: Mantenha o padrão atual e considere introduzir alimentos funcionais premium e superalimentos para potencializar ainda mais seus resultados e prevenir declínios futuros'
       ]
     },
     sales: {

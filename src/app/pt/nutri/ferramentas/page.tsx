@@ -84,7 +84,17 @@ export default function FerramentasNutri() {
   useEffect(() => {
     const carregarFerramentas = async () => {
       try {
+        // Verificar se Supabase está configurado
         if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          console.warn('Supabase não configurado, usando dados mockados')
+          setLoading(false)
+          return
+        }
+
+        // Verificar se o cliente Supabase foi inicializado corretamente
+        if (!supabase) {
+          console.warn('Supabase cliente não inicializado, usando dados mockados')
+          setLoading(false)
           return
         }
 
@@ -100,6 +110,7 @@ export default function FerramentasNutri() {
 
         if (error) {
           console.warn('Supabase indisponível em ferramentas:', error.message)
+          setLoading(false)
           return
         }
 
@@ -180,9 +191,9 @@ export default function FerramentasNutri() {
               <div className="h-12 w-px bg-gray-300"></div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Minhas Ferramentas
+                  Meus Links
                 </h1>
-                <p className="text-sm text-gray-600">Gerencie suas ferramentas de captação de leads</p>
+                <p className="text-sm text-gray-600">Gerencie os links que você criou para captação de leads</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -196,7 +207,7 @@ export default function FerramentasNutri() {
                 href="/pt/nutri/ferramentas/nova"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Nova Ferramenta
+                Criar Link
               </Link>
             </div>
           </div>
@@ -212,7 +223,7 @@ export default function FerramentasNutri() {
                 <span className="text-2xl">🛠️</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total de Ferramentas</p>
+                <p className="text-sm font-medium text-gray-600">Total de Links</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalFerramentas}</p>
               </div>
             </div>
@@ -224,7 +235,7 @@ export default function FerramentasNutri() {
                 <span className="text-2xl">✅</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Ferramentas Ativas</p>
+                <p className="text-sm font-medium text-gray-600">Links Ativos</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.ferramentasAtivas}</p>
               </div>
             </div>
@@ -287,7 +298,7 @@ export default function FerramentasNutri() {
             
             <div className="ml-auto">
               <p className="text-sm text-gray-600">
-                Mostrando {ferramentasFiltradas.length} de {ferramentas.length} ferramentas
+                Mostrando {ferramentasFiltradas.length} de {ferramentas.length} links
               </p>
             </div>
           </div>
@@ -296,7 +307,7 @@ export default function FerramentasNutri() {
         {/* Lista de Ferramentas */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Ferramentas</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Links</h2>
           </div>
           
           <div className="divide-y divide-gray-200">
@@ -387,18 +398,18 @@ export default function FerramentasNutri() {
         {ferramentasFiltradas.length === 0 && (
           <div className="text-center py-12">
             <span className="text-6xl mb-4 block">🛠️</span>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhuma ferramenta encontrada</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum link encontrado</h3>
             <p className="text-gray-600 mb-6">
               {ferramentas.length === 0 
-                ? 'Crie sua primeira ferramenta para começar a capturar leads'
-                : 'Tente ajustar os filtros para ver mais ferramentas'
+                ? 'Crie seu primeiro link para começar a capturar leads'
+                : 'Tente ajustar os filtros para ver mais links'
               }
             </p>
             <Link 
               href="/pt/nutri/ferramentas/nova"
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Criar Nova Ferramenta
+              Criar Novo Link
             </Link>
           </div>
         )}

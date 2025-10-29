@@ -113,3 +113,4 @@
 6. URL dinâmica (funciona com hardcode)
 7. Melhorias de UI/UX (feedback, toasts)
 
+

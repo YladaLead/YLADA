@@ -181,3 +181,4 @@ A área Wellness está **100% funcional** e pronta para:
 
 **Observação:** Wellness não captura leads (conforme normas Herbalife), mas toda estrutura está pronta para reutilização em outros perfis (Nutri, Coach) que precisam de captura de leads.
 
+

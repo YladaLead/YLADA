@@ -69,6 +69,22 @@ export default function FerramentaPersonalizadaPage() {
 
       const data = await response.json()
       setTool(data.tool)
+
+      // Incrementar contador de visualizações
+      if (data.tool?.id) {
+        try {
+          await fetch('/api/wellness/ferramentas/track-view', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ tool_id: data.tool.id }),
+          })
+          // Silencioso - não interrompe se falhar
+        } catch (err) {
+          console.error('Erro ao registrar visualização:', err)
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar ferramenta')
     } finally {

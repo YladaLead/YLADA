@@ -111,11 +111,11 @@ export default function FerramentasWellness() {
               <div className="h-12 sm:h-16 w-px bg-gray-300"></div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Minhas Ferramentas
+                  Meus Links
                 </h1>
                 <div className="flex items-center space-x-4 mt-2">
                   <p className="text-base sm:text-lg font-medium text-gray-700">
-                    Wellness Tools
+                    Links criados pelos seus templates
                   </p>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                     Ativo
@@ -127,7 +127,7 @@ export default function FerramentasWellness() {
               href="/pt/wellness/ferramentas/nova"
               className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg font-medium"
             >
-              + Criar Novo Link
+              + Criar Link
             </Link>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function FerramentasWellness() {
           <div className="bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total de Ferramentas</p>
+                <p className="text-sm text-gray-600">Total de Links</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalFerramentas}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -152,7 +152,7 @@ export default function FerramentasWellness() {
           <div className="bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Ferramentas Ativas</p>
+                <p className="text-sm text-gray-600">Links Ativos</p>
                 <p className="text-2xl font-bold text-green-600">{stats.ferramentasAtivas}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -230,18 +230,18 @@ export default function FerramentasWellness() {
           <div className="bg-white rounded-lg p-12 border border-gray-200 text-center">
             <span className="text-6xl mb-4 block">🔧</span>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Nenhuma ferramenta encontrada
+              Nenhum link encontrado
             </h3>
             <p className="text-gray-600 mb-6">
               {filtroStatus === 'todas' 
-                ? 'Crie sua primeira ferramenta para começar.'
-                : `Nenhuma ferramenta ${filtroStatus === 'ativa' ? 'ativa' : 'inativa'} encontrada.`}
+                ? 'Crie seu primeiro link para começar.'
+                : `Nenhum link ${filtroStatus === 'ativa' ? 'ativa' : 'inativa'} encontrado.`}
             </p>
             <Link
               href="/pt/wellness/ferramentas/nova"
               className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              + Criar Novo Link
+              + Criar Link
             </Link>
           </div>
         ) : (
@@ -305,9 +305,12 @@ export default function FerramentasWellness() {
                       >
                         Ver Link →
                       </Link>
-                      <button className="text-sm text-gray-600 hover:text-gray-800 font-medium">
+                      <Link
+                        href={`/pt/wellness/ferramentas/${ferramenta.id}/editar`}
+                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                      >
                         Editar
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

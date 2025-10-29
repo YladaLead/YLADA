@@ -156,3 +156,4 @@ COMMENT ON COLUMN user_templates.whatsapp_number IS 'Número WhatsApp completo c
 COMMENT ON COLUMN user_templates.template_slug IS 'Slug do template base usado';
 COMMENT ON COLUMN user_templates.profession IS 'Profissão/Área: wellness, nutri, coach';
 
+

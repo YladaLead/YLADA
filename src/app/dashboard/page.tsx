@@ -267,7 +267,7 @@ export default function DashboardPage() {
               href="/create"
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
             >
-              + Criar Ferramenta
+              + Criar Link
             </Link>
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function DashboardPage() {
               <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Ferramentas Ativas</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Links Ativos</p>
                     <p className="text-3xl font-bold text-gray-900">{mockStats.totalTools}</p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -406,16 +406,16 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Recommended Tools Section */}
+            {/* Ver Templates Section */}
             <div className="bg-white rounded-2xl shadow-xl mb-10 border border-gray-100">
               <div className="p-8 border-b border-gray-100">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                      🎯 Ferramentas Recomendadas para Você
+                      🎯 Ver Templates
                     </h2>
                     <p className="text-gray-600 text-lg">
-                      Baseado no seu perfil de <span className="font-semibold text-blue-600">{userProfile?.profession}</span> especializada em <span className="font-semibold text-purple-600">{userProfile?.specialization}</span>
+                      Explore templates recomendados baseado no seu perfil de <span className="font-semibold text-blue-600">{userProfile?.profession}</span> especializada em <span className="font-semibold text-purple-600">{userProfile?.specialization}</span>
                     </p>
                   </div>
                   <div className="hidden md:block">
@@ -457,7 +457,7 @@ export default function DashboardPage() {
                         href={`/create?template=${tool.id}`}
                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-center block font-semibold shadow-lg hover:shadow-xl"
                       >
-                        Criar Agora →
+                        Criar Link →
                       </Link>
                     </div>
                   ))}
@@ -477,7 +477,7 @@ export default function DashboardPage() {
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    Minhas Ferramentas
+                    Meus Links
                   </button>
                   <button
                     onClick={() => setActiveTab('leads')}
@@ -575,16 +575,16 @@ export default function DashboardPage() {
                       <div className="text-center py-12">
                         <div className="text-gray-400 text-6xl mb-4">🧩</div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          Nenhuma ferramenta criada ainda
+                          Nenhum link criado ainda
                         </h3>
                         <p className="text-gray-600 mb-4">
-                          Comece criando sua primeira ferramenta personalizada
+                          Comece criando seu primeiro link personalizado
                         </p>
                         <Link
                           href="/create"
                           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
                         >
-                          Criar Primeira Ferramenta
+                          Criar Primeiro Link
                         </Link>
                       </div>
                     )}

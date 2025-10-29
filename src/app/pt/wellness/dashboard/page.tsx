@@ -146,17 +146,17 @@ export default function WellnessDashboard() {
               className="flex flex-col items-center justify-center p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <span className="text-2xl sm:text-3xl mb-2">🎨</span>
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Templates</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Prontos para usar</p>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Ver Templates</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Explorar modelos</p>
             </Link>
             
             <Link 
               href="/pt/wellness/ferramentas"
               className="flex flex-col items-center justify-center p-3 sm:p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
-              <span className="text-2xl sm:text-3xl mb-2">🛠️</span>
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Ferramentas</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Minhas ativas</p>
+              <span className="text-2xl sm:text-3xl mb-2">🔗</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Meus Links</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Links criados</p>
             </Link>
 
             <Link 
@@ -179,15 +179,15 @@ export default function WellnessDashboard() {
           </div>
         </div>
 
-        {/* Ferramentas Ativas - Expandido */}
+        {/* Links Ativos - Expandido */}
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 mb-6">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Ferramentas Ativas</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Links Ativos</h2>
             <Link 
               href="/pt/wellness/ferramentas" 
               className="text-blue-600 hover:text-blue-700 font-medium text-sm sm:text-base"
             >
-              Ver todas →
+              Ver todos →
             </Link>
           </div>
           <div className="space-y-3 sm:space-y-4">
