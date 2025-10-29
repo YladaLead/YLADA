@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
-export default function TabelaBemestar() {
+export default function TabelaBemestar({ config }: TemplateBaseProps) {
   const [dados, setDados] = useState({
     date: '',
     weight: '',
@@ -20,24 +22,12 @@ export default function TabelaBemestar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
-              alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
-            />
-            <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Tabela Bem-Estar Diário</h1>
-              <p className="text-sm text-gray-600">Acompanhe suas métricas diárias</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Tabela Bem-Estar Diário"
+        defaultDescription="Acompanhe suas métricas diárias"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-teal-200">
@@ -168,25 +158,25 @@ export default function TabelaBemestar() {
 
             <button
               type="submit"
-              className="w-full mt-8 bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-teal-700 hover:to-cyan-700 transition-all transform hover:scale-[1.02] shadow-lg"
+              className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
+              style={config?.custom_colors
+                ? {
+                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                  }
+                : {
+                    background: 'linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%)'
+                  }}
             >
               💾 Salvar Registro
             </button>
           </form>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center mt-6">
-          <p className="text-white text-lg font-semibold mb-4">
-            Quer acompanhar seu progresso com orientação profissional?
-          </p>
-          <a
-            href="https://wa.me/5511999999999?text=Olá! Acompanho meu bem-estar diário através do YLADA e gostaria de saber mais sobre otimização. Pode me ajudar?"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-          >
-            💬 Conversar com Especialista
-          </a>
+        <div className="mt-6">
+          <WellnessCTAButton
+            config={config}
+            resultadoTexto="Registro de Bem-Estar Diário"
+          />
         </div>
       </main>
     </div>

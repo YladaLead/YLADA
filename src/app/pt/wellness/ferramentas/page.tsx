@@ -23,46 +23,59 @@ interface Ferramenta {
 }
 
 export default function FerramentasWellness() {
-  // Dados simulados - depois virão do banco de dados
-  const [ferramentas, setFerramentas] = useState<Ferramenta[]>([
-    {
-      id: 'quiz-wellness-001',
-      nome: 'Quiz: Perfil de Bem-Estar',
-      categoria: 'Quiz',
-      objetivo: 'Perfil de bem-estar',
-      url: 'https://ylada.app/pt/wellness/quiz-wellness-001',
-      status: 'ativa',
-      leads: 12,
-      visualizacoes: 85,
-      conversao: 14.1,
-      ultimaAtividade: '2024-01-15',
-      cores: { primaria: '#8B5CF6', secundaria: '#7C3AED' },
-      criadaEm: '2024-01-10'
-    },
-    {
-      id: 'calc-imc-002',
-      nome: 'Calculadora IMC',
-      categoria: 'Calculadora',
-      objetivo: 'Avaliação corporal',
-      url: 'https://ylada.app/pt/wellness/calc-imc-002',
-      status: 'ativa',
-      leads: 8,
-      visualizacoes: 95,
-      conversao: 8.4,
-      ultimaAtividade: '2024-01-14',
-      cores: { primaria: '#10B981', secundaria: '#059669' },
-      criadaEm: '2024-01-08'
-    }
-  ])
-
+  const [ferramentas, setFerramentas] = useState<Ferramenta[]>([])
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'ativa' | 'inativa'>('todas')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  // TODO: Carregar ferramentas reais do Supabase quando variáveis estiverem configuradas
+  // Carregar ferramentas do banco de dados
   useEffect(() => {
-    // Por enquanto, usa dados mockados
-    setLoading(false)
+    carregarFerramentas()
   }, [])
+
+  const carregarFerramentas = async () => {
+    try {
+      setLoading(true)
+      // TODO: Pegar user_id do sistema de autenticação
+      const userId = 'user-temp-001' // Temporário
+
+      const response = await fetch(
+        `/api/wellness/ferramentas?user_id=${userId}&profession=wellness`
+      )
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar ferramentas')
+      }
+
+      const data = await response.json()
+      
+      // Transformar dados da API para o formato da interface
+      const ferramentasFormatadas: Ferramenta[] = (data.tools || []).map((tool: any) => ({
+        id: tool.id,
+        nome: tool.title,
+        categoria: tool.template_slug?.startsWith('calc-') ? 'Calculadora' : 
+                  tool.template_slug?.startsWith('quiz-') ? 'Quiz' : 'Planilha',
+        objetivo: tool.description || '',
+        url: tool.user_profiles?.user_slug 
+          ? `https://ylada.app/pt/wellness/${tool.user_profiles.user_slug}/${tool.slug}`
+          : `https://ylada.app/pt/wellness/ferramenta/${tool.id}`,
+        status: tool.status === 'active' ? 'ativa' : 'inativa',
+        leads: tool.leads_count || 0,
+        visualizacoes: tool.views || 0,
+        conversao: tool.views > 0 ? (tool.leads_count || 0) / tool.views * 100 : 0,
+        ultimaAtividade: new Date(tool.updated_at).toLocaleDateString('pt-BR'),
+        cores: tool.custom_colors || { primaria: '#10B981', secundaria: '#059669' },
+        criadaEm: new Date(tool.created_at).toLocaleDateString('pt-BR')
+      }))
+
+      setFerramentas(ferramentasFormatadas)
+    } catch (error) {
+      console.error('Erro ao carregar ferramentas:', error)
+      // Em caso de erro, manter array vazio
+      setFerramentas([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const stats = {
     totalFerramentas: ferramentas.length,
@@ -209,20 +222,26 @@ export default function FerramentasWellness() {
 
         {/* Lista de Ferramentas */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <div className="bg-white rounded-lg p-12 border border-gray-200 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Carregando ferramentas...</p>
           </div>
         ) : ferramentasFiltradas.length === 0 ? (
-          <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhuma ferramenta criada ainda</h3>
-            <p className="text-gray-600 mb-6">Crie sua primeira ferramenta para começar a gerar leads</p>
+          <div className="bg-white rounded-lg p-12 border border-gray-200 text-center">
+            <span className="text-6xl mb-4 block">🔧</span>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Nenhuma ferramenta encontrada
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {filtroStatus === 'todas' 
+                ? 'Crie sua primeira ferramenta para começar.'
+                : `Nenhuma ferramenta ${filtroStatus === 'ativa' ? 'ativa' : 'inativa'} encontrada.`}
+            </p>
             <Link
               href="/pt/wellness/ferramentas/nova"
-              className="inline-flex items-center bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg font-medium"
+              className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              + Criar Meu Primeiro Link
+              + Criar Novo Link
             </Link>
           </div>
         ) : (

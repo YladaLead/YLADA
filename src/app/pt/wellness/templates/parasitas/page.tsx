@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface Pergunta {
   id: number
@@ -18,7 +21,7 @@ interface Resultado {
   recomendacoes: string[]
 }
 
-export default function QuizParasitas() {
+export default function QuizParasitas({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'quiz' | 'resultado'>('landing')
   const [perguntaAtual, setPerguntaAtual] = useState(0)
   const [respostas, setRespostas] = useState<number[]>([])
@@ -169,68 +172,38 @@ export default function QuizParasitas() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-red-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
-              alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
-            />
-            <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Quiz: Diagnóstico de Parasitas</h1>
-              <p className="text-sm text-gray-600">Seu bem-estar está comprometido?</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Quiz: Diagnóstico de Parasitas"
+        defaultDescription="Seu bem-estar está comprometido?"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-rose-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🧬</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Diagnóstico de Parasitas</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Descubra se você tem parasitas afetando sua saúde
-              </p>
-              <p className="text-gray-600 mb-6">
-                Avalie sintomas comuns relacionados a saúde intestinal e digestiva
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-rose-50 to-red-50 rounded-xl p-6 mb-8 border-2 border-rose-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 Por que fazer este quiz?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-rose-600 mr-2">✓</span>
-                  <span>Identifique sinais de problemas digestivos e intestinais</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-rose-600 mr-2">✓</span>
-                  <span>Entenda como podem estar afetando sua energia</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-rose-600 mr-2">✓</span>
-                  <span>Saiba quando buscar tratamento especializado</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-rose-600 mr-2">✓</span>
-                  <span>Receba orientações de prevenção e cuidados</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarQuiz}
-              className="w-full bg-gradient-to-r from-rose-600 to-red-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-rose-700 hover:to-red-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Iniciar Quiz - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="🧬"
+            defaultTitle="Diagnóstico de Parasitas"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Descubra se você tem parasitas afetando sua saúde
+                </p>
+                <p className="text-gray-600">
+                  Avalie sintomas comuns relacionados a saúde intestinal e digestiva
+                </p>
+              </>
+            }
+            benefits={[
+              'Identifique sinais de problemas digestivos e intestinais',
+              'Entenda como podem estar afetando sua energia',
+              'Saiba quando buscar tratamento especializado',
+              'Receba orientações de prevenção e cuidados'
+            ]}
+            onStart={iniciarQuiz}
+            buttonText="▶️ Iniciar Quiz - É Grátis"
+          />
         )}
 
         {etapa === 'quiz' && (
@@ -294,19 +267,10 @@ export default function QuizParasitas() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center">
-              <p className="text-white text-lg font-semibold mb-4">
-                Quer saber mais sobre protocolos de limpeza e tratamento?
-              </p>
-              <a
-                href="https://wa.me/5511999999999?text=Olá! Completei o Quiz de Diagnóstico de Parasitas através do YLADA e gostaria de saber mais sobre protocolos de limpeza. Pode me ajudar?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                💬 Conversar com Especialista
-              </a>
-            </div>
+            <WellnessCTAButton
+              config={config}
+              resultadoTexto={`${resultado.perfil} (Score: ${resultado.score}/12) - ${resultado.descricao}`}
+            />
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button

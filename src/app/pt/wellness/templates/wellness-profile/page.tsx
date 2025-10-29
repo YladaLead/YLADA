@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface Pergunta {
   id: number
@@ -18,7 +21,7 @@ interface Resultado {
   recomendacoes: string[]
 }
 
-export default function QuizPerfilBemestar() {
+export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'quiz' | 'resultado'>('landing')
   const [perguntaAtual, setPerguntaAtual] = useState(0)
   const [respostas, setRespostas] = useState<number[]>([])
@@ -169,68 +172,38 @@ export default function QuizPerfilBemestar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
-              alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
-            />
-            <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Quiz: Perfil de Bem-Estar</h1>
-              <p className="text-sm text-gray-600">Avaliação completa do seu bem-estar</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Quiz: Perfil de Bem-Estar"
+        defaultDescription="Avaliação completa do seu bem-estar"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-green-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">💚</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Perfil de Bem-Estar</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Descubra seu perfil completo de bem-estar
-              </p>
-              <p className="text-gray-600 mb-6">
-                Avaliação de saúde física, mental, emocional e social
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-8 border-2 border-green-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 O que você vai descobrir?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Seu nível atual de energia e vitalidade</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Áreas de bem-estar para otimizar</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Como criar rotina de autocuidado</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Estratégias para atingir bem-estar integral</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarQuiz}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Iniciar Quiz - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="💚"
+            defaultTitle="Perfil de Bem-Estar"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Descubra seu perfil completo de bem-estar
+                </p>
+                <p className="text-gray-600">
+                  Avaliação de saúde física, mental, emocional e social
+                </p>
+              </>
+            }
+            benefits={[
+              'Seu nível atual de energia e vitalidade',
+              'Áreas de bem-estar para otimizar',
+              'Como criar rotina de autocuidado',
+              'Estratégias para atingir bem-estar integral'
+            ]}
+            onStart={iniciarQuiz}
+            buttonText="▶️ Iniciar Quiz - É Grátis"
+          />
         )}
 
         {etapa === 'quiz' && (
@@ -294,19 +267,10 @@ export default function QuizPerfilBemestar() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center">
-              <p className="text-white text-lg font-semibold mb-4">
-                Quer criar um plano personalizado de bem-estar?
-              </p>
-              <a
-                href="https://wa.me/5511999999999?text=Olá! Completei o Quiz de Perfil de Bem-Estar através do YLADA e gostaria de conversar sobre estratégias. Pode me ajudar?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                💬 Conversar com Especialista
-              </a>
-            </div>
+            <WellnessCTAButton
+              config={config}
+              resultadoTexto={`${resultado.perfil} (Score: ${resultado.score}/12) - ${resultado.descricao}`}
+            />
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button

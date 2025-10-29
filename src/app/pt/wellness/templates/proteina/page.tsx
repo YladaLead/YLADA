@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface ResultadoProteina {
   proteinaDiaria: number
@@ -12,7 +14,7 @@ interface ResultadoProteina {
   recomendacoes: string[]
 }
 
-export default function CalculadoraProteina() {
+export default function CalculadoraProteina({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
   const [idade, setIdade] = useState('')
   const [genero, setGenero] = useState('')
@@ -128,72 +130,38 @@ export default function CalculadoraProteina() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Image
-                src="/logos/ylada-logo-horizontal-vazado.png"
-                alt="YLADA"
-                width={160}
-                height={50}
-                className="h-10"
-              />
-              <div className="h-10 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Calculadora de Proteína</h1>
-                <p className="text-sm text-gray-600">Suas necessidades proteicas diárias</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Calculadora de Proteína"
+        defaultDescription="Suas necessidades proteicas diárias"
+      />
 
-      {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">💪</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Calculadora de Proteína</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Descubra quantas gramas de proteína você precisa por dia
-              </p>
-              <p className="text-gray-600 mb-6">
-                Para atingir seus objetivos com saúde e resultados
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 mb-8 border-2 border-orange-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 Por que calcular sua proteína?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-orange-600 mr-2">✓</span>
-                  <span>Entenda suas necessidades individuais baseadas no seu perfil</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-orange-600 mr-2">✓</span>
-                  <span>Saiba quanto consumir por refeição para melhores resultados</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-orange-600 mr-2">✓</span>
-                  <span>Otimize recuperação muscular e ganho de massa</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-orange-600 mr-2">✓</span>
-                  <span>Receba recomendações personalizadas de fontes proteicas</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarCalculo}
-              className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Calcular Minha Proteína - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="💪"
+            defaultTitle="Calculadora de Proteína"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Descubra quantas gramas de proteína você precisa por dia
+                </p>
+                <p className="text-gray-600">
+                  Para atingir seus objetivos com saúde e resultados
+                </p>
+              </>
+            }
+            benefits={[
+              'Entenda suas necessidades individuais baseadas no seu perfil',
+              'Saiba quanto consumir por refeição para melhores resultados',
+              'Otimize recuperação muscular e ganho de massa',
+              'Receba recomendações personalizadas de fontes proteicas'
+            ]}
+            onStart={iniciarCalculo}
+            buttonText="▶️ Calcular Minha Proteína - É Grátis"
+          />
         )}
 
         {etapa === 'formulario' && (
@@ -308,7 +276,14 @@ export default function CalculadoraProteina() {
 
             <button
               onClick={calcularProteina}
-              className="w-full mt-8 bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-[1.02] shadow-lg"
+              className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
+              style={config?.custom_colors
+                ? {
+                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                  }
+                : {
+                    background: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)'
+                  }}
             >
               Calcular Proteína →
             </button>
@@ -343,20 +318,10 @@ export default function CalculadoraProteina() {
               </div>
             </div>
 
-            {/* CTA WhatsApp */}
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center">
-              <p className="text-white text-lg font-semibold mb-4">
-                Quer ajuda para implementar essas quantidades no seu dia a dia?
-              </p>
-              <a
-                href="https://wa.me/5511999999999?text=Olá! Calculei minhas necessidades proteicas diárias através do YLADA. Gostaria de saber mais sobre estratégias de implementação. Pode me ajudar?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                💬 Conversar com Especialista
-              </a>
-            </div>
+            <WellnessCTAButton
+              config={config}
+              resultadoTexto={`${resultado.proteinaDiaria}g de proteína/dia - ${resultado.interpretacao}`}
+            />
 
             {/* Botões */}
             <div className="flex flex-col sm:flex-row gap-4">

@@ -15,8 +15,7 @@ interface Template {
 }
 
 interface Configuracao {
-  nomeFerramenta: string
-  urlPersonalizada: string // Ex: "calculadora-imc"
+  urlPersonalizada: string // Ex: "calculadora-imc" - agora é o nome principal também
   urlCompleta: string
   emoji: string
   cores: {
@@ -36,7 +35,6 @@ export default function NovaFerramentaWellness() {
   const [busca, setBusca] = useState('')
   const [paisTelefone, setPaisTelefone] = useState('BR')
   const [configuracao, setConfiguracao] = useState<Configuracao>({
-    nomeFerramenta: '',
     urlPersonalizada: '',
     urlCompleta: '',
     emoji: '',
@@ -51,6 +49,11 @@ export default function NovaFerramentaWellness() {
     textoBotao: 'Conversar com Especialista'
   })
   const [urlDisponivel, setUrlDisponivel] = useState(true)
+  const [emojiEditadoManual, setEmojiEditadoManual] = useState(false) // Flag para saber se usuário já editou
+  const [abaNomeProjeto, setAbaNomeProjeto] = useState(false) // Controla aba de nome do projeto
+  const [abaAparencia, setAbaAparencia] = useState(false) // Controla aba de aparência
+  const [abaCTA, setAbaCTA] = useState(false) // Controla aba de CTA
+  const [descricao, setDescricao] = useState('') // Descrição opcional embaixo do título
 
   // Nome do usuário logado (simulado - depois virá do sistema)
   const nomeDoUsuario = 'Carlos Oliveira'
@@ -211,33 +214,28 @@ export default function NovaFerramentaWellness() {
     return gerarSlug(texto) // Já faz tudo: minúsculo, remove acentos, espaços vira hífen
   }
 
-  // Sugerir dados ao selecionar template
+  // Sugerir dados ao selecionar template (apenas na primeira vez, não sobrescreve se usuário já editou)
   useEffect(() => {
     if (templateSelecionado) {
-      if (!configuracao.emoji) {
+      // Emoji: só sugere se campo estiver vazio E usuário ainda não editou manualmente
+      if (!configuracao.emoji && !emojiEditadoManual) {
         setConfiguracao(prev => ({ ...prev, emoji: templateSelecionado.icon }))
       }
-      if (!configuracao.nomeFerramenta) {
-        setConfiguracao(prev => ({ ...prev, nomeFerramenta: templateSelecionado.nome }))
-      }
       if (!configuracao.urlPersonalizada) {
-        // Sugerir baseado no nome da ferramenta
+        // Sugerir baseado no nome do template
         const sugestao = tratarUrl(templateSelecionado.nome)
         setConfiguracao(prev => ({ ...prev, urlPersonalizada: sugestao }))
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateSelecionado])
 
-  // Atualizar URL completa automaticamente
+  // Atualizar URL completa automaticamente e validar disponibilidade
   useEffect(() => {
     if (configuracao.urlPersonalizada && templateSelecionado) {
       const slugTratado = tratarUrl(configuracao.urlPersonalizada)
       const urlNome = tratarUrl(nomeDoUsuario)
       const url = `ylada.app/wellness/${urlNome}/${slugTratado}`
-      
-      // Verificar se URL está disponível
-      const urlDisponivel = !['calculadora-imc', 'calculadora-imc-2', 'calculadora-imc-3'].includes(slugTratado)
-      setUrlDisponivel(urlDisponivel)
       
       // Atualizar URL completa
       setConfiguracao(prev => ({ 
@@ -245,34 +243,129 @@ export default function NovaFerramentaWellness() {
         urlPersonalizada: slugTratado, // Mantém sempre tratado
         urlCompleta: url
       }))
+      
+      // Validar disponibilidade via API (debounce)
+      const timeoutId = setTimeout(() => {
+        validarUrl(slugTratado)
+      }, 500) // Aguarda 500ms após parar de digitar
+
+      return () => clearTimeout(timeoutId)
     }
   }, [configuracao.urlPersonalizada, templateSelecionado])
 
-  // Validar URL disponível (simulação - depois virá da API)
-  const validarUrl = (url: string) => {
-    // Simulação: nomes já existentes
-    const urlsUsadas = ['carlos', 'maria', 'joao-silva']
-    const urlExiste = urlsUsadas.includes(url)
-    setUrlDisponivel(!urlExiste)
-    return !urlExiste
+  // Validar URL disponível usando API
+  const validarUrl = async (url: string): Promise<boolean> => {
+    if (!url || url.trim() === '') {
+      setUrlDisponivel(false)
+      return false
+    }
+
+    try {
+      const response = await fetch(`/api/wellness/ferramentas/check-slug?slug=${encodeURIComponent(url)}`)
+      const data = await response.json()
+      
+      setUrlDisponivel(data.available)
+      return data.available
+    } catch (error) {
+      console.error('Erro ao validar URL:', error)
+      setUrlDisponivel(false)
+      return false
+    }
+  }
+
+  // Validar URL sincronamente (para uso em submit)
+  const validarUrlSync = (url: string): boolean => {
+    // Validação básica - a validação completa será feita na API no momento do submit
+    return Boolean(url && url.trim().length > 0 && urlDisponivel)
   }
 
   const criarFerramenta = (template: Template) => {
     setTemplateSelecionado(template)
+    setEmojiEditadoManual(false) // Reset flag ao selecionar novo template, para permitir sugestão novamente
     // Scroll para configuração
     setTimeout(() => {
       document.getElementById('configuracao')?.scrollIntoView({ behavior: 'smooth' })
     }, 100)
   }
 
-  const salvarFerramenta = () => {
-    if (!validarUrl(configuracao.nomeUrl)) {
+  const salvarFerramenta = async () => {
+    // Validar URL antes de salvar
+    const urlValida = await validarUrl(configuracao.urlPersonalizada)
+    if (!urlValida) {
       alert('Este nome de URL já está em uso. Escolha outro.')
       return
     }
-    
-    alert('Ferramenta criada com sucesso! Em breve você terá o link completo.')
-    console.log('Configuração:', configuracao)
+
+    if (!templateSelecionado) {
+      alert('Selecione um template primeiro.')
+      return
+    }
+
+    // Validar campos obrigatórios
+    if (!configuracao.urlPersonalizada) {
+      alert('Preencha o nome do projeto.')
+      return
+    }
+
+    if (configuracao.tipoCta === 'whatsapp' && !configuracao.numeroWhatsapp) {
+      alert('Informe o número do WhatsApp.')
+      return
+    }
+
+    if (configuracao.tipoCta === 'url' && !configuracao.urlExterna) {
+      alert('Informe a URL externa.')
+      return
+    }
+
+    try {
+      // TODO: Pegar user_id do sistema de autenticação
+      const userId = 'user-temp-001' // Temporário
+
+      // Converter slug para nome amigável para exibição
+      const nomeAmigavel = configuracao.urlPersonalizada
+        .split('-')
+        .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+        .join(' ')
+
+      const payload = {
+        user_id: userId,
+        template_slug: templateSelecionado.slug,
+        title: nomeAmigavel, // Usar o nome do projeto formatado como título
+        description: descricao || templateSelecionado.descricao, // Usar descrição personalizada ou padrão
+        slug: configuracao.urlPersonalizada,
+        emoji: configuracao.emoji,
+        custom_colors: configuracao.cores,
+        cta_type: configuracao.tipoCta === 'whatsapp' ? 'whatsapp' : 'url_externa',
+        whatsapp_number: configuracao.tipoCta === 'whatsapp' 
+          ? `${codigosTelefone[paisTelefone as keyof typeof codigosTelefone].codigo}${configuracao.numeroWhatsapp}`
+          : null,
+        external_url: configuracao.tipoCta === 'url' ? configuracao.urlExterna : null,
+        cta_button_text: configuracao.textoBotao,
+        custom_whatsapp_message: configuracao.mensagemWhatsapp,
+        profession: 'wellness'
+      }
+
+      const response = await fetch('/api/wellness/ferramentas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao criar ferramenta')
+      }
+
+      // Sucesso! Redirecionar para a lista de ferramentas
+      alert(`Ferramenta criada com sucesso!\n\nURL: ${data.tool?.full_url || configuracao.urlCompleta}`)
+      window.location.href = '/pt/wellness/ferramentas'
+    } catch (error: any) {
+      console.error('Erro ao salvar ferramenta:', error)
+      alert(error.message || 'Erro ao criar ferramenta. Tente novamente.')
+    }
   }
 
   return (
@@ -436,248 +529,312 @@ export default function NovaFerramentaWellness() {
             {/* Coluna Esquerda: Formulário */}
             <div className="space-y-6">
               <div id="configuracao" className="bg-white rounded-xl border-2 border-green-200 p-8">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="text-4xl">{templateSelecionado.icon}</div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Criar seu link de {templateSelecionado.nome}</h2>
-                    <p className="text-sm text-gray-600">{templateSelecionado.categoria}</p>
-                  </div>
-                </div>
-
                 <div className="space-y-6">
-                  {/* Emoji da Ferramenta */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Ícone/Emoji da Ferramenta
-                    </label>
-                    <input
-                      type="text"
-                      value={configuracao.emoji}
-                      onChange={(e) => setConfiguracao({ ...configuracao, emoji: e.target.value })}
-                      placeholder="🎯"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-center text-2xl"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      💡 <strong>Opcional.</strong> Digite seu emoji ou cole do celular/computador (botão direito → colar emoji)
-                    </p>
-                  </div>
-
-                  {/* Nome da Ferramenta */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nome da Ferramenta <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={configuracao.nomeFerramenta}
-                      onChange={(e) => setConfiguracao({ ...configuracao, nomeFerramenta: e.target.value })}
-                      placeholder="Ex: Minha Calculadora IMC"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      💡 <strong>O que é?</strong> Nome que aparecerá para o cliente quando usar a ferramenta
-                    </p>
-                  </div>
-
-                  {/* Cores Personalizadas */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Cores Personalizadas
-                    </label>
-                    <p className="text-xs text-gray-500 mb-3">
-                      💡 <strong>O que é?</strong> Cores do botão que o cliente verá. Use tons de verde para Wellness
-                    </p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-gray-600 mb-1 block">Cor Principal</label>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="color"
-                            value={configuracao.cores.principal}
-                            onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, principal: e.target.value } })}
-                            className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={configuracao.cores.principal}
-                            onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, principal: e.target.value } })}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                          />
+                  {/* 1. NOME DO PROJETO - ABA COLAPSÁVEL */}
+                  <div className="border border-gray-200 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setAbaNomeProjeto(!abaNomeProjeto)}
+                      className="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">📝</span>
+                        <div className="text-left">
+                          <h3 className="font-semibold text-gray-900">Nome do Projeto <span className="text-red-500">*</span></h3>
+                          <p className="text-xs text-gray-600">Nome da ferramenta e URL</p>
                         </div>
                       </div>
-                      <div>
-                        <label className="text-xs text-gray-600 mb-1 block">Cor Secundária</label>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="color"
-                            value={configuracao.cores.secundaria}
-                            onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, secundaria: e.target.value } })}
-                            className="w-16 h-12 rounded-lg border border-gray-300 cursor-pointer"
-                          />
+                      <span className="text-gray-400">{abaNomeProjeto ? '▼' : '▶'}</span>
+                    </button>
+                    {abaNomeProjeto && (
+                      <div className="p-6 space-y-4 border-t border-gray-200">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nome do Projeto <span className="text-red-500">*</span>
+                          </label>
                           <input
                             type="text"
-                            value={configuracao.cores.secundaria}
-                            onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, secundaria: e.target.value } })}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                            value={configuracao.urlPersonalizada}
+                            onChange={(e) => setConfiguracao({ ...configuracao, urlPersonalizada: e.target.value })}
+                            onBlur={(e) => {
+                              const tratado = tratarUrl(e.target.value)
+                              setConfiguracao({ ...configuracao, urlPersonalizada: tratado })
+                            }}
+                            placeholder="Ex: calculadora-imc"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           />
+                          <p className="text-xs text-gray-500 mt-1">
+                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos". Será tratado automaticamente.
+                          </p>
+                          {configuracao.urlCompleta && (
+                            <div className={`mt-2 px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                              <p className="text-sm font-medium">
+                                {urlDisponivel ? '✓ Disponível' : '✗ Já em uso'} 
+                                <span className="ml-2 text-xs font-mono">{configuracao.urlCompleta}</span>
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* URL Personalizada */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nome do Projeto (para URL) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={configuracao.urlPersonalizada}
-                      onChange={(e) => setConfiguracao({ ...configuracao, urlPersonalizada: e.target.value })}
-                      onBlur={(e) => {
-                        const tratado = tratarUrl(e.target.value)
-                        setConfiguracao({ ...configuracao, urlPersonalizada: tratado })
-                      }}
-                      placeholder="Ex: calculadora-imc"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      💡 <strong>O que é?</strong> Nome único para esta ferramenta. Ex: "calculadora-imc", "quiz-ganhos". Será tratado automaticamente.
-                    </p>
-                    {configuracao.urlCompleta && (
-                      <div className={`mt-2 px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                        <p className="text-sm font-medium">
-                          {urlDisponivel ? '✓ Disponível' : '✗ Já em uso'} 
-                          <span className="ml-2 text-xs">{configuracao.urlCompleta}</span>
-                        </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Configuração do CTA */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Depois do resultado, o cliente vai para:
-                    </label>
-                    <select
-                      value={configuracao.tipoCta}
-                      onChange={(e) => setConfiguracao({ ...configuracao, tipoCta: e.target.value as 'whatsapp' | 'url' })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  {/* 2. APARÊNCIA - ABA COLAPSÁVEL */}
+                  <div className="border border-gray-200 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setAbaAparencia(!abaAparencia)}
+                      className="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
                     >
-                      <option value="whatsapp">WhatsApp (recomendado)</option>
-                      <option value="url">URL Externa</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      💡 <strong>O que é?</strong> Para onde o cliente será redirecionado após ver o resultado
-                    </p>
-                  </div>
-
-                  {/* Configuração WhatsApp */}
-                  {configuracao.tipoCta === 'whatsapp' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          País <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          value={paisTelefone}
-                          onChange={(e) => setPaisTelefone(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        >
-                          {Object.entries(codigosTelefone).map(([codigo, dados]) => (
-                            <option key={codigo} value={codigo}>
-                              {dados.bandeira} {dados.nome} ({dados.codigo})
-                            </option>
-                          ))}
-                        </select>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">🎨</span>
+                        <div className="text-left">
+                          <h3 className="font-semibold text-gray-900">Aparência</h3>
+                          <p className="text-xs text-gray-600">Emoji, título e descrição</p>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Número WhatsApp <span className="text-red-500">*</span>
-                        </label>
-                        <div className="flex items-center space-x-2">
-                          <div className="flex items-center justify-center w-16 h-12 bg-gray-100 rounded-lg border border-gray-300 font-medium">
-                            {codigosTelefone[paisTelefone as keyof typeof codigosTelefone]?.codigo}
-                          </div>
+                      <span className="text-gray-400">{abaAparencia ? '▼' : '▶'}</span>
+                    </button>
+                    {abaAparencia && (
+                      <div className="p-6 space-y-6 border-t border-gray-200">
+                        {/* Emoji */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Ícone/Emoji da Ferramenta
+                          </label>
                           <input
                             type="text"
-                            value={configuracao.numeroWhatsapp}
-                            onChange={(e) => setConfiguracao({ ...configuracao, numeroWhatsapp: e.target.value })}
-                            placeholder="11999999999"
-                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            value={configuracao.emoji}
+                            onChange={(e) => {
+                              setEmojiEditadoManual(true)
+                              setConfiguracao({ ...configuracao, emoji: e.target.value })
+                            }}
+                            placeholder="🎯 (opcional)"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-center text-2xl"
+                            onFocus={() => setEmojiEditadoManual(true)}
                           />
+                          <p className="text-xs text-gray-500 mt-1">
+                            💡 <strong>Opcional.</strong> Digite seu emoji ou cole do celular/computador (botão direito → colar emoji)
+                          </p>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Apenas DDD + número (sem parênteses ou espaços)
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Mensagem pré-formatada <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                          value={configuracao.mensagemWhatsapp}
-                          onChange={(e) => setConfiguracao({ ...configuracao, mensagemWhatsapp: e.target.value })}
-                          placeholder="Olá! Calculei meu IMC através do YLADA e gostaria de saber mais sobre como alcançar meu objetivo. Pode me ajudar?"
-                          rows={4}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        />
-                        <div className="mt-2 bg-blue-50 rounded-lg p-3">
-                          <p className="text-xs text-blue-700 font-medium mb-1">💡 Placeholders disponíveis:</p>
-                          <p className="text-xs text-blue-600">
-                            [RESULTADO] - Resultado obtido na ferramenta<br/>
-                            [NOME_CLIENTE] - Nome do cliente (se coletado)<br/>
-                            [DATA] - Data/hora do uso
+
+                        {/* Título (gerado automaticamente do nome do projeto) */}
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Título (gerado automaticamente)
+                          </label>
+                          <div className="px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700">
+                            {configuracao.urlPersonalizada 
+                              ? configuracao.urlPersonalizada
+                                  .split('-')
+                                  .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                                  .join(' ')
+                              : 'Digite o nome do projeto acima'}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Este título será gerado automaticamente a partir do "Nome do Projeto"
+                          </p>
+                        </div>
+
+                        {/* Descrição */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Descrição (opcional)
+                          </label>
+                          <textarea
+                            value={descricao}
+                            onChange={(e) => setDescricao(e.target.value)}
+                            placeholder="Ex: Descubra seu IMC e receba orientações personalizadas para seu objetivo..."
+                            rows={3}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            💡 <strong>Opcional.</strong> Texto que aparecerá embaixo do título na ferramenta. Pode deixar vazio.
                           </p>
                         </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Texto do Botão
-                        </label>
-                        <input
-                          type="text"
-                          value={configuracao.textoBotao}
-                          onChange={(e) => setConfiguracao({ ...configuracao, textoBotao: e.target.value })}
-                          placeholder="Conversar com Especialista"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          💡 <strong>O que é?</strong> Texto que aparecerá no botão de ação. Ex: "Conversar comigo", "Saiba mais"
-                        </p>
-                      </div>
-                    </>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Configuração URL Externa */}
-                  {configuracao.tipoCta === 'url' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          URL de Redirecionamento <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="url"
-                          value={configuracao.urlExterna}
-                          onChange={(e) => setConfiguracao({ ...configuracao, urlExterna: e.target.value })}
-                          placeholder="https://seu-site.com/contato"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        />
+                  {/* 3. CTA E BOTÃO - ABA COLAPSÁVEL */}
+                  <div className="border border-gray-200 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setAbaCTA(!abaCTA)}
+                      className="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">🔘</span>
+                        <div className="text-left">
+                          <h3 className="font-semibold text-gray-900">CTA e Botão</h3>
+                          <p className="text-xs text-gray-600">Texto, cores e redirecionamento</p>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Texto do Botão
-                        </label>
-                        <input
-                          type="text"
-                          value={configuracao.textoBotao}
-                          onChange={(e) => setConfiguracao({ ...configuracao, textoBotao: e.target.value })}
-                          placeholder="Saiba Mais"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        />
+                      <span className="text-gray-400">{abaCTA ? '▼' : '▶'}</span>
+                    </button>
+                    {abaCTA && (
+                      <div className="p-6 space-y-6 border-t border-gray-200">
+                        {/* Tipo de CTA */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Depois do resultado, o cliente vai para:
+                          </label>
+                          <select
+                            value={configuracao.tipoCta}
+                            onChange={(e) => setConfiguracao({ ...configuracao, tipoCta: e.target.value as 'whatsapp' | 'url' })}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          >
+                            <option value="whatsapp">WhatsApp (recomendado)</option>
+                            <option value="url">URL Externa</option>
+                          </select>
+                          <p className="text-xs text-gray-500 mt-1">
+                            💡 <strong>O que é?</strong> Para onde o cliente será redirecionado após ver o resultado
+                          </p>
+                        </div>
+
+                        {/* Texto do Botão */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Texto do Botão <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={configuracao.textoBotao}
+                            onChange={(e) => setConfiguracao({ ...configuracao, textoBotao: e.target.value })}
+                            placeholder="Conversar com Especialista"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            💡 <strong>O que é?</strong> Texto que aparecerá no botão de ação. Ex: "Conversar comigo", "Saiba mais"
+                          </p>
+                        </div>
+
+                        {/* Cores Personalizadas */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Cores do Botão
+                          </label>
+                          <p className="text-xs text-gray-500 mb-3">
+                            💡 <strong>O que é?</strong> Cores do botão que o cliente verá. Use tons de verde para Wellness
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs text-gray-600 mb-1 block">Cor Principal</label>
+                              <div className="flex items-center space-x-3">
+                                <input
+                                  type="color"
+                                  value={configuracao.cores.principal}
+                                  onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, principal: e.target.value } })}
+                                  className="w-20 h-12 rounded-lg border border-gray-300 cursor-pointer flex-shrink-0"
+                                />
+                                <input
+                                  type="text"
+                                  value={configuracao.cores.principal}
+                                  onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, principal: e.target.value } })}
+                                  className="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-xs text-gray-600 mb-1 block">Cor Secundária</label>
+                              <div className="flex items-center space-x-3">
+                                <input
+                                  type="color"
+                                  value={configuracao.cores.secundaria}
+                                  onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, secundaria: e.target.value } })}
+                                  className="w-20 h-12 rounded-lg border border-gray-300 cursor-pointer flex-shrink-0"
+                                />
+                                <input
+                                  type="text"
+                                  value={configuracao.cores.secundaria}
+                                  onChange={(e) => setConfiguracao({ ...configuracao, cores: { ...configuracao.cores, secundaria: e.target.value } })}
+                                  className="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Configuração WhatsApp */}
+                        {configuracao.tipoCta === 'whatsapp' && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                País <span className="text-red-500">*</span>
+                              </label>
+                              <select
+                                value={paisTelefone}
+                                onChange={(e) => setPaisTelefone(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              >
+                                {Object.entries(codigosTelefone).map(([codigo, dados]) => (
+                                  <option key={codigo} value={codigo}>
+                                    {dados.bandeira} {dados.nome} ({dados.codigo})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Número WhatsApp <span className="text-red-500">*</span>
+                              </label>
+                              <div className="flex items-center space-x-2">
+                                <div className="flex items-center justify-center w-16 h-12 bg-gray-100 rounded-lg border border-gray-300 font-medium">
+                                  {codigosTelefone[paisTelefone as keyof typeof codigosTelefone]?.codigo}
+                                </div>
+                                <input
+                                  type="text"
+                                  value={configuracao.numeroWhatsapp}
+                                  onChange={(e) => setConfiguracao({ ...configuracao, numeroWhatsapp: e.target.value })}
+                                  placeholder="11999999999"
+                                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Apenas DDD + número (sem parênteses ou espaços)
+                              </p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Mensagem pré-formatada <span className="text-red-500">*</span>
+                              </label>
+                              <textarea
+                                value={configuracao.mensagemWhatsapp}
+                                onChange={(e) => setConfiguracao({ ...configuracao, mensagemWhatsapp: e.target.value })}
+                                placeholder="Olá! Calculei meu IMC através do YLADA e gostaria de saber mais sobre como alcançar meu objetivo. Pode me ajudar?"
+                                rows={4}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              />
+                              <div className="mt-2 bg-blue-50 rounded-lg p-3">
+                                <p className="text-xs text-blue-700 font-medium mb-1">💡 Placeholders disponíveis:</p>
+                                <p className="text-xs text-blue-600">
+                                  [RESULTADO] - Resultado obtido na ferramenta<br/>
+                                  [NOME_CLIENTE] - Nome do cliente (se coletado)<br/>
+                                  [DATA] - Data/hora do uso
+                                </p>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {/* Configuração URL Externa */}
+                        {configuracao.tipoCta === 'url' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              URL de Redirecionamento <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="url"
+                              value={configuracao.urlExterna}
+                              onChange={(e) => setConfiguracao({ ...configuracao, urlExterna: e.target.value })}
+                              placeholder="https://seu-site.com/contato"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                          </div>
+                        )}
                       </div>
-                    </>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-4 mt-8">
@@ -700,34 +857,74 @@ export default function NovaFerramentaWellness() {
             {/* Coluna Direita: Preview */}
             <div className="bg-white rounded-xl border-2 border-green-200 p-8">
               <h3 className="text-lg font-bold text-gray-900 mb-4">📱 Preview</h3>
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <div className="text-center mb-6">
-                  <div className="text-5xl mb-3">{configuracao.emoji || templateSelecionado.icon}</div>
-                  <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                    {configuracao.nomeFerramenta || templateSelecionado.nome}
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-4">Cliente preenche os dados e recebe o resultado...</p>
-                  <div className="bg-gray-200 rounded-lg p-3">
-                    <p className="text-xs text-gray-600">[Formulário da ferramenta]</p>
-                  </div>
-                </div>
-                <div 
-                  className="rounded-lg p-4 text-center"
-                  style={{ background: `linear-gradient(135deg, ${configuracao.cores.principal} 0%, ${configuracao.cores.secundaria} 100%)` }}
-                >
-                  <p className="text-sm text-white mb-2 font-medium">Cliente verá este botão:</p>
-                  <button
-                    disabled
-                    className="bg-white text-gray-900 px-6 py-3 rounded-lg font-bold text-lg w-full hover:bg-gray-50 transition-all"
+              <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                {/* Sequência exata do que está sendo configurado */}
+                
+                {/* 1. Emoji (se tiver) */}
+                {configuracao.emoji && (
+                  <div className="text-5xl mb-4 text-center">{configuracao.emoji}</div>
+                )}
+
+                {/* 2. Título (Nome do Projeto formatado) */}
+                <h4 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+                  {configuracao.urlPersonalizada 
+                    ? configuracao.urlPersonalizada
+                        .split('-')
+                        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                        .join(' ')
+                    : 'Nome do Projeto'}
+                </h4>
+
+                {/* 3. Descrição (se tiver) */}
+                {descricao && (
+                  <p className="text-sm text-gray-600 mb-6 text-center">{descricao}</p>
+                )}
+
+                {/* 4. CTA e Botão */}
+                {configuracao.textoBotao && (
+                  <div 
+                    className="rounded-lg p-6 text-center"
+                    style={{ background: `linear-gradient(135deg, ${configuracao.cores.principal} 0%, ${configuracao.cores.secundaria} 100%)` }}
                   >
-                    {configuracao.textoBotao || 'Conversar com Especialista'}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-4 text-center">
-                  {configuracao.tipoCta === 'whatsapp' 
-                    ? '📱 Abrirá WhatsApp automaticamente'
-                    : '🌐 Redirecionará para URL externa'}
-                </p>
+                    <button
+                      disabled
+                      className="bg-white text-gray-900 px-6 py-4 rounded-lg font-bold text-lg w-full hover:bg-gray-50 transition-all shadow-lg"
+                    >
+                      {configuracao.textoBotao}
+                    </button>
+                    
+                    {configuracao.tipoCta === 'whatsapp' && (
+                      <p className="text-xs text-white/80 mt-3">
+                        📱 Abrirá WhatsApp: {paisTelefone && codigosTelefone[paisTelefone as keyof typeof codigosTelefone]?.codigo} {configuracao.numeroWhatsapp || '...'}
+                      </p>
+                    )}
+                    
+                    {configuracao.tipoCta === 'url' && (
+                      <p className="text-xs text-white/80 mt-3">
+                        🌐 Redirecionará para: {configuracao.urlExterna ? (
+                          <span className="break-all">{configuracao.urlExterna}</span>
+                        ) : (
+                          'URL não informada'
+                        )}
+                      </p>
+                    )}
+
+                    {configuracao.tipoCta === 'whatsapp' && configuracao.mensagemWhatsapp && (
+                      <div className="mt-4 bg-white/20 rounded-lg p-3 text-left">
+                        <p className="text-xs text-white font-medium mb-1">Mensagem:</p>
+                        <p className="text-xs text-white/90">{configuracao.mensagemWhatsapp.substring(0, 80)}{configuracao.mensagemWhatsapp.length > 80 ? '...' : ''}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!configuracao.textoBotao && (
+                  <div className="text-center py-8">
+                    <p className="text-xs text-gray-500 italic">
+                      Configure o CTA acima para ver o preview completo
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

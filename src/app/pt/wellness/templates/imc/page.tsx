@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface ResultadoIMC {
   imc: number
@@ -11,7 +14,7 @@ interface ResultadoIMC {
   recomendacoes: string[]
 }
 
-export default function CalculadoraIMC() {
+export default function CalculadoraIMC({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
   const [idade, setIdade] = useState('')
   const [genero, setGenero] = useState('')
@@ -134,72 +137,38 @@ export default function CalculadoraIMC() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Image
-                src="/logos/ylada-logo-horizontal-vazado.png"
-                alt="YLADA"
-                width={160}
-                height={50}
-                className="h-10"
-              />
-              <div className="h-10 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Calculadora IMC</h1>
-                <p className="text-sm text-gray-600">Descubra seu Índice de Massa Corporal</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Calculadora IMC"
+        defaultDescription="Descubra seu Índice de Massa Corporal"
+      />
 
-      {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">📊</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Calculadora de IMC</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Descubra seu Índice de Massa Corporal em segundos
-              </p>
-              <p className="text-gray-600 mb-6">
-                Com orientações personalizadas para alcançar seu peso ideal
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8 border-2 border-blue-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 Por que calcular seu IMC?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">✓</span>
-                  <span>Identifique se você está no peso ideal para sua altura</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">✓</span>
-                  <span>Receba orientações personalizadas baseadas no seu resultado</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">✓</span>
-                  <span>Entenda sua saúde corporal atual em menos de 2 minutos</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">✓</span>
-                  <span>Conecte-se com quem pode te ajudar a alcançar seus objetivos</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarCalculo}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Calcular Agora - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="📊"
+            defaultTitle="Calculadora de IMC"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Descubra seu Índice de Massa Corporal em segundos
+                </p>
+                <p className="text-gray-600">
+                  Com orientações personalizadas para alcançar seu peso ideal
+                </p>
+              </>
+            }
+            benefits={[
+              'Identifique se você está no peso ideal para sua altura',
+              'Receba orientações personalizadas baseadas no seu resultado',
+              'Entenda sua saúde corporal atual em menos de 2 minutos',
+              'Conecte-se com quem pode te ajudar a alcançar seus objetivos'
+            ]}
+            onStart={iniciarCalculo}
+            buttonText="▶️ Calcular Agora - É Grátis"
+          />
         )}
 
         {etapa === 'formulario' && (
@@ -274,7 +243,14 @@ export default function CalculadoraIMC() {
 
             <button
               onClick={calcularIMC}
-              className="w-full mt-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] shadow-lg"
+              className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
+              style={config?.custom_colors
+                ? {
+                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                  }
+                : {
+                    background: 'linear-gradient(135deg, #2563eb 0%, #9333ea 100%)'
+                  }}
             >
               Calcular IMC →
             </button>
@@ -307,21 +283,10 @@ export default function CalculadoraIMC() {
                 </ul>
               </div>
 
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
-                <div className="text-center">
-                  <p className="text-gray-700 font-medium mb-4">
-                    💬 Quer orientações personalizadas para alcançar seu objetivo?
-                  </p>
-                  <a
-                    href={`https://wa.me/5511999999999?text=Olá! Calculei meu IMC (${resultado.imc}) e gostaria de conversar sobre como posso melhorar minha saúde e bem-estar.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all transform hover:scale-105 font-semibold shadow-lg"
-                  >
-                    📱 Falar no WhatsApp
-                  </a>
-                </div>
-              </div>
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`IMC: ${resultado.imc} - ${resultado.categoria}`}
+              />
             </div>
 
             <div className="flex gap-4">

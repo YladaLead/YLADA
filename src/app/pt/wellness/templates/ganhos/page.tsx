@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface Pergunta {
   id: number
@@ -18,7 +21,7 @@ interface Resultado {
   recomendacoes: string[]
 }
 
-export default function QuizGanhos() {
+export default function QuizGanhos({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'quiz' | 'resultado'>('landing')
   const [perguntaAtual, setPerguntaAtual] = useState(0)
   const [respostas, setRespostas] = useState<number[]>([])
@@ -169,68 +172,38 @@ export default function QuizGanhos() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
-              alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
-            />
-            <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Quiz: Ganhos e Prosperidade</h1>
-              <p className="text-sm text-gray-600">Seu estilo de vida permite ganhar mais?</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Quiz: Ganhos e Prosperidade"
+        defaultDescription="Seu estilo de vida permite ganhar mais?"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-yellow-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">💰</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Ganhos e Prosperidade</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Avalie se seu estilo de vida permite ganhar mais
-              </p>
-              <p className="text-gray-600 mb-6">
-                Descubra como seu estilo de vida impacta sua capacidade de gerar renda
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 mb-8 border-2 border-yellow-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 O que você vai descobrir?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-yellow-600 mr-2">✓</span>
-                  <span>Se suas fontes de renda estão aproveitando seu potencial</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-yellow-600 mr-2">✓</span>
-                  <span>Como otimizar seu tempo para gerar mais renda</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-yellow-600 mr-2">✓</span>
-                  <span>Oportunidades de crescimento que você está perdendo</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-yellow-600 mr-2">✓</span>
-                  <span>Estratégias para multiplicar sua prosperidade</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarQuiz}
-              className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-yellow-700 hover:to-orange-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Iniciar Quiz - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="💰"
+            defaultTitle="Ganhos e Prosperidade"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Avalie se seu estilo de vida permite ganhar mais
+                </p>
+                <p className="text-gray-600">
+                  Descubra como seu estilo de vida impacta sua capacidade de gerar renda
+                </p>
+              </>
+            }
+            benefits={[
+              'Se suas fontes de renda estão aproveitando seu potencial',
+              'Como otimizar seu tempo para gerar mais renda',
+              'Oportunidades de crescimento que você está perdendo',
+              'Estratégias para multiplicar sua prosperidade'
+            ]}
+            onStart={iniciarQuiz}
+            buttonText="▶️ Iniciar Quiz - É Grátis"
+          />
         )}
 
         {etapa === 'quiz' && (
@@ -294,19 +267,10 @@ export default function QuizGanhos() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center">
-              <p className="text-white text-lg font-semibold mb-4">
-                Quer descobrir estratégias práticas para multiplicar sua renda?
-              </p>
-              <a
-                href="https://wa.me/5511999999999?text=Olá! Completei o Quiz de Ganhos e Prosperidade através do YLADA e gostaria de saber mais sobre como otimizar minha renda. Pode me ajudar?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                💬 Conversar com Especialista
-              </a>
-            </div>
+            <WellnessCTAButton
+              config={config}
+              resultadoTexto={`${resultado.perfil} (Score: ${resultado.score}/12) - ${resultado.descricao}`}
+            />
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button

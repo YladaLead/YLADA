@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface Resultado {
   caloriasDiarias: number
@@ -11,7 +14,7 @@ interface Resultado {
   suplementos: string[]
 }
 
-export default function PlanejadorRefeicoes() {
+export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
   const [dados, setDados] = useState({
     idade: '',
@@ -90,68 +93,38 @@ export default function PlanejadorRefeicoes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
-              alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
-            />
-            <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Planejador de Refeições</h1>
-              <p className="text-sm text-gray-600">Crie seu plano alimentar personalizado</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Planejador de Refeições"
+        defaultDescription="Crie seu plano alimentar personalizado"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-pink-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🍽️</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Planejador de Refeições</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Crie seu plano alimentar personalizado
-              </p>
-              <p className="text-gray-600 mb-6">
-                Receba um plano completo com cardápio e macronutrientes
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl p-6 mb-8 border-2 border-pink-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 O que você vai receber?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-pink-600 mr-2">✓</span>
-                  <span>Cardápio semanal personalizado</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-pink-600 mr-2">✓</span>
-                  <span>Distribuição exata de macronutrientes</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-pink-600 mr-2">✓</span>
-                  <span>Receitas recomendadas para seu objetivo</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-pink-600 mr-2">✓</span>
-                  <span>Suplementação específica para seus resultados</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarPlanejamento}
-              className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-pink-700 hover:to-rose-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Criar Meu Plano - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="🍽️"
+            defaultTitle="Planejador de Refeições"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Crie seu plano alimentar personalizado
+                </p>
+                <p className="text-gray-600">
+                  Receba um plano completo com cardápio e macronutrientes
+                </p>
+              </>
+            }
+            benefits={[
+              'Cardápio semanal personalizado',
+              'Distribuição exata de macronutrientes',
+              'Receitas recomendadas para seu objetivo',
+              'Suplementação específica para seus resultados'
+            ]}
+            onStart={iniciarPlanejamento}
+            buttonText="▶️ Criar Meu Plano - É Grátis"
+          />
         )}
 
         {etapa === 'formulario' && (
@@ -264,7 +237,14 @@ export default function PlanejadorRefeicoes() {
 
             <button
               onClick={calcularPlano}
-              className="w-full mt-8 bg-gradient-to-r from-pink-600 to-rose-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-pink-700 hover:to-rose-700 transition-all transform hover:scale-[1.02] shadow-lg"
+              className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
+              style={config?.custom_colors
+                ? {
+                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                  }
+                : {
+                    background: 'linear-gradient(135deg, #db2777 0%, #e11d48 100%)'
+                  }}
             >
               Gerar Meu Plano →
             </button>
@@ -336,19 +316,10 @@ export default function PlanejadorRefeicoes() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center">
-              <p className="text-white text-lg font-semibold mb-4">
-                Quer receber receitas e cardápio semanal personalizado?
-              </p>
-              <a
-                href="https://wa.me/5511999999999?text=Olá! Solicitei meu plano alimentar personalizado através do YLADA e gostaria de saber mais sobre implementação. Pode me ajudar?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                💬 Conversar com Especialista
-              </a>
-            </div>
+            <WellnessCTAButton
+              config={config}
+              resultadoTexto={`Plano: ${resultado.caloriasDiarias} cal/dia | Proteínas: ${resultado.proteinas}g | Carboidratos: ${resultado.carbs}g | Gorduras: ${resultado.gorduras}g`}
+            />
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button

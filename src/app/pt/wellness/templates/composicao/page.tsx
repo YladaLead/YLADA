@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface ResultadoComposicao {
   imc: number
@@ -13,7 +16,7 @@ interface ResultadoComposicao {
   recomendacoes: string[]
 }
 
-export default function CalculadoraComposicao() {
+export default function CalculadoraComposicao({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
   const [idade, setIdade] = useState('')
   const [genero, setGenero] = useState('')
@@ -112,68 +115,38 @@ export default function CalculadoraComposicao() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
-              alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
-            />
-            <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Composição Corporal</h1>
-              <p className="text-sm text-gray-600">Sua massa muscular, gordura e hidratação</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Composição Corporal"
+        defaultDescription="Sua massa muscular, gordura e hidratação"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-green-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🎯</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Avalie sua Composição Corporal</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Entenda sua massa muscular, gordura corporal e hidratação
-              </p>
-              <p className="text-gray-600 mb-6">
-                Para otimizar sua saúde e alcançar seus objetivos
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-8 border-2 border-green-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 Por que avaliar sua composição?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Entenda o que você ganha ao perder peso (músculo vs gordura)</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Monitore ganhos de massa muscular e redução de gordura</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Planeje treinos e dieta com base em dados reais</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span>Motive-se com progresso mensurável</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarCalculo}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Avaliar Minha Composição - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="🎯"
+            defaultTitle="Avalie sua Composição Corporal"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Entenda sua massa muscular, gordura corporal e hidratação
+                </p>
+                <p className="text-gray-600">
+                  Para otimizar sua saúde e alcançar seus objetivos
+                </p>
+              </>
+            }
+            benefits={[
+              'Entenda o que você ganha ao perder peso (músculo vs gordura)',
+              'Monitore ganhos de massa muscular e redução de gordura',
+              'Planeje treinos e dieta com base em dados reais',
+              'Motive-se com progresso mensurável'
+            ]}
+            onStart={iniciarCalculo}
+            buttonText="▶️ Avaliar Minha Composição - É Grátis"
+          />
         )}
 
         {etapa === 'formulario' && (
@@ -263,7 +236,14 @@ export default function CalculadoraComposicao() {
 
             <button
               onClick={calcularComposicao}
-              className="w-full mt-8 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-[1.02] shadow-lg"
+              className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
+              style={config?.custom_colors
+                ? {
+                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                  }
+                : {
+                    background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)'
+                  }}
             >
               Avaliar Composição →
             </button>
@@ -311,19 +291,10 @@ export default function CalculadoraComposicao() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center">
-              <p className="text-white text-lg font-semibold mb-4">
-                Quer criar um plano para otimizar sua composição corporal?
-              </p>
-              <a
-                href="https://wa.me/5511999999999?text=Olá! Avaliei minha composição corporal através do YLADA e gostaria de saber mais sobre otimização. Pode me ajudar?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                💬 Conversar com Especialista
-              </a>
-            </div>
+            <WellnessCTAButton
+              config={config}
+              resultadoTexto={`IMC: ${resultado.imc} - ${resultado.interpretacao} | Massa Muscular: ${resultado.massaMuscular}kg | Gordura: ${resultado.gorduraCorporal}kg`}
+            />
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button

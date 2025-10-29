@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { TemplateBaseProps } from '@/types/wellness'
+import WellnessHeader from '@/components/wellness/WellnessHeader'
+import WellnessLanding from '@/components/wellness/WellnessLanding'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface Pergunta {
   id: number
@@ -18,7 +21,7 @@ interface Resultado {
   recomendacoes: string[]
 }
 
-export default function QuizPotencial() {
+export default function QuizPotencial({ config }: TemplateBaseProps) {
   const [etapa, setEtapa] = useState<'landing' | 'quiz' | 'resultado'>('landing')
   const [perguntaAtual, setPerguntaAtual] = useState(0)
   const [respostas, setRespostas] = useState<number[]>([])
@@ -169,68 +172,38 @@ export default function QuizPotencial() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
-              alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
-            />
-            <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Quiz: Potencial e Crescimento</h1>
-              <p className="text-sm text-gray-600">Seu potencial está sendo bem aproveitado?</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <WellnessHeader
+        title={config?.title}
+        description={config?.description}
+        defaultTitle="Quiz: Potencial e Crescimento"
+        defaultDescription="Seu potencial está sendo bem aproveitado?"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-indigo-200">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">📈</div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Potencial e Crescimento</h2>
-              <p className="text-xl text-gray-600 mb-2">
-                Descubra se seu potencial está sendo bem aproveitado
-              </p>
-              <p className="text-gray-600 mb-6">
-                Avalie seu nível atual de desenvolvimento e oportunidades de crescimento
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-8 border-2 border-indigo-200">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 O que você vai descobrir?</h3>
-              <ul className="text-left space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">✓</span>
-                  <span>Se está aproveitando todo seu potencial</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">✓</span>
-                  <span>Oportunidades de crescimento que está perdendo</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">✓</span>
-                  <span>Como acelerar seu desenvolvimento</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-indigo-600 mr-2">✓</span>
-                  <span>Estratégias para alcançar seu potencial máximo</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={iniciarQuiz}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] shadow-lg"
-            >
-              ▶️ Iniciar Quiz - É Grátis
-            </button>
-          </div>
+          <WellnessLanding
+            config={config}
+            defaultEmoji="📈"
+            defaultTitle="Potencial e Crescimento"
+            defaultDescription={
+              <>
+                <p className="text-xl text-gray-600 mb-2">
+                  Descubra se seu potencial está sendo bem aproveitado
+                </p>
+                <p className="text-gray-600">
+                  Avalie seu nível atual de desenvolvimento e oportunidades de crescimento
+                </p>
+              </>
+            }
+            benefits={[
+              'Se está aproveitando todo seu potencial',
+              'Oportunidades de crescimento que está perdendo',
+              'Como acelerar seu desenvolvimento',
+              'Estratégias para alcançar seu potencial máximo'
+            ]}
+            onStart={iniciarQuiz}
+            buttonText="▶️ Iniciar Quiz - É Grátis"
+          />
         )}
 
         {etapa === 'quiz' && (
@@ -294,19 +267,10 @@ export default function QuizPotencial() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-center">
-              <p className="text-white text-lg font-semibold mb-4">
-                Quer criar um plano de crescimento personalizado?
-              </p>
-              <a
-                href="https://wa.me/5511999999999?text=Olá! Completei o Quiz de Potencial e Crescimento através do YLADA e gostaria de conversar sobre estratégias de desenvolvimento. Pode me ajudar?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                💬 Conversar com Especialista
-              </a>
-            </div>
+            <WellnessCTAButton
+              config={config}
+              resultadoTexto={`${resultado.perfil} (Score: ${resultado.score}/12) - ${resultado.descricao}`}
+            />
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button

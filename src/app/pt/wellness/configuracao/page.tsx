@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -17,8 +17,61 @@ export default function WellnessConfiguracaoPage() {
     email: 'joao@wellness.com',
     telefone: '+55 11 99999-9999',
     whatsapp: '5511999999999',
-    bio: 'Consultor de bem-estar especializado em suplementação natural'
+    bio: 'Consultor de bem-estar especializado em suplementação natural',
+    userSlug: 'joao-silva'
   })
+  const [slugDisponivel, setSlugDisponivel] = useState(true)
+  const [slugValidando, setSlugValidando] = useState(false)
+
+  // Função para tratar slug (lowercase, sem espaços/acentos, hífens)
+  const tratarSlug = (texto: string): string => {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  }
+
+  // Validar disponibilidade do slug
+  const validarSlug = async (slug: string) => {
+    if (!slug || slug.trim() === '') {
+      setSlugDisponivel(false)
+      return
+    }
+
+    try {
+      setSlugValidando(true)
+      // TODO: Criar API route para validar user_slug
+      // Por enquanto, validação básica
+      const slugTratado = tratarSlug(slug)
+      setSlugDisponivel(slugTratado.length >= 3)
+    } catch (error) {
+      setSlugDisponivel(false)
+    } finally {
+      setSlugValidando(false)
+    }
+  }
+
+  // Atualizar slug automaticamente ao mudar nome
+  useEffect(() => {
+    if (!perfil.userSlug || perfil.userSlug === 'joao-silva') {
+      const sugestao = tratarSlug(perfil.nome)
+      if (sugestao) {
+        setPerfil(prev => ({ ...prev, userSlug: sugestao }))
+      }
+    }
+  }, [perfil.nome])
+
+  // Validar slug ao mudar
+  useEffect(() => {
+    if (perfil.userSlug && perfil.userSlug !== 'joao-silva') {
+      const timeoutId = setTimeout(() => {
+        validarSlug(perfil.userSlug)
+      }, 500)
+      return () => clearTimeout(timeoutId)
+    }
+  }, [perfil.userSlug])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,6 +157,41 @@ export default function WellnessConfiguracaoPage() {
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Seu Slug para URL (obrigatório)
+              </label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={perfil.userSlug}
+                  onChange={(e) => {
+                    const slugTratado = tratarSlug(e.target.value)
+                    setPerfil({...perfil, userSlug: slugTratado})
+                  }}
+                  className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                    slugDisponivel 
+                      ? 'border-green-300 focus:ring-green-500' 
+                      : 'border-red-300 focus:ring-red-500'
+                  }`}
+                  placeholder="joao-silva"
+                />
+                {slugValidando ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                ) : slugDisponivel && perfil.userSlug ? (
+                  <span className="text-green-600 text-sm">✓ Disponível</span>
+                ) : perfil.userSlug && !slugDisponivel ? (
+                  <span className="text-red-600 text-sm">✗ Indisponível</span>
+                ) : null}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Este slug será usado nas suas URLs: ylada.app/wellness/<strong>{perfil.userSlug || 'seu-slug'}</strong>/[nome-ferramenta]
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                • Apenas letras minúsculas, números e hífens<br/>
+                • Será usado para criar seus links personalizados
+              </p>
             </div>
             <button className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all">
               Salvar Alterações
