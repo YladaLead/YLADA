@@ -112,9 +112,9 @@ export default function FerramentasWellness() {
             </div>
             <Link
               href="/pt/wellness/ferramentas/nova"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg font-medium"
             >
-              + Nova Ferramenta
+              + Criar Novo Link
             </Link>
           </div>
         </div>
@@ -220,9 +220,9 @@ export default function FerramentasWellness() {
             <p className="text-gray-600 mb-6">Crie sua primeira ferramenta para começar a gerar leads</p>
             <Link
               href="/pt/wellness/ferramentas/nova"
-              className="inline-flex items-center bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
+              className="inline-flex items-center bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg font-medium"
             >
-              + Criar Primeira Ferramenta
+              + Criar Meu Primeiro Link
             </Link>
           </div>
         ) : (

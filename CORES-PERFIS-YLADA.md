@@ -104,34 +104,29 @@ Texto Badge: #1E40AF (Azul-800)
 
 ### 🎯 **Identidade Visual**
 - **Profissão:** Consultor de Bem-Estar / Wellness
-- **Símbolo:** 💖 (Coração Cor-de-Rosa)
-- **Tom Principal:** Gradiente Roxo-Rosa (Energia, Vitalidade, Transformação)
+- **Símbolo:** 🌱 (Bem-Estar Natural)
+- **Tom Principal:** Verde-Esmeralda (Natureza, Vitalidade, Crescimento)
 
 ### 🎨 **Esquema de Cores**
 
 #### **Cores Principais:**
 ```css
-Gradiente Primário:
-  From: #9333EA (Roxo-600)
-  To: #EC4899 (Rosa-500)
-
-Gradiente Secundário:
-  From: #A855F7 (Roxo-500)
-  To: #F472B6 (Rosa-400)
-
-Clara: #F3E8FF (Roxo-100)
-Background Badge: #FCE7F3 (Rosa-100)
-Texto Badge: #9D174D (Rosa-800)
+Primária: #059669 (Verde-Esmeralda-600)
+Secundária: #10B981 (Verde-500)
+Clara: #D1FAE5 (Verde-100)
+Background Badge: #14B8A6 (Teal-500)
+Texto Badge: #0F766E (Teal-700)
 ```
 
 #### **Códigos HEX para Design:**
-- **Roxo:** `#9333EA`
-- **Rosa:** `#EC4899`
-- **Roxo Claro:** `#A855F7`
-- **Rosa Claro:** `#F472B6`
+- **Verde Principal:** `#059669`
+- **Verde Secundário:** `#10B981`
+- **Teal:** `#14B8A6`
+- **Verde Claro:** `#D1FAE5`
+- **Gradiente:** `from-green-600 to-emerald-600`
 
 #### **Uso:**
-- Gradientes em botões principais
+- Gradientes em botões principais (verde → esmeralda)
 - Badges de certificação
 - Elementos de destaque
 - CTAs e elementos de ação
@@ -187,7 +182,7 @@ Informação: #3B82F6 (Azul)
 | **Nutri** | Verde | `#10B981` | `#10B981` | `#047857` |
 | **Coach** | Roxo | `#9333EA` | `#E9D5FF` | `#6B21A8` |
 | **Consultor** | Azul | `#3B82F6` | `#DBEAFE` | `#1E40AF` |
-| **Wellness** | Roxo-Rosa | `#9333EA → #EC4899` | `#FCE7F3` | `#9D174D` |
+| **Wellness** | Verde-Esmeralda | `#059669 → #10B981` | `#14B8A6` | `#0F766E` |
 
 ---
 
@@ -209,9 +204,9 @@ Informação: #3B82F6 (Azul)
 - Profissionalismo
 
 ### **Para Wellness:**
-- 💖 Ícone rosa ou gradiente roxo-rosa
-- Formas fluidas
-- Energia e vitalidade
+- 🌱 Ícone verde ou gradiente verde-esmeralda
+- Formas fluidas e orgânicas
+- Natureza e vitalidade
 
 ---
 
@@ -220,7 +215,7 @@ Informação: #3B82F6 (Azul)
 - [ ] Logo Nutri em verde `#10B981`
 - [ ] Logo Coach em roxo `#9333EA`
 - [ ] Logo Consultor em azul `#3B82F6`
-- [ ] Logo Wellness com gradiente roxo-rosa
+- [ ] Logo Wellness com gradiente verde-esmeralda
 - [ ] Versões para fundo claro e escuro
 - [ ] Versões com e sem ícone
 - [ ] SVG para alta qualidade
