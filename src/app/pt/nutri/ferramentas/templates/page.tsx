@@ -10,6 +10,9 @@ export default function TemplatesNutri() {
   const [templatePreviewAberto, setTemplatePreviewAberto] = useState<string | null>(null)
   const [etapaPreviewQuiz, setEtapaPreviewQuiz] = useState(0) // Para quiz: 0 = landing, 1-6 = perguntas, 7 = resultados
   const [etapaPreviewQuizBemEstar, setEtapaPreviewQuizBemEstar] = useState(0) // Para quiz-bem-estar: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizPerfil, setEtapaPreviewQuizPerfil] = useState(0) // Para quiz-perfil-nutricional: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizDetox, setEtapaPreviewQuizDetox] = useState(0) // Para quiz-detox: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizEnergetico, setEtapaPreviewQuizEnergetico] = useState(0) // Para quiz-energetico: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewCalc, setEtapaPreviewCalc] = useState(0) // Para calculadora: 0 = landing, 1-3 = campos, 4 = resultados
 
   // Todos os 38 templates validados da área admin-diagnosticos
@@ -272,6 +275,9 @@ export default function TemplatesNutri() {
                     setTemplatePreviewAberto(template.id)
                     setEtapaPreviewQuiz(0)
                     setEtapaPreviewQuizBemEstar(0)
+                    setEtapaPreviewQuizPerfil(0)
+                    setEtapaPreviewQuizDetox(0)
+                    setEtapaPreviewQuizEnergetico(0)
                     setEtapaPreviewCalc(0)
                   }}
                   className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
@@ -328,6 +334,9 @@ export default function TemplatesNutri() {
                     setTemplatePreviewAberto(null)
                     setEtapaPreviewQuiz(0)
                     setEtapaPreviewQuizBemEstar(0)
+                    setEtapaPreviewQuizPerfil(0)
+                    setEtapaPreviewQuizDetox(0)
+                    setEtapaPreviewQuizEnergetico(0)
                     setEtapaPreviewCalc(0)
                   }}
                   className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
@@ -1021,8 +1030,683 @@ export default function TemplatesNutri() {
                 </div>
               )}
 
+              {/* Quiz de Perfil Nutricional */}
+              {templatePreviewSelecionado.id === 'quiz-perfil-nutricional' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    🥗 Preview do Quiz de Perfil Nutricional - "Seu corpo está absorvendo bem os nutrientes?"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewQuizPerfil === 0 && (
+                      <div className="bg-gradient-to-r from-green-50 to-orange-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">🔬 Descubra Seu Perfil de Absorção Nutricional em 2 Minutos</h4>
+                        <p className="text-gray-700 mb-3">Avalie como seu corpo está processando e absorvendo os nutrientes essenciais — e descubra estratégias personalizadas para otimizar sua digestão e absorção.</p>
+                        <p className="text-green-600 font-semibold">🧬 Uma avaliação que pode revolucionar sua saúde digestiva.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewQuizPerfil >= 1 && etapaPreviewQuizPerfil <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewQuizPerfil === 1 && (
+                          <div className="bg-green-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-green-900 mb-3">🍽️ 1. Como você se sente após as refeições?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="pos-refeicao" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Cansado, pesado, com sono</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="pos-refeicao" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Normal, sem grandes mudanças</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="pos-refeicao" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Energizado e satisfeito</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Autopercepção digestiva</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizPerfil === 2 && (
+                          <div className="bg-orange-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-orange-900 mb-3">💊 2. Como seu corpo reage aos suplementos?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="suplementos" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Não sinto diferença ou tenho desconforto</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="suplementos" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Sinto alguns benefícios ocasionais</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="suplementos" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Sinto benefícios claros e consistentes</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Experiência com suplementação</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizPerfil === 3 && (
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 mb-3">🚽 3. Como é sua digestão e eliminação?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="digestao" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Irregular, constipação ou diarreia</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="digestao" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Normal, mas às vezes irregular</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="digestao" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Regular e consistente</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Funcionamento intestinal</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizPerfil === 4 && (
+                          <div className="bg-purple-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-purple-900 mb-3">⚡ 4. Como está sua energia ao longo do dia?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="energia" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Baixa, com picos e quedas</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="energia" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Moderada, estável</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="energia" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Alta e constante</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Nível energético</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizPerfil === 5 && (
+                          <div className="bg-indigo-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-indigo-900 mb-3">🧠 5. Como está sua concentração e clareza mental?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="concentracao" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Difícil manter foco, mente nebulosa</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="concentracao" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Boa, mas pode melhorar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="concentracao" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Excelente foco e clareza</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Performance cognitiva</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewQuizPerfil === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Quiz</h4>
+                        
+                        {/* Resultado 1: Absorção Baixa */}
+                        <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-red-900">📉 Absorção Baixa</h5>
+                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">5-8 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Dificuldades de absorção que precisam de intervenção personalizada</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Problemas digestivos ou inflamação podem estar reduzindo a absorção. Uma avaliação completa identifica a origem e como reverter</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para receber um protocolo seguro e adequado. Evite auto-suplementação — cada caso tem necessidades específicas</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Protocolo inicial focado em reparo digestivo e alimentos anti-inflamatórios, com ajustes conforme sua resposta individual</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Definida após avaliação; pode incluir suporte digestivo específico conforme necessidade</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Evite alimentos inflamatórios enquanto aguarda sua avaliação. Aumente fibras prebióticas de forma gradual</p>
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Absorção Moderada */}
+                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-yellow-900">⚖️ Absorção Moderada</h5>
+                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">9-12 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Boa base, mas pode ser otimizada com estratégias personalizadas</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Boa digestão, mas timing e combinações podem ser refinados. Uma análise detalhada mostra onde ganhar eficiência</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e considere avaliação para identificar estratégias de timing que potencializam absorção</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Otimização com combinações alimentares estratégicas e timing nutricional específico para seu perfil</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma avaliação identifica se você se beneficia de suporte preventivo. Multivitamínico e probióticos costumam ser indicados, mas apenas após análise do seu caso</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Combine nutrientes para melhor absorção (ex.: ferro + vitamina C). Um plano otimizado considera combinações específicas para maximizar seus resultados</p>
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Absorção Otimizada */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">🌟 Absorção Otimizada</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">13-15 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Sistema digestivo funcionando bem; estratégias avançadas podem potencializar ainda mais</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Sistema digestivo saudável e eficiente. Estratégias preventivas avançadas ajudam a preservar essa condição e evoluir para níveis superiores</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Continue a rotina atual e considere avaliação preventiva para introduzir estratégias nutricionais avançadas que sustentam resultados a longo prazo</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Manutenção com alimentos funcionais premium e protocolo preventivo personalizado para sustentabilidade</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma análise preventiva identifica se você se beneficia de suporte para performance. O protocolo é personalizado conforme seu perfil metabólico atual</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Mantenha o padrão atual e considere introduzir superalimentos para potencializar ainda mais seus resultados e prevenir declínios futuros</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewQuizPerfil(Math.max(0, etapaPreviewQuizPerfil - 1))}
+                        disabled={etapaPreviewQuizPerfil === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewQuizPerfil(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewQuizPerfil === etapa
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewQuizPerfil(Math.min(6, etapaPreviewQuizPerfil + 1))}
+                        disabled={etapaPreviewQuizPerfil === 6}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Quiz Detox */}
+              {templatePreviewSelecionado.id === 'quiz-detox' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    🧽 Preview do Quiz Detox - "Seu corpo precisa de detox?"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewQuizDetox === 0 && (
+                      <div className="bg-gradient-to-r from-green-50 to-red-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">🧽 Descubra Seu Nível de Toxicidade em 2 Minutos</h4>
+                        <p className="text-gray-700 mb-3">Avalie sinais de acúmulo tóxico no seu corpo — e descubra estratégias personalizadas para eliminar toxinas e revitalizar sua saúde.</p>
+                        <p className="text-green-600 font-semibold">🔥 Uma avaliação que pode transformar sua saúde completamente.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewQuizDetox >= 1 && etapaPreviewQuizDetox <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewQuizDetox === 1 && (
+                          <div className="bg-green-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-green-900 mb-3">🍽️ 1. Como você se sente após comer alimentos processados?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="alimentos-processados" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Normal, sem diferença</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="alimentos-processados" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Leve desconforto ou peso</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="alimentos-processados" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Cansaço, inchaço ou mal-estar</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Sensibilidade alimentar</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizDetox === 2 && (
+                          <div className="bg-orange-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-orange-900 mb-3">🌍 2. Como você se sente em ambientes poluídos?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="poluicao" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Normal, sem problemas</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="poluicao" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Leve irritação ou cansaço</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="poluicao" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Dor de cabeça, irritação ou falta de ar</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Sensibilidade ambiental</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizDetox === 3 && (
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 mb-3">💧 3. Como está sua hidratação e eliminação?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="hidratacao" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Bebo água regularmente e elimino bem</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="hidratacao" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Bebo água ocasionalmente, eliminação normal</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="hidratacao" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Pouca água, constipação ou retenção</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Funcionamento renal</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizDetox === 4 && (
+                          <div className="bg-purple-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-purple-900 mb-3">😴 4. Como está seu sono e recuperação?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="sono" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Durmo bem e acordo renovado</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="sono" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Sono regular, mas às vezes cansado</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="sono" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Sono ruim, acordo cansado e sem energia</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Qualidade do sono</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizDetox === 5 && (
+                          <div className="bg-indigo-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-indigo-900 mb-3">🧠 5. Como está sua clareza mental e foco?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="clareza-mental" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Mente clara e foco excelente</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="clareza-mental" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Boa clareza, mas às vezes nebulosa</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="clareza-mental" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Mente nebulosa, difícil manter foco</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Performance cognitiva</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewQuizDetox === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Quiz</h4>
+                        
+                        {/* Resultado 1: Baixa Toxicidade */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">🛡️ Baixa Toxicidade</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">5-8 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Baixa carga tóxica mantendo boa saúde; estratégias preventivas podem preservar essa condição</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Boa alimentação e estilo de vida saudável mantêm toxinas controladas. Estratégias preventivas ajudam a preservar essa condição ideal</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Continue hábitos atuais e considere avaliação preventiva para introduzir estratégias de manutenção que sustentam saúde a longo prazo</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Manutenção preventiva com alimentos antioxidantes e protocolo de hidratação personalizado conforme seu perfil</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma análise preventiva identifica se você se beneficia de suporte antioxidante. O protocolo é personalizado conforme sua necessidade</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Mantenha o padrão atual e considere introduzir chás detox e vegetais verdes para potencializar ainda mais seus resultados preventivos</p>
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Toxicidade Moderada */}
+                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-yellow-900">⚠️ Toxicidade Moderada</h5>
+                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">9-12 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Sinais de acúmulo tóxico moderado que precisam de intervenção estratégica</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Exposição ambiental e alimentação podem estar aumentando toxinas. Uma avaliação completa identifica a origem e estratégias para reduzir</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para receber um protocolo detox adequado ao seu perfil. Evite protocolos genéricos — cada organismo responde diferente</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Protocolo detox moderado personalizado, considerando seu perfil metabólico e estilo de vida, com ajustes conforme sua resposta</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma avaliação identifica quais suplementos detox seu corpo realmente precisa. Suporte digestivo costuma ser indicado, mas apenas após análise detalhada do seu caso</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Um plano alimentar detox personalizado considera suas preferências. Aumente vegetais crucíferos de forma gradual enquanto aguarda sua avaliação</p>
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Alta Toxicidade */}
+                        <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-red-900">🚨 Alta Toxicidade</h5>
+                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">13-15 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Alta carga tóxica que precisa de intervenção personalizada e urgente</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Exposição excessiva a toxinas e sistema de eliminação comprometido podem estar afetando sua saúde. Uma avaliação completa identifica a origem e estratégias para reverter</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Busque avaliação nutricional imediata para receber um protocolo detox seguro e adequado. Evite protocolos intensivos sem acompanhamento — cada caso requer abordagem específica</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Protocolo detox completo personalizado, com acompanhamento para ajustes conforme sua resposta individual e necessidade metabólica</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma avaliação completa identifica quais suplementos detox são adequados. Protocolos intensivos devem ser definidos apenas após análise detalhada do seu caso</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Um plano alimentar detox rigoroso, totalmente personalizado, considerando suas necessidades metabólicas e preferências, sob acompanhamento profissional</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewQuizDetox(Math.max(0, etapaPreviewQuizDetox - 1))}
+                        disabled={etapaPreviewQuizDetox === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewQuizDetox(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewQuizDetox === etapa
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewQuizDetox(Math.min(6, etapaPreviewQuizDetox + 1))}
+                        disabled={etapaPreviewQuizDetox === 6}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Quiz Energético */}
+              {templatePreviewSelecionado.id === 'quiz-energetico' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    ⚡ Preview do Quiz Energético - "Descubra sua energia natural"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewQuizEnergetico === 0 && (
+                      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">⚡ Descubra Seu Perfil Energético Natural em 2 Minutos</h4>
+                        <p className="text-gray-700 mb-3">Avalie como seu corpo produz e mantém energia naturalmente — e descubra estratégias personalizadas para otimizar sua vitalidade e performance.</p>
+                        <p className="text-yellow-600 font-semibold">🚀 Uma avaliação que pode revolucionar sua energia e disposição.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewQuizEnergetico >= 1 && etapaPreviewQuizEnergetico <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewQuizEnergetico === 1 && (
+                          <div className="bg-yellow-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-yellow-900 mb-3">🌅 1. Como você se sente ao acordar pela manhã?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                                <input type="radio" name="acordar-manha" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Cansado, preciso de tempo para despertar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                                <input type="radio" name="acordar-manha" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Normal, preciso de um café para despertar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                                <input type="radio" name="acordar-manha" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Energizado e pronto para o dia</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Energia matinal</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizEnergetico === 2 && (
+                          <div className="bg-orange-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-orange-900 mb-3">🍽️ 2. Como sua energia muda após as refeições?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="energia-refeicoes" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Fico mais cansado e com sono</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="energia-refeicoes" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Mantenho o mesmo nível de energia</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="energia-refeicoes" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Fico mais energizado e focado</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Resposta metabólica</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizEnergetico === 3 && (
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 mb-3">🏃‍♂️ 3. Como você se sente durante exercícios físicos?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="exercicios" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Cansado rapidamente, sem resistência</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="exercicios" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Consigo fazer exercícios moderados</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="exercicios" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Tenho energia para exercícios intensos</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Capacidade física</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizEnergetico === 4 && (
+                          <div className="bg-purple-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-purple-900 mb-3">🧠 4. Como está sua concentração ao longo do dia?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="concentracao" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Difícil manter foco, mente nebulosa</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="concentracao" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Boa concentração, mas às vezes cansa</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="concentracao" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Excelente foco e clareza mental</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Performance cognitiva</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewQuizEnergetico === 5 && (
+                          <div className="bg-indigo-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-indigo-900 mb-3">🌙 5. Como você se sente no final do dia?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="final-dia" className="mr-3" disabled />
+                                <span className="text-gray-700">(A) Exausto, sem energia para nada</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="final-dia" className="mr-3" disabled />
+                                <span className="text-gray-700">(B) Cansado, mas ainda consigo fazer algumas coisas</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="final-dia" className="mr-3" disabled />
+                                <span className="text-gray-700">(C) Ainda com energia para atividades</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Resistência energética</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewQuizEnergetico === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Quiz</h4>
+                        
+                        {/* Resultado 1: Energia Baixa */}
+                        <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-red-900">📉 Energia Baixa</h5>
+                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">5-8 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Baixa energia natural que precisa de revitalização personalizada</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Deficiências nutricionais ou desequilíbrios metabólicos podem estar afetando sua produção energética. Uma avaliação completa identifica exatamente o que está impactando sua vitalidade</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para receber um protocolo energético seguro e adequado. Evite auto-suplementação — carências específicas precisam ser identificadas primeiro</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Protocolo energético inicial personalizado, ajustado ao seu perfil metabólico e rotina, com foco em carboidratos complexos e proteínas distribuídas</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma avaliação completa identifica quais suplementos energéticos seu corpo realmente precisa. Exemplos comuns incluem suporte a energia celular, mas apenas após análise individual</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Um plano alimentar energético personalizado, considerando suas preferências. Aumente carboidratos complexos e proteínas de forma estratégica enquanto aguarda sua avaliação</p>
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Energia Moderada */}
+                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-yellow-900">⚡ Energia Moderada</h5>
+                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">9-12 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Energia moderada que pode ser otimizada com estratégias personalizadas</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Boa base energética, mas ajustes nutricionais específicos podem elevar sua vitalidade. Uma análise detalhada mostra exatamente onde ganhar performance</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e considere avaliação para identificar estratégias de timing nutricional que potencializam energia</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Otimização energética com timing nutricional estratégico específico para seu perfil metabólico e rotina</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma avaliação identifica se você se beneficia de suporte preventivo. Multivitamínico e ômega-3 costumam ser indicados, mas a dosagem é personalizada após análise do seu caso</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Mantenha padrão atual e otimize horários e combinações alimentares. Um plano otimizado considera estratégias específicas para maximizar seus resultados</p>
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Energia Alta */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">🚀 Energia Alta</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">13-15 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">📋 DIAGNÓSTICO: Excelente energia natural; estratégias avançadas podem potencializar ainda mais</p>
+                            <p className="text-gray-700">🔍 CAUSA RAIZ: Sistema energético eficiente e nutrição adequada. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para performance superior</p>
+                            <p className="text-gray-700">⚡ AÇÃO IMEDIATA: Continue a rotina atual e considere avaliação preventiva para introduzir estratégias nutricionais avançadas que sustentam energia a longo prazo</p>
+                            <p className="text-gray-700">📅 PLANO 7 DIAS: Manutenção energética com alimentos funcionais premium e protocolo preventivo personalizado para sustentabilidade</p>
+                            <p className="text-gray-700">💊 SUPLEMENTAÇÃO: Uma análise preventiva identifica se você se beneficia de suporte para performance. O protocolo é personalizado conforme seu perfil metabólico atual</p>
+                            <p className="text-gray-700">🍎 ALIMENTAÇÃO: Mantenha o padrão atual e considere introduzir superalimentos e alimentos funcionais premium para potencializar ainda mais seus resultados e prevenir declínios futuros</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewQuizEnergetico(Math.max(0, etapaPreviewQuizEnergetico - 1))}
+                        disabled={etapaPreviewQuizEnergetico === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewQuizEnergetico(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewQuizEnergetico === etapa
+                                  ? 'bg-yellow-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewQuizEnergetico(Math.min(6, etapaPreviewQuizEnergetico + 1))}
+                        disabled={etapaPreviewQuizEnergetico === 6}
+                        className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Fallback para templates sem preview específico */}
-              {templatePreviewSelecionado.id !== 'quiz-interativo' && templatePreviewSelecionado.id !== 'calculadora-imc' && templatePreviewSelecionado.id !== 'quiz-bem-estar' && (
+              {templatePreviewSelecionado.id !== 'quiz-interativo' && templatePreviewSelecionado.id !== 'calculadora-imc' && templatePreviewSelecionado.id !== 'quiz-bem-estar' && templatePreviewSelecionado.id !== 'quiz-perfil-nutricional' && templatePreviewSelecionado.id !== 'quiz-detox' && templatePreviewSelecionado.id !== 'quiz-energetico' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     {templatePreviewSelecionado.icon} Preview do {templatePreviewSelecionado.nome}
@@ -1049,6 +1733,9 @@ export default function TemplatesNutri() {
                     setTemplatePreviewAberto(null)
                     setEtapaPreviewQuiz(0)
                     setEtapaPreviewQuizBemEstar(0)
+                    setEtapaPreviewQuizPerfil(0)
+                    setEtapaPreviewQuizDetox(0)
+                    setEtapaPreviewQuizEnergetico(0)
                     setEtapaPreviewCalc(0)
                   }}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
