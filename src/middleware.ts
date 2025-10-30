@@ -7,12 +7,24 @@ export function middleware(request: NextRequest) {
   // Debug: log da rota
   console.log('Middleware - Rota:', pathname)
   
+  // Redirecionar rotas legadas de admin-diagnósticos
+  if (
+    pathname === '/admin-diagnostic' ||
+    pathname === '/admin-diagnosticos' ||
+    pathname === '/pt/admin-diagnostic' ||
+    pathname === '/pt/admin-diagnosticos'
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/pt/nutri/ferramentas/templates'
+    return NextResponse.redirect(url)
+  }
+  
   // Rotas que NUNCA devem ser redirecionadas
   if (
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||
     pathname.startsWith('/calculadora-imc') ||
-    pathname.startsWith('/admin-diagnosticos') ||
+    pathname.startsWith('/admin-diagnosticos') || // mantido, mas acima já redirecionamos
     pathname.startsWith('/admin') ||
     pathname.startsWith('/cursos') ||
     pathname.startsWith('/create') ||

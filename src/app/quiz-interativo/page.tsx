@@ -129,7 +129,7 @@ export default function QuizInterativo() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
         <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
-          <Link href="/pt/admin-diagnosticos">
+          <Link href="/pt/nutri/ferramentas/templates">
             <YLADALogo size="md" responsive={true} />
           </Link>
           <div className="text-sm text-gray-600">
@@ -306,7 +306,7 @@ export default function QuizInterativo() {
                   Fazer Novamente
                 </button>
                 <Link
-                  href="/pt/admin-diagnosticos"
+                  href="/pt/nutri/ferramentas/templates"
                   className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300 inline-block"
                 >
                   Voltar ao Admin

@@ -1,10 +1,8 @@
-'use client'
-
+"use client"
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { diagnosticosNutri, calculadoraAguaDiagnosticos, calculadoraCaloriasDiagnosticos, checklistDetoxDiagnosticos, checklistAlimentarDiagnosticos, miniEbookDiagnosticos, guiaNutraceuticoDiagnosticos, guiaProteicoDiagnosticos, tabelaComparativaDiagnosticos, tabelaSubstituicoesDiagnosticos, tabelaSintomasDiagnosticos, planoAlimentarBaseDiagnosticos } from '@/lib/diagnosticos-nutri'
-
+import { diagnosticosNutri, calculadoraAguaDiagnosticos, calculadoraCaloriasDiagnosticos, checklistDetoxDiagnosticos, checklistAlimentarDiagnosticos, miniEbookDiagnosticos, guiaNutraceuticoDiagnosticos, guiaProteicoDiagnosticos, tabelaComparativaDiagnosticos, tabelaSubstituicoesDiagnosticos, planoAlimentarBaseDiagnosticos } from '@/lib/diagnosticos-nutri'
 export default function TemplatesNutri() {
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas')
   const [busca, setBusca] = useState('')
@@ -25,7 +23,22 @@ export default function TemplatesNutri() {
   const [etapaPreviewGuiaProteico, setEtapaPreviewGuiaProteico] = useState(0) // Para guia-proteico: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewTabelaComparativa, setEtapaPreviewTabelaComparativa] = useState(0) // Para tabela-comparativa: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewTabelaSubstituicoes, setEtapaPreviewTabelaSubstituicoes] = useState(0) // Para tabela-substituicoes: 0 = landing, 1-5 = perguntas, 6 = resultados
-  const [etapaPreviewTabelaSintomas, setEtapaPreviewTabelaSintomas] = useState(0) // Para tabela-sintomas: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewParasitose, setEtapaPreviewParasitose] = useState(0) // Para diagnostico-parasitose: 0 = landing, 1-10 = perguntas, 11 = resultados
+  const [etapaPreviewEletritos, setEtapaPreviewEletritos] = useState(0) // Para diagnostico-eletritos: 0 = landing, 1-10 = perguntas, 11 = resultados
+  const [etapaPreviewMetabolico, setEtapaPreviewMetabolico] = useState(0) // Para diagnostico-perfil-metabolico: 0 = landing, 1-10 = perguntas, 11 = resultados
+  const [etapaPreviewSintomasIntestinais, setEtapaPreviewSintomasIntestinais] = useState(0) // Para diagnostico-sintomas-intestinais: 0 = landing, 1-10 = perguntas, 11 = resultados
+  const [etapaPreviewSono, setEtapaPreviewSono] = useState(0) // Para avaliacao-sono-energia: 0 = landing, 1-10 = perguntas, 11 = resultados
+  const [etapaPreviewRetencao, setEtapaPreviewRetencao] = useState(0) // Para teste-retencao-liquidos: 0 = landing, 1-10 = perguntas, 11 = resultados
+  const [etapaPreviewFomeEmocional, setEtapaPreviewFomeEmocional] = useState(0) // Para avaliacao-fome-emocional
+  const [etapaPreviewTipoMetabolico, setEtapaPreviewTipoMetabolico] = useState(0) // Para diagnostico-tipo-metabolismo
+  const [etapaPreviewSensibilidades, setEtapaPreviewSensibilidades] = useState(0) // Para avaliacao-sensibilidades-alimentares
+  const [etapaPreviewSindMetabolica, setEtapaPreviewSindMetabolica] = useState(0) // Para avaliacao-risco-sindrome-metabolica
+  const [etapaPreviewPerfilBemEstar, setEtapaPreviewPerfilBemEstar] = useState(0) // Para descoberta-perfil-bem-estar
+  const [etapaPreviewTipoFome, setEtapaPreviewTipoFome] = useState(0) // Para quiz-tipo-fome
+  const [etapaPreviewDetox, setEtapaPreviewDetox] = useState(0) // Para quiz-pedindo-detox
+  const [etapaPreviewRotinaAlimentar, setEtapaPreviewRotinaAlimentar] = useState(0) // Para avaliacao-rotina-alimentar
+  const [etapaPreviewProntidaoEmagrecer, setEtapaPreviewProntidaoEmagrecer] = useState(0) // Para pronto-emagrecer
+  const [etapaPreviewAutoconhecimento, setEtapaPreviewAutoconhecimento] = useState(0) // Para autoconhecimento-corporal
 
   // Todos os 38 templates validados da área admin-diagnosticos
   const templates = [
@@ -52,49 +65,25 @@ export default function TemplatesNutri() {
     { id: 'guia-proteico', nome: 'Guia Proteico', categoria: 'Conteúdo', descricao: 'Guia especializado sobre proteínas e fontes proteicas', icon: '🥛', cor: 'orange', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '44/mês', conversao: '27%', preview: 'Especialização em nutrição proteica' },
     { id: 'tabela-comparativa', nome: 'Tabela Comparativa', categoria: 'Conteúdo', descricao: 'Tabelas comparativas de alimentos e nutrientes', icon: '📊', cor: 'green', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '40/mês', conversao: '25%', preview: 'Ferramenta de conversão através de comparações' },
     { id: 'tabela-substituicoes', nome: 'Tabela de Substituições', categoria: 'Conteúdo', descricao: 'Tabela de substituições de alimentos para mais variedade', icon: '🔄', cor: 'blue', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '36/mês', conversao: '23%', preview: 'Valor agregado através de substituições inteligentes' },
-    { id: 'tabela-sintomas', nome: 'Tabela de Sintomas', categoria: 'Conteúdo', descricao: 'Tabela para diagnóstico de sintomas relacionados à alimentação', icon: '🩺', cor: 'red', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '33/mês', conversao: '22%', preview: 'Diagnóstico leve através de sintomas' },
     
-    // PLANOS E ORGANIZAÇÃO (5)
-    { id: 'plano-alimentar-base', nome: 'Plano Alimentar Base', categoria: 'Plano', descricao: 'Plano alimentar base para início de jornada nutricional', icon: '📅', cor: 'green', perguntas: 5, tempoEstimado: 'Download', leadsMedio: '52/mês', conversao: '31%', preview: 'Valor prático através de plano alimentar estruturado' },
-    { id: 'planner-refeicoes', nome: 'Planner de Refeições', categoria: 'Plano', descricao: 'Planner semanal de refeições para organização alimentar', icon: '🗓️', cor: 'blue', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '46/mês', conversao: '28%', preview: 'Organização através de planejamento de refeições' },
-    { id: 'rastreador-alimentar', nome: 'Rastreador Alimentar', categoria: 'Plano', descricao: 'Rastreador para acompanhamento diário de consumo', icon: '📈', cor: 'purple', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '41/mês', conversao: '26%', preview: 'Acompanhamento detalhado de hábitos alimentares' },
-    { id: 'diario-alimentar', nome: 'Diário Alimentar', categoria: 'Plano', descricao: 'Diário para registro de alimentos e sentimentos', icon: '📝', cor: 'orange', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '39/mês', conversao: '25%', preview: 'Engajamento através de registro diário' },
-    { id: 'tabela-metas-semanais', nome: 'Tabela de Metas Semanais', categoria: 'Plano', descricao: 'Tabela para definição e acompanhamento de metas semanais', icon: '🎯', cor: 'yellow', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '37/mês', conversao: '24%', preview: 'Motivação através de metas claras e alcançáveis' },
     
-    // DESAFIOS (2)
-    { id: 'template-desafio-7dias', nome: 'Desafio 7 Dias', categoria: 'Desafio', descricao: 'Desafio gamificado de 7 dias para mudança de hábitos', icon: '🏆', cor: 'orange', perguntas: 7, tempoEstimado: '7 dias', leadsMedio: '58/mês', conversao: '35%', preview: 'Gamificação através de desafio estruturado' },
-    { id: 'template-desafio-21dias', nome: 'Desafio 21 Dias', categoria: 'Desafio', descricao: 'Desafio de 21 dias para formação de hábitos duradouros', icon: '📅', cor: 'green', perguntas: 21, tempoEstimado: '21 dias', leadsMedio: '62/mês', conversao: '38%', preview: 'Comprometimento através de desafio de 21 dias' },
-    
-    // GUIAS ESPECÍFICOS (2)
-    { id: 'guia-hidratacao', nome: 'Guia de Hidratação', categoria: 'Guia', descricao: 'Guia completo sobre hidratação e importância da água', icon: '💧', cor: 'blue', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '35/mês', conversao: '22%', preview: 'Educação visual sobre hidratação' },
-    { id: 'infografico-educativo', nome: 'Infográfico Educativo', categoria: 'Guia', descricao: 'Infográficos educativos sobre nutrição e saúde', icon: '📊', cor: 'purple', perguntas: 0, tempoEstimado: 'Visualização', leadsMedio: '43/mês', conversao: '27%', preview: 'Autoridade através de infográficos visuais' },
-    
-    // RECEITAS E CARDÁPIOS (2)
-    { id: 'template-receitas', nome: 'Receitas', categoria: 'Receita', descricao: 'Coleção de receitas saudáveis e práticas', icon: '👨‍🍳', cor: 'orange', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '49/mês', conversao: '30%', preview: 'Valor prático através de receitas saudáveis' },
-    { id: 'cardapio-detox', nome: 'Cardápio Detox', categoria: 'Receita', descricao: 'Cardápio completo de detox para limpeza do organismo', icon: '🥗', cor: 'green', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '47/mês', conversao: '29%', preview: 'Conversão indireta através de cardápio detox' },
-    
-    // SIMULADORES (1)
-    { id: 'simulador-resultados', nome: 'Simulador de Resultados', categoria: 'Simulador', descricao: 'Simule resultados futuros baseados em mudanças de hábitos', icon: '🔮', cor: 'purple', perguntas: 6, tempoEstimado: '3 min', leadsMedio: '51/mês', conversao: '31%', preview: 'Curiosidade através de simulação de resultados' },
-    
-    // FORMULÁRIOS (2)
-    { id: 'template-avaliacao-inicial', nome: 'Avaliação Inicial', categoria: 'Formulário', descricao: 'Formulário completo para avaliação inicial do cliente', icon: '📋', cor: 'blue', perguntas: 15, tempoEstimado: '5 min', leadsMedio: '44/mês', conversao: '28%', preview: 'Captação através de avaliação inicial detalhada' },
-    { id: 'formulario-recomendacao', nome: 'Formulário de Recomendação', categoria: 'Formulário', descricao: 'Formulário para recomendações nutricionais personalizadas', icon: '📝', cor: 'green', perguntas: 10, tempoEstimado: '4 min', leadsMedio: '40/mês', conversao: '26%', preview: 'Diagnóstico rápido através de formulário' },
-    
-    // CONTEÚDO PARA REDES SOCIAIS (5)
-    { id: 'template-story-interativo', nome: 'Story Interativo', categoria: 'Social', descricao: 'Template de stories interativos para Instagram', icon: '📱', cor: 'purple', perguntas: 5, tempoEstimado: '2 min', leadsMedio: '53/mês', conversao: '32%', preview: 'Engajamento nas redes através de stories' },
-    { id: 'post-curiosidades', nome: 'Post de Curiosidades', categoria: 'Social', descricao: 'Posts educativos com curiosidades nutricionais', icon: '💡', cor: 'yellow', perguntas: 0, tempoEstimado: 'Leitura', leadsMedio: '45/mês', conversao: '28%', preview: 'Autoridade através de conteúdo educativo' },
-    { id: 'template-post-dica', nome: 'Post com Dica', categoria: 'Social', descricao: 'Templates de posts com dicas práticas de nutrição', icon: '📝', cor: 'blue', perguntas: 0, tempoEstimado: 'Leitura', leadsMedio: '42/mês', conversao: '27%', preview: 'Conteúdo recorrente com dicas práticas' },
-    { id: 'template-reels-roteirizado', nome: 'Reels Roteirizado', categoria: 'Social', descricao: 'Roteiros prontos para reels educativos no Instagram', icon: '🎬', cor: 'orange', perguntas: 0, tempoEstimado: 'Produção', leadsMedio: '56/mês', conversao: '34%', preview: 'Atração visual através de reels roteirizados' },
-    { id: 'template-artigo-curto', nome: 'Artigo Curto', categoria: 'Social', descricao: 'Templates de artigos curtos para blog e redes sociais', icon: '📄', cor: 'green', perguntas: 0, tempoEstimado: 'Leitura', leadsMedio: '38/mês', conversao: '25%', preview: 'Autoridade escrita através de artigos' },
-    
-    // CATÁLOGOS (1)
-    { id: 'template-catalogo-digital', nome: 'Catálogo Digital', categoria: 'Catálogo', descricao: 'Catálogo digital de produtos e serviços nutricionais', icon: '📱', cor: 'purple', perguntas: 0, tempoEstimado: 'Navegação', leadsMedio: '50/mês', conversao: '30%', preview: 'Conversão direta através de catálogo' },
-    
-    // SIMULADORES ESPECÍFICOS (1)
-    { id: 'simulador-ganho', nome: 'Simulador de Ganho', categoria: 'Simulador', descricao: 'Simule ganhos financeiros com produtos nutricionais', icon: '💰', cor: 'yellow', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '48/mês', conversao: '29%', preview: 'Recrutamento através de simulação de ganhos' },
-    
-    // DIAGNÓSTICOS ESPECÍFICOS (1)
-    { id: 'template-diagnostico-parasitose', nome: 'Diagnóstico de Parasitose', categoria: 'Diagnóstico', descricao: 'Ferramenta para diagnóstico de parasitose intestinal', icon: '🦠', cor: 'red', perguntas: 8, tempoEstimado: '3 min', leadsMedio: '41/mês', conversao: '27%', preview: 'Diagnóstico específico de parasitose' }
+    // DIAGNÓSTICOS ESPECÍFICOS (16)
+    { id: 'template-diagnostico-parasitose', nome: 'Diagnóstico de Parasitose', categoria: 'Diagnóstico', descricao: 'Ferramenta para diagnóstico de parasitose intestinal', icon: '🦠', cor: 'red', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '41/mês', conversao: '27%', preview: 'Diagnóstico específico de parasitose' },
+    { id: 'diagnostico-eletritos', nome: 'Diagnóstico de Eletrólitos', categoria: 'Diagnóstico', descricao: 'Avalie sinais de desequilíbrio de sódio, potássio, magnésio e cálcio', icon: '⚡', cor: 'yellow', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '39/mês', conversao: '25%', preview: 'Detecta necessidade de reposição de eletrólitos' },
+    { id: 'diagnostico-perfil-metabolico', nome: 'Avaliação do Perfil Metabólico', categoria: 'Diagnóstico', descricao: 'Identifique sinais de metabolismo acelerado, equilibrado ou lento', icon: '🔥', cor: 'orange', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '42/mês', conversao: '28%', preview: 'Classifica seu perfil metabólico e orienta próximos passos' },
+    { id: 'diagnostico-sintomas-intestinais', nome: 'Diagnóstico de Sintomas Intestinais', categoria: 'Diagnóstico', descricao: 'Identifique sinais de constipação, disbiose, inflamação e irregularidade', icon: '💩', cor: 'purple', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '45/mês', conversao: '29%', preview: 'Detecta desequilíbrio intestinal e orienta próximos passos' },
+    { id: 'avaliacao-sono-energia', nome: 'Avaliação do Sono e Energia', categoria: 'Diagnóstico', descricao: 'Avalie se o sono está restaurando sua energia diária', icon: '😴', cor: 'blue', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '40/mês', conversao: '26%', preview: 'Classifica o descanso e energia (baixo/moderado/alto comprometimento)' },
+    { id: 'teste-retencao-liquidos', nome: 'Teste de Retenção de Líquidos', categoria: 'Diagnóstico', descricao: 'Avalie sinais de retenção hídrica e desequilíbrio mineral', icon: '💧', cor: 'teal', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '38/mês', conversao: '25%', preview: 'Detecta retenção hídrica e orienta próximos passos' },
+    { id: 'avaliacao-fome-emocional', nome: 'Avaliação de Fome Emocional', categoria: 'Diagnóstico', descricao: 'Identifique se a alimentação está sendo influenciada por emoções e estresse', icon: '🧠', cor: 'pink', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '43/mês', conversao: '27%', preview: 'Avalia influência emocional na alimentação' },
+    { id: 'diagnostico-tipo-metabolismo', nome: 'Diagnóstico do Tipo de Metabolismo', categoria: 'Diagnóstico', descricao: 'Avalie se seu metabolismo é lento, normal ou acelerado', icon: '⚙️', cor: 'gray', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '41/mês', conversao: '26%', preview: 'Classifica o tipo metabólico por sintomas e hábitos' }
+    ,{ id: 'avaliacao-sensibilidades', nome: 'Avaliação de Intolerâncias/Sensibilidades', categoria: 'Diagnóstico', descricao: 'Detecte sinais de sensibilidades alimentares não diagnosticadas', icon: '⚠️', cor: 'red', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '44/mês', conversao: '28%', preview: 'Identifica possíveis reações alimentares e orienta próximos passos' }
+    ,{ id: 'avaliacao-sindrome-metabolica', nome: 'Risco de Síndrome Metabólica', categoria: 'Diagnóstico', descricao: 'Avalie fatores de risco ligados à resistência à insulina e inflamação', icon: '🚨', cor: 'gray', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '46/mês', conversao: '30%', preview: 'Sinaliza risco metabólico e orienta condutas' }
+    ,{ id: 'descoberta-perfil-bem-estar', nome: 'Descubra seu Perfil de Bem-Estar', categoria: 'Diagnóstico', descricao: 'Identifique se seu perfil é Estético, Equilibrado ou Saúde/Performance', icon: '🧭', cor: 'purple', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '47/mês', conversao: '31%', preview: 'Diagnóstico leve com convite à avaliação personalizada' }
+    ,{ id: 'quiz-tipo-fome', nome: 'Qual é o seu Tipo de Fome?', categoria: 'Diagnóstico', descricao: 'Identifique Fome Física, por Hábito ou Emocional', icon: '🍽️', cor: 'pink', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '44/mês', conversao: '29%', preview: 'Provoca curiosidade e direciona para avaliação' }
+    ,{ id: 'quiz-pedindo-detox', nome: 'Seu corpo está pedindo Detox?', categoria: 'Diagnóstico', descricao: 'Avalie sinais de sobrecarga e acúmulo de toxinas', icon: '💧', cor: 'teal', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '46/mês', conversao: '30%', preview: 'Sinaliza necessidade de detox guiado' }
+    ,{ id: 'avaliacao-rotina-alimentar', nome: 'Você está se alimentando conforme sua rotina?', categoria: 'Diagnóstico', descricao: 'Descubra se sua rotina alimentar está adequada aos horários e demandas', icon: '⏰', cor: 'blue', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '43/mês', conversao: '28%', preview: 'Aponta alinhamento da rotina e sugere reeducação' }
+    ,{ id: 'pronto-emagrecer', nome: 'Pronto para Emagrecer com Saúde?', categoria: 'Diagnóstico', descricao: 'Avalie seu nível de prontidão física e emocional', icon: '🏁', cor: 'green', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '48/mês', conversao: '32%', preview: 'Identifica prontidão e direciona para preparação personalizada' }
+    ,{ id: 'autoconhecimento-corporal', nome: 'Você conhece o seu corpo?', categoria: 'Diagnóstico', descricao: 'Avalie seu nível de autoconhecimento corporal e nutricional', icon: '🧠', cor: 'purple', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '45/mês', conversao: '30%', preview: 'Mostra o quanto você entende seus sinais físicos e emocionais' }
   ]
 
   const categorias = ['todas', 'Quiz', 'Calculadora', 'Checklist', 'Conteúdo', 'Plano', 'Desafio', 'Guia', 'Receita', 'Simulador', 'Formulário', 'Social', 'Catálogo', 'Diagnóstico']
@@ -301,7 +290,22 @@ export default function TemplatesNutri() {
                     setEtapaPreviewGuiaProteico(0)
                     setEtapaPreviewTabelaComparativa(0)
                     setEtapaPreviewTabelaSubstituicoes(0)
-                    setEtapaPreviewTabelaSintomas(0)
+                    setEtapaPreviewParasitose(0)
+                    setEtapaPreviewEletritos(0)
+                    setEtapaPreviewMetabolico(0)
+                    setEtapaPreviewSintomasIntestinais(0)
+                    setEtapaPreviewSono(0)
+                    setEtapaPreviewRetencao(0)
+                    setEtapaPreviewFomeEmocional(0)
+                    setEtapaPreviewTipoMetabolico(0)
+                    setEtapaPreviewSensibilidades(0)
+                    setEtapaPreviewSindMetabolica(0)
+                    setEtapaPreviewPerfilBemEstar(0)
+                    setEtapaPreviewTipoFome(0)
+                    setEtapaPreviewDetox(0)
+                    setEtapaPreviewRotinaAlimentar(0)
+                    setEtapaPreviewProntidaoEmagrecer(0)
+                    setEtapaPreviewAutoconhecimento(0)
                   }}
                   className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
@@ -337,7 +341,6 @@ export default function TemplatesNutri() {
           </div>
         </div>
       </div>
-
       {/* Modal de Preview do Fluxo */}
       {templatePreviewSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -370,8 +373,1629 @@ export default function TemplatesNutri() {
             </div>
 
             {/* Conteúdo do Preview - Mesmo formato do admin-diagnosticos */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 pb-24">
               {/* Renderizar preview baseado no ID do template */}
+              {templatePreviewSelecionado.id === 'diagnostico-eletritos' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">⚡ Preview do Diagnóstico de Eletrólitos</h3>
+                  <div className="relative">
+                    {etapaPreviewEletritos === 0 && (
+                      <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Seu corpo está pedindo eletrólitos?</h4>
+                        <p className="text-gray-700 mb-2">Eletrólitos (sódio, potássio, magnésio, cálcio) são essenciais para hidratação, energia e função muscular.</p>
+                        <p className="text-amber-700 font-semibold">Faça este diagnóstico rápido e descubra se você precisa repor minerais.</p>
+                      </div>
+                    )}
+
+                    {etapaPreviewEletritos >= 1 && etapaPreviewEletritos <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você sente cansaço ou fraqueza mesmo dormindo bem?',
+                          'Tem dores de cabeça, especialmente em dias quentes?',
+                          'Já sentiu câimbras ou tremores musculares?',
+                          'Sua boca ou pele ficam ressecadas com frequência?',
+                          'Você sua muito ou pratica atividade física regularmente?',
+                          'Costuma beber pouca água (menos de 1,5L por dia)?',
+                          'Sente tontura ao levantar (sensação de pressão baixa)?',
+                          'Percebe retenção de líquidos (inchaço)?',
+                          'Consome poucos alimentos ricos em minerais (banana, folhas verdes, coco, abacate, sementes)?',
+                          'Usa álcool, café ou diuréticos com frequência?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewEletritos === index + 1 && (
+                            <div key={index} className="bg-amber-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-amber-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-amber-700 mt-2">Escala de 1 a 5 para estimar intensidade/frequência dos sinais.</p>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+
+                    {etapaPreviewEletritos === 11 && (
+                      <div className="space-y-4">
+                        {/* Baixo */}
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Equilíbrio Bom (0–10)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Baixo</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Níveis de eletrólitos aparentam estar equilibrados.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Bons hábitos de hidratação e alimentação mineralizada.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter ingestão hídrica e alimentação natural.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Água ao longo do dia; incluir água de coco, frutas e folhas.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Não necessária salvo orientação profissional.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Priorizar fontes ricas em minerais (banana, abacate, folhas, sementes).</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Monitorar sinais em dias quentes/treinos intensos.</p>
+                          </div>
+                        </div>
+
+                        {/* Moderado */}
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Necessidade Moderada (11–25)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sinais de leve desequilíbrio eletrolítico.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Suor elevado, baixo consumo hídrico ou consumo de diuréticos.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Aumentar ingestão de água e alimentos ricos em minerais.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Rotina hídrica; sal marinho moderado; água de coco pós‑treino.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Considerar magnésio/potássio somente com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Reforçar frutas, legumes, sementes e caldos.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Agendar avaliação para ajuste individualizado.</p>
+                          </div>
+                        </div>
+
+                        {/* Alto */}
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Alta Necessidade (26–40)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Fortes sinais de desequilíbrio de eletrólitos.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Perdas elevadas por suor/diurese e baixa reposição mineral.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Procurar avaliação profissional antes de suplementar.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Protocolo de reidratação guiado; caldos e eletrólitos alimentares.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Somente com orientação e dosagem adequada.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Reforçar alimentos mineralizantes e reduzir diuréticos.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Exames/avaliação para plano personalizado.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewEletritos(Math.max(0, etapaPreviewEletritos - 1))}
+                        disabled={etapaPreviewEletritos === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+
+                      <div className="flex space-x-2">
+                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((etapa) => {
+                          const labels = ['Início','1','2','3','4','5','6','7','8','9','10','Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewEletritos(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewEletritos === etapa
+                                  ? 'bg-amber-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 11 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewEletritos(Math.min(11, etapaPreviewEletritos + 1))}
+                        disabled={etapaPreviewEletritos === 11}
+                        className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'diagnostico-perfil-metabolico' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🔥 Preview da Avaliação do Perfil Metabólico</h3>
+                  <div className="relative">
+                    {etapaPreviewMetabolico === 0 && (
+                      <div className="bg-gradient-to-r from-orange-50 to-rose-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Como está seu metabolismo hoje?</h4>
+                        <p className="text-gray-700 mb-2">Identifique sinais de metabolismo lento, equilibrado ou acelerado com 10 perguntas rápidas.</p>
+                        <p className="text-orange-700 font-semibold">No final, veja o resultado e orientações personalizadas em 7 etapas.</p>
+                      </div>
+                    )}
+
+                    {etapaPreviewMetabolico >= 1 && etapaPreviewMetabolico <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você sente cansaço constante mesmo dormindo bem?',
+                          'Tem dificuldade para emagrecer, mesmo comendo pouco?',
+                          'Sente-se inchado(a) com frequência, especialmente ao final do dia?',
+                          'Costuma ter mãos e pés frios ou sente frio com facilidade?',
+                          'Sente fome exagerada ou vontade de comer doces frequentemente?',
+                          'Tem variação de humor e energia ao longo do dia?',
+                          'Sua digestão é lenta ou sente empachamento após comer?',
+                          'Dorme mal ou acorda cansado(a)?',
+                          'Tem retenção de líquidos ou peso que oscila rapidamente?',
+                          'Você pratica atividade física regularmente (3x por semana ou mais)?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewMetabolico === index + 1 && (
+                            <div key={index} className="bg-orange-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-orange-900 mb-3">{index + 1}. {pergunta}{index === 9 && ' (esta é invertida)'} </h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-orange-700 mt-2">Escala de 1 a 5 para estimar intensidade/frequência (a questão 10 é invertida na pontuação).</p>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+
+                    {etapaPreviewMetabolico === 11 && (
+                      <div className="space-y-4">
+                        {/* Acelerado */}
+                        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-rose-900">Resultado: Metabolismo Acelerado (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-rose-600 text-white">Acelerado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sinais de queima energética alta e instável.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Baixa densidade nutricional/calórica, estresse ou treinos intensos sem reposição adequada.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Refeições equilibradas a cada 3h com proteína + gordura boa.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Ajuste calórico controlado; priorize sono e recuperação.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Reposição mineral (magnésio, potássio) somente com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Enfatizar proteínas completas, carboidratos complexos e gorduras boas.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação metabólica para calibrar ingestão e proteger massa magra.</p>
+                          </div>
+                        </div>
+
+                        {/* Equilibrado */}
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Metabolismo Equilibrado (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Equilibrado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Funcionamento energético adequado e estável.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Bons hábitos de sono, hidratação, atividade e alimentação variada.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter rotina e revisar hidratação/fibras.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Plano equilibrado com proteínas, fibras e vegetais diariamente.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se houver necessidade identificada.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Priorizar alimentos in natura e timing adequado ao treino.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação metabólica para objetivo específico (emagrecer/ganhar/manter).</p>
+                          </div>
+                        </div>
+
+                        {/* Lento */}
+                        <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-orange-900">Resultado: Metabolismo Lento (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-orange-600 text-white">Lento</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sinais de queima reduzida com tendência a inchaço e fadiga.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Baixa massa magra, sono insuficiente e alimentação inadequada.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Aumentar proteína e fibras; evitar longos períodos em jejum.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Refeições fracionadas ricas em proteína + treino de força leve.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Considerar apoio metabólico apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Reduzir ultraprocessados e açúcar; priorizar integrais.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Consulta para identificar gatilhos e acelerar o metabolismo com segurança.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewMetabolico(Math.max(0, etapaPreviewMetabolico - 1))}
+                        disabled={etapaPreviewMetabolico === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+
+                      <div className="flex space-x-2">
+                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((etapa) => {
+                          const labels = ['Início','1','2','3','4','5','6','7','8','9','10','Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewMetabolico(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewMetabolico === etapa
+                                  ? 'bg-orange-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 11 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewMetabolico(Math.min(11, etapaPreviewMetabolico + 1))}
+                        disabled={etapaPreviewMetabolico === 11}
+                        className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'diagnostico-sintomas-intestinais' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">💩 Preview do Diagnóstico de Sintomas Intestinais</h3>
+                  <div className="relative">
+                    {etapaPreviewSintomasIntestinais === 0 && (
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Como está o seu intestino?</h4>
+                        <p className="text-gray-700 mb-2">Identifique sinais de disfunções intestinais, como constipação, disbiose, inflamação, gases e irregularidade.</p>
+                        <p className="text-purple-700 font-semibold">Responda 10 perguntas e veja o diagnóstico com orientações em 7 etapas.</p>
+                      </div>
+                    )}
+
+                    {etapaPreviewSintomasIntestinais >= 1 && etapaPreviewSintomasIntestinais <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você sente inchaço abdominal com frequência?',
+                          'Costuma ter gases em excesso (arrotos ou flatulência)?',
+                          'Percebe variações no ritmo intestinal (dias de diarreia e outros de prisão de ventre)?',
+                          'Nota odor forte nas fezes ou gases?',
+                          'Sente dores abdominais recorrentes, especialmente após comer?',
+                          'Tem fezes muito ressecadas ou muito moles com frequência?',
+                          'Observa muco, restos de alimentos ou gordura nas fezes?',
+                          'Sente muito sono ou cansaço após as refeições?',
+                          'Apresenta queda de imunidade (gripes, aftas ou infecções frequentes)?',
+                          'Usa antibióticos, antiácidos ou laxantes com frequência?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewSintomasIntestinais === index + 1 && (
+                            <div key={index} className="bg-purple-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-purple-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-purple-700 mt-2">Escala de 1 a 5 para estimar intensidade/frequência dos sinais.</p>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+
+                    {etapaPreviewSintomasIntestinais === 11 && (
+                      <div className="space-y-4">
+                        {/* Equilíbrio */}
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Equilíbrio Intestinal (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Equilíbrio</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Função intestinal dentro da normalidade.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Hábitos consistentes de alimentação, hidratação e rotina.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter fibras, água e probióticos naturais.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Rotina com frutas, vegetais, cereais integrais e água.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se indicado por profissional.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Evitar ultraprocessados; observar reações a industrializados.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Manter constância; reavaliar se surgirem sintomas novos.</p>
+                          </div>
+                        </div>
+
+                        {/* Moderado */}
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Desequilíbrio Moderado (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sinais de desajuste na microbiota/digestão irregular.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Baixa ingestão de fibras/água, excesso de açúcar/medicamentos.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Aumentar fibras solúveis, hidratação e reduzir açúcar.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Inclusão de prebióticos (aveia, banana verde) e probióticos alimentares.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Probióticos/enzimas apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Evitar frituras e ultraprocessados; refeições regulares.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação nutricional para identificar gatilhos e restaurar a microbiota.</p>
+                          </div>
+                        </div>
+
+                        {/* Importante */}
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Disfunção Intestinal Importante (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Importante</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Forte suspeita de disbiose, inflamação ou má absorção.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Uso recorrente de medicamentos, alimentação inadequada, infecções.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Procurar avaliação para definir conduta e exames.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Protocolo anti-inflamatório leve; caldos, cozidos e hidratação.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Probióticos específicos e suporte digestivo apenas com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Remover ultraprocessados; priorizar integrais e especiarias.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Consulta para plano de limpeza/regeneração intestinal baseado em evidências.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewSintomasIntestinais(Math.max(0, etapaPreviewSintomasIntestinais - 1))}
+                        disabled={etapaPreviewSintomasIntestinais === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+
+                      <div className="flex space-x-2">
+                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((etapa) => {
+                          const labels = ['Início','1','2','3','4','5','6','7','8','9','10','Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewSintomasIntestinais(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewSintomasIntestinais === etapa
+                                  ? 'bg-purple-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 11 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewSintomasIntestinais(Math.min(11, etapaPreviewSintomasIntestinais + 1))}
+                        disabled={etapaPreviewSintomasIntestinais === 11}
+                        className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'avaliacao-sono-energia' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">😴 Preview da Avaliação do Sono e Energia</h3>
+                  <div className="relative">
+                    {etapaPreviewSono === 0 && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Seu corpo está recuperando energia?</h4>
+                        <p className="text-gray-700 mb-2">Descubra se seu sono está restaurando sua energia e foco ao longo do dia.</p>
+                      </div>
+                    )}
+                    {etapaPreviewSono >= 1 && etapaPreviewSono <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você demora para adormecer ou acorda várias vezes à noite?',
+                          'Acorda cansado(a) mesmo dormindo mais de 7 horas?',
+                          'Sente sonolência ou queda de energia após o almoço?',
+                          'Precisa de café ou estimulantes para “funcionar” de manhã?',
+                          'Sente dificuldade de concentração ao longo do dia?',
+                          'Tem variações fortes de humor ou irritabilidade?',
+                          'Costuma dormir menos de 6 horas por noite?',
+                          'Usa celular ou TV até poucos minutos antes de dormir?',
+                          'Sente fome ou vontade de doce à noite?',
+                          'Dorme em horários irregulares?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewSono === index + 1 && (
+                            <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-blue-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-blue-700 mt-2">Escala de 1 a 5 para estimar intensidade/frequência dos sinais.</p>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewSono === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Sono Restaurador (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Bom</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Seu corpo parece descansar bem e repor energia.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Rotina, sono adequado e exposição à luz natural.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter higiene do sono e constância de horários.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Horários fixos; reduzir telas à noite; luz natural pela manhã.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Jantar leve, evitar estimulantes noturnos.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Manter hábitos e monitorar energia ao longo do dia.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Sono Levemente Prejudicado (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Há sinais de fadiga acumulada e ritmo circadiano alterado.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Cafeína, telas noturnas, horários irregulares.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Reduzir cafeína, telas à noite e regular horários.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Higiene do sono, luz matinal e pausas de foco.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Considerar magnésio/teanina sob orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Ajustar carboidratos à noite; evitar refeições tardias.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Reorganizar rotina e reavaliar energia em 7–14 dias.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Sono e Energia Comprometidos (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Forte desequilíbrio no descanso e possível impacto metabólico.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Privação crônica de sono, estresse e hábitos noturnos inadequados.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Avaliação profissional para ajuste de sono e rotina.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Agenda de sono rígida; reduzir telas/cafeína; técnicas de relaxamento.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Só com orientação; evitar automedicação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Refeições leves à noite; hidratação adequada.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Procurar acompanhamento para restabelecer sono e energia.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewSono(Math.max(0, etapaPreviewSono - 1))} disabled={etapaPreviewSono === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewSono(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewSono===e?'bg-blue-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewSono(Math.min(11, etapaPreviewSono + 1))} disabled={etapaPreviewSono === 11} className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'teste-retencao-liquidos' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">💧 Preview do Teste de Retenção de Líquidos</h3>
+                  <div className="relative">
+                    {etapaPreviewRetencao === 0 && (
+                      <div className="bg-gradient-to-r from-teal-50 to-cyan-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Há sinais de retenção hídrica?</h4>
+                        <p className="text-gray-700 mb-2">Avalie circulação, hidratação e possível desequilíbrio mineral.</p>
+                      </div>
+                    )}
+                    {etapaPreviewRetencao >= 1 && etapaPreviewRetencao <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Sente pernas, pés ou mãos inchadas no fim do dia?',
+                          'Seus anéis ou sapatos ficam mais apertados ao longo do dia?',
+                          'Tem sensação de peso nas pernas ou cansaço corporal?',
+                          'Sente rosto inchado ao acordar?',
+                          'Urina em pouca quantidade mesmo bebendo água?',
+                          'Tem variações rápidas de peso (2kg+ em poucos dias)?',
+                          'Consome muito sal, embutidos ou alimentos industrializados?',
+                          'Sente-se “estufado(a)” após refeições?',
+                          'Usa diuréticos, anticoncepcionais ou medicamentos hormonais?',
+                          'Sua alimentação tem poucas frutas e vegetais frescos?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewRetencao === index + 1 && (
+                            <div key={index} className="bg-teal-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-teal-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-teal-700 mt-2">Escala de 1 a 5 para estimar intensidade/frequência dos sinais.</p>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewRetencao === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Baixa Retenção (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Baixo</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Circulação e equilíbrio hídrico adequados.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Hábitos de hidratação e alimentação equilibrados.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter hidratação e atividade física.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Água fracionada; caminhar diariamente.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Não necessária salvo orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Frutas e vegetais frescos diariamente.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Manter rotina e observar variações sazonais.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Retenção Moderada (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Pequeno acúmulo de líquidos requer atenção.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Excesso de sódio, ultraprocessados e baixa ingestão de potássio.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Reduzir sal e alimentos industrializados; aumentar potássio.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Água adequada; incluir banana, abacate e folhas verdes.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação; evitar diuréticos por conta.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Preferir in natura; evitar embutidos.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Reavaliar em 7–14 dias e ajustar plano.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Retenção Elevada (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Alta probabilidade de retenção e desequilíbrio mineral.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Sódio elevado, hormônios/medicamentos, baixa hidratação.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Procurar orientação profissional.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Hidratação guiada; reduzir sódio; acompanhar sintomas.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Somente com orientação; evitar automedicação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Foco em alimentos frescos e integrais.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação nutricional para plano individual.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewRetencao(Math.max(0, etapaPreviewRetencao - 1))} disabled={etapaPreviewRetencao === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewRetencao(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewRetencao===e?'bg-teal-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewRetencao(Math.min(11, etapaPreviewRetencao + 1))} disabled={etapaPreviewRetencao === 11} className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'avaliacao-fome-emocional' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🧠 Preview da Avaliação de Fome Emocional</h3>
+                  <div className="relative">
+                    {etapaPreviewFomeEmocional === 0 && (
+                      <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Como suas emoções influenciam sua alimentação?</h4>
+                        <p className="text-gray-700 mb-2">Identifique gatilhos emocionais e melhore sua relação com a comida.</p>
+                      </div>
+                    )}
+                    {etapaPreviewFomeEmocional >= 1 && etapaPreviewFomeEmocional <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você come mesmo sem fome, por ansiedade ou tédio?',
+                          'Sente necessidade de doces ou carboidratos quando está estressado(a)?',
+                          'Come rápido, sem perceber o sabor?',
+                          'Fica irritado(a) quando tenta controlar a comida?',
+                          'Usa a comida como “recompensa” ou “conforto”?',
+                          'Sente culpa após comer demais?',
+                          'Tem episódios de compulsão alimentar?',
+                          'Faz dietas muito restritivas e depois “descompensa”?',
+                          'Evita eventos sociais por medo de exagerar?',
+                          'Come mais quando está triste, cansado(a) ou frustrado(a)?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewFomeEmocional === index + 1 && (
+                            <div key={index} className="bg-pink-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-pink-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-pink-700 mt-2">Escala de 1 a 5 para estimar intensidade/frequência.</p>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewFomeEmocional === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Relação Saudável (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Baixo</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Boa percepção de fome e saciedade.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Consciência corporal e rotina estável.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter atenção plena às refeições.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Refeições regulares e mastigação consciente.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Não necessária.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Priorizar alimentos in natura; hidratação.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Continuar atento(a) aos sinais do corpo.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Tendência à Fome Emocional (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Alimentação em resposta às emoções.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Estresse, tédio ou restrições alimentares.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Mindfulness alimentar e registro de gatilhos.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Planejar lanches de qualidade; pausas de respiração.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se indicado; foco em rotina.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Refeições completas com proteína e fibras.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Construir autoconsciência e revisar gatilhos.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Fome Emocional Acentuada (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Relação emocional intensa com a comida.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Estresse crônico/emocional e restrições extremas.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Procurar apoio nutricional e emocional.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Estruturar refeições e hidratação; remover gatilhos imediatos.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Somente com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Foco em refeições completas; evitar compensações.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Trabalhar comportamento alimentar com acompanhamento.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewFomeEmocional(Math.max(0, etapaPreviewFomeEmocional - 1))} disabled={etapaPreviewFomeEmocional === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewFomeEmocional(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewFomeEmocional===e?'bg-pink-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewFomeEmocional(Math.min(11, etapaPreviewFomeEmocional + 1))} disabled={etapaPreviewFomeEmocional === 11} className="flex items-center px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'diagnostico-tipo-metabolismo' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">⚙️ Preview do Diagnóstico do Tipo de Metabolismo</h3>
+                  <div className="relative">
+                    {etapaPreviewTipoMetabolico === 0 && (
+                      <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Qual é o seu ritmo metabólico?</h4>
+                        <p className="text-gray-700 mb-2">Avalie sintomas e hábitos para classificar seu tipo metabólico.</p>
+                      </div>
+                    )}
+                    {etapaPreviewTipoMetabolico >= 1 && etapaPreviewTipoMetabolico <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Sente muito frio ou calor fora do normal?',
+                          'Ganha ou perde peso facilmente?',
+                          'Tem variações de energia ao longo do dia?',
+                          'Come pouco e não emagrece?',
+                          'Sente fome e irritação se demora a comer?',
+                          'Pratica atividade física regular?',
+                          'Dorme bem e acorda disposto(a)?',
+                          'Tem digestão rápida ou lenta?',
+                          'Retém líquidos com facilidade?',
+                          'Se sente melhor com refeições leves ou reforçadas?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewTipoMetabolico === index + 1 && (
+                            <div key={index} className="bg-slate-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-slate-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-slate-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewTipoMetabolico === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-rose-900">Resultado: Acelerado (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-rose-600 text-white">Acelerado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Alta queima energética com maior demanda calórica.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Metabolismo rápido; treinos/estresse sem reposição adequada.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Evitar longos jejuns; distribuir proteínas e gorduras boas.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Refeições fracionadas e calóricas na medida.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Priorizar proteínas completas e carboidratos complexos.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Ajustar ingestão para proteger massa magra e estabilidade de energia.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Normal/Equilibrado (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Equilibrado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Funcionamento energético ideal.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Rotina estável de sono, atividade e alimentação.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter ritmo equilibrado.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Plano regular com proteínas, fibras e hidratação.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Refeições no timing adequado ao treino.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Manter rotina estável e revisar metas.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-orange-900">Resultado: Lento (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-orange-600 text-white">Lento</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Baixa taxa metabólica, tendência a acúmulo e fadiga.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Baixa massa magra/sono ruim/sedentarismo.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Aumentar proteína e fibras; reduzir sedentarismo.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Treino de força leve; refeições fracionadas.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Só com avaliação; evitar estimulantes por conta.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Evitar restrições extremas e ultraprocessados.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Consulta para estratégia de aceleração metabólica segura.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewTipoMetabolico(Math.max(0, etapaPreviewTipoMetabolico - 1))} disabled={etapaPreviewTipoMetabolico === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewTipoMetabolico(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewTipoMetabolico===e?'bg-slate-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewTipoMetabolico(Math.min(11, etapaPreviewTipoMetabolico + 1))} disabled={etapaPreviewTipoMetabolico === 11} className="flex items-center px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'avaliacao-sensibilidades' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">⚠️ Preview da Avaliação de Intolerâncias ou Sensibilidades Alimentares</h3>
+                  <div className="relative">
+                    {etapaPreviewSensibilidades === 0 && (
+                      <div className="bg-gradient-to-r from-red-50 to-amber-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Existe uma sensibilidade alimentar escondida?</h4>
+                        <p className="text-gray-700 mb-2">Detecte sinais de reações alimentares não diagnosticadas.</p>
+                      </div>
+                    )}
+                    {etapaPreviewSensibilidades >= 1 && etapaPreviewSensibilidades <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Sente inchaço ou gases após comer?',
+                          'Tem dor de cabeça ou enxaqueca após certos alimentos?',
+                          'Percebe sonolência ou fadiga após as refeições?',
+                          'Sente coceira, urticária ou vermelhidão após comer algo específico?',
+                          'Nota variação de humor após laticínios, trigo ou açúcar?',
+                          'Tem azia, refluxo ou dor de estômago com frequência?',
+                          'Percebe muco, rinite ou congestão após refeições?',
+                          'Tem constipação ou diarreia frequente?',
+                          'Já notou melhora quando retirou um alimento específico?',
+                          'Consome muitos industrializados ou adoçantes artificiais?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewSensibilidades === index + 1 && (
+                            <div key={index} className="bg-amber-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-amber-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewSensibilidades === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Baixo Risco (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Baixo</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Digestão e absorção parecem adequadas.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Rotina alimentar variada e estável.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter variedade e hidratação.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Rotina com fibras solúveis e probióticos alimentares.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Preferir in natura; evitar ultraprocessados.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Continuar variando a dieta.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Sensibilidade Leve a Moderada (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Reações ocasionais indicam possível intolerância leve.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Exposição intermitente a alimentos gatilho.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Observar padrões e registrar sintomas.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Diário alimentar e teste de exclusão curto.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apoio digestivo somente com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Reduzir industrializados e adoçantes artificiais.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Anotar alimentos suspeitos e avaliar resposta.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Alta Probabilidade de Intolerância (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sinais compatíveis com reação alimentar frequente.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Exposição recorrente a alimentos gatilho e disbiose.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Avaliação nutricional e possível teste laboratorial.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Protocolo de exclusão orientado; foco em alimentos simples.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Probióticos/enzimas com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Eliminar ultraprocessados e investigar laticínios/trigo.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Identificar alimentos‑gatilho com acompanhamento profissional.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewSensibilidades(Math.max(0, etapaPreviewSensibilidades - 1))} disabled={etapaPreviewSensibilidades === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewSensibilidades(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewSensibilidades===e?'bg-amber-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewSensibilidades(Math.min(11, etapaPreviewSensibilidades + 1))} disabled={etapaPreviewSensibilidades === 11} className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'avaliacao-sindrome-metabolica' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🚨 Preview da Avaliação do Risco de Síndrome Metabólica</h3>
+                  <div className="relative">
+                    {etapaPreviewSindMetabolica === 0 && (
+                      <div className="bg-gradient-to-r from-slate-50 to-red-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Quais são seus fatores de risco?</h4>
+                        <p className="text-gray-700 mb-2">Detecte sinais ligados à resistência à insulina, obesidade central e inflamação.</p>
+                      </div>
+                    )}
+                    {etapaPreviewSindMetabolica >= 1 && etapaPreviewSindMetabolica <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Possui gordura localizada no abdômen?',
+                          'Tem pressão alta ou oscilante?',
+                          'Apresenta glicemia elevada ou histórico familiar de diabetes?',
+                          'Faz pouco ou nenhum exercício físico?',
+                          'Costuma comer doces ou carboidratos refinados diariamente?',
+                          'Tem triglicerídeos ou colesterol alterados?',
+                          'Sente sono e fome logo após comer carboidratos?',
+                          'Dorme pouco ou mal?',
+                          'Está acima do peso ideal (IMC > 25)?',
+                          'Sente fadiga após refeições ou à tarde?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewSindMetabolica === index + 1 && (
+                            <div key={index} className="bg-red-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-red-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewSindMetabolica === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Baixo Risco (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Baixo</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Estilo de vida e metabolismo equilibrados.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Bons hábitos de sono, atividade e alimentação.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter rotina saudável.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Refeições equilibradas; atividade física regular.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Evitar ultraprocessados e açúcar excessivo.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Manter hábitos e monitorar indicadores periodicamente.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Risco Moderado (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sinais de resistência à insulina e inflamação inicial.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Excesso de carboidratos refinados e sedentarismo.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Ajustar alimentação e iniciar exercícios regulares.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Reduzir açúcar/farinha; treinos moderados.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Foco em integrais, proteínas e fibras.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação metabólica para plano personalizado.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Risco Elevado (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Alta probabilidade de síndrome metabólica.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Resistência à insulina, gordura abdominal e inflamação.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Procurar avaliação completa urgentemente.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Dieta anti-inflamatória inicial; caminhada diária; sono regular.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação; evitar uso por conta própria.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Reduzir ultraprocessados, açúcar e álcool.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Consulta metabólica/nutricional para reduzir riscos cardiovasculares.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewSindMetabolica(Math.max(0, etapaPreviewSindMetabolica - 1))} disabled={etapaPreviewSindMetabolica === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewSindMetabolica(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewSindMetabolica===e?'bg-red-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewSindMetabolica(Math.min(11, etapaPreviewSindMetabolica + 1))} disabled={etapaPreviewSindMetabolica === 11} className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'descoberta-perfil-bem-estar' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🧭 Preview – Descubra seu Perfil de Bem-Estar</h3>
+                  <div className="relative">
+                    {etapaPreviewPerfilBemEstar === 0 && (
+                      <div className="bg-gradient-to-r from-purple-50 to-emerald-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Qual é seu perfil predominante?</h4>
+                        <p className="text-gray-700 mb-2">Estético, Equilibrado ou Saúde/Performance — descubra em 1 minuto.</p>
+                      </div>
+                    )}
+                    {etapaPreviewPerfilBemEstar >= 1 && etapaPreviewPerfilBemEstar <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você costuma priorizar o que come, mesmo com o dia corrido?',
+                          'Dorme bem e acorda com disposição?',
+                          'Pratica algum tipo de atividade física regularmente?',
+                          'Cuida mais da aparência física do que da saúde interna?',
+                          'Faz exames ou consultas de rotina com frequência?',
+                          'Se sente cansado(a) ou sem energia no dia a dia?',
+                          'Costuma lidar bem com o estresse?',
+                          'Alimenta-se com frutas, verduras e água todos os dias?',
+                          'Se preocupa mais com estética ou bem-estar?',
+                          'Consegue manter disciplina mesmo nos fins de semana?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewPerfilBemEstar === index + 1 && (
+                            <div key={index} className="bg-purple-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-purple-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewPerfilBemEstar === 11 && (
+                      <div className="space-y-4">
+                        {/* Perfil Estético */}
+                        <div className="rounded-lg border border-pink-200 bg-pink-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-pink-900">Resultado: Perfil Estético (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-pink-600 text-white">Estético</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Motivação voltada para resultados visuais e autoestima.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Preferência por mudanças rápidas e foco em aparência.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Unir beleza e saúde com estratégias sustentáveis.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Alimentação equilibrada, hidratação e treino moderado.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Refeições completas com proteínas, fibras e vegetais.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Fazer avaliação personalizada e alinhar beleza + saúde.</p>
+                          </div>
+                        </div>
+                        {/* Perfil Equilibrado */}
+                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-emerald-900">Resultado: Perfil Equilibrado (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-600 text-white">Equilibrado</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Valoriza corpo, mente e rotina de forma balanceada.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Bons hábitos mas com oportunidades de otimização.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Ajustes simples de metabolismo e energia.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Pequenas mudanças em hidratação, fibras e treino.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Somente se indicado.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Manter variedade e timing adequado.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Fazer avaliação completa de bem‑estar.</p>
+                          </div>
+                        </div>
+                        {/* Perfil Saúde/Performance */}
+                        <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-indigo-900">Resultado: Perfil Saúde/Performance (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-indigo-600 text-white">Saúde</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Foco em energia, saúde e longevidade.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Disciplina e rotina de longo prazo.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Refinar metabolismo e performance com ajustes finos.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Estratégias de timing de carboidratos e treino.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Qualidade e densidade nutricional elevadas.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação metabólica para potencializar resultados.</p>
+                          </div>
+                        </div>
+                        {/* CTA final demonstrativo */}
+                        <div className="bg-gradient-to-r from-purple-50 to-emerald-50 p-4 rounded-lg border">
+                          <p className="text-sm text-gray-800 mb-2">💬 Quer entender como seu perfil impacta seus resultados?</p>
+                          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold">Fazer Avaliação de Bem‑Estar Personalizada</button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewPerfilBemEstar(Math.max(0, etapaPreviewPerfilBemEstar - 1))} disabled={etapaPreviewPerfilBemEstar === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewPerfilBemEstar(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewPerfilBemEstar===e?'bg-purple-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewPerfilBemEstar(Math.min(11, etapaPreviewPerfilBemEstar + 1))} disabled={etapaPreviewPerfilBemEstar === 11} className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'quiz-tipo-fome' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🍽️ Preview – Qual é o seu Tipo de Fome?</h3>
+                  <div className="relative">
+                    {etapaPreviewTipoFome === 0 && (
+                      <div className="bg-gradient-to-r from-pink-50 to-orange-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Fome Física, por Hábito ou Emocional?</h4>
+                        <p className="text-gray-700">Identifique seu padrão e receba orientação personalizada.</p>
+                      </div>
+                    )}
+                    {etapaPreviewTipoFome >= 1 && etapaPreviewTipoFome <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você sente vontade de comer mesmo sem estar com fome?',
+                          'Busca doces ou alimentos específicos quando está triste ou estressado(a)?',
+                          'Come rápido, quase sem perceber o sabor dos alimentos?',
+                          'Come por tédio, ansiedade ou hábito de “beliscar”?',
+                          'Sente culpa após comer demais?',
+                          'Fica irritado(a) quando tenta controlar a comida?',
+                          'Come mais quando está assistindo TV ou no celular?',
+                          'Faz dietas muito restritivas e depois “descompensa”?',
+                          'Consegue identificar facilmente quando está satisfeito(a)?',
+                          'Usa comida como forma de recompensa?'
+                        ].map((p, i) => (
+                          etapaPreviewTipoFome === i + 1 && (
+                            <div key={i} className="bg-orange-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-orange-900 mb-3">{i + 1}. {p}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca','Raramente','Às vezes','Frequentemente','Sempre'].map((op, j)=>(
+                                  <label key={j} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewTipoFome === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Fome Física (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Física</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Seu corpo pede energia real e você reconhece saciedade.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Sinais de fome/saciedade bem percebidos.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter refeições nutritivas e atenção plena.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Refeições completas e mastigação consciente.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Priorizar in natura e equilíbrio de macros.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Fazer avaliação personalizada de nutrição e bem‑estar.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Fome por Hábito (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Hábito</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Rotina e distração guiam a alimentação.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Comer automático, telas e horários irregulares.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Consciência alimentar e rotina de refeições.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Planejar lanches e reduzir distrações ao comer.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Não necessária.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Refeições completas com proteína e fibras.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Receber análise do padrão alimentar.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Fome Emocional (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Emocional</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Emoções influenciam fortemente sua alimentação.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Estresse, ansiedade e recompensas com comida.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Iniciar avaliação comportamental nutricional.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Registro de gatilhos e refeições estruturadas.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Refeições completas e estratégias de mindfulness.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Fazer Avaliação Comportamental Nutricional.</p>
+                          </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-purple-50 to-orange-50 p-4 rounded-lg border">
+                          <p className="text-sm text-gray-800 mb-2">💬 Quer entender de onde vem sua fome?</p>
+                          <button className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold">Fazer Avaliação Personalizada</button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewTipoFome(Math.max(0, etapaPreviewTipoFome - 1))} disabled={etapaPreviewTipoFome === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewTipoFome(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewTipoFome===e?'bg-orange-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewTipoFome(Math.min(11, etapaPreviewTipoFome + 1))} disabled={etapaPreviewTipoFome === 11} className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'quiz-pedindo-detox' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">💧 Preview – Seu corpo está pedindo Detox?</h3>
+                  <div className="relative">
+                    {etapaPreviewDetox === 0 && (
+                      <div className="bg-gradient-to-r from-teal-50 to-lime-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Avalie sinais de sobrecarga e acúmulo de toxinas</h4>
+                        <p className="text-gray-700">Descubra se é hora de um detox leve e guiado.</p>
+                      </div>
+                    )}
+                    {etapaPreviewDetox >= 1 && etapaPreviewDetox <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Sente-se cansado(a) mesmo dormindo bem?',
+                          'Tem inchaço, gases ou sensação de empachamento após comer?',
+                          'Sente a pele sem brilho, com acne ou olheiras?',
+                          'Sofre com dores de cabeça ou dificuldade de concentração?',
+                          'Tem vontade constante de doces ou cafeína?',
+                          'Nota mau hálito ou odor corporal alterado?',
+                          'Tem prisão de ventre ou intestino irregular?',
+                          'Costuma consumir álcool, frituras ou alimentos processados?',
+                          'Sente peso, lentidão ou falta de energia após as refeições?',
+                          'Acorda com a sensação de corpo “carregado”?'
+                        ].map((p, i) => (
+                          etapaPreviewDetox === i + 1 && (
+                            <div key={i} className="bg-teal-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-teal-900 mb-3">{i + 1}. {p}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca','Raramente','Às vezes','Frequentemente','Sempre'].map((op, j)=>(
+                                  <label key={j} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewDetox === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Corpo Equilibrado (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Equilíbrio</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sem sinais significativos de sobrecarga.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Sono, hidratação e alimentação natural consistentes.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter rotina e prevenção.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Hidratação e fibras; evitar ultraprocessados.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Preferir in natura; reduzir açúcar/álcool.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Receber plano de manutenção detox.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Sinais Leves de Toxinas (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Leve</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Primeiro sinais de acúmulo: cansaço e lentidão digestiva.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Excesso de processados, açúcar e rotina.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Detox leve e guiado, sem restrições extremas.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Aumentar água, vegetais e reduzir processados.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Somente com orientação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Cardápio simples com alimentos de verdade.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Fazer mini avaliação detox personalizada.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Corpo Pedindo Detox (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Sinais claros de sobrecarga e acúmulo tóxico.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Estresse, alimentação processada e hábitos.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Iniciar avaliação detox com especialista.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Protocolo inicial anti-inflamatório leve e suporte intestinal.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Conforme orientação profissional.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Foco em simples, cozidos e hidratação.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Iniciar avaliação detox personalizada.</p>
+                          </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-teal-50 to-lime-50 p-4 rounded-lg border">
+                          <p className="text-sm text-gray-800 mb-2">💬 Quer descobrir o melhor detox para o seu corpo?</p>
+                          <button className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-semibold">Fazer Avaliação Detox Personalizada</button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewDetox(Math.max(0, etapaPreviewDetox - 1))} disabled={etapaPreviewDetox === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewDetox(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewDetox===e?'bg-teal-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewDetox(Math.min(11, etapaPreviewDetox + 1))} disabled={etapaPreviewDetox === 11} className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'avaliacao-rotina-alimentar' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">⏰ Preview – Você está se alimentando conforme sua rotina?</h3>
+                  <div className="relative">
+                    {etapaPreviewRotinaAlimentar === 0 && (
+                      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Sua rotina alimentar acompanha seu dia?</h4>
+                        <p className="text-gray-700">Descubra se horários, escolhas e energia estão em equilíbrio.</p>
+                      </div>
+                    )}
+                    {etapaPreviewRotinaAlimentar >= 1 && etapaPreviewRotinaAlimentar <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Costuma pular refeições por falta de tempo?',
+                          'Fica longos períodos sem comer e sente fraqueza?',
+                          'Faz refeições rápidas ou na correria com frequência?',
+                          'Belisca entre as refeições por ansiedade ou hábito?',
+                          'Tem horários fixos para comer durante o dia?',
+                          'Come mais à noite do que durante o dia?',
+                          'Sente sonolência ou cansaço após comer?',
+                          'Faz escolhas alimentares baseadas em praticidade (fast food, delivery)?',
+                          'Leva lanches saudáveis quando sai de casa?',
+                          'Sente fome intensa à noite ou de madrugada?'
+                        ].map((p, i) => (
+                          etapaPreviewRotinaAlimentar === i + 1 && (
+                            <div key={i} className="bg-blue-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-blue-900 mb-3">{i + 1}. {p}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca','Raramente','Às vezes','Frequentemente','Sempre'].map((op, j)=>(
+                                  <label key={j} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              {(i===4 || i===8) && (
+                                <p className="text-xs text-blue-700 mt-2">Pergunta inversa: aqui, respostas mais altas indicam melhor alinhamento.</p>
+                              )}
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewRotinaAlimentar === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Alimentação Alinhada (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Alinhada</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Bom equilíbrio entre horários e energia.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Planejamento e constância nas refeições.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Manter variedade e timing adequado.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Refeições regulares e lanches planejados.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Preferir in natura; montar marmitas simples.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Fazer avaliação nutricional para refinar o plano.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Desajuste Leve (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Desajuste</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Padrão com pequenos desequilíbrios de horário e qualidade.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Pular refeições, correria e escolhas por praticidade.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Organizar horários e preparar lanches saudáveis.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Kit lanche; agenda de refeições; hidratação.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Não necessária.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Reforçar proteínas e fibras em cada refeição.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Fazer ajuste de rotina alimentar com especialista.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Rotina Caótica (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Caótica</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Padrão desregulado com impacto metabólico.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Falta de horários e escolhas rápidas frequentes.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Iniciar reeducação alimentar com orientação.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Estruturar refeições simples e previsíveis.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Cardápio básico com alimentos de verdade.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Receber reeducação alimentar personalizada.</p>
+                          </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border">
+                          <p className="text-sm text-gray-800 mb-2">💬 Quer descobrir se sua rotina alimentar está ajudando ou sabotando seus resultados?</p>
+                          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">Fazer Avaliação de Rotina Alimentar</button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewRotinaAlimentar(Math.max(0, etapaPreviewRotinaAlimentar - 1))} disabled={etapaPreviewRotinaAlimentar === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewRotinaAlimentar(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewRotinaAlimentar===e?'bg-blue-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewRotinaAlimentar(Math.min(11, etapaPreviewRotinaAlimentar + 1))} disabled={etapaPreviewRotinaAlimentar === 11} className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'pronto-emagrecer' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🏁 Preview – Você está pronto para emagrecer com saúde?</h3>
+                  <div className="relative">
+                    {etapaPreviewProntidaoEmagrecer === 0 && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Avalie sua prontidão física e emocional</h4>
+                        <p className="text-gray-700">Veja se corpo e mente estão preparados para mudar.</p>
+                      </div>
+                    )}
+                    {etapaPreviewProntidaoEmagrecer >= 1 && etapaPreviewProntidaoEmagrecer <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você sente que tem controle sobre o que come?',
+                          'Come mais quando está ansioso(a), triste ou estressado(a)?',
+                          'Consegue manter uma rotina alimentar por mais de 30 dias?',
+                          'Dorme bem e acorda com energia?',
+                          'Faz atividade física com regularidade?',
+                          'Tem horários fixos para comer?',
+                          'Se sente frustrado(a) quando não vê resultados rápidos?',
+                          'Costuma beber pouca água?',
+                          'Faz escolhas alimentares saudáveis na maioria das vezes?',
+                          'Acredita que pode mudar seus hábitos de forma definitiva?'
+                        ].map((p, i) => (
+                          etapaPreviewProntidaoEmagrecer === i + 1 && (
+                            <div key={i} className="bg-emerald-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-emerald-900 mb-3">{i + 1}. {p}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca','Raramente','Às vezes','Frequentemente','Sempre'].map((op, j)=>(
+                                  <label key={j} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewProntidaoEmagrecer === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Pronto para Começar (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Pronto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Alta disciplina e consciência corporal.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Hábitos consistentes e boa organização.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Iniciar plano de emagrecimento saudável.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Calendário simples de refeições e treinos.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Somente com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Refeições equilibradas e hidratação.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação de início de programa de emagrecimento.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Quase Pronto (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Intermediário</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Boa intenção, falta consistência e ajustes.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Rotina e constância irregulares.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Preparação e organização com acompanhamento.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Ajustes simples de horários e hidratação.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Reforçar proteínas e fibras.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Receber plano de preparação personalizado.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Precisa de Orientação (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Orientação</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Desorganização alimentar/emocional limitando resultados.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Falta de estrutura e gatilhos emocionais.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Reeducação alimentar com suporte profissional.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Estrutura mínima de refeições e hidratação.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Base simples e previsível com alimentos de verdade.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação de reeducação alimentar.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewProntidaoEmagrecer(Math.max(0, etapaPreviewProntidaoEmagrecer - 1))} disabled={etapaPreviewProntidaoEmagrecer === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewProntidaoEmagrecer(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewProntidaoEmagrecer===e?'bg-emerald-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewProntidaoEmagrecer(Math.min(11, etapaPreviewProntidaoEmagrecer + 1))} disabled={etapaPreviewProntidaoEmagrecer === 11} className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id === 'autoconhecimento-corporal' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🧠 Preview – Você conhece o seu corpo?</h3>
+                  <div className="relative">
+                    {etapaPreviewAutoconhecimento === 0 && (
+                      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Avalie seu nível de autoconhecimento corporal</h4>
+                        <p className="text-gray-700">Entenda como seu corpo responde a alimentação, sono, estresse e exercício.</p>
+                      </div>
+                    )}
+                    {etapaPreviewAutoconhecimento >= 1 && etapaPreviewAutoconhecimento <= 10 && (
+                      <div className="space-y-6">
+                        {[
+                          'Você percebe quando está com fome real ou emocional?',
+                          'Reconhece quando seu corpo está cansado e precisa descansar?',
+                          'Nota sinais de inchaço, desconforto ou má digestão após comer?',
+                          'Observa como certos alimentos afetam seu humor ou energia?',
+                          'Sente-se conectado(a) com o seu corpo durante o dia?',
+                          'Faz check-ups ou avaliações corporais regulares?',
+                          'Ajusta a alimentação conforme o que seu corpo pede?',
+                          'Consegue identificar alimentos que te fazem bem ou mal?',
+                          'Tem consciência da sua postura e respiração no dia a dia?',
+                          'Sabe como seu corpo reage a estresse, sono e exercício?'
+                        ].map((p, i) => (
+                          etapaPreviewAutoconhecimento === i + 1 && (
+                            <div key={i} className="bg-indigo-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-indigo-900 mb-3">{i + 1}. {p}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca','Raramente','Às vezes','Frequentemente','Sempre'].map((op, j)=>(
+                                  <label key={j} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {etapaPreviewAutoconhecimento === 11 && (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-green-900">Resultado: Alto Autoconhecimento (10–20)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Alto</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Excelente percepção corporal e emocional.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Atenção aos sinais e rotina consistente.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Aprofundar consciência com acompanhamento.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Rotina de sono, alimentação e respiração.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se necessário.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Qualidade nutricional e variedade.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação de equilíbrio corporal e nutricional.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-yellow-900">Resultado: Consciência Parcial (21–35)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Parcial</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Entende parte dos sinais, precisa de orientação.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Confusão entre fome/ansiedade e cansaço.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Olhar nutricional guiado para clareza.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Diário corporal: fome, energia, humor, sono.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Ajuste progressivo conforme sinais.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Análise de consciência corporal.</p>
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-bold text-red-900">Resultado: Desconexão Corporal (36–50)</h5>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Baixo</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                            <p><strong>DIAGNÓSTICO:</strong> Pouca percepção dos sinais físicos e emocionais.</p>
+                            <p><strong>CAUSA RAIZ:</strong> Rotina estressante e atenção externa.</p>
+                            <p><strong>AÇÃO IMEDIATA:</strong> Reconexão com suporte profissional.</p>
+                            <p><strong>PLANO 7 DIAS:</strong> Práticas simples de respiração, sono e hidratação.</p>
+                            <p><strong>SUPLEMENTAÇÃO:</strong> Apenas com avaliação.</p>
+                            <p><strong>ALIMENTAÇÃO:</strong> Estruturar refeições básicas com alimentos de verdade.</p>
+                            <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Avaliação de autoconhecimento físico e emocional.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button onClick={() => setEtapaPreviewAutoconhecimento(Math.max(0, etapaPreviewAutoconhecimento - 1))} disabled={etapaPreviewAutoconhecimento === 0} className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">← Anterior</button>
+                      <div className="flex space-x-2">{[0,1,2,3,4,5,6,7,8,9,10,11].map((e)=>{const l=['Início','1','2','3','4','5','6','7','8','9','10','Resultados'];return <button key={e} onClick={()=>setEtapaPreviewAutoconhecimento(e)} className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${etapaPreviewAutoconhecimento===e?'bg-indigo-600 text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'}`} title={e===0?'Tela Inicial':e===11?'Resultados':`Pergunta ${e}`}>{l[e]}</button>})}</div>
+                      <button onClick={() => setEtapaPreviewAutoconhecimento(Math.min(11, etapaPreviewAutoconhecimento + 1))} disabled={etapaPreviewAutoconhecimento === 11} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Próxima →</button>
+                    </div>
+                  </div>
+                </div>
+              )}
               {templatePreviewSelecionado.id === 'quiz-interativo' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -833,7 +2457,6 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
               {/* Quiz de Bem-Estar */}
               {templatePreviewSelecionado.id === 'quiz-bem-estar' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -1289,7 +2912,6 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
               {/* Quiz Detox */}
               {templatePreviewSelecionado.id === 'quiz-detox' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -1745,7 +3367,6 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
               {/* Fallback para templates sem preview específico */}
               {/* Calculadora de Proteína */}
               {templatePreviewSelecionado.id === 'calculadora-proteina' && (
@@ -2250,7 +3871,6 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
               {/* Calculadora de Calorias */}
               {templatePreviewSelecionado.id === 'calculadora-calorias' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -2753,7 +4373,6 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
               {/* Checklist Alimentar */}
               {templatePreviewSelecionado.id === 'checklist-alimentar' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -3221,7 +4840,6 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
               {/* Guia Nutracêutico */}
               {templatePreviewSelecionado.id === 'guia-nutraceutico' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -3689,7 +5307,6 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
               {/* Tabela Comparativa */}
               {templatePreviewSelecionado.id === 'tabela-comparativa' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -4157,222 +5774,133 @@ export default function TemplatesNutri() {
                   </div>
                 </div>
               )}
-
-              {/* Tabela de Sintomas */}
-              {templatePreviewSelecionado.id === 'tabela-sintomas' && (
+              {/* Diagnóstico de Parasitose */}
+              {templatePreviewSelecionado.id === 'template-diagnostico-parasitose' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    🩺 Preview da Tabela de Sintomas - "Identifique sintomas e receba orientações específicas"
-                  </h3>
-                  
-                  {/* Container principal com navegação */}
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">🧫 Preview do Diagnóstico de Parasitose</h3>
                   <div className="relative">
-                    {/* Tela de Abertura - Etapa 0 */}
-                    {etapaPreviewTabelaSintomas === 0 && (
-                      <div className="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg">
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">🩺 Identifique Sintomas e Receba Orientações Específicas</h4>
-                        <p className="text-gray-700 mb-3">Descubra a relação entre seus sintomas e receba orientações personalizadas para correção baseadas em sua área de interesse.</p>
-                        <p className="text-red-600 font-semibold">💡 Uma análise que pode transformar sua saúde.</p>
+                    {etapaPreviewParasitose === 0 && (
+                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Você sabia?</h4>
+                        <p className="text-gray-700 mb-2">Parasitas intestinais podem interferir diretamente no seu metabolismo, causar inchaço, fadiga, dores abdominais e queda de imunidade.</p>
+                        <p className="text-teal-700 font-semibold">Responda este diagnóstico rápido e descubra se você apresenta sinais compatíveis com parasitose intestinal.</p>
                       </div>
                     )}
 
-                    {/* Perguntas 1-5 - Navegação com setinhas */}
-                    {etapaPreviewTabelaSintomas >= 1 && etapaPreviewTabelaSintomas <= 5 && (
+                    {etapaPreviewParasitose >= 1 && etapaPreviewParasitose <= 10 && (
                       <div className="space-y-6">
-                        {etapaPreviewTabelaSintomas === 1 && (
-                          <div className="bg-red-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-red-900 mb-3">🩺 1. Que tipo de sintomas você está apresentando?</h4>
-                            <div className="space-y-2">
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
-                                <input type="radio" name="tipo-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Sintomas leves (1-3 sintomas)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
-                                <input type="radio" name="tipo-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Sintomas moderados (4-6 sintomas)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
-                                <input type="radio" name="tipo-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Sintomas graves (7+ sintomas)</span>
-                              </label>
+                        {[
+                          'Você sente inchaço abdominal com frequência, mesmo comendo pouco?',
+                          'Tem episódios de gases ou cólicas intestinais?',
+                          'Nota alterações no apetite (muita fome ou falta total)?',
+                          'Percebe náuseas, enjoo ou gosto amargo na boca em alguns dias?',
+                          'Sente coceira anal, especialmente à noite?',
+                          'Tem episódios de diarreia alternando com prisão de ventre?',
+                          'Sente cansaço excessivo mesmo dormindo bem?',
+                          'Notou queda de cabelo, unhas fracas ou pele seca sem causa aparente?',
+                          'Sofre com sono agitado ou ranger de dentes à noite?',
+                          'Teve contato frequente com animais ou alimentos crus/mal higienizados?'
+                        ].map((pergunta, index) => (
+                          etapaPreviewParasitose === index + 1 && (
+                            <div key={index} className="bg-emerald-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-emerald-900 mb-3">{index + 1}. {pergunta}</h4>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'].map((op, i) => (
+                                  <label key={i} className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                                    <input type="radio" className="mr-3" disabled />
+                                    <span className="text-gray-700">{op}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-emerald-700 mt-2">Escala de 1 a 5 para estimar intensidade/frequência dos sinais.</p>
                             </div>
-                            <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de gravidade</p>
-                          </div>
-                        )}
-
-                        {etapaPreviewTabelaSintomas === 2 && (
-                          <div className="bg-pink-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-pink-900 mb-3">🔍 2. Qual é a frequência dos seus sintomas?</h4>
-                            <div className="space-y-2">
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
-                                <input type="radio" name="frequencia-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Ocasionalmente (raros)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
-                                <input type="radio" name="frequencia-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Frequentemente (regulares)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
-                                <input type="radio" name="frequencia-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Constantemente (persistentes)</span>
-                              </label>
-                            </div>
-                            <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência de frequência</p>
-                          </div>
-                        )}
-
-                        {etapaPreviewTabelaSintomas === 3 && (
-                          <div className="bg-rose-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-rose-900 mb-3">⚖️ 3. Que tipo de sintomas são mais comuns?</h4>
-                            <div className="space-y-2">
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
-                                <input type="radio" name="categoria-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Digestivos (estômago, intestino)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
-                                <input type="radio" name="categoria-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Energéticos (fadiga, cansaço)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
-                                <input type="radio" name="categoria-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Inflamatórios (dores, inchaço)</span>
-                              </label>
-                            </div>
-                            <p className="text-xs text-rose-600 mt-2">🧠 Gatilho: Consciência de categoria</p>
-                          </div>
-                        )}
-
-                        {etapaPreviewTabelaSintomas === 4 && (
-                          <div className="bg-orange-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-orange-900 mb-3">🎯 4. Há quanto tempo você apresenta esses sintomas?</h4>
-                            <div className="space-y-2">
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
-                                <input type="radio" name="duracao-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Pouco tempo (menos de 1 mês)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
-                                <input type="radio" name="duracao-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Tempo moderado (1-6 meses)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
-                                <input type="radio" name="duracao-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Muito tempo (mais de 6 meses)</span>
-                              </label>
-                            </div>
-                            <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de duração</p>
-                          </div>
-                        )}
-
-                        {etapaPreviewTabelaSintomas === 5 && (
-                          <div className="bg-amber-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-amber-900 mb-3">📈 5. Que impacto os sintomas têm na sua vida?</h4>
-                            <div className="space-y-2">
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
-                                <input type="radio" name="impacto-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Baixo impacto (não afeta muito)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
-                                <input type="radio" name="impacto-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Moderado impacto (afeta algumas atividades)</span>
-                              </label>
-                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
-                                <input type="radio" name="impacto-sintoma" className="mr-3" disabled />
-                                <span className="text-gray-700">Alto impacto (afeta muitas atividades)</span>
-                              </label>
-                            </div>
-                            <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência de impacto</p>
-                          </div>
-                        )}
+                          )
+                        ))}
                       </div>
                     )}
 
-                    {/* Tela de Resultados - Etapa 6 */}
-                    {etapaPreviewTabelaSintomas === 6 && (
+                    {etapaPreviewParasitose === 11 && (
                       <div className="space-y-6">
-                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis da Tabela de Sintomas</h4>
+                        {/* Interpretação em 7 etapas por faixa de risco */}
+                        <div className="space-y-4">
+                          {/* Baixo */}
+                          <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-bold text-green-900">Resultado: Risco Baixo (0–10)</h5>
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-green-600 text-white">Baixo</span>
+                            </div>
+                            <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                              <p><strong>DIAGNÓSTICO:</strong> Poucos sinais compatíveis com parasitose intestinal no momento.</p>
+                              <p><strong>CAUSA RAIZ:</strong> Possível desequilíbrio pontual de hábitos de higiene/alimentação, sem evidência consistente de parasitas.</p>
+                              <p><strong>AÇÃO IMEDIATA:</strong> Reforçar higiene de alimentos/água e monitorar sintomas por 7–14 dias.</p>
+                              <p><strong>PLANO 7 DIAS:</strong> Hidratação adequada; higienização rigorosa; fibras solúveis; probióticos alimentares.</p>
+                              <p><strong>SUPLEMENTAÇÃO:</strong> Apenas se indicado por profissional. Probióticos leves podem ser considerados.</p>
+                              <p><strong>ALIMENTAÇÃO:</strong> Priorizar alimentos frescos higienizados, evitar crus de procedência duvidosa.</p>
+                              <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Manter rotina e reavaliar se surgirem novos sintomas.</p>
+                            </div>
+                          </div>
+
+                          {/* Moderado */}
+                          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-bold text-yellow-900">Resultado: Risco Moderado (11–25)</h5>
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-600 text-white">Moderado</span>
+                            </div>
+                            <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                              <p><strong>DIAGNÓSTICO:</strong> Alguns sinais sugerem possível parasitose ou disbiose intestinal.</p>
+                              <p><strong>CAUSA RAIZ:</strong> Exposição a alimentos/água de risco, higiene inconsistente ou microbiota desequilibrada.</p>
+                              <p><strong>AÇÃO IMEDIATA:</strong> Ajustar higiene alimentar e procurar avaliação profissional para triagem clínica.</p>
+                              <p><strong>PLANO 7 DIAS:</strong> Protocolo leve de correção: hidratação, fibras, probióticos, reduzir açúcar ultraprocessado.</p>
+                              <p><strong>SUPLEMENTAÇÃO:</strong> Considerar probióticos/fitoterápicos apenas após avaliação.</p>
+                              <p><strong>ALIMENTAÇÃO:</strong> Cozinhar bem proteínas; lavar e sanitizar hortifrútis; evitar crus fora de casa.</p>
+                              <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Marcar consulta para definir necessidade de exames laboratoriais.</p>
+                            </div>
+                          </div>
+
+                          {/* Alto */}
+                          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-bold text-red-900">Resultado: Risco Alto (26–40)</h5>
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-red-600 text-white">Alto</span>
+                            </div>
+                            <div className="bg-white rounded-lg p-3 space-y-2 text-sm text-gray-800">
+                              <p><strong>DIAGNÓSTICO:</strong> Vários sintomas compatíveis com parasitose intestinal.</p>
+                              <p><strong>CAUSA RAIZ:</strong> Alta probabilidade de exposição/colonização por parasitas; possível disbiose importante.</p>
+                              <p><strong>AÇÃO IMEDIATA:</strong> Procurar nutricionista/médico para avaliação e solicitação de exames específicos.</p>
+                              <p><strong>PLANO 7 DIAS:</strong> Medidas rigorosas de higiene alimentar; protocolo alimentar anti-inflamatório leve e suporte digestivo.</p>
+                              <p><strong>SUPLEMENTAÇÃO:</strong> Somente com orientação profissional; uso direcionado conforme resultado clínico/lab.</p>
+                              <p><strong>ALIMENTAÇÃO:</strong> Evitar crus; reforçar cozimento adequado; priorizar caldos, cozidos, especiarias.</p>
+                              <p className="font-semibold bg-purple-50 p-3 rounded-lg">🎯 PRÓXIMO PASSO: Agendar avaliação e seguir conduta baseada em evidências.</p>
+                            </div>
+                          </div>
+                        </div>
+
                         
-                        {/* Resultado 1: Sintomas Leves */}
-                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
-                          <div className="flex items-center justify-between mb-4">
-                            <h5 className="text-lg font-bold text-green-900">✅ Sintomas Leves</h5>
-                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">1-3 sintomas</span>
-                          </div>
-                          <div className="bg-white rounded-lg p-4 space-y-2">
-                            <p className="font-semibold text-gray-900">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.diagnostico}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.causaRaiz}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.acaoImediata}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.plano7Dias}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.suplementacao}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.alimentacao}</p>
-                            {tabelaSintomasDiagnosticos.nutri.sintomasLeves.proximoPasso && (
-                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.proximoPasso}</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Resultado 2: Sintomas Moderados */}
-                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
-                          <div className="flex items-center justify-between mb-4">
-                            <h5 className="text-lg font-bold text-yellow-900">⚠️ Sintomas Moderados</h5>
-                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">4-6 sintomas</span>
-                          </div>
-                          <div className="bg-white rounded-lg p-4 space-y-2">
-                            <p className="font-semibold text-gray-900">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.diagnostico}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.causaRaiz}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.acaoImediata}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.plano7Dias}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.suplementacao}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.alimentacao}</p>
-                            {tabelaSintomasDiagnosticos.nutri.sintomasModerados.proximoPasso && (
-                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.proximoPasso}</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Resultado 3: Sintomas Graves */}
-                        <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
-                          <div className="flex items-center justify-between mb-4">
-                            <h5 className="text-lg font-bold text-red-900">🚨 Sintomas Graves</h5>
-                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">7+ sintomas</span>
-                          </div>
-                          <div className="bg-white rounded-lg p-4 space-y-2">
-                            <p className="font-semibold text-gray-900">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.diagnostico}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.causaRaiz}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.acaoImediata}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.plano7Dias}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.suplementacao}</p>
-                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.alimentacao}</p>
-                            {tabelaSintomasDiagnosticos.nutri.sintomasGraves.proximoPasso && (
-                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.proximoPasso}</p>
-                            )}
-                          </div>
-                        </div>
                       </div>
                     )}
 
-                    {/* Navegação com Setinhas */}
                     <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
                       <button
-                        onClick={() => setEtapaPreviewTabelaSintomas(Math.max(0, etapaPreviewTabelaSintomas - 1))}
-                        disabled={etapaPreviewTabelaSintomas === 0}
+                        onClick={() => setEtapaPreviewParasitose(Math.max(0, etapaPreviewParasitose - 1))}
+                        disabled={etapaPreviewParasitose === 0}
                         className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         ← Anterior
                       </button>
-                      
+
                       <div className="flex space-x-2">
-                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
-                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((etapa) => {
+                          const labels = ['Início','1','2','3','4','5','6','7','8','9','10','Resultados']
                           return (
                             <button
                               key={etapa}
-                              onClick={() => setEtapaPreviewTabelaSintomas(etapa)}
+                              onClick={() => setEtapaPreviewParasitose(etapa)}
                               className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                                etapaPreviewTabelaSintomas === etapa
-                                  ? 'bg-red-600 text-white'
+                                etapaPreviewParasitose === etapa
+                                  ? 'bg-teal-600 text-white'
                                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                               }`}
-                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 11 ? 'Resultados' : `Pergunta ${etapa}`}
                             >
                               {labels[etapa]}
                             </button>
@@ -4381,9 +5909,9 @@ export default function TemplatesNutri() {
                       </div>
 
                       <button
-                        onClick={() => setEtapaPreviewTabelaSintomas(Math.min(6, etapaPreviewTabelaSintomas + 1))}
-                        disabled={etapaPreviewTabelaSintomas === 6}
-                        className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => setEtapaPreviewParasitose(Math.min(11, etapaPreviewParasitose + 1))}
+                        disabled={etapaPreviewParasitose === 11}
+                        className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Próxima →
                       </button>
@@ -4392,7 +5920,7 @@ export default function TemplatesNutri() {
                 </div>
               )}
 
-              {templatePreviewSelecionado.id !== 'quiz-interativo' && templatePreviewSelecionado.id !== 'calculadora-imc' && templatePreviewSelecionado.id !== 'quiz-bem-estar' && templatePreviewSelecionado.id !== 'quiz-perfil-nutricional' && templatePreviewSelecionado.id !== 'quiz-detox' && templatePreviewSelecionado.id !== 'quiz-energetico' && templatePreviewSelecionado.id !== 'calculadora-proteina' && templatePreviewSelecionado.id !== 'calculadora-agua' && templatePreviewSelecionado.id !== 'calculadora-calorias' && templatePreviewSelecionado.id !== 'checklist-detox' && templatePreviewSelecionado.id !== 'checklist-alimentar' && templatePreviewSelecionado.id !== 'mini-ebook' && templatePreviewSelecionado.id !== 'guia-nutraceutico' && templatePreviewSelecionado.id !== 'guia-proteico' && templatePreviewSelecionado.id !== 'tabela-comparativa' && templatePreviewSelecionado.id !== 'tabela-substituicoes' && templatePreviewSelecionado.id !== 'tabela-sintomas' && (
+              {templatePreviewSelecionado.id !== 'quiz-interativo' && templatePreviewSelecionado.id !== 'calculadora-imc' && templatePreviewSelecionado.id !== 'quiz-bem-estar' && templatePreviewSelecionado.id !== 'quiz-perfil-nutricional' && templatePreviewSelecionado.id !== 'quiz-detox' && templatePreviewSelecionado.id !== 'quiz-energetico' && templatePreviewSelecionado.id !== 'calculadora-proteina' && templatePreviewSelecionado.id !== 'calculadora-agua' && templatePreviewSelecionado.id !== 'calculadora-calorias' && templatePreviewSelecionado.id !== 'checklist-detox' && templatePreviewSelecionado.id !== 'checklist-alimentar' && templatePreviewSelecionado.id !== 'mini-ebook' && templatePreviewSelecionado.id !== 'guia-nutraceutico' && templatePreviewSelecionado.id !== 'guia-proteico' && templatePreviewSelecionado.id !== 'tabela-comparativa' && templatePreviewSelecionado.id !== 'tabela-substituicoes' && templatePreviewSelecionado.id !== 'template-diagnostico-parasitose' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     {templatePreviewSelecionado.icon} Preview do {templatePreviewSelecionado.nome}
@@ -4433,7 +5961,7 @@ export default function TemplatesNutri() {
                     setEtapaPreviewGuiaProteico(0)
                     setEtapaPreviewTabelaComparativa(0)
                     setEtapaPreviewTabelaSubstituicoes(0)
-                    setEtapaPreviewTabelaSintomas(0)
+                    setEtapaPreviewParasitose(0)
                   }}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                 >
