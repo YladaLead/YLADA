@@ -14,7 +14,9 @@ Este documento estabelece o padrão para criação e formatação de diagnóstic
 
 ## 📊 Estrutura Padrão dos Resultados
 
-Todos os diagnósticos devem seguir esta estrutura de **6 seções obrigatórias**:
+Todos os diagnósticos devem seguir esta estrutura de **6 seções obrigatórias** + **1 seção opcional**:
+
+### **Seções Obrigatórias (1-6)**
 
 ### 1. **📋 DIAGNÓSTICO**
 - **Objetivo**: Comunicar o estado atual de forma clara e objetiva
@@ -75,6 +77,32 @@ Todos os diagnósticos devem seguir esta estrutura de **6 seções obrigatórias
 - ✅ "Um plano alimentar personalizado considera suas preferências e objetivos para reequilibrar nutrientes de forma estratégica. Aumente frutas, verduras e grãos integrais enquanto aguarda sua avaliação profissional"
 - ❌ "Coma apenas salada e peixe grelhado"
 
+### 7. **🎯 PRÓXIMO PASSO** (OPCIONAL)
+- **Objetivo**: Criar gatilho emocional e conexão - "quero saber mais"
+- **Tom**: Inspirador, acolhedor e assertivo (varia por gravidade)
+- **Formato**: 1 linha apenas
+- **Foco**: Emocional + CTA indireto
+
+**Princípios:**
+- Não repetir o que já foi dito nas outras seções
+- Criar curiosidade e desejo de avançar
+- Conectar com o estado emocional do cliente
+- Tom varia conforme gravidade do resultado
+
+**Exemplos por Nível:**
+
+**Grave/Urgente:**
+- ✅ "Seu organismo já deu o primeiro sinal. Agora é hora de transformar esse diagnóstico em ação — personalize seu plano e veja resultados reais."
+- ✅ "Seu corpo precisa de cuidado agora — e é totalmente possível reverter com apoio profissional especializado."
+
+**Moderado:**
+- ✅ "Seu corpo está pedindo equilíbrio — e você já deu o primeiro passo. O próximo é descobrir o que ele realmente precisa."
+- ✅ "Esse é o primeiro passo. O próximo é descobrir como seu corpo pode responder a um plano personalizado."
+
+**Normal/Positivo:**
+- ✅ "Parabéns! Seu equilíbrio atual é um ótimo ponto de partida. Descubra como estratégias avançadas podem potencializar ainda mais seus resultados."
+- ✅ "Sabia que 73% das pessoas com esse perfil têm oportunidades de otimização sem perceber? Descubra as suas."
+
 ---
 
 ## 🎨 Princípios de Escrita
@@ -95,6 +123,36 @@ Todos os diagnósticos devem seguir esta estrutura de **6 seções obrigatórias
 ### 4. **Valor da Avaliação Profissional**
 - Conectar sintomas/carências à necessidade de avaliação
 - Mostrar que cada caso é único e precisa de análise individual
+
+### 5. **Gatilho de Curiosidade e Conexão**
+- Sempre incluir a seção 7 "🎯 PRÓXIMO PASSO" para criar desejo de avançar
+- Usar dados científicos de forma educativa (não promissória)
+- Criar conexão emocional apropriada ao nível de gravidade
+
+### 6. **Variações de Tom por Gravidade**
+Ajustar o tom emocional conforme o nível do resultado:
+
+**Nível Normal/Positivo:**
+- Tom: Leve e celebrativo
+- Exemplo: "Parabéns! Seu equilíbrio atual é um ótimo ponto de partida."
+
+**Nível Moderado:**
+- Tom: Motivacional e encorajador
+- Exemplo: "Seu corpo está pedindo equilíbrio — e você já deu o primeiro passo."
+
+**Nível Grave/Urgente:**
+- Tom: Acolhedor e assertivo
+- Exemplo: "Seu organismo precisa de cuidado agora — e é totalmente possível reverter com apoio profissional."
+
+### 7. **Dados e Curiosidades Científicas (Opcional)**
+- **Quando usar**: Na seção "🔍 CAUSA RAIZ" ou como box informativo
+- **Como usar**: De forma educativa, não promissória
+- **Formato**: "Estudos indicam que..." ou "Pesquisas mostram que..."
+- **Evitar**: Promessas específicas ("você vai perder X kg")
+
+**Exemplos:**
+- ✅ "Estudos mostram que pequenas mudanças de 300 kcal por dia já podem influenciar a composição corporal ao longo do tempo."
+- ❌ "Estudos garantem que você vai perder 2kg em 4 semanas."
 
 ---
 
@@ -180,13 +238,16 @@ Se necessário manter compatibilidade temporária, pode sincronizar de `diagnost
 
 Antes de finalizar um diagnóstico, verifique:
 
-- [ ] Todas as 6 seções estão preenchidas?
+- [ ] Todas as 6 seções obrigatórias estão preenchidas?
+- [ ] Seção 7 "Próximo Passo" foi incluída com tom apropriado ao nível?
 - [ ] Não há prescrições diretas de suplementos/dosagens?
 - [ ] Menciona avaliação profissional de forma sutil (1-2x no máximo)?
 - [ ] Enfatiza personalização do plano?
 - [ ] Tom é consultivo e educativo, não prescritivo?
+- [ ] Tom emocional está adequado à gravidade do resultado?
 - [ ] Texto está sincronizado entre preview e admin-diagnosticos?
 - [ ] Evita termos muito técnicos sem explicação?
+- [ ] Há gatilho de curiosidade que desperta "quero saber mais"?
 
 ---
 
@@ -224,17 +285,20 @@ Antes de finalizar um diagnóstico, verifique:
 ## 📚 Ferramentas Implementadas
 
 ### Com Diagnósticos em `diagnosticos-nutri.ts` (Padrão Permanente):
-- ✅ Quiz Interativo (Metabolismo)
-- ✅ Quiz de Bem-Estar
-- ✅ Quiz de Perfil Nutricional
-- 🔄 Calculadora de IMC (diagnósticos ainda em admin-diagnosticos - migrar quando possível)
+- ✅ Quiz Interativo (Metabolismo) - **Com seção Próximo Passo + dados científicos**
+- ✅ Quiz de Bem-Estar - **Com seção Próximo Passo + dados científicos**
+- ✅ Quiz de Perfil Nutricional - **Com seção Próximo Passo + dados científicos**
+- ✅ Quiz Detox - **Com seção Próximo Passo + dados científicos**
+- ✅ Quiz Energético - **Com seção Próximo Passo + dados científicos**
+- ✅ Calculadora de IMC - **Com seção Próximo Passo + dados científicos** (Campos juntos)
+- ✅ Calculadora de Proteína - **Com seção Próximo Passo + dados científicos** (Campos juntos)
 
 ### Status de Migração:
 **Admin-diagnosticos** → **diagnosticos-nutri.ts**
 
 1. ⚠️ **Objetivo**: Migrar todos os diagnósticos de `admin-diagnosticos/page.tsx` para `diagnosticos-nutri.ts`
-2. ✅ **Concluído**: Quiz Interativo, Quiz de Bem-Estar, Quiz de Perfil Nutricional
-3. 🔄 **Pendente**: Calculadora de IMC e outras ferramentas
+2. ✅ **Concluído**: Quiz Interativo, Quiz de Bem-Estar, Quiz de Perfil Nutricional, Quiz Detox, Quiz Energético, Calculadora de IMC, Calculadora de Proteína
+3. 🔄 **Pendente**: Outras calculadoras e ferramentas restantes
 4. 📝 **Nova Regra**: Todas as novas ferramentas devem começar direto em `diagnosticos-nutri.ts`
 
 **Próximas ferramentas**: Seguir este padrão permanente desde o início.
@@ -254,5 +318,32 @@ Sempre que houver:
 ---
 
 **Última atualização**: Dezembro 2024
-**Versão**: 1.0
+**Versão**: 2.0
+
+---
+
+## 📝 Exemplo Refinado: Calculadora de IMC
+
+### **Baixo Peso (versão aprimorada)**
+
+📋 **DIAGNÓSTICO:**
+Seu IMC indica baixo peso, o que pode sinalizar carência energética e nutricional. É importante restaurar o equilíbrio de forma segura e personalizada.
+
+🔍 **CAUSA RAIZ:**
+Pode estar relacionado a ingestão calórica insuficiente, metabolismo acelerado ou má absorção. Estudos indicam que 40% das pessoas com baixo peso têm causas nutricionais não identificadas. Uma avaliação nutricional identifica exatamente onde está o desequilíbrio.
+
+⚡ **AÇÃO IMEDIATA:**
+Evite aumentar calorias de forma desordenada. O ideal é ajustar alimentos densos nutricionalmente conforme seu estilo de vida e rotina diária.
+
+📅 **PLANO 7 DIAS:**
+Protocolo inicial para ganho saudável, com foco em refeições equilibradas, aumento gradual de calorias e estímulo do apetite natural.
+
+💊 **SUPLEMENTAÇÃO:**
+A necessidade de suplementos só é definida após avaliação completa. Costuma-se considerar opções como whey protein, multivitamínicos e probióticos, sempre de acordo com a individualidade biológica.
+
+🍎 **ALIMENTAÇÃO:**
+Priorize alimentos naturais e calóricos como abacate, castanhas, raízes e cereais integrais. Um plano personalizado ajusta quantidades e combinações ideais para você.
+
+🎯 **PRÓXIMO PASSO:**
+Descubra em minutos como seu corpo pode responder a um plano de ganho saudável — solicite sua análise personalizada agora.
 
