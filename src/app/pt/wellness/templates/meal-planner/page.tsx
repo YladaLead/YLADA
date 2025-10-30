@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 
 interface Resultado {
   caloriasDiarias: number
@@ -12,6 +13,7 @@ interface Resultado {
   carbs: number
   gorduras: number
   suplementos: string[]
+  objetivo: string
 }
 
 export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
@@ -22,9 +24,12 @@ export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
     peso: '',
     altura: '',
     atividade: '',
-    objetivo: ''
+    objetivo: '',
+    preferencias: [] as string[],
+    refeicoes: ''
   })
   const [resultado, setResultado] = useState<Resultado | null>(null)
+  const [diagnostico, setDiagnostico] = useState<DiagnosticoCompleto | null>(null)
 
   const iniciarPlanejamento = () => {
     setEtapa('formulario')
@@ -81,14 +86,32 @@ export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
     suplementos.push('Multivitamínico (pela manhã)')
     suplementos.push('Ômega 3 (com refeições)')
 
+    // Determinar qual diagnóstico mostrar baseado no objetivo
+    let diagnosticoId = 'manterPeso'
+    if (dados.objetivo === 'perder') diagnosticoId = 'perderPeso'
+    else if (dados.objetivo === 'ganhar') diagnosticoId = 'ganharMassa'
+    else if (dados.objetivo === 'manter') diagnosticoId = 'manterPeso'
+
+    const diagnosticoCompleto = getDiagnostico('planner-refeicoes', 'nutri', diagnosticoId)
+    setDiagnostico(diagnosticoCompleto)
+
     setResultado({
       caloriasDiarias: Math.round(calorias),
       proteinas,
       carbs,
       gorduras,
-      suplementos
+      suplementos,
+      objetivo: dados.objetivo
     })
     setEtapa('resultado')
+  }
+
+  const togglePreferencia = (pref: string) => {
+    if (dados.preferencias.includes(pref)) {
+      setDados({ ...dados, preferencias: dados.preferencias.filter(p => p !== pref) })
+    } else {
+      setDados({ ...dados, preferencias: [...dados.preferencias, pref] })
+    }
   }
 
   return (
@@ -233,6 +256,45 @@ export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
                   <option value="ganhar">Ganhar massa muscular</option>
                 </select>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Preferências alimentares
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {['Carnes', 'Frango', 'Peixe', 'Vegetariano', 'Vegano'].map((pref) => (
+                    <button
+                      key={pref}
+                      type="button"
+                      onClick={() => togglePreferencia(pref)}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                        dados.preferencias.includes(pref)
+                          ? 'border-pink-500 bg-pink-50 text-pink-700'
+                          : 'border-gray-300 bg-white text-gray-700 hover:border-pink-300'
+                      }`}
+                    >
+                      {pref}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Refeições por dia
+                </label>
+                <select
+                  value={dados.refeicoes}
+                  onChange={(e) => setDados({ ...dados, refeicoes: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-lg"
+                >
+                  <option value="">Selecione (opcional)</option>
+                  <option value="3">3 refeições</option>
+                  <option value="4">4 refeições</option>
+                  <option value="5">5 refeições</option>
+                  <option value="6">6 refeições</option>
+                </select>
+              </div>
             </div>
 
             <button
@@ -290,6 +352,43 @@ export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
                 </ul>
               </div>
 
+              {/* Diagnósticos Nutricionais */}
+              {diagnostico && (
+                <div className="space-y-4 mb-6">
+                  <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl p-6 border-2 border-pink-200">
+                    <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
+                      <span className="text-2xl mr-2">📋</span>
+                      Diagnóstico Nutricional Completo
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.diagnostico}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.causaRaiz}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.acaoImediata}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.plano7Dias}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.suplementacao}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.alimentacao}</p>
+                      </div>
+                      {diagnostico.proximoPasso && (
+                        <div className="bg-gradient-to-r from-pink-100 to-rose-100 rounded-lg p-4 border-l-4 border-pink-500">
+                          <p className="text-gray-900 font-semibold whitespace-pre-line">{diagnostico.proximoPasso}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-gray-50 rounded-xl p-6">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                   <span className="text-2xl mr-2">💡</span>
@@ -298,7 +397,7 @@ export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start">
                     <span className="text-pink-600 mr-2">✓</span>
-                    <span>Dividir calorias em 5-6 refeições ao longo do dia</span>
+                    <span>Dividir calorias em {dados.refeicoes || '5-6'} refeições ao longo do dia</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-pink-600 mr-2">✓</span>
@@ -330,8 +429,12 @@ export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
                     peso: '',
                     altura: '',
                     atividade: '',
-                    objetivo: ''
+                    objetivo: '',
+                    preferencias: [],
+                    refeicoes: ''
                   })
+                  setResultado(null)
+                  setDiagnostico(null)
                   setEtapa('formulario')
                 }}
                 className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
@@ -346,8 +449,12 @@ export default function PlanejadorRefeicoes({ config }: TemplateBaseProps) {
                     peso: '',
                     altura: '',
                     atividade: '',
-                    objetivo: ''
+                    objetivo: '',
+                    preferencias: [],
+                    refeicoes: ''
                   })
+                  setResultado(null)
+                  setDiagnostico(null)
                   setEtapa('landing')
                 }}
                 className="flex-1 bg-pink-600 text-white py-3 rounded-lg font-medium hover:bg-pink-700 transition-colors"

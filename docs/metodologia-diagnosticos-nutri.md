@@ -285,20 +285,89 @@ Antes de finalizar um diagnóstico, verifique:
 ## 📚 Ferramentas Implementadas
 
 ### Com Diagnósticos em `diagnosticos-nutri.ts` (Padrão Permanente):
+
+**QUIZES (5 ferramentas):**
 - ✅ Quiz Interativo (Metabolismo) - **Com seção Próximo Passo + dados científicos**
 - ✅ Quiz de Bem-Estar - **Com seção Próximo Passo + dados científicos**
 - ✅ Quiz de Perfil Nutricional - **Com seção Próximo Passo + dados científicos**
 - ✅ Quiz Detox - **Com seção Próximo Passo + dados científicos**
 - ✅ Quiz Energético - **Com seção Próximo Passo + dados científicos**
+
+**CALCULADORAS (4 ferramentas):**
 - ✅ Calculadora de IMC - **Com seção Próximo Passo + dados científicos** (Campos juntos)
 - ✅ Calculadora de Proteína - **Com seção Próximo Passo + dados científicos** (Campos juntos)
+- ✅ Calculadora de Água - **Com seção Próximo Passo + dados científicos** (Campos juntos)
+- ✅ Calculadora de Calorias - **Com seção Próximo Passo + dados científicos** (Campos juntos)
+
+**CHECKLISTS (2 ferramentas):**
+- ✅ Checklist Detox - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+- ✅ Checklist Alimentar - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+
+**CONTEÚDO EDUCATIVO (6 ferramentas):**
+- ✅ Mini E-book Educativo - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+- ✅ Guia Nutracêutico - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+- ✅ Guia Proteico - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+- ✅ Tabela Comparativa - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+- ✅ Tabela de Substituições - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+- ✅ Tabela de Sintomas - **Com seção Próximo Passo + dados científicos** (Navegação por setinhas)
+
+**PLANOS E ORGANIZAÇÃO (5 ferramentas):**
+- ✅ Planner de Refeições - **Com seção Próximo Passo + dados científicos** (Campos: idade, gênero, peso, altura, atividade, objetivo, preferências, refeições)
+- ✅ Plano Alimentar Base - **Com seção Próximo Passo + dados científicos**
+- ✅ Rastreador Alimentar - **Com seção Próximo Passo + dados científicos** (Campos: experiência, frequência, detalhamento, objetivo)
+- ✅ Diário Alimentar - **Com seção Próximo Passo + dados científicos** (Campos: experiência, registro de sentimentos, detalhamento, objetivo)
+- ✅ Tabela de Metas Semanais - **Com seção Próximo Passo + dados científicos** (Campos: seleção de metas + alvos por meta + nível atual)
+
+**DESAFIOS (2 ferramentas):**
+- ✅ Desafio 7 Dias - **Com seção Próximo Passo + dados científicos** (Campos: experiência, objetivo, disponibilidade)
+- ✅ Desafio 21 Dias - **Com seção Próximo Passo + dados científicos** (Campos: experiência, objetivo, comprometimento - estruturado em 3 semanas)
+
+**GUIAS EDUCACIONAIS (2 ferramentas):**
+- ✅ Guia de Hidratação - **Com seção Próximo Passo + dados científicos** (Campos: peso, atividade, clima, água atual, sintomas - cálculo personalizado de necessidade hídrica)
+- ✅ Infográfico Educativo - **Com seção Próximo Passo + dados científicos** (Quiz de 5 perguntas para avaliar conhecimento - resultados: básico, moderado, avançado)
+
+**RECEITAS E CARDÁPIOS (2 ferramentas):**
+- ✅ Receitas - **Com seção Próximo Passo + dados científicos** (Campos: experiência, tempo, tipo refeição, objetivo, preferências - resultados: básicas, moderadas, avançadas)
+- ✅ Cardápio Detox - **Com seção Próximo Passo + dados científicos** (Campos: sintomas, exposição, objetivo, experiência - resultados: básico, moderado, avançado)
+
+**SIMULADORES (1 ferramenta):**
+- ✅ Simulador de Resultados - **Com seção Próximo Passo + dados científicos** (Campos: peso, objetivo, mudanças planejadas, consistência, tempo - projeções em 1, 3, 6 e 12 meses)
+
+**FORMULÁRIOS (2 ferramentas):**
+- ✅ Avaliação Inicial - **Com seção Próximo Passo + dados científicos** (Campos: dados pessoais, objetivos, histórico, sintomas, alimentação, medicamentos - resultados: básica, moderada, avançada)
+- ✅ Formulário de Recomendação - **Com seção Próximo Passo + dados científicos** (Campos: objetivo, experiência, restrições, sintomas, rotina, orçamento, disponibilidade, preferências, dificuldades - resultados: básica, moderada, avançada)
+
+**Total**: 31 ferramentas completas com preview implementado e diagnósticos padronizados
 
 ### Status de Migração:
 **Admin-diagnosticos** → **diagnosticos-nutri.ts**
 
 1. ⚠️ **Objetivo**: Migrar todos os diagnósticos de `admin-diagnosticos/page.tsx` para `diagnosticos-nutri.ts`
-2. ✅ **Concluído**: Quiz Interativo, Quiz de Bem-Estar, Quiz de Perfil Nutricional, Quiz Detox, Quiz Energético, Calculadora de IMC, Calculadora de Proteína
-3. 🔄 **Pendente**: Outras calculadoras e ferramentas restantes
+2. ✅ **Concluído**: 
+   - Todos os 5 Quizzes
+   - Todas as 4 Calculadoras
+   - Todas as 2 Checklists
+   - Mini E-book Educativo
+   - Guia Nutracêutico
+   - Guia Proteico
+   - Tabela Comparativa
+   - Tabela de Substituições
+   - Tabela de Sintomas
+   - Planner de Refeições
+   - Plano Alimentar Base
+   - Rastreador Alimentar
+   - Diário Alimentar
+   - Tabela de Metas Semanais
+   - Desafio 7 Dias
+   - Desafio 21 Dias
+   - Guia de Hidratação
+   - Infográfico Educativo
+   - Receitas
+   - Cardápio Detox
+   - Simulador de Resultados
+   - Avaliação Inicial
+   - Formulário de Recomendação
+3. 🔄 **Pendente**: Outras ferramentas restantes (tabelas, planos, desafios, etc.)
 4. 📝 **Nova Regra**: Todas as novas ferramentas devem começar direto em `diagnosticos-nutri.ts`
 
 **Próximas ferramentas**: Seguir este padrão permanente desde o início.

@@ -4193,28 +4193,28 @@ const diagnosticosCompletos = {
   'quiz-perfil-nutricional': {
     nutri: {
       absorcaoBaixa: [
-        '📋 DIAGNÓSTICO: Seu corpo tem dificuldade para absorver nutrientes essenciais',
-        '🔍 CAUSA RAIZ: Problemas digestivos, inflamação intestinal ou deficiências enzimáticas',
-        '⚡ AÇÃO IMEDIATA: Inicie probióticos e enzimas digestivas para melhorar absorção',
-        '📅 PLANO 7 DIAS: Protocolo de reparo intestinal com alimentos anti-inflamatórios',
-        '💊 SUPLEMENTAÇÃO: Probióticos + Enzimas digestivas + Magnésio para absorção',
-        '🍎 ALIMENTAÇÃO: Evite alimentos inflamatórios, aumente fibras prebióticas'
+        '📋 DIAGNÓSTICO: Dificuldades de absorção que precisam de intervenção personalizada',
+        '🔍 CAUSA RAIZ: Problemas digestivos ou inflamação podem estar reduzindo a absorção. Uma avaliação completa identifica a origem e como reverter',
+        '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para receber um protocolo seguro e adequado. Evite auto-suplementação — cada caso tem necessidades específicas',
+        '📅 PLANO 7 DIAS: Protocolo inicial focado em reparo digestivo e alimentos anti-inflamatórios, com ajustes conforme sua resposta individual',
+        '💊 SUPLEMENTAÇÃO: Definida após avaliação; pode incluir suporte digestivo específico conforme necessidade',
+        '🍎 ALIMENTAÇÃO: Evite alimentos inflamatórios enquanto aguarda sua avaliação. Aumente fibras prebióticas de forma gradual'
       ],
       absorcaoModerada: [
-        '📋 DIAGNÓSTICO: Sua absorção nutricional está boa, mas pode ser otimizada',
-        '🔍 CAUSA RAIZ: Boa base digestiva, mas precisa de ajustes para máxima eficiência',
-        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e adicione estratégias de timing',
-        '📅 PLANO 7 DIAS: Otimização com combinações alimentares estratégicas',
-        '💊 SUPLEMENTAÇÃO: Multivitamínico + Probióticos para manutenção',
-        '🍎 ALIMENTAÇÃO: Combine nutrientes para melhor absorção (ferro + vitamina C)'
+        '📋 DIAGNÓSTICO: Boa base, mas pode ser otimizada com estratégias personalizadas',
+        '🔍 CAUSA RAIZ: Boa digestão, mas timing e combinações podem ser refinados. Uma análise detalhada mostra onde ganhar eficiência',
+        '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e considere avaliação para identificar estratégias de timing que potencializam absorção',
+        '📅 PLANO 7 DIAS: Otimização com combinações alimentares estratégicas e timing nutricional específico para seu perfil',
+        '💊 SUPLEMENTAÇÃO: Uma avaliação identifica se você se beneficia de suporte preventivo. Multivitamínico e probióticos costumam ser indicados, mas apenas após análise do seu caso',
+        '🍎 ALIMENTAÇÃO: Combine nutrientes para melhor absorção (ex.: ferro + vitamina C). Um plano otimizado considera combinações específicas para maximizar seus resultados'
       ],
       absorcaoOtimizada: [
-        '📋 DIAGNÓSTICO: Excelente absorção nutricional! Seu corpo está funcionando perfeitamente',
-        '🔍 CAUSA RAIZ: Sistema digestivo saudável e eficiente',
-        '⚡ AÇÃO IMEDIATA: Continue rotina atual e adicione nutrição esportiva',
-        '📅 PLANO 7 DIAS: Manutenção com alimentos funcionais premium',
-        '💊 SUPLEMENTAÇÃO: Antioxidantes + Adaptógenos para performance',
-        '🍎 ALIMENTAÇÃO: Mantenha padrão atual, adicione superalimentos'
+        '📋 DIAGNÓSTICO: Sistema digestivo funcionando bem; estratégias avançadas podem potencializar ainda mais',
+        '🔍 CAUSA RAIZ: Sistema digestivo saudável e eficiente. Estratégias preventivas avançadas ajudam a preservar essa condição e evoluir para níveis superiores',
+        '⚡ AÇÃO IMEDIATA: Continue a rotina atual e considere avaliação preventiva para introduzir estratégias nutricionais avançadas que sustentam resultados a longo prazo',
+        '📅 PLANO 7 DIAS: Manutenção com alimentos funcionais premium e protocolo preventivo personalizado para sustentabilidade',
+        '💊 SUPLEMENTAÇÃO: Uma análise preventiva identifica se você se beneficia de suporte para performance. O protocolo é personalizado conforme seu perfil metabólico atual',
+        '🍎 ALIMENTAÇÃO: Mantenha o padrão atual e considere introduzir superalimentos para potencializar ainda mais seus resultados e prevenir declínios futuros'
       ]
     },
     sales: {

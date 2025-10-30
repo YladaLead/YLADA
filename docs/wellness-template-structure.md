@@ -138,3 +138,4 @@ case 'novo-template-slug':
 4. ⏳ Documentar padrões de cada tipo (Calculadora, Quiz, Planilha)
 
 
+

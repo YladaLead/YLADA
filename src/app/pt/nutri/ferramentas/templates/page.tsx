@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { diagnosticosNutri, calculadoraAguaDiagnosticos, calculadoraCaloriasDiagnosticos, checklistDetoxDiagnosticos, checklistAlimentarDiagnosticos, miniEbookDiagnosticos } from '@/lib/diagnosticos-nutri'
+import { diagnosticosNutri, calculadoraAguaDiagnosticos, calculadoraCaloriasDiagnosticos, checklistDetoxDiagnosticos, checklistAlimentarDiagnosticos, miniEbookDiagnosticos, guiaNutraceuticoDiagnosticos, guiaProteicoDiagnosticos, tabelaComparativaDiagnosticos, tabelaSubstituicoesDiagnosticos, tabelaSintomasDiagnosticos, planoAlimentarBaseDiagnosticos } from '@/lib/diagnosticos-nutri'
 
 export default function TemplatesNutri() {
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas')
@@ -21,6 +21,11 @@ export default function TemplatesNutri() {
   const [etapaPreviewChecklistDetox, setEtapaPreviewChecklistDetox] = useState(0) // Para checklist-detox: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewChecklistAlimentar, setEtapaPreviewChecklistAlimentar] = useState(0) // Para checklist-alimentar: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewMiniEbook, setEtapaPreviewMiniEbook] = useState(0) // Para mini-ebook: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewGuiaNutraceutico, setEtapaPreviewGuiaNutraceutico] = useState(0) // Para guia-nutraceutico: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewGuiaProteico, setEtapaPreviewGuiaProteico] = useState(0) // Para guia-proteico: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewTabelaComparativa, setEtapaPreviewTabelaComparativa] = useState(0) // Para tabela-comparativa: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewTabelaSubstituicoes, setEtapaPreviewTabelaSubstituicoes] = useState(0) // Para tabela-substituicoes: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewTabelaSintomas, setEtapaPreviewTabelaSintomas] = useState(0) // Para tabela-sintomas: 0 = landing, 1-5 = perguntas, 6 = resultados
 
   // Todos os 38 templates validados da área admin-diagnosticos
   const templates = [
@@ -43,11 +48,11 @@ export default function TemplatesNutri() {
     
     // CONTEÚDO EDUCATIVO (6)
     { id: 'mini-ebook', nome: 'Mini E-book Educativo', categoria: 'Conteúdo', descricao: 'E-book compacto para demonstrar expertise e autoridade', icon: '📚', cor: 'purple', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '55/mês', conversao: '32%', preview: 'Demonstração de autoridade através de conteúdo educativo' },
-    { id: 'guia-nutraceutico', nome: 'Guia Nutracêutico', categoria: 'Conteúdo', descricao: 'Guia completo sobre suplementos e nutracêuticos', icon: '💊', cor: 'blue', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '48/mês', conversao: '29%', preview: 'Atração de interesse por suplementação' },
-    { id: 'guia-proteico', nome: 'Guia Proteico', categoria: 'Conteúdo', descricao: 'Guia especializado sobre proteínas e fontes proteicas', icon: '🥛', cor: 'orange', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '44/mês', conversao: '27%', preview: 'Especialização em nutrição proteica' },
-    { id: 'tabela-comparativa', nome: 'Tabela Comparativa', categoria: 'Conteúdo', descricao: 'Tabelas comparativas de alimentos e nutrientes', icon: '📊', cor: 'green', perguntas: 0, tempoEstimado: 'Visualização', leadsMedio: '40/mês', conversao: '25%', preview: 'Ferramenta de conversão através de comparações' },
-    { id: 'tabela-substituicoes', nome: 'Tabela de Substituições', categoria: 'Conteúdo', descricao: 'Tabela de substituições de alimentos para mais variedade', icon: '🔄', cor: 'blue', perguntas: 0, tempoEstimado: 'Visualização', leadsMedio: '36/mês', conversao: '23%', preview: 'Valor agregado através de substituições inteligentes' },
-    { id: 'tabela-sintomas', nome: 'Tabela de Sintomas', categoria: 'Conteúdo', descricao: 'Tabela para diagnóstico de sintomas relacionados à alimentação', icon: '🩺', cor: 'red', perguntas: 0, tempoEstimado: 'Visualização', leadsMedio: '33/mês', conversao: '22%', preview: 'Diagnóstico leve através de sintomas' },
+    { id: 'guia-nutraceutico', nome: 'Guia Nutracêutico', categoria: 'Conteúdo', descricao: 'Guia completo sobre suplementos e nutracêuticos', icon: '💊', cor: 'blue', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '48/mês', conversao: '29%', preview: 'Atração de interesse por suplementação' },
+    { id: 'guia-proteico', nome: 'Guia Proteico', categoria: 'Conteúdo', descricao: 'Guia especializado sobre proteínas e fontes proteicas', icon: '🥛', cor: 'orange', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '44/mês', conversao: '27%', preview: 'Especialização em nutrição proteica' },
+    { id: 'tabela-comparativa', nome: 'Tabela Comparativa', categoria: 'Conteúdo', descricao: 'Tabelas comparativas de alimentos e nutrientes', icon: '📊', cor: 'green', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '40/mês', conversao: '25%', preview: 'Ferramenta de conversão através de comparações' },
+    { id: 'tabela-substituicoes', nome: 'Tabela de Substituições', categoria: 'Conteúdo', descricao: 'Tabela de substituições de alimentos para mais variedade', icon: '🔄', cor: 'blue', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '36/mês', conversao: '23%', preview: 'Valor agregado através de substituições inteligentes' },
+    { id: 'tabela-sintomas', nome: 'Tabela de Sintomas', categoria: 'Conteúdo', descricao: 'Tabela para diagnóstico de sintomas relacionados à alimentação', icon: '🩺', cor: 'red', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '33/mês', conversao: '22%', preview: 'Diagnóstico leve através de sintomas' },
     
     // PLANOS E ORGANIZAÇÃO (5)
     { id: 'plano-alimentar-base', nome: 'Plano Alimentar Base', categoria: 'Plano', descricao: 'Plano alimentar base para início de jornada nutricional', icon: '📅', cor: 'green', perguntas: 5, tempoEstimado: 'Download', leadsMedio: '52/mês', conversao: '31%', preview: 'Valor prático através de plano alimentar estruturado' },
@@ -292,6 +297,11 @@ export default function TemplatesNutri() {
                     setEtapaPreviewChecklistDetox(0)
                     setEtapaPreviewChecklistAlimentar(0)
                     setEtapaPreviewMiniEbook(0)
+                    setEtapaPreviewGuiaNutraceutico(0)
+                    setEtapaPreviewGuiaProteico(0)
+                    setEtapaPreviewTabelaComparativa(0)
+                    setEtapaPreviewTabelaSubstituicoes(0)
+                    setEtapaPreviewTabelaSintomas(0)
                   }}
                   className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
@@ -3212,7 +3222,1177 @@ export default function TemplatesNutri() {
                 </div>
               )}
 
-              {templatePreviewSelecionado.id !== 'quiz-interativo' && templatePreviewSelecionado.id !== 'calculadora-imc' && templatePreviewSelecionado.id !== 'quiz-bem-estar' && templatePreviewSelecionado.id !== 'quiz-perfil-nutricional' && templatePreviewSelecionado.id !== 'quiz-detox' && templatePreviewSelecionado.id !== 'quiz-energetico' && templatePreviewSelecionado.id !== 'calculadora-proteina' && templatePreviewSelecionado.id !== 'calculadora-agua' && templatePreviewSelecionado.id !== 'calculadora-calorias' && templatePreviewSelecionado.id !== 'checklist-detox' && templatePreviewSelecionado.id !== 'checklist-alimentar' && templatePreviewSelecionado.id !== 'mini-ebook' && (
+              {/* Guia Nutracêutico */}
+              {templatePreviewSelecionado.id === 'guia-nutraceutico' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    💊 Preview do Guia Nutracêutico - "Qual é seu interesse em nutracêuticos?"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewGuiaNutraceutico === 0 && (
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">💊 Avalie Seu Interesse em Nutracêuticos</h4>
+                        <p className="text-gray-700 mb-3">Descubra seu nível de interesse em nutracêuticos e receba orientações personalizadas para evoluir seu conhecimento sobre alimentos funcionais e suplementação baseadas em sua área de interesse.</p>
+                        <p className="text-purple-600 font-semibold">💪 Uma avaliação que pode transformar seu interesse em nutracêuticos.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewGuiaNutraceutico >= 1 && etapaPreviewGuiaNutraceutico <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewGuiaNutraceutico === 1 && (
+                          <div className="bg-purple-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-purple-900 mb-3">💊 1. Qual é seu interesse em suplementos nutracêuticos?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="suplementos-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho muito interesse em suplementos nutracêuticos</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="suplementos-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho interesse moderado em suplementos nutracêuticos</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
+                                <input type="radio" name="suplementos-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho pouco interesse em suplementos nutracêuticos</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Consciência suplementar</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaNutraceutico === 2 && (
+                          <div className="bg-pink-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-pink-900 mb-3">🥗 2. Qual é seu interesse em alimentos funcionais?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                                <input type="radio" name="alimentos-funcionais" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho muito interesse em alimentos funcionais</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                                <input type="radio" name="alimentos-funcionais" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho interesse moderado em alimentos funcionais</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                                <input type="radio" name="alimentos-funcionais" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho pouco interesse em alimentos funcionais</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência funcional</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaNutraceutico === 3 && (
+                          <div className="bg-indigo-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-indigo-900 mb-3">🌿 3. Qual é seu interesse em nutracêuticos naturais?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="naturais-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho muito interesse em nutracêuticos naturais</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="naturais-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho interesse moderado em nutracêuticos naturais</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="naturais-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho pouco interesse em nutracêuticos naturais</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência natural</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaNutraceutico === 4 && (
+                          <div className="bg-cyan-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-cyan-900 mb-3">🧘‍♀️ 4. Qual é seu interesse em nutracêuticos para bem-estar?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="bem-estar-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho muito interesse em nutracêuticos para bem-estar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="bem-estar-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho interesse moderado em nutracêuticos para bem-estar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="bem-estar-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Tenho pouco interesse em nutracêuticos para bem-estar</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de bem-estar</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaNutraceutico === 5 && (
+                          <div className="bg-teal-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-teal-900 mb-3">📚 5. Com que frequência você busca informações sobre nutracêuticos?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="frequencia-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Diariamente busco informações sobre nutracêuticos</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="frequencia-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Semanalmente busco informações sobre nutracêuticos</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="frequencia-nutraceutico" className="mr-3" disabled />
+                                <span className="text-gray-700">Raramente busco informações sobre nutracêuticos</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de aprendizado</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewGuiaNutraceutico === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Guia Nutracêutico</h4>
+                        
+                        {/* Resultado 1: Baixo Interesse */}
+                        <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-red-900">📉 Baixo Interesse</h5>
+                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0-40 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.diagnostico}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.causaRaiz}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.acaoImediata}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.plano7Dias}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.suplementacao}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.alimentacao}</p>
+                            {guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{guiaNutraceuticoDiagnosticos.nutri.baixoInteresse.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Interesse Moderado */}
+                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-yellow-900">⚠️ Interesse Moderado</h5>
+                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">41-70 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{guiaNutraceuticoDiagnosticos.nutri.interesseModerado.diagnostico}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.interesseModerado.causaRaiz}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.interesseModerado.acaoImediata}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.interesseModerado.plano7Dias}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.interesseModerado.suplementacao}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.interesseModerado.alimentacao}</p>
+                            {guiaNutraceuticoDiagnosticos.nutri.interesseModerado.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{guiaNutraceuticoDiagnosticos.nutri.interesseModerado.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Alto Interesse */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">🚀 Alto Interesse</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">71-100 pontos</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{guiaNutraceuticoDiagnosticos.nutri.altoInteresse.diagnostico}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.altoInteresse.causaRaiz}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.altoInteresse.acaoImediata}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.altoInteresse.plano7Dias}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.altoInteresse.suplementacao}</p>
+                            <p className="text-gray-700">{guiaNutraceuticoDiagnosticos.nutri.altoInteresse.alimentacao}</p>
+                            {guiaNutraceuticoDiagnosticos.nutri.altoInteresse.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{guiaNutraceuticoDiagnosticos.nutri.altoInteresse.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewGuiaNutraceutico(Math.max(0, etapaPreviewGuiaNutraceutico - 1))}
+                        disabled={etapaPreviewGuiaNutraceutico === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewGuiaNutraceutico(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewGuiaNutraceutico === etapa
+                                  ? 'bg-purple-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewGuiaNutraceutico(Math.min(6, etapaPreviewGuiaNutraceutico + 1))}
+                        disabled={etapaPreviewGuiaNutraceutico === 6}
+                        className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Guia Proteico */}
+              {templatePreviewSelecionado.id === 'guia-proteico' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    🥩 Preview do Guia Proteico - "Qual é seu consumo de proteínas?"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewGuiaProteico === 0 && (
+                      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">🥩 Avalie Seu Consumo de Proteínas</h4>
+                        <p className="text-gray-700 mb-3">Descubra seu nível de consumo de proteínas e receba orientações personalizadas para otimizar sua ingestão proteica baseadas em sua área de interesse.</p>
+                        <p className="text-orange-600 font-semibold">💪 Uma avaliação que pode transformar seu consumo de proteínas.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewGuiaProteico >= 1 && etapaPreviewGuiaProteico <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewGuiaProteico === 1 && (
+                          <div className="bg-orange-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-orange-900 mb-3">🥩 1. Qual é seu consumo diário de proteínas?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="consumo-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Consumo mais de 1.2g de proteína por kg de peso</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="consumo-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Consumo entre 0.8-1.2g de proteína por kg de peso</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="consumo-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Consumo menos de 0.8g de proteína por kg de peso</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência proteica</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaProteico === 2 && (
+                          <div className="bg-red-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-red-900 mb-3">🍖 2. Quais são suas principais fontes de proteína?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                                <input type="radio" name="fontes-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Carnes, ovos, peixes e laticínios</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                                <input type="radio" name="fontes-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Mix de fontes animais e vegetais</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                                <input type="radio" name="fontes-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Principalmente fontes vegetais</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de fontes</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaProteico === 3 && (
+                          <div className="bg-amber-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-amber-900 mb-3">💪 3. Qual é seu objetivo com o consumo de proteínas?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                <input type="radio" name="objetivo-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Ganho de massa muscular e performance</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                <input type="radio" name="objetivo-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Manutenção da saúde e bem-estar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                <input type="radio" name="objetivo-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Perda de peso e definição</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência de objetivos</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaProteico === 4 && (
+                          <div className="bg-yellow-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-yellow-900 mb-3">⏰ 4. Como você distribui as proteínas ao longo do dia?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                                <input type="radio" name="distribuicao-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Distribuo uniformemente em todas as refeições</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                                <input type="radio" name="distribuicao-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Concentro principalmente no almoço e jantar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-yellow-300">
+                                <input type="radio" name="distribuicao-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Não tenho uma distribuição específica</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-yellow-600 mt-2">🧠 Gatilho: Consciência de timing</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewGuiaProteico === 5 && (
+                          <div className="bg-lime-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-lime-900 mb-3">📚 5. Com que frequência você busca informações sobre proteínas?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                                <input type="radio" name="frequencia-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Diariamente busco informações sobre proteínas</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                                <input type="radio" name="frequencia-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Semanalmente busco informações sobre proteínas</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-lime-300">
+                                <input type="radio" name="frequencia-proteina" className="mr-3" disabled />
+                                <span className="text-gray-700">Raramente busco informações sobre proteínas</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-lime-600 mt-2">🧠 Gatilho: Consciência de aprendizado</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewGuiaProteico === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Guia Proteico</h4>
+                        
+                        {/* Resultado 1: Baixa Proteína */}
+                        <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-red-900">📉 Baixa Proteína</h5>
+                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">&lt; 0.8g/kg</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{guiaProteicoDiagnosticos.nutri.baixaProteina.diagnostico}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.baixaProteina.causaRaiz}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.baixaProteina.acaoImediata}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.baixaProteina.plano7Dias}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.baixaProteina.suplementacao}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.baixaProteina.alimentacao}</p>
+                            {guiaProteicoDiagnosticos.nutri.baixaProteina.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{guiaProteicoDiagnosticos.nutri.baixaProteina.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Proteína Moderada */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">✅ Proteína Moderada</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0.8-1.2g/kg</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{guiaProteicoDiagnosticos.nutri.proteinaModerada.diagnostico}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.proteinaModerada.causaRaiz}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.proteinaModerada.acaoImediata}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.proteinaModerada.plano7Dias}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.proteinaModerada.suplementacao}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.proteinaModerada.alimentacao}</p>
+                            {guiaProteicoDiagnosticos.nutri.proteinaModerada.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{guiaProteicoDiagnosticos.nutri.proteinaModerada.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Alta Proteína */}
+                        <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-blue-900">🚀 Alta Proteína</h5>
+                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">&gt; 1.2g/kg</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{guiaProteicoDiagnosticos.nutri.altaProteina.diagnostico}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.altaProteina.causaRaiz}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.altaProteina.acaoImediata}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.altaProteina.plano7Dias}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.altaProteina.suplementacao}</p>
+                            <p className="text-gray-700">{guiaProteicoDiagnosticos.nutri.altaProteina.alimentacao}</p>
+                            {guiaProteicoDiagnosticos.nutri.altaProteina.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{guiaProteicoDiagnosticos.nutri.altaProteina.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewGuiaProteico(Math.max(0, etapaPreviewGuiaProteico - 1))}
+                        disabled={etapaPreviewGuiaProteico === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewGuiaProteico(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewGuiaProteico === etapa
+                                  ? 'bg-orange-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewGuiaProteico(Math.min(6, etapaPreviewGuiaProteico + 1))}
+                        disabled={etapaPreviewGuiaProteico === 6}
+                        className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tabela Comparativa */}
+              {templatePreviewSelecionado.id === 'tabela-comparativa' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    📊 Preview da Tabela Comparativa - "Compare produtos e escolha o melhor"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewTabelaComparativa === 0 && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">📊 Compare Produtos e Escolha o Melhor</h4>
+                        <p className="text-gray-700 mb-3">Descubra as diferenças entre produtos e receba orientações personalizadas para fazer a melhor escolha baseadas em sua área de interesse.</p>
+                        <p className="text-blue-600 font-semibold">💡 Uma comparação que pode transformar suas escolhas.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewTabelaComparativa >= 1 && etapaPreviewTabelaComparativa <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewTabelaComparativa === 1 && (
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 mb-3">📊 1. Que tipo de produtos você quer comparar?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="tipo-produto" className="mr-3" disabled />
+                                <span className="text-gray-700">Produtos essenciais (básicos)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="tipo-produto" className="mr-3" disabled />
+                                <span className="text-gray-700">Produtos especializados (avançados)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300">
+                                <input type="radio" name="tipo-produto" className="mr-3" disabled />
+                                <span className="text-gray-700">Produtos de elite (premium)</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-blue-600 mt-2">🧠 Gatilho: Consciência de categoria</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaComparativa === 2 && (
+                          <div className="bg-indigo-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-indigo-900 mb-3">🔍 2. Qual é seu objetivo com a comparação?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="objetivo-comparacao" className="mr-3" disabled />
+                                <span className="text-gray-700">Encontrar o melhor custo-benefício</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="objetivo-comparacao" className="mr-3" disabled />
+                                <span className="text-gray-700">Identificar a melhor qualidade</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-300">
+                                <input type="radio" name="objetivo-comparacao" className="mr-3" disabled />
+                                <span className="text-gray-700">Descobrir a melhor eficácia</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-indigo-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaComparativa === 3 && (
+                          <div className="bg-cyan-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-cyan-900 mb-3">⚖️ 3. Que critérios são mais importantes para você?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="criterios" className="mr-3" disabled />
+                                <span className="text-gray-700">Preço e disponibilidade</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="criterios" className="mr-3" disabled />
+                                <span className="text-gray-700">Qualidade e composição</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="criterios" className="mr-3" disabled />
+                                <span className="text-gray-700">Eficácia e resultados</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de critérios</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaComparativa === 4 && (
+                          <div className="bg-teal-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-teal-900 mb-3">🎯 4. Qual é sua experiência com produtos similares?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="experiencia" className="mr-3" disabled />
+                                <span className="text-gray-700">Pouca experiência, preciso de orientação</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="experiencia" className="mr-3" disabled />
+                                <span className="text-gray-700">Experiência moderada, quero otimizar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="experiencia" className="mr-3" disabled />
+                                <span className="text-gray-700">Muita experiência, quero evoluir</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de experiência</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaComparativa === 5 && (
+                          <div className="bg-sky-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-sky-900 mb-3">📈 5. Com que frequência você faz comparações de produtos?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                                <input type="radio" name="frequencia-comparacao" className="mr-3" disabled />
+                                <span className="text-gray-700">Sempre comparo antes de comprar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                                <input type="radio" name="frequencia-comparacao" className="mr-3" disabled />
+                                <span className="text-gray-700">Comparo ocasionalmente</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                                <input type="radio" name="frequencia-comparacao" className="mr-3" disabled />
+                                <span className="text-gray-700">Raramente faço comparações</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-sky-600 mt-2">🧠 Gatilho: Consciência de hábito</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewTabelaComparativa === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis da Tabela Comparativa</h4>
+                        
+                        {/* Resultado 1: Comparação Básica */}
+                        <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-blue-900">📊 Comparação Básica</h5>
+                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Produtos essenciais</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaComparativaDiagnosticos.nutri.comparacaoBasica.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoBasica.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoBasica.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoBasica.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoBasica.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoBasica.alimentacao}</p>
+                            {tabelaComparativaDiagnosticos.nutri.comparacaoBasica.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaComparativaDiagnosticos.nutri.comparacaoBasica.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Comparação Avançada */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">🚀 Comparação Avançada</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Produtos especializados</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.alimentacao}</p>
+                            {tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaComparativaDiagnosticos.nutri.comparacaoAvancada.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Comparação Premium */}
+                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-yellow-900">⭐ Comparação Premium</h5>
+                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Produtos de elite</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaComparativaDiagnosticos.nutri.comparacaoPremium.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoPremium.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoPremium.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoPremium.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoPremium.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaComparativaDiagnosticos.nutri.comparacaoPremium.alimentacao}</p>
+                            {tabelaComparativaDiagnosticos.nutri.comparacaoPremium.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaComparativaDiagnosticos.nutri.comparacaoPremium.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewTabelaComparativa(Math.max(0, etapaPreviewTabelaComparativa - 1))}
+                        disabled={etapaPreviewTabelaComparativa === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewTabelaComparativa(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewTabelaComparativa === etapa
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewTabelaComparativa(Math.min(6, etapaPreviewTabelaComparativa + 1))}
+                        disabled={etapaPreviewTabelaComparativa === 6}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tabela de Substituições */}
+              {templatePreviewSelecionado.id === 'tabela-substituicoes' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    🔄 Preview da Tabela de Substituições - "Substitua alimentos e melhore sua alimentação"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewTabelaSubstituicoes === 0 && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">🔄 Substitua Alimentos e Melhore Sua Alimentação</h4>
+                        <p className="text-gray-700 mb-3">Descubra alternativas saudáveis para seus alimentos e receba orientações personalizadas para fazer substituições inteligentes baseadas em sua área de interesse.</p>
+                        <p className="text-green-600 font-semibold">💡 Uma substituição que pode transformar sua alimentação.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewTabelaSubstituicoes >= 1 && etapaPreviewTabelaSubstituicoes <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewTabelaSubstituicoes === 1 && (
+                          <div className="bg-green-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-green-900 mb-3">🔄 1. Que tipo de alimentos você quer substituir?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="tipo-alimento" className="mr-3" disabled />
+                                <span className="text-gray-700">Alimentos comuns (básicos)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="tipo-alimento" className="mr-3" disabled />
+                                <span className="text-gray-700">Alimentos específicos (avançados)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-300">
+                                <input type="radio" name="tipo-alimento" className="mr-3" disabled />
+                                <span className="text-gray-700">Alimentos de elite (premium)</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-green-600 mt-2">🧠 Gatilho: Consciência de categoria</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSubstituicoes === 2 && (
+                          <div className="bg-emerald-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-emerald-900 mb-3">🥗 2. Qual é seu objetivo com as substituições?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                                <input type="radio" name="objetivo-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Melhorar a saúde geral</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                                <input type="radio" name="objetivo-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Otimizar nutrientes específicos</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-emerald-300">
+                                <input type="radio" name="objetivo-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Evoluir para alimentação premium</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-emerald-600 mt-2">🧠 Gatilho: Consciência de objetivo</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSubstituicoes === 3 && (
+                          <div className="bg-teal-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-teal-900 mb-3">⚖️ 3. Que critérios são mais importantes para você?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="criterios-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Facilidade e praticidade</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="criterios-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Valor nutricional e qualidade</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300">
+                                <input type="radio" name="criterios-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Sabor e experiência gastronômica</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-teal-600 mt-2">🧠 Gatilho: Consciência de critérios</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSubstituicoes === 4 && (
+                          <div className="bg-cyan-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-cyan-900 mb-3">🎯 4. Qual é sua experiência com substituições alimentares?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="experiencia-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Pouca experiência, preciso de orientação</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="experiencia-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Experiência moderada, quero otimizar</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-cyan-300">
+                                <input type="radio" name="experiencia-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Muita experiência, quero evoluir</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-cyan-600 mt-2">🧠 Gatilho: Consciência de experiência</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSubstituicoes === 5 && (
+                          <div className="bg-sky-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-sky-900 mb-3">📈 5. Com que frequência você faz substituições alimentares?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                                <input type="radio" name="frequencia-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Sempre faço substituições</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                                <input type="radio" name="frequencia-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Faço substituições ocasionalmente</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-sky-300">
+                                <input type="radio" name="frequencia-substituicao" className="mr-3" disabled />
+                                <span className="text-gray-700">Raramente faço substituições</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-sky-600 mt-2">🧠 Gatilho: Consciência de hábito</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewTabelaSubstituicoes === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis da Tabela de Substituições</h4>
+                        
+                        {/* Resultado 1: Substituições Básicas */}
+                        <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-blue-900">🔄 Substituições Básicas</h5>
+                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Alternativas simples</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.alimentacao}</p>
+                            {tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesBasicas.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Substituições Avançadas */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">🚀 Substituições Avançadas</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Alternativas especializadas</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.alimentacao}</p>
+                            {tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesAvancadas.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Substituições Premium */}
+                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-yellow-900">⭐ Substituições Premium</h5>
+                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Alternativas de elite</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.alimentacao}</p>
+                            {tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSubstituicoesDiagnosticos.nutri.substituicoesPremium.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewTabelaSubstituicoes(Math.max(0, etapaPreviewTabelaSubstituicoes - 1))}
+                        disabled={etapaPreviewTabelaSubstituicoes === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewTabelaSubstituicoes(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewTabelaSubstituicoes === etapa
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewTabelaSubstituicoes(Math.min(6, etapaPreviewTabelaSubstituicoes + 1))}
+                        disabled={etapaPreviewTabelaSubstituicoes === 6}
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tabela de Sintomas */}
+              {templatePreviewSelecionado.id === 'tabela-sintomas' && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    🩺 Preview da Tabela de Sintomas - "Identifique sintomas e receba orientações específicas"
+                  </h3>
+                  
+                  {/* Container principal com navegação */}
+                  <div className="relative">
+                    {/* Tela de Abertura - Etapa 0 */}
+                    {etapaPreviewTabelaSintomas === 0 && (
+                      <div className="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg">
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">🩺 Identifique Sintomas e Receba Orientações Específicas</h4>
+                        <p className="text-gray-700 mb-3">Descubra a relação entre seus sintomas e receba orientações personalizadas para correção baseadas em sua área de interesse.</p>
+                        <p className="text-red-600 font-semibold">💡 Uma análise que pode transformar sua saúde.</p>
+                      </div>
+                    )}
+
+                    {/* Perguntas 1-5 - Navegação com setinhas */}
+                    {etapaPreviewTabelaSintomas >= 1 && etapaPreviewTabelaSintomas <= 5 && (
+                      <div className="space-y-6">
+                        {etapaPreviewTabelaSintomas === 1 && (
+                          <div className="bg-red-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-red-900 mb-3">🩺 1. Que tipo de sintomas você está apresentando?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                                <input type="radio" name="tipo-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Sintomas leves (1-3 sintomas)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                                <input type="radio" name="tipo-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Sintomas moderados (4-6 sintomas)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-red-300">
+                                <input type="radio" name="tipo-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Sintomas graves (7+ sintomas)</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-red-600 mt-2">🧠 Gatilho: Consciência de gravidade</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSintomas === 2 && (
+                          <div className="bg-pink-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-pink-900 mb-3">🔍 2. Qual é a frequência dos seus sintomas?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                                <input type="radio" name="frequencia-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Ocasionalmente (raros)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                                <input type="radio" name="frequencia-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Frequentemente (regulares)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-pink-300">
+                                <input type="radio" name="frequencia-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Constantemente (persistentes)</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-pink-600 mt-2">🧠 Gatilho: Consciência de frequência</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSintomas === 3 && (
+                          <div className="bg-rose-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-rose-900 mb-3">⚖️ 3. Que tipo de sintomas são mais comuns?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                                <input type="radio" name="categoria-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Digestivos (estômago, intestino)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                                <input type="radio" name="categoria-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Energéticos (fadiga, cansaço)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-rose-300">
+                                <input type="radio" name="categoria-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Inflamatórios (dores, inchaço)</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-rose-600 mt-2">🧠 Gatilho: Consciência de categoria</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSintomas === 4 && (
+                          <div className="bg-orange-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-orange-900 mb-3">🎯 4. Há quanto tempo você apresenta esses sintomas?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="duracao-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Pouco tempo (menos de 1 mês)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="duracao-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Tempo moderado (1-6 meses)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-orange-300">
+                                <input type="radio" name="duracao-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Muito tempo (mais de 6 meses)</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-orange-600 mt-2">🧠 Gatilho: Consciência de duração</p>
+                          </div>
+                        )}
+
+                        {etapaPreviewTabelaSintomas === 5 && (
+                          <div className="bg-amber-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-amber-900 mb-3">📈 5. Que impacto os sintomas têm na sua vida?</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                <input type="radio" name="impacto-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Baixo impacto (não afeta muito)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                <input type="radio" name="impacto-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Moderado impacto (afeta algumas atividades)</span>
+                              </label>
+                              <label className="flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-amber-300">
+                                <input type="radio" name="impacto-sintoma" className="mr-3" disabled />
+                                <span className="text-gray-700">Alto impacto (afeta muitas atividades)</span>
+                              </label>
+                            </div>
+                            <p className="text-xs text-amber-600 mt-2">🧠 Gatilho: Consciência de impacto</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tela de Resultados - Etapa 6 */}
+                    {etapaPreviewTabelaSintomas === 6 && (
+                      <div className="space-y-6">
+                        <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis da Tabela de Sintomas</h4>
+                        
+                        {/* Resultado 1: Sintomas Leves */}
+                        <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-green-900">✅ Sintomas Leves</h5>
+                            <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">1-3 sintomas</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.alimentacao}</p>
+                            {tabelaSintomasDiagnosticos.nutri.sintomasLeves.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSintomasDiagnosticos.nutri.sintomasLeves.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 2: Sintomas Moderados */}
+                        <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-yellow-900">⚠️ Sintomas Moderados</h5>
+                            <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">4-6 sintomas</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.alimentacao}</p>
+                            {tabelaSintomasDiagnosticos.nutri.sintomasModerados.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSintomasDiagnosticos.nutri.sintomasModerados.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Resultado 3: Sintomas Graves */}
+                        <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="text-lg font-bold text-red-900">🚨 Sintomas Graves</h5>
+                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">7+ sintomas</span>
+                          </div>
+                          <div className="bg-white rounded-lg p-4 space-y-2">
+                            <p className="font-semibold text-gray-900">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.diagnostico}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.causaRaiz}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.acaoImediata}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.plano7Dias}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.suplementacao}</p>
+                            <p className="text-gray-700">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.alimentacao}</p>
+                            {tabelaSintomasDiagnosticos.nutri.sintomasGraves.proximoPasso && (
+                              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{tabelaSintomasDiagnosticos.nutri.sintomasGraves.proximoPasso}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navegação com Setinhas */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={() => setEtapaPreviewTabelaSintomas(Math.max(0, etapaPreviewTabelaSintomas - 1))}
+                        disabled={etapaPreviewTabelaSintomas === 0}
+                        className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Anterior
+                      </button>
+                      
+                      <div className="flex space-x-2">
+                        {[0, 1, 2, 3, 4, 5, 6].map((etapa) => {
+                          const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+                          return (
+                            <button
+                              key={etapa}
+                              onClick={() => setEtapaPreviewTabelaSintomas(etapa)}
+                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                etapaPreviewTabelaSintomas === etapa
+                                  ? 'bg-red-600 text-white'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              }`}
+                              title={etapa === 0 ? 'Tela Inicial' : etapa === 6 ? 'Resultados' : `Pergunta ${etapa}`}
+                            >
+                              {labels[etapa]}
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setEtapaPreviewTabelaSintomas(Math.min(6, etapaPreviewTabelaSintomas + 1))}
+                        disabled={etapaPreviewTabelaSintomas === 6}
+                        className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {templatePreviewSelecionado.id !== 'quiz-interativo' && templatePreviewSelecionado.id !== 'calculadora-imc' && templatePreviewSelecionado.id !== 'quiz-bem-estar' && templatePreviewSelecionado.id !== 'quiz-perfil-nutricional' && templatePreviewSelecionado.id !== 'quiz-detox' && templatePreviewSelecionado.id !== 'quiz-energetico' && templatePreviewSelecionado.id !== 'calculadora-proteina' && templatePreviewSelecionado.id !== 'calculadora-agua' && templatePreviewSelecionado.id !== 'calculadora-calorias' && templatePreviewSelecionado.id !== 'checklist-detox' && templatePreviewSelecionado.id !== 'checklist-alimentar' && templatePreviewSelecionado.id !== 'mini-ebook' && templatePreviewSelecionado.id !== 'guia-nutraceutico' && templatePreviewSelecionado.id !== 'guia-proteico' && templatePreviewSelecionado.id !== 'tabela-comparativa' && templatePreviewSelecionado.id !== 'tabela-substituicoes' && templatePreviewSelecionado.id !== 'tabela-sintomas' && (
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     {templatePreviewSelecionado.icon} Preview do {templatePreviewSelecionado.nome}
@@ -3249,6 +4429,11 @@ export default function TemplatesNutri() {
                     setEtapaPreviewChecklistDetox(0)
                     setEtapaPreviewChecklistAlimentar(0)
                     setEtapaPreviewMiniEbook(0)
+                    setEtapaPreviewGuiaNutraceutico(0)
+                    setEtapaPreviewGuiaProteico(0)
+                    setEtapaPreviewTabelaComparativa(0)
+                    setEtapaPreviewTabelaSubstituicoes(0)
+                    setEtapaPreviewTabelaSintomas(0)
                   }}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                 >

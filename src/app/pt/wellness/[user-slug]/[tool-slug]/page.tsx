@@ -41,6 +41,18 @@ const TemplateWellnessProfile = dynamic(() => import('@/app/pt/wellness/template
 const TemplateNutritionAssessment = dynamic(() => import('@/app/pt/wellness/templates/nutrition-assessment/page'), { ssr: false })
 const TemplateDailyWellness = dynamic(() => import('@/app/pt/wellness/templates/daily-wellness/page'), { ssr: false })
 const TemplateMealPlanner = dynamic(() => import('@/app/pt/wellness/templates/meal-planner/page'), { ssr: false })
+const TemplateFoodTracker = dynamic(() => import('@/app/pt/wellness/templates/food-tracker/page'), { ssr: false })
+const TemplateFoodDiary = dynamic(() => import('@/app/pt/wellness/templates/food-diary/page'), { ssr: false })
+const TemplateWeeklyGoals = dynamic(() => import('@/app/pt/wellness/templates/weekly-goals/page'), { ssr: false })
+const Template7DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/7-day-challenge/page'), { ssr: false })
+const Template21DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/21-day-challenge/page'), { ssr: false })
+const TemplateHydrationGuide = dynamic(() => import('@/app/pt/wellness/templates/hydration-guide/page'), { ssr: false })
+const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
+const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
+const TemplateDetoxMenu = dynamic(() => import('@/app/pt/wellness/templates/detox-menu/page'), { ssr: false })
+const TemplateResultsSimulator = dynamic(() => import('@/app/pt/wellness/templates/results-simulator/page'), { ssr: false })
+const TemplateInitialAssessment = dynamic(() => import('@/app/pt/wellness/templates/initial-assessment/page'), { ssr: false })
+const TemplateRecommendationForm = dynamic(() => import('@/app/pt/wellness/templates/recommendation-form/page'), { ssr: false })
 
 export default function FerramentaPersonalizadaPage() {
   const params = useParams()
@@ -162,6 +174,35 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplateDailyWellness config={config} />
       case 'planilha-meal-planner':
         return <TemplateMealPlanner config={config} />
+      case 'rastreador-alimentar':
+      case 'planilha-rastreador-alimentar':
+        return <TemplateFoodTracker config={config} />
+      case 'diario-alimentar':
+      case 'planilha-diario-alimentar':
+        return <TemplateFoodDiary config={config} />
+      case 'tabela-metas-semanais':
+      case 'planilha-metas-semanais':
+        return <TemplateWeeklyGoals config={config} />
+      case 'template-desafio-7dias':
+      case 'desafio-7-dias':
+        return <Template7DayChallenge config={config} />
+      case 'template-desafio-21dias':
+      case 'desafio-21-dias':
+        return <Template21DayChallenge config={config} />
+      case 'guia-hidratacao':
+        return <TemplateHydrationGuide config={config} />
+      case 'infografico-educativo':
+        return <TemplateInfographic config={config} />
+      case 'template-receitas':
+        return <TemplateRecipes config={config} />
+      case 'cardapio-detox':
+        return <TemplateDetoxMenu config={config} />
+      case 'simulador-resultados':
+        return <TemplateResultsSimulator config={config} />
+      case 'template-avaliacao-inicial':
+        return <TemplateInitialAssessment config={config} />
+      case 'formulario-recomendacao':
+        return <TemplateRecommendationForm config={config} />
       default:
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center">

@@ -200,3 +200,4 @@ src/types/
 4. **Criar sistema de templates unificado:** Um catálogo único para todas as áreas
 
 
+
