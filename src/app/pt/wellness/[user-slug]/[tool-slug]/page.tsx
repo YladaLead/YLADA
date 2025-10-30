@@ -48,6 +48,7 @@ const Template7DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/
 const Template21DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/21-day-challenge/page'), { ssr: false })
 const TemplateHydrationGuide = dynamic(() => import('@/app/pt/wellness/templates/hydration-guide/page'), { ssr: false })
 const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
+const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
 const TemplateDetoxMenu = dynamic(() => import('@/app/pt/wellness/templates/detox-menu/page'), { ssr: false })
 const TemplateResultsSimulator = dynamic(() => import('@/app/pt/wellness/templates/results-simulator/page'), { ssr: false })
@@ -195,6 +196,8 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplateInfographic config={config} />
       case 'template-receitas':
         return <TemplateRecipes config={config} />
+      case 'template-story-interativo':
+        return <TemplateStory config={config} />
       case 'cardapio-detox':
         return <TemplateDetoxMenu config={config} />
       case 'simulador-resultados':

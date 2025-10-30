@@ -337,7 +337,10 @@ Antes de finalizar um diagnóstico, verifique:
 - ✅ Avaliação Inicial - **Com seção Próximo Passo + dados científicos** (Campos: dados pessoais, objetivos, histórico, sintomas, alimentação, medicamentos - resultados: básica, moderada, avançada)
 - ✅ Formulário de Recomendação - **Com seção Próximo Passo + dados científicos** (Campos: objetivo, experiência, restrições, sintomas, rotina, orçamento, disponibilidade, preferências, dificuldades - resultados: básica, moderada, avançada)
 
-**Total**: 31 ferramentas completas com preview implementado e diagnósticos padronizados
+**SOCIAL (1 ferramenta):**
+- ✅ Story Interativo - **Com seção Próximo Passo + dados científicos** (Campos: objetivo, experiência, tema - resultados: engajamento básico, moderado, avançado)
+
+**Total**: 32 ferramentas completas com preview implementado e diagnósticos padronizados
 
 ### Status de Migração:
 **Admin-diagnosticos** → **diagnosticos-nutri.ts**
