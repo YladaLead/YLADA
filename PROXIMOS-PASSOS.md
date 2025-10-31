@@ -26,13 +26,13 @@ SELECT tablename, policyname FROM pg_policies
 WHERE tablename IN ('user_profiles', 'user_templates', 'leads');
 
 -- Verificar se RLS está habilitado
-SELECT tablename, row_security 
+SELECT tablename, rowsecurity 
 FROM pg_tables 
 WHERE schemaname = 'public' 
 AND tablename IN ('user_profiles', 'user_templates', 'leads');
 ```
 
-**Resultado esperado:** Todas as políticas listadas e RLS = 'YES'
+**Resultado esperado:** Todas as políticas listadas e `rowsecurity = true`
 
 ---
 

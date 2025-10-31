@@ -7,12 +7,15 @@
 -- 1. VERIFICAR ESTRUTURA E POLÍTICAS RLS
 -- =====================================================
 
--- Verificar se tabelas existem
+-- Verificar se tabelas existem e se RLS está ativo
 SELECT 
-  table_name,
-  CASE WHEN row_security = 'YES' THEN '✅ RLS Ativo' ELSE '❌ RLS Inativo' END as rls_status
+  t.table_name,
+  CASE 
+    WHEN pt.rowsecurity = true THEN '✅ RLS Ativo' 
+    ELSE '❌ RLS Inativo' 
+  END as rls_status
 FROM information_schema.tables t
-LEFT JOIN pg_tables pt ON pt.tablename = t.table_name
+LEFT JOIN pg_tables pt ON pt.tablename = t.table_name AND pt.schemaname = 'public'
 WHERE t.table_schema = 'public' 
   AND t.table_type = 'BASE TABLE'
   AND t.table_name IN ('user_profiles', 'user_templates', 'leads', 'generated_links')
