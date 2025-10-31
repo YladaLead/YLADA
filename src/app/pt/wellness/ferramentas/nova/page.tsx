@@ -377,10 +377,10 @@ export default function NovaFerramentaWellness() {
             <div className="flex items-center space-x-4">
               <Link href="/pt/wellness/dashboard">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
                   alt="YLADA"
-                  width={120}
-                  height={40}
+                  width={280}
+                  height={84}
                   className="h-10 w-auto"
                 />
               </Link>

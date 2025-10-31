@@ -439,10 +439,10 @@ export default function QuizPersonalizadoPage() {
             <div className="flex items-center space-x-6">
               <Link href="/pt/wellness/dashboard">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
                   alt="YLADA"
-                  width={150}
-                  height={50}
+                  width={280}
+                  height={84}
                   className="h-10 w-auto"
                 />
               </Link>

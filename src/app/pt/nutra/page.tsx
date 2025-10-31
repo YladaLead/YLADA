@@ -5,7 +5,7 @@ import YLADALogo from '../../../components/YLADALogo'
 import LanguageSelector from '../../../components/LanguageSelector'
 import { useTranslations } from '../../../hooks/useTranslations'
 
-export default function ConsultorLandingPage() {
+export default function NutraLandingPage() {
   const { t } = useTranslations()
 
   return (

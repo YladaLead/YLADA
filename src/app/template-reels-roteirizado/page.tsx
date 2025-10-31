@@ -302,7 +302,7 @@ export default function TemplateReelsRoteirizado() {
     } else {
       const urls = {
         nutri: '/pt/nutri',
-        sales: '/pt/consultor', 
+        sales: '/pt/nutra', 
         coach: '/pt/coach'
       }
       window.location.href = urls[data.profissao]

@@ -24,11 +24,12 @@ export default function WellnessHeader({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Image
-              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+              src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
               alt="YLADA"
-              width={160}
-              height={50}
-              className="h-10"
+              width={196}
+              height={59}
+              className="h-10 bg-transparent object-contain"
+              style={{ backgroundColor: 'transparent' }}
             />
             <div className="h-10 w-px bg-gray-300"></div>
             <div>

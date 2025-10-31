@@ -5,12 +5,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ChatIA from '../../../../components/ChatIA'
 
-export default function ConsultorDashboard() {
+export default function NutraDashboard() {
   // Dados do usuário (simulados - depois virão do banco de dados)
-  const usuarioConsultor = {
+  const usuarioNutra = {
     nome: 'Roberto Santos',
-    certificacao: 'Consultor Certificado',
-    email: 'roberto@consultor.com',
+    certificacao: 'Consultor Nutra Certificado',
+    email: 'roberto@nutra.com',
     especialidade: 'Suplementos e Nutraceuticos',
     experiencia: '6 anos'
   }
@@ -112,31 +112,31 @@ export default function ConsultorDashboard() {
               <div className="h-14 sm:h-16 w-px bg-gray-300"></div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Dashboard CONSULTOR
+                  Dashboard CONSULTOR NUTRA
                 </h1>
                 <div className="flex items-center space-x-4 mt-2">
-                  <p className="text-base sm:text-lg font-medium text-gray-700">{usuarioConsultor.nome}</p>
+                  <p className="text-base sm:text-lg font-medium text-gray-700">{usuarioNutra.nome}</p>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                    {usuarioConsultor.certificacao}
+                    {usuarioNutra.certificacao}
                   </span>
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <Link 
-                href="/pt/consultor/suporte"
+                href="/pt/nutra/suporte"
                 className="text-gray-600 hover:text-gray-900 text-sm"
               >
                 Suporte
               </Link>
               <Link 
-                href="/pt/consultor/quiz-personalizado"
+                href="/pt/nutra/quiz-personalizado"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
               >
                 🎯 Criar Quiz Personalizado
               </Link>
               <Link 
-                href="/pt/consultor/ferramentas/nova"
+                href="/pt/nutra/ferramentas/nova"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Nova Ferramenta
@@ -162,7 +162,7 @@ export default function ConsultorDashboard() {
                 </div>
               </div>
               <Link 
-                href="/pt/consultor/quiz-personalizado"
+                href="/pt/nutra/quiz-personalizado"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg font-medium"
               >
                 Criar Agora
@@ -172,7 +172,7 @@ export default function ConsultorDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Link 
-              href="/pt/consultor/ferramentas/templates"
+              href="/pt/nutra/ferramentas/templates"
               className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <span className="text-2xl mr-3">🎨</span>
@@ -183,7 +183,7 @@ export default function ConsultorDashboard() {
             </Link>
             
             <Link 
-              href="/pt/consultor/ferramentas"
+              href="/pt/nutra/ferramentas"
               className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
               <span className="text-2xl mr-3">🛠️</span>
@@ -194,7 +194,7 @@ export default function ConsultorDashboard() {
             </Link>
             
             <Link 
-              href="/pt/consultor/leads"
+              href="/pt/nutra/leads"
               className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
             >
               <span className="text-2xl mr-3">👥</span>
@@ -205,7 +205,7 @@ export default function ConsultorDashboard() {
             </Link>
             
             <Link 
-              href="/pt/consultor/relatorios"
+              href="/pt/nutra/relatorios"
               className="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
             >
               <span className="text-2xl mr-3">📊</span>
@@ -287,7 +287,7 @@ export default function ConsultorDashboard() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Ferramentas Ativas</h2>
               <Link 
-                href="/pt/consultor/ferramentas" 
+                href="/pt/nutra/ferramentas" 
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 Ver todas
@@ -317,7 +317,7 @@ export default function ConsultorDashboard() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Leads Recentes</h2>
               <Link 
-                href="/pt/consultor/leads" 
+                href="/pt/nutra/leads" 
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 Ver todos

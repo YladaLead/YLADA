@@ -290,9 +290,15 @@ export default function HomePage() {
               <span>•</span>
               <span className="text-gray-400">Idiomas: PT / ES / EN</span>
             </div>
-            <p className="text-gray-500 text-xs text-center">
-              © {new Date().getFullYear()} YLADA. Todos os direitos reservados.
-            </p>
+                    <p className="text-gray-500 text-xs text-center mb-2">
+                      © {new Date().getFullYear()} YLADA. Todos os direitos reservados.
+                    </p>
+                    <p className="text-gray-400 text-xs text-center">
+                      Portal Solutions Tech & Innovation LTDA
+                    </p>
+                    <p className="text-gray-400 text-xs text-center">
+                      CNPJ: 63.447.492/0001-88
+                    </p>
           </div>
         </div>
       </footer>

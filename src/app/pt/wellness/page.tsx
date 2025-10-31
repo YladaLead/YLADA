@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import LanguageSelector from '../../../components/LanguageSelector'
 
-export default function WellnessVendaPage() {
+export default function WellnessPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -36,13 +36,13 @@ export default function WellnessVendaPage() {
               </p>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                <span className="text-green-600">Transforme o seu espaço de bem-estar</span>
+                <span className="text-green-600">Transforme o seu trabalho de bem-estar</span>
                 <br />
-                em um gerador de conexões reais.
+                em uma ponte de conexões reais.
               </h1>
               
               <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-2xl mx-auto leading-relaxed">
-                O YLADA Wellness é o assistente digital que te ajuda a atrair novas pessoas, acompanhar seus clientes e duplicar o seu trabalho de forma simples, profissional e inspiradora.
+                O YLADA Wellness é o assistente digital que te ajuda a gerar novos contatos, despertar interesse em pessoas certas e fortalecer suas conexões — de forma leve, simples e inspiradora.
               </p>
               
               <Link
@@ -55,20 +55,22 @@ export default function WellnessVendaPage() {
           </div>
         </section>
 
-        {/* 🌱 2️⃣ SEÇÃO – O DESAFIO DO DISTRIBUIDOR ATUAL */}
+        {/* 🌱 2️⃣ SEÇÃO – O DESAFIO DO DISTRIBUIDOR MODERNO */}
         <section className="py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Você já inspira pessoas todos os dias. Mas e se a tecnologia pudesse fazer isso junto com você?
+                Você já inspira pessoas todos os dias. Mas e se a tecnologia pudesse te ajudar a alcançar ainda mais?
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Você fala dos produtos, dos desafios, posta nas redes…
+                Você fala dos produtos, dos desafios, compartilha resultados…
                 <br />
-                <span className="font-semibold text-gray-900">Mas muitos contatos se perdem no meio do caminho.</span>
+                <span className="font-semibold text-gray-900">Mas muitas vezes o alcance não se transforma em novas conexões.</span>
               </p>
               <p className="text-lg text-gray-700 font-medium mt-6">
-                O YLADA foi criado para que você não perca mais nenhuma oportunidade de ajudar alguém a mudar de vida.
+                O YLADA Wellness foi criado para te ajudar a atrair novos contatos — sem complicação, sem formulários e sem armazenar dados.
+                <br />
+                <span className="text-base font-normal mt-2 block">Apenas inspiração e tecnologia a favor do seu propósito.</span>
               </p>
             </div>
           </div>
@@ -83,7 +85,7 @@ export default function WellnessVendaPage() {
               </h2>
               
               <p className="text-lg text-gray-700 text-center mb-10 leading-relaxed">
-                Com o YLADA, você tem um link inteligente que reúne suas ferramentas, avaliações e formulários — tudo personalizado com o seu nome, sua cidade e seu contato.
+                O YLADA oferece ferramentas digitais prontas para você gerar novas conexões e mostrar o seu trabalho de forma mais moderna e profissional.
               </p>
               
               <div className="grid sm:grid-cols-1 gap-6 mb-10">
@@ -91,8 +93,8 @@ export default function WellnessVendaPage() {
                   <div className="flex items-start">
                     <span className="text-3xl mr-4">💚</span>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Crie avaliações inteligentes</h3>
-                      <p className="text-gray-600">IMC, metabolismo, perfil de bem-estar e muito mais.</p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Crie links com quizzes e desafios que despertam curiosidade</h3>
+                      <p className="text-gray-600">IMC, Quiz de Bem-Estar, Desafio 21 Dias e outras opções prontas.</p>
                     </div>
                   </div>
                 </div>
@@ -101,8 +103,8 @@ export default function WellnessVendaPage() {
                   <div className="flex items-start">
                     <span className="text-3xl mr-4">💬</span>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Receba automaticamente os contatos interessados</h3>
-                      <p className="text-gray-600">Todos os leads organizados no seu painel.</p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Compartilhe de forma simples no WhatsApp e redes sociais</h3>
+                      <p className="text-gray-600">Use em status, grupos e eventos para gerar interesse genuíno.</p>
                     </div>
                   </div>
                 </div>
@@ -111,8 +113,8 @@ export default function WellnessVendaPage() {
                   <div className="flex items-start">
                     <span className="text-3xl mr-4">🔁</span>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Duplique o mesmo sistema para sua equipe</h3>
-                      <p className="text-gray-600">Cada membro com seu próprio link personalizado.</p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Duplicável para toda a sua equipe</h3>
+                      <p className="text-gray-600">Cada membro pode ter seu próprio link e divulgar do mesmo jeito.</p>
                     </div>
                   </div>
                 </div>
@@ -153,9 +155,9 @@ export default function WellnessVendaPage() {
                   <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="text-4xl">2️⃣</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Personalize com seu nome e contato</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Personalize com seu nome e cidade</h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Crie sua identidade digital em poucos cliques.
+                    Crie seu link com sua identidade e comece a divulgar.
                   </p>
                 </div>
                 
@@ -163,9 +165,9 @@ export default function WellnessVendaPage() {
                   <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="text-4xl">3️⃣</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Compartilhe o link e acompanhe os resultados</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Compartilhe e gere novas conexões</h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Veja quem respondeu, entre em contato e acompanhe sua jornada.
+                    Use nas redes, status, grupos e eventos — e veja o interesse crescer.
                   </p>
                 </div>
               </div>
@@ -184,7 +186,7 @@ export default function WellnessVendaPage() {
               <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
                 <div className="text-4xl mb-4">💬</div>
                 <p className="text-gray-700 mb-4 italic leading-relaxed">
-                  "Com meu link, gerei 32 contatos em uma semana. O melhor é que tudo fica organizado."
+                  "Com meu link, consegui alcançar pessoas novas que nunca tinham ouvido falar do meu espaço. É simples e bonito."
                 </p>
                 <p className="text-sm font-semibold text-gray-900">
                   — Cláudia R., Supervisora Wellness
@@ -194,7 +196,7 @@ export default function WellnessVendaPage() {
               <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
                 <div className="text-4xl mb-4">💬</div>
                 <p className="text-gray-700 mb-4 italic leading-relaxed">
-                  "Meu time inteiro começou a usar o mesmo sistema. Ficou muito mais fácil acompanhar os novos clientes."
+                  "Agora o meu time inteiro divulga de forma igual. Ficou padronizado e profissional."
                 </p>
                 <p className="text-sm font-semibold text-gray-900">
                   — Carlos F., Líder de Equipe 7.5K
@@ -204,7 +206,7 @@ export default function WellnessVendaPage() {
               <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
                 <div className="text-4xl mb-4">💬</div>
                 <p className="text-gray-700 mb-4 italic leading-relaxed">
-                  "É profissional, moderno e ajuda a mostrar o valor do nosso trabalho."
+                  "Adorei poder mostrar meu propósito de um jeito mais digital, sem precisar explicar tudo."
                 </p>
                 <p className="text-sm font-semibold text-gray-900">
                   — Juliana M., Distribuidora Wellness
@@ -219,18 +221,18 @@ export default function WellnessVendaPage() {
           <div className="container mx-auto px-6 lg:px-8">
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
               <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 text-center">
-                <div className="text-5xl mb-4">🧠</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Inteligência de Captação</h3>
+                <div className="text-5xl mb-4">💡</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Inteligência de Atração</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Gere leads automáticos a partir dos seus desafios e avaliações.
+                  Use links criativos e ferramentas prontas para gerar interesse genuíno.
                 </p>
               </div>
               
               <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 text-center">
                 <div className="text-5xl mb-4">💬</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Comunicação Integrada</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Comunicação Natural</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Acompanhe tudo pelo WhatsApp e receba os dados direto no seu painel.
+                  Envie seu link por WhatsApp, status, Instagram ou QR Code.
                 </p>
               </div>
               
@@ -238,7 +240,7 @@ export default function WellnessVendaPage() {
                 <div className="text-5xl mb-4">🔁</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Sistema Duplicável</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Cada novo distribuidor pode usar o mesmo formato com seu nome.
+                  Cada membro pode criar o próprio link e divulgar do mesmo jeito.
                 </p>
               </div>
               
@@ -253,132 +255,102 @@ export default function WellnessVendaPage() {
           </div>
         </section>
 
-        {/* 💚 7️⃣ SEÇÃO – PLANOS DE ACESSO */}
+        {/* 💚 7️⃣ SEÇÃO – FORMATO DE ACESSO */}
         <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
               Escolha seu formato de acesso
             </h2>
             
-            <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8">
+            <div className="max-w-4xl mx-auto grid sm:grid-cols-2 gap-8">
+              {/* Plano Mensal */}
               <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-gray-200 hover:border-green-500 transition-all">
-                <div className="text-4xl mb-4 text-center">🌱</div>
-                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Individual</h3>
-                <p className="text-gray-600 text-center mb-6">Distribuidores e Espaços de Vida Saudável</p>
-                <div className="text-center mb-6">
-                  <span className="text-4xl font-bold text-green-600">R$ 37</span>
-                  <span className="text-gray-600">/mês</span>
-                </div>
-                <ul className="space-y-3 mb-6 text-sm text-gray-600">
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Link personalizado
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Todas as ferramentas
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Dashboard completo
-                  </li>
-                </ul>
-                <Link
-                  href="/pt/wellness/dashboard"
-                  className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Começar agora
-                </Link>
-              </div>
-              
-              <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-green-500 hover:border-green-600 transition-all transform scale-105">
                 <div className="text-4xl mb-4 text-center">🌿</div>
-                <div className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full text-center mb-4 inline-block">
-                  MAIS POPULAR
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Líder de Equipe</h3>
-                <p className="text-gray-600 text-center mb-6">Supervisores e Líderes com times ativos</p>
+                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Mensal</h3>
+                <p className="text-gray-600 text-center mb-6">Distribuidores, Supervisores e Líderes de Equipe</p>
                 <div className="text-center mb-6">
-                  <span className="text-4xl font-bold text-green-600">R$ 97</span>
+                  <span className="text-4xl font-bold text-green-600">R$ 60</span>
                   <span className="text-gray-600">/mês</span>
                 </div>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    Tudo do Individual
+                    Acesso a todas as ferramentas de atração
                   </li>
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    Gerenciamento de equipe
+                    Link personalizado com nome e cidade
                   </li>
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    Relatórios consolidados
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Suporte prioritário
+                    Atualizações automáticas
                   </li>
                 </ul>
                 <Link
                   href="/pt/wellness/dashboard"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  Começar agora
+                  💚 Assinar mensal
                 </Link>
               </div>
               
-              <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-gray-200 hover:border-green-500 transition-all">
-                <div className="text-4xl mb-4 text-center">💎</div>
-                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Parceria Regional</h3>
-                <p className="text-gray-600 text-center mb-6">Líderes de comunidade com mais de 10 membros</p>
+              {/* Plano Anual */}
+              <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-green-500 hover:border-green-600 transition-all transform scale-105 relative">
+                <div className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full text-center mb-4 inline-block absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  ECONOMIA DE 21%
+                </div>
+                <div className="text-4xl mb-4 text-center mt-4">💚</div>
+                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Anual</h3>
+                <p className="text-gray-600 text-center mb-6">Distribuidores, Supervisores e Líderes de Equipe</p>
                 <div className="text-center mb-6">
-                  <span className="text-2xl font-bold text-green-600">Sob consulta</span>
+                  <span className="text-4xl font-bold text-green-600">R$ 47,50</span>
+                  <span className="text-gray-600">/mês</span>
+                  <div className="text-sm text-gray-500 mt-2">
+                    12 meses
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    Total de <span className="font-semibold text-gray-700">R$ 570/ano</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    <span className="line-through text-gray-400">R$ 720</span> você economiza R$ 150
+                  </div>
                 </div>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    Tudo do Líder
+                    Tudo do plano mensal
                   </li>
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    White-label
+                    Pagamento único anual
                   </li>
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    API personalizada
+                    Melhor custo-benefício
                   </li>
                 </ul>
                 <Link
                   href="/pt/wellness/dashboard"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  Falar com equipe
+                  💚 Assinar anual
                 </Link>
               </div>
-            </div>
-            
-            <div className="text-center mt-12">
-              <Link
-                href="/pt/wellness/dashboard"
-                className="inline-flex items-center px-8 py-4 bg-green-600 text-white text-lg font-semibold rounded-xl hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                💚 Quero meu link agora
-              </Link>
             </div>
           </div>
         </section>
 
-        {/* 🌍 8️⃣ SEÇÃO – COMUNIDADE E DUPLICAÇÃO */}
+        {/* 🔄 8️⃣ SEÇÃO – DUPLICAÇÃO E PROPÓSITO */}
         <section className="py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Duplicar ficou mais fácil quando tudo está conectado.
+                Duplicar ficou mais fácil quando tudo está conectado à sua missão.
               </h2>
               <p className="text-lg text-gray-700 leading-relaxed mb-8">
-                Cada membro da sua equipe pode ter seu próprio link.
-                Você acompanha tudo, organiza seus contatos e constrói uma rede de forma mais humana e profissional.
+                Cada membro da sua equipe pode ter seu próprio link e divulgar do mesmo jeito que você.
+                <br />
+                Mais organização, mais impacto, e o mesmo propósito: ajudar mais pessoas a se cuidarem.
               </p>
               <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
                 <div className="text-6xl mb-4">🌐</div>
@@ -390,23 +362,24 @@ export default function WellnessVendaPage() {
           </div>
         </section>
 
-        {/* 🌟 9️⃣ SEÇÃO – CONVITE FINAL */}
+        {/* 🌟 9️⃣ SEÇÃO FINAL – CONVITE HUMANO */}
         <section className="bg-gradient-to-br from-green-600 to-emerald-700 py-16 sm:py-20 lg:py-24 text-white">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
                 O bem-estar começa com uma boa conexão.
               </h2>
-              <p className="text-xl text-green-50 mb-8 leading-relaxed">
-                Leve sua missão ainda mais longe.
-                <br />
-                Com o YLADA Wellness, o seu espaço, seu desafio e sua equipe ficam no mesmo lugar — com tecnologia e propósito.
+              <p className="text-xl text-green-50 mb-6 leading-relaxed">
+                Mostre o valor do que você faz e conquiste novas pessoas todos os dias.
+              </p>
+              <p className="text-lg text-green-50 mb-8 leading-relaxed">
+                Com o YLADA Wellness, você transforma sua presença digital em resultados reais — atraindo com propósito, inspirando com autenticidade e crescendo com consistência.
               </p>
               <Link
                 href="/pt/wellness/dashboard"
                 className="inline-flex items-center px-10 py-5 bg-white text-green-600 text-xl font-bold rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
               >
-                🌿 Criar meu link de bem-estar agora
+                🌿 Criar meu link e começar agora
               </Link>
             </div>
           </div>
@@ -428,11 +401,17 @@ export default function WellnessVendaPage() {
                 priority
               />
             </div>
-            <p className="text-gray-600 text-sm mb-4 text-center">
+            <p className="text-gray-600 text-sm mb-2 text-center">
               YLADA Wellness — Your Lead Advanced Data Assistant
             </p>
-            <p className="text-gray-500 text-xs text-center">
+            <p className="text-gray-500 text-xs text-center mb-2">
               © {new Date().getFullYear()} YLADA. Todos os direitos reservados.
+            </p>
+            <p className="text-gray-400 text-xs text-center">
+              Portal Solutions Tech & Innovation LTDA
+            </p>
+            <p className="text-gray-400 text-xs text-center">
+              CNPJ: 63.447.492/0001-88
             </p>
           </div>
         </div>

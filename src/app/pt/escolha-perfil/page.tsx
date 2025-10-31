@@ -66,7 +66,7 @@ export default function EscolhaPerfilPage() {
 
             {/* Consultor Nutra */}
             <Link 
-              href="/pt/consultor"
+              href="/pt/nutra"
               className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="text-center">

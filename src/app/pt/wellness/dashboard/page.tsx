@@ -104,11 +104,12 @@ export default function WellnessDashboard() {
             {/* Logo e Info do Usuário */}
             <div className="flex items-center space-x-4 w-full sm:w-auto">
               <Image
-                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
                 alt="YLADA"
-                width={200}
-                height={70}
-                className="h-14 sm:h-16 w-auto"
+                width={280}
+                height={84}
+                className="h-12 sm:h-14 lg:h-16 w-auto bg-transparent object-contain"
+                style={{ backgroundColor: 'transparent' }}
               />
               <div className="h-14 sm:h-16 w-px bg-gray-300"></div>
               <div className="flex-1 sm:flex-none">

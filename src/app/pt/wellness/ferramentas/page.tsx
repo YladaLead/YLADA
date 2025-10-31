@@ -101,10 +101,10 @@ export default function FerramentasWellness() {
             <div className="flex items-center space-x-4">
               <Link href="/pt/wellness/dashboard">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
                   alt="YLADA"
-                  width={180}
-                  height={60}
+                  width={280}
+                  height={84}
                   className="h-12 sm:h-14 w-auto"
                 />
               </Link>
