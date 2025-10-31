@@ -3,8 +3,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
+import ProtectedRoute from '../../components/auth/ProtectedRoute'
 
 export default function AdminDashboard() {
+  return (
+    <ProtectedRoute perfil="admin" allowAdmin={true}>
+      <AdminDashboardContent />
+    </ProtectedRoute>
+  )
+}
+
+function AdminDashboardContent() {
   const [stats, setStats] = useState({
     usuariosTotal: 152,
     usuariosAtivos: 138,
@@ -16,19 +25,19 @@ export default function AdminDashboard() {
     assinaturasAtivas: 138
   })
 
-  const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'consultor' | 'wellness'>('todos')
+  const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
 
   const usuariosPorArea = {
     nutri: { total: 45, ativos: 42 },
     coach: { total: 38, ativos: 35 },
-    consultor: { total: 32, ativos: 28 },
+    nutra: { total: 32, ativos: 28 },
     wellness: { total: 37, ativos: 33 }
   }
 
   const receitasPorArea = {
     nutri: { mensal: 12000, anual: 144000 },
     coach: { mensal: 11200, anual: 134400 },
-    consultor: { mensal: 10500, anual: 126000 },
+    nutra: { mensal: 10500, anual: 126000 },
     wellness: { mensal: 11530.50, anual: 138366 }
   }
 
@@ -36,7 +45,7 @@ export default function AdminDashboard() {
     {
       id: 'usuarios',
       title: 'Usuários',
-      description: 'Gerenciar nutricionistas, coaches e consultores',
+      description: 'Gerenciar nutricionistas, coaches, nutras e wellness',
       icon: '👥',
       link: '/admin/usuarios',
       color: 'bg-blue-500',
@@ -128,7 +137,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-900">Filtrar por Área</h3>
             <div className="flex flex-wrap gap-2">
-              {['todos', 'nutri', 'coach', 'consultor', 'wellness'].map((area) => (
+              {['todos', 'nutri', 'coach', 'nutra', 'wellness'].map((area) => (
                 <button
                   key={area}
                   onClick={() => setFiltroArea(area as any)}
@@ -220,13 +229,13 @@ export default function AdminDashboard() {
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                       area === 'nutri' ? 'bg-green-100' :
                       area === 'coach' ? 'bg-purple-100' :
-                      area === 'consultor' ? 'bg-blue-100' :
+                      area === 'nutra' ? 'bg-blue-100' :
                       'bg-teal-100'
                     }`}>
                       <span className="text-xl">{
                         area === 'nutri' ? '🥗' :
                         area === 'coach' ? '💜' :
-                        area === 'consultor' ? '🔬' :
+                        area === 'nutra' ? '🔬' :
                         '💖'
                       }</span>
                     </div>
@@ -254,13 +263,13 @@ export default function AdminDashboard() {
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                       area === 'nutri' ? 'bg-green-100' :
                       area === 'coach' ? 'bg-purple-100' :
-                      area === 'consultor' ? 'bg-blue-100' :
+                      area === 'nutra' ? 'bg-blue-100' :
                       'bg-teal-100'
                     }`}>
                       <span className="text-xl">{
                         area === 'nutri' ? '🥗' :
                         area === 'coach' ? '💜' :
-                        area === 'consultor' ? '🔬' :
+                        area === 'nutra' ? '🔬' :
                         '💖'
                       }</span>
                     </div>

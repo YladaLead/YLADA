@@ -73,6 +73,7 @@ SELECT add_column_if_not_exists('user_profiles', 'created_at', 'TIMESTAMP WITH T
 SELECT add_column_if_not_exists('user_profiles', 'updated_at', 'TIMESTAMP WITH TIME ZONE');
 SELECT add_column_if_not_exists('user_profiles', 'last_login', 'TIMESTAMP WITH TIME ZONE');
 SELECT add_column_if_not_exists('user_profiles', 'is_active', 'BOOLEAN');
+SELECT add_column_if_not_exists('user_profiles', 'is_admin', 'BOOLEAN');
 
 -- Adicionar defaults após criar as colunas
 DO $$
@@ -126,6 +127,16 @@ BEGIN
     ) THEN
         ALTER TABLE user_profiles ALTER COLUMN is_active SET DEFAULT true;
     END IF;
+    
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+          AND table_name = 'user_profiles' 
+          AND column_name = 'is_admin'
+          AND column_default IS NULL
+    ) THEN
+        ALTER TABLE user_profiles ALTER COLUMN is_admin SET DEFAULT false;
+    END IF;
 END $$;
 
 -- Preencher email dos registros existentes
@@ -148,7 +159,7 @@ ALTER TABLE user_profiles DROP CONSTRAINT IF EXISTS user_profiles_perfil_check;
 
 ALTER TABLE user_profiles 
 ADD CONSTRAINT user_profiles_perfil_check 
-CHECK (perfil IN ('nutri', 'wellness', 'coach', 'nutra'));
+CHECK (perfil IN ('nutri', 'wellness', 'coach', 'nutra', 'admin'));
 
 -- Tornar perfil NOT NULL apenas se não houver registros NULL
 DO $$
@@ -198,22 +209,31 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+  v_perfil VARCHAR(50);
+  v_is_admin BOOLEAN;
 BEGIN
+  v_perfil := COALESCE(NEW.raw_user_meta_data->>'perfil', 'nutri');
+  v_is_admin := (v_perfil = 'admin' AND COALESCE((NEW.raw_user_meta_data->>'is_admin')::boolean, false));
+  
   INSERT INTO public.user_profiles (
     user_id,
     email,
     nome_completo,
-    perfil
+    perfil,
+    is_admin
   ) VALUES (
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'perfil', 'nutri')
+    v_perfil,
+    v_is_admin
   )
   ON CONFLICT (user_id) DO UPDATE SET
     email = EXCLUDED.email,
     nome_completo = COALESCE(EXCLUDED.nome_completo, user_profiles.nome_completo),
-    perfil = COALESCE(EXCLUDED.perfil, user_profiles.perfil);
+    perfil = COALESCE(EXCLUDED.perfil, user_profiles.perfil),
+    is_admin = COALESCE(EXCLUDED.is_admin, user_profiles.is_admin, false);
   RETURN NEW;
 END;
 $$;

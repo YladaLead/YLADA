@@ -1,16 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireApiAuth, getAuthenticatedUserId } from '@/lib/api-auth'
 
 // GET - Listar ferramentas do usuário ou buscar por ID
 export async function GET(request: NextRequest) {
   try {
+    // 🔒 Verificar autenticação e perfil wellness
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult // Retorna erro de autenticação
+    }
+    const { user, profile } = authResult
+
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('user_id')
     const toolId = searchParams.get('id')
     const profession = searchParams.get('profession') || 'wellness'
 
+    // 🔒 Usar user_id do token (seguro), não do parâmetro
+    const authenticatedUserId = user.id
+
     if (toolId) {
-      // Buscar ferramenta específica
+      // Buscar ferramenta específica (só se pertencer ao usuário ou for admin)
       const { data, error } = await supabaseAdmin
         .from('user_templates')
         .select(`
@@ -20,21 +30,22 @@ export async function GET(request: NextRequest) {
         `)
         .eq('id', toolId)
         .eq('profession', profession)
+        .eq('user_id', authenticatedUserId) // 🔒 Garantir que pertence ao usuário
         .single()
 
       if (error) throw error
 
+      if (!data) {
+        return NextResponse.json(
+          { error: 'Ferramenta não encontrada ou você não tem permissão para acessá-la' },
+          { status: 404 }
+        )
+      }
+
       return NextResponse.json({ tool: data })
     }
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'user_id é obrigatório' },
-        { status: 400 }
-      )
-    }
-
-    // Listar ferramentas do usuário
+    // Listar ferramentas do usuário autenticado
     const { data, error } = await supabaseAdmin
       .from('user_templates')
       .select(`
@@ -42,7 +53,7 @@ export async function GET(request: NextRequest) {
         user_profiles!inner(user_slug),
         users!inner(name, email)
       `)
-      .eq('user_id', userId)
+      .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
       .eq('profession', profession)
       .order('created_at', { ascending: false })
 
@@ -61,9 +72,15 @@ export async function GET(request: NextRequest) {
 // POST - Criar nova ferramenta
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 Verificar autenticação e perfil wellness
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult // Retorna erro de autenticação
+    }
+    const { user } = authResult
+
     const body = await request.json()
     const {
-      user_id,
       template_id,
       template_slug,
       title,
@@ -79,14 +96,10 @@ export async function POST(request: NextRequest) {
       profession = 'wellness'
     } = body
 
-    // Validações
-    if (!user_id) {
-      return NextResponse.json(
-        { error: 'user_id é obrigatório' },
-        { status: 400 }
-      )
-    }
+    // 🔒 Usar user_id do token (seguro), não do body
+    const authenticatedUserId = user.id
 
+    // Validações
     if (!slug) {
       return NextResponse.json(
         { error: 'slug é obrigatório' },
@@ -126,7 +139,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabaseAdmin
       .from('user_templates')
       .insert({
-        user_id,
+        user_id: authenticatedUserId, // 🔒 Sempre usar user_id do token
         template_id: template_id || null,
         template_slug,
         slug,
@@ -173,10 +186,16 @@ export async function POST(request: NextRequest) {
 // PUT - Atualizar ferramenta
 export async function PUT(request: NextRequest) {
   try {
+    // 🔒 Verificar autenticação e perfil wellness
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { user } = authResult
+
     const body = await request.json()
     const {
       id,
-      user_id,
       title,
       description,
       slug,
@@ -228,12 +247,13 @@ export async function PUT(request: NextRequest) {
     if (custom_whatsapp_message !== undefined) updateData.custom_whatsapp_message = custom_whatsapp_message
     if (status !== undefined) updateData.status = status
 
-    // Atualizar
+    // 🔒 Atualizar (só se pertencer ao usuário autenticado)
+    const authenticatedUserId = user.id
     const { data, error } = await supabaseAdmin
       .from('user_templates')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', user_id) // Segurança: só atualiza se for do usuário
+      .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
       .select(`
         *,
         user_profiles!inner(user_slug),
@@ -266,23 +286,30 @@ export async function PUT(request: NextRequest) {
 // DELETE - Deletar ferramenta
 export async function DELETE(request: NextRequest) {
   try {
+    // 🔒 Verificar autenticação e perfil wellness
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { user } = authResult
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
-    const user_id = searchParams.get('user_id')
 
-    if (!id || !user_id) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'id e user_id são obrigatórios' },
+        { error: 'id é obrigatório' },
         { status: 400 }
       )
     }
 
-    // Deletar (verificando se pertence ao usuário)
+    // 🔒 Deletar (só se pertencer ao usuário autenticado)
+    const authenticatedUserId = user.id
     const { error } = await supabaseAdmin
       .from('user_templates')
       .delete()
       .eq('id', id)
-      .eq('user_id', user_id)
+      .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
 
     if (error) throw error
 

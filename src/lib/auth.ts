@@ -76,11 +76,26 @@ export async function requireAuth(redirectTo?: string) {
 }
 
 // Helper para verificar perfil específico
-export async function requireProfile(perfil: 'nutri' | 'wellness' | 'coach' | 'nutra') {
+export async function requireProfile(perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin') {
   const profile = await getUserProfile()
   
   if (!profile || profile.perfil !== perfil) {
-    redirect(`/pt/${perfil}/login`)
+    if (perfil === 'admin') {
+      redirect('/admin/login')
+    } else {
+      redirect(`/pt/${perfil}/login`)
+    }
+  }
+  
+  return profile
+}
+
+// Helper para verificar se usuário é admin
+export async function requireAdmin() {
+  const profile = await getUserProfile()
+  
+  if (!profile || !profile.is_admin) {
+    redirect('/admin/login')
   }
   
   return profile

@@ -4,8 +4,17 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ChatIA from '../../../../components/ChatIA'
+import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 
 export default function NutriDashboard() {
+  return (
+    <ProtectedRoute perfil="nutri">
+      <NutriDashboardContent />
+    </ProtectedRoute>
+  )
+}
+
+function NutriDashboardContent() {
   // Dados do usuário (simulados - depois virão do banco de dados)
   const usuarioNutri = {
     nome: 'Dr. Ana Maria Silva',

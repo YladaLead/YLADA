@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 
 interface LoginFormProps {
-  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra'
+  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin'
   redirectPath: string
   logoColor?: 'azul-claro' | 'verde' | 'laranja' | 'roxo'
   logoPath?: string
@@ -30,7 +30,8 @@ export default function LoginForm({
     nutri: 'Nutricionista',
     wellness: 'Consultor Wellness',
     coach: 'Coach',
-    nutra: 'Consultor Nutra'
+    nutra: 'Consultor Nutra',
+    admin: 'Administrador'
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

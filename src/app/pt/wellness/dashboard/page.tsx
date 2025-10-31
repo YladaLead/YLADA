@@ -4,8 +4,17 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ChatIA from '../../../../components/ChatIA'
+import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 
 export default function WellnessDashboard() {
+  return (
+    <ProtectedRoute perfil="wellness">
+      <WellnessDashboardContent />
+    </ProtectedRoute>
+  )
+}
+
+function WellnessDashboardContent() {
   // Dados do usuário (simulados - depois virão do banco de dados)
   const usuarioWellness = {
     nome: 'Carlos Oliveira',

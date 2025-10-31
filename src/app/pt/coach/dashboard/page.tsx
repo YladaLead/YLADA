@@ -4,8 +4,17 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ChatIA from '../../../../components/ChatIA'
+import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 
 export default function CoachDashboard() {
+  return (
+    <ProtectedRoute perfil="coach">
+      <CoachDashboardContent />
+    </ProtectedRoute>
+  )
+}
+
+function CoachDashboardContent() {
   // Dados do usuário (simulados - depois virão do banco de dados)
   const usuarioCoach = {
     nome: 'Mariana Costa',
