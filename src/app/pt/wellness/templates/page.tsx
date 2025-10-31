@@ -167,7 +167,7 @@ export default function WellnessTemplatesPage() {
               <Link href="/pt/wellness/dashboard">
                 <button className="flex items-center text-gray-600 hover:text-gray-900">
                   <Image
-                    src="/logos/ylada-logo-horizontal-vazado.png"
+                    src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                     alt="YLADA"
                     width={120}
                     height={40}

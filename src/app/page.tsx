@@ -1,176 +1,297 @@
 'use client'
 
+import { useState } from 'react'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
-import { useTranslations } from '../hooks/useTranslations'
 
 export default function HomePage() {
-  const { t } = useTranslations()
+  const [formData, setFormData] = useState({
+    nome: '',
+    profissao: '',
+    pais: '',
+    email: ''
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // TODO: Implementar envio do formulário
+    console.log('Formulário enviado:', formData)
+    alert('Obrigado pelo interesse! Entraremos em contato em breve.')
+    setFormData({ nome: '', profissao: '', pais: '', email: '' })
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header - Clean Design */}
+      {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
         <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
-          <YLADALogo size="md" responsive={true} />
+          <YLADALogo size="sm" responsive={true} className="bg-transparent" />
           <LanguageSelector />
         </div>
       </header>
 
-      {/* Hero Section - Filosofia YLADA */}
-      <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
-        <div className="text-center max-w-5xl mx-auto">
-
-          {/* Badge de Filosofia */}
-          <div className="inline-flex items-center px-5 py-2.5 rounded-full bg-blue-50 text-blue-700 text-base font-medium mb-8 border border-blue-200">
-            🧭 {t.main.badge}
-          </div>
-
-          {/* Título Principal - Filosofia Universal */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
-            {t.main.title}
-          </h1>
-          
-          {/* Subtítulo - Propósito Universal */}
-          <p className="text-lg sm:text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-            {t.main.subtitle}
-          </p>
-
-          {/* CTA Principal - Chamada Universal */}
-          <div className="space-y-6 mb-16">
+      <main>
+        {/* (1) Hero Section - Abertura elegante */}
+        <section className="container mx-auto px-4 py-12 sm:py-16 lg:py-20">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Conectando pessoas ao bem-estar, através de inteligência digital.
+            </h1>
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              O Ylada ajuda profissionais da saúde, bem-estar e performance a criar experiências inteligentes, gerar conexões reais e transformar atendimentos em relacionamentos.
+            </p>
             <Link 
-              href="/pt/como-funciona"
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              href="#solucoes"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
             >
-              <span className="mr-2 text-base">🚀</span>
-              {t.main.cta}
+              Explorar soluções
+              <span className="ml-2">→</span>
             </Link>
-            
-            {/* Credibilidade Universal */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-base text-gray-500 mt-4">
-              <div className="flex items-center">
-                <span className="text-3xl mr-4">✅</span>
-                <span className="text-gray-700 font-medium">{t.main.credibility.professionals}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-3xl mr-4">🌍</span>
-                <span className="text-gray-700 font-medium">{t.main.credibility.global}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-3xl mr-4">⚡</span>
-                <span className="text-gray-700 font-medium">{t.main.credibility.quickStart}</span>
-              </div>
-            </div>
           </div>
+        </section>
 
-          {/* Benefícios - 3 Pilares da Filosofia YLADA */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <div className="bg-white rounded-xl p-6 sm:p-8 lg:p-10 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-              <div className="w-20 h-20 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-4xl text-blue-600">⚡</span>
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-gray-900 text-center">Simplicidade</h3>
-              <p className="text-gray-600 text-base sm:text-lg leading-relaxed text-center px-2">
-                <span className="text-blue-600 font-semibold">Um link, infinitas possibilidades</span>. 
-                Transforme qualquer ideia em uma ferramenta inteligente em segundos.
-              </p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 sm:p-8 lg:p-10 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-              <div className="w-20 h-20 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-4xl text-blue-600">🎯</span>
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-gray-900 text-center">Inteligência</h3>
-              <p className="text-gray-600 text-base sm:text-lg leading-relaxed text-center px-2">
-                <span className="text-blue-600 font-semibold">IA que entende seu público</span>. 
-                Cada ferramenta é otimizada para converter visitantes em conexões reais.
-              </p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 sm:p-8 lg:p-10 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 sm:col-span-2 lg:col-span-1">
-              <div className="w-20 h-20 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-4xl text-blue-600">🌍</span>
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-gray-900 text-center">Escalabilidade</h3>
-              <p className="text-gray-600 text-base sm:text-lg leading-relaxed text-center px-2">
-                <span className="text-blue-600 font-semibold">Cresça sem limites</span>. 
-                Da primeira conexão ao milhão de usuários, o YLADA escala com você.
+        {/* (2) Seção "Quem somos" */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Quem somos
+              </h2>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                O Ylada nasceu da ideia de que cada profissional pode ter seu próprio sistema inteligente de relacionamento.
+                Reunimos ferramentas e automações para que nutricionistas, coaches, consultores e distribuidores possam se conectar com clientes e equipes de forma simples, rápida e personalizada.
               </p>
             </div>
           </div>
+        </section>
 
-          {/* Credibilidade - Filosofia Universal */}
-          <div className="bg-gray-50 rounded-xl p-8 border border-gray-200 mb-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-              Uma plataforma para{' '}
-              <span className="text-blue-600">
-                todos os profissionais
-              </span>
+        {/* (3) Seção "Como funciona" */}
+        <section className="py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
+              Como funciona
             </h2>
-            <p className="text-base text-gray-600 mb-8 text-center max-w-2xl mx-auto">
-              Seja qual for sua área, o YLADA se adapta ao seu público e objetivos. 
-              Descubra como funciona especificamente para você.
-            </p>
-            
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg p-6 sm:p-8 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-5xl mb-5">🥗</div>
-                <h3 className="text-lg font-bold mb-4 text-gray-900">Nutricionistas</h3>
-                <p className="text-gray-600 mb-4 text-base leading-relaxed">Transforme consultas em conexões duradouras</p>
-                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+              <div className="text-center">
+                <div className="text-5xl mb-4">🧠</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Inteligência de Leads</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Crie ferramentas e quizzes inteligentes que atraem pessoas interessadas.
+                </p>
               </div>
               
-              <div className="bg-white rounded-lg p-6 sm:p-8 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-5xl mb-5">💊</div>
-                <h3 className="text-lg font-bold mb-4 text-gray-900">Vendedores</h3>
-                <p className="text-gray-600 mb-4 text-base leading-relaxed">Conecte produtos com pessoas certas</p>
-                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
+              <div className="text-center">
+                <div className="text-5xl mb-4">💬</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Comunicação Integrada</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Automatize o relacionamento e mantenha o contato ativo.
+                </p>
               </div>
               
-              <div className="bg-white rounded-lg p-6 sm:p-8 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-5xl mb-5">🧘‍♀️</div>
-                <h3 className="text-lg font-bold mb-4 text-gray-900">Coaches</h3>
-                <p className="text-gray-600 mb-4 text-base leading-relaxed">Engaje e transforme vidas</p>
-                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
+              <div className="text-center">
+                <div className="text-5xl mb-4">📊</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Acompanhamento e Resultados</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Veja em tempo real quem está interagindo com seus links e avaliações.
+                </p>
               </div>
               
-              <div className="bg-white rounded-lg p-6 sm:p-8 text-center hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-5xl mb-5">💼</div>
-                <h3 className="text-lg font-bold mb-4 text-gray-900">Empreendedores</h3>
-                <p className="text-gray-600 mb-4 text-base leading-relaxed">Escale seu negócio inteligentemente</p>
-                <div className="text-sm text-blue-600 font-medium">✨ Disponível</div>
+              <div className="text-center">
+                <div className="text-5xl mb-4">🌍</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Expansão Global</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Suporte em 3 idiomas: português, espanhol e inglês.
+                </p>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* CTA Final - Chamada Universal */}
-          <div className="text-center">
-            <Link 
-              href="/pt/como-funciona"
-              className="inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xl font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 mb-8"
-            >
-              <span className="mr-3 text-2xl">🚀</span>
-              {t.main.cta}
-            </Link>
-            <p className="text-gray-500 text-lg">
-              Gratuito para começar • Sem compromisso • Resultados em minutos
-            </p>
+        {/* (4) Seção "Para quem é o Ylada" */}
+        <section id="solucoes" className="bg-gray-50 py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
+              Para quem é o Ylada
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4 text-center">🥗</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Nutricionistas</h3>
+                <p className="text-gray-600 text-sm text-center leading-relaxed">
+                  Que desejam gerar avaliações inteligentes e captar pacientes certos.
+                </p>
+                <div className="mt-4 text-center">
+                  <Link href="/pt/nutri" className="text-blue-600 text-sm font-medium hover:text-blue-700">
+                    Explorar →
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4 text-center">💊</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Consultores Nutracêuticos</h3>
+                <p className="text-gray-600 text-sm text-center leading-relaxed">
+                  Que querem mostrar produtos com base em diagnósticos e resultados.
+                </p>
+                <div className="mt-4 text-center">
+                  <Link href="/pt/wellness" className="text-blue-600 text-sm font-medium hover:text-blue-700">
+                    Explorar →
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4 text-center">🌿</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Coaches de Bem-Estar</h3>
+                <p className="text-gray-600 text-sm text-center leading-relaxed">
+                  Que buscam inspirar pessoas com ferramentas e desafios interativos.
+                </p>
+                <div className="mt-4 text-center">
+                  <Link href="/pt/coach" className="text-blue-600 text-sm font-medium hover:text-blue-700">
+                    Explorar →
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
+                <div className="text-4xl mb-4 text-center">🧘</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Distribuidores de Bem-Estar</h3>
+                <p className="text-gray-600 text-sm text-center leading-relaxed">
+                  Que desejam expandir sua rede de forma organizada e digital.
+                </p>
+                <div className="mt-4 text-center">
+                  <Link href="/pt/wellness" className="text-blue-600 text-sm font-medium hover:text-blue-700">
+                    Explorar →
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* (5) Seção "Filosofia Ylada" */}
+        <section className="py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Filosofia Ylada
+              </h2>
+              <p className="text-lg text-gray-600 leading-relaxed mb-4">
+                YLADA significa <span className="font-semibold text-gray-900">Your Lead Advanced Data Assistant</span> — o seu assistente avançado para gerar conexões significativas.
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Nossa missão é aproximar tecnologia e propósito humano.
+                Cada ferramenta do Ylada é desenhada para apoiar o profissional que acredita no poder do bem-estar compartilhado.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* (6) Seção "Entre em contato" */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-4">
+                Entre em contato
+              </h2>
+              <p className="text-lg text-gray-600 text-center mb-8">
+                Quer conhecer mais sobre o Ylada?
+                Preencha o formulário e entraremos em contato quando novas funcionalidades forem lançadas.
+              </p>
+              
+              <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200">
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-2">
+                      Nome
+                    </label>
+                    <input
+                      type="text"
+                      id="nome"
+                      value={formData.nome}
+                      onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="profissao" className="block text-sm font-medium text-gray-700 mb-2">
+                      Profissão
+                    </label>
+                    <input
+                      type="text"
+                      id="profissao"
+                      value={formData.profissao}
+                      onChange={(e) => setFormData({ ...formData, profissao: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="pais" className="block text-sm font-medium text-gray-700 mb-2">
+                      País
+                    </label>
+                    <input
+                      type="text"
+                      id="pais"
+                      value={formData.pais}
+                      onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      E-mail
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* Footer */}
+      {/* (7) Footer */}
       <footer className="border-t border-gray-200 bg-white mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col items-center justify-center">
             <div className="mb-4">
-              <YLADALogo size="lg" />
+              <YLADALogo size="md" className="bg-transparent" />
             </div>
-            <p className="text-gray-600 text-sm mb-3">
-              {t.footer.tagline}
+            <p className="text-gray-600 text-sm mb-4 text-center">
+              YLADA — Your Lead Advanced Data Assistant
             </p>
-            <p className="text-gray-500 text-xs">
-              {t.footer.copyright}
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-4 text-sm text-gray-500">
+              <Link href="#" className="hover:text-gray-700">Sobre</Link>
+              <span>•</span>
+              <Link href="#" className="hover:text-gray-700">Termos</Link>
+              <span>•</span>
+              <Link href="#" className="hover:text-gray-700">Política</Link>
+              <span>•</span>
+              <span className="text-gray-400">Idiomas: PT / ES / EN</span>
+            </div>
+            <p className="text-gray-500 text-xs text-center">
+              © {new Date().getFullYear()} YLADA. Todos os direitos reservados.
             </p>
           </div>
         </div>

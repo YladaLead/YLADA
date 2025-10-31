@@ -104,7 +104,7 @@ export default function WellnessDashboard() {
             {/* Logo e Info do Usuário */}
             <div className="flex items-center space-x-4 w-full sm:w-auto">
               <Image
-                src="/logos/ylada-logo-horizontal-vazado.png"
+                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                 alt="YLADA"
                 width={200}
                 height={70}

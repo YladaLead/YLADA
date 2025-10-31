@@ -103,7 +103,7 @@ export default function ConsultorDashboard() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-6">
               <Image
-                src="/logos/ylada-logo-horizontal-vazado.png"
+                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                 alt="YLADA"
                 width={220}
                 height={70}

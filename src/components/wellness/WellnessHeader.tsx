@@ -24,7 +24,7 @@ export default function WellnessHeader({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Image
-              src="/logos/ylada-logo-horizontal-vazado.png"
+              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
               alt="YLADA"
               width={160}
               height={50}
@@ -45,6 +45,7 @@ export default function WellnessHeader({
     </header>
   )
 }
+
 
 
 

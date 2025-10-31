@@ -1,97 +1,54 @@
-# 🎨 Logos YLADA - Arquivos Oficiais
+# 🎨 Logos YLADA
 
-Este diretório contém todos os arquivos de logo da marca YLADA, criados e organizados para uso em diferentes contextos.
+## ⚠️ **IMPORTANTE: ESTRUTURA ATUALIZADA**
 
-## 📁 Arquivos Disponíveis
+Os logos foram organizados e movidos para uma nova estrutura mais organizada:
 
-### 🖼️ Logos Principais
-- **`ylada-logo-horizontal.png`** - Logo principal com gráfico verde (400x120px)
-- **`ylada-logo-horizontal.svg`** - Versão SVG do logo principal
-- **`ylada-logo-text-only.png`** - Logo apenas com texto (300x80px)
-- **`ylada-logo-text-only.svg`** - Versão SVG do logo texto
-
-### 🎯 Ícones
-- **`ylada-icon.png`** - Ícone isolado para fundos claros (80x80px)
-- **`ylada-icon-dark.png`** - Ícone para fundos escuros com brilho (80x80px)
-- **`ylada-icon.svg`** - Versão SVG do ícone
-
-### 🔖 Favicons
-- **`ylada-favicon-16.png`** - Favicon 16x16px
-- **`ylada-favicon-32.png`** - Favicon 32x32px
-- **`favicon.ico`** - Favicon principal do site
-
-## 🎨 Características do Design
-
-### Elementos Visuais
-- **Gráfico Verde**: Representa crescimento e dados
-- **Silhueta de Pessoa**: Representa o usuário/profissional
-- **Gráfico de Barras**: Representa métricas e performance
-- **Linha Ascendente**: Representa crescimento e sucesso
-- **Seta para Cima**: Representa progresso e melhoria
-
-### Cores
-- **Verde Principal**: #10B981 (emerald-500)
-- **Texto Escuro**: #374151 (gray-700)
-- **Texto Claro**: #6B7280 (gray-500)
-
-## 💻 Como Usar
-
-### Importação
-```javascript
-import { logos } from './logos-config'
-
-// Logo principal
-<img src={logos.horizontal} alt="YLADA" />
-
-// Logo texto apenas
-<img src={logos.textOnly} alt="YLADA" />
-
-// Ícone
-<img src={logos.icon} alt="YLADA Icon" />
+### 📁 Nova Localização:
+```
+public/images/logo/ylada/
 ```
 
-### Contextos Recomendados
-- **Header/Cabeçalho**: `horizontal` ou `textOnly`
-- **Mobile**: `icon`
-- **Fundo Escuro**: `iconDark`
-- **Favicon**: `favicon32`
+### ✅ **O QUE FOI FEITO:**
 
-## 📐 Especificações Técnicas
+1. **Organização por Cor:**
+   - 🟢 Verde (2 variações) - Logo principal
+   - 🟠 Laranja (4 variações)
+   - 🔴 Vermelho (2 variações)
+   - 🟣 Roxo (8 variações)
+   - 🔵 Azul Claro (4 variações)
 
-### Formatos
-- **PNG**: Para uso geral (otimizado)
-- **SVG**: Para escalabilidade perfeita
-- **ICO**: Para favicons
+2. **Nomenclatura Padronizada:**
+   - `ylada-quadrado-[cor]-[numero].png`
+   - Exemplo: `ylada-quadrado-verde-2.png`
 
-### Tamanhos
-- **Logo Horizontal**: 400x120px (proporção 3.33:1)
-- **Logo Texto**: 300x80px (proporção 3.75:1)
-- **Ícone**: 80x80px (quadrado)
-- **Favicon**: 16x16px, 32x32px
+3. **Arquivos Criados:**
+   - ✅ `/public/images/logo/ylada/logos-config.js` - Configuração atualizada
+   - ✅ `/public/images/logo/ylada/README.md` - Documentação completa
+   - ✅ `/src/components/Logo.tsx` - Componente React reutilizável
 
-## 🔧 Manutenção
+### 📖 **PARA USAR OS LOGOS:**
 
-### Atualizações
-- Os arquivos SVG são a fonte principal
-- PNGs são gerados automaticamente via script
-- Favicons são criados a partir do ícone principal
+Consulte a documentação completa em:
+- **`/public/images/logo/ylada/README.md`**
 
-### Script de Conversão
-```bash
-node scripts/convert-logos.js
+Ou use diretamente:
+```jsx
+import Logo from '@/components/Logo'
+
+// Logo principal (verde)
+<Logo cor="verde" tamanho="medio" />
+
+// Logo roxo
+<Logo cor="roxo" tamanho="grande" />
 ```
 
-## 📋 Checklist de Uso
-
-- [ ] Logo principal no cabeçalho
-- [ ] Favicon configurado
-- [ ] Ícone para mobile
-- [ ] Versão escura para fundos escuros
-- [ ] Alt text configurado
-- [ ] Lazy loading implementado
+### 📝 **NOTAS:**
+- Todos os logos originais foram preservados nesta pasta (`/public/logos/`)
+- Os logos organizados estão em `/public/images/logo/ylada/`
+- Use preferencialmente os logos da nova estrutura
 
 ---
 
-**Última atualização**: Dezembro 2024  
-**Versão**: 1.0  
-**Status**: ✅ Produção
+**Status**: ✅ Logos organizados e documentados  
+**Próximos passos**: Implementar no site usando o componente `<Logo />`

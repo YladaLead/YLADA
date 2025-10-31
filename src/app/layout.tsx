@@ -10,8 +10,8 @@ export const metadata = {
   authors: [{ name: 'YLADA Team' }],
   manifest: '/manifest.json',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+    apple: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
   },
   openGraph: {
     title: 'YLADA - Transforme suas ideias em links inteligentes',
@@ -20,9 +20,9 @@ export const metadata = {
     siteName: 'YLADA',
     images: [
       {
-        url: 'https://www.ylada.com/logos/ylada-logo-main.png',
-        width: 1200,
-        height: 630,
+        url: 'https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png',
+        width: 1080,
+        height: 1080,
         alt: 'YLADA - Transforme suas ideias em links inteligentes',
         type: 'image/png',
       },
@@ -34,7 +34,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'YLADA - Transforme suas ideias em links inteligentes',
     description: 'Transforme suas ideias em links inteligentes em 60 segundos com IA',
-    images: ['https://www.ylada.com/logos/ylada-logo-main.png'],
+    images: ['https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'],
     creator: '@ylada',
   },
   robots: {

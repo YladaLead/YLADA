@@ -93,7 +93,7 @@ export default function AdminDashboard() {
             <div className="flex items-center space-x-4">
               <Link href="/">
                 <Image
-                  src="/logos/ylada-logo-horizontal-vazado.png"
+                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                   alt="YLADA"
                   width={200}
                   height={70}

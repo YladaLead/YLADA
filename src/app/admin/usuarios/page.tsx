@@ -124,7 +124,7 @@ export default function AdminUsuarios() {
             <div className="flex items-center space-x-4">
               <Link href="/admin">
                 <Image
-                  src="/logos/ylada-logo-horizontal-vazado.png"
+                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                   alt="YLADA"
                   width={180}
                   height={60}

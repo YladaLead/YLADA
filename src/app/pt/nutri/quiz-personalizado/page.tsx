@@ -439,7 +439,7 @@ export default function QuizPersonalizadoPage() {
             <div className="flex items-center space-x-6">
               <Link href="/pt/nutri/dashboard">
                 <Image
-                  src="/logos/ylada-logo-horizontal-vazado.png"
+                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                   alt="YLADA"
                   width={150}
                   height={50}

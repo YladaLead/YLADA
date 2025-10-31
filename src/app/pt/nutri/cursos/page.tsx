@@ -92,7 +92,7 @@ export default function NutriCursosPage() {
             <div className="flex items-center space-x-4">
               <Link href="/pt/nutri/dashboard">
                 <Image
-                  src="/logos/ylada-logo-horizontal-vazado.png"
+                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                   alt="YLADA"
                   width={180}
                   height={60}
