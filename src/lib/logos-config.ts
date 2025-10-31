@@ -134,16 +134,35 @@ export const tamanhos = {
 
 // Função helper para obter logo por cor e formato
 export function getLogoPorCor(cor = 'azul-claro', formato = 'horizontal'): string {
+  // Mapear nomes de cores para as chaves do objeto
+  const corMap: Record<string, keyof typeof logos.horizontal> = {
+    'verde': 'verde',
+    'laranja': 'laranja',
+    'roxo': 'roxo',
+    'vermelho': 'vermelho',
+    'azul-claro': 'azulClaro',
+    'azul': 'azulClaro'
+  }
+  
+  const corKey = corMap[cor] || 'azulClaro'
+  
   if (formato === 'horizontal') {
-    if (cor === 'azul-claro' || cor === 'azul') {
-      return logos.horizontal.azulClaro.oficial
+    if (corKey === 'azulClaro') {
+      return logos.horizontal.azulClaro?.oficial || logos.principal
     }
-    return (logos.horizontal as any)[cor]?.principal || logos.horizontal.azulClaro.oficial
+    // Verificar se a cor existe no formato horizontal (vermelho não existe em horizontal)
+    if (corKey === 'vermelho') {
+      // Vermelho só existe em quadrado, usar azul como fallback
+      return logos.horizontal.azulClaro?.oficial || logos.principal
+    }
+    const logoCor = logos.horizontal[corKey] as { principal?: string } | undefined
+    return logoCor?.principal || logos.horizontal.azulClaro?.oficial || logos.principal
   } else {
-    if (cor === 'azul-claro' || cor === 'azul') {
-      return logos.quadrado.azulClaro.oficial
+    if (corKey === 'azulClaro') {
+      return logos.quadrado.azulClaro?.oficial || logos.quadrado
     }
-    return (logos.quadrado as any)[cor]?.principal || logos.quadrado.azulClaro.oficial
+    const logoCor = logos.quadrado[corKey as keyof typeof logos.quadrado] as { principal?: string } | undefined
+    return (logoCor as any)?.principal || logos.quadrado.azulClaro?.oficial || logos.quadrado
   }
 }
 
