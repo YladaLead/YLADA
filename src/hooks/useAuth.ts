@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase-client'
 import { User, Session } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+
+const supabase = createClient()
 
 interface UserProfile {
   id: string

@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
+
+const supabase = createClient()
 
 interface LoginFormProps {
   perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin'

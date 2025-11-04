@@ -11,15 +11,44 @@ export async function requireApiAuth(
   allowedProfiles?: ('nutri' | 'wellness' | 'coach' | 'nutra' | 'admin')[]
 ): Promise<{ user: any; profile: any } | NextResponse> {
   try {
-    // Criar cliente Supabase server-side
+    // Criar cliente Supabase server-side usando cookies do request
     const cookieStore = await cookies()
+    
+    // Também tentar ler cookies diretamente do request (caso cookies() não pegue)
+    const requestCookies = request.headers.get('cookie') || ''
+    
+    // Debug: log dos cookies (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      const allCookies = cookieStore.getAll()
+      console.log('🔍 API Auth - Debug:', {
+        cookieStoreCount: allCookies.length,
+        cookieNames: allCookies.map(c => c.name),
+        requestCookieHeader: requestCookies ? 'present' : 'missing',
+        requestCookieLength: requestCookies.length
+      })
+    }
+    
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           get(name: string) {
-            return cookieStore.get(name)?.value
+            // Tentar primeiro do cookieStore
+            const cookie = cookieStore.get(name)
+            if (cookie?.value) {
+              return cookie.value
+            }
+            
+            // Se não encontrar, tentar parsear do header do request
+            if (requestCookies) {
+              const match = requestCookies.match(new RegExp(`(^| )${name}=([^;]+)`))
+              if (match) {
+                return decodeURIComponent(match[2])
+              }
+            }
+            
+            return undefined
           },
           set(name: string, value: string, options: any) {
             // Não podemos setar cookies em API routes
@@ -34,9 +63,27 @@ export async function requireApiAuth(
     // Obter sessão do cookie
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
+    // Debug: log da sessão (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 API Auth - Sessão:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id,
+        error: sessionError?.message,
+        errorCode: sessionError?.status
+      })
+    }
+    
     if (sessionError || !session || !session.user) {
       return NextResponse.json(
-        { error: 'Não autenticado. Faça login para continuar.' },
+        { 
+          error: 'Não autenticado. Faça login para continuar.',
+          debug: process.env.NODE_ENV === 'development' ? {
+            sessionError: sessionError?.message,
+            errorCode: sessionError?.status,
+            hasRequestCookies: !!requestCookies
+          } : undefined
+        },
         { status: 401 }
       )
     }

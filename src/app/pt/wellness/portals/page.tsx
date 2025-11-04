@@ -1,0 +1,295 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+
+interface Portal {
+  id: string
+  name: string
+  slug: string
+  description: string
+  status: string
+  views: number
+  navigation_type: 'sequential' | 'menu'
+  created_at: string
+  tools_count: number
+}
+
+export default function PortalsWellness() {
+  // Renderizar diretamente sem verificação prévia - deixar a API tratar autenticação
+  return <PortalsWellnessContent />
+}
+
+function PortalsWellnessContent() {
+  const [portals, setPortals] = useState<Portal[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Carregar portais diretamente - a API vai verificar autenticação
+    carregarPortais()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const carregarPortais = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch('/api/wellness/portals', {
+        credentials: 'include',
+        cache: 'no-store'
+      })
+
+      if (response.status === 401) {
+        const errorData = await response.json().catch(() => ({ error: 'Não autenticado' }))
+        setError(`Erro 401: ${errorData.error || 'Não autenticado. Faça login novamente.'}`)
+        setLoading(false)
+        // Não redirecionar automaticamente - deixar usuário ver o erro
+        return
+      }
+
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({ error: 'Acesso negado' }))
+        setError(`Erro 403: ${errorData.error || 'Você não tem permissão para acessar esta área. Verifique seu perfil Wellness.'}`)
+        setLoading(false)
+        return
+      }
+
+      if (!response.ok) {
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch {
+          errorData = { error: `Erro ${response.status}: ${response.statusText}` }
+        }
+        
+        // Mostrar erro específico se disponível
+        const errorMessage = errorData.error || errorData.message || `Erro ${response.status}`
+        setError(`Erro ${response.status}: ${errorMessage}`)
+        setLoading(false)
+        console.error('Erro na API:', { status: response.status, error: errorData })
+        return
+      }
+
+      const data = await response.json()
+      
+      // Verificar se a resposta tem o formato esperado
+      if (!data.success && !data.data) {
+        setError('Resposta inválida do servidor')
+        setLoading(false)
+        return
+      }
+
+      const portalsData = (data.data?.portals || []).map((portal: any) => ({
+        id: portal.id,
+        name: portal.name,
+        slug: portal.slug,
+        description: portal.description || '',
+        status: portal.status,
+        views: portal.views || 0,
+        navigation_type: portal.navigation_type || 'menu',
+        created_at: portal.created_at,
+        tools_count: portal.portal_tools?.length || 0
+      }))
+
+      setPortals(portalsData)
+    } catch (err: any) {
+      console.error('Erro ao carregar portais:', err)
+      setError(`Erro ao carregar portais: ${err.message || 'Erro desconhecido'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const deletarPortal = async (id: string) => {
+    if (!confirm('Tem certeza que deseja deletar este portal?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/wellness/portals?id=${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao deletar portal')
+      }
+
+      carregarPortais()
+    } catch (err: any) {
+      console.error('Erro ao deletar portal:', err)
+      alert('Erro ao deletar portal')
+    }
+  }
+
+  const stats = {
+    total: portals.length,
+    ativos: portals.filter(p => p.status === 'active').length,
+    totalViews: portals.reduce((sum, p) => sum + p.views, 0),
+    totalTools: portals.reduce((sum, p) => sum + p.tools_count, 0)
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href="/pt/wellness/dashboard">
+                <Image
+                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
+                  alt="YLADA"
+                  width={280}
+                  height={84}
+                  className="h-10 w-auto"
+                />
+              </Link>
+              <div className="h-8 w-px bg-gray-300"></div>
+              <h1 className="text-xl font-bold text-gray-900">Portal do Bem-Estar</h1>
+            </div>
+            <Link
+              href="/pt/wellness/dashboard"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              ← Voltar ao Dashboard
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <p className="text-sm text-gray-600">Total de Portais</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+          </div>
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <p className="text-sm text-gray-600">Portais Ativos</p>
+            <p className="text-2xl font-bold text-green-600">{stats.ativos}</p>
+          </div>
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <p className="text-sm text-gray-600">Total de Visualizações</p>
+            <p className="text-2xl font-bold text-blue-600">{stats.totalViews}</p>
+          </div>
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <p className="text-sm text-gray-600">Ferramentas nos Portais</p>
+            <p className="text-2xl font-bold text-purple-600">{stats.totalTools}</p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mb-6 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-900">Meus Portais</h2>
+          <Link
+            href="/pt/wellness/portals/novo"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            + Novo Portal
+          </Link>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <p className="font-semibold mb-2">⚠️ Erro ao acessar portais:</p>
+            <p className="mb-3">{error}</p>
+            <div className="mt-3 flex space-x-3">
+              <button
+                onClick={() => window.location.href = '/pt/wellness/login'}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                Fazer Login
+              </button>
+              <button
+                onClick={carregarPortais}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              >
+                Tentar Novamente
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Carregando portais...</p>
+          </div>
+        )}
+
+        {/* Portals List */}
+        {!loading && portals.length === 0 && (
+          <div className="bg-white rounded-lg p-12 text-center shadow-sm border border-gray-200">
+            <p className="text-gray-600 mb-4">Você ainda não criou nenhum portal.</p>
+            <Link
+              href="/pt/wellness/portals/novo"
+              className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Criar Primeiro Portal
+            </Link>
+          </div>
+        )}
+
+        {/* Portals Grid */}
+        {!loading && portals.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {portals.map((portal) => (
+              <div
+                key={portal.id}
+                className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{portal.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{portal.description || 'Sem descrição'}</p>
+                    <div className="flex items-center space-x-2 text-xs text-gray-500">
+                      <span className={`px-2 py-1 rounded ${
+                        portal.status === 'active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {portal.status === 'active' ? 'Ativo' : 'Inativo'}
+                      </span>
+                      <span>•</span>
+                      <span>{portal.navigation_type === 'sequential' ? 'Sequencial' : 'Menu'}</span>
+                      <span>•</span>
+                      <span>{portal.tools_count} ferramentas</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                  <div className="text-xs text-gray-500">
+                    {portal.views} visualizações
+                  </div>
+                  <div className="flex space-x-2">
+                    <Link
+                      href={`/pt/wellness/portal/${portal.slug}`}
+                      target="_blank"
+                      className="text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      Ver
+                    </Link>
+                    <button
+                      onClick={() => deletarPortal(portal.id)}
+                      className="text-sm text-red-600 hover:text-red-700"
+                    >
+                      Deletar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
