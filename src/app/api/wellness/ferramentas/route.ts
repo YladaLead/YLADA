@@ -403,7 +403,6 @@ export async function PUT(request: NextRequest) {
     }
 
     // 🔒 Atualizar (só se pertencer ao usuário autenticado)
-    const authenticatedUserId = user.id
     const { data: updatedTool, error } = await supabaseAdmin
       .from('user_templates')
       .update(updateData)
