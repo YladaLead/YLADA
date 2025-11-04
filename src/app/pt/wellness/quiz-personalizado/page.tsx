@@ -373,7 +373,6 @@ export default function QuizPersonalizadoPage() {
       
       // Preparar dados para salvar
       const quizData = {
-        user_id: 'user-temp-001', // TODO: Pegar do contexto de autenticação
         titulo: quiz.titulo,
         descricao: quiz.descricao,
         emoji: quiz.emoji,
@@ -389,6 +388,7 @@ export default function QuizPersonalizadoPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           quizData,
           perguntas: quiz.perguntas.map(p => ({

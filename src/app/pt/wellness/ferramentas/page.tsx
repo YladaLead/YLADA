@@ -38,11 +38,12 @@ export default function FerramentasWellness() {
   const carregarFerramentas = async () => {
     try {
       setLoading(true)
-      // TODO: Pegar user_id do sistema de autenticação
-      const userId = 'user-temp-001' // Temporário
 
       const response = await fetch(
-        `/api/wellness/ferramentas?user_id=${userId}&profession=wellness`
+        `/api/wellness/ferramentas?profession=wellness`,
+        {
+          credentials: 'include'
+        }
       )
 
       if (!response.ok) {

@@ -361,9 +361,6 @@ export default function NovaFerramentaWellness() {
     }
 
     try {
-      // TODO: Pegar user_id do sistema de autenticação
-      const userId = 'user-temp-001' // Temporário
-
       // Converter slug para nome amigável para exibição
       const nomeAmigavel = configuracao.urlPersonalizada
         .split('-')
@@ -378,7 +375,6 @@ export default function NovaFerramentaWellness() {
         .join(' ')
 
       const payload = {
-        user_id: userId,
         template_slug: templateSelecionado.slug,
         title: nomeAmigavel, // Usar o nome do projeto formatado como título
         description: descricao || templateSelecionado.descricao, // Usar descrição personalizada ou padrão
@@ -399,6 +395,7 @@ export default function NovaFerramentaWellness() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       })
 

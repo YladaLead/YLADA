@@ -144,10 +144,12 @@ export default function EditarFerramentaWellness() {
   const carregarFerramenta = async () => {
     try {
       setLoading(true)
-      const userId = 'user-temp-001' // TODO: Autenticação
 
       const response = await fetch(
-        `/api/wellness/ferramentas?id=${toolId}&user_id=${userId}&profession=wellness`
+        `/api/wellness/ferramentas?id=${toolId}&profession=wellness`,
+        {
+          credentials: 'include'
+        }
       )
 
       if (!response.ok) {
@@ -280,8 +282,6 @@ export default function EditarFerramentaWellness() {
     }
 
     try {
-      const userId = 'user-temp-001' // TODO: Autenticação
-
       // Formatar título: capitalizar palavras e manter siglas em maiúsculas
       const nomeAmigavel = configuracao.urlPersonalizada
         .split('-')
@@ -297,7 +297,6 @@ export default function EditarFerramentaWellness() {
 
       const payload = {
         id: toolData.id,
-        user_id: userId,
         title: nomeAmigavel,
         description: descricao || toolData.description,
         slug: configuracao.urlPersonalizada,
@@ -316,6 +315,7 @@ export default function EditarFerramentaWellness() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       })
 
