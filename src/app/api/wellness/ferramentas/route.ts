@@ -21,13 +21,9 @@ export async function GET(request: NextRequest) {
 
     if (toolId) {
       // Buscar ferramenta específica (só se pertencer ao usuário ou for admin)
-      const { data, error } = await supabaseAdmin
+      const { data: toolData, error } = await supabaseAdmin
         .from('user_templates')
-        .select(`
-          *,
-          user_profiles!inner(user_slug),
-          users!inner(name, email)
-        `)
+        .select('*')
         .eq('id', toolId)
         .eq('profession', profession)
         .eq('user_id', authenticatedUserId) // 🔒 Garantir que pertence ao usuário
@@ -35,31 +31,67 @@ export async function GET(request: NextRequest) {
 
       if (error) throw error
 
-      if (!data) {
+      if (!toolData) {
         return NextResponse.json(
           { error: 'Ferramenta não encontrada ou você não tem permissão para acessá-la' },
           { status: 404 }
         )
       }
 
+      // Buscar user_slug separadamente (pode não existir)
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_slug')
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+
+      // Buscar dados do usuário
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(authenticatedUserId)
+
+      // Montar resposta completa
+      const data = {
+        ...toolData,
+        user_profiles: profile ? { user_slug: profile.user_slug } : null,
+        users: userData?.user ? {
+          name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
+          email: userData.user.email || ''
+        } : null
+      }
+
       return NextResponse.json({ tool: data })
     }
 
     // Listar ferramentas do usuário autenticado
-    const { data, error } = await supabaseAdmin
+    const { data: toolsData, error } = await supabaseAdmin
       .from('user_templates')
-      .select(`
-        *,
-        user_profiles!inner(user_slug),
-        users!inner(name, email)
-      `)
+      .select('*')
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
       .eq('profession', profession)
       .order('created_at', { ascending: false })
 
     if (error) throw error
 
-    return NextResponse.json({ tools: data || [] })
+    // Buscar user_slug uma vez para todas as ferramentas (pode não existir)
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_slug')
+      .eq('user_id', authenticatedUserId)
+      .maybeSingle()
+
+    // Buscar dados do usuário
+    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(authenticatedUserId)
+
+    // Montar resposta completa para cada ferramenta
+    const data = (toolsData || []).map(tool => ({
+      ...tool,
+      user_profiles: profile ? { user_slug: profile.user_slug } : null,
+      users: userData?.user ? {
+        name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
+        email: userData.user.email || ''
+      } : null
+    }))
+
+    return NextResponse.json({ tools: data })
   } catch (error: any) {
     console.error('Erro ao buscar ferramentas:', error)
     return NextResponse.json(
@@ -89,11 +121,12 @@ export async function POST(request: NextRequest) {
       emoji,
       custom_colors,
       cta_type,
-      whatsapp_number,
+      whatsapp_number, // Ignorado - sempre usar do perfil
       external_url,
       cta_button_text,
       custom_whatsapp_message,
-      profession = 'wellness'
+      profession = 'wellness',
+      generate_short_url = false
     } = body
 
     // 🔒 Usar user_id do token (seguro), não do body
@@ -105,6 +138,39 @@ export async function POST(request: NextRequest) {
         { error: 'slug é obrigatório' },
         { status: 400 }
       )
+    }
+
+    // Buscar WhatsApp do perfil (sempre usar do perfil, não do body)
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('whatsapp')
+      .eq('user_id', authenticatedUserId)
+      .maybeSingle()
+
+    const whatsappDoPerfil = profile?.whatsapp || null
+
+    // Se CTA é WhatsApp mas não tem número no perfil, retornar erro
+    if (cta_type === 'whatsapp' && !whatsappDoPerfil) {
+      return NextResponse.json(
+        { error: 'Configure seu WhatsApp no perfil antes de criar ferramentas com CTA WhatsApp' },
+        { status: 400 }
+      )
+    }
+
+    // Validar se URL externa não é do WhatsApp (segurança)
+    if (external_url) {
+      const urlLower = external_url.toLowerCase()
+      const isWhatsappUrl = urlLower.includes('wa.me') || 
+                            urlLower.includes('whatsapp.com') || 
+                            urlLower.includes('web.whatsapp.com') ||
+                            urlLower.includes('api.whatsapp.com')
+      
+      if (isWhatsappUrl) {
+        return NextResponse.json(
+          { error: 'URLs do WhatsApp não são permitidas em URLs externas. Para usar WhatsApp, escolha a opção "WhatsApp" no tipo de CTA.' },
+          { status: 400 }
+        )
+      }
     }
 
     // Verificar se o slug já existe
@@ -135,8 +201,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Gerar código curto se solicitado
+    let shortCode = null
+    if (generate_short_url) {
+      const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+      if (!codeError && codeData) {
+        shortCode = codeData
+      } else {
+        console.error('Erro ao gerar código curto:', codeError)
+      }
+    }
+
     // Inserir nova ferramenta
-    const { data, error } = await supabaseAdmin
+    const { data: insertedTool, error: insertError } = await supabaseAdmin
       .from('user_templates')
       .insert({
         user_id: authenticatedUserId, // 🔒 Sempre usar user_id do token
@@ -148,7 +225,7 @@ export async function POST(request: NextRequest) {
         emoji,
         custom_colors: custom_colors || { principal: '#10B981', secundaria: '#059669' },
         cta_type: cta_type || 'whatsapp',
-        whatsapp_number,
+        whatsapp_number: cta_type === 'whatsapp' ? whatsappDoPerfil : null, // Sempre usar do perfil
         external_url,
         cta_button_text: cta_button_text || 'Conversar com Especialista',
         custom_whatsapp_message,
@@ -156,16 +233,33 @@ export async function POST(request: NextRequest) {
         content,
         status: 'active',
         views: 0,
-        leads_count: 0
+        leads_count: 0,
+        short_code: shortCode
       })
-      .select(`
-        *,
-        user_profiles!inner(user_slug),
-        users!inner(name, email)
-      `)
+      .select('*')
       .single()
 
-    if (error) throw error
+    if (insertError) throw insertError
+
+    // Buscar user_slug separadamente (pode não existir)
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_slug')
+      .eq('user_id', authenticatedUserId)
+      .maybeSingle()
+
+    // Buscar dados do usuário
+    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(authenticatedUserId)
+
+    // Montar resposta completa
+    const data = {
+      ...insertedTool,
+      user_profiles: profile ? { user_slug: profile.user_slug } : null,
+      users: userData?.user ? {
+        name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
+        email: userData.user.email || ''
+      } : null
+    }
 
     return NextResponse.json(
       { 
@@ -202,11 +296,12 @@ export async function PUT(request: NextRequest) {
       emoji,
       custom_colors,
       cta_type,
-      whatsapp_number,
+      whatsapp_number, // Ignorado - sempre usar do perfil
       external_url,
       cta_button_text,
       custom_whatsapp_message,
-      status
+      status,
+      generate_short_url = false
     } = body
 
     if (!id) {
@@ -214,6 +309,41 @@ export async function PUT(request: NextRequest) {
         { error: 'id é obrigatório' },
         { status: 400 }
       )
+    }
+
+    const authenticatedUserId = user.id
+
+    // Buscar WhatsApp do perfil (sempre usar do perfil, não do body)
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('whatsapp')
+      .eq('user_id', authenticatedUserId)
+      .maybeSingle()
+
+    const whatsappDoPerfil = profile?.whatsapp || null
+
+    // Se CTA é WhatsApp mas não tem número no perfil, retornar erro
+    if (cta_type === 'whatsapp' && !whatsappDoPerfil) {
+      return NextResponse.json(
+        { error: 'Configure seu WhatsApp no perfil antes de atualizar ferramentas com CTA WhatsApp' },
+        { status: 400 }
+      )
+    }
+
+    // Validar se URL externa não é do WhatsApp (segurança)
+    if (external_url) {
+      const urlLower = external_url.toLowerCase()
+      const isWhatsappUrl = urlLower.includes('wa.me') || 
+                            urlLower.includes('whatsapp.com') || 
+                            urlLower.includes('web.whatsapp.com') ||
+                            urlLower.includes('api.whatsapp.com')
+      
+      if (isWhatsappUrl) {
+        return NextResponse.json(
+          { error: 'URLs do WhatsApp não são permitidas em URLs externas. Para usar WhatsApp, escolha a opção "WhatsApp" no tipo de CTA.' },
+          { status: 400 }
+        )
+      }
     }
 
     // Verificar se o slug mudou e se já existe
@@ -241,33 +371,74 @@ export async function PUT(request: NextRequest) {
     if (emoji !== undefined) updateData.emoji = emoji
     if (custom_colors !== undefined) updateData.custom_colors = custom_colors
     if (cta_type !== undefined) updateData.cta_type = cta_type
-    if (whatsapp_number !== undefined) updateData.whatsapp_number = whatsapp_number
+    if (whatsapp_number !== undefined) {
+      // Ignorar whatsapp_number do body - sempre usar do perfil se CTA for whatsapp
+      if (cta_type === 'whatsapp') {
+        updateData.whatsapp_number = whatsappDoPerfil
+      } else {
+        updateData.whatsapp_number = null
+      }
+    }
     if (external_url !== undefined) updateData.external_url = external_url
     if (cta_button_text !== undefined) updateData.cta_button_text = cta_button_text
     if (custom_whatsapp_message !== undefined) updateData.custom_whatsapp_message = custom_whatsapp_message
     if (status !== undefined) updateData.status = status
 
+    // Gerar código curto se solicitado e ainda não existir
+    if (generate_short_url) {
+      const { data: existingTool } = await supabaseAdmin
+        .from('user_templates')
+        .select('short_code')
+        .eq('id', id)
+        .single()
+
+      if (!existingTool?.short_code) {
+        const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+        if (!codeError && codeData) {
+          updateData.short_code = codeData
+        } else {
+          console.error('Erro ao gerar código curto:', codeError)
+        }
+      }
+    }
+
     // 🔒 Atualizar (só se pertencer ao usuário autenticado)
     const authenticatedUserId = user.id
-    const { data, error } = await supabaseAdmin
+    const { data: updatedTool, error } = await supabaseAdmin
       .from('user_templates')
       .update(updateData)
       .eq('id', id)
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
-      .select(`
-        *,
-        user_profiles!inner(user_slug),
-        users!inner(name, email)
-      `)
+      .select('*')
       .single()
 
     if (error) throw error
 
-    if (!data) {
+    if (!updatedTool) {
       return NextResponse.json(
         { error: 'Ferramenta não encontrada ou não pertence ao usuário' },
         { status: 404 }
       )
+    }
+
+    // Buscar user_slug separadamente (pode não existir)
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_slug')
+      .eq('user_id', authenticatedUserId)
+      .maybeSingle()
+
+    // Buscar dados do usuário
+    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(authenticatedUserId)
+
+    // Montar resposta completa
+    const data = {
+      ...updatedTool,
+      user_profiles: profile ? { user_slug: profile.user_slug } : null,
+      users: userData?.user ? {
+        name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
+        email: userData.user.email || ''
+      } : null
     }
 
     return NextResponse.json({

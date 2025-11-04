@@ -30,6 +30,8 @@ function NovoPortalWellnessContent() {
   const [loading, setLoading] = useState(false)
   const [tools, setTools] = useState<Tool[]>([])
   const [selectedTools, setSelectedTools] = useState<string[]>([])
+  const [userSlug, setUserSlug] = useState<string | null>(null)
+  const [carregandoSlug, setCarregandoSlug] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -43,7 +45,27 @@ function NovoPortalWellnessContent() {
 
   useEffect(() => {
     carregarFerramentas()
+    carregarUserSlug()
   }, [])
+
+  const carregarUserSlug = async () => {
+    try {
+      setCarregandoSlug(true)
+      const response = await fetch('/api/wellness/profile', {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.profile?.userSlug) {
+          setUserSlug(data.profile.userSlug)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar user_slug:', error)
+    } finally {
+      setCarregandoSlug(false)
+    }
+  }
 
   const carregarFerramentas = async () => {
     try {
@@ -64,9 +86,10 @@ function NovoPortalWellnessContent() {
     return nome
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^a-z0-9]+/g, '-') // Substitui tudo que não é letra/número por hífen
+      .replace(/-+/g, '-') // Remove múltiplos hífens seguidos
+      .replace(/^-+|-+$/g, '') // Remove hífens do início e fim
   }
 
   const verificarSlug = async (slug: string) => {
@@ -237,30 +260,61 @@ function NovoPortalWellnessContent() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   URL do Portal *
                 </label>
-                <div className="flex items-center">
-                  <span className="text-gray-500 mr-2">ylada.app/pt/wellness/portal/</span>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={(e) => {
-                      const slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-')
-                      setFormData({ ...formData, slug })
-                      verificarSlug(slug)
-                    }}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="meu-portal"
-                    required
-                  />
-                  {checkingSlug && (
-                    <span className="ml-2 text-gray-500 text-sm">Verificando...</span>
-                  )}
-                  {slugAvailable === true && (
-                    <span className="ml-2 text-green-600 text-sm">✓ Disponível</span>
-                  )}
-                  {slugAvailable === false && (
-                    <span className="ml-2 text-red-600 text-sm">✗ Já em uso</span>
-                  )}
-                </div>
+                {carregandoSlug ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-pulse bg-gray-200 h-10 flex-1 rounded-lg"></div>
+                  </div>
+                ) : !userSlug ? (
+                  <div className="border border-yellow-300 bg-yellow-50 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800 mb-2">
+                      ⚠️ <strong>Configure seu slug pessoal</strong> para personalizar suas URLs
+                    </p>
+                    <Link
+                      href="/pt/wellness/configuracao"
+                      className="text-sm text-yellow-900 underline hover:text-yellow-700"
+                    >
+                      Ir para Configurações →
+                    </Link>
+                    <div className="mt-3 flex items-center text-gray-500 text-sm">
+                      <span>ylada.app/pt/wellness/</span>
+                      <span className="px-2 py-1 bg-gray-200 rounded text-gray-600 font-mono">[seu-slug]</span>
+                      <span>/portal/</span>
+                      <span className="px-2 py-1 bg-gray-200 rounded text-gray-600 font-mono">[slug-do-portal]</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center flex-wrap gap-2">
+                      <span className="text-gray-500 text-sm">ylada.app/pt/wellness/</span>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">{userSlug}</span>
+                      <span className="text-gray-500 text-sm">/portal/</span>
+                      <input
+                        type="text"
+                        value={formData.slug}
+                        onChange={(e) => {
+                          const slug = gerarSlug(e.target.value) // Normaliza automaticamente: acentos, espaços, maiúsculas
+                          setFormData({ ...formData, slug })
+                          verificarSlug(slug)
+                        }}
+                        className="flex-1 min-w-[120px] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        placeholder="meu-portal"
+                        required
+                      />
+                      {checkingSlug && (
+                        <span className="text-gray-500 text-sm">Verificando...</span>
+                      )}
+                      {slugAvailable === true && (
+                        <span className="text-green-600 text-sm">✓ Disponível</span>
+                      )}
+                      {slugAvailable === false && (
+                        <span className="text-red-600 text-sm">✗ Já em uso</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      URL completa: <span className="font-mono">ylada.app/pt/wellness/{userSlug}/portal/{formData.slug || '[slug-do-portal]'}</span>
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>

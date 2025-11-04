@@ -23,7 +23,6 @@ interface Configuracao {
     secundaria: string
   }
   tipoCta: 'whatsapp' | 'url'
-  numeroWhatsapp: string
   mensagemWhatsapp: string
   urlExterna: string
   textoBotao: string
@@ -33,7 +32,6 @@ export default function NovaFerramentaWellness() {
   const [templateSelecionado, setTemplateSelecionado] = useState<Template | null>(null)
   const [filtroCategoria, setFiltroCategoria] = useState<'todas' | 'Calculadora' | 'Quiz' | 'Planilha'>('todas')
   const [busca, setBusca] = useState('')
-  const [paisTelefone, setPaisTelefone] = useState('BR')
   const [configuracao, setConfiguracao] = useState<Configuracao>({
     urlPersonalizada: '',
     urlCompleta: '',
@@ -43,7 +41,6 @@ export default function NovaFerramentaWellness() {
       secundaria: '#059669'
     },
     tipoCta: 'whatsapp',
-    numeroWhatsapp: '',
     mensagemWhatsapp: '',
     urlExterna: '',
     textoBotao: 'Conversar com Especialista'
@@ -54,9 +51,49 @@ export default function NovaFerramentaWellness() {
   const [abaAparencia, setAbaAparencia] = useState(false) // Controla aba de aparência
   const [abaCTA, setAbaCTA] = useState(false) // Controla aba de CTA
   const [descricao, setDescricao] = useState('') // Descrição opcional embaixo do título
+  const [slugNormalizado, setSlugNormalizado] = useState(false) // Flag para mostrar aviso de normalização
+  const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
+  const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null) // WhatsApp do perfil
+  const [perfilCountryCode, setPerfilCountryCode] = useState<string>('BR') // Código do país do perfil
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
+  const [erroUrlWhatsapp, setErroUrlWhatsapp] = useState(false) // Flag para erro de URL do WhatsApp
 
   // Nome do usuário logado (simulado - depois virá do sistema)
   const nomeDoUsuario = 'Carlos Oliveira'
+
+  // Função para validar se URL é do WhatsApp
+  const validarUrlWhatsapp = (url: string): boolean => {
+    if (!url) return false
+    const urlLower = url.toLowerCase()
+    return urlLower.includes('wa.me') || 
+           urlLower.includes('whatsapp.com') || 
+           urlLower.includes('web.whatsapp.com') ||
+           urlLower.includes('api.whatsapp.com')
+  }
+
+  // Carregar WhatsApp do perfil
+  useEffect(() => {
+    const carregarPerfil = async () => {
+      try {
+        setCarregandoPerfil(true)
+        const response = await fetch('/api/wellness/profile')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile?.whatsapp) {
+            setPerfilWhatsapp(data.profile.whatsapp)
+          }
+          if (data.profile?.countryCode) {
+            setPerfilCountryCode(data.profile.countryCode)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+      } finally {
+        setCarregandoPerfil(false)
+      }
+    }
+    carregarPerfil()
+  }, [])
 
   // Códigos de telefone por país
   const codigosTelefone = {
@@ -307,13 +344,19 @@ export default function NovaFerramentaWellness() {
       return
     }
 
-    if (configuracao.tipoCta === 'whatsapp' && !configuracao.numeroWhatsapp) {
-      alert('Informe o número do WhatsApp.')
+    if (configuracao.tipoCta === 'whatsapp' && !perfilWhatsapp) {
+      alert('Configure seu WhatsApp no perfil antes de criar ferramentas com CTA WhatsApp. Acesse: Configurações > Perfil')
       return
     }
 
     if (configuracao.tipoCta === 'url' && !configuracao.urlExterna) {
       alert('Informe a URL externa.')
+      return
+    }
+
+    // Validar se URL externa não é do WhatsApp
+    if (configuracao.tipoCta === 'url' && validarUrlWhatsapp(configuracao.urlExterna)) {
+      alert('⚠️ URLs do WhatsApp não são permitidas em URLs externas.\n\nPara usar WhatsApp, escolha a opção "WhatsApp" no tipo de CTA. Essa opção usa automaticamente o número do seu perfil.')
       return
     }
 
@@ -324,7 +367,14 @@ export default function NovaFerramentaWellness() {
       // Converter slug para nome amigável para exibição
       const nomeAmigavel = configuracao.urlPersonalizada
         .split('-')
-        .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+        .map(palavra => {
+          // Se for sigla conhecida (2-3 letras), manter maiúsculas
+          if (palavra.length <= 3 && palavra.match(/^[a-z]{2,3}$/)) {
+            return palavra.toUpperCase()
+          }
+          // Caso contrário, capitalizar primeira letra
+          return palavra.charAt(0).toUpperCase() + palavra.slice(1)
+        })
         .join(' ')
 
       const payload = {
@@ -336,13 +386,12 @@ export default function NovaFerramentaWellness() {
         emoji: configuracao.emoji,
         custom_colors: configuracao.cores,
         cta_type: configuracao.tipoCta === 'whatsapp' ? 'whatsapp' : 'url_externa',
-        whatsapp_number: configuracao.tipoCta === 'whatsapp' 
-          ? `${codigosTelefone[paisTelefone as keyof typeof codigosTelefone].codigo}${configuracao.numeroWhatsapp}`
-          : null,
+        whatsapp_number: configuracao.tipoCta === 'whatsapp' ? perfilWhatsapp : null,
         external_url: configuracao.tipoCta === 'url' ? configuracao.urlExterna : null,
         cta_button_text: configuracao.textoBotao,
         custom_whatsapp_message: configuracao.mensagemWhatsapp,
-        profession: 'wellness'
+        profession: 'wellness',
+        generate_short_url: generateShortUrl
       }
 
       const response = await fetch('/api/wellness/ferramentas', {
@@ -555,16 +604,30 @@ export default function NovaFerramentaWellness() {
                           <input
                             type="text"
                             value={configuracao.urlPersonalizada}
-                            onChange={(e) => setConfiguracao({ ...configuracao, urlPersonalizada: e.target.value })}
-                            onBlur={(e) => {
-                              const tratado = tratarUrl(e.target.value)
-                              setConfiguracao({ ...configuracao, urlPersonalizada: tratado })
+                            onChange={(e) => {
+                              const valorOriginal = e.target.value
+                              const valorTratado = tratarUrl(valorOriginal)
+                              
+                              // Se foi normalizado, mostrar aviso
+                              if (valorOriginal !== valorTratado && valorOriginal.length > 0) {
+                                setSlugNormalizado(true)
+                                setTimeout(() => setSlugNormalizado(false), 3000) // Esconde após 3s
+                              }
+                              
+                              setConfiguracao({ ...configuracao, urlPersonalizada: valorTratado })
                             }}
                             placeholder="Ex: calculadora-imc"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           />
+                          {slugNormalizado && (
+                            <div className="mt-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                              <p className="text-xs text-blue-800">
+                                ℹ️ <strong>Normalizado automaticamente:</strong> Acentos, espaços e caracteres especiais foram convertidos para formato de URL válido.
+                              </p>
+                            </div>
+                          )}
                           <p className="text-xs text-gray-500 mt-1">
-                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos". Será tratado automaticamente.
+                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos". Será tratado automaticamente enquanto você digita.
                           </p>
                           {configuracao.urlCompleta && (
                             <div className={`mt-2 px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
@@ -574,6 +637,23 @@ export default function NovaFerramentaWellness() {
                               </p>
                             </div>
                           )}
+                          <div className="mt-4 flex items-start space-x-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                            <input
+                              type="checkbox"
+                              id="generateShortUrl"
+                              checked={generateShortUrl}
+                              onChange={(e) => setGenerateShortUrl(e.target.checked)}
+                              className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer">
+                              <span className="text-sm font-medium text-gray-900 block">
+                                🔗 Gerar URL Encurtada
+                              </span>
+                              <span className="text-xs text-gray-600 mt-1 block">
+                                Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">ylada.app/p/abc123</code> para facilitar compartilhamento via WhatsApp, SMS ou impresso.
+                              </span>
+                            </label>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -627,12 +707,19 @@ export default function NovaFerramentaWellness() {
                             {configuracao.urlPersonalizada 
                               ? configuracao.urlPersonalizada
                                   .split('-')
-                                  .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                                  .map(p => {
+                                    // Se for sigla conhecida (2-3 letras), manter maiúsculas
+                                    if (p.length <= 3 && p.match(/^[a-z]{2,3}$/)) {
+                                      return p.toUpperCase()
+                                    }
+                                    // Caso contrário, capitalizar primeira letra
+                                    return p.charAt(0).toUpperCase() + p.slice(1)
+                                  })
                                   .join(' ')
                               : 'Digite o nome do projeto acima'}
                           </div>
                           <p className="text-xs text-gray-500 mt-1">
-                            Este título será gerado automaticamente a partir do "Nome do Projeto"
+                            Este título será gerado automaticamente a partir do "Nome do Projeto" enquanto você digita
                           </p>
                         </div>
 
@@ -681,7 +768,10 @@ export default function NovaFerramentaWellness() {
                           </label>
                           <select
                             value={configuracao.tipoCta}
-                            onChange={(e) => setConfiguracao({ ...configuracao, tipoCta: e.target.value as 'whatsapp' | 'url' })}
+                            onChange={(e) => {
+                              setConfiguracao({ ...configuracao, tipoCta: e.target.value as 'whatsapp' | 'url' })
+                              setErroUrlWhatsapp(false) // Limpar erro ao trocar tipo de CTA
+                            }}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           >
                             <option value="whatsapp">WhatsApp (recomendado)</option>
@@ -758,42 +848,49 @@ export default function NovaFerramentaWellness() {
                         {/* Configuração WhatsApp */}
                         {configuracao.tipoCta === 'whatsapp' && (
                           <>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                País <span className="text-red-500">*</span>
-                              </label>
-                              <select
-                                value={paisTelefone}
-                                onChange={(e) => setPaisTelefone(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                              >
-                                {Object.entries(codigosTelefone).map(([codigo, dados]) => (
-                                  <option key={codigo} value={codigo}>
-                                    {dados.bandeira} {dados.nome} ({dados.codigo})
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Número WhatsApp <span className="text-red-500">*</span>
-                              </label>
-                              <div className="flex items-center space-x-2">
-                                <div className="flex items-center justify-center w-16 h-12 bg-gray-100 rounded-lg border border-gray-300 font-medium">
-                                  {codigosTelefone[paisTelefone as keyof typeof codigosTelefone]?.codigo}
+                            {carregandoPerfil ? (
+                              <div className="animate-pulse bg-gray-100 h-20 rounded-lg"></div>
+                            ) : perfilWhatsapp ? (
+                              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div className="flex items-start space-x-3">
+                                  <span className="text-2xl">✅</span>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium text-gray-900 mb-1">
+                                      WhatsApp do Perfil
+                                    </p>
+                                    <p className="text-sm text-gray-700 font-mono mb-2">
+                                      {perfilWhatsapp}
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                      Este número será usado em todas as suas ferramentas. Para alterar, acesse{' '}
+                                      <Link href="/pt/wellness/configuracao" className="text-green-600 underline font-semibold">
+                                        Configurações → Perfil
+                                      </Link>
+                                    </p>
+                                  </div>
                                 </div>
-                                <input
-                                  type="text"
-                                  value={configuracao.numeroWhatsapp}
-                                  onChange={(e) => setConfiguracao({ ...configuracao, numeroWhatsapp: e.target.value })}
-                                  placeholder="11999999999"
-                                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                />
                               </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Apenas DDD + número (sem parênteses ou espaços)
-                              </p>
-                            </div>
+                            ) : (
+                              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div className="flex items-start space-x-3">
+                                  <span className="text-2xl">⚠️</span>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium text-yellow-900 mb-2">
+                                      WhatsApp não configurado
+                                    </p>
+                                    <p className="text-xs text-yellow-800 mb-3">
+                                      Configure seu WhatsApp no perfil para usar esta opção.
+                                    </p>
+                                    <Link
+                                      href="/pt/wellness/configuracao"
+                                      className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
+                                    >
+                                      Ir para Configurações
+                                    </Link>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Mensagem pré-formatada <span className="text-red-500">*</span>
@@ -804,6 +901,7 @@ export default function NovaFerramentaWellness() {
                                 placeholder="Olá! Calculei meu IMC através do YLADA e gostaria de saber mais sobre como alcançar meu objetivo. Pode me ajudar?"
                                 rows={4}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                disabled={!perfilWhatsapp}
                               />
                               <div className="mt-2 bg-blue-50 rounded-lg p-3">
                                 <p className="text-xs text-blue-700 font-medium mb-1">💡 Placeholders disponíveis:</p>
@@ -826,10 +924,32 @@ export default function NovaFerramentaWellness() {
                             <input
                               type="url"
                               value={configuracao.urlExterna}
-                              onChange={(e) => setConfiguracao({ ...configuracao, urlExterna: e.target.value })}
+                              onChange={(e) => {
+                                const url = e.target.value
+                                const isWhatsappUrl = validarUrlWhatsapp(url)
+                                setErroUrlWhatsapp(isWhatsappUrl)
+                                setConfiguracao({ ...configuracao, urlExterna: url })
+                              }}
                               placeholder="https://seu-site.com/contato"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent ${
+                                erroUrlWhatsapp 
+                                  ? 'border-red-500 focus:ring-red-500' 
+                                  : 'border-gray-300 focus:ring-green-500'
+                              }`}
                             />
+                            {erroUrlWhatsapp && (
+                              <div className="mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+                                <p className="text-xs text-red-800">
+                                  ⚠️ <strong>URL do WhatsApp detectada!</strong> URLs do WhatsApp não são permitidas aqui.
+                                </p>
+                                <p className="text-xs text-red-700 mt-1">
+                                  Para usar WhatsApp, escolha a opção <strong>"WhatsApp"</strong> no tipo de CTA acima. Essa opção usa automaticamente o número do seu perfil.
+                                </p>
+                              </div>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                              💡 <strong>O que é?</strong> URL para onde o cliente será redirecionado após ver o resultado (ex: site, formulário, página de agendamento)
+                            </p>
                           </div>
                         )}
                       </div>
@@ -870,7 +990,14 @@ export default function NovaFerramentaWellness() {
                   {configuracao.urlPersonalizada 
                     ? configuracao.urlPersonalizada
                         .split('-')
-                        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                        .map(p => {
+                          // Se for sigla conhecida (2-3 letras), manter maiúsculas
+                          if (p.length <= 3 && p.match(/^[a-z]{2,3}$/)) {
+                            return p.toUpperCase()
+                          }
+                          // Caso contrário, capitalizar primeira letra
+                          return p.charAt(0).toUpperCase() + p.slice(1)
+                        })
                         .join(' ')
                     : 'Nome do Projeto'}
                 </h4>
@@ -895,7 +1022,7 @@ export default function NovaFerramentaWellness() {
                     
                     {configuracao.tipoCta === 'whatsapp' && (
                       <p className="text-xs text-white/80 mt-3">
-                        📱 Abrirá WhatsApp: {paisTelefone && codigosTelefone[paisTelefone as keyof typeof codigosTelefone]?.codigo} {configuracao.numeroWhatsapp || '...'}
+                        📱 Abrirá WhatsApp: {perfilWhatsapp || 'Configure no perfil'}
                       </p>
                     )}
                     

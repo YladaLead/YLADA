@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import QRCode from '@/components/QRCode'
 
 interface Ferramenta {
   id: string
@@ -10,6 +11,8 @@ interface Ferramenta {
   categoria: string
   objetivo: string
   url: string
+  shortUrl?: string
+  shortCode?: string
   status: 'ativa' | 'inativa'
   leads: number
   visualizacoes: number
@@ -58,6 +61,8 @@ export default function FerramentasWellness() {
         url: tool.user_profiles?.user_slug 
           ? `https://ylada.app/pt/wellness/${tool.user_profiles.user_slug}/${tool.slug}`
           : `https://ylada.app/pt/wellness/ferramenta/${tool.id}`,
+        shortUrl: tool.short_code ? `https://ylada.app/p/${tool.short_code}` : undefined,
+        shortCode: tool.short_code,
         status: tool.status === 'active' ? 'ativa' : 'inativa',
         leads: tool.leads_count || 0,
         visualizacoes: tool.views || 0,
@@ -294,20 +299,59 @@ export default function FerramentasWellness() {
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <p className="text-sm text-gray-600">
-                      Última atividade: {ferramenta.ultimaAtividade}
-                    </p>
-                    <div className="flex space-x-2">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Última atividade: {ferramenta.ultimaAtividade}
+                      </p>
+                      {/* URL Completa */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-gray-500">URL:</span>
+                        <span className="text-xs text-gray-700 font-mono break-all">{ferramenta.url}</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(ferramenta.url)
+                            alert('URL copiada!')
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-700 underline"
+                        >
+                          Copiar
+                        </button>
+                      </div>
+                      {/* URL Encurtada */}
+                      {ferramenta.shortUrl && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xs text-gray-500">URL Curta:</span>
+                          <span className="text-xs text-purple-700 font-mono font-semibold">{ferramenta.shortUrl}</span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(ferramenta.shortUrl!)
+                              alert('URL encurtada copiada!')
+                            }}
+                            className="text-xs text-purple-600 hover:text-purple-700 underline"
+                          >
+                            Copiar
+                          </button>
+                        </div>
+                      )}
+                      {/* QR Code */}
+                      {ferramenta.shortUrl && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <p className="text-xs text-gray-500 mb-2">QR Code:</p>
+                          <QRCode url={ferramenta.shortUrl} size={120} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col space-y-2 ml-4">
                       <Link
                         href={ferramenta.url}
                         target="_blank"
-                        className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                        className="text-sm text-purple-600 hover:text-purple-800 font-medium text-right"
                       >
                         Ver Link →
                       </Link>
                       <Link
                         href={`/pt/wellness/ferramentas/${ferramenta.id}/editar`}
-                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                        className="text-sm text-gray-600 hover:text-gray-800 font-medium text-right"
                       >
                         Editar
                       </Link>

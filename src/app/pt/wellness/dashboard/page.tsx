@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ChatIA from '../../../../components/ChatIA'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function WellnessDashboard() {
   return (
@@ -15,14 +16,13 @@ export default function WellnessDashboard() {
 }
 
 function WellnessDashboardContent() {
-  // Dados do usuário (simulados - depois virão do banco de dados)
-  const usuarioWellness = {
-    nome: 'Carlos Oliveira',
-    certificacao: 'Consultor de Bem-Estar',
-    email: 'carlos@wellness.com',
-    especialidade: 'Bem-Estar e Vida Saudável',
-    experiencia: '5 anos'
-  }
+  const { user, signOut } = useAuth()
+  
+  const [perfil, setPerfil] = useState({
+    nome: '',
+    bio: ''
+  })
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
 
   const [stats, setStats] = useState({
     ferramentasAtivas: 0,
@@ -93,6 +93,48 @@ function WellnessDashboardContent() {
     }
   ])
 
+  // Carregar perfil do usuário
+  useEffect(() => {
+    const carregarPerfil = async () => {
+      if (!user) return
+      
+      try {
+        setCarregandoPerfil(true)
+        const response = await fetch('/api/wellness/profile', {
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile) {
+            setPerfil({
+              nome: data.profile.nome || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '',
+              bio: data.profile.bio || ''
+            })
+          }
+        } else {
+          // Fallback para dados do usuário logado
+          setPerfil({
+            nome: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
+            bio: ''
+          })
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+        // Fallback para dados do usuário logado
+        setPerfil({
+          nome: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
+          bio: ''
+        })
+      } finally {
+        setCarregandoPerfil(false)
+      }
+    }
+
+    if (user) {
+      carregarPerfil()
+    }
+  }, [user])
+
   useEffect(() => {
     // Simular carregamento de dados
     setStats({
@@ -112,35 +154,52 @@ function WellnessDashboardContent() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-4 sm:space-y-0">
             {/* Logo e Info do Usuário */}
             <div className="flex items-center space-x-4 w-full sm:w-auto">
-              <Image
-                src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                alt="YLADA"
-                width={280}
-                height={84}
-                className="h-12 sm:h-14 lg:h-16 w-auto bg-transparent object-contain"
-                style={{ backgroundColor: 'transparent' }}
-              />
+              <Link href="/pt/wellness/dashboard">
+                <Image
+                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
+                  alt="YLADA"
+                  width={280}
+                  height={84}
+                  className="h-12 sm:h-14 lg:h-16 w-auto bg-transparent object-contain"
+                  style={{ backgroundColor: 'transparent' }}
+                />
+              </Link>
               <div className="h-14 sm:h-16 w-px bg-gray-300"></div>
               <div className="flex-1 sm:flex-none">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  Dashboard WELLNESS
-                </h1>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mt-1">
-                  <p className="text-sm sm:text-base font-medium text-gray-700">{usuarioWellness.nome}</p>
-                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-teal-100 text-teal-800 mt-1 sm:mt-0 w-fit">
-                    {usuarioWellness.certificacao}
-                  </span>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+                  {carregandoPerfil ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-pulse bg-gray-200 h-5 w-32 rounded"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm sm:text-base font-medium text-gray-700">{perfil.nome || 'Usuário'}</p>
+                      {perfil.bio && (
+                        <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-teal-100 text-teal-800 mt-1 sm:mt-0 w-fit">
+                          {perfil.bio}
+                        </span>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-            {/* Botão de Suporte */}
+            {/* Botões de Ação */}
             <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
               <Link 
-                href="/pt/wellness/suporte"
-                className="text-gray-600 hover:text-gray-900 text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                href="/pt/wellness/configuracao"
+                className="text-gray-600 hover:text-gray-900 text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
               >
-                💬 Suporte
+                <span>👤</span>
+                <span className="hidden sm:inline">Perfil</span>
               </Link>
+              <button
+                onClick={signOut}
+                className="text-gray-600 hover:text-red-600 text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+              >
+                <span>🚪</span>
+                <span className="hidden sm:inline">Sair</span>
+              </button>
             </div>
           </div>
         </div>
@@ -150,7 +209,16 @@ function WellnessDashboardContent() {
         {/* Ações Rápidas - Otimizado Mobile First */}
         <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
           {/* Cards de Acesso Rápido - Grid Responsivo */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <Link 
+              href="/pt/wellness/portals"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg hover:from-emerald-100 hover:to-green-100 transition-colors border border-emerald-200"
+            >
+              <span className="text-2xl sm:text-3xl mb-2">🌿</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Portal do Bem-Estar</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Criar portal</p>
+            </Link>
+            
             <Link 
               href="/pt/wellness/templates"
               className="flex flex-col items-center justify-center p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"

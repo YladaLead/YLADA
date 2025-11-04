@@ -25,12 +25,34 @@ function PortalsWellnessContent() {
   const [portals, setPortals] = useState<Portal[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [userSlug, setUserSlug] = useState<string | null>(null)
+  const [carregandoSlug, setCarregandoSlug] = useState(true)
 
   useEffect(() => {
     // Carregar portais diretamente - a API vai verificar autenticação
     carregarPortais()
+    carregarUserSlug()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const carregarUserSlug = async () => {
+    try {
+      setCarregandoSlug(true)
+      const response = await fetch('/api/wellness/profile', {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.profile?.userSlug) {
+          setUserSlug(data.profile.userSlug)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar user_slug:', error)
+    } finally {
+      setCarregandoSlug(false)
+    }
+  }
 
   const carregarPortais = async () => {
     try {
@@ -183,6 +205,28 @@ function PortalsWellnessContent() {
           </div>
         </div>
 
+        {/* Aviso de configuração de slug */}
+        {!carregandoSlug && !userSlug && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p className="text-sm text-yellow-800 mb-2">
+                  ⚠️ <strong>Configure seu slug pessoal</strong> para personalizar as URLs dos seus portais
+                </p>
+                <p className="text-xs text-yellow-700 mb-3">
+                  Sem o slug configurado, suas URLs não serão personalizadas. Configure agora para ter URLs como: <span className="font-mono">ylada.app/pt/wellness/[seu-slug]/portal/[nome-portal]</span>
+                </p>
+                <Link
+                  href="/pt/wellness/configuracao"
+                  className="inline-block text-sm text-yellow-900 underline hover:text-yellow-700 font-medium"
+                >
+                  Ir para Configurações →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">Meus Portais</h2>
@@ -264,13 +308,44 @@ function PortalsWellnessContent() {
                   </div>
                 </div>
 
+                {/* URL do Portal */}
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 mb-1">URL do Portal:</p>
+                  {carregandoSlug ? (
+                    <div className="animate-pulse bg-gray-200 h-4 w-full rounded"></div>
+                  ) : userSlug ? (
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className="text-xs text-gray-600 font-mono break-all">
+                        ylada.app/pt/wellness/<span className="text-green-600 font-semibold">{userSlug}</span>/portal/{portal.slug}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/pt/wellness/${userSlug}/portal/${portal.slug}`
+                          navigator.clipboard.writeText(url)
+                          alert('URL copiada!')
+                        }}
+                        className="text-xs text-blue-600 hover:text-blue-700 underline"
+                      >
+                        Copiar
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-400">
+                      <span className="font-mono">ylada.app/pt/wellness/[configure]/portal/{portal.slug}</span>
+                      <Link href="/pt/wellness/configuracao" className="text-blue-600 hover:text-blue-700 underline ml-1">
+                        Configurar
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
                   <div className="text-xs text-gray-500">
                     {portal.views} visualizações
                   </div>
                   <div className="flex space-x-2">
                     <Link
-                      href={`/pt/wellness/portal/${portal.slug}`}
+                      href={userSlug ? `/pt/wellness/${userSlug}/portal/${portal.slug}` : `/pt/wellness/portal/${portal.slug}`}
                       target="_blank"
                       className="text-sm text-blue-600 hover:text-blue-700"
                     >
