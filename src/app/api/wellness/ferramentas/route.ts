@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     if (authResult instanceof NextResponse) {
       return authResult // Retorna erro de autenticação
     }
-    const { user, profile } = authResult
+    const { user, profile: authProfile } = authResult
 
     const { searchParams } = new URL(request.url)
     const toolId = searchParams.get('id')
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Buscar user_slug separadamente (pode não existir)
-      const { data: profile } = await supabaseAdmin
+      const { data: userProfile } = await supabaseAdmin
         .from('user_profiles')
         .select('user_slug')
         .eq('user_id', authenticatedUserId)
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       // Montar resposta completa
       const data = {
         ...toolData,
-        user_profiles: profile ? { user_slug: profile.user_slug } : null,
+        user_profiles: userProfile ? { user_slug: userProfile.user_slug } : null,
         users: userData?.user ? {
           name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
           email: userData.user.email || ''
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error
 
     // Buscar user_slug uma vez para todas as ferramentas (pode não existir)
-    const { data: profile } = await supabaseAdmin
+    const { data: userProfile } = await supabaseAdmin
       .from('user_profiles')
       .select('user_slug')
       .eq('user_id', authenticatedUserId)
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     // Montar resposta completa para cada ferramenta
     const data = (toolsData || []).map(tool => ({
       ...tool,
-      user_profiles: profile ? { user_slug: profile.user_slug } : null,
+      user_profiles: userProfile ? { user_slug: userProfile.user_slug } : null,
       users: userData?.user ? {
         name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
         email: userData.user.email || ''
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
     if (insertError) throw insertError
 
     // Buscar user_slug separadamente (pode não existir)
-    const { data: profile } = await supabaseAdmin
+    const { data: userProfile } = await supabaseAdmin
       .from('user_profiles')
       .select('user_slug')
       .eq('user_id', authenticatedUserId)
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
     // Montar resposta completa
     const data = {
       ...insertedTool,
-      user_profiles: profile ? { user_slug: profile.user_slug } : null,
+      user_profiles: userProfile ? { user_slug: userProfile.user_slug } : null,
       users: userData?.user ? {
         name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
         email: userData.user.email || ''
@@ -422,7 +422,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Buscar user_slug separadamente (pode não existir)
-    const { data: profile } = await supabaseAdmin
+    const { data: userProfile } = await supabaseAdmin
       .from('user_profiles')
       .select('user_slug')
       .eq('user_id', authenticatedUserId)
@@ -434,7 +434,7 @@ export async function PUT(request: NextRequest) {
     // Montar resposta completa
     const data = {
       ...updatedTool,
-      user_profiles: profile ? { user_slug: profile.user_slug } : null,
+      user_profiles: userProfile ? { user_slug: userProfile.user_slug } : null,
       users: userData?.user ? {
         name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
         email: userData.user.email || ''
