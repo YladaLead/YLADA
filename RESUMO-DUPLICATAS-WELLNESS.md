@@ -85,3 +85,4 @@
 - Foi mantido o template com nome mais completo ("Calculadora de IMC")
 - Todos os outros templates estão únicos e sem duplicatas
 
+

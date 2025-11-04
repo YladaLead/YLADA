@@ -50,3 +50,4 @@ WHERE id IN (
   WHERE rn > 1 -- Manter apenas o mais antigo (rn = 1)
 );
 
+

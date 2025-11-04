@@ -1262,14 +1262,16 @@ export default function CriarFerramenta() {
                     >
                       <div className="flex items-center space-x-2">
                         <h3 className="text-lg font-medium text-gray-900">Nome da URL</h3>
-                        <div className="group relative">
+                        <div className="group relative z-10">
                           <button 
                             onClick={(e) => e.stopPropagation()}
-                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors"
+                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors flex items-center justify-center font-bold"
+                            type="button"
+                            aria-label="Ajuda sobre Nome da URL"
                           >
                             ?
                           </button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 bg-gray-900 text-white text-xs rounded-lg p-3 hidden group-hover:block pointer-events-none z-50 shadow-lg">
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-[100] shadow-lg">
                             <div className="text-center">
                               <strong>Nome único para seus links:</strong><br/>
                               • <strong>Exemplos:</strong> "ana-silva", "nutri-sp", "consultorio-sao-paulo"<br/>
@@ -1337,14 +1339,16 @@ export default function CriarFerramenta() {
                     >
                       <div className="flex items-center space-x-2">
                         <h3 className="text-lg font-medium text-gray-900">Nome do Projeto</h3>
-                        <div className="group relative">
+                        <div className="group relative z-10">
                           <button 
                             onClick={(e) => e.stopPropagation()}
-                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors"
+                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors flex items-center justify-center font-bold"
+                            type="button"
+                            aria-label="Ajuda sobre Nome do Projeto"
                           >
                             ?
                           </button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 bg-gray-900 text-white text-xs rounded-lg p-3 hidden group-hover:block pointer-events-none z-50 shadow-lg">
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-[100] shadow-lg">
                             <div className="text-center">
                               <strong>Organize suas ferramentas por projeto:</strong><br/>
                               • <strong>Por situação:</strong> "Consultório", "WhatsApp", "Instagram"<br/>
@@ -1409,14 +1413,16 @@ export default function CriarFerramenta() {
                     >
                       <div className="flex items-center space-x-2">
                         <h3 className="text-lg font-medium text-gray-900">Textos</h3>
-                        <div className="group relative">
+                        <div className="group relative z-10">
                           <button 
                             onClick={(e) => e.stopPropagation()}
-                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors"
+                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors flex items-center justify-center font-bold"
+                            type="button"
+                            aria-label="Ajuda sobre Textos"
                           >
                             ?
                           </button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 hidden group-hover:block pointer-events-none z-50 shadow-lg">
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-[100] shadow-lg">
                             <div className="text-center">
                               <strong>Personalize os textos da sua ferramenta:</strong><br/>
                               • <strong>Título:</strong> Nome principal da ferramenta<br/>
@@ -1494,14 +1500,16 @@ export default function CriarFerramenta() {
                     >
                       <div className="flex items-center space-x-2">
                         <h3 className="text-lg font-medium text-gray-900">Configurações Pós-Diagnóstico</h3>
-                        <div className="group relative">
+                        <div className="group relative z-10">
                           <button 
                             onClick={(e) => e.stopPropagation()}
-                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors"
+                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors flex items-center justify-center font-bold"
+                            type="button"
+                            aria-label="Ajuda sobre Configurações Pós-Diagnóstico"
                           >
                             ?
                           </button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 hidden group-hover:block pointer-events-none z-50 shadow-lg">
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-[100] shadow-lg">
                             <div className="text-center">
                               <strong>Configure o que acontece após o diagnóstico:</strong><br/>
                               • <strong>Completo:</strong> Explicações detalhadas + causas + ações<br/>
@@ -1729,14 +1737,16 @@ export default function CriarFerramenta() {
                     >
                       <div className="flex items-center space-x-2">
                         <h3 className="text-lg font-medium text-gray-900">Como Entregar o Diagnóstico</h3>
-                        <div className="group relative">
+                        <div className="group relative z-10">
                           <button 
                             onClick={(e) => e.stopPropagation()}
-                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors"
+                            className="w-5 h-5 bg-gray-400 text-white rounded-full text-xs hover:bg-gray-500 transition-colors flex items-center justify-center font-bold"
+                            type="button"
+                            aria-label="Ajuda sobre Entrega do Diagnóstico"
                           >
                             ?
                           </button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 hidden group-hover:block pointer-events-none z-50 shadow-lg">
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-[100] shadow-lg">
                             <div className="text-center">
                               <strong>Escolha como entregar o diagnóstico:</strong><br/>
                               • <strong>Página:</strong> Cliente vê resultado diretamente na tela<br/>
@@ -1841,7 +1851,24 @@ export default function CriarFerramenta() {
                         readOnly
                         className="flex-1 px-3 py-2 bg-white border border-green-300 rounded-lg text-sm font-mono"
                       />
-                      <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                      <button 
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(ferramentaPersonalizada.url)
+                            alert('Link copiado para a área de transferência!')
+                          } catch (err) {
+                            // Fallback para navegadores antigos
+                            const input = document.createElement('input')
+                            input.value = ferramentaPersonalizada.url
+                            document.body.appendChild(input)
+                            input.select()
+                            document.execCommand('copy')
+                            document.body.removeChild(input)
+                            alert('Link copiado para a área de transferência!')
+                          }
+                        }}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                      >
                         Copiar
                       </button>
                     </div>

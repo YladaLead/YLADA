@@ -16,3 +16,4 @@ SET is_active = false
 WHERE id = '4db486d1-a525-4ff6-833d-f09ace962518'
   AND name = 'Calculadora IMC';
 
+

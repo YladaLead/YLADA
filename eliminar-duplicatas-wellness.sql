@@ -72,3 +72,4 @@ GROUP BY LOWER(TRIM(name))
 HAVING COUNT(*) > 1;
 -- Se esta query retornar 0 linhas, todas as duplicatas foram eliminadas!
 
+

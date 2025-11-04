@@ -24,3 +24,4 @@ WHERE LOWER(name) LIKE '%imc%'
 GROUP BY name, type
 HAVING COUNT(*) > 1;
 
+
