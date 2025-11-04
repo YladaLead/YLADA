@@ -100,16 +100,18 @@ function NovoPortalWellnessContent() {
 
     setCheckingSlug(true)
     try {
-      const response = await fetch(`/api/wellness/portals?slug=${slug}`, {
+      const response = await fetch(`/api/wellness/portals/check-slug?slug=${encodeURIComponent(slug)}`, {
         credentials: 'include'
       })
 
-      if (response.status === 404) {
-        setSlugAvailable(true)
+      if (response.ok) {
+        const data = await response.json()
+        setSlugAvailable(data.available)
       } else {
         setSlugAvailable(false)
       }
     } catch (error) {
+      console.error('Erro ao verificar slug:', error)
       setSlugAvailable(false)
     } finally {
       setCheckingSlug(false)

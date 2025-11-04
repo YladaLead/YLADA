@@ -1,0 +1,550 @@
+{
+    "success": true,
+    "total_templates": 37,
+    "resumo": {
+        "com_preview_completo": 3,
+        "sem_preview_completo": 34,
+        "percentual_completo": "8.1"
+    },
+    "por_tipo": {
+        "calculadoras": {
+            "total": 4,
+            "completo": 3,
+            "incompleto": 1
+        },
+        "quizzes": {
+            "total": 25,
+            "completo": 0,
+            "incompleto": 25
+        },
+        "planilhas": {
+            "total": 8,
+            "completo": 0,
+            "incompleto": 8
+        }
+    },
+    "templates_com_preview_completo": [
+        {
+            "id": "18dae9f8-b1a8-47f0-b04f-3b6168d43ddc",
+            "name": "Calculadora de \u00c1gua",
+            "type": "calculadora",
+            "temPreviewCompleto": true,
+            "motivo": "Calculadora de \u00c1gua - Preview completo com 4 etapas"
+        },
+        {
+            "id": "a71083ec-fa8a-4143-81dd-ba2a966bd7c8",
+            "name": "Calculadora de Calorias",
+            "type": "calculadora",
+            "temPreviewCompleto": true,
+            "motivo": "Calculadora de Calorias - Preview completo com 4 etapas"
+        },
+        {
+            "id": "39b79fb9-a115-4a17-ab12-17fb6c83a8d1",
+            "name": "Calculadora de IMC",
+            "type": "calculadora",
+            "temPreviewCompleto": true,
+            "motivo": "Calculadora IMC - Preview completo com 4 etapas"
+        }
+    ],
+    "templates_sem_preview_completo": [
+        {
+            "id": "53d2549d-4d46-40ab-ba2e-51f75e00c20b",
+            "name": "Calculadora de Prote\u00edna",
+            "type": "calculadora",
+            "temPreviewCompleto": false,
+            "motivo": "Calculadora - Preview gen\u00e9rico (sem etapas espec\u00edficas)"
+        },
+        {
+            "id": "3d211358-7f53-439f-b621-d4a0e54c3cbf",
+            "name": "Checklist Alimentar",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "57dccba9-a597-4016-87a0-3872617ac9e1",
+            "name": "Checklist Detox",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "2e92754d-dc7e-4358-ad65-72a4584ce476",
+            "name": "Guia Nutrac\u00eautico",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "050aa8fc-c2df-489c-b141-459f105685e8",
+            "name": "Guia Proteico",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "e0a288ad-ef16-4dcd-9a75-aa202105a132",
+            "name": "Mini E-book Educativo",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "869d70e3-ebaa-447e-aaa3-96af52650cd0",
+            "name": "Planilha Dieta Emagrecimento",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "1c592084-d241-42db-9f83-71f3747af501",
+            "name": "Tabela Comparativa",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "bc45a07f-17dd-4a5d-ae36-07b1c39f85a1",
+            "name": "Tabela de Substitui\u00e7\u00f5es",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "cd5ef372-3377-41d8-8b9d-3a7ce4659adc",
+            "name": "Avalia\u00e7\u00e3o de Fome Emocional",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "c5f7de6a-cda2-4f5d-a672-b26fbbb1e590",
+            "name": "Avalia\u00e7\u00e3o de Intoler\u00e2ncias/Sensibilidades",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "aba64faa-bd97-4e2c-9f58-656b1aa18b6d",
+            "name": "Avalia\u00e7\u00e3o do Perfil Metab\u00f3lico",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "50f9ee13-b666-4c0d-9d90-fe314a05354c",
+            "name": "Avalia\u00e7\u00e3o do Sono e Energia",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "361b2763-eb73-43b6-a9cf-df85f242526d",
+            "name": "Descubra seu Perfil de Bem-Estar",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "9cc1620c-a678-4cc2-84b1-3be857797770",
+            "name": "Diagn\u00f3stico de Eletr\u00f3litos",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "b66b4806-c79e-4dd4-b3a6-7f7ef8e98e9f",
+            "name": "Diagn\u00f3stico de Parasitose",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "6e90544a-8f5a-470f-a8f0-a4a10cdbfed2",
+            "name": "Diagn\u00f3stico de Sintomas Intestinais",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "f15a6359-cb5a-4ce3-94ed-5b795875ad4e",
+            "name": "Diagn\u00f3stico do Tipo de Metabolismo",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "19cad91a-b82f-4524-894a-43ac5f03b1d8",
+            "name": "Pronto para Emagrecer com Sa\u00fade?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "88e6714e-09c3-435d-8a4c-7e6ec7c8d16c",
+            "name": "Qual \u00e9 o seu Tipo de Fome?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "75465811-ecb5-4d95-a68f-d1f9189eccaf",
+            "name": "Qual \u00e9 seu perfil de intestino?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "09602456-2790-41f8-b0c6-db70350b188d",
+            "name": "Quiz Avalia\u00e7\u00e3o Nutricional",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "18e8ca3b-1828-42a5-9b3a-b64fca4cdf0f",
+            "name": "Quiz de Bem-Estar",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "8b83b1ff-79e5-4f69-a5ec-4dd800450de0",
+            "name": "Quiz de Perfil Nutricional",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "e0af7fd2-e002-43ee-8cf3-d8bd412132c5",
+            "name": "Quiz Detox",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "4b3e2e42-9af5-456e-9beb-ec2c3b39e3eb",
+            "name": "Quiz Energ\u00e9tico",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "6760f310-7adb-4923-84e3-12b02d012653",
+            "name": "Quiz Interativo",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "51add9fd-efe7-4ebc-80c6-39ffef95b3d4",
+            "name": "Risco de S\u00edndrome Metab\u00f3lica",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "5141e512-1b74-4e19-b324-0307a8d1076c",
+            "name": "Seu corpo est\u00e1 pedindo Detox?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "f848b643-07f0-4a95-867f-da3d87ce6aa5",
+            "name": "Teste de Reten\u00e7\u00e3o de L\u00edquidos",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "01b62264-ba9d-4689-ad78-9121fe4a3862",
+            "name": "Voc\u00ea conhece o seu corpo?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "5075ee9b-fd87-444f-9c93-a3ecf3b75a43",
+            "name": "Voc\u00ea \u00e9 mais disciplinado ou emocional com a comida?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "2502603c-ce3a-423c-8bfd-55b006e83b0b",
+            "name": "Voc\u00ea est\u00e1 nutrido ou apenas alimentado?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "027900a0-ab40-4efc-b670-e3fc3589a7c8",
+            "name": "Voc\u00ea est\u00e1 se alimentando conforme sua rotina?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        }
+    ],
+    "todos_templates": [
+        {
+            "id": "18dae9f8-b1a8-47f0-b04f-3b6168d43ddc",
+            "name": "Calculadora de \u00c1gua",
+            "type": "calculadora",
+            "temPreviewCompleto": true,
+            "motivo": "Calculadora de \u00c1gua - Preview completo com 4 etapas"
+        },
+        {
+            "id": "a71083ec-fa8a-4143-81dd-ba2a966bd7c8",
+            "name": "Calculadora de Calorias",
+            "type": "calculadora",
+            "temPreviewCompleto": true,
+            "motivo": "Calculadora de Calorias - Preview completo com 4 etapas"
+        },
+        {
+            "id": "39b79fb9-a115-4a17-ab12-17fb6c83a8d1",
+            "name": "Calculadora de IMC",
+            "type": "calculadora",
+            "temPreviewCompleto": true,
+            "motivo": "Calculadora IMC - Preview completo com 4 etapas"
+        },
+        {
+            "id": "53d2549d-4d46-40ab-ba2e-51f75e00c20b",
+            "name": "Calculadora de Prote\u00edna",
+            "type": "calculadora",
+            "temPreviewCompleto": false,
+            "motivo": "Calculadora - Preview gen\u00e9rico (sem etapas espec\u00edficas)"
+        },
+        {
+            "id": "3d211358-7f53-439f-b621-d4a0e54c3cbf",
+            "name": "Checklist Alimentar",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "57dccba9-a597-4016-87a0-3872617ac9e1",
+            "name": "Checklist Detox",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "2e92754d-dc7e-4358-ad65-72a4584ce476",
+            "name": "Guia Nutrac\u00eautico",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "050aa8fc-c2df-489c-b141-459f105685e8",
+            "name": "Guia Proteico",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "e0a288ad-ef16-4dcd-9a75-aa202105a132",
+            "name": "Mini E-book Educativo",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "869d70e3-ebaa-447e-aaa3-96af52650cd0",
+            "name": "Planilha Dieta Emagrecimento",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "1c592084-d241-42db-9f83-71f3747af501",
+            "name": "Tabela Comparativa",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "bc45a07f-17dd-4a5d-ae36-07b1c39f85a1",
+            "name": "Tabela de Substitui\u00e7\u00f5es",
+            "type": "planilha",
+            "temPreviewCompleto": false,
+            "motivo": "Planilha - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "cd5ef372-3377-41d8-8b9d-3a7ce4659adc",
+            "name": "Avalia\u00e7\u00e3o de Fome Emocional",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "c5f7de6a-cda2-4f5d-a672-b26fbbb1e590",
+            "name": "Avalia\u00e7\u00e3o de Intoler\u00e2ncias/Sensibilidades",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "aba64faa-bd97-4e2c-9f58-656b1aa18b6d",
+            "name": "Avalia\u00e7\u00e3o do Perfil Metab\u00f3lico",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "50f9ee13-b666-4c0d-9d90-fe314a05354c",
+            "name": "Avalia\u00e7\u00e3o do Sono e Energia",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "361b2763-eb73-43b6-a9cf-df85f242526d",
+            "name": "Descubra seu Perfil de Bem-Estar",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "9cc1620c-a678-4cc2-84b1-3be857797770",
+            "name": "Diagn\u00f3stico de Eletr\u00f3litos",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "b66b4806-c79e-4dd4-b3a6-7f7ef8e98e9f",
+            "name": "Diagn\u00f3stico de Parasitose",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "6e90544a-8f5a-470f-a8f0-a4a10cdbfed2",
+            "name": "Diagn\u00f3stico de Sintomas Intestinais",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "f15a6359-cb5a-4ce3-94ed-5b795875ad4e",
+            "name": "Diagn\u00f3stico do Tipo de Metabolismo",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "19cad91a-b82f-4524-894a-43ac5f03b1d8",
+            "name": "Pronto para Emagrecer com Sa\u00fade?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "88e6714e-09c3-435d-8a4c-7e6ec7c8d16c",
+            "name": "Qual \u00e9 o seu Tipo de Fome?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "75465811-ecb5-4d95-a68f-d1f9189eccaf",
+            "name": "Qual \u00e9 seu perfil de intestino?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "09602456-2790-41f8-b0c6-db70350b188d",
+            "name": "Quiz Avalia\u00e7\u00e3o Nutricional",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "18e8ca3b-1828-42a5-9b3a-b64fca4cdf0f",
+            "name": "Quiz de Bem-Estar",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "8b83b1ff-79e5-4f69-a5ec-4dd800450de0",
+            "name": "Quiz de Perfil Nutricional",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "e0af7fd2-e002-43ee-8cf3-d8bd412132c5",
+            "name": "Quiz Detox",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "4b3e2e42-9af5-456e-9beb-ec2c3b39e3eb",
+            "name": "Quiz Energ\u00e9tico",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "6760f310-7adb-4923-84e3-12b02d012653",
+            "name": "Quiz Interativo",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "51add9fd-efe7-4ebc-80c6-39ffef95b3d4",
+            "name": "Risco de S\u00edndrome Metab\u00f3lica",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "5141e512-1b74-4e19-b324-0307a8d1076c",
+            "name": "Seu corpo est\u00e1 pedindo Detox?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "f848b643-07f0-4a95-867f-da3d87ce6aa5",
+            "name": "Teste de Reten\u00e7\u00e3o de L\u00edquidos",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "01b62264-ba9d-4689-ad78-9121fe4a3862",
+            "name": "Voc\u00ea conhece o seu corpo?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "5075ee9b-fd87-444f-9c93-a3ecf3b75a43",
+            "name": "Voc\u00ea \u00e9 mais disciplinado ou emocional com a comida?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "2502603c-ce3a-423c-8bfd-55b006e83b0b",
+            "name": "Voc\u00ea est\u00e1 nutrido ou apenas alimentado?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        },
+        {
+            "id": "027900a0-ab40-4efc-b670-e3fc3589a7c8",
+            "name": "Voc\u00ea est\u00e1 se alimentando conforme sua rotina?",
+            "type": "quiz",
+            "temPreviewCompleto": false,
+            "motivo": "Quiz - Preview simples (sem navega\u00e7\u00e3o por etapas)"
+        }
+    ]
+}
