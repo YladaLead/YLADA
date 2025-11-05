@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import NutriNavBar from '@/components/nutri/NutriNavBar'
 
 export default function NutriConfiguracoes() {
   const [usuario, setUsuario] = useState({
@@ -50,21 +51,14 @@ export default function NutriConfiguracoes() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Barra de Navegação */}
+      <NutriNavBar showTitle title="Configurações NUTRI" />
+
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-6">
-              <Link href="/pt/nutri/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
-                  alt="YLADA"
-                  width={180}
-                  height={60}
-                  className="h-12 w-auto"
-                />
-              </Link>
-              <div className="h-12 w-px bg-gray-300"></div>
               <h1 className="text-xl font-semibold text-gray-900">
                 Configurações NUTRI
               </h1>

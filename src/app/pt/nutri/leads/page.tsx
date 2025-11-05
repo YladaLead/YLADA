@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
+import NutriNavBar from '@/components/nutri/NutriNavBar'
 
 export default function NutriLeads() {
   const [filtroStatus, setFiltroStatus] = useState('todos')
@@ -171,21 +172,14 @@ export default function NutriLeads() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Barra de Navegação */}
+      <NutriNavBar showTitle title="Leads NUTRI" />
+
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <Link href="/pt/nutri/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
-                  alt="YLADA"
-                  width={120}
-                  height={40}
-                  className="h-8 w-auto"
-                />
-              </Link>
-              <div className="h-8 w-px bg-gray-300"></div>
               <h1 className="text-xl font-semibold text-gray-900">
                 Leads NUTRI
               </h1>
