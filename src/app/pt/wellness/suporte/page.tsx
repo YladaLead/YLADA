@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 
 export default function WellnessSuportePage() {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null)
@@ -109,35 +110,7 @@ export default function WellnessSuportePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pt/wellness/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                  alt="YLADA"
-                  width={280}
-                  height={84}
-                  className="h-12 w-auto"
-                />
-              </Link>
-              <div className="h-12 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Suporte</h1>
-                <p className="text-sm text-gray-600">Central de ajuda e perguntas frequentes</p>
-              </div>
-            </div>
-            <Link
-              href="/pt/wellness/dashboard"
-              className="text-gray-600 hover:text-gray-900 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              ← Voltar
-            </Link>
-          </div>
-        </div>
-      </header>
+      <WellnessNavBar showTitle={true} title="Suporte" />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

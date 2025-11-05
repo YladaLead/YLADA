@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import WellnessNavBar from '@/components/wellness/WellnessNavBar'
+import { getAppUrl, buildWellnessToolUrl } from '@/lib/url-utils'
 
 interface Configuracao {
   urlPersonalizada: string
@@ -55,7 +57,6 @@ export default function EditarFerramentaWellness() {
       secundaria: '#059669'
     },
     tipoCta: 'whatsapp',
-    numeroWhatsapp: '',
     mensagemWhatsapp: '',
     urlExterna: '',
     textoBotao: 'Conversar com Especialista'
@@ -134,12 +135,12 @@ export default function EditarFerramentaWellness() {
     carregarPerfil()
   }, [])
 
-  // Carregar dados da ferramenta quando toolId e userSlug estiverem disponíveis
+  // Carregar dados da ferramenta quando toolId estiver disponível (userSlug pode vir depois)
   useEffect(() => {
-    if (toolId) {
+    if (toolId && !carregandoPerfil) {
       carregarFerramenta()
     }
-  }, [toolId, userSlug])
+  }, [toolId, carregandoPerfil])
 
   const carregarFerramenta = async () => {
     try {
@@ -162,9 +163,16 @@ export default function EditarFerramentaWellness() {
 
       setSlugOriginal(tool.slug)
       setDescricao(tool.description || '')
+      
+      // Calcular URL completa baseada no slug e userSlug atual
+      const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
+      const urlCompletaCalculada = userSlug 
+        ? `${baseUrl}/pt/wellness/${userSlug}/${tool.slug}`
+        : `${baseUrl}/pt/wellness/[configure-seu-slug]/${tool.slug}`
+      
       setConfiguracao({
         urlPersonalizada: tool.slug,
-        urlCompleta,
+        urlCompleta: urlCompletaCalculada,
         emoji: tool.emoji || '',
         cores: tool.custom_colors || { principal: '#10B981', secundaria: '#059669' },
         tipoCta: tool.cta_type === 'whatsapp' ? 'whatsapp' : 'url',
@@ -172,6 +180,13 @@ export default function EditarFerramentaWellness() {
         urlExterna: tool.external_url || '',
         textoBotao: tool.cta_button_text || 'Conversar com Especialista'
       })
+      
+      // Atualizar URL completa se userSlug mudar depois
+      if (userSlug) {
+        const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
+        const novaUrl = `${baseUrl}/pt/wellness/${userSlug}/${tool.slug}`
+        setConfiguracao(prev => ({ ...prev, urlCompleta: novaUrl }))
+      }
       setUrlDisponivel(true)
     } catch (error: any) {
       console.error('Erro ao carregar ferramenta:', error)
@@ -220,9 +235,10 @@ export default function EditarFerramentaWellness() {
         setTimeout(() => setSlugNormalizado(false), 3000)
       }
       
+      const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
       const url = userSlug 
-        ? `ylada.app/pt/wellness/${userSlug}/${slugTratado}`
-        : `ylada.app/pt/wellness/[configure-seu-slug]/${slugTratado}`
+        ? `${baseUrl}/pt/wellness/${userSlug}/${slugTratado}`
+        : `${baseUrl}/pt/wellness/[configure-seu-slug]/${slugTratado}`
       
       setConfiguracao(prev => ({ 
         ...prev, 
@@ -362,34 +378,7 @@ export default function EditarFerramentaWellness() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pt/wellness/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                  alt="YLADA"
-                  width={280}
-                  height={84}
-                  className="h-10 w-auto"
-                />
-              </Link>
-              <div className="h-8 w-px bg-gray-300"></div>
-              <h1 className="text-xl font-bold text-gray-900">
-                Editar Ferramenta
-              </h1>
-            </div>
-            <Link
-              href="/pt/wellness/ferramentas"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </Link>
-          </div>
-        </div>
-      </header>
+      <WellnessNavBar showTitle={true} title="Editar Ferramenta" />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -471,7 +460,7 @@ export default function EditarFerramentaWellness() {
                             🔗 Gerar URL Encurtada
                           </span>
                           <span className="text-xs text-gray-600 mt-1 block">
-                            Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">ylada.app/p/abc123</code> para facilitar compartilhamento.
+                            Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{getAppUrl().replace(/^https?:\/\//, '')}/p/abc123</code> para facilitar compartilhamento.
                           </span>
                         </label>
                       </div>

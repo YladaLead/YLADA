@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import QRCode from '@/components/QRCode'
+import WellnessNavBar from '@/components/wellness/WellnessNavBar'
+import { buildWellnessToolUrl, buildWellnessToolUrlFallback, buildShortUrl } from '@/lib/url-utils'
 
 interface Ferramenta {
   id: string
@@ -60,9 +62,9 @@ export default function FerramentasWellness() {
                   tool.template_slug?.startsWith('quiz-') ? 'Quiz' : 'Planilha',
         objetivo: tool.description || '',
         url: tool.user_profiles?.user_slug 
-          ? `https://ylada.app/pt/wellness/${tool.user_profiles.user_slug}/${tool.slug}`
-          : `https://ylada.app/pt/wellness/ferramenta/${tool.id}`,
-        shortUrl: tool.short_code ? `https://ylada.app/p/${tool.short_code}` : undefined,
+          ? buildWellnessToolUrl(tool.user_profiles.user_slug, tool.slug)
+          : buildWellnessToolUrlFallback(tool.id),
+        shortUrl: tool.short_code ? buildShortUrl(tool.short_code) : undefined,
         shortCode: tool.short_code,
         status: tool.status === 'active' ? 'ativa' : 'inativa',
         leads: tool.leads_count || 0,
@@ -100,44 +102,19 @@ export default function FerramentasWellness() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pt/wellness/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                  alt="YLADA"
-                  width={280}
-                  height={84}
-                  className="h-12 sm:h-14 w-auto"
-                />
-              </Link>
-              <div className="h-12 sm:h-16 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Meus Links
-                </h1>
-                <div className="flex items-center space-x-4 mt-2">
-                  <p className="text-base sm:text-lg font-medium text-gray-700">
-                    Links criados pelos seus templates
-                  </p>
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                    Ativo
-                  </span>
-                </div>
-              </div>
-            </div>
-            <Link
-              href="/pt/wellness/ferramentas/nova"
-              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg font-medium"
-            >
-              + Criar Link
-            </Link>
-          </div>
+      <WellnessNavBar showTitle={true} title="Meus Links" />
+      
+      {/* Botão Criar Link */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex justify-end mb-4">
+          <Link
+            href="/pt/wellness/ferramentas/nova"
+            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg font-medium"
+          >
+            + Criar Link
+          </Link>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

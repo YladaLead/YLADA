@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import WellnessNavBar from '@/components/wellness/WellnessNavBar'
+import { getAppUrl } from '@/lib/url-utils'
 
 interface Template {
   id: string
@@ -57,9 +59,56 @@ export default function NovaFerramentaWellness() {
   const [perfilCountryCode, setPerfilCountryCode] = useState<string>('BR') // Código do país do perfil
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
   const [erroUrlWhatsapp, setErroUrlWhatsapp] = useState(false) // Flag para erro de URL do WhatsApp
+  const [erroSalvamento, setErroSalvamento] = useState<string | null>(null) // Erro ao salvar ferramenta
+  const [salvando, setSalvando] = useState(false) // Estado de salvamento
+  const [templates, setTemplates] = useState<Template[]>([]) // Templates do banco de dados
+  const [carregandoTemplates, setCarregandoTemplates] = useState(true) // Estado de carregamento dos templates
 
   // Nome do usuário logado (simulado - depois virá do sistema)
   const nomeDoUsuario = 'Carlos Oliveira'
+
+  // Carregar templates do banco de dados
+  useEffect(() => {
+    const carregarTemplates = async () => {
+      try {
+        setCarregandoTemplates(true)
+        const response = await fetch('/api/wellness/templates', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.templates && data.templates.length > 0) {
+            // Mapear templates da API para o formato esperado
+            const templatesFormatados: Template[] = data.templates.map((t: any) => ({
+              id: t.id || t.slug,
+              nome: t.nome,
+              categoria: t.categoria,
+              objetivo: t.objetivo || 'Avaliar',
+              icon: t.icon || (t.categoria === 'Calculadora' ? '🧮' : t.categoria === 'Quiz' ? '🎯' : '📊'),
+              descricao: t.descricao || '',
+              slug: t.slug || t.id
+            }))
+            setTemplates(templatesFormatados)
+            console.log(`✅ ${templatesFormatados.length} templates carregados do banco de dados`)
+          } else {
+            console.warn('⚠️ Nenhum template encontrado na API')
+            setTemplates([])
+          }
+        } else {
+          console.error('❌ Erro ao carregar templates:', response.status)
+          setTemplates([])
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar templates:', error)
+        setTemplates([])
+      } finally {
+        setCarregandoTemplates(false)
+      }
+    }
+
+    carregarTemplates()
+  }, [])
 
   // Função para validar se URL é do WhatsApp
   const validarUrlWhatsapp = (url: string): boolean => {
@@ -114,126 +163,51 @@ export default function NovaFerramentaWellness() {
     'ES': { codigo: '+34', bandeira: '🇪🇸', nome: 'Espanha' }
   }
 
-  // Todos os 13 templates disponíveis para Wellness
-  const templates: Template[] = [
-    {
-      id: 'calc-imc',
-      nome: 'Calculadora IMC',
-      categoria: 'Calculadora',
-      objetivo: 'Avaliar IMC',
-      icon: '📊',
-      descricao: 'Calcule o Índice de Massa Corporal',
-      slug: 'calc-imc'
-    },
-    {
-      id: 'calc-proteina',
-      nome: 'Calculadora de Proteína',
-      categoria: 'Calculadora',
-      objetivo: 'Calcular proteína diária',
-      icon: '💪',
-      descricao: 'Necessidades proteicas individuais',
-      slug: 'calc-proteina'
-    },
-    {
-      id: 'calc-hidratacao',
-      nome: 'Calculadora de Hidratação',
-      categoria: 'Calculadora',
-      objetivo: 'Calcular água diária',
-      icon: '💧',
-      descricao: 'Necessidades de água e eletrólitos',
-      slug: 'calc-hidratacao'
-    },
-    {
-      id: 'calc-composicao',
-      nome: 'Composição Corporal',
-      categoria: 'Calculadora',
-      objetivo: 'Avaliar composição corporal',
-      icon: '🎯',
-      descricao: 'Massa muscular, gordura e hidratação',
-      slug: 'calc-composicao'
-    },
-    {
-      id: 'quiz-ganhos',
-      nome: 'Quiz: Ganhos e Prosperidade',
-      categoria: 'Quiz',
-      objetivo: 'Avaliar potencial financeiro',
-      icon: '💰',
-      descricao: 'Descubra se permite ganhar mais',
-      slug: 'quiz-ganhos'
-    },
-    {
-      id: 'quiz-potencial',
-      nome: 'Quiz: Potencial e Crescimento',
-      categoria: 'Quiz',
-      objetivo: 'Avaliar potencial',
-      icon: '📈',
-      descricao: 'Potencial está sendo aproveitado?',
-      slug: 'quiz-potencial'
-    },
-    {
-      id: 'quiz-proposito',
-      nome: 'Quiz: Propósito e Equilíbrio',
-      categoria: 'Quiz',
-      objetivo: 'Alinhamento de vida',
-      icon: '⭐',
-      descricao: 'Dia a dia alinhado com sonhos?',
-      slug: 'quiz-proposito'
-    },
-    {
-      id: 'quiz-parasitas',
-      nome: 'Quiz: Diagnóstico de Parasitas',
-      categoria: 'Quiz',
-      objetivo: 'Avaliar saúde intestinal',
-      icon: '🧬',
-      descricao: 'Parasitas afetando sua saúde?',
-      slug: 'quiz-parasitas'
-    },
-    {
-      id: 'quiz-alimentacao',
-      nome: 'Quiz: Alimentação Saudável',
-      categoria: 'Quiz',
-      objetivo: 'Avaliar hábitos alimentares',
-      icon: '🥗',
-      descricao: 'Hábitos alimentares saudáveis',
-      slug: 'quiz-alimentacao'
-    },
-    {
-      id: 'quiz-wellness-profile',
-      nome: 'Quiz: Perfil de Bem-Estar',
-      categoria: 'Quiz',
-      objetivo: 'Perfil completo de bem-estar',
-      icon: '💚',
-      descricao: 'Saúde física, mental e emocional',
-      slug: 'quiz-perfil-bemestar'
-    },
-    {
-      id: 'quiz-avaliacao',
-      nome: 'Avaliação Nutricional',
-      categoria: 'Quiz',
-      objetivo: 'Avaliação nutricional completa',
-      icon: '🔬',
-      descricao: 'Questionário de hábitos alimentares',
-      slug: 'quiz-avaliacao-nutricional'
-    },
-    {
-      id: 'tabela-bemestar',
-      nome: 'Tabela Bem-Estar Diário',
-      categoria: 'Planilha',
-      objetivo: 'Acompanhamento diário',
-      icon: '📊',
-      descricao: 'Acompanhe métricas diárias',
-      slug: 'tabela-bemestar'
-    },
-    {
-      id: 'planejador',
-      nome: 'Planejador de Refeições',
-      categoria: 'Calculadora',
-      objetivo: 'Plano alimentar personalizado',
-      icon: '🍽️',
-      descricao: 'Cardápio e macronutrientes',
-      slug: 'planejador-refeicoes'
+  // Carregar templates do banco de dados
+  useEffect(() => {
+    const carregarTemplates = async () => {
+      try {
+        setCarregandoTemplates(true)
+        const response = await fetch('/api/wellness/templates', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.templates && data.templates.length > 0) {
+            // Mapear templates da API para o formato esperado
+            const templatesFormatados: Template[] = data.templates.map((t: any) => ({
+              id: t.id || t.slug,
+              nome: t.nome,
+              categoria: t.categoria,
+              objetivo: t.objetivo || 'Avaliar',
+              icon: t.icon || (t.categoria === 'Calculadora' ? '🧮' : t.categoria === 'Quiz' ? '🎯' : '📊'),
+              descricao: t.descricao || '',
+              slug: t.slug || t.id
+            }))
+            setTemplates(templatesFormatados)
+            console.log(`✅ ${templatesFormatados.length} templates carregados do banco de dados`)
+          } else {
+            // Nenhum template encontrado no banco - exibir array vazio
+            console.warn('⚠️ Nenhum template encontrado na API')
+            setTemplates([])
+          }
+        } else {
+          // Erro na API - exibir array vazio
+          console.error('❌ Erro ao carregar templates:', response.status)
+          setTemplates([])
+        }
+      } catch (error) {
+        // Erro ao carregar - exibir array vazio
+        console.error('❌ Erro ao carregar templates:', error)
+        setTemplates([])
+      } finally {
+        setCarregandoTemplates(false)
+      }
     }
-  ]
+
+    carregarTemplates()
+  }, [])
 
   // Gerar URL amigável
   const gerarSlug = (texto: string) => {
@@ -272,7 +246,8 @@ export default function NovaFerramentaWellness() {
     if (configuracao.urlPersonalizada && templateSelecionado) {
       const slugTratado = tratarUrl(configuracao.urlPersonalizada)
       const urlNome = tratarUrl(nomeDoUsuario)
-      const url = `ylada.app/wellness/${urlNome}/${slugTratado}`
+      const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
+      const url = `${baseUrl}/pt/wellness/${urlNome}/${slugTratado}`
       
       // Atualizar URL completa
       setConfiguracao(prev => ({ 
@@ -326,41 +301,56 @@ export default function NovaFerramentaWellness() {
   }
 
   const salvarFerramenta = async () => {
-    // Validar URL antes de salvar
-    const urlValida = await validarUrl(configuracao.urlPersonalizada)
-    if (!urlValida) {
-      alert('Este nome de URL já está em uso. Escolha outro.')
-      return
-    }
-
-    if (!templateSelecionado) {
-      alert('Selecione um template primeiro.')
-      return
-    }
-
-    // Validar campos obrigatórios
-    if (!configuracao.urlPersonalizada) {
-      alert('Preencha o nome do projeto.')
-      return
-    }
-
-    if (configuracao.tipoCta === 'whatsapp' && !perfilWhatsapp) {
-      alert('Configure seu WhatsApp no perfil antes de criar ferramentas com CTA WhatsApp. Acesse: Configurações > Perfil')
-      return
-    }
-
-    if (configuracao.tipoCta === 'url' && !configuracao.urlExterna) {
-      alert('Informe a URL externa.')
-      return
-    }
-
-    // Validar se URL externa não é do WhatsApp
-    if (configuracao.tipoCta === 'url' && validarUrlWhatsapp(configuracao.urlExterna)) {
-      alert('⚠️ URLs do WhatsApp não são permitidas em URLs externas.\n\nPara usar WhatsApp, escolha a opção "WhatsApp" no tipo de CTA. Essa opção usa automaticamente o número do seu perfil.')
-      return
-    }
-
     try {
+      setSalvando(true)
+      setErroSalvamento(null)
+      
+      // Validar URL antes de salvar
+      const urlValida = await validarUrl(configuracao.urlPersonalizada)
+      if (!urlValida) {
+        setErroSalvamento('Este nome de URL já está em uso. Escolha outro.')
+        setTimeout(() => setErroSalvamento(null), 8000)
+        setSalvando(false)
+        return
+      }
+
+      if (!templateSelecionado) {
+        setErroSalvamento('Selecione um template primeiro.')
+        setTimeout(() => setErroSalvamento(null), 8000)
+        setSalvando(false)
+        return
+      }
+
+      // Validar campos obrigatórios
+      if (!configuracao.urlPersonalizada) {
+        setErroSalvamento('Preencha o nome do projeto.')
+        setTimeout(() => setErroSalvamento(null), 8000)
+        setSalvando(false)
+        return
+      }
+
+      if (configuracao.tipoCta === 'whatsapp' && !perfilWhatsapp) {
+        setErroSalvamento('Configure seu WhatsApp no perfil antes de criar ferramentas com CTA WhatsApp. Acesse: Configurações > Perfil')
+        setTimeout(() => setErroSalvamento(null), 8000)
+        setSalvando(false)
+        return
+      }
+
+      if (configuracao.tipoCta === 'url' && !configuracao.urlExterna) {
+        setErroSalvamento('Informe a URL externa.')
+        setTimeout(() => setErroSalvamento(null), 8000)
+        setSalvando(false)
+        return
+      }
+
+      // Validar se URL externa não é do WhatsApp
+      if (configuracao.tipoCta === 'url' && validarUrlWhatsapp(configuracao.urlExterna)) {
+        setErroSalvamento('URLs do WhatsApp não são permitidas em URLs externas. Para usar WhatsApp, escolha a opção "WhatsApp" no tipo de CTA.')
+        setTimeout(() => setErroSalvamento(null), 8000)
+        setSalvando(false)
+        return
+      }
+
       // Converter slug para nome amigável para exibição
       const nomeAmigavel = configuracao.urlPersonalizada
         .split('-')
@@ -402,6 +392,12 @@ export default function NovaFerramentaWellness() {
       const data = await response.json()
 
       if (!response.ok) {
+        // Log detalhado do erro para debug
+        console.error('❌ Erro ao criar ferramenta:', {
+          status: response.status,
+          errorData: data,
+          technical: data.technical
+        })
         throw new Error(data.error || 'Erro ao criar ferramenta')
       }
 
@@ -409,41 +405,22 @@ export default function NovaFerramentaWellness() {
       alert(`Ferramenta criada com sucesso!\n\nURL: ${data.tool?.full_url || configuracao.urlCompleta}`)
       window.location.href = '/pt/wellness/ferramentas'
     } catch (error: any) {
-      console.error('Erro ao salvar ferramenta:', error)
-      alert(error.message || 'Erro ao criar ferramenta. Tente novamente.')
+      console.error('❌ Erro técnico ao salvar ferramenta:', {
+        error,
+        message: error?.message,
+        stack: error?.stack
+      })
+      setErroSalvamento(error.message || 'Erro ao criar ferramenta. Tente novamente.')
+      // Esconder erro após 8 segundos
+      setTimeout(() => setErroSalvamento(null), 8000)
+    } finally {
+      setSalvando(false)
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pt/wellness/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                  alt="YLADA"
-                  width={280}
-                  height={84}
-                  className="h-10 w-auto"
-                />
-              </Link>
-              <div className="h-8 w-px bg-gray-300"></div>
-              <h1 className="text-xl font-bold text-gray-900">
-                {templateSelecionado ? `Configurar: ${templateSelecionado.nome}` : 'Criar Novo Link'}
-              </h1>
-            </div>
-            <Link
-              href="/pt/wellness/ferramentas"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </Link>
-          </div>
-        </div>
-      </header>
+      <WellnessNavBar showTitle={true} title={templateSelecionado ? `Configurar: ${templateSelecionado.nome}` : 'Criar Novo Link'} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -515,28 +492,42 @@ export default function NovaFerramentaWellness() {
               </button>
             </div>
 
-            {busca && (
-              <p className="text-sm text-gray-600 mb-4">
-                {templates.filter(t => {
-                  const matchCategoria = filtroCategoria === 'todas' || t.categoria === filtroCategoria
-                  const matchBusca = busca === '' || 
-                    t.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                    t.descricao.toLowerCase().includes(busca.toLowerCase())
-                  return matchCategoria && matchBusca
-                }).length} ferramenta(s) encontrada(s)
-              </p>
-            )}
+            {carregandoTemplates ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Carregando ferramentas...</p>
+                </div>
+              </div>
+            ) : templates.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-2">Nenhuma ferramenta encontrada.</p>
+                <p className="text-sm text-gray-500">Verifique se os templates estão configurados no banco de dados.</p>
+              </div>
+            ) : (
+              <>
+                {busca && (
+                  <p className="text-sm text-gray-600 mb-4">
+                    {templates.filter(t => {
+                      const matchCategoria = filtroCategoria === 'todas' || t.categoria === filtroCategoria
+                      const matchBusca = busca === '' || 
+                        t.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                        t.descricao.toLowerCase().includes(busca.toLowerCase())
+                      return matchCategoria && matchBusca
+                    }).length} ferramenta(s) encontrada(s)
+                  </p>
+                )}
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {templates
-                .filter(t => {
-                  const matchCategoria = filtroCategoria === 'todas' || t.categoria === filtroCategoria
-                  const matchBusca = busca === '' || 
-                    t.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                    t.descricao.toLowerCase().includes(busca.toLowerCase())
-                  return matchCategoria && matchBusca
-                })
-                .map((template) => (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {templates
+                    .filter(t => {
+                      const matchCategoria = filtroCategoria === 'todas' || t.categoria === filtroCategoria
+                      const matchBusca = busca === '' || 
+                        t.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                        t.descricao.toLowerCase().includes(busca.toLowerCase())
+                      return matchCategoria && matchBusca
+                    })
+                    .map((template) => (
                 <div
                   key={template.id}
                   className="bg-white rounded-xl border-2 border-gray-200 hover:border-green-400 transition-all hover:shadow-lg cursor-pointer group"
@@ -565,9 +556,11 @@ export default function NovaFerramentaWellness() {
                   </div>
                 </div>
               ))}
-            </div>
-          </>
-        )}
+                </div>
+              </>
+            )}
+              </>
+            )}
 
         {/* Configurar Ferramenta */}
         {templateSelecionado && (
@@ -647,7 +640,7 @@ export default function NovaFerramentaWellness() {
                                 🔗 Gerar URL Encurtada
                               </span>
                               <span className="text-xs text-gray-600 mt-1 block">
-                                Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">ylada.app/p/abc123</code> para facilitar compartilhamento via WhatsApp, SMS ou impresso.
+                                Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{getAppUrl().replace(/^https?:\/\//, '')}/p/abc123</code> para facilitar compartilhamento via WhatsApp, SMS ou impresso.
                               </span>
                             </label>
                           </div>
@@ -963,10 +956,45 @@ export default function NovaFerramentaWellness() {
                   </button>
                   <button
                     onClick={salvarFerramenta}
-                    className="flex-1 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                    disabled={salvando}
+                    className={`flex-1 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center ${
+                      salvando ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    Criar Meu Link
+                    {salvando ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Criando...
+                      </>
+                    ) : (
+                      'Criar Meu Link'
+                    )}
                   </button>
+                  {erroSalvamento && (
+                    <div className="mt-4 px-4 py-3 bg-red-50 border-2 border-red-300 rounded-lg shadow-sm">
+                      <div className="flex items-start space-x-2">
+                        <span className="text-red-600 text-xl">⚠️</span>
+                        <div className="flex-1">
+                          <p className="text-sm text-red-800 font-bold mb-1">
+                            Não foi possível criar a ferramenta
+                          </p>
+                          <p className="text-sm text-red-700">
+                            {erroSalvamento}
+                          </p>
+                          <p className="text-xs text-red-600 mt-2 italic">
+                            Tente novamente após resolver o problema. Se o erro persistir, entre em contato com o suporte.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setErroSalvamento(null)}
+                          className="text-red-600 hover:text-red-800 text-lg font-bold"
+                          aria-label="Fechar mensagem de erro"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

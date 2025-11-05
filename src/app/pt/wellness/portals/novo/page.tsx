@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { useAuth } from '@/hooks/useAuth'
 
 interface Tool {
@@ -209,32 +210,7 @@ function NovoPortalWellnessContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pt/wellness/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                  alt="YLADA"
-                  width={280}
-                  height={84}
-                  className="h-10 w-auto"
-                />
-              </Link>
-              <div className="h-8 w-px bg-gray-300"></div>
-              <h1 className="text-xl font-bold text-gray-900">Novo Portal de Bem-Estar</h1>
-            </div>
-            <Link
-              href="/pt/wellness/portals"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </Link>
-          </div>
-        </div>
-      </header>
+      <WellnessNavBar showTitle={true} title="Novo Portal de Bem-Estar" />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

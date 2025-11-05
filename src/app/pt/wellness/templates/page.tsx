@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { Calculator, Target, Heart, Droplets, Activity, Sparkles, FileText, Brain, DollarSign, TrendingUp, Star, Zap, UtensilsCrossed, Search } from 'lucide-react'
 import { calculadoraAguaDiagnosticos, calculadoraImcDiagnosticos, calculadoraProteinaDiagnosticos, calculadoraCaloriasDiagnosticos } from '@/lib/diagnosticos-nutri'
 
@@ -244,34 +245,7 @@ export default function WellnessTemplatesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pt/wellness/dashboard">
-                <button className="flex items-center text-gray-600 hover:text-gray-900">
-                  <Image
-                    src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                    alt="YLADA"
-                    width={280}
-                    height={84}
-                    className="h-10 w-auto"
-                  />
-                </button>
-              </Link>
-              <div className="h-8 w-px bg-gray-300"></div>
-              <h1 className="text-xl font-bold text-gray-900">Templates Wellness</h1>
-            </div>
-            <Link
-              href="/pt/wellness/dashboard"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar ao Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
+      <WellnessNavBar showTitle={true} title="Templates Wellness" />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
