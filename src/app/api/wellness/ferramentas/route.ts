@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar conteúdo do template base se template_id fornecido
-    let content = {}
+    let content: any = null // Inicializar como null
     if (template_id) {
       const { data: template } = await supabaseAdmin
         .from('templates_nutrition')
@@ -206,6 +206,12 @@ export async function POST(request: NextRequest) {
       if (template) {
         content = template.content
       }
+    }
+    
+    // Se não tem content, usar objeto vazio (será NULL no banco se permitido)
+    // Mas garantir que seja um objeto válido para JSONB
+    if (!content) {
+      content = {} // Objeto vazio válido para JSONB
     }
 
     // Gerar código curto se solicitado
@@ -220,29 +226,39 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir nova ferramenta
+    const insertData: any = {
+      user_id: authenticatedUserId, // 🔒 Sempre usar user_id do token
+      template_id: template_id || null,
+      template_slug,
+      slug,
+      title,
+      description: description || null,
+      emoji: emoji || null,
+      custom_colors: custom_colors || { principal: '#10B981', secundaria: '#059669' },
+      cta_type: cta_type || 'whatsapp',
+      whatsapp_number: cta_type === 'whatsapp' ? whatsappDoPerfil : null, // Sempre usar do perfil
+      external_url: external_url || null,
+      cta_button_text: cta_button_text || 'Conversar com Especialista',
+      custom_whatsapp_message: custom_whatsapp_message || null,
+      profession,
+      status: 'active',
+      views: 0,
+      leads_count: 0
+    }
+    
+    // Adicionar content apenas se não for null/vazio
+    if (content && Object.keys(content).length > 0) {
+      insertData.content = content
+    }
+    
+    // Adicionar short_code apenas se foi gerado
+    if (shortCode) {
+      insertData.short_code = shortCode
+    }
+    
     const { data: insertedTool, error: insertError } = await supabaseAdmin
       .from('user_templates')
-      .insert({
-        user_id: authenticatedUserId, // 🔒 Sempre usar user_id do token
-        template_id: template_id || null,
-        template_slug,
-        slug,
-        title,
-        description,
-        emoji,
-        custom_colors: custom_colors || { principal: '#10B981', secundaria: '#059669' },
-        cta_type: cta_type || 'whatsapp',
-        whatsapp_number: cta_type === 'whatsapp' ? whatsappDoPerfil : null, // Sempre usar do perfil
-        external_url,
-        cta_button_text: cta_button_text || 'Conversar com Especialista',
-        custom_whatsapp_message,
-        profession,
-        content,
-        status: 'active',
-        views: 0,
-        leads_count: 0,
-        short_code: shortCode
-      })
+      .insert(insertData)
       .select('*')
       .single()
 
