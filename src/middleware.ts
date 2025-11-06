@@ -7,6 +7,23 @@ export function middleware(request: NextRequest) {
   // Debug: log da rota
   console.log('Middleware - Rota:', pathname)
   
+  // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)
+  if (
+    pathname.startsWith('/templates-environment') ||
+    pathname.startsWith('/template/') ||
+    pathname.startsWith('/calculadora-imc') ||
+    pathname.startsWith('/admin') || // IMPORTANTE: Admin SEMPRE sem /pt
+    pathname.startsWith('/cursos') ||
+    pathname.startsWith('/create') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname.includes('.') ||
+    pathname === '/favicon.ico'
+  ) {
+    console.log('Middleware - Rota excluída (sem redirecionamento):', pathname)
+    return NextResponse.next()
+  }
+  
   // Redirecionar rotas legadas de admin-diagnósticos
   if (
     pathname === '/admin-diagnostic' ||
@@ -17,24 +34,6 @@ export function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/pt/nutri/ferramentas/templates'
     return NextResponse.redirect(url)
-  }
-  
-  // Rotas que NUNCA devem ser redirecionadas
-  if (
-    pathname.startsWith('/templates-environment') ||
-    pathname.startsWith('/template/') ||
-    pathname.startsWith('/calculadora-imc') ||
-    pathname.startsWith('/admin-diagnosticos') || // mantido, mas acima já redirecionamos
-    pathname.startsWith('/admin') ||
-    pathname.startsWith('/cursos') ||
-    pathname.startsWith('/create') ||
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/_next/') ||
-    pathname.includes('.') ||
-    pathname === '/favicon.ico'
-  ) {
-    console.log('Middleware - Rota excluída:', pathname)
-    return NextResponse.next()
   }
   
   // Verificar se já tem idioma na URL
