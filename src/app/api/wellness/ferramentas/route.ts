@@ -197,21 +197,30 @@ export async function POST(request: NextRequest) {
     // Buscar conteúdo do template base se template_id fornecido
     let content: any = null // Inicializar como null
     if (template_id) {
-      const { data: template } = await supabaseAdmin
+      const { data: template, error: templateError } = await supabaseAdmin
         .from('templates_nutrition')
         .select('content')
         .eq('id', template_id)
         .single()
 
-      if (template) {
+      if (templateError) {
+        console.warn('⚠️ Erro ao buscar template:', templateError)
+      }
+
+      if (template?.content) {
         content = template.content
       }
     }
     
-    // Se não tem content, usar objeto vazio (será NULL no banco se permitido)
-    // Mas garantir que seja um objeto válido para JSONB
+    // Se não tem content, usar objeto vazio válido para JSONB
+    // Mas garantir que seja um objeto JSON válido
     if (!content) {
       content = {} // Objeto vazio válido para JSONB
+    }
+    
+    // Garantir que content seja sempre um objeto válido
+    if (typeof content !== 'object' || Array.isArray(content)) {
+      content = {}
     }
 
     // Gerar código curto se solicitado
@@ -229,7 +238,7 @@ export async function POST(request: NextRequest) {
     const insertData: any = {
       user_id: authenticatedUserId, // 🔒 Sempre usar user_id do token
       template_id: template_id || null,
-      template_slug,
+      template_slug: template_slug || null,
       slug,
       title,
       description: description || null,
@@ -240,21 +249,31 @@ export async function POST(request: NextRequest) {
       external_url: external_url || null,
       cta_button_text: cta_button_text || 'Conversar com Especialista',
       custom_whatsapp_message: custom_whatsapp_message || null,
-      profession,
+      profession: profession || 'wellness',
       status: 'active',
       views: 0,
       leads_count: 0
     }
     
-    // Adicionar content apenas se não for null/vazio
-    if (content && Object.keys(content).length > 0) {
-      insertData.content = content
-    }
+    // Adicionar content sempre (objeto vazio se não tiver)
+    // JSONB aceita objetos vazios {}
+    insertData.content = content || {}
     
     // Adicionar short_code apenas se foi gerado
     if (shortCode) {
       insertData.short_code = shortCode
     }
+    
+    // Log detalhado antes de inserir (sem dados sensíveis)
+    console.log('📝 Tentando inserir ferramenta:', {
+      user_id: authenticatedUserId,
+      slug,
+      template_slug,
+      profession,
+      has_content: !!content,
+      content_keys: content ? Object.keys(content).length : 0,
+      has_short_code: !!shortCode
+    })
     
     const { data: insertedTool, error: insertError } = await supabaseAdmin
       .from('user_templates')
@@ -262,7 +281,20 @@ export async function POST(request: NextRequest) {
       .select('*')
       .single()
 
-    if (insertError) throw insertError
+    if (insertError) {
+      console.error('❌ Erro ao inserir ferramenta:', {
+        error: insertError,
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+        insertData: {
+          ...insertData,
+          content: content ? `{${Object.keys(content).length} keys}` : 'empty'
+        }
+      })
+      throw insertError
+    }
 
     // Buscar user_slug separadamente (pode não existir)
     const { data: userProfile } = await supabaseAdmin
