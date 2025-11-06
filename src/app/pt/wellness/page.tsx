@@ -287,7 +287,7 @@ export default function WellnessPage() {
                   </li>
                 </ul>
                 <Link
-                  href="/pt/wellness/dashboard"
+                  href="/pt/wellness/checkout?plan=monthly"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
                   💚 Assinar mensal
@@ -330,7 +330,7 @@ export default function WellnessPage() {
                   </li>
                 </ul>
                 <Link
-                  href="/pt/wellness/dashboard"
+                  href="/pt/wellness/checkout?plan=annual"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
                   💚 Assinar anual

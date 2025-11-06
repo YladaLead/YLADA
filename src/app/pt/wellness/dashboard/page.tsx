@@ -3,30 +3,29 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
-// TODO: Reativar após migração completa
-// import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
-// import { useAuth } from '@/hooks/useAuth'
+import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
+import RequireSubscription from '@/components/auth/RequireSubscription'
+import { useAuth } from '@/hooks/useAuth'
+import ChatIA from '@/components/ChatIA'
 
 export default function WellnessDashboard() {
-  // TODO: Reativar login após migração completa
-  // return (
-  //   <ProtectedRoute perfil="wellness">
-  //     <WellnessDashboardContent />
-  //   </ProtectedRoute>
-  // )
-  return <WellnessDashboardContent />
+  return (
+    <ProtectedRoute perfil="wellness">
+      <RequireSubscription area="wellness">
+        <WellnessDashboardContent />
+      </RequireSubscription>
+    </ProtectedRoute>
+  )
 }
 
 function WellnessDashboardContent() {
-  // TODO: Reativar useAuth após migração
-  // const { user, signOut } = useAuth()
-  const user = null // Temporário durante migração
+  const { user, userProfile, signOut } = useAuth()
   
   const [perfil, setPerfil] = useState({
-    nome: 'Usuário Teste', // Temporário durante migração
+    nome: '',
     bio: ''
   })
-  const [carregandoPerfil, setCarregandoPerfil] = useState(false) // Não carregar durante migração
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
 
   const [stats, setStats] = useState({
     ferramentasAtivas: 0,
@@ -35,8 +34,7 @@ function WellnessDashboardContent() {
     clientesAtivos: 0
   })
 
-  // TODO: Reativar chat após migração
-  // const [chatAberto, setChatAberto] = useState(false)
+  const [chatAberto, setChatAberto] = useState(false)
 
   const [ferramentasAtivas, setFerramentasAtivas] = useState<Array<{
     id: string
@@ -50,18 +48,87 @@ function WellnessDashboardContent() {
 
   const [carregandoDados, setCarregandoDados] = useState(true)
 
-  // TODO: Reativar carregamento de dados após migração
-  // Carregar dados do dashboard (desabilitado durante migração)
+  // Carregar perfil do usuário
   useEffect(() => {
-    // Simular dados vazios durante migração
-    setCarregandoDados(false)
-    setStats({
-      ferramentasAtivas: 0,
-      leadsGerados: 0,
-      conversoes: 0,
-      clientesAtivos: 0
-    })
-  }, [])
+    const carregarPerfil = async () => {
+      if (!user) return
+      
+      try {
+        setCarregandoPerfil(true)
+        const response = await fetch('/api/wellness/profile', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile) {
+            setPerfil({
+              nome: data.profile.nome || userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+              bio: data.profile.bio || ''
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+        setPerfil({
+          nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+          bio: ''
+        })
+      } finally {
+        setCarregandoPerfil(false)
+      }
+    }
+
+    carregarPerfil()
+  }, [user, userProfile])
+
+  // Carregar dados do dashboard
+  useEffect(() => {
+    const carregarDados = async () => {
+      if (!user) return
+      
+      try {
+        setCarregandoDados(true)
+        
+        // Carregar ferramentas
+        const response = await fetch('/api/wellness/ferramentas', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          const ferramentas = data.ferramentas || []
+          
+          // Filtrar apenas ferramentas ativas
+          const ativas = ferramentas.filter((f: any) => f.status === 'ativa')
+          
+          setFerramentasAtivas(ativas.map((f: any) => ({
+            id: f.id,
+            nome: f.nome,
+            categoria: f.categoria || 'Geral',
+            leads: f.views || 0,
+            conversoes: 0, // TODO: calcular conversões
+            status: f.status,
+            icon: f.emoji || '🔗'
+          })))
+          
+          // Calcular estatísticas
+          setStats({
+            ferramentasAtivas: ativas.length,
+            leadsGerados: ferramentas.reduce((acc: number, f: any) => acc + (f.views || 0), 0),
+            conversoes: 0, // TODO: calcular conversões
+            clientesAtivos: 0 // TODO: calcular clientes ativos
+          })
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+      } finally {
+        setCarregandoDados(false)
+      }
+    }
+
+    carregarDados()
+  }, [user])
 
 
   return (
@@ -191,8 +258,8 @@ function WellnessDashboardContent() {
 
       </div>
 
-      {/* TODO: Reativar chat após migração */}
-      {/* <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} /> */}
+      {/* Chat IA */}
+      <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
     </div>
   )
 }
