@@ -220,6 +220,45 @@ export default function NovaFerramentaWellness() {
       .replace(/^-|-$/g, '')
   }
 
+  // Gerar título amigável a partir do slug
+  // Trata palavras de ligação, acentos e capitalização corretamente
+  const gerarTituloDoSlug = (slug: string): string => {
+    if (!slug) return ''
+    
+    // Lista de palavras de ligação que devem permanecer minúsculas (exceto se forem a primeira palavra)
+    const palavrasLigacao = new Set([
+      'de', 'da', 'do', 'das', 'dos',
+      'em', 'na', 'no', 'nas', 'nos',
+      'para', 'por', 'com', 'sem',
+      'a', 'o', 'as', 'os',
+      'e', 'ou', 'mas',
+      'que', 'qual', 'quais',
+      'um', 'uma', 'uns', 'umas'
+    ])
+    
+    // Dividir o slug por hífen
+    const palavras = slug.split('-')
+    
+    // Processar cada palavra
+    const palavrasProcessadas = palavras.map((palavra, index) => {
+      // Se for a primeira palavra, sempre capitalizar
+      if (index === 0) {
+        return palavra.charAt(0).toUpperCase() + palavra.slice(1)
+      }
+      
+      // Se for palavra de ligação, manter minúscula
+      if (palavrasLigacao.has(palavra.toLowerCase())) {
+        return palavra.toLowerCase()
+      }
+      
+      // Caso contrário, capitalizar primeira letra
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1)
+    })
+    
+    // Juntar com espaços
+    return palavrasProcessadas.join(' ')
+  }
+
   // Função para tratar URL automaticamente (remove maiúsculas, espaços, acentos)
   const tratarUrl = (texto: string) => {
     return gerarSlug(texto) // Já faz tudo: minúsculo, remove acentos, espaços vira hífen
@@ -695,17 +734,7 @@ export default function NovaFerramentaWellness() {
                           </label>
                           <div className="px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700">
                             {configuracao.urlPersonalizada 
-                              ? configuracao.urlPersonalizada
-                                  .split('-')
-                                  .map(p => {
-                                    // Se for sigla conhecida (2-3 letras), manter maiúsculas
-                                    if (p.length <= 3 && p.match(/^[a-z]{2,3}$/)) {
-                                      return p.toUpperCase()
-                                    }
-                                    // Caso contrário, capitalizar primeira letra
-                                    return p.charAt(0).toUpperCase() + p.slice(1)
-                                  })
-                                  .join(' ')
+                              ? gerarTituloDoSlug(configuracao.urlPersonalizada)
                               : 'Digite o nome do projeto acima'}
                           </div>
                           <p className="text-xs text-gray-500 mt-1">
