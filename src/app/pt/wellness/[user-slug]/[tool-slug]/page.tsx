@@ -52,11 +52,19 @@ const TemplateElectrolyteDiagnosis = dynamic(() => import('@/app/pt/wellness/tem
 const TemplateIntestinalSymptomsDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/intestinal-symptoms-diagnosis/page'), { ssr: false })
 const TemplateReadyToLoseWeight = dynamic(() => import('@/app/pt/wellness/templates/ready-to-lose-weight/page'), { ssr: false })
 const TemplateHungerType = dynamic(() => import('@/app/pt/wellness/templates/hunger-type/page'), { ssr: false })
+const TemplateHealthyEatingQuiz = dynamic(() => import('@/app/pt/wellness/templates/healthy-eating-quiz/page'), { ssr: false })
+const TemplateMetabolicSyndromeRisk = dynamic(() => import('@/app/pt/wellness/templates/metabolic-syndrome-risk/page'), { ssr: false })
+const TemplateWaterRetentionTest = dynamic(() => import('@/app/pt/wellness/templates/water-retention-test/page'), { ssr: false })
+const TemplateBodyAwareness = dynamic(() => import('@/app/pt/wellness/templates/body-awareness/page'), { ssr: false })
+const TemplateNourishedVsFed = dynamic(() => import('@/app/pt/wellness/templates/nourished-vs-fed/page'), { ssr: false })
+const TemplateEatingRoutine = dynamic(() => import('@/app/pt/wellness/templates/eating-routine/page'), { ssr: false })
+const TemplateGainsAndProsperity = dynamic(() => import('@/app/pt/wellness/templates/gains-and-prosperity/page'), { ssr: false })
+const TemplatePotentialAndGrowth = dynamic(() => import('@/app/pt/wellness/templates/potential-and-growth/page'), { ssr: false })
+const TemplatePurposeAndBalance = dynamic(() => import('@/app/pt/wellness/templates/purpose-and-balance/page'), { ssr: false })
 const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
 const TemplateDetoxMenu = dynamic(() => import('@/app/pt/wellness/templates/detox-menu/page'), { ssr: false })
-const TemplateResultsSimulator = dynamic(() => import('@/app/pt/wellness/templates/results-simulator/page'), { ssr: false })
 const TemplateInitialAssessment = dynamic(() => import('@/app/pt/wellness/templates/initial-assessment/page'), { ssr: false })
 const TemplateRecommendationForm = dynamic(() => import('@/app/pt/wellness/templates/recommendation-form/page'), { ssr: false })
 
@@ -222,6 +230,54 @@ export default function FerramentaPersonalizadaPage() {
       case 'qual-e-o-seu-tipo-de-fome':
       case 'tipo de fome':
         return <TemplateHungerType config={config} />
+      case 'alimentacao-saudavel':
+      case 'quiz-alimentacao-saudavel':
+      case 'healthy-eating-quiz':
+      case 'healthy-eating':
+        return <TemplateHealthyEatingQuiz config={config} />
+      case 'sindrome-metabolica':
+      case 'risco-sindrome-metabolica':
+      case 'metabolic-syndrome-risk':
+      case 'metabolic-syndrome':
+        return <TemplateMetabolicSyndromeRisk config={config} />
+      case 'retencao-liquidos':
+      case 'teste-retencao-liquidos':
+      case 'water-retention-test':
+      case 'water-retention':
+        return <TemplateWaterRetentionTest config={config} />
+      case 'conhece-seu-corpo':
+      case 'voce-conhece-seu-corpo':
+      case 'body-awareness':
+      case 'autoconhecimento-corporal':
+        return <TemplateBodyAwareness config={config} />
+      case 'nutrido-vs-alimentado':
+      case 'voce-nutrido-ou-apenas-alimentado':
+      case 'nourished-vs-fed':
+      case 'nutrido ou alimentado':
+        return <TemplateNourishedVsFed config={config} />
+      case 'alimentacao-rotina':
+      case 'voce-alimentando-conforme-rotina':
+      case 'eating-routine':
+      case 'alimentação conforme rotina':
+        return <TemplateEatingRoutine config={config} />
+      case 'ganhos-prosperidade':
+      case 'quiz-ganhos-prosperidade':
+      case 'gains-and-prosperity':
+      case 'ganhos e prosperidade':
+      case 'quiz-ganhos':
+        return <TemplateGainsAndProsperity config={config} />
+      case 'potencial-crescimento':
+      case 'quiz-potencial-crescimento':
+      case 'potential-and-growth':
+      case 'potencial e crescimento':
+      case 'quiz-potencial':
+        return <TemplatePotentialAndGrowth config={config} />
+      case 'proposito-equilibrio':
+      case 'quiz-proposito-equilibrio':
+      case 'purpose-and-balance':
+      case 'propósito e equilíbrio':
+      case 'quiz-proposito':
+        return <TemplatePurposeAndBalance config={config} />
       case 'infografico-educativo':
         return <TemplateInfographic config={config} />
       case 'template-receitas':
@@ -230,8 +286,6 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplateStory config={config} />
       case 'cardapio-detox':
         return <TemplateDetoxMenu config={config} />
-      case 'simulador-resultados':
-        return <TemplateResultsSimulator config={config} />
       case 'template-avaliacao-inicial':
         return <TemplateInitialAssessment config={config} />
       case 'formulario-recomendacao':

@@ -34,6 +34,15 @@ import QuizEletrolitosPreview from '@/components/wellness-previews/quizzes/QuizE
 import QuizSintomasIntestinaisPreview from '@/components/wellness-previews/quizzes/QuizSintomasIntestinaisPreview'
 import QuizProntoEmagrecerPreview from '@/components/wellness-previews/quizzes/QuizProntoEmagrecerPreview'
 import QuizTipoFomePreview from '@/components/wellness-previews/quizzes/QuizTipoFomePreview'
+import QuizAlimentacaoSaudavelPreview from '@/components/wellness-previews/quizzes/QuizAlimentacaoSaudavelPreview'
+import QuizSindromeMetabolicaPreview from '@/components/wellness-previews/quizzes/QuizSindromeMetabolicaPreview'
+import QuizRetencaoLiquidosPreview from '@/components/wellness-previews/quizzes/QuizRetencaoLiquidosPreview'
+import QuizConheceSeuCorpoPreview from '@/components/wellness-previews/quizzes/QuizConheceSeuCorpoPreview'
+import QuizNutridoVsAlimentadoPreview from '@/components/wellness-previews/quizzes/QuizNutridoVsAlimentadoPreview'
+import QuizAlimentacaoRotinaPreview from '@/components/wellness-previews/quizzes/QuizAlimentacaoRotinaPreview'
+import QuizGanhosProsperidadePreview from '@/components/wellness-previews/quizzes/QuizGanhosProsperidadePreview'
+import QuizPotencialCrescimentoPreview from '@/components/wellness-previews/quizzes/QuizPotencialCrescimentoPreview'
+import QuizPropositoEquilibrioPreview from '@/components/wellness-previews/quizzes/QuizPropositoEquilibrioPreview'
 import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
 import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
 import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
@@ -72,6 +81,15 @@ export default function WellnessTemplatesPage() {
   const [etapaPreviewQuizSintomasIntestinais, setEtapaPreviewQuizSintomasIntestinais] = useState(0) // Para quiz-sintomas-intestinais: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizProntoEmagrecer, setEtapaPreviewQuizProntoEmagrecer] = useState(0) // Para quiz-pronto-emagrecer: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizTipoFome, setEtapaPreviewQuizTipoFome] = useState(0) // Para quiz-tipo-fome: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizAlimentacaoSaudavel, setEtapaPreviewQuizAlimentacaoSaudavel] = useState(0) // Para quiz-alimentacao-saudavel: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizSindromeMetabolica, setEtapaPreviewQuizSindromeMetabolica] = useState(0) // Para quiz-sindrome-metabolica: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizRetencaoLiquidos, setEtapaPreviewQuizRetencaoLiquidos] = useState(0) // Para quiz-retencao-liquidos: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizConheceSeuCorpo, setEtapaPreviewQuizConheceSeuCorpo] = useState(0) // Para quiz-conhece-seu-corpo: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizNutridoVsAlimentado, setEtapaPreviewQuizNutridoVsAlimentado] = useState(0) // Para quiz-nutrido-vs-alimentado: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizAlimentacaoRotina, setEtapaPreviewQuizAlimentacaoRotina] = useState(0) // Para quiz-alimentacao-rotina: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizGanhosProsperidade, setEtapaPreviewQuizGanhosProsperidade] = useState(0) // Para quiz-ganhos-prosperidade: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizPotencialCrescimento, setEtapaPreviewQuizPotencialCrescimento] = useState(0) // Para quiz-potencial-crescimento: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizPropositoEquilibrio, setEtapaPreviewQuizPropositoEquilibrio] = useState(0) // Para quiz-proposito-equilibrio: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewGuiaHidratacao, setEtapaPreviewGuiaHidratacao] = useState(0) // Para guia-hidratacao: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewDesafio7Dias, setEtapaPreviewDesafio7Dias] = useState(0) // Para desafio-7-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
   const [etapaPreviewDesafio21Dias, setEtapaPreviewDesafio21Dias] = useState(0) // Para desafio-21-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
@@ -652,6 +670,15 @@ export default function WellnessTemplatesPage() {
                           setEtapaPreviewQuizSintomasIntestinais(0)
                           setEtapaPreviewQuizProntoEmagrecer(0)
                           setEtapaPreviewQuizTipoFome(0)
+                          setEtapaPreviewQuizAlimentacaoSaudavel(0)
+                          setEtapaPreviewQuizSindromeMetabolica(0)
+                          setEtapaPreviewQuizRetencaoLiquidos(0)
+                          setEtapaPreviewQuizConheceSeuCorpo(0)
+                          setEtapaPreviewQuizNutridoVsAlimentado(0)
+                          setEtapaPreviewQuizAlimentacaoRotina(0)
+                          setEtapaPreviewQuizGanhosProsperidade(0)
+                          setEtapaPreviewQuizPotencialCrescimento(0)
+                          setEtapaPreviewQuizPropositoEquilibrio(0)
                           setEtapaPreviewGuiaHidratacao(0)
                           setEtapaPreviewDesafio7Dias(0)
                           setEtapaPreviewDesafio21Dias(0)
@@ -834,6 +861,115 @@ export default function WellnessTemplatesPage() {
                         (templateNameLower.includes('tipo') && templateNameLower.includes('fome'))
                       )
                       
+                      const isQuizAlimentacaoSaudavel = isQuizType && (
+                        templateIdLower.includes('quiz-alimentacao-saudavel') ||
+                        templateIdLower.includes('alimentacao-saudavel') ||
+                        templateIdLower.includes('healthy-eating-quiz') ||
+                        templateIdLower.includes('healthy-eating') ||
+                        templateNameLower.includes('alimentação saudável') ||
+                        templateNameLower.includes('alimentacao saudavel') ||
+                        templateNameLower.includes('healthy eating') ||
+                        (templateNameLower.includes('alimentação') && templateNameLower.includes('saudável'))
+                      )
+                      
+                      const isQuizSindromeMetabolica = isQuizType && (
+                        templateIdLower.includes('quiz-sindrome-metabolica') ||
+                        templateIdLower.includes('risco-sindrome-metabolica') ||
+                        templateIdLower.includes('sindrome-metabolica') ||
+                        templateIdLower.includes('metabolic-syndrome-risk') ||
+                        templateIdLower.includes('metabolic-syndrome') ||
+                        templateNameLower.includes('síndrome metabólica') ||
+                        templateNameLower.includes('sindrome metabolica') ||
+                        templateNameLower.includes('risco síndrome metabólica') ||
+                        templateNameLower.includes('metabolic syndrome') ||
+                        (templateNameLower.includes('síndrome') && templateNameLower.includes('metabólica'))
+                      )
+                      
+                      const isQuizRetencaoLiquidos = isQuizType && (
+                        templateIdLower.includes('quiz-retencao-liquidos') ||
+                        templateIdLower.includes('teste-retencao-liquidos') ||
+                        templateIdLower.includes('retencao-liquidos') ||
+                        templateIdLower.includes('water-retention-test') ||
+                        templateIdLower.includes('water-retention') ||
+                        templateNameLower.includes('retenção de líquidos') ||
+                        templateNameLower.includes('retencao de liquidos') ||
+                        templateNameLower.includes('teste retenção') ||
+                        templateNameLower.includes('water retention') ||
+                        (templateNameLower.includes('retenção') && templateNameLower.includes('líquidos'))
+                      )
+                      
+                      const isQuizConheceSeuCorpo = isQuizType && (
+                        templateIdLower.includes('quiz-conhece-seu-corpo') ||
+                        templateIdLower.includes('voce-conhece-seu-corpo') ||
+                        templateIdLower.includes('conhece-seu-corpo') ||
+                        templateIdLower.includes('body-awareness') ||
+                        templateIdLower.includes('autoconhecimento-corporal') ||
+                        templateNameLower.includes('você conhece o seu corpo') ||
+                        templateNameLower.includes('voce conhece seu corpo') ||
+                        templateNameLower.includes('conhece seu corpo') ||
+                        templateNameLower.includes('autoconhecimento corporal') ||
+                        templateNameLower.includes('body awareness') ||
+                        (templateNameLower.includes('conhece') && templateNameLower.includes('corpo'))
+                      )
+                      
+                      const isQuizNutridoVsAlimentado = isQuizType && (
+                        templateIdLower.includes('quiz-nutrido-vs-alimentado') ||
+                        templateIdLower.includes('voce-nutrido-ou-apenas-alimentado') ||
+                        templateIdLower.includes('nutrido-vs-alimentado') ||
+                        templateIdLower.includes('nourished-vs-fed') ||
+                        templateNameLower.includes('você está nutrido ou apenas alimentado') ||
+                        templateNameLower.includes('voce esta nutrido ou apenas alimentado') ||
+                        templateNameLower.includes('nutrido ou apenas alimentado') ||
+                        templateNameLower.includes('nourished vs fed') ||
+                        (templateNameLower.includes('nutrido') && templateNameLower.includes('alimentado'))
+                      )
+                      
+                      const isQuizAlimentacaoRotina = isQuizType && (
+                        templateIdLower.includes('quiz-alimentacao-rotina') ||
+                        templateIdLower.includes('voce-alimentando-conforme-rotina') ||
+                        templateIdLower.includes('alimentacao-rotina') ||
+                        templateIdLower.includes('eating-routine') ||
+                        templateNameLower.includes('você está se alimentando conforme sua rotina') ||
+                        templateNameLower.includes('voce esta se alimentando conforme sua rotina') ||
+                        templateNameLower.includes('alimentando conforme rotina') ||
+                        templateNameLower.includes('eating routine') ||
+                        (templateNameLower.includes('alimentando') && templateNameLower.includes('rotina'))
+                      )
+                      
+                      const isQuizGanhosProsperidade = isQuizType && (
+                        templateIdLower.includes('quiz-ganhos-prosperidade') ||
+                        templateIdLower.includes('ganhos-prosperidade') ||
+                        templateIdLower.includes('gains-and-prosperity') ||
+                        templateIdLower.includes('quiz-ganhos') ||
+                        templateNameLower.includes('ganhos e prosperidade') ||
+                        templateNameLower.includes('ganhos e prosperidade') ||
+                        templateNameLower.includes('gains and prosperity') ||
+                        (templateNameLower.includes('ganhos') && templateNameLower.includes('prosperidade'))
+                      )
+                      
+                      const isQuizPotencialCrescimento = isQuizType && (
+                        templateIdLower.includes('quiz-potencial-crescimento') ||
+                        templateIdLower.includes('potencial-crescimento') ||
+                        templateIdLower.includes('potential-and-growth') ||
+                        templateIdLower.includes('quiz-potencial') ||
+                        templateNameLower.includes('potencial e crescimento') ||
+                        templateNameLower.includes('potencial e crescimento') ||
+                        templateNameLower.includes('potential and growth') ||
+                        (templateNameLower.includes('potencial') && templateNameLower.includes('crescimento'))
+                      )
+                      
+                      const isQuizPropositoEquilibrio = isQuizType && (
+                        templateIdLower.includes('quiz-proposito-equilibrio') ||
+                        templateIdLower.includes('proposito-equilibrio') ||
+                        templateIdLower.includes('purpose-and-balance') ||
+                        templateIdLower.includes('quiz-proposito') ||
+                        templateNameLower.includes('propósito e equilíbrio') ||
+                        templateNameLower.includes('proposito e equilibrio') ||
+                        templateNameLower.includes('purpose and balance') ||
+                        (templateNameLower.includes('proposito') && templateNameLower.includes('equilibrio')) ||
+                        (templateNameLower.includes('propósito') && templateNameLower.includes('equilíbrio'))
+                      )
+                      
                       const isChecklistAlimentar = templateIdLower.includes('checklist-alimentar') || 
                                                    templateIdLower === 'checklist-alimentar' ||
                                                    templateNameLower === 'checklist alimentar' ||
@@ -890,7 +1026,7 @@ export default function WellnessTemplatesPage() {
                                              (templateNameLower.includes('desafio') && templateNameLower.includes('21'))
                       
                       // Log de detecção para debug - TODOS os templates modulares
-                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial || isQuizEletrolitos || isQuizSintomasIntestinais || isQuizProntoEmagrecer || isQuizTipoFome ||
+                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial || isQuizEletrolitos || isQuizSintomasIntestinais || isQuizProntoEmagrecer || isQuizTipoFome || isQuizAlimentacaoSaudavel || isQuizSindromeMetabolica || isQuizRetencaoLiquidos || isQuizConheceSeuCorpo || isQuizNutridoVsAlimentado || isQuizAlimentacaoRotina ||
                                        isChecklistAlimentar || isChecklistDetox || isGuiaHidratacao || isDesafio7Dias || isDesafio21Dias
                       
                       if (isModular) {
@@ -1037,6 +1173,93 @@ export default function WellnessTemplatesPage() {
                           <QuizTipoFomePreview
                             etapa={etapaPreviewQuizTipoFome}
                             onEtapaChange={setEtapaPreviewQuizTipoFome}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Alimentação Saudável - Componente Modular
+                      if (isQuizAlimentacaoSaudavel) {
+                        return (
+                          <QuizAlimentacaoSaudavelPreview
+                            etapa={etapaPreviewQuizAlimentacaoSaudavel}
+                            onEtapaChange={setEtapaPreviewQuizAlimentacaoSaudavel}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Síndrome Metabólica - Componente Modular
+                      if (isQuizSindromeMetabolica) {
+                        return (
+                          <QuizSindromeMetabolicaPreview
+                            etapa={etapaPreviewQuizSindromeMetabolica}
+                            onEtapaChange={setEtapaPreviewQuizSindromeMetabolica}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Retenção de Líquidos - Componente Modular
+                      if (isQuizRetencaoLiquidos) {
+                        return (
+                          <QuizRetencaoLiquidosPreview
+                            etapa={etapaPreviewQuizRetencaoLiquidos}
+                            onEtapaChange={setEtapaPreviewQuizRetencaoLiquidos}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Conhece o Seu Corpo - Componente Modular
+                      if (isQuizConheceSeuCorpo) {
+                        return (
+                          <QuizConheceSeuCorpoPreview
+                            etapa={etapaPreviewQuizConheceSeuCorpo}
+                            onEtapaChange={setEtapaPreviewQuizConheceSeuCorpo}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Nutrido vs Alimentado - Componente Modular
+                      if (isQuizNutridoVsAlimentado) {
+                        return (
+                          <QuizNutridoVsAlimentadoPreview
+                            etapa={etapaPreviewQuizNutridoVsAlimentado}
+                            onEtapaChange={setEtapaPreviewQuizNutridoVsAlimentado}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Alimentação Conforme Rotina - Componente Modular
+                      if (isQuizAlimentacaoRotina) {
+                        return (
+                          <QuizAlimentacaoRotinaPreview
+                            etapa={etapaPreviewQuizAlimentacaoRotina}
+                            onEtapaChange={setEtapaPreviewQuizAlimentacaoRotina}
+                          />
+                        )
+                      }
+                      
+                      if (isQuizGanhosProsperidade) {
+                        return (
+                          <QuizGanhosProsperidadePreview
+                            etapa={etapaPreviewQuizGanhosProsperidade}
+                            onEtapaChange={setEtapaPreviewQuizGanhosProsperidade}
+                          />
+                        )
+                      }
+                      
+                      if (isQuizPotencialCrescimento) {
+                        return (
+                          <QuizPotencialCrescimentoPreview
+                            etapa={etapaPreviewQuizPotencialCrescimento}
+                            onEtapaChange={setEtapaPreviewQuizPotencialCrescimento}
+                          />
+                        )
+                      }
+                      
+                      if (isQuizPropositoEquilibrio) {
+                        return (
+                          <QuizPropositoEquilibrioPreview
+                            etapa={etapaPreviewQuizPropositoEquilibrio}
+                            onEtapaChange={setEtapaPreviewQuizPropositoEquilibrio}
                           />
                         )
                       }
@@ -2693,6 +2916,15 @@ export default function WellnessTemplatesPage() {
                     setEtapaPreviewQuizSintomasIntestinais(0)
                     setEtapaPreviewQuizProntoEmagrecer(0)
                     setEtapaPreviewQuizTipoFome(0)
+                    setEtapaPreviewQuizAlimentacaoSaudavel(0)
+                    setEtapaPreviewQuizSindromeMetabolica(0)
+                    setEtapaPreviewQuizRetencaoLiquidos(0)
+                    setEtapaPreviewQuizConheceSeuCorpo(0)
+                    setEtapaPreviewQuizNutridoVsAlimentado(0)
+                    setEtapaPreviewQuizAlimentacaoRotina(0)
+                    setEtapaPreviewQuizGanhosProsperidade(0)
+                    setEtapaPreviewQuizPotencialCrescimento(0)
+                    setEtapaPreviewQuizPropositoEquilibrio(0)
                     setEtapaPreviewGuiaHidratacao(0)
                     setEtapaPreviewDesafio7Dias(0)
                     setEtapaPreviewDesafio21Dias(0)

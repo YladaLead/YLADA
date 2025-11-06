@@ -9,6 +9,15 @@ import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from './di
 import { sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness } from './diagnostics/wellness/sintomas-intestinais'
 import { prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness } from './diagnostics/wellness/pronto-emagrecer'
 import { tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness } from './diagnostics/wellness/tipo-fome'
+import { alimentacaoSaudavelDiagnosticos as alimentacaoSaudavelDiagnosticosWellness } from './diagnostics/wellness/alimentacao-saudavel'
+import { sindromeMetabolicaDiagnosticos as sindromeMetabolicaDiagnosticosWellness } from './diagnostics/wellness/sindrome-metabolica'
+import { retencaoLiquidosDiagnosticos as retencaoLiquidosDiagnosticosWellness } from './diagnostics/wellness/retencao-liquidos'
+import { conheceSeuCorpoDiagnosticos as conheceSeuCorpoDiagnosticosWellness } from './diagnostics/wellness/conhece-seu-corpo'
+import { nutridoVsAlimentadoDiagnosticos as nutridoVsAlimentadoDiagnosticosWellness } from './diagnostics/wellness/nutrido-vs-alimentado'
+import { alimentacaoRotinaDiagnosticos as alimentacaoRotinaDiagnosticosWellness } from './diagnostics/wellness/alimentacao-rotina'
+import { ganhosProsperidadeDiagnosticos as ganhosProsperidadeDiagnosticosWellness } from './diagnostics/wellness/ganhos-prosperidade'
+import { potencialCrescimentoDiagnosticos as potencialCrescimentoDiagnosticosWellness } from './diagnostics/wellness/potencial-crescimento'
+import { propositoEquilibrioDiagnosticos as propositoEquilibrioDiagnosticosWellness } from './diagnostics/wellness/proposito-equilibrio'
 
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
@@ -258,6 +267,105 @@ export function getDiagnostico(
         diagnosticos = tipoFomeDiagnosticosWellness // Por enquanto só temos wellness
       }
       break
+    case 'alimentacao-saudavel':
+    case 'quiz-alimentacao-saudavel':
+    case 'healthy-eating-quiz':
+    case 'healthy-eating':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = alimentacaoSaudavelDiagnosticosWellness
+      } else {
+        diagnosticos = alimentacaoSaudavelDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'sindrome-metabolica':
+    case 'risco-sindrome-metabolica':
+    case 'metabolic-syndrome-risk':
+    case 'metabolic-syndrome':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = sindromeMetabolicaDiagnosticosWellness
+      } else {
+        diagnosticos = sindromeMetabolicaDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'retencao-liquidos':
+    case 'teste-retencao-liquidos':
+    case 'water-retention-test':
+    case 'water-retention':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = retencaoLiquidosDiagnosticosWellness
+      } else {
+        diagnosticos = retencaoLiquidosDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'conhece-seu-corpo':
+    case 'voce-conhece-seu-corpo':
+    case 'body-awareness':
+    case 'autoconhecimento-corporal':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = conheceSeuCorpoDiagnosticosWellness
+      } else {
+        diagnosticos = conheceSeuCorpoDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'nutrido-vs-alimentado':
+    case 'voce-nutrido-ou-apenas-alimentado':
+    case 'nourished-vs-fed':
+    case 'nutrido ou alimentado':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = nutridoVsAlimentadoDiagnosticosWellness
+      } else {
+        diagnosticos = nutridoVsAlimentadoDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'alimentacao-rotina':
+    case 'voce-alimentando-conforme-rotina':
+    case 'eating-routine':
+    case 'alimentação conforme rotina':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = alimentacaoRotinaDiagnosticosWellness
+      } else {
+        diagnosticos = alimentacaoRotinaDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'ganhos-prosperidade':
+    case 'quiz-ganhos-prosperidade':
+    case 'gains-and-prosperity':
+    case 'ganhos e prosperidade':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = ganhosProsperidadeDiagnosticosWellness
+      } else {
+        diagnosticos = ganhosProsperidadeDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'potencial-crescimento':
+    case 'quiz-potencial-crescimento':
+    case 'potential-and-growth':
+    case 'potencial e crescimento':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = potencialCrescimentoDiagnosticosWellness
+      } else {
+        diagnosticos = potencialCrescimentoDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'proposito-equilibrio':
+    case 'quiz-proposito-equilibrio':
+    case 'purpose-and-balance':
+    case 'propósito e equilíbrio':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = propositoEquilibrioDiagnosticosWellness
+      } else {
+        diagnosticos = propositoEquilibrioDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
     case 'calculadora-imc':
       diagnosticos = calculadoraImcDiagnosticos
       break
@@ -343,9 +451,6 @@ export function getDiagnostico(
       break
     case 'cardapio-detox':
       diagnosticos = cardapioDetoxDiagnosticos
-      break
-    case 'simulador-resultados':
-      diagnosticos = simuladorResultadosDiagnosticos
       break
     case 'template-avaliacao-inicial':
       diagnosticos = avaliacaoInicialDiagnosticos
@@ -1425,7 +1530,6 @@ export const diagnosticosNutri = {
   'infografico-educativo': infograficoEducativoDiagnosticos,
   'template-receitas': receitasDiagnosticos,
   'cardapio-detox': cardapioDetoxDiagnosticos,
-  'simulador-resultados': simuladorResultadosDiagnosticos,
   'template-avaliacao-inicial': avaliacaoInicialDiagnosticos,
   'formulario-recomendacao': formularioRecomendacaoDiagnosticos
 }
