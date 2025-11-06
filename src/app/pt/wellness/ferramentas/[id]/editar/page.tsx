@@ -112,6 +112,45 @@ export default function EditarFerramentaWellness() {
       .replace(/^-|-$/g, '')
   }
 
+  // Gerar título amigável a partir do slug
+  // Trata palavras de ligação, acentos e capitalização corretamente
+  const gerarTituloDoSlug = (slug: string): string => {
+    if (!slug) return ''
+    
+    // Lista de palavras de ligação que devem permanecer minúsculas (exceto se forem a primeira palavra)
+    const palavrasLigacao = new Set([
+      'de', 'da', 'do', 'das', 'dos',
+      'em', 'na', 'no', 'nas', 'nos',
+      'para', 'por', 'com', 'sem',
+      'a', 'o', 'as', 'os',
+      'e', 'ou', 'mas',
+      'que', 'qual', 'quais',
+      'um', 'uma', 'uns', 'umas'
+    ])
+    
+    // Dividir o slug por hífen
+    const palavras = slug.split('-')
+    
+    // Processar cada palavra
+    const palavrasProcessadas = palavras.map((palavra, index) => {
+      // Se for a primeira palavra, sempre capitalizar
+      if (index === 0) {
+        return palavra.charAt(0).toUpperCase() + palavra.slice(1)
+      }
+      
+      // Se for palavra de ligação, manter minúscula
+      if (palavrasLigacao.has(palavra.toLowerCase())) {
+        return palavra.toLowerCase()
+      }
+      
+      // Caso contrário, capitalizar primeira letra
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1)
+    })
+    
+    // Juntar com espaços
+    return palavrasProcessadas.join(' ')
+  }
+
   // Carregar user_slug do perfil primeiro
   useEffect(() => {
     const carregarPerfil = async () => {
