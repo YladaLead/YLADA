@@ -1042,17 +1042,7 @@ export default function NovaFerramentaWellness() {
                 {/* 2. Título (Nome do Projeto formatado) */}
                 <h4 className="text-2xl font-bold text-gray-900 mb-3 text-center">
                   {configuracao.urlPersonalizada 
-                    ? configuracao.urlPersonalizada
-                        .split('-')
-                        .map(p => {
-                          // Se for sigla conhecida (2-3 letras), manter maiúsculas
-                          if (p.length <= 3 && p.match(/^[a-z]{2,3}$/)) {
-                            return p.toUpperCase()
-                          }
-                          // Caso contrário, capitalizar primeira letra
-                          return p.charAt(0).toUpperCase() + p.slice(1)
-                        })
-                        .join(' ')
+                    ? gerarTituloDoSlug(configuracao.urlPersonalizada)
                     : 'Nome do Projeto'}
                 </h4>
 
