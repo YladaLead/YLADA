@@ -188,21 +188,21 @@ DROP POLICY IF EXISTS "Admins can view all profiles" ON user_profiles;
 DROP POLICY IF EXISTS "Admins can update all profiles" ON user_profiles;
 DROP POLICY IF EXISTS "Admins can insert profiles" ON user_profiles;
 
--- Criar políticas corretas
-CREATE POLICY IF NOT EXISTS "Users can view own profile"
+-- Criar políticas corretas (DROP IF EXISTS já foi feito acima)
+CREATE POLICY "Users can view own profile"
 ON user_profiles FOR SELECT
 USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update own profile"
+CREATE POLICY "Users can update own profile"
 ON user_profiles FOR UPDATE
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can insert own profile"
+CREATE POLICY "Users can insert own profile"
 ON user_profiles FOR INSERT
 WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Admins can view all profiles"
+CREATE POLICY "Admins can view all profiles"
 ON user_profiles FOR SELECT
 USING (
   auth.uid() = user_id 
@@ -215,7 +215,7 @@ USING (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Admins can update all profiles"
+CREATE POLICY "Admins can update all profiles"
 ON user_profiles FOR UPDATE
 USING (
   auth.uid() = user_id 
@@ -238,7 +238,7 @@ WITH CHECK (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Admins can insert profiles"
+CREATE POLICY "Admins can insert profiles"
 ON user_profiles FOR INSERT
 WITH CHECK (
   auth.uid() = user_id 
