@@ -35,8 +35,7 @@ WITH duplicatas AS (
   SELECT 
     name,
     type,
-    MIN(created_at) as data_mais_antiga,
-    MIN(id) as id_manter
+    MIN(created_at) as data_mais_antiga
   FROM templates_nutrition
   WHERE profession = 'wellness'
     AND language = 'pt'
@@ -53,7 +52,7 @@ FROM templates_nutrition t
 INNER JOIN duplicatas d ON t.name = d.name AND t.type = d.type
 WHERE t.profession = 'wellness'
   AND t.language = 'pt'
-  AND t.id = d.id_manter
+  AND t.created_at = d.data_mais_antiga
 ORDER BY t.name, t.type;
 
 -- 4. IDENTIFICAR QUAIS DUPLICATAS SERÃO REMOVIDAS
@@ -61,8 +60,7 @@ WITH duplicatas AS (
   SELECT 
     name,
     type,
-    MIN(created_at) as data_mais_antiga,
-    MIN(id) as id_manter
+    MIN(created_at) as data_mais_antiga
   FROM templates_nutrition
   WHERE profession = 'wellness'
     AND language = 'pt'
@@ -79,7 +77,7 @@ FROM templates_nutrition t
 INNER JOIN duplicatas d ON t.name = d.name AND t.type = d.type
 WHERE t.profession = 'wellness'
   AND t.language = 'pt'
-  AND t.id != d.id_manter
+  AND t.created_at != d.data_mais_antiga
 ORDER BY t.name, t.type;
 
 -- 5. REMOVER DUPLICATAS (manter apenas o mais antigo de cada)
@@ -88,8 +86,7 @@ WITH duplicatas AS (
   SELECT 
     name,
     type,
-    MIN(created_at) as data_mais_antiga,
-    MIN(id) as id_manter
+    MIN(created_at) as data_mais_antiga
   FROM templates_nutrition
   WHERE profession = 'wellness'
     AND language = 'pt'
@@ -103,7 +100,7 @@ WHERE id IN (
   INNER JOIN duplicatas d ON t.name = d.name AND t.type = d.type
   WHERE t.profession = 'wellness'
     AND t.language = 'pt'
-    AND t.id != d.id_manter
+    AND t.created_at != d.data_mais_antiga
 );
 
 -- 6. VERIFICAÇÃO FINAL APÓS LIMPEZA
