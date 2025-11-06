@@ -19,7 +19,7 @@ interface Tool {
 
 export default function NovoPortalWellness() {
   return (
-    <ProtectedRoute perfil="wellness">
+    <ProtectedRoute perfil="wellness" allowAdmin={true}>
       <NovoPortalWellnessContent />
     </ProtectedRoute>
   )
