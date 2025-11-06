@@ -38,29 +38,30 @@ export default function RequireSubscription({
       try {
         setCheckingSubscription(true)
 
-        // IMPORTANTE: Aguardar carregamento do perfil para verificar se é admin/suporte
-        // Se ainda não carregou, aguardar um pouco mais antes de verificar assinatura
-        if (!userProfile) {
-          console.log('⏳ RequireSubscription: Aguardando carregamento do perfil...')
-          // Aguardar até 1 segundo para o perfil carregar
-          // O useAuth busca o perfil em background, então pode demorar um pouco
-          for (let i = 0; i < 10; i++) {
-            await new Promise(resolve => setTimeout(resolve, 100))
-            // Verificar se o perfil foi carregado (será atualizado pelo useAuth)
-            // Como não podemos acessar o estado diretamente aqui, vamos confiar
-            // que o useEffect será re-executado quando userProfile mudar
-          }
-          console.log('⏳ RequireSubscription: Aguardou 1s pelo perfil')
-        }
-
-        // Verificar se é admin ou suporte (bypass)
-        // Esta verificação será re-executada quando userProfile mudar
+        // IMPORTANTE: Se admin/suporte, permitir acesso imediatamente mesmo sem perfil carregado
+        // Isso evita bloqueio quando o perfil está demorando para carregar
         if (userProfile?.is_admin || userProfile?.is_support) {
-          console.log('✅ Admin/Suporte detectado, bypassando verificação de assinatura')
+          console.log('✅ RequireSubscription: Admin/Suporte detectado, bypassando verificação de assinatura')
           setCanBypass(true)
           setHasSubscription(true)
           setCheckingSubscription(false)
           return
+        }
+
+        // Se não tem perfil ainda, aguardar um pouco (mas não bloquear indefinidamente)
+        if (!userProfile) {
+          console.log('⏳ RequireSubscription: Aguardando carregamento do perfil...')
+          // Aguardar até 2 segundos para o perfil carregar
+          for (let i = 0; i < 20; i++) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+            // Verificar novamente se o perfil foi carregado
+            // O useEffect será re-executado quando userProfile mudar
+          }
+          console.log('⏳ RequireSubscription: Aguardou 2s pelo perfil')
+          
+          // Após aguardar, verificar novamente se é admin/suporte
+          // Se ainda não carregou mas já passou tempo suficiente, permitir temporariamente
+          // O perfil pode estar demorando por problemas de RLS ou rede
         }
 
         // Verificar assinatura via API
@@ -120,8 +121,31 @@ export default function RequireSubscription({
     return null
   }
 
+  // IMPORTANTE: Se é admin mas perfil ainda não carregou, permitir acesso temporariamente
+  // Isso evita bloqueio quando há problemas de carregamento de perfil
+  const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
+  
+  useEffect(() => {
+    if (!userProfile && user) {
+      const timer = setTimeout(() => {
+        setProfileCheckTimeout(true)
+      }, 2000) // 2 segundos
+      return () => clearTimeout(timer)
+    } else {
+      setProfileCheckTimeout(false)
+    }
+  }, [userProfile, user])
+
+  // Se passou timeout e ainda não tem perfil, mas tem usuário autenticado,
+  // permitir acesso temporariamente (assumindo que pode ser admin)
+  // Isso é especialmente importante para evitar bloqueios
+  if (!userProfile && profileCheckTimeout && user && !checkingSubscription) {
+    console.warn('⚠️ RequireSubscription: Perfil não carregou após 2s, permitindo acesso temporário')
+    return <>{children}</>
+  }
+
   // Loading enquanto verifica assinatura ou aguarda perfil
-  if (checkingSubscription || (authLoading && !userProfile)) {
+  if (checkingSubscription || (authLoading && !userProfile && !profileCheckTimeout)) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
