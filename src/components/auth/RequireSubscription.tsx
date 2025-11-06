@@ -28,6 +28,19 @@ export default function RequireSubscription({
   const [hasSubscription, setHasSubscription] = useState(false)
   const [canBypass, setCanBypass] = useState(false)
   const [subscriptionData, setSubscriptionData] = useState<any>(null)
+  const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
+  
+  // IMPORTANTE: Hooks devem estar sempre no topo, antes de qualquer retorno condicional
+  useEffect(() => {
+    if (!userProfile && user) {
+      const timer = setTimeout(() => {
+        setProfileCheckTimeout(true)
+      }, 2000) // 2 segundos
+      return () => clearTimeout(timer)
+    } else {
+      setProfileCheckTimeout(false)
+    }
+  }, [userProfile, user])
 
   useEffect(() => {
     const checkSubscription = async () => {
@@ -135,6 +148,21 @@ export default function RequireSubscription({
       setProfileCheckTimeout(false)
     }
   }, [userProfile, user])
+
+  // Se passou timeout e ainda não tem perfil, mas tem usuário autenticado,
+  // permitir acesso temporariamente (assumindo que pode ser admin)
+  // Isso é especialmente importante para evitar bloqueios
+  if (!userProfile && profileCheckTimeout && user && !checkingSubscription) {
+    console.warn('⚠️ RequireSubscription: Perfil não carregou após 2s, permitindo acesso temporário')
+    return <>{children}</>
+  }
+
+  // Se não está autenticado, redirecionar para login
+  if (!user) {
+    const loginPath = redirectTo || `/pt/${area}/login`
+    router.push(loginPath)
+    return null
+  }
 
   // Se passou timeout e ainda não tem perfil, mas tem usuário autenticado,
   // permitir acesso temporariamente (assumindo que pode ser admin)
