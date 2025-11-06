@@ -232,55 +232,82 @@ export default function WellnessTemplatesPage() {
             console.log('📦 Templates carregados do banco:', data.templates.length)
             
             // Transformar templates do banco para formato da página
-            const templatesFormatados = data.templates.map((t: any) => {
-              // Normalizar ID para detecção (slug ou nome em lowercase com hífens)
-              const normalizedId = (t.slug || t.id || '').toLowerCase().replace(/\s+/g, '-')
-              const normalizedName = (t.nome || '').toLowerCase()
-              
-              // Log para debug de checklists
-              if (normalizedName.includes('checklist') || normalizedName.includes('alimentar')) {
-                console.log('🔍 Checklist detectado no mapeamento:', {
-                  id: normalizedId,
-                  name: normalizedName,
-                  type: t.type,
-                  categoria: t.categoria,
-                  slug: t.slug,
-                  originalId: t.id
-                })
-              }
-              
-              // Log para debug de guias
-              if (normalizedName.includes('guia') || normalizedName.includes('ebook') || normalizedName.includes('e-book') || normalizedName.includes('mini')) {
-                console.log('📚 Guia detectado no mapeamento:', {
-                  id: normalizedId,
-                  name: normalizedName,
-                  type: t.type,
-                  categoria: t.categoria,
-                  slug: t.slug,
-                  originalId: t.id
-                })
-              }
-              
-              // Determinar tipo corretamente
-              // IMPORTANTE: Se o nome contém "checklist", SEMPRE é 'planilha'
-              let tipoFinal = t.type || (t.categoria === 'Calculadora' ? 'calculadora' : t.categoria === 'Quiz' ? 'quiz' : 'planilha')
-              
-              // Forçar tipo 'planilha' para checklists (baseado no nome)
-              if (normalizedName.includes('checklist')) {
-                tipoFinal = 'planilha'
-              }
-              
-              return {
-                id: normalizedId || t.slug || t.id,
-                name: t.nome,
-                description: t.descricao || t.nome,
-                icon: iconMap[tipoFinal?.toLowerCase()] || iconMap[t.categoria?.toLowerCase()] || iconMap['default'],
-                type: tipoFinal,
-                category: t.categoria || categoryMap[tipoFinal] || 'Outros',
-                link: `/pt/wellness/ferramentas/nova?template=${t.slug || t.id}`,
-                color: colorMap[tipoFinal?.toLowerCase()] || colorMap[t.categoria?.toLowerCase()] || colorMap['default']
-              }
-            })
+            const templatesFormatados = data.templates
+              .filter((t: any) => {
+                // Filtrar templates que não devem aparecer
+                const normalizedId = (t.slug || t.id || '').toLowerCase().replace(/\s+/g, '-')
+                const normalizedName = (t.nome || '').toLowerCase()
+                
+                // Excluir templates removidos
+                const templatesExcluidos = [
+                  'food-tracker',
+                  'rastreador-alimentar',
+                  'planilha-rastreador-alimentar',
+                  'daily-wellness',
+                  'tabela-daily-wellness',
+                  'planilha-daily-wellness'
+                ]
+                
+                const isExcluido = templatesExcluidos.some(excluido => 
+                  normalizedId.includes(excluido) || 
+                  normalizedName.includes(excluido) ||
+                  normalizedName.includes('rastreador de alimentos') ||
+                  normalizedName.includes('rastreador alimentar') ||
+                  normalizedName.includes('bem-estar diário') ||
+                  normalizedName.includes('bem estar diario')
+                )
+                
+                return !isExcluido
+              })
+              .map((t: any) => {
+                // Normalizar ID para detecção (slug ou nome em lowercase com hífens)
+                const normalizedId = (t.slug || t.id || '').toLowerCase().replace(/\s+/g, '-')
+                const normalizedName = (t.nome || '').toLowerCase()
+                
+                // Log para debug de checklists
+                if (normalizedName.includes('checklist') || normalizedName.includes('alimentar')) {
+                  console.log('🔍 Checklist detectado no mapeamento:', {
+                    id: normalizedId,
+                    name: normalizedName,
+                    type: t.type,
+                    categoria: t.categoria,
+                    slug: t.slug,
+                    originalId: t.id
+                  })
+                }
+                
+                // Log para debug de guias
+                if (normalizedName.includes('guia') || normalizedName.includes('ebook') || normalizedName.includes('e-book') || normalizedName.includes('mini')) {
+                  console.log('📚 Guia detectado no mapeamento:', {
+                    id: normalizedId,
+                    name: normalizedName,
+                    type: t.type,
+                    categoria: t.categoria,
+                    slug: t.slug,
+                    originalId: t.id
+                  })
+                }
+                
+                // Determinar tipo corretamente
+                // IMPORTANTE: Se o nome contém "checklist", SEMPRE é 'planilha'
+                let tipoFinal = t.type || (t.categoria === 'Calculadora' ? 'calculadora' : t.categoria === 'Quiz' ? 'quiz' : 'planilha')
+                
+                // Forçar tipo 'planilha' para checklists (baseado no nome)
+                if (normalizedName.includes('checklist')) {
+                  tipoFinal = 'planilha'
+                }
+                
+                return {
+                  id: normalizedId || t.slug || t.id,
+                  name: t.nome,
+                  description: t.descricao || t.nome,
+                  icon: iconMap[tipoFinal?.toLowerCase()] || iconMap[t.categoria?.toLowerCase()] || iconMap['default'],
+                  type: tipoFinal,
+                  category: t.categoria || categoryMap[tipoFinal] || 'Outros',
+                  link: `/pt/wellness/ferramentas/nova?template=${t.slug || t.id}`,
+                  color: colorMap[tipoFinal?.toLowerCase()] || colorMap[t.categoria?.toLowerCase()] || colorMap['default']
+                }
+              })
             
             console.log('✨ Templates formatados:', templatesFormatados.length)
             
