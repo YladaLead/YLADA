@@ -38,6 +38,20 @@ export default function RequireSubscription({
       try {
         setCheckingSubscription(true)
 
+        // IMPORTANTE: Aguardar carregamento do perfil para verificar se é admin/suporte
+        // Se ainda não carregou, aguardar um pouco mais antes de verificar assinatura
+        if (!userProfile) {
+          console.log('⏳ RequireSubscription: Aguardando carregamento do perfil...')
+          // Aguardar até 2 segundos para o perfil carregar
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          // Se ainda não carregou após espera, verificar novamente
+          // Mas não bloquear indefinidamente - continuar com verificação de assinatura
+          if (!userProfile) {
+            console.warn('⚠️ RequireSubscription: Perfil ainda não carregou, continuando verificação...')
+          }
+        }
+
         // Verificar se é admin ou suporte (bypass)
         if (userProfile?.is_admin || userProfile?.is_support) {
           console.log('✅ Admin/Suporte detectado, bypassando verificação de assinatura')
@@ -104,13 +118,15 @@ export default function RequireSubscription({
     return null
   }
 
-  // Loading enquanto verifica assinatura
-  if (checkingSubscription) {
+  // Loading enquanto verifica assinatura ou aguarda perfil
+  if (checkingSubscription || (authLoading && !userProfile)) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando assinatura...</p>
+          <p className="text-gray-600">
+            {!userProfile ? 'Carregando perfil...' : 'Verificando assinatura...'}
+          </p>
         </div>
       </div>
     )
