@@ -1,6 +1,7 @@
 import { desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-7-dias'
 import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-21-dias'
 import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from './diagnostics/wellness/guia-hidratacao'
+import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from './diagnostics/wellness/avaliacao-emocional'
 
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
@@ -166,6 +167,15 @@ export function getDiagnostico(
       break
     case 'quiz-energetico':
       diagnosticos = quizEnergeticoDiagnosticos
+      break
+    case 'avaliacao-emocional':
+    case 'quiz-emocional':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = avaliacaoEmocionalDiagnosticosWellness
+      } else {
+        diagnosticos = avaliacaoEmocionalDiagnosticosWellness // Por enquanto só temos wellness
+      }
       break
     case 'calculadora-imc':
       diagnosticos = calculadoraImcDiagnosticos

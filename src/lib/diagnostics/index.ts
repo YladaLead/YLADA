@@ -21,6 +21,7 @@ export { quizBemEstarDiagnosticos } from './wellness/quiz-bem-estar'
 export { quizPerfilNutricionalDiagnosticos } from './wellness/quiz-perfil-nutricional'
 export { quizDetoxDiagnosticos } from './wellness/quiz-detox'
 export { quizEnergeticoDiagnosticos } from './wellness/quiz-energetico'
+export { avaliacaoEmocionalDiagnosticos } from './wellness/avaliacao-emocional'
 
 // Guias e Conteúdos
 export { miniEbookDiagnosticos } from './wellness/mini-ebook'

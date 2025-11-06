@@ -26,6 +26,7 @@ import QuizBemEstarPreview from '@/components/wellness-previews/quizzes/QuizBemE
 import QuizPerfilNutricionalPreview from '@/components/wellness-previews/quizzes/QuizPerfilNutricionalPreview'
 import QuizDetoxPreview from '@/components/wellness-previews/quizzes/QuizDetoxPreview'
 import QuizEnergeticoPreview from '@/components/wellness-previews/quizzes/QuizEnergeticoPreview'
+import QuizEmocionalPreview from '@/components/wellness-previews/quizzes/QuizEmocionalPreview'
 import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
 import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
 import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
@@ -56,6 +57,7 @@ export default function WellnessTemplatesPage() {
   const [etapaPreviewQuizPerfilNutricional, setEtapaPreviewQuizPerfilNutricional] = useState(0) // Para quiz-perfil-nutricional: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizDetox, setEtapaPreviewQuizDetox] = useState(0) // Para quiz-detox: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizEnergetico, setEtapaPreviewQuizEnergetico] = useState(0) // Para quiz-energetico: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizEmocional, setEtapaPreviewQuizEmocional] = useState(0) // Para quiz-emocional: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewGuiaHidratacao, setEtapaPreviewGuiaHidratacao] = useState(0) // Para guia-hidratacao: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewDesafio7Dias, setEtapaPreviewDesafio7Dias] = useState(0) // Para desafio-7-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
   const [etapaPreviewDesafio21Dias, setEtapaPreviewDesafio21Dias] = useState(0) // Para desafio-21-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
@@ -185,6 +187,16 @@ export default function WellnessTemplatesPage() {
       category: 'Nutrição',
       link: '/pt/wellness/templates/nutrition-assessment',
       color: 'bg-indigo-500'
+    },
+    {
+      id: 'emotional-assessment',
+      name: 'Avaliação de Forma Emocional',
+      description: 'Descubra seu perfil emocional e como podemos ajudar na sua transformação',
+      icon: Heart,
+      type: 'quiz',
+      category: 'Bem-Estar',
+      link: '/pt/wellness/templates/emotional-assessment',
+      color: 'bg-pink-500'
     }
   ]
 
@@ -618,6 +630,7 @@ export default function WellnessTemplatesPage() {
                           setEtapaPreviewQuizPerfilNutricional(0)
                           setEtapaPreviewQuizDetox(0)
                           setEtapaPreviewQuizEnergetico(0)
+                          setEtapaPreviewQuizEmocional(0)
                           setEtapaPreviewGuiaHidratacao(0)
                           setEtapaPreviewDesafio7Dias(0)
                           setEtapaPreviewDesafio21Dias(0)
@@ -699,6 +712,20 @@ export default function WellnessTemplatesPage() {
                         templateNameLower.includes('energético') ||
                         templateNameLower.includes('energia')
                       )
+                      
+                      const isQuizEmocional = isQuizType && (
+                        templateIdLower.includes('quiz-emocional') || 
+                        templateIdLower.includes('avaliacao-emocional') ||
+                        templateIdLower.includes('avaliação-emocional') ||
+                        templateIdLower.includes('emocional') ||
+                        templateNameLower.includes('avaliação emocional') ||
+                        templateNameLower.includes('avaliacao emocional') ||
+                        templateNameLower.includes('avaliação de forma emocional') ||
+                        templateNameLower.includes('forma emocional') ||
+                        templateNameLower.includes('autoestima') ||
+                        (templateNameLower.includes('avaliação') && templateNameLower.includes('emocional'))
+                      )
+                      
                       const isChecklistAlimentar = templateIdLower.includes('checklist-alimentar') || 
                                                    templateIdLower === 'checklist-alimentar' ||
                                                    templateNameLower === 'checklist alimentar' ||
@@ -755,7 +782,7 @@ export default function WellnessTemplatesPage() {
                                              (templateNameLower.includes('desafio') && templateNameLower.includes('21'))
                       
                       // Log de detecção para debug - TODOS os templates modulares
-                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || 
+                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || 
                                        isChecklistAlimentar || isChecklistDetox || isGuiaHidratacao || isDesafio7Dias || isDesafio21Dias
                       
                       if (isModular) {
@@ -767,6 +794,7 @@ export default function WellnessTemplatesPage() {
                           isQuizPerfilNutricional,
                           isQuizDetox,
                           isQuizEnergetico,
+                          isQuizEmocional,
                           isChecklistAlimentar,
                           isChecklistDetox,
                           isGuiaHidratacao,
@@ -2405,7 +2433,7 @@ export default function WellnessTemplatesPage() {
                                              nameCheck.includes('checklist alimentar')
                         const isDetox = idCheck.includes('checklist-detox') || 
                                        nameCheck.includes('checklist detox')
-                        const isQuiz = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico
+                        const isQuiz = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional
                         const isGuia = isGuiaHidratacao
                         const isDesafio = isDesafio7Dias || isDesafio21Dias
                         
@@ -2469,6 +2497,7 @@ export default function WellnessTemplatesPage() {
                     setEtapaPreviewQuizPerfilNutricional(0)
                     setEtapaPreviewQuizDetox(0)
                     setEtapaPreviewQuizEnergetico(0)
+                    setEtapaPreviewQuizEmocional(0)
                     setEtapaPreviewGuiaHidratacao(0)
                     setEtapaPreviewDesafio7Dias(0)
                     setEtapaPreviewDesafio21Dias(0)
