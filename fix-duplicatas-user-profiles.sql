@@ -55,8 +55,7 @@ SELECT DISTINCT ON (user_id)
   is_admin,
   is_support,
   created_at,
-  updated_at,
-  last_login
+  updated_at
 FROM user_profiles
 ORDER BY user_id, 
   -- Priorizar registros com mais dados preenchidos
