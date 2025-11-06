@@ -97,11 +97,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Triggers para updated_at
+DROP TRIGGER IF EXISTS update_subscriptions_updated_at ON subscriptions;
 CREATE TRIGGER update_subscriptions_updated_at
   BEFORE UPDATE ON subscriptions
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_payments_updated_at ON payments;
 CREATE TRIGGER update_payments_updated_at
   BEFORE UPDATE ON payments
   FOR EACH ROW
@@ -116,23 +118,28 @@ ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
 -- Policies para subscriptions
+DROP POLICY IF EXISTS "Users can view their own subscriptions" ON subscriptions;
 CREATE POLICY "Users can view their own subscriptions"
   ON subscriptions FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own subscriptions" ON subscriptions;
 CREATE POLICY "Users can insert their own subscriptions"
   ON subscriptions FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own subscriptions" ON subscriptions;
 CREATE POLICY "Users can update their own subscriptions"
   ON subscriptions FOR UPDATE
   USING (auth.uid() = user_id);
 
 -- Policies para payments
+DROP POLICY IF EXISTS "Users can view their own payments" ON payments;
 CREATE POLICY "Users can view their own payments"
   ON payments FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own payments" ON payments;
 CREATE POLICY "Users can insert their own payments"
   ON payments FOR INSERT
   WITH CHECK (auth.uid() = user_id);
