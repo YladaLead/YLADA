@@ -25,6 +25,7 @@ export { avaliacaoEmocionalDiagnosticos } from './wellness/avaliacao-emocional'
 export { intoleranciaDiagnosticos } from './wellness/intolerancia'
 export { perfilMetabolicoDiagnosticos } from './wellness/perfil-metabolico'
 export { avaliacaoInicialDiagnosticos } from './wellness/avaliacao-inicial'
+export { eletrolitosDiagnosticos } from './wellness/eletrolitos'
 
 // Guias e Conteúdos
 export { miniEbookDiagnosticos } from './wellness/mini-ebook'

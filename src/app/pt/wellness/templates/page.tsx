@@ -30,6 +30,7 @@ import QuizEmocionalPreview from '@/components/wellness-previews/quizzes/QuizEmo
 import QuizIntoleranciaPreview from '@/components/wellness-previews/quizzes/QuizIntoleranciaPreview'
 import QuizPerfilMetabolicoPreview from '@/components/wellness-previews/quizzes/QuizPerfilMetabolicoPreview'
 import QuizAvaliacaoInicialPreview from '@/components/wellness-previews/quizzes/QuizAvaliacaoInicialPreview'
+import QuizEletrolitosPreview from '@/components/wellness-previews/quizzes/QuizEletrolitosPreview'
 import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
 import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
 import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
@@ -64,6 +65,7 @@ export default function WellnessTemplatesPage() {
   const [etapaPreviewQuizIntolerancia, setEtapaPreviewQuizIntolerancia] = useState(0) // Para quiz-intolerancia: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizPerfilMetabolico, setEtapaPreviewQuizPerfilMetabolico] = useState(0) // Para quiz-perfil-metabolico: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizAvaliacaoInicial, setEtapaPreviewQuizAvaliacaoInicial] = useState(0) // Para quiz-avaliacao-inicial: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizEletrolitos, setEtapaPreviewQuizEletrolitos] = useState(0) // Para quiz-eletrolitos: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewGuiaHidratacao, setEtapaPreviewGuiaHidratacao] = useState(0) // Para guia-hidratacao: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewDesafio7Dias, setEtapaPreviewDesafio7Dias] = useState(0) // Para desafio-7-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
   const [etapaPreviewDesafio21Dias, setEtapaPreviewDesafio21Dias] = useState(0) // Para desafio-21-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
@@ -640,6 +642,7 @@ export default function WellnessTemplatesPage() {
                           setEtapaPreviewQuizIntolerancia(0)
                           setEtapaPreviewQuizPerfilMetabolico(0)
                           setEtapaPreviewQuizAvaliacaoInicial(0)
+                          setEtapaPreviewQuizEletrolitos(0)
                           setEtapaPreviewGuiaHidratacao(0)
                           setEtapaPreviewDesafio7Dias(0)
                           setEtapaPreviewDesafio21Dias(0)
@@ -773,6 +776,19 @@ export default function WellnessTemplatesPage() {
                         (templateNameLower.includes('avaliação') && templateNameLower.includes('inicial'))
                       )
                       
+                      const isQuizEletrolitos = isQuizType && (
+                        templateIdLower.includes('quiz-eletrolitos') || 
+                        templateIdLower.includes('diagnostico-eletrolitos') ||
+                        templateIdLower.includes('diagnóstico-eletrólitos') ||
+                        templateIdLower.includes('eletrolitos') ||
+                        templateIdLower.includes('eletrólitos') ||
+                        templateNameLower.includes('diagnóstico de eletrólitos') ||
+                        templateNameLower.includes('diagnostico de eletrolitos') ||
+                        templateNameLower.includes('eletrólitos') ||
+                        templateNameLower.includes('eletrolitos') ||
+                        (templateNameLower.includes('diagnóstico') && templateNameLower.includes('eletrólitos'))
+                      )
+                      
                       const isChecklistAlimentar = templateIdLower.includes('checklist-alimentar') || 
                                                    templateIdLower === 'checklist-alimentar' ||
                                                    templateNameLower === 'checklist alimentar' ||
@@ -829,7 +845,7 @@ export default function WellnessTemplatesPage() {
                                              (templateNameLower.includes('desafio') && templateNameLower.includes('21'))
                       
                       // Log de detecção para debug - TODOS os templates modulares
-                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial ||
+                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial || isQuizEletrolitos ||
                                        isChecklistAlimentar || isChecklistDetox || isGuiaHidratacao || isDesafio7Dias || isDesafio21Dias
                       
                       if (isModular) {
@@ -936,6 +952,16 @@ export default function WellnessTemplatesPage() {
                           <QuizAvaliacaoInicialPreview
                             etapa={etapaPreviewQuizAvaliacaoInicial}
                             onEtapaChange={setEtapaPreviewQuizAvaliacaoInicial}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Eletrólitos - Componente Modular
+                      if (isQuizEletrolitos) {
+                        return (
+                          <QuizEletrolitosPreview
+                            etapa={etapaPreviewQuizEletrolitos}
+                            onEtapaChange={setEtapaPreviewQuizEletrolitos}
                           />
                         )
                       }
@@ -2588,6 +2614,7 @@ export default function WellnessTemplatesPage() {
                     setEtapaPreviewQuizIntolerancia(0)
                     setEtapaPreviewQuizPerfilMetabolico(0)
                     setEtapaPreviewQuizAvaliacaoInicial(0)
+                    setEtapaPreviewQuizEletrolitos(0)
                     setEtapaPreviewGuiaHidratacao(0)
                     setEtapaPreviewDesafio7Dias(0)
                     setEtapaPreviewDesafio21Dias(0)

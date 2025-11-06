@@ -5,6 +5,7 @@ import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellnes
 import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from './diagnostics/wellness/intolerancia'
 import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } from './diagnostics/wellness/perfil-metabolico'
 import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from './diagnostics/wellness/avaliacao-inicial'
+import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from './diagnostics/wellness/eletrolitos'
 
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
@@ -209,6 +210,17 @@ export function getDiagnostico(
         diagnosticos = avaliacaoInicialDiagnosticosWellness
       } else {
         diagnosticos = avaliacaoInicialDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'diagnostico-eletrolitos':
+    case 'quiz-eletrolitos':
+    case 'eletrolitos':
+    case 'eletrólitos':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = eletrolitosDiagnosticosWellness
+      } else {
+        diagnosticos = eletrolitosDiagnosticosWellness // Por enquanto só temos wellness
       }
       break
     case 'calculadora-imc':
