@@ -28,51 +28,79 @@ export function useAuth() {
     try {
       console.log('🔍 Buscando perfil para user_id:', userId)
       
-      // Usar maybeSingle() ao invés de single() para não dar erro se não encontrar
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('id, user_id, perfil, nome_completo, email, is_admin, is_support')
-        .eq('user_id', userId)
-        .maybeSingle()
+      // Tentar buscar com retry (até 3 tentativas)
+      let lastError = null
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('id, user_id, perfil, nome_completo, email, is_admin, is_support')
+            .eq('user_id', userId)
+            .maybeSingle()
 
-      if (error) {
-        console.error('❌ Erro ao buscar perfil:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        })
-        
-        // Se for erro de RLS ou permissão, logar especificamente
-        if (error.code === 'PGRST301' || error.message?.includes('permission') || error.message?.includes('policy')) {
-          console.error('🚫 Erro de permissão RLS ao buscar perfil. Verifique as políticas RLS.')
+          if (error) {
+            console.error(`❌ Erro ao buscar perfil (tentativa ${attempt}/3):`, {
+              code: error.code,
+              message: error.message,
+              details: error.details,
+              hint: error.hint
+            })
+            
+            // Se for erro de RLS ou permissão, logar especificamente
+            if (error.code === 'PGRST301' || error.message?.includes('permission') || error.message?.includes('policy')) {
+              console.error('🚫 Erro de permissão RLS ao buscar perfil. Verifique as políticas RLS.')
+            }
+            
+            lastError = error
+            // Se não for erro de rede, não tentar novamente
+            if (error.code !== 'PGRST301' && !error.message?.includes('network')) {
+              break
+            }
+            
+            // Aguardar antes de tentar novamente
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, 500))
+            }
+            continue
+          }
+
+          if (!data) {
+            console.log(`⚠️ Perfil não encontrado para user_id: ${userId} (tentativa ${attempt}/3)`)
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, 500))
+              continue
+            }
+            return null
+          }
+
+          console.log('✅ Perfil encontrado:', {
+            id: data.id,
+            perfil: data.perfil,
+            is_admin: data.is_admin,
+            is_support: data.is_support,
+            email: data.email,
+            nome_completo: data.nome_completo
+          })
+
+          return data as UserProfile
+        } catch (err: any) {
+          console.error(`❌ Erro na tentativa ${attempt}/3:`, err)
+          lastError = err
+          if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, 500))
+          }
         }
-        
-        return null
       }
-
-      if (!data) {
-        console.log('⚠️ Perfil não encontrado para user_id:', userId)
-        return null
-      }
-
-      console.log('✅ Perfil encontrado:', {
-        id: data.id,
-        perfil: data.perfil,
-        is_admin: data.is_admin,
-        is_support: data.is_support,
-        email: data.email,
-        nome_completo: data.nome_completo
-      })
-
-      return data as UserProfile
+      
+      // Se chegou aqui, todas as tentativas falharam
+      console.error('❌ Todas as tentativas de buscar perfil falharam')
+      return null
     } catch (error: any) {
       console.error('❌ Erro geral ao buscar perfil:', {
         error,
         message: error?.message,
         stack: error?.stack
       })
-      // Retornar null mas não bloquear o fluxo
       return null
     }
   }
