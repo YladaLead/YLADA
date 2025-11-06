@@ -73,6 +73,11 @@ export default function EditarFerramentaWellness() {
   const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null)
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
   const [erroUrlWhatsapp, setErroUrlWhatsapp] = useState(false) // Flag para erro de URL do WhatsApp
+  const [salvando, setSalvando] = useState(false) // Estado de salvamento
+  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null) // Mensagem de sucesso
+  const [mensagemErro, setMensagemErro] = useState<string | null>(null) // Mensagem de erro
+  const [excluindo, setExcluindo] = useState(false) // Estado de exclusão
+  const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState(false) // Modal de confirmação
 
   // Função para validar se URL é do WhatsApp
   const validarUrlWhatsapp = (url: string): boolean => {
@@ -229,8 +234,10 @@ export default function EditarFerramentaWellness() {
       setUrlDisponivel(true)
     } catch (error: any) {
       console.error('Erro ao carregar ferramenta:', error)
-      alert(error.message || 'Erro ao carregar ferramenta')
-      router.push('/pt/wellness/ferramentas')
+      setMensagemErro(error.message || 'Erro ao carregar ferramenta')
+      setTimeout(() => {
+        router.push('/pt/wellness/ferramentas')
+      }, 3000)
     } finally {
       setLoading(false)
     }
@@ -304,39 +311,48 @@ export default function EditarFerramentaWellness() {
     if (configuracao.urlPersonalizada !== slugOriginal) {
       const urlValida = await validarUrl(configuracao.urlPersonalizada)
       if (!urlValida) {
-        alert('Este nome de URL já está em uso. Escolha outro.')
+        setMensagemErro('Este nome de URL já está em uso. Escolha outro.')
+        setTimeout(() => setMensagemErro(null), 5000)
         return
       }
     }
 
     if (!toolData) {
-      alert('Erro: dados da ferramenta não carregados.')
+      setMensagemErro('Erro: dados da ferramenta não carregados.')
+      setTimeout(() => setMensagemErro(null), 5000)
       return
     }
 
     // Validar campos obrigatórios
     if (!configuracao.urlPersonalizada) {
-      alert('Preencha o nome do projeto.')
+      setMensagemErro('Preencha o nome do projeto.')
+      setTimeout(() => setMensagemErro(null), 5000)
       return
     }
 
     if (configuracao.tipoCta === 'whatsapp' && !perfilWhatsapp) {
-      alert('Configure seu WhatsApp no perfil antes de atualizar ferramentas com CTA WhatsApp. Acesse: Configurações > Perfil')
+      setMensagemErro('Configure seu WhatsApp no perfil antes de atualizar ferramentas com CTA WhatsApp. Acesse: Configurações > Perfil')
+      setTimeout(() => setMensagemErro(null), 5000)
       return
     }
 
     if (configuracao.tipoCta === 'url' && !configuracao.urlExterna) {
-      alert('Informe a URL externa.')
+      setMensagemErro('Informe a URL externa.')
+      setTimeout(() => setMensagemErro(null), 5000)
       return
     }
 
     // Validar se URL externa não é do WhatsApp
     if (configuracao.tipoCta === 'url' && validarUrlWhatsapp(configuracao.urlExterna)) {
-      alert('⚠️ URLs do WhatsApp não são permitidas em URLs externas.\n\nPara usar WhatsApp, escolha a opção "WhatsApp" no tipo de CTA. Essa opção usa automaticamente o número do seu perfil.')
+      setMensagemErro('URLs do WhatsApp não são permitidas em URLs externas. Para usar WhatsApp, escolha a opção "WhatsApp" no tipo de CTA. Essa opção usa automaticamente o número do seu perfil.')
+      setTimeout(() => setMensagemErro(null), 5000)
       return
     }
 
     try {
+      setSalvando(true)
+      setMensagemErro(null)
+      
       // Formatar título usando função melhorada
       const nomeAmigavel = gerarTituloDoSlug(configuracao.urlPersonalizada)
 
@@ -370,11 +386,91 @@ export default function EditarFerramentaWellness() {
         throw new Error(data.error || 'Erro ao atualizar ferramenta')
       }
 
-      alert('Ferramenta atualizada com sucesso!')
-      router.push('/pt/wellness/ferramentas')
+      // Mostrar mensagem de sucesso visual
+      setMensagemSucesso('Ferramenta atualizada com sucesso!')
+      
+      // Redirecionar após 2 segundos
+      setTimeout(() => {
+        router.push('/pt/wellness/ferramentas')
+      }, 2000)
     } catch (error: any) {
       console.error('Erro ao salvar ferramenta:', error)
-      alert(error.message || 'Erro ao atualizar ferramenta. Tente novamente.')
+      setMensagemErro(error.message || 'Erro ao atualizar ferramenta. Tente novamente.')
+      setTimeout(() => setMensagemErro(null), 5000)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  // Alternar status (ativa/inativa)
+  const alternarStatus = async () => {
+    if (!toolData) return
+    
+    try {
+      setSalvando(true)
+      const novoStatus = toolData.status === 'active' ? 'inactive' : 'active'
+      
+      const response = await fetch('/api/wellness/ferramentas', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          id: toolData.id,
+          status: novoStatus
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao alterar status')
+      }
+
+      // Atualizar estado local
+      setToolData({ ...toolData, status: novoStatus })
+      setMensagemSucesso(`Ferramenta ${novoStatus === 'active' ? 'ativada' : 'desativada'} com sucesso!`)
+      setTimeout(() => setMensagemSucesso(null), 3000)
+    } catch (error: any) {
+      console.error('Erro ao alterar status:', error)
+      setMensagemErro(error.message || 'Erro ao alterar status. Tente novamente.')
+      setTimeout(() => setMensagemErro(null), 5000)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  // Excluir ferramenta
+  const excluirFerramenta = async () => {
+    if (!toolData) return
+    
+    try {
+      setExcluindo(true)
+      
+      const response = await fetch(`/api/wellness/ferramentas?id=${toolData.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao excluir ferramenta')
+      }
+
+      // Mostrar mensagem de sucesso e redirecionar
+      setMensagemSucesso('Ferramenta excluída com sucesso!')
+      setTimeout(() => {
+        router.push('/pt/wellness/ferramentas')
+      }, 1500)
+    } catch (error: any) {
+      console.error('Erro ao excluir ferramenta:', error)
+      setMensagemErro(error.message || 'Erro ao excluir ferramenta. Tente novamente.')
+      setTimeout(() => setMensagemErro(null), 5000)
+      setMostrarConfirmacaoExclusao(false)
+    } finally {
+      setExcluindo(false)
     }
   }
 
@@ -408,6 +504,82 @@ export default function EditarFerramentaWellness() {
   return (
     <div className="min-h-screen bg-gray-50">
       <WellnessNavBar showTitle={true} title="Editar Ferramenta" />
+
+      {/* Mensagens de Sucesso/Erro */}
+      {mensagemSucesso && (
+        <div className="fixed top-4 right-4 bg-green-50 border-2 border-green-400 rounded-lg shadow-lg p-4 z-50 max-w-md" style={{ animation: 'slideInRight 0.3s ease-out' }}>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <span className="text-green-600 text-2xl">✅</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-green-900 mb-1">Sucesso!</h3>
+              <p className="text-xs text-green-700">{mensagemSucesso}</p>
+            </div>
+            <button 
+              onClick={() => setMensagemSucesso(null)}
+              className="text-green-600 hover:text-green-800 text-lg font-bold"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mensagemErro && (
+        <div className="fixed top-4 right-4 bg-red-50 border-2 border-red-400 rounded-lg shadow-lg p-4 z-50 max-w-md" style={{ animation: 'slideInRight 0.3s ease-out' }}>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <span className="text-red-600 text-2xl">❌</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-red-900 mb-1">Erro</h3>
+              <p className="text-xs text-red-700">{mensagemErro}</p>
+            </div>
+            <button 
+              onClick={() => setMensagemErro(null)}
+              className="text-red-600 hover:text-red-800 text-lg font-bold"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      {mostrarConfirmacaoExclusao && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-start space-x-4 mb-6">
+              <div className="flex-shrink-0">
+                <span className="text-red-600 text-4xl">⚠️</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Confirmar Exclusão</h3>
+                <p className="text-sm text-gray-600">
+                  Tem certeza que deseja excluir esta ferramenta? Esta ação não pode ser desfeita.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMostrarConfirmacaoExclusao(false)}
+                className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                disabled={excluindo}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={excluirFerramenta}
+                disabled={excluindo}
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {excluindo ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -757,18 +929,60 @@ export default function EditarFerramentaWellness() {
                 )}
               </div>
 
+              {/* Status e Ações */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">
+                      Status da Ferramenta
+                    </label>
+                    <p className="text-xs text-gray-500">
+                      {toolData.status === 'active' 
+                        ? '✅ Ferramenta está ativa e visível para seus clientes'
+                        : '⏸️ Ferramenta está inativa e não será exibida'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={alternarStatus}
+                    disabled={salvando}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                      toolData.status === 'active' ? 'bg-green-600' : 'bg-gray-300'
+                    } ${salvando ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        toolData.status === 'active' ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
               <div className="flex gap-4 mt-8">
                 <button
                   onClick={() => router.push('/pt/wellness/ferramentas')}
-                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                  disabled={salvando || excluindo}
+                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={salvarFerramenta}
-                  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  disabled={salvando || excluindo}
+                  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Salvar Alterações
+                  {salvando ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+              </div>
+
+              {/* Botão de Excluir */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setMostrarConfirmacaoExclusao(true)}
+                  disabled={salvando || excluindo}
+                  className="w-full bg-red-50 text-red-600 py-3 rounded-lg font-medium hover:bg-red-100 transition-colors border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  🗑️ Excluir Ferramenta
                 </button>
               </div>
             </div>
