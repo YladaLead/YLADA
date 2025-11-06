@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
     // Buscar perfil do usuário (tentar buscar campos que podem não existir)
     let profile: any = null
     try {
+      console.log('🔍 GET /api/wellness/profile - Buscando perfil para user_id:', user.id)
+      
       // Tentar buscar todos os campos primeiro
       const { data: profileData, error: profileError } = await supabaseAdmin
         .from('user_profiles')
@@ -46,14 +48,31 @@ export async function GET(request: NextRequest) {
         .eq('user_id', user.id)
         .single()
 
+      console.log('📋 Resultado da busca:', {
+        hasData: !!profileData,
+        hasError: !!profileError,
+        errorCode: profileError?.code,
+        errorMessage: profileError?.message,
+        data: profileData
+      })
+
       if (!profileError) {
         profile = profileData
+        console.log('✅ Perfil encontrado:', {
+          nome_completo: profileData?.nome_completo,
+          email: profileData?.email,
+          whatsapp: profileData?.whatsapp,
+          bio: profileData?.bio,
+          user_slug: profileData?.user_slug,
+          country_code: profileData?.country_code
+        })
       } else if (profileError.code === 'PGRST116') {
         // Não encontrado - tudo bem, será criado
+        console.log('⚠️ Perfil não encontrado (PGRST116)')
         profile = null
       } else if (profileError.message?.includes('column') || profileError.message?.includes('schema cache')) {
         // Campos não existem - tentar buscar apenas campos básicos
-        console.warn('Alguns campos não existem, buscando apenas campos básicos')
+        console.warn('⚠️ Alguns campos não existem, buscando apenas campos básicos')
         try {
           const { data: basicProfile } = await supabaseAdmin
             .from('user_profiles')
@@ -61,18 +80,19 @@ export async function GET(request: NextRequest) {
             .eq('user_id', user.id)
             .maybeSingle()
           profile = basicProfile || null
+          console.log('✅ Perfil básico encontrado:', basicProfile)
         } catch (e) {
-          console.warn('Erro ao buscar perfil básico:', e)
+          console.warn('❌ Erro ao buscar perfil básico:', e)
           profile = null
         }
       } else {
         // Outro erro - logar mas continuar
-        console.warn('Erro ao buscar perfil completo:', profileError)
+        console.warn('❌ Erro ao buscar perfil completo:', profileError)
         profile = null
       }
     } catch (err: any) {
       // Se deu erro geral, tentar buscar apenas campos básicos
-      console.warn('Erro ao buscar perfil:', err)
+      console.error('❌ Erro geral ao buscar perfil:', err)
       try {
         const { data: basicProfile } = await supabaseAdmin
           .from('user_profiles')
@@ -80,8 +100,9 @@ export async function GET(request: NextRequest) {
           .eq('user_id', user.id)
           .maybeSingle()
         profile = basicProfile || null
+        console.log('✅ Perfil básico encontrado após erro:', basicProfile)
       } catch (e) {
-        console.warn('Erro ao buscar perfil básico:', e)
+        console.error('❌ Erro ao buscar perfil básico:', e)
         profile = null
       }
     }
@@ -89,7 +110,7 @@ export async function GET(request: NextRequest) {
     // Buscar email do auth.users
     const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(user.id)
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       profile: {
         nome: profile?.nome_completo || authUser?.user?.user_metadata?.full_name || '',
@@ -100,7 +121,18 @@ export async function GET(request: NextRequest) {
         bio: profile?.bio || '',
         userSlug: profile?.user_slug || ''
       }
+    }
+
+    console.log('📤 Retornando dados do perfil:', {
+      nome: responseData.profile.nome,
+      email: responseData.profile.email,
+      whatsapp: responseData.profile.whatsapp,
+      bio: responseData.profile.bio,
+      userSlug: responseData.profile.userSlug,
+      countryCode: responseData.profile.countryCode
     })
+
+    return NextResponse.json(responseData)
   } catch (error: any) {
     console.error('Erro técnico ao buscar perfil:', error)
     const mensagemAmigavel = translateError(error)
@@ -150,6 +182,32 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json(
           { error: 'Este nome de URL já está em uso por outro usuário. Escolha outro.' },
           { status: 409 }
+        )
+      }
+    }
+
+    // Buscar perfil atual para garantir que não está mudando de área
+    const { data: currentProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('perfil, is_admin, is_support')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    // VALIDAÇÃO: Não permitir mudança de perfil após criado
+    // EXCEÇÃO: Admin e Suporte podem ter múltiplos perfis
+    if (currentProfile && currentProfile.perfil && currentProfile.perfil !== 'wellness') {
+      if (!currentProfile.is_admin && !currentProfile.is_support) {
+        return NextResponse.json(
+          { 
+            error: `Você não pode alterar seu perfil. Este email está cadastrado na área ${currentProfile.perfil}.`,
+            technical: process.env.NODE_ENV === 'development' ? {
+              currentPerfil: currentProfile.perfil,
+              attemptedPerfil: 'wellness',
+              is_admin: currentProfile.is_admin,
+              is_support: currentProfile.is_support
+            } : undefined
+          },
+          { status: 403 }
         )
       }
     }

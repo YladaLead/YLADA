@@ -98,17 +98,32 @@ export default function WellnessConfiguracaoPage() {
 
   // Carregar perfil do usuário
   const carregarPerfil = async () => {
-    if (!user) return
+    if (!user) {
+      console.log('⚠️ carregarPerfil: Usuário não disponível')
+      return
+    }
     
     try {
+      console.log('🔄 carregarPerfil: Iniciando carregamento do perfil...')
       setCarregando(true)
-      const response = await fetch('/api/wellness/profile', {
-        credentials: 'include'
+      
+      // Adicionar timestamp para evitar cache
+      const response = await fetch(`/api/wellness/profile?t=${Date.now()}`, {
+        credentials: 'include',
+        cache: 'no-store' // Forçar não usar cache
       })
+      
+      console.log('📡 carregarPerfil: Resposta recebida:', {
+        ok: response.ok,
+        status: response.status
+      })
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('📋 carregarPerfil: Dados recebidos:', data)
+        
         if (data.profile) {
-          setPerfil({
+          const novoPerfil = {
             nome: data.profile.nome || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '',
             email: data.profile.email || user?.email || '',
             telefone: data.profile.telefone || data.profile.whatsapp || '',
@@ -116,9 +131,19 @@ export default function WellnessConfiguracaoPage() {
             countryCode: data.profile.countryCode || 'BR',
             bio: data.profile.bio || '',
             userSlug: data.profile.userSlug || ''
-          })
+          }
+          
+          console.log('✅ carregarPerfil: Definindo perfil:', novoPerfil)
+          setPerfil(novoPerfil)
+        } else {
+          console.warn('⚠️ carregarPerfil: data.profile não existe')
         }
       } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('❌ carregarPerfil: Erro na resposta:', {
+          status: response.status,
+          error: errorData
+        })
         // Se erro ao carregar perfil, usar dados do usuário logado
         setPerfil(prev => ({
           ...prev,
@@ -127,7 +152,7 @@ export default function WellnessConfiguracaoPage() {
         }))
       }
     } catch (error) {
-      console.error('Erro ao carregar perfil:', error)
+      console.error('❌ carregarPerfil: Erro ao carregar perfil:', error)
       // Em caso de erro, usar dados do usuário logado
       setPerfil(prev => ({
         ...prev,
@@ -136,6 +161,7 @@ export default function WellnessConfiguracaoPage() {
       }))
     } finally {
       setCarregando(false)
+      console.log('✅ carregarPerfil: Carregamento finalizado')
     }
   }
 
