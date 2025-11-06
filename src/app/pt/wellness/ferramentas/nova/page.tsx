@@ -390,18 +390,8 @@ export default function NovaFerramentaWellness() {
         return
       }
 
-      // Converter slug para nome amigável para exibição
-      const nomeAmigavel = configuracao.urlPersonalizada
-        .split('-')
-        .map(palavra => {
-          // Se for sigla conhecida (2-3 letras), manter maiúsculas
-          if (palavra.length <= 3 && palavra.match(/^[a-z]{2,3}$/)) {
-            return palavra.toUpperCase()
-          }
-          // Caso contrário, capitalizar primeira letra
-          return palavra.charAt(0).toUpperCase() + palavra.slice(1)
-        })
-        .join(' ')
+      // Converter slug para nome amigável usando função melhorada
+      const nomeAmigavel = gerarTituloDoSlug(configuracao.urlPersonalizada)
 
       const payload = {
         template_slug: templateSelecionado.slug,
@@ -435,8 +425,15 @@ export default function NovaFerramentaWellness() {
         console.error('❌ Erro ao criar ferramenta:', {
           status: response.status,
           errorData: data,
-          technical: data.technical
+          technical: data.technical,
+          payload: payload
         })
+        
+        // Se houver detalhes técnicos, mostrar no console
+        if (data.technical) {
+          console.error('🔍 Detalhes técnicos do erro:', data.technical)
+        }
+        
         throw new Error(data.error || 'Erro ao criar ferramenta')
       }
 
