@@ -134,36 +134,6 @@ export default function RequireSubscription({
     return null
   }
 
-  // IMPORTANTE: Se é admin mas perfil ainda não carregou, permitir acesso temporariamente
-  // Isso evita bloqueio quando há problemas de carregamento de perfil
-  const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
-  
-  useEffect(() => {
-    if (!userProfile && user) {
-      const timer = setTimeout(() => {
-        setProfileCheckTimeout(true)
-      }, 2000) // 2 segundos
-      return () => clearTimeout(timer)
-    } else {
-      setProfileCheckTimeout(false)
-    }
-  }, [userProfile, user])
-
-  // Se passou timeout e ainda não tem perfil, mas tem usuário autenticado,
-  // permitir acesso temporariamente (assumindo que pode ser admin)
-  // Isso é especialmente importante para evitar bloqueios
-  if (!userProfile && profileCheckTimeout && user && !checkingSubscription) {
-    console.warn('⚠️ RequireSubscription: Perfil não carregou após 2s, permitindo acesso temporário')
-    return <>{children}</>
-  }
-
-  // Se não está autenticado, redirecionar para login
-  if (!user) {
-    const loginPath = redirectTo || `/pt/${area}/login`
-    router.push(loginPath)
-    return null
-  }
-
   // Se passou timeout e ainda não tem perfil, mas tem usuário autenticado,
   // permitir acesso temporariamente (assumindo que pode ser admin)
   // Isso é especialmente importante para evitar bloqueios
