@@ -40,7 +40,6 @@ export default function RequireSubscription({
 
         // IMPORTANTE: Aguardar carregamento do perfil para verificar se é admin/suporte
         // Se ainda não carregou, aguardar um pouco mais antes de verificar assinatura
-        let profileLoaded = !!userProfile
         if (!userProfile) {
           console.log('⏳ RequireSubscription: Aguardando carregamento do perfil...')
           // Aguardar até 1 segundo para o perfil carregar
