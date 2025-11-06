@@ -46,6 +46,7 @@ const Template7DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/
 const Template21DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/21-day-challenge/page'), { ssr: false })
 const TemplateHydrationGuide = dynamic(() => import('@/app/pt/wellness/templates/hydration-guide/page'), { ssr: false })
 const TemplateEmotionalAssessment = dynamic(() => import('@/app/pt/wellness/templates/emotional-assessment/page'), { ssr: false })
+const TemplateIntoleranceAssessment = dynamic(() => import('@/app/pt/wellness/templates/intolerance-assessment/page'), { ssr: false })
 const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
@@ -188,6 +189,10 @@ export default function FerramentaPersonalizadaPage() {
       case 'avaliacao-emocional':
       case 'quiz-emocional':
         return <TemplateEmotionalAssessment config={config} />
+      case 'avaliacao-intolerancia':
+      case 'quiz-intolerancia':
+      case 'intolerancia':
+        return <TemplateIntoleranceAssessment config={config} />
       case 'infografico-educativo':
         return <TemplateInfographic config={config} />
       case 'template-receitas':

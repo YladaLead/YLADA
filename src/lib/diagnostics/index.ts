@@ -22,6 +22,7 @@ export { quizPerfilNutricionalDiagnosticos } from './wellness/quiz-perfil-nutric
 export { quizDetoxDiagnosticos } from './wellness/quiz-detox'
 export { quizEnergeticoDiagnosticos } from './wellness/quiz-energetico'
 export { avaliacaoEmocionalDiagnosticos } from './wellness/avaliacao-emocional'
+export { intoleranciaDiagnosticos } from './wellness/intolerancia'
 
 // Guias e Conteúdos
 export { miniEbookDiagnosticos } from './wellness/mini-ebook'

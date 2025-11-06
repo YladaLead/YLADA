@@ -2,6 +2,7 @@ import { desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness } from './
 import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-21-dias'
 import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from './diagnostics/wellness/guia-hidratacao'
 import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from './diagnostics/wellness/avaliacao-emocional'
+import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from './diagnostics/wellness/intolerancia'
 
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
@@ -175,6 +176,16 @@ export function getDiagnostico(
         diagnosticos = avaliacaoEmocionalDiagnosticosWellness
       } else {
         diagnosticos = avaliacaoEmocionalDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'avaliacao-intolerancia':
+    case 'quiz-intolerancia':
+    case 'intolerancia':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = intoleranciaDiagnosticosWellness
+      } else {
+        diagnosticos = intoleranciaDiagnosticosWellness // Por enquanto só temos wellness
       }
       break
     case 'calculadora-imc':
