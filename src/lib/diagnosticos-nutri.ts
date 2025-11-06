@@ -6,6 +6,7 @@ import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from './
 import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } from './diagnostics/wellness/perfil-metabolico'
 import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from './diagnostics/wellness/avaliacao-inicial'
 import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from './diagnostics/wellness/eletrolitos'
+import { sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness } from './diagnostics/wellness/sintomas-intestinais'
 
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
@@ -221,6 +222,17 @@ export function getDiagnostico(
         diagnosticos = eletrolitosDiagnosticosWellness
       } else {
         diagnosticos = eletrolitosDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'diagnostico-sintomas-intestinais':
+    case 'quiz-sintomas-intestinais':
+    case 'sintomas-intestinais':
+    case 'sintomas intestinais':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = sintomasIntestinaisDiagnosticosWellness
+      } else {
+        diagnosticos = sintomasIntestinaisDiagnosticosWellness // Por enquanto só temos wellness
       }
       break
     case 'calculadora-imc':

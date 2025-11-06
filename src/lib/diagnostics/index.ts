@@ -26,6 +26,7 @@ export { intoleranciaDiagnosticos } from './wellness/intolerancia'
 export { perfilMetabolicoDiagnosticos } from './wellness/perfil-metabolico'
 export { avaliacaoInicialDiagnosticos } from './wellness/avaliacao-inicial'
 export { eletrolitosDiagnosticos } from './wellness/eletrolitos'
+export { sintomasIntestinaisDiagnosticos } from './wellness/sintomas-intestinais'
 
 // Guias e Conteúdos
 export { miniEbookDiagnosticos } from './wellness/mini-ebook'

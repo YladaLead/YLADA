@@ -49,6 +49,7 @@ const TemplateEmotionalAssessment = dynamic(() => import('@/app/pt/wellness/temp
 const TemplateIntoleranceAssessment = dynamic(() => import('@/app/pt/wellness/templates/intolerance-assessment/page'), { ssr: false })
 const TemplateMetabolicProfileAssessment = dynamic(() => import('@/app/pt/wellness/templates/metabolic-profile-assessment/page'), { ssr: false })
 const TemplateElectrolyteDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/electrolyte-diagnosis/page'), { ssr: false })
+const TemplateIntestinalSymptomsDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/intestinal-symptoms-diagnosis/page'), { ssr: false })
 const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
@@ -205,6 +206,11 @@ export default function FerramentaPersonalizadaPage() {
       case 'eletrolitos':
       case 'eletrólitos':
         return <TemplateElectrolyteDiagnosis config={config} />
+      case 'diagnostico-sintomas-intestinais':
+      case 'quiz-sintomas-intestinais':
+      case 'sintomas-intestinais':
+      case 'sintomas intestinais':
+        return <TemplateIntestinalSymptomsDiagnosis config={config} />
       case 'infografico-educativo':
         return <TemplateInfographic config={config} />
       case 'template-receitas':
