@@ -341,14 +341,24 @@ export default function WellnessTemplatesPage() {
                   tipoFinal = 'planilha'
                 }
                 
+                // Determinar categoria corretamente
+                // Se t.categoria existe e é válida, usar ela
+                // Senão, usar categoryMap baseado no tipo
+                let categoriaFinal = 'Outros'
+                if (t.categoria && ['Calculadora', 'Quiz', 'Planilha'].includes(t.categoria)) {
+                  categoriaFinal = t.categoria
+                } else {
+                  categoriaFinal = categoryMap[tipoFinal] || 'Outros'
+                }
+                
                 return {
                   id: normalizedId || t.slug || t.id,
                   name: t.nome,
                   description: t.descricao || t.nome,
                   icon: iconMap[tipoFinal?.toLowerCase()] || iconMap[t.categoria?.toLowerCase()] || iconMap['default'],
                   type: tipoFinal,
-                  category: t.categoria || categoryMap[tipoFinal] || 'Outros',
-                  link: `/pt/wellness/ferramentas/nova?template=${t.slug || t.id}`,
+                  category: categoriaFinal, // ✅ Sempre usar categoria correta (não specialization)
+                  link: `/pt/wellness/ferramentas/nova?template=${t.templateId || t.slug || t.id}`,
                   color: colorMap[tipoFinal?.toLowerCase()] || colorMap[t.categoria?.toLowerCase()] || colorMap['default']
                 }
               })
@@ -392,7 +402,7 @@ export default function WellnessTemplatesPage() {
     }
   }, [])
 
-  const categories = ['todas', ...new Set(templates.map(t => t.category))]
+  const categories = ['todas', ...new Set(templates.map(t => t.category).filter(c => c && c !== 'Outros'))]
   
   // Filtrar templates por categoria e busca
   const templatesFiltrados = templates.filter(template => {
@@ -403,6 +413,20 @@ export default function WellnessTemplatesPage() {
       template.category.toLowerCase().includes(busca.toLowerCase())
     return matchCategoria && matchBusca
   })
+
+  // Debug: Log para verificar quantos templates temos
+  useEffect(() => {
+    console.log('📊 Templates carregados:', {
+      total: templates.length,
+      filtrados: templatesFiltrados.length,
+      categoriaSelecionada: selectedCategory,
+      categoriasDisponiveis: categories,
+      templatesPorCategoria: categories.reduce((acc, cat) => {
+        acc[cat] = templates.filter(t => cat === 'todas' || t.category === cat).length
+        return acc
+      }, {} as Record<string, number>)
+    })
+  }, [templates, templatesFiltrados, selectedCategory, categories])
 
   return (
     <div className="min-h-screen bg-gray-50">
