@@ -301,6 +301,15 @@ export default function WellnessTemplatesPage() {
                   normalizedName.includes('bem estar diario')
                 )
                 
+                // Log para debug: mostrar quais templates estão sendo excluídos
+                if (isExcluido) {
+                  console.log('🚫 Template excluído:', {
+                    id: normalizedId,
+                    nome: normalizedName,
+                    motivo: 'Está na lista de templates excluídos'
+                  })
+                }
+                
                 return !isExcluido
               })
               .map((t: any) => {
@@ -364,6 +373,12 @@ export default function WellnessTemplatesPage() {
               })
             
             console.log('✨ Templates formatados:', templatesFormatados.length)
+            console.log('📋 Lista de templates formatados:', templatesFormatados.map((t: any) => ({
+              id: t.id,
+              name: t.name,
+              category: t.category,
+              type: t.type
+            })))
             
             if (!cancelled) {
               setTemplates(templatesFormatados)
