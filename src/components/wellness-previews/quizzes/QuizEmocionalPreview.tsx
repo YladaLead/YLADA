@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { avaliacaoEmocionalDiagnosticos } from '@/lib/diagnostics'
 
 interface QuizEmocionalPreviewProps {
   etapa: number
@@ -8,6 +9,7 @@ interface QuizEmocionalPreviewProps {
 }
 
 export default function QuizEmocionalPreview({ etapa, onEtapaChange }: QuizEmocionalPreviewProps) {
+  const diagnosticos = avaliacaoEmocionalDiagnosticos.wellness
   const totalEtapas = 6 // 0=landing, 1-5=perguntas, 6=resultados
 
   const handleNext = () => {
@@ -174,17 +176,33 @@ export default function QuizEmocionalPreview({ etapa, onEtapaChange }: QuizEmoci
           <div className="space-y-6">
             <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis da Avaliação</h4>
             
-            {/* Resultado 1: Necessita Suporte */}
+            {/* Resultado 1: Necessita Suporte Emocional */}
             <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
               <div className="flex items-center justify-between mb-4">
-                <h5 className="text-lg font-bold text-red-900">💖 Necessita Suporte</h5>
+                <h5 className="text-lg font-bold text-red-900">💖 Necessita Suporte Emocional</h5>
                 <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0-5 pontos</span>
               </div>
-              <div className="bg-white rounded-lg p-4 space-y-2">
-                <p className="font-semibold text-gray-900">Você está no início da sua jornada de transformação e pode se beneficiar muito de um acompanhamento personalizado e motivacional.</p>
-                <p className="text-gray-700">Recomendações incluem buscar um acompanhamento personalizado para ter suporte emocional, estabelecer metas pequenas e alcançáveis, e encontrar um mentor que entenda suas necessidades.</p>
-                <div className="bg-pink-50 p-3 rounded-lg mt-2">
-                  <p className="text-gray-700 font-semibold">💬 Próximo Passo: Entre em contato para receber um acompanhamento personalizado que pode fazer toda diferença na sua transformação.</p>
+              <div className="bg-white rounded-lg p-4 space-y-4">
+                <div className="bg-red-50 p-3 rounded-lg">
+                  <p className="font-semibold text-gray-900 mb-2">{diagnosticos.necessitaSuporteEmocional.diagnostico}</p>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.necessitaSuporteEmocional.causaRaiz}</p>
+                </div>
+                <div className="bg-yellow-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.necessitaSuporteEmocional.acaoImediata}</p>
+                </div>
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.necessitaSuporteEmocional.plano7Dias}</p>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.necessitaSuporteEmocional.suplementacao}</p>
+                </div>
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.necessitaSuporteEmocional.alimentacao}</p>
+                </div>
+                <div className="bg-pink-50 p-3 rounded-lg border-l-4 border-pink-500">
+                  <p className="text-gray-900 font-semibold whitespace-pre-line">{diagnosticos.necessitaSuporteEmocional.proximoPasso}</p>
                 </div>
               </div>
             </div>
@@ -195,26 +213,58 @@ export default function QuizEmocionalPreview({ etapa, onEtapaChange }: QuizEmoci
                 <h5 className="text-lg font-bold text-yellow-900">💖 Pronto para Transformação</h5>
                 <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">6-10 pontos</span>
               </div>
-              <div className="bg-white rounded-lg p-4 space-y-2">
-                <p className="font-semibold text-gray-900">Você tem motivação e está aberto(a) para mudanças. Um acompanhamento personalizado pode acelerar seus resultados e manter sua motivação.</p>
-                <p className="text-gray-700">Recomendações incluem investir em um programa personalizado de transformação, ter um mentor que te guie passo a passo, e acompanhar seu progresso com suporte profissional.</p>
-                <div className="bg-pink-50 p-3 rounded-lg mt-2">
-                  <p className="text-gray-700 font-semibold">💬 Próximo Passo: Conecte-se com um mentor especializado para acelerar seus resultados e manter sua motivação.</p>
+              <div className="bg-white rounded-lg p-4 space-y-4">
+                <div className="bg-yellow-50 p-3 rounded-lg">
+                  <p className="font-semibold text-gray-900 mb-2">{diagnosticos.prontoParaTransformacao.diagnostico}</p>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.prontoParaTransformacao.causaRaiz}</p>
+                </div>
+                <div className="bg-yellow-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.prontoParaTransformacao.acaoImediata}</p>
+                </div>
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.prontoParaTransformacao.plano7Dias}</p>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.prontoParaTransformacao.suplementacao}</p>
+                </div>
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.prontoParaTransformacao.alimentacao}</p>
+                </div>
+                <div className="bg-pink-50 p-3 rounded-lg border-l-4 border-pink-500">
+                  <p className="text-gray-900 font-semibold whitespace-pre-line">{diagnosticos.prontoParaTransformacao.proximoPasso}</p>
                 </div>
               </div>
             </div>
 
-            {/* Resultado 3: Alto Potencial */}
+            {/* Resultado 3: Alto Potencial Emocional */}
             <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
               <div className="flex items-center justify-between mb-4">
-                <h5 className="text-lg font-bold text-green-900">💖 Alto Potencial</h5>
+                <h5 className="text-lg font-bold text-green-900">💖 Alto Potencial Emocional</h5>
                 <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">11-15 pontos</span>
               </div>
-              <div className="bg-white rounded-lg p-4 space-y-2">
-                <p className="font-semibold text-gray-900">Você tem uma base sólida e está muito motivado(a)! Um acompanhamento especializado pode potencializar seus resultados e levar você ao próximo nível.</p>
-                <p className="text-gray-700">Recomendações incluem acelerar resultados com programa de alto desempenho, acesso a produtos premium e estratégias avançadas, e mentoria especializada para resultados excepcionais.</p>
-                <div className="bg-pink-50 p-3 rounded-lg mt-2">
-                  <p className="text-gray-700 font-semibold">💬 Próximo Passo: Acesse um programa VIP para maximizar seu potencial e alcançar resultados excepcionais.</p>
+              <div className="bg-white rounded-lg p-4 space-y-4">
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="font-semibold text-gray-900 mb-2">{diagnosticos.altoPotencialEmocional.diagnostico}</p>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.altoPotencialEmocional.causaRaiz}</p>
+                </div>
+                <div className="bg-yellow-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.altoPotencialEmocional.acaoImediata}</p>
+                </div>
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.altoPotencialEmocional.plano7Dias}</p>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.altoPotencialEmocional.suplementacao}</p>
+                </div>
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-line">{diagnosticos.altoPotencialEmocional.alimentacao}</p>
+                </div>
+                <div className="bg-pink-50 p-3 rounded-lg border-l-4 border-pink-500">
+                  <p className="text-gray-900 font-semibold whitespace-pre-line">{diagnosticos.altoPotencialEmocional.proximoPasso}</p>
                 </div>
               </div>
             </div>
