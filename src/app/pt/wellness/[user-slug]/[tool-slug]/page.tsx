@@ -50,6 +50,8 @@ const TemplateIntoleranceAssessment = dynamic(() => import('@/app/pt/wellness/te
 const TemplateMetabolicProfileAssessment = dynamic(() => import('@/app/pt/wellness/templates/metabolic-profile-assessment/page'), { ssr: false })
 const TemplateElectrolyteDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/electrolyte-diagnosis/page'), { ssr: false })
 const TemplateIntestinalSymptomsDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/intestinal-symptoms-diagnosis/page'), { ssr: false })
+const TemplateReadyToLoseWeight = dynamic(() => import('@/app/pt/wellness/templates/ready-to-lose-weight/page'), { ssr: false })
+const TemplateHungerType = dynamic(() => import('@/app/pt/wellness/templates/hunger-type/page'), { ssr: false })
 const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
@@ -211,6 +213,15 @@ export default function FerramentaPersonalizadaPage() {
       case 'sintomas-intestinais':
       case 'sintomas intestinais':
         return <TemplateIntestinalSymptomsDiagnosis config={config} />
+      case 'pronto-emagrecer':
+      case 'quiz-pronto-emagrecer':
+      case 'pronto para emagrecer':
+        return <TemplateReadyToLoseWeight config={config} />
+      case 'tipo-fome':
+      case 'quiz-tipo-fome':
+      case 'qual-e-o-seu-tipo-de-fome':
+      case 'tipo de fome':
+        return <TemplateHungerType config={config} />
       case 'infografico-educativo':
         return <TemplateInfographic config={config} />
       case 'template-receitas':

@@ -7,6 +7,8 @@ import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } 
 import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from './diagnostics/wellness/avaliacao-inicial'
 import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from './diagnostics/wellness/eletrolitos'
 import { sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness } from './diagnostics/wellness/sintomas-intestinais'
+import { prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness } from './diagnostics/wellness/pronto-emagrecer'
+import { tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness } from './diagnostics/wellness/tipo-fome'
 
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
@@ -233,6 +235,27 @@ export function getDiagnostico(
         diagnosticos = sintomasIntestinaisDiagnosticosWellness
       } else {
         diagnosticos = sintomasIntestinaisDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'pronto-emagrecer':
+    case 'quiz-pronto-emagrecer':
+    case 'pronto para emagrecer':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = prontoEmagrecerDiagnosticosWellness
+      } else {
+        diagnosticos = prontoEmagrecerDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'tipo-fome':
+    case 'quiz-tipo-fome':
+    case 'qual-e-o-seu-tipo-de-fome':
+    case 'tipo de fome':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = tipoFomeDiagnosticosWellness
+      } else {
+        diagnosticos = tipoFomeDiagnosticosWellness // Por enquanto só temos wellness
       }
       break
     case 'calculadora-imc':

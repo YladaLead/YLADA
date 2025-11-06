@@ -32,6 +32,8 @@ import QuizPerfilMetabolicoPreview from '@/components/wellness-previews/quizzes/
 import QuizAvaliacaoInicialPreview from '@/components/wellness-previews/quizzes/QuizAvaliacaoInicialPreview'
 import QuizEletrolitosPreview from '@/components/wellness-previews/quizzes/QuizEletrolitosPreview'
 import QuizSintomasIntestinaisPreview from '@/components/wellness-previews/quizzes/QuizSintomasIntestinaisPreview'
+import QuizProntoEmagrecerPreview from '@/components/wellness-previews/quizzes/QuizProntoEmagrecerPreview'
+import QuizTipoFomePreview from '@/components/wellness-previews/quizzes/QuizTipoFomePreview'
 import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
 import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
 import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
@@ -68,6 +70,8 @@ export default function WellnessTemplatesPage() {
   const [etapaPreviewQuizAvaliacaoInicial, setEtapaPreviewQuizAvaliacaoInicial] = useState(0) // Para quiz-avaliacao-inicial: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizEletrolitos, setEtapaPreviewQuizEletrolitos] = useState(0) // Para quiz-eletrolitos: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizSintomasIntestinais, setEtapaPreviewQuizSintomasIntestinais] = useState(0) // Para quiz-sintomas-intestinais: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizProntoEmagrecer, setEtapaPreviewQuizProntoEmagrecer] = useState(0) // Para quiz-pronto-emagrecer: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizTipoFome, setEtapaPreviewQuizTipoFome] = useState(0) // Para quiz-tipo-fome: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewGuiaHidratacao, setEtapaPreviewGuiaHidratacao] = useState(0) // Para guia-hidratacao: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewDesafio7Dias, setEtapaPreviewDesafio7Dias] = useState(0) // Para desafio-7-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
   const [etapaPreviewDesafio21Dias, setEtapaPreviewDesafio21Dias] = useState(0) // Para desafio-21-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
@@ -646,6 +650,8 @@ export default function WellnessTemplatesPage() {
                           setEtapaPreviewQuizAvaliacaoInicial(0)
                           setEtapaPreviewQuizEletrolitos(0)
                           setEtapaPreviewQuizSintomasIntestinais(0)
+                          setEtapaPreviewQuizProntoEmagrecer(0)
+                          setEtapaPreviewQuizTipoFome(0)
                           setEtapaPreviewGuiaHidratacao(0)
                           setEtapaPreviewDesafio7Dias(0)
                           setEtapaPreviewDesafio21Dias(0)
@@ -806,6 +812,28 @@ export default function WellnessTemplatesPage() {
                         (templateNameLower.includes('diagnóstico') && templateNameLower.includes('intestinal'))
                       )
                       
+                      const isQuizProntoEmagrecer = isQuizType && (
+                        templateIdLower.includes('quiz-pronto-emagrecer') || 
+                        templateIdLower.includes('pronto-emagrecer') ||
+                        templateIdLower.includes('pronto para emagrecer') ||
+                        templateNameLower.includes('pronto para emagrecer') ||
+                        templateNameLower.includes('pronto para emagrecer com saúde') ||
+                        templateNameLower.includes('emagrecer com saúde') ||
+                        (templateNameLower.includes('pronto') && templateNameLower.includes('emagrecer'))
+                      )
+                      
+                      const isQuizTipoFome = isQuizType && (
+                        templateIdLower.includes('quiz-tipo-fome') || 
+                        templateIdLower.includes('tipo-fome') ||
+                        templateIdLower.includes('tipo de fome') ||
+                        templateIdLower.includes('qual-e-o-seu-tipo-de-fome') ||
+                        templateNameLower.includes('qual é o seu tipo de fome') ||
+                        templateNameLower.includes('tipo de fome') ||
+                        templateNameLower.includes('fome emocional') ||
+                        templateNameLower.includes('fome física') ||
+                        (templateNameLower.includes('tipo') && templateNameLower.includes('fome'))
+                      )
+                      
                       const isChecklistAlimentar = templateIdLower.includes('checklist-alimentar') || 
                                                    templateIdLower === 'checklist-alimentar' ||
                                                    templateNameLower === 'checklist alimentar' ||
@@ -862,7 +890,7 @@ export default function WellnessTemplatesPage() {
                                              (templateNameLower.includes('desafio') && templateNameLower.includes('21'))
                       
                       // Log de detecção para debug - TODOS os templates modulares
-                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial || isQuizEletrolitos || isQuizSintomasIntestinais ||
+                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial || isQuizEletrolitos || isQuizSintomasIntestinais || isQuizProntoEmagrecer || isQuizTipoFome ||
                                        isChecklistAlimentar || isChecklistDetox || isGuiaHidratacao || isDesafio7Dias || isDesafio21Dias
                       
                       if (isModular) {
@@ -989,6 +1017,26 @@ export default function WellnessTemplatesPage() {
                           <QuizSintomasIntestinaisPreview
                             etapa={etapaPreviewQuizSintomasIntestinais}
                             onEtapaChange={setEtapaPreviewQuizSintomasIntestinais}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Pronto para Emagrecer - Componente Modular
+                      if (isQuizProntoEmagrecer) {
+                        return (
+                          <QuizProntoEmagrecerPreview
+                            etapa={etapaPreviewQuizProntoEmagrecer}
+                            onEtapaChange={setEtapaPreviewQuizProntoEmagrecer}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Tipo de Fome - Componente Modular
+                      if (isQuizTipoFome) {
+                        return (
+                          <QuizTipoFomePreview
+                            etapa={etapaPreviewQuizTipoFome}
+                            onEtapaChange={setEtapaPreviewQuizTipoFome}
                           />
                         )
                       }
@@ -2643,6 +2691,8 @@ export default function WellnessTemplatesPage() {
                     setEtapaPreviewQuizAvaliacaoInicial(0)
                     setEtapaPreviewQuizEletrolitos(0)
                     setEtapaPreviewQuizSintomasIntestinais(0)
+                    setEtapaPreviewQuizProntoEmagrecer(0)
+                    setEtapaPreviewQuizTipoFome(0)
                     setEtapaPreviewGuiaHidratacao(0)
                     setEtapaPreviewDesafio7Dias(0)
                     setEtapaPreviewDesafio21Dias(0)

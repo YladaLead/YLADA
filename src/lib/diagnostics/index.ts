@@ -27,6 +27,8 @@ export { perfilMetabolicoDiagnosticos } from './wellness/perfil-metabolico'
 export { avaliacaoInicialDiagnosticos } from './wellness/avaliacao-inicial'
 export { eletrolitosDiagnosticos } from './wellness/eletrolitos'
 export { sintomasIntestinaisDiagnosticos } from './wellness/sintomas-intestinais'
+export { prontoEmagrecerDiagnosticos } from './wellness/pronto-emagrecer'
+export { tipoFomeDiagnosticos } from './wellness/tipo-fome'
 
 // Guias e Conteúdos
 export { miniEbookDiagnosticos } from './wellness/mini-ebook'
