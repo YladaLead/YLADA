@@ -139,7 +139,7 @@ export default function GuiaHidratacao({ config }: TemplateBaseProps) {
       ]
     }
 
-    const diagnosticoCompleto = getDiagnostico('guia-hidratacao', 'nutri', nivelHidratacao)
+    const diagnosticoCompleto = getDiagnostico('guia-hidratacao', 'wellness', nivelHidratacao)
     setDiagnostico(diagnosticoCompleto)
 
     setResultado({

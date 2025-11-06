@@ -41,6 +41,39 @@ export default function Desafio21Dias({ config }: TemplateBaseProps) {
       return
     }
 
+    // Sistema de pontuação para determinar diagnóstico
+    let pontuacao = 0
+    
+    // Pontuação por experiência (0-2 pontos)
+    if (dados.experiencia === 'iniciante') pontuacao += 0
+    else if (dados.experiencia === 'intermediario') pontuacao += 1
+    else if (dados.experiencia === 'avancado') pontuacao += 2
+    
+    // Pontuação por objetivo (0-2 pontos)
+    if (dados.objetivo === 'habitos') pontuacao += 0
+    else if (dados.objetivo === 'saude' || dados.objetivo === 'disciplina') pontuacao += 1
+    else if (dados.objetivo === 'transformacao' || dados.objetivo === 'performance') pontuacao += 2
+    
+    // Pontuação por comprometimento (0-2 pontos)
+    if (dados.comprometimento === 'baixo') pontuacao += 0
+    else if (dados.comprometimento === 'moderado') pontuacao += 1
+    else if (dados.comprometimento === 'alto') pontuacao += 2
+    
+    // Total: 0-6 pontos
+    // Mapear pontuação para diagnóstico usando os 5 diagnósticos disponíveis
+    let diagnosticoId = 'motivacaoBaixa'
+    if (pontuacao === 0) {
+      diagnosticoId = 'motivacaoBaixa'
+    } else if (pontuacao >= 1 && pontuacao <= 2) {
+      diagnosticoId = 'perfeitoParaDesafioEstruturado'
+    } else if (pontuacao === 3) {
+      diagnosticoId = 'altaMotivacaoParaMudanca'
+    } else if (pontuacao >= 4 && pontuacao <= 5) {
+      diagnosticoId = 'prontoParaTransformacao'
+    } else if (pontuacao === 6) {
+      diagnosticoId = 'motivacaoMuitoAlta'
+    }
+
     // Determinar nível do desafio
     let nivelDesafio = 'desafioBasico'
     let habitos: string[] = []
@@ -192,7 +225,7 @@ export default function Desafio21Dias({ config }: TemplateBaseProps) {
       ]
     }
 
-    const diagnosticoCompleto = getDiagnostico('template-desafio-21dias', 'nutri', nivelDesafio)
+    const diagnosticoCompleto = getDiagnostico('template-desafio-21dias', 'wellness', diagnosticoId)
     setDiagnostico(diagnosticoCompleto)
 
     setResultado({

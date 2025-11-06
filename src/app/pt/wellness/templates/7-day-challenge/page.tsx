@@ -57,6 +57,39 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
       return
     }
 
+    // Sistema de pontuação para determinar diagnóstico
+    let pontuacao = 0
+    
+    // Pontuação por experiência (0-2 pontos)
+    if (dados.experiencia === 'iniciante') pontuacao += 0
+    else if (dados.experiencia === 'intermediario') pontuacao += 1
+    else if (dados.experiencia === 'avancado') pontuacao += 2
+    
+    // Pontuação por objetivo (0-2 pontos)
+    if (dados.objetivo === 'habitos') pontuacao += 0
+    else if (dados.objetivo === 'bem-estar' || dados.objetivo === 'energia') pontuacao += 1
+    else if (dados.objetivo === 'perder-peso' || dados.objetivo === 'performance') pontuacao += 2
+    
+    // Pontuação por disponibilidade (0-2 pontos)
+    if (dados.disponibilidade === 'baixa') pontuacao += 0
+    else if (dados.disponibilidade === 'moderada') pontuacao += 1
+    else if (dados.disponibilidade === 'alta') pontuacao += 2
+    
+    // Total: 0-6 pontos
+    // Mapear pontuação para diagnóstico usando os 5 diagnósticos disponíveis
+    let diagnosticoId = 'motivacaoBaixa'
+    if (pontuacao === 0) {
+      diagnosticoId = 'motivacaoBaixa'
+    } else if (pontuacao >= 1 && pontuacao <= 2) {
+      diagnosticoId = 'perfeitoParaDesafioEstruturado7Dias'
+    } else if (pontuacao === 3) {
+      diagnosticoId = 'altaMotivacaoParaTransformacaoRapida'
+    } else if (pontuacao >= 4 && pontuacao <= 5) {
+      diagnosticoId = 'prontoParaResultadosRapidos'
+    } else if (pontuacao === 6) {
+      diagnosticoId = 'motivacaoMuitoAlta'
+    }
+
     // Determinar nível do desafio
     let nivelDesafio = 'desafioBasico'
     let habitos: string[] = []
@@ -103,7 +136,7 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
       ]
     }
 
-    const diagnosticoCompleto = getDiagnostico('template-desafio-7dias', 'nutri', nivelDesafio)
+    const diagnosticoCompleto = getDiagnostico('template-desafio-7dias', 'wellness', diagnosticoId)
     setDiagnostico(diagnosticoCompleto)
 
     setResultado({

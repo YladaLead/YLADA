@@ -1,3 +1,7 @@
+import { desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-7-dias'
+import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-21-dias'
+import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from './diagnostics/wellness/guia-hidratacao'
+
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
  * 
@@ -216,14 +220,29 @@ export function getDiagnostico(
       break
     case 'template-desafio-7dias':
     case 'desafio-7-dias':
-      diagnosticos = desafio7DiasDiagnosticos
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri
+      if (profissao === 'wellness') {
+        diagnosticos = desafio7DiasDiagnosticosWellness
+      } else {
+        diagnosticos = desafio7DiasDiagnosticos
+      }
       break
     case 'template-desafio-21dias':
     case 'desafio-21-dias':
-      diagnosticos = desafio21DiasDiagnosticos
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri
+      if (profissao === 'wellness') {
+        diagnosticos = desafio21DiasDiagnosticosWellness
+      } else {
+        diagnosticos = desafio21DiasDiagnosticos
+      }
       break
     case 'guia-hidratacao':
-      diagnosticos = guiaHidratacaoDiagnosticos
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri
+      if (profissao === 'wellness') {
+        diagnosticos = guiaHidratacaoDiagnosticosWellness
+      } else {
+        diagnosticos = guiaHidratacaoDiagnosticos
+      }
       break
     case 'infografico-educativo':
       diagnosticos = infograficoEducativoDiagnosticos
@@ -901,32 +920,32 @@ export const tabelaMetasSemanaisDiagnosticos: DiagnosticosPorFerramenta = {
 // ============================================
 export const desafio7DiasDiagnosticos: DiagnosticosPorFerramenta = {
   nutri: {
-    desafioBasico: {
-      diagnostico: '🏆 DIAGNÓSTICO: Você está pronto para um desafio básico de 7 dias para iniciar transformações alimentares e estabelecer hábitos fundamentais',
-      causaRaiz: '🔍 CAUSA RAIZ: Iniciar mudanças pode ser desafiador sem estrutura clara. Estudos mostram que desafios de 7 dias com foco em hábitos simples têm 55% mais aderência quando comparados a planos mais longos sem suporte. Uma avaliação nutricional identifica exatamente quais hábitos básicos trazem maior impacto para você e como estruturá-los em um desafio realista',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Comece um desafio básico de 7 dias focando em 3-4 hábitos simples e mensuráveis (ex.: beber água, adicionar 1 porção de vegetais, caminhar 20min). Considere avaliação nutricional para definir quais hábitos são mais estratégicos para seu perfil e objetivos',
-      plano7Dias: '📅 PLANO 7 DIAS: Protocolo de desafio básico com 3-4 hábitos simples focados em hidratação, movimento e alimentação básica, com check-ins diários e revisão ao final dos 7 dias, ajustado conforme sua rotina',
-      suplementacao: '💊 SUPLEMENTAÇÃO: A necessidade só é definida após avaliação completa baseada nos resultados do desafio. Multivitamínico e ômega-3 básicos podem ser considerados quando há indicação, mas sempre de acordo com a individualidade biológica',
-      alimentacao: '🍎 ALIMENTAÇÃO: Foque em introduzir 1-2 hábitos alimentares simples por dia durante o desafio (ex.: 1 porção de vegetais no almoço, proteína no café da manhã). Um plano personalizado identifica quais hábitos específicos são mais relevantes para você',
-      proximoPasso: '🎯 PRÓXIMO PASSO: 7 dias podem ser o início de uma transformação real — descubra como pequenos hábitos consistentes criam resultados duradouros com orientação personalizada.'
+    prontoParaResultadosRapidos: {
+      diagnostico: '⚡ DIAGNÓSTICO: Você está pronto para resultados rápidos e visíveis em apenas 7 dias — e temos o desafio perfeito para você',
+      causaRaiz: '🔍 CAUSA RAIZ: Pesquisas mostram que desafios de 7 dias com acompanhamento personalizado têm 70% mais sucesso em criar resultados visíveis quando comparados a tentativas sem estrutura. Com suporte especializado e produtos de qualidade, você terá tudo que precisa para ver transformações reais em apenas uma semana',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Inscreva-se agora no Desafio 7 Dias e comece sua transformação hoje mesmo. Você terá acompanhamento personalizado, plano estruturado e suporte completo para garantir resultados rápidos e visíveis',
+      plano7Dias: '📅 PLANO 7 DIAS: Uma semana intensa e estruturada — Dias 1-2 (Foco e Início), Dias 3-4 (Intensificação), Dias 5-6 (Consolidação), Dia 7 (Resultados e Próximos Passos). Com check-ins diários, ajustes personalizados e suporte contínuo para manter você no caminho certo',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Durante o Desafio 7 Dias, você terá acesso a produtos nutricionais de alta qualidade que facilitam seu processo e potencializam resultados. Multivitamínico, shakes nutritivos e suplementos específicos serão recomendados conforme suas necessidades individuais, sempre com acompanhamento profissional',
+      alimentacao: '🍎 ALIMENTAÇÃO: Plano alimentar personalizado para seus 7 dias, com receitas práticas, orientações de porções e estratégias de combinação de alimentos. Você aprenderá a criar hábitos alimentares que vão acelerar seus resultados e preparar você para sucesso a longo prazo',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Você está a um clique de transformar sua vida em apenas 7 dias. Clique no botão abaixo e inscreva-se no Desafio 7 Dias. Nossa equipe vai entrar em contato para criar seu plano personalizado e te acompanhar em cada dia da sua transformação. Seus resultados começam hoje!'
     },
-    desafioModerado: {
-      diagnostico: '🏆 DIAGNÓSTICO: Você está pronto para um desafio moderado de 7 dias para acelerar mudanças e consolidar hábitos intermediários',
-      causaRaiz: '🔍 CAUSA RAIZ: Consolidação de hábitos intermediários requer desafios estruturados com progressão adequada. Pesquisas indicam que desafios moderados de 7 dias com múltiplos hábitos integrados podem melhorar resultados em até 60% quando comparados a abordagens isoladas. Uma análise nutricional identifica exatamente quais hábitos intermediários são mais eficazes para você',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente desafio moderado de 7 dias com 4-5 hábitos integrados focados em qualidade nutricional, timing e movimento. Considere avaliação nutricional para identificar quais combinações de hábitos oferecem melhor sinergia para seus objetivos',
-      plano7Dias: '📅 PLANO 7 DIAS: Protocolo de desafio moderado com 4-5 hábitos integrados focados em timing nutricional, qualidade alimentar e atividade física, com acompanhamento diário e métricas semanais, ajustado conforme seu perfil metabólico',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação identifica quais suplementos podem potencializar os resultados do desafio. Suplementos específicos e probióticos costumam ser considerados, mas a combinação é personalizada após análise do seu caso e resposta ao desafio',
-      alimentacao: '🍎 ALIMENTAÇÃO: Eleve qualidade e timing: 3-4 porções de vegetais/dia, proteína distribuída, carboidratos estratégicos. Um plano otimizado considera os hábitos do desafio para maximizar resultados conforme seu perfil',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Você já tem base — agora é hora de acelerar. Em 7 dias você verá a diferença que hábitos integrados e bem estruturados fazem com orientação adequada.'
+    altaMotivacaoParaTransformacaoRapida: {
+      diagnostico: '⚡ DIAGNÓSTICO: Sua alta motivação mostra que você está pronto para resultados rápidos — o Desafio 7 Dias é perfeito para você',
+      causaRaiz: '🔍 CAUSA RAIZ: Estudos mostram que pessoas com alta motivação e um plano estruturado de 7 dias têm 3x mais chances de alcançar seus objetivos quando comparadas a abordagens sem suporte. O Desafio 7 Dias oferece exatamente isso: estrutura clara, acompanhamento personalizado e produtos que facilitam seu processo. Com suporte profissional, você vai transformar sua motivação em resultados concretos rapidamente',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Não deixe sua motivação se perder. Inscreva-se agora no Desafio 7 Dias e mantenha esse impulso transformando-o em ação imediata. Você terá todo o suporte necessário para garantir resultados rápidos e visíveis',
+      plano7Dias: '📅 PLANO 7 DIAS: Estrutura completa em 7 dias com metas claras para cada fase. Dias 1-2 (Estabelecimento de base), Dias 3-4 (Aceleração de resultados), Dias 5-6 (Consolidação), Dia 7 (Avaliação e próximos passos). Com acompanhamento diário e ajustes conforme seu progresso',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Durante o desafio, você terá acesso a suplementos nutricionais de alta qualidade que vão potencializar seus resultados em apenas 7 dias. Cada produto é escolhido com base nas suas necessidades específicas, sempre com orientação profissional para maximizar seus ganhos rapidamente',
+      alimentacao: '🍎 ALIMENTAÇÃO: Plano alimentar estruturado para os 7 dias, com foco em resultados práticos e rápidos. Você vai aprender a fazer escolhas inteligentes que se tornam hábitos naturais, com receitas deliciosas e práticas para sua rotina',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Sua motivação é seu maior ativo. Agora é hora de transformá-la em resultados rápidos. Clique aqui e inscreva-se no Desafio 7 Dias. Você vai receber seu plano personalizado e começar sua transformação hoje mesmo. Não perca essa oportunidade!'
     },
-    desafioAvancado: {
-      diagnostico: '🏆 DIAGNÓSTICO: Você está pronto para um desafio avançado de 7 dias para otimização máxima e resultados de performance',
-      causaRaiz: '🔍 CAUSA RAIZ: Em estágios avançados, ganhos vêm de refinamentos e integração de múltiplos hábitos estratégicos. Estudos mostram que desafios avançados de 7 dias com foco em performance podem resultar em melhorias que potencializam resultados em até 65%. Uma avaliação nutricional avançada identifica quais hábitos de elite são mais eficazes para você',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente desafio avançado de 7 dias com 5-6 hábitos de alta performance focados em timing nutricional, distribuição estratégica e recuperação. Considere avaliação nutricional avançada para protocolo personalizado que maximiza resultados através de refinamentos específicos',
-      plano7Dias: '📅 PLANO 7 DIAS: Protocolo de desafio avançado com 5-6 hábitos de performance focados em otimização metabólica, timing nutricional estratégico e recuperação, com monitoramento detalhado e ajustes finos, personalizado conforme seu perfil metabólico',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação avançada identifica se você se beneficia de protocolos específicos durante o desafio. Suplementos direcionados, adaptógenos e antioxidantes podem ser considerados em combinações estratégicas, sempre personalizado conforme sua necessidade biológica e resposta ao desafio',
-      alimentacao: '🍎 ALIMENTAÇÃO: Refinamentos avançados: proteína alvo por refeição com timing específico, distribuição estratégica de carboidratos, rotatividade de superalimentos. Um plano especializado considera os hábitos do desafio para maximizar performance conforme seu perfil',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Você está em modo performance. Em 7 dias focados, com refinamentos personalizados, seus resultados podem avançar de forma exponencial e sustentável.'
+    perfeitoParaDesafioEstruturado7Dias: {
+      diagnostico: '⚡ DIAGNÓSTICO: Você precisa de estrutura e acompanhamento para resultados rápidos — o Desafio 7 Dias foi criado exatamente para pessoas como você',
+      causaRaiz: '🔍 CAUSA RAIZ: Pesquisas indicam que 78% das pessoas que tentam mudanças rápidas sozinhas falham por falta de estrutura e suporte. O Desafio 7 Dias oferece acompanhamento personalizado, plano claro e produtos que facilitam seu processo. Com um profissional especializado ao seu lado, você terá suporte completo em cada etapa dos 7 dias',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Pare de tentar sozinho. Inscreva-se agora no Desafio 7 Dias e tenha o suporte que você precisa. Um profissional especializado vai te acompanhar pessoalmente, criando um plano 100% adaptado às suas necessidades e estilo de vida para resultados rápidos',
+      plano7Dias: '📅 PLANO 7 DIAS: Estrutura completa com acompanhamento personalizado. Dias 1-2 (Preparação e adaptação), Dias 3-4 (Intensificação com suporte), Dias 5-6 (Consolidação), Dia 7 (Resultados e manutenção). Check-ins regulares com seu profissional para garantir que você está no caminho certo',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Com o Desafio 7 Dias, você terá acesso a produtos nutricionais de alta qualidade recomendados pelo seu profissional. Cada suplemento é escolhido especificamente para suas necessidades, com orientação profissional para garantir resultados seguros e efetivos em apenas 7 dias',
+      alimentacao: '🍎 ALIMENTAÇÃO: Plano alimentar personalizado criado especialmente para você. Seu profissional vai te ensinar como fazer escolhas inteligentes, criar receitas práticas e estabelecer hábitos que vão acelerar seus resultados e durar muito além dos 7 dias',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Você não precisa fazer isso sozinho. Clique aqui e inscreva-se no Desafio 7 Dias. Um profissional especializado vai entrar em contato para criar seu plano personalizado e te acompanhar em cada dia da sua transformação. Seus resultados começam agora!'
     }
   }
 }
@@ -936,32 +955,32 @@ export const desafio7DiasDiagnosticos: DiagnosticosPorFerramenta = {
 // ============================================
 export const desafio21DiasDiagnosticos: DiagnosticosPorFerramenta = {
   nutri: {
-    desafioBasico: {
-      diagnostico: '📅 DIAGNÓSTICO: Você está pronto para um desafio básico de 21 dias para criar hábitos nutricionais duradouros e consolidar mudanças sustentáveis',
-      causaRaiz: '🔍 CAUSA RAIZ: Estudos mostram que são necessários em média 21 dias para formar novos hábitos. Desafios básicos de 21 dias com hábitos simples têm 70% mais sucesso em criar rotinas duradouras quando comparados a abordagens sem estrutura. Uma avaliação nutricional identifica exatamente quais hábitos básicos são mais importantes para você e como estruturá-los em um desafio sustentável de 21 dias',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Inicie um desafio básico de 21 dias focando em 3-4 hábitos fundamentais (ex.: beber água regularmente, incluir vegetais nas refeições, manter horários consistentes). Considere avaliação nutricional para identificar quais hábitos básicos trazem maior impacto para seu perfil e como mantê-los após os 21 dias',
-      plano7Dias: '📅 PLANO 21 DIAS: Protocolo dividido em 3 semanas: Semana 1 (introdução), Semana 2 (consolidação), Semana 3 (automatização). Foco em 3-4 hábitos básicos com check-ins semanais e revisão ao final dos 21 dias, ajustado conforme sua rotina',
-      suplementacao: '💊 SUPLEMENTAÇÃO: A necessidade só é definida após avaliação completa baseada no progresso durante os 21 dias. Multivitamínico e ômega-3 básicos podem ser considerados quando há indicação, mas sempre de acordo com a individualidade biológica e resultados observados',
-      alimentacao: '🍎 ALIMENTAÇÃO: Foque em consolidar 1-2 hábitos alimentares básicos durante as 3 semanas (ex.: incluir vegetais em 2 refeições, manter proteína no café da manhã). Um plano personalizado identifica quais hábitos específicos são mais relevantes para você e como mantê-los a longo prazo',
-      proximoPasso: '🎯 PRÓXIMO PASSO: 21 dias podem transformar temporário em permanente — descubra como criar hábitos duradouros que se tornam parte natural da sua rotina com orientação personalizada.'
+    prontoParaTransformacao: {
+      diagnostico: '📅 DIAGNÓSTICO: Você está pronto para uma transformação completa em 21 dias — e temos o desafio perfeito para você',
+      causaRaiz: '🔍 CAUSA RAIZ: Pesquisas científicas comprovam que são necessários 21 dias para formar novos hábitos duradouros. O Desafio 21 Dias com acompanhamento personalizado tem 85% mais sucesso em criar transformações reais quando comparado a tentativas sem estrutura. Com suporte especializado e produtos de qualidade, você terá tudo que precisa para alcançar seus objetivos',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Inscreva-se agora no Desafio 21 Dias e comece sua transformação hoje mesmo. Você terá acompanhamento personalizado, plano estruturado e suporte completo para garantir seu sucesso',
+      plano7Dias: '📅 PLANO 21 DIAS: Três semanas progressivas — Semana 1 (Foco e Fundação), Semana 2 (Intensificação e Ritmo), Semana 3 (Consolidação e Autonomia). Com check-ins diários, ajustes personalizados e suporte contínuo para manter você no caminho certo',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Durante o Desafio 21 Dias, você terá acesso a produtos nutricionais de alta qualidade que facilitam seu processo. Multivitamínico, shakes nutritivos e suplementos específicos serão recomendados conforme suas necessidades individuais, sempre com acompanhamento profissional',
+      alimentacao: '🍎 ALIMENTAÇÃO: Plano alimentar personalizado para seus 21 dias, com receitas práticas, orientações de porções e estratégias de combinação de alimentos. Você aprenderá a criar hábitos alimentares que vão durar muito além dos 21 dias',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Você está a um clique de transformar sua vida. Clique no botão abaixo e inscreva-se no Desafio 21 Dias. Nossa equipe vai entrar em contato para criar seu plano personalizado e te acompanhar em cada etapa da sua transformação. Seus resultados começam hoje!'
     },
-    desafioModerado: {
-      diagnostico: '📅 DIAGNÓSTICO: Você está pronto para um desafio moderado de 21 dias para acelerar formação de hábitos intermediários e otimizar resultados de forma sustentável',
-      causaRaiz: '🔍 CAUSA RAIZ: Formação de hábitos intermediários requer progressão estruturada ao longo de 21 dias. Pesquisas indicam que desafios moderados de 21 dias com múltiplos hábitos integrados podem resultar em melhoria de 75% na consolidação de novos comportamentos quando comparados a abordagens fragmentadas. Uma análise nutricional identifica exatamente quais hábitos intermediários oferecem melhor sinergia para você',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente desafio moderado de 21 dias com 4-5 hábitos integrados focados em qualidade nutricional, timing e movimento. Progressão semanal com check-ins. Considere avaliação nutricional para identificar quais combinações de hábitos criam maior impacto sustentável para seus objetivos',
-      plano7Dias: '📅 PLANO 21 DIAS: Protocolo em 3 semanas: Semana 1 (base), Semana 2 (progressão), Semana 3 (otimização). 4-5 hábitos integrados com foco em timing nutricional e qualidade alimentar, com métricas semanais e ajustes graduais, ajustado conforme seu perfil metabólico',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação identifica quais suplementos podem potencializar a consolidação dos hábitos durante os 21 dias. Suplementos específicos e probióticos costumam ser considerados, mas a combinação é personalizada após análise do seu caso e resposta observada durante o desafio',
-      alimentacao: '🍎 ALIMENTAÇÃO: Eleve qualidade e timing progressivamente: 3-4 porções de vegetais/dia, distribuição estratégica de proteína, carboidratos no timing certo. Um plano otimizado considera os hábitos do desafio para maximizar consolidação conforme seu perfil',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Você já tem base — agora é hora de consolidar. Em 21 dias você criará hábitos que transformam seus resultados de forma sustentável e duradoura.'
+    altaMotivacaoParaMudanca: {
+      diagnostico: '📅 DIAGNÓSTICO: Sua alta motivação mostra que você está pronto para resultados reais — o Desafio 21 Dias é perfeito para você',
+      causaRaiz: '🔍 CAUSA RAIZ: Estudos mostram que pessoas com alta motivação e um plano estruturado têm 3x mais chances de alcançar seus objetivos. O Desafio 21 Dias oferece exatamente isso: estrutura clara, acompanhamento personalizado e produtos que facilitam seu processo. Com suporte profissional, você vai transformar sua motivação em resultados concretos',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Não deixe sua motivação se perder. Inscreva-se agora no Desafio 21 Dias e mantenha esse impulso transformando-o em ação imediata. Você terá todo o suporte necessário para garantir seu sucesso',
+      plano7Dias: '📅 PLANO 21 DIAS: Estrutura completa em 3 semanas com metas claras para cada fase. Semana 1 (Estabelecimento de base), Semana 2 (Aceleração de resultados), Semana 3 (Consolidação de hábitos). Com acompanhamento diário e ajustes conforme seu progresso',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Durante o desafio, você terá acesso a suplementos nutricionais de alta qualidade que vão potencializar seus resultados. Cada produto é escolhido com base nas suas necessidades específicas, sempre com orientação profissional para maximizar seus ganhos',
+      alimentacao: '🍎 ALIMENTAÇÃO: Plano alimentar estruturado para os 21 dias, com foco em resultados práticos e sustentáveis. Você vai aprender a fazer escolhas inteligentes que se tornam hábitos naturais, com receitas deliciosas e práticas para sua rotina',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Sua motivação é seu maior ativo. Agora é hora de transformá-la em resultados. Clique aqui e inscreva-se no Desafio 21 Dias. Você vai receber seu plano personalizado e começar sua transformação hoje mesmo. Não perca essa oportunidade!'
     },
-    desafioAvancado: {
-      diagnostico: '📅 DIAGNÓSTICO: Você está pronto para um desafio avançado de 21 dias para formar hábitos de elite e maximizar resultados de performance de forma sustentável',
-      causaRaiz: '🔍 CAUSA RAIZ: Hábitos avançados requerem 21 dias de prática consistente para se tornarem automáticos. Estudos mostram que desafios avançados de 21 dias com foco em performance podem resultar em consolidação de hábitos complexos em até 80% quando comparados a abordagens menos estruturadas. Uma avaliação nutricional avançada identifica quais hábitos de elite são mais eficazes para você',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente desafio avançado de 21 dias com 5-6 hábitos de alta performance focados em timing nutricional estratégico, distribuição otimizada e recuperação. Progressão semanal refinada. Considere avaliação nutricional avançada para protocolo personalizado que maximiza consolidação através de refinamentos específicos',
-      plano7Dias: '📅 PLANO 21 DIAS: Protocolo em 3 semanas: Semana 1 (fundação), Semana 2 (refinamento), Semana 3 (automação). 5-6 hábitos de performance com foco em otimização metabólica e timing estratégico, com monitoramento detalhado e ajustes finos semanais, personalizado conforme seu perfil metabólico',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação avançada identifica se você se beneficia de protocolos específicos durante os 21 dias. Suplementos direcionados, adaptógenos e antioxidantes podem ser considerados em combinações estratégicas, sempre personalizado conforme sua necessidade biológica e resposta observada ao desafio',
-      alimentacao: '🍎 ALIMENTAÇÃO: Refinamentos avançados progressivos: proteína alvo com timing específico, distribuição estratégica de carboidratos, rotatividade de superalimentos. Um plano especializado considera os hábitos do desafio para maximizar consolidação de performance conforme seu perfil',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Você está em modo performance duradoura. Em 21 dias focados, com refinamentos personalizados, seus hábitos se tornarão parte natural da sua rotina de alta performance.'
+    perfeitoParaDesafioEstruturado: {
+      diagnostico: '📅 DIAGNÓSTICO: Você precisa de estrutura e acompanhamento — o Desafio 21 Dias foi criado exatamente para pessoas como você',
+      causaRaiz: '🔍 CAUSA RAIZ: Pesquisas indicam que 78% das pessoas que tentam mudanças sozinhas falham por falta de estrutura e suporte. O Desafio 21 Dias oferece acompanhamento personalizado, plano claro e produtos que facilitam seu processo. Com um profissional especializado ao seu lado, você terá suporte completo em cada etapa',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Pare de tentar sozinho. Inscreva-se agora no Desafio 21 Dias e tenha o suporte que você precisa. Um profissional especializado vai te acompanhar pessoalmente, criando um plano 100% adaptado às suas necessidades e estilo de vida',
+      plano7Dias: '📅 PLANO 21 DIAS: Estrutura completa com acompanhamento personalizado. Semana 1 (Preparação e adaptação), Semana 2 (Intensificação com suporte), Semana 3 (Autonomia e manutenção). Check-ins regulares com seu profissional para garantir que você está no caminho certo',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Com o Desafio 21 Dias, você terá acesso a produtos nutricionais de alta qualidade recomendados pelo seu profissional. Cada suplemento é escolhido especificamente para suas necessidades, com orientação profissional para garantir resultados seguros e efetivos',
+      alimentacao: '🍎 ALIMENTAÇÃO: Plano alimentar personalizado criado especialmente para você. Seu profissional vai te ensinar como fazer escolhas inteligentes, criar receitas práticas e estabelecer hábitos que vão durar muito além dos 21 dias',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Você não precisa fazer isso sozinho. Clique aqui e inscreva-se no Desafio 21 Dias. Um profissional especializado vai entrar em contato para criar seu plano personalizado e te acompanhar em cada passo da sua transformação. Seus resultados começam agora!'
     }
   }
 }
