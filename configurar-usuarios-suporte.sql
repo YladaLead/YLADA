@@ -141,11 +141,14 @@ BEGIN
       true   -- É suporte (pode acessar todas as áreas)
     )
     ON CONFLICT (user_id) DO UPDATE SET
-      perfil = 'wellness',
+      perfil = COALESCE(user_profiles.perfil, 'wellness'),
       nome_completo = 'Renan Lieiria',
       email = 'renan.mdlr@gmail.com',
       is_admin = false,
       is_support = true,
+      bio = COALESCE(user_profiles.bio, 'Suporte'),
+      user_slug = COALESCE(user_profiles.user_slug, 'renan-lieiria'),
+      country_code = COALESCE(user_profiles.country_code, 'BR'),
       updated_at = NOW();
     
     RAISE NOTICE 'Perfil do Renan Lieiria criado/atualizado com user_id: %', v_user_id;
