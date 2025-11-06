@@ -237,94 +237,46 @@ export async function PUT(request: NextRequest) {
       profileData.country_code = countryCode
     }
 
-    // Verificar se perfil existe
-    const { data: existingProfile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    // Preparar dados completos para UPSERT
+    const fullProfileData = {
+      user_id: user.id,
+      ...profileData
+    }
 
-    console.log('📝 Salvando perfil:', {
+    console.log('📝 Salvando perfil (UPSERT):', {
       userId: user.id,
-      existingProfile: !!existingProfile,
-      profileData: Object.keys(profileData)
+      profileData: Object.keys(fullProfileData)
     })
 
+    // Usar UPSERT para evitar duplicatas
+    // Isso garante que se já existe um registro com esse user_id, ele será atualizado
+    // Se não existe, será criado
     let result
-    if (existingProfile) {
-      // Atualizar existente - tentar atualizar todos os campos
+    try {
       const { data, error } = await supabaseAdmin
         .from('user_profiles')
-        .update(profileData)
-        .eq('user_id', user.id)
+        .upsert(fullProfileData, {
+          onConflict: 'user_id', // Usar user_id como chave de conflito
+          ignoreDuplicates: false // Atualizar se existir
+        })
         .select()
         .single()
 
       if (error) {
-        console.error('❌ Erro ao atualizar perfil completo:', {
+        console.error('❌ Erro ao fazer UPSERT do perfil completo:', {
           code: error.code,
           message: error.message,
           details: error.details,
           hint: error.hint
         })
 
-        // Se der erro de coluna não encontrada ou schema cache, tentar atualizar apenas campos básicos
+        // Se der erro de coluna não encontrada ou schema cache, tentar UPSERT apenas campos básicos
         if (error.message?.includes('column') || error.message?.includes('schema cache') || error.code === '42703') {
-          console.log('⚠️ Tentando salvar apenas campos básicos...')
-          const basicData: any = {
-            nome_completo: nome,
-            perfil: 'wellness' // Garantir que o perfil está definido
-          }
-          if (whatsapp || telefone) {
-            basicData.whatsapp = whatsapp || telefone
-          }
-          
-          const { data: basicResult, error: basicError } = await supabaseAdmin
-            .from('user_profiles')
-            .update(basicData)
-            .eq('user_id', user.id)
-            .select()
-            .single()
-          
-          if (basicError) {
-            console.error('❌ Erro ao atualizar perfil básico:', basicError)
-            throw basicError
-          }
-          console.log('✅ Perfil básico atualizado com sucesso')
-          result = basicResult
-        } else {
-          throw error
-        }
-      } else {
-        console.log('✅ Perfil atualizado com sucesso')
-        result = data
-      }
-    } else {
-      // Criar novo - tentar inserir todos os campos
-      const { data, error } = await supabaseAdmin
-        .from('user_profiles')
-        .insert({
-          user_id: user.id,
-          ...profileData
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('❌ Erro ao criar perfil completo:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        })
-
-        // Se der erro de coluna não encontrada ou schema cache, tentar inserir apenas campos básicos
-        if (error.message?.includes('column') || error.message?.includes('schema cache') || error.code === '42703') {
-          console.log('⚠️ Tentando criar apenas com campos básicos...')
+          console.log('⚠️ Tentando UPSERT apenas com campos básicos...')
           const basicData: any = {
             user_id: user.id,
             nome_completo: nome,
-            perfil: 'wellness' // Garantir que o perfil está definido
+            perfil: 'wellness'
           }
           if (whatsapp || telefone) {
             basicData.whatsapp = whatsapp || telefone
@@ -332,22 +284,70 @@ export async function PUT(request: NextRequest) {
           
           const { data: basicResult, error: basicError } = await supabaseAdmin
             .from('user_profiles')
-            .insert(basicData)
+            .upsert(basicData, {
+              onConflict: 'user_id',
+              ignoreDuplicates: false
+            })
             .select()
             .single()
           
           if (basicError) {
-            console.error('❌ Erro ao criar perfil básico:', basicError)
+            console.error('❌ Erro ao fazer UPSERT do perfil básico:', basicError)
             throw basicError
           }
-          console.log('✅ Perfil básico criado com sucesso')
+          console.log('✅ Perfil básico salvo com sucesso (UPSERT)')
           result = basicResult
         } else {
           throw error
         }
       } else {
-        console.log('✅ Perfil criado com sucesso')
+        console.log('✅ Perfil salvo com sucesso (UPSERT):', {
+          id: data?.id,
+          user_id: data?.user_id,
+          nome_completo: data?.nome_completo
+        })
         result = data
+      }
+    } catch (upsertError: any) {
+      // Se UPSERT falhar por constraint, tentar UPDATE primeiro, depois INSERT
+      console.warn('⚠️ UPSERT falhou, tentando UPDATE/INSERT manual...', upsertError)
+      
+      // Verificar se existe
+      const { data: existingProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (existingProfile) {
+        // Atualizar existente
+        const { data, error } = await supabaseAdmin
+          .from('user_profiles')
+          .update(profileData)
+          .eq('user_id', user.id)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('❌ Erro ao atualizar perfil:', error)
+          throw error
+        }
+        result = data
+        console.log('✅ Perfil atualizado manualmente')
+      } else {
+        // Criar novo
+        const { data, error } = await supabaseAdmin
+          .from('user_profiles')
+          .insert(fullProfileData)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('❌ Erro ao criar perfil:', error)
+          throw error
+        }
+        result = data
+        console.log('✅ Perfil criado manualmente')
       }
     }
 
