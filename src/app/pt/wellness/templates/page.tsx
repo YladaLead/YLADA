@@ -28,6 +28,7 @@ import QuizDetoxPreview from '@/components/wellness-previews/quizzes/QuizDetoxPr
 import QuizEnergeticoPreview from '@/components/wellness-previews/quizzes/QuizEnergeticoPreview'
 import QuizEmocionalPreview from '@/components/wellness-previews/quizzes/QuizEmocionalPreview'
 import QuizIntoleranciaPreview from '@/components/wellness-previews/quizzes/QuizIntoleranciaPreview'
+import QuizPerfilMetabolicoPreview from '@/components/wellness-previews/quizzes/QuizPerfilMetabolicoPreview'
 import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
 import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
 import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
@@ -60,6 +61,7 @@ export default function WellnessTemplatesPage() {
   const [etapaPreviewQuizEnergetico, setEtapaPreviewQuizEnergetico] = useState(0) // Para quiz-energetico: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizEmocional, setEtapaPreviewQuizEmocional] = useState(0) // Para quiz-emocional: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizIntolerancia, setEtapaPreviewQuizIntolerancia] = useState(0) // Para quiz-intolerancia: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizPerfilMetabolico, setEtapaPreviewQuizPerfilMetabolico] = useState(0) // Para quiz-perfil-metabolico: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewGuiaHidratacao, setEtapaPreviewGuiaHidratacao] = useState(0) // Para guia-hidratacao: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewDesafio7Dias, setEtapaPreviewDesafio7Dias] = useState(0) // Para desafio-7-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
   const [etapaPreviewDesafio21Dias, setEtapaPreviewDesafio21Dias] = useState(0) // Para desafio-21-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
@@ -634,6 +636,7 @@ export default function WellnessTemplatesPage() {
                           setEtapaPreviewQuizEnergetico(0)
                           setEtapaPreviewQuizEmocional(0)
                           setEtapaPreviewQuizIntolerancia(0)
+                          setEtapaPreviewQuizPerfilMetabolico(0)
                           setEtapaPreviewGuiaHidratacao(0)
                           setEtapaPreviewDesafio7Dias(0)
                           setEtapaPreviewDesafio21Dias(0)
@@ -742,6 +745,20 @@ export default function WellnessTemplatesPage() {
                         (templateNameLower.includes('avaliação') && templateNameLower.includes('intolerância'))
                       )
                       
+                      const isQuizPerfilMetabolico = isQuizType && (
+                        templateIdLower.includes('quiz-perfil-metabolico') || 
+                        templateIdLower.includes('avaliacao-perfil-metabolico') ||
+                        templateIdLower.includes('avaliação-perfil-metabólico') ||
+                        templateIdLower.includes('perfil-metabolico') ||
+                        templateIdLower.includes('perfil-metabólico') ||
+                        templateNameLower.includes('avaliação do perfil metabólico') ||
+                        templateNameLower.includes('avaliacao do perfil metabolico') ||
+                        templateNameLower.includes('perfil metabólico') ||
+                        templateNameLower.includes('perfil metabolico') ||
+                        templateNameLower.includes('metabolismo') ||
+                        (templateNameLower.includes('avaliação') && templateNameLower.includes('metabólico'))
+                      )
+                      
                       const isChecklistAlimentar = templateIdLower.includes('checklist-alimentar') || 
                                                    templateIdLower === 'checklist-alimentar' ||
                                                    templateNameLower === 'checklist alimentar' ||
@@ -798,7 +815,7 @@ export default function WellnessTemplatesPage() {
                                              (templateNameLower.includes('desafio') && templateNameLower.includes('21'))
                       
                       // Log de detecção para debug - TODOS os templates modulares
-                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia ||
+                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico ||
                                        isChecklistAlimentar || isChecklistDetox || isGuiaHidratacao || isDesafio7Dias || isDesafio21Dias
                       
                       if (isModular) {
@@ -885,6 +902,16 @@ export default function WellnessTemplatesPage() {
                           <QuizIntoleranciaPreview
                             etapa={etapaPreviewQuizIntolerancia}
                             onEtapaChange={setEtapaPreviewQuizIntolerancia}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Perfil Metabólico - Componente Modular
+                      if (isQuizPerfilMetabolico) {
+                        return (
+                          <QuizPerfilMetabolicoPreview
+                            etapa={etapaPreviewQuizPerfilMetabolico}
+                            onEtapaChange={setEtapaPreviewQuizPerfilMetabolico}
                           />
                         )
                       }
@@ -2535,6 +2562,7 @@ export default function WellnessTemplatesPage() {
                     setEtapaPreviewQuizEnergetico(0)
                     setEtapaPreviewQuizEmocional(0)
                     setEtapaPreviewQuizIntolerancia(0)
+                    setEtapaPreviewQuizPerfilMetabolico(0)
                     setEtapaPreviewGuiaHidratacao(0)
                     setEtapaPreviewDesafio7Dias(0)
                     setEtapaPreviewDesafio21Dias(0)

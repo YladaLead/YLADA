@@ -3,6 +3,7 @@ import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from '
 import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from './diagnostics/wellness/guia-hidratacao'
 import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from './diagnostics/wellness/avaliacao-emocional'
 import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from './diagnostics/wellness/intolerancia'
+import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } from './diagnostics/wellness/perfil-metabolico'
 
 /**
  * DIAGNÓSTICOS NUTRICIONAIS - YLADA
@@ -186,6 +187,17 @@ export function getDiagnostico(
         diagnosticos = intoleranciaDiagnosticosWellness
       } else {
         diagnosticos = intoleranciaDiagnosticosWellness // Por enquanto só temos wellness
+      }
+      break
+    case 'avaliacao-perfil-metabolico':
+    case 'quiz-perfil-metabolico':
+    case 'perfil-metabolico':
+    case 'perfil-metabólico':
+      // Se for wellness, usar diagnósticos de wellness, senão usar de nutri (se existir)
+      if (profissao === 'wellness') {
+        diagnosticos = perfilMetabolicoDiagnosticosWellness
+      } else {
+        diagnosticos = perfilMetabolicoDiagnosticosWellness // Por enquanto só temos wellness
       }
       break
     case 'calculadora-imc':

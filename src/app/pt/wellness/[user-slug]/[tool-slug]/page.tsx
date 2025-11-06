@@ -47,6 +47,7 @@ const Template21DayChallenge = dynamic(() => import('@/app/pt/wellness/templates
 const TemplateHydrationGuide = dynamic(() => import('@/app/pt/wellness/templates/hydration-guide/page'), { ssr: false })
 const TemplateEmotionalAssessment = dynamic(() => import('@/app/pt/wellness/templates/emotional-assessment/page'), { ssr: false })
 const TemplateIntoleranceAssessment = dynamic(() => import('@/app/pt/wellness/templates/intolerance-assessment/page'), { ssr: false })
+const TemplateMetabolicProfileAssessment = dynamic(() => import('@/app/pt/wellness/templates/metabolic-profile-assessment/page'), { ssr: false })
 const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
@@ -193,6 +194,11 @@ export default function FerramentaPersonalizadaPage() {
       case 'quiz-intolerancia':
       case 'intolerancia':
         return <TemplateIntoleranceAssessment config={config} />
+      case 'avaliacao-perfil-metabolico':
+      case 'quiz-perfil-metabolico':
+      case 'perfil-metabolico':
+      case 'perfil-metabólico':
+        return <TemplateMetabolicProfileAssessment config={config} />
       case 'infografico-educativo':
         return <TemplateInfographic config={config} />
       case 'template-receitas':
