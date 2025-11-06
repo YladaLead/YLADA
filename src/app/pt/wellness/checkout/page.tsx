@@ -16,7 +16,7 @@ const stripePromise = loadStripe(
 
 export default function WellnessCheckoutPage() {
   return (
-    <ProtectedRoute perfil="wellness">
+    <ProtectedRoute perfil="wellness" allowAdmin={true}>
       <WellnessCheckoutContent />
     </ProtectedRoute>
   )

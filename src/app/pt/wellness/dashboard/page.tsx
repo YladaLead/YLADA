@@ -10,7 +10,7 @@ import ChatIA from '@/components/ChatIA'
 
 export default function WellnessDashboard() {
   return (
-    <ProtectedRoute perfil="wellness">
+    <ProtectedRoute perfil="wellness" allowAdmin={true}>
       <RequireSubscription area="wellness">
         <WellnessDashboardContent />
       </RequireSubscription>

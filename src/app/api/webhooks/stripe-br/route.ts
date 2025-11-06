@@ -65,67 +65,6 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * POST /api/webhooks/stripe-us
- * Webhook para processar eventos do Stripe US
- */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.text()
-    const signature = request.headers.get('stripe-signature')
-
-    if (!signature) {
-      return NextResponse.json(
-        { error: 'Missing stripe-signature header' },
-        { status: 400 }
-      )
-    }
-
-    // Obter configuração Stripe US
-    const config = getStripeConfig('us', process.env.NODE_ENV !== 'production')
-    
-    if (!config.webhookSecret) {
-      console.error('❌ STRIPE_WEBHOOK_SECRET_US não configurado')
-      return NextResponse.json(
-        { error: 'Webhook secret not configured' },
-        { status: 500 }
-      )
-    }
-
-    // Criar instância do Stripe US
-    const stripe = await getStripeInstance('us', process.env.NODE_ENV !== 'production')
-
-    // Verificar assinatura do webhook
-    let event: Stripe.Event
-    try {
-      event = stripe.webhooks.constructEvent(
-        body,
-        signature,
-        config.webhookSecret
-      )
-    } catch (err: any) {
-      console.error('❌ Erro ao verificar webhook US:', err.message)
-      return NextResponse.json(
-        { error: `Webhook signature verification failed: ${err.message}` },
-        { status: 400 }
-      )
-    }
-
-    console.log(`📥 Webhook US recebido: ${event.type}`)
-
-    // Processar evento
-    await handleStripeEvent(event, 'us')
-
-    return NextResponse.json({ received: true })
-  } catch (error: any) {
-    console.error('❌ Erro no webhook US:', error)
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-/**
  * Processa eventos do Stripe
  */
 async function handleStripeEvent(event: Stripe.Event, stripeAccount: 'br' | 'us') {

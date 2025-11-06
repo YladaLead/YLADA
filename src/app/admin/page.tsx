@@ -2,15 +2,207 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
-import ProtectedRoute from '../../components/auth/ProtectedRoute'
+import { useState, useEffect, useRef } from 'react'
+import { createClient } from '@/lib/supabase-client'
+
+const supabase = createClient()
 
 export default function AdminDashboard() {
-  return (
-    <ProtectedRoute perfil="admin" allowAdmin={true}>
-      <AdminDashboardContent />
-    </ProtectedRoute>
-  )
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const safetyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isAuthenticatedRef = useRef(false)
+  const hasCheckedRef = useRef(false)
+
+  // Detectar quando a página está sendo redirecionada
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      console.log('⚠️ AdminDashboard: Página está sendo descarregada/redirecionada')
+      console.log('⚠️ AdminDashboard: Estado atual:', {
+        isAuthenticated,
+        loading,
+        isAuthenticatedRef: isAuthenticatedRef.current
+      })
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [isAuthenticated, loading])
+
+  // Limpar cache ao carregar
+  useEffect(() => {
+    // Limpar Service Workers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          registration.unregister()
+        })
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    // Evitar múltiplas execuções
+    if (hasCheckedRef.current) {
+      console.log('⚠️ AdminDashboard: Já verificou autenticação, ignorando...')
+      return
+    }
+    
+    let mounted = true
+    hasCheckedRef.current = true
+    
+    const checkAuth = async () => {
+      try {
+        console.log('🚀 AdminDashboard: INICIANDO verificação de autenticação...')
+        console.log('📌 AdminDashboard: Timestamp:', new Date().toISOString())
+        
+        // Verificar sessão
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        console.log('📋 AdminDashboard: Resultado da sessão:', {
+          hasSession: !!session,
+          hasError: !!sessionError,
+          errorMessage: sessionError?.message,
+          userId: session?.user?.id,
+          email: session?.user?.email
+        })
+        
+        if (!mounted) {
+          console.log('⚠️ AdminDashboard: Componente desmontado, cancelando...')
+          return
+        }
+        
+        if (!session || sessionError) {
+          console.log('❌ AdminDashboard: Sem sessão, redirecionando para login')
+          if (mounted) {
+            window.location.href = '/admin/login'
+          }
+          return
+        }
+
+        console.log('✅ AdminDashboard: Sessão encontrada! User:', session.user.email)
+
+        // Verificar se é admin
+        console.log('🔍 AdminDashboard: Verificando se é admin...')
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('is_admin')
+          .eq('user_id', session.user.id)
+          .single()
+
+        console.log('📋 AdminDashboard: Resultado do perfil:', {
+          hasProfile: !!profile,
+          is_admin: profile?.is_admin,
+          hasError: !!profileError,
+          errorMessage: profileError?.message
+        })
+
+        if (!mounted) {
+          console.log('⚠️ AdminDashboard: Componente desmontado após buscar perfil, cancelando...')
+          return
+        }
+
+        if (profileError) {
+          console.error('❌ AdminDashboard: Erro ao buscar perfil:', profileError.message)
+          if (mounted) {
+            window.location.href = '/admin/login'
+          }
+          return
+        }
+
+        if (!profile?.is_admin) {
+          console.log('❌ AdminDashboard: Não é admin')
+          if (mounted) {
+            window.location.href = '/admin/login'
+          }
+          return
+        }
+
+        console.log('✅✅✅ AdminDashboard: ACESSO PERMITIDO! É admin!')
+        console.log('🔄 AdminDashboard: Definindo isAuthenticated=true e loading=false')
+        
+        if (mounted) {
+          // Limpar timeout de segurança ANTES de mudar o estado
+          if (safetyTimeoutRef.current) {
+            console.log('🧹 AdminDashboard: Limpando timeout de segurança')
+            clearTimeout(safetyTimeoutRef.current)
+            safetyTimeoutRef.current = null
+          }
+          isAuthenticatedRef.current = true
+          setIsAuthenticated(true)
+          setLoading(false)
+          console.log('✅ AdminDashboard: Estado atualizado com sucesso!')
+          console.log('✅ AdminDashboard: Página deve permanecer carregada agora')
+        }
+      } catch (error: any) {
+        console.error('❌ AdminDashboard: Erro geral:', error.message)
+        console.error('❌ AdminDashboard: Stack:', error.stack)
+        if (mounted) {
+          window.location.href = '/admin/login'
+        }
+      }
+    }
+
+    checkAuth()
+    
+    // Listener para detectar mudanças na autenticação - DESABILITADO para evitar redirecionamentos
+    // O listener estava causando redirecionamentos desnecessários
+    // const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    //   console.log('🔄 AdminDashboard: Auth state changed:', event)
+    //   // Não fazer nada - deixar o checkAuth inicial fazer o trabalho
+    // })
+    
+    // Timeout de segurança - se não concluir em 10 segundos, redirecionar
+    // Só redireciona se ainda não autenticado
+    safetyTimeoutRef.current = setTimeout(() => {
+      if (mounted && !isAuthenticatedRef.current) {
+        console.log('⏰ AdminDashboard: Timeout de segurança ativado, verificando sessão...')
+        // Verificar novamente se ainda não autenticado
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          console.log('⏰ AdminDashboard: Verificação do timeout:', {
+            hasSession: !!session,
+            isAuthenticated: isAuthenticatedRef.current
+          })
+          if (!session && mounted && !isAuthenticatedRef.current) {
+            console.error('⏰ AdminDashboard: TIMEOUT DE SEGURANÇA - sem sessão, redirecionando...')
+            window.location.href = '/admin/login'
+          } else if (session && mounted) {
+            console.log('⏰ AdminDashboard: Sessão ainda existe, não redirecionando')
+          }
+        })
+      }
+    }, 10000)
+
+    return () => {
+      console.log('🧹 AdminDashboard: Cleanup - desmontando componente')
+      mounted = false
+      // subscription.unsubscribe() // Removido porque não estamos usando mais
+      if (safetyTimeoutRef.current) {
+        clearTimeout(safetyTimeoutRef.current)
+        safetyTimeoutRef.current = null
+      }
+    }
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return <AdminDashboardContent />
 }
 
 function AdminDashboardContent() {
@@ -117,15 +309,24 @@ function AdminDashboardContent() {
                 <p className="text-sm text-gray-600">Gerenciamento completo do YLADA</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">Admin</p>
-                <p className="text-xs text-gray-600">Administrador do Sistema</p>
-              </div>
-              <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600">A</span>
-              </div>
-            </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900">Admin</p>
+                        <p className="text-xs text-gray-600">Administrador do Sistema</p>
+                      </div>
+                      <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600">A</span>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          await supabase.auth.signOut()
+                          window.location.href = '/admin/login'
+                        }}
+                        className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        Sair
+                      </button>
+                    </div>
           </div>
         </div>
       </header>
