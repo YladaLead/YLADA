@@ -13,6 +13,22 @@ export function createClient() {
     return null as unknown as SupabaseClient
   }
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+  // createBrowserClient do @supabase/ssr gerencia cookies automaticamente
+  // Ele usa localStorage para persistir a sessão e sincroniza com cookies
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return document.cookie.split(';').map(cookie => {
+          const [name, ...rest] = cookie.split('=')
+          return { name: name.trim(), value: rest.join('=') }
+        })
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          document.cookie = `${name}=${value}; path=${options?.path || '/'}; ${options?.maxAge ? `max-age=${options.maxAge};` : ''} ${options?.domain ? `domain=${options.domain};` : ''} ${options?.sameSite ? `SameSite=${options.sameSite};` : ''} ${options?.secure ? 'Secure;' : ''}`
+        })
+      },
+    },
+  })
 }
 

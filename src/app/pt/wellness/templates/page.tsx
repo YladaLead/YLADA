@@ -276,41 +276,26 @@ export default function WellnessTemplatesPage() {
             console.log('📦 Templates carregados do banco:', data.templates.length)
             
             // Transformar templates do banco para formato da página
+            // IMPORTANTE: Mostrar TODOS os templates ativos, sem filtros restritivos
             const templatesFormatados = data.templates
               .filter((t: any) => {
-                // Filtrar templates que não devem aparecer
-                const normalizedId = (t.slug || t.id || '').toLowerCase().replace(/\s+/g, '-')
-                const normalizedName = (t.nome || '').toLowerCase()
-                
-                // Excluir templates removidos
-                const templatesExcluidos = [
-                  'food-tracker',
-                  'rastreador-alimentar',
-                  'planilha-rastreador-alimentar',
-                  'daily-wellness',
-                  'tabela-daily-wellness',
-                  'planilha-daily-wellness'
-                ]
-                
-                const isExcluido = templatesExcluidos.some(excluido => 
-                  normalizedId.includes(excluido) || 
-                  normalizedName.includes(excluido) ||
-                  normalizedName.includes('rastreador de alimentos') ||
-                  normalizedName.includes('rastreador alimentar') ||
-                  normalizedName.includes('bem-estar diário') ||
-                  normalizedName.includes('bem estar diario')
-                )
-                
-                // Log para debug: mostrar quais templates estão sendo excluídos
-                if (isExcluido) {
-                  console.log('🚫 Template excluído:', {
-                    id: normalizedId,
-                    nome: normalizedName,
-                    motivo: 'Está na lista de templates excluídos'
-                  })
+                // Apenas garantir que o template tem nome e está ativo
+                // Removemos filtros restritivos para não perder templates
+                if (!t.nome || !t.nome.trim()) {
+                  console.log('⚠️ Template sem nome ignorado:', t.id)
+                  return false
                 }
                 
-                return !isExcluido
+                // Log para debug: mostrar todos os templates sendo processados
+                console.log('✅ Template processado:', {
+                  id: t.id,
+                  nome: t.nome,
+                  slug: t.slug,
+                  type: t.type,
+                  categoria: t.categoria
+                })
+                
+                return true
               })
               .map((t: any) => {
                 // Normalizar ID para detecção (slug ou nome em lowercase com hífens)

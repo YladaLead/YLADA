@@ -20,8 +20,7 @@ export async function GET(request: NextRequest) {
       .from('user_templates')
       .select(`
         *,
-        user_profiles!inner(user_slug, user_id),
-        users!inner(name, email)
+        user_profiles!inner(user_slug, user_id, nome_completo, email)
       `)
       .eq('user_profiles.user_slug', userSlug)
       .eq('slug', toolSlug)
@@ -30,12 +29,76 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('❌ Erro ao buscar ferramenta por URL:', {
+        error,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        userSlug,
+        toolSlug
+      })
+      
       if (error.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Ferramenta não encontrada' },
           { status: 404 }
         )
       }
+      
+      // Se for erro de relação/join, tentar buscar sem join primeiro
+      if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        console.warn('⚠️ Erro de relação detectado, tentando busca alternativa...')
+        
+        // Buscar primeiro o user_id pelo user_slug
+        const { data: profile, error: profileError } = await supabaseAdmin
+          .from('user_profiles')
+          .select('user_id')
+          .eq('user_slug', userSlug)
+          .maybeSingle()
+        
+        if (profileError || !profile) {
+          return NextResponse.json(
+            { error: 'Usuário não encontrado' },
+            { status: 404 }
+          )
+        }
+        
+        // Buscar ferramenta diretamente pelo user_id e slug
+        const { data: toolData, error: toolError } = await supabaseAdmin
+          .from('user_templates')
+          .select('*')
+          .eq('user_id', profile.user_id)
+          .eq('slug', toolSlug)
+          .eq('profession', 'wellness')
+          .eq('status', 'active')
+          .single()
+        
+        if (toolError) {
+          if (toolError.code === 'PGRST116') {
+            return NextResponse.json(
+              { error: 'Ferramenta não encontrada' },
+              { status: 404 }
+            )
+          }
+          throw toolError
+        }
+        
+        // Buscar perfil separadamente e adicionar aos dados
+        const { data: userProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('user_slug, user_id, nome_completo, email')
+          .eq('user_id', profile.user_id)
+          .maybeSingle()
+        
+        return NextResponse.json({ 
+          tool: {
+            ...toolData,
+            user_profiles: userProfile
+          }
+        })
+      }
+      
       throw error
     }
 

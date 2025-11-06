@@ -261,3 +261,5 @@ export default function ChecklistAlimentarPreview({ etapa, onEtapaChange }: Chec
 }
 
 
+
+

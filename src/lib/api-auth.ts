@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * Helper para proteger APIs - retorna erro JSON ao invés de redirect
@@ -11,20 +12,32 @@ export async function requireApiAuth(
   allowedProfiles?: ('nutri' | 'wellness' | 'coach' | 'nutra' | 'admin')[]
 ): Promise<{ user: any; profile: any } | NextResponse> {
   try {
-    // Criar cliente Supabase server-side usando cookies do request
-    const cookieStore = await cookies()
-    
-    // Também tentar ler cookies diretamente do request (caso cookies() não pegue)
+    // Ler cookies diretamente do header do request (mais confiável em API routes)
     const requestCookies = request.headers.get('cookie') || ''
+    
+    // Também tentar usar cookies() do Next.js como fallback
+    let cookieStore: any = null
+    try {
+      cookieStore = await cookies()
+    } catch (e) {
+      // Se cookies() falhar, usar apenas requestCookies
+      console.warn('⚠️ cookies() falhou, usando apenas request headers')
+    }
     
     // Debug: log dos cookies (apenas em desenvolvimento)
     if (process.env.NODE_ENV === 'development') {
-      const allCookies = cookieStore.getAll()
+      const cookieNames: string[] = []
+      if (requestCookies) {
+        const matches = requestCookies.matchAll(/([^=]+)=/g)
+        for (const match of matches) {
+          cookieNames.push(match[1].trim())
+        }
+      }
       console.log('🔍 API Auth - Debug:', {
-        cookieStoreCount: allCookies.length,
-        cookieNames: allCookies.map(c => c.name),
         requestCookieHeader: requestCookies ? 'present' : 'missing',
-        requestCookieLength: requestCookies.length
+        requestCookieLength: requestCookies.length,
+        cookieNames: cookieNames,
+        cookieStoreAvailable: !!cookieStore
       })
     }
     
@@ -34,17 +47,28 @@ export async function requireApiAuth(
       {
         cookies: {
           get(name: string) {
-            // Tentar primeiro do cookieStore
-            const cookie = cookieStore.get(name)
-            if (cookie?.value) {
-              return cookie.value
+            // PRIORIDADE 1: Tentar parsear do header do request (mais confiável)
+            if (requestCookies) {
+              // Buscar cookie com regex mais robusto
+              const regex = new RegExp(`(?:^|;\\s*)${name}=([^;]*)`, 'i')
+              const match = requestCookies.match(regex)
+              if (match && match[1]) {
+                const value = decodeURIComponent(match[1].trim())
+                if (value) {
+                  return value
+                }
+              }
             }
             
-            // Se não encontrar, tentar parsear do header do request
-            if (requestCookies) {
-              const match = requestCookies.match(new RegExp(`(^| )${name}=([^;]+)`))
-              if (match) {
-                return decodeURIComponent(match[2])
+            // PRIORIDADE 2: Tentar do cookieStore (fallback)
+            if (cookieStore) {
+              try {
+                const cookie = cookieStore.get(name)
+                if (cookie?.value) {
+                  return cookie.value
+                }
+              } catch (e) {
+                // Ignorar erro do cookieStore
               }
             }
             
@@ -70,18 +94,20 @@ export async function requireApiAuth(
         hasUser: !!session?.user,
         userId: session?.user?.id,
         error: sessionError?.message,
-        errorCode: sessionError?.status
+        errorCode: sessionError?.status,
+        hasCookies: !!requestCookies
       })
     }
     
     if (sessionError || !session || !session.user) {
       return NextResponse.json(
         { 
-          error: 'Não autenticado. Faça login para continuar.',
-          debug: process.env.NODE_ENV === 'development' ? {
+          error: 'Você precisa fazer login para continuar.',
+          technical: process.env.NODE_ENV === 'development' ? {
             sessionError: sessionError?.message,
             errorCode: sessionError?.status,
-            hasRequestCookies: !!requestCookies
+            hasRequestCookies: !!requestCookies,
+            cookieHeaderLength: requestCookies.length
           } : undefined
         },
         { status: 401 }
@@ -89,17 +115,83 @@ export async function requireApiAuth(
     }
 
     // Buscar perfil do usuário
-    const { data: profile, error: profileError } = await supabase
+    let { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('user_id', session.user.id)
-      .single()
+      .maybeSingle()
 
-    if (profileError || !profile) {
-      return NextResponse.json(
-        { error: 'Perfil não encontrado.' },
-        { status: 403 }
-      )
+    // Se perfil não existe, criar automaticamente com o perfil inferido da rota
+    if (!profile || profileError?.code === 'PGRST116') {
+      // Tentar inferir o perfil da URL ou usar o primeiro allowedProfile
+      let inferredProfile: string | null = null
+      if (allowedProfiles && allowedProfiles.length > 0) {
+        inferredProfile = allowedProfiles[0] // Usar o primeiro perfil permitido
+      } else {
+        // Tentar inferir da URL
+        const url = request.url.toLowerCase()
+        if (url.includes('/wellness/')) inferredProfile = 'wellness'
+        else if (url.includes('/nutri/')) inferredProfile = 'nutri'
+        else if (url.includes('/coach/')) inferredProfile = 'coach'
+        else if (url.includes('/nutra/')) inferredProfile = 'nutra'
+      }
+
+      if (inferredProfile) {
+        console.log(`📝 Criando perfil automaticamente para usuário ${session.user.id} com perfil: ${inferredProfile}`)
+        
+        // Buscar email do usuário usando supabaseAdmin
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(session.user.id)
+        const email = authUser?.user?.email || session.user.email || ''
+        
+        // Criar perfil básico usando supabaseAdmin
+        const { data: newProfile, error: createError } = await supabaseAdmin
+          .from('user_profiles')
+          .insert({
+            user_id: session.user.id,
+            perfil: inferredProfile,
+            nome_completo: authUser?.user?.user_metadata?.full_name || '',
+            email: email
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('❌ Erro ao criar perfil automaticamente:', createError)
+          return NextResponse.json(
+            { 
+              error: 'Erro ao criar perfil. Tente fazer logout e login novamente.',
+              technical: process.env.NODE_ENV === 'development' ? createError.message : undefined
+            },
+            { status: 500 }
+          )
+        }
+
+        profile = newProfile
+        console.log('✅ Perfil criado automaticamente:', profile)
+      } else {
+        return NextResponse.json(
+          { error: 'Perfil não encontrado e não foi possível criar automaticamente.' },
+          { status: 403 }
+        )
+      }
+    }
+
+    // Se o perfil existe mas não tem 'perfil' definido, atualizar usando supabaseAdmin
+    if (profile && !profile.perfil && allowedProfiles && allowedProfiles.length > 0) {
+      const inferredProfile = allowedProfiles[0]
+      console.log(`📝 Atualizando perfil ${profile.id} para ter perfil: ${inferredProfile}`)
+      
+      const { data: updatedProfile, error: updateError } = await supabaseAdmin
+        .from('user_profiles')
+        .update({ perfil: inferredProfile })
+        .eq('user_id', session.user.id)
+        .select()
+        .single()
+
+      if (!updateError && updatedProfile) {
+        profile = updatedProfile
+        console.log('✅ Perfil atualizado:', profile)
+      }
     }
 
     // Se há perfis permitidos, verificar
@@ -109,13 +201,31 @@ export async function requireApiAuth(
         return { user: session.user, profile }
       }
 
+      // Suporte (funcionários/parceiros) pode acessar todas as áreas para guiar usuários
+      if (profile.is_support) {
+        return { user: session.user, profile }
+      }
+
       // Verificar se o perfil do usuário está na lista de permitidos
-      if (!allowedProfiles.includes(profile.perfil as any)) {
+      if (!profile.perfil || !allowedProfiles.includes(profile.perfil as any)) {
+        console.error('❌ Perfil não autorizado:', {
+          required: allowedProfiles,
+          current: profile.perfil,
+          userId: session.user.id,
+          is_admin: profile.is_admin,
+          is_support: profile.is_support
+        })
         return NextResponse.json(
           { 
             error: 'Acesso negado. Este recurso é apenas para perfis específicos.',
             required_profiles: allowedProfiles,
-            your_profile: profile.perfil
+            your_profile: profile.perfil || 'não definido',
+            technical: process.env.NODE_ENV === 'development' ? {
+              profileId: profile.id,
+              userId: session.user.id,
+              is_admin: profile.is_admin,
+              is_support: profile.is_support
+            } : undefined
           },
           { status: 403 }
         )

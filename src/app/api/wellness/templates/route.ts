@@ -4,8 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase'
 // Função auxiliar para formatar templates
 function formatTemplates(templates: any[]) {
   return templates.map(template => {
-    // Gerar slug do nome
-    const slug = template.name
+    // ✅ Usar slug do banco se existir, senão gerar do nome (fallback)
+    const slug = template.slug || template.name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
     try {
       const { data, error: err } = await supabaseAdmin
         .from('templates_nutrition')
-        .select('id, name, type, specialization, objective, title, description, content, profession')
-        .eq('is_active', true)
+        .select('id, name, slug, type, specialization, objective, title, description, content, profession, is_active')
+        .eq('is_active', true) // Apenas ativos (mas incluímos is_active no select para debug)
         .eq('profession', 'wellness') // Apenas templates Wellness
         .eq('language', 'pt') // Apenas português
         .order('type', { ascending: true })
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       if (err.message?.includes('profession') || err.code === '42703') {
         const { data: allTemplates, error: error2 } = await supabaseAdmin
           .from('templates_nutrition')
-          .select('id, name, type, specialization, objective, title, description, content')
+          .select('id, name, slug, type, specialization, objective, title, description, content')
           .eq('is_active', true)
           .eq('language', 'pt') // Apenas português
           .order('type', { ascending: true })

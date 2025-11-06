@@ -49,7 +49,7 @@ export default function WellnessNavBar({ showTitle = false, title }: WellnessNav
               href="/pt/wellness/dashboard"
               className="text-gray-700 hover:text-green-600 font-medium transition-colors"
             >
-              Wellness
+              Dashboard
             </Link>
             <Link
               href="/pt/wellness/configuracao"

@@ -27,6 +27,7 @@ export default function LoginForm({
   const [error, setError] = useState<string | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [name, setName] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const perfilLabels = {
     nutri: 'Nutricionista',
@@ -36,13 +37,49 @@ export default function LoginForm({
     admin: 'Administrador'
   }
 
+  const perfilAreaLabels: Record<string, string> = {
+    nutri: 'Nutricionista',
+    wellness: 'Wellness',
+    coach: 'Coach',
+    nutra: 'Nutra'
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     try {
+      // VALIDAÇÃO: Verificar perfil antes de fazer login/cadastro
+      const checkResponse = await fetch('/api/auth/check-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+
+      const checkData = await checkResponse.json()
+
       if (isSignUp) {
+        // CADASTRO: Verificar se email já existe
+        if (checkData.exists) {
+          if (checkData.hasProfile && checkData.perfil) {
+            // Email já tem perfil em outra área
+            // EXCEÇÃO: Se for admin ou suporte, pode ter múltiplos perfis
+            if (checkData.is_admin || checkData.is_support) {
+              // Admin/Suporte pode criar conta em qualquer área
+              // Continuar com cadastro
+            } else {
+              const areaLabel = perfilAreaLabels[checkData.perfil] || checkData.perfil
+              setError(`Este email já está cadastrado na área ${areaLabel}. Faça login na área correta ou use outro email.`)
+              setLoading(false)
+              return
+            }
+          } else {
+            // Email existe mas não tem perfil - pode criar perfil na área atual
+            // Continuar com cadastro
+          }
+        }
+
         // Criar novo usuário
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
@@ -56,7 +93,15 @@ export default function LoginForm({
           }
         })
 
-        if (signUpError) throw signUpError
+        if (signUpError) {
+          // Se erro de email já existe, informar melhor
+          if (signUpError.message?.includes('already registered') || signUpError.message?.includes('already exists')) {
+            setError('Este email já está cadastrado. Faça login ou use outro email.')
+          } else {
+            throw signUpError
+          }
+          return
+        }
 
         if (data.user) {
           // Verificar se precisa confirmar email
@@ -68,75 +113,76 @@ export default function LoginForm({
           }
         }
       } else {
-        // Login
+        // LOGIN: Verificar se perfil corresponde à área
+        if (checkData.exists && checkData.hasProfile && checkData.perfil) {
+          // EXCEÇÃO: Admin e Suporte podem acessar qualquer área
+          if (checkData.is_admin || checkData.is_support) {
+            // Admin/Suporte pode fazer login em qualquer área
+            // Continuar com login
+          } else if (checkData.perfil !== perfil) {
+            // Perfil não corresponde à área atual
+            const areaLabel = perfilAreaLabels[checkData.perfil] || checkData.perfil
+            setError(`Este email está cadastrado na área ${areaLabel}. Faça login na área correta.`)
+            setLoading(false)
+            return
+          }
+        }
+
+        // Fazer login
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password
         })
 
-        if (signInError) throw signInError
+        if (signInError) {
+          // Melhorar mensagens de erro
+          if (signInError.message?.includes('Invalid login credentials')) {
+            setError('Email ou senha incorretos. Verifique suas credenciais.')
+          } else {
+            throw signInError
+          }
+          return
+        }
 
         if (data.session) {
-          // Verificar e garantir que o perfil existe e está correto
-          try {
-            // Primeiro verificar se a tabela user_profiles tem a coluna perfil
-            const { data: profileData, error: profileError } = await supabase
-              .from('user_profiles')
-              .select('perfil')
-              .eq('user_id', data.session.user.id)
-              .maybeSingle()
-
-            // Se não existe perfil ou está incorreto, criar/atualizar
-            if (profileError || !profileData || profileData.perfil !== perfil) {
-              // Tentar upsert apenas com user_id e perfil (colunas mínimas)
-              const upsertData: any = {
-                user_id: data.session.user.id,
-                perfil: perfil
-              }
-
-              // Adicionar email e nome_completo apenas se as colunas existirem
-              // (vamos tentar e ignorar erro se não existirem)
-              try {
-                const { error: upsertError } = await supabase
-                  .from('user_profiles')
-                  .upsert(upsertData, {
-                    onConflict: 'user_id'
-                  })
-
-                if (upsertError) {
-                  console.error('Erro ao atualizar perfil:', upsertError)
-                  // Tentar sem email e nome_completo se der erro
-                  if (upsertError.message?.includes('email') || upsertError.message?.includes('nome_completo')) {
-                    const { error: simpleUpsertError } = await supabase
-                      .from('user_profiles')
-                      .upsert({
-                        user_id: data.session.user.id,
-                        perfil: perfil
-                      }, {
-                        onConflict: 'user_id'
-                      })
-                    
-                    if (simpleUpsertError) {
-                      console.error('Erro ao atualizar perfil (simples):', simpleUpsertError)
-                    }
-                  }
-                } else {
-                  // Aguardar um pouco para garantir que o perfil foi salvo
-                  await new Promise(resolve => setTimeout(resolve, 500))
-                }
-              } catch (err) {
-                console.error('Erro ao atualizar perfil:', err)
-              }
+          console.log('✅ Login bem-sucedido!')
+          console.log('👤 User ID:', data.session.user.id)
+          console.log('📧 Email:', data.session.user.email)
+          
+          // IMPORTANTE: Aguardar um pouco para garantir que a sessão foi salva nos cookies
+          // O createBrowserClient precisa de tempo para persistir a sessão
+          console.log('⏳ Aguardando persistência da sessão...')
+          await new Promise(resolve => setTimeout(resolve, 800))
+          
+          // Verificar se a sessão foi realmente salva
+          const { data: { session: verifySession } } = await supabase.auth.getSession()
+          console.log('🔍 Verificando sessão salva:', {
+            hasSession: !!verifySession,
+            hasUser: !!verifySession?.user,
+            userId: verifySession?.user?.id
+          })
+          
+          if (!verifySession) {
+            console.error('❌ Sessão não foi salva! Tentando novamente...')
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            const { data: { session: retrySession } } = await supabase.auth.getSession()
+            if (!retrySession) {
+              setError('Erro ao salvar sessão. Tente fazer login novamente.')
+              setLoading(false)
+              return
             }
-          } catch (profileErr) {
-            console.error('Erro ao verificar perfil:', profileErr)
-            // Continuar mesmo com erro - o usuário pode tentar acessar
+            console.log('✅ Sessão salva após retry!')
           }
-
-          // Aguardar um pouco antes de redirecionar para garantir que o perfil foi carregado
-          await new Promise(resolve => setTimeout(resolve, 300))
-          router.push(redirectPath)
-          router.refresh()
+          
+          // Redirecionar usando window.location.href para garantir reload completo
+          console.log('🔄 Redirecionando para:', redirectPath)
+          window.location.href = redirectPath
+          
+          return
+        } else {
+          console.error('❌ Nenhuma sessão retornada após login!')
+          setError('Erro ao criar sessão. Tente novamente.')
+          setLoading(false)
         }
       }
     } catch (err: any) {
@@ -214,16 +260,35 @@ export default function LoginForm({
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Senha
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {error && (

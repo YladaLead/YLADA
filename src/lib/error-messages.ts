@@ -20,7 +20,16 @@ export function translateError(error: any): string {
 
   // Erros de foreign key
   if (errorString.includes('foreign key') || errorString.includes('constraint')) {
+    // Verificar se é erro específico de foreign key violation
+    if (errorString.includes('violates foreign key constraint')) {
+      return 'Não foi possível salvar. Verifique se todos os dados estão corretos e se você tem permissão para criar esta ferramenta.'
+    }
     return 'Não foi possível salvar. Verifique se os dados estão corretos.'
+  }
+  
+  // Erros específicos do Supabase - código 42703 (coluna não existe)
+  if (error?.code === '42703' || errorString.includes('42703')) {
+    return 'Estamos atualizando o sistema. Por favor, execute o script SQL de atualização e tente novamente.'
   }
 
   // Erros de duplicado/unique

@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth, getAuthenticatedUserId } from '@/lib/api-auth'
 import { translateError } from '@/lib/error-messages'
+import { 
+  validateTemplateBeforeCreate,
+  handleDatabaseInsertError 
+} from '@/lib/template-helpers'
+import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 
 // GET - Listar ferramentas do usuário ou buscar por ID
 export async function GET(request: NextRequest) {
@@ -194,13 +199,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ✅ Validar template antes de criar (usando helper reutilizável)
+    const { templateId: templateIdToUse, templateSlug: templateSlugCanonico, error: templateError } = await validateTemplateBeforeCreate(
+      template_slug,
+      template_id,
+      profession, // 'wellness'
+      'pt'
+    )
+
+    if (templateError) {
+      return NextResponse.json(
+        { error: templateError },
+        { status: 400 }
+      )
+    }
+
     // Buscar conteúdo do template base se template_id fornecido
     let content: any = null // Inicializar como null
-    if (template_id) {
+    
+    if (templateIdToUse) {
       const { data: template, error: templateError } = await supabaseAdmin
         .from('templates_nutrition')
         .select('content')
-        .eq('id', template_id)
+        .eq('id', templateIdToUse)
         .single()
 
       if (templateError) {
@@ -237,8 +258,8 @@ export async function POST(request: NextRequest) {
     // Inserir nova ferramenta
     const insertData: any = {
       user_id: authenticatedUserId, // 🔒 Sempre usar user_id do token
-      template_id: template_id || null,
-      template_slug: template_slug || null,
+      template_id: templateIdToUse || null,
+      template_slug: templateSlugCanonico, // ✅ Slug canônico do banco ou normalizado
       slug,
       title,
       description: description || null,
@@ -293,7 +314,18 @@ export async function POST(request: NextRequest) {
           content: content ? `{${Object.keys(content).length} keys}` : 'empty'
         }
       })
-      throw insertError
+      
+      // ✅ Usar helper para tratar erros de inserção
+      const errorResponse = handleDatabaseInsertError(insertError)
+      return NextResponse.json(
+        { 
+          error: errorResponse.error,
+          technical: errorResponse.technical,
+          code: errorResponse.code,
+          hint: errorResponse.hint
+        },
+        { status: errorResponse.status }
+      )
     }
 
     // Buscar user_slug separadamente (pode não existir)
@@ -328,25 +360,32 @@ export async function POST(request: NextRequest) {
       error,
       message: error?.message,
       code: error?.code,
-      details: error?.details
+      details: error?.details,
+      hint: error?.hint
     })
     
-    // Usar translateError para mensagem amigável em português
-    const mensagemAmigavel = translateError(error)
-    
     // Se for erro de coluna não encontrada, dar mensagem específica
-    if (error?.message?.includes('column') || error?.message?.includes('schema cache') || error?.code === '42703') {
+    if (error?.code === '42703' || error?.message?.includes('column') || error?.message?.includes('does not exist') || error?.message?.includes('schema cache')) {
       return NextResponse.json(
         { 
-          error: 'Estamos atualizando o sistema. Por favor, atualize a página (F5) e tente novamente.',
-          technical: error?.message // Para debug
+          error: 'Estamos atualizando o sistema. Por favor, execute o script SQL de atualização do banco de dados e tente novamente.',
+          technical: error?.message,
+          code: error?.code,
+          hint: error?.hint
         },
         { status: 500 }
       )
     }
     
+    // Usar translateError para mensagem amigável em português
+    const mensagemAmigavel = translateError(error)
+    
     return NextResponse.json(
-      { error: mensagemAmigavel },
+      { 
+        error: mensagemAmigavel,
+        technical: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+        code: error?.code
+      },
       { status: 500 }
     )
   }

@@ -412,3 +412,4 @@ const titulo = slug
 **Última atualização:** Janeiro 2024
 **Mantido por:** Equipe de Desenvolvimento YLADA
 
+

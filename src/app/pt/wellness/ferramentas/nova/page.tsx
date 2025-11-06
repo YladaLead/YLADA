@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
@@ -14,6 +15,7 @@ interface Template {
   icon: string
   descricao: string
   slug: string // Ex: 'calc-imc', 'quiz-ganhos', etc
+  templateId?: string // UUID do banco de dados
 }
 
 interface Configuracao {
@@ -31,6 +33,7 @@ interface Configuracao {
 }
 
 export default function NovaFerramentaWellness() {
+  const searchParams = useSearchParams()
   const [templateSelecionado, setTemplateSelecionado] = useState<Template | null>(null)
   const [filtroCategoria, setFiltroCategoria] = useState<'todas' | 'Calculadora' | 'Quiz' | 'Planilha'>('todas')
   const [busca, setBusca] = useState('')
@@ -110,6 +113,36 @@ export default function NovaFerramentaWellness() {
     carregarTemplates()
   }, [])
 
+  // Pré-selecionar template da URL quando templates forem carregados
+  useEffect(() => {
+    const templateParam = searchParams.get('template')
+    
+    if (templateParam && templates.length > 0 && !templateSelecionado) {
+      // Buscar template por slug, id ou templateId (UUID do banco)
+      const templateEncontrado = templates.find(
+        t => t.slug === templateParam || t.id === templateParam || t.templateId === templateParam
+      )
+      
+      if (templateEncontrado) {
+        console.log('✅ Template pré-selecionado da URL:', templateEncontrado.nome)
+        setTemplateSelecionado(templateEncontrado)
+        
+        // Filtrar categoria automaticamente
+        if (templateEncontrado.categoria) {
+          const categoriaMap: Record<string, 'todas' | 'Calculadora' | 'Quiz' | 'Planilha'> = {
+            'Calculadora': 'Calculadora',
+            'Quiz': 'Quiz',
+            'Planilha': 'Planilha'
+          }
+          const categoria = categoriaMap[templateEncontrado.categoria] || 'todas'
+          setFiltroCategoria(categoria)
+        }
+      } else {
+        console.warn('⚠️ Template não encontrado:', templateParam)
+      }
+    }
+  }, [searchParams, templates, templateSelecionado])
+
   // Função para validar se URL é do WhatsApp
   const validarUrlWhatsapp = (url: string): boolean => {
     if (!url) return false
@@ -183,7 +216,8 @@ export default function NovaFerramentaWellness() {
               objetivo: t.objetivo || 'Avaliar',
               icon: t.icon || (t.categoria === 'Calculadora' ? '🧮' : t.categoria === 'Quiz' ? '🎯' : '📊'),
               descricao: t.descricao || '',
-              slug: t.slug || t.id
+              slug: t.slug || t.id,
+              templateId: t.templateId // UUID do banco de dados
             }))
             setTemplates(templatesFormatados)
             console.log(`✅ ${templatesFormatados.length} templates carregados do banco de dados`)
@@ -426,20 +460,66 @@ export default function NovaFerramentaWellness() {
           status: response.status,
           errorData: data,
           technical: data.technical,
+          code: data.code,
+          hint: data.hint,
           payload: payload
         })
         
         // Se houver detalhes técnicos, mostrar no console
         if (data.technical) {
           console.error('🔍 Detalhes técnicos do erro:', data.technical)
+          if (data.hint) {
+            console.error('💡 Dica:', data.hint)
+          }
+        }
+        
+        // Se for erro de coluna faltando, mostrar mensagem mais específica
+        if (data.code === '42703' || data.technical?.includes('column') || data.technical?.includes('does not exist')) {
+          throw new Error('O banco de dados precisa ser atualizado. Execute o script SQL "garantir-colunas-user-templates.sql" e tente novamente.')
         }
         
         throw new Error(data.error || 'Erro ao criar ferramenta')
       }
 
-      // Sucesso! Redirecionar para a lista de ferramentas
-      alert(`Ferramenta criada com sucesso!\n\nURL: ${data.tool?.full_url || configuracao.urlCompleta}`)
-      window.location.href = '/pt/wellness/ferramentas'
+      // Sucesso! Mostrar mensagem amigável e redirecionar
+      const urlCompleta = data.tool?.full_url || configuracao.urlCompleta
+      
+      // Criar mensagem de sucesso visual
+      const mensagemSucesso = document.createElement('div')
+      mensagemSucesso.className = 'fixed top-4 right-4 bg-green-50 border-2 border-green-400 rounded-lg shadow-lg p-4 z-50 max-w-md'
+      mensagemSucesso.innerHTML = `
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <span class="text-green-600 text-2xl">✅</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-bold text-green-900 mb-1">Ferramenta criada com sucesso!</h3>
+            <p class="text-xs text-green-700 mb-2">Sua ferramenta está pronta para uso.</p>
+            <div class="bg-white rounded p-2 mb-2 border border-green-200">
+              <p class="text-xs text-gray-600 font-mono break-all">${urlCompleta}</p>
+            </div>
+            <button 
+              onclick="navigator.clipboard.writeText('${urlCompleta}').then(() => alert('URL copiada!'))"
+              class="text-xs text-green-700 hover:text-green-900 underline"
+            >
+              Copiar URL
+            </button>
+          </div>
+          <button 
+            onclick="this.parentElement.parentElement.remove()"
+            class="text-green-600 hover:text-green-800 text-lg font-bold"
+          >
+            ×
+          </button>
+        </div>
+      `
+      document.body.appendChild(mensagemSucesso)
+      
+      // Remover mensagem após 5 segundos e redirecionar
+      setTimeout(() => {
+        mensagemSucesso.remove()
+        window.location.href = '/pt/wellness/ferramentas'
+      }, 5000)
     } catch (error: any) {
       console.error('❌ Erro técnico ao salvar ferramenta:', {
         error,

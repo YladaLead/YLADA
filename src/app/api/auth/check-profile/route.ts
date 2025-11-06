@@ -1,0 +1,85 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+
+/**
+ * Verificar perfil por email antes do login/cadastro
+ * Retorna o perfil atual do email (se existir)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const { email } = await request.json()
+
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email é obrigatório' },
+        { status: 400 }
+      )
+    }
+
+    // Buscar usuário no Supabase Auth pelo email (método mais eficiente)
+    const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers()
+    
+    if (authError) {
+      console.error('Erro ao buscar usuários:', authError)
+      return NextResponse.json(
+        { error: 'Erro ao verificar email' },
+        { status: 500 }
+      )
+    }
+
+    // Encontrar usuário pelo email (case-insensitive)
+    const authUser = authUsers.users.find(u => 
+      u.email?.toLowerCase() === email.toLowerCase()
+    )
+
+    if (!authUser) {
+      // Email não existe - pode criar conta
+      return NextResponse.json({
+        exists: false,
+        canCreate: true
+      })
+    }
+
+    // Buscar perfil do usuário
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('perfil, email, is_admin, is_support')
+      .eq('user_id', authUser.id)
+      .maybeSingle()
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Erro ao buscar perfil:', profileError)
+      return NextResponse.json(
+        { error: 'Erro ao verificar perfil' },
+        { status: 500 }
+      )
+    }
+
+    if (!profile) {
+      // Usuário existe mas não tem perfil - pode criar perfil na área atual
+      return NextResponse.json({
+        exists: true,
+        hasProfile: false,
+        canCreate: true
+      })
+    }
+
+    // Usuário existe e tem perfil
+    return NextResponse.json({
+      exists: true,
+      hasProfile: true,
+      perfil: profile.perfil,
+      is_admin: profile.is_admin || false,
+      is_support: profile.is_support || false,
+      canCreate: false
+    })
+
+  } catch (error: any) {
+    console.error('Erro ao verificar perfil:', error)
+    return NextResponse.json(
+      { error: 'Erro interno ao verificar perfil' },
+      { status: 500 }
+    )
+  }
+}
+

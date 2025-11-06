@@ -51,3 +51,5 @@ Após testar, envie:
 3. Com esses logs, posso ajustar a detecção para os IDs corretos
 
 
+
+
