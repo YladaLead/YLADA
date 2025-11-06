@@ -21,6 +21,7 @@ function formatTemplates(templates: any[]) {
     return {
       id: slug,
       nome: template.name,
+      type: template.type, // IMPORTANTE: Incluir o type do banco
       categoria,
       objetivo: template.objective || 'Avaliar',
       icon: template.type === 'calculadora' ? '🧮' :

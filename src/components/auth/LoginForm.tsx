@@ -77,6 +77,64 @@ export default function LoginForm({
         if (signInError) throw signInError
 
         if (data.session) {
+          // Verificar e garantir que o perfil existe e está correto
+          try {
+            // Primeiro verificar se a tabela user_profiles tem a coluna perfil
+            const { data: profileData, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('perfil')
+              .eq('user_id', data.session.user.id)
+              .maybeSingle()
+
+            // Se não existe perfil ou está incorreto, criar/atualizar
+            if (profileError || !profileData || profileData.perfil !== perfil) {
+              // Tentar upsert apenas com user_id e perfil (colunas mínimas)
+              const upsertData: any = {
+                user_id: data.session.user.id,
+                perfil: perfil
+              }
+
+              // Adicionar email e nome_completo apenas se as colunas existirem
+              // (vamos tentar e ignorar erro se não existirem)
+              try {
+                const { error: upsertError } = await supabase
+                  .from('user_profiles')
+                  .upsert(upsertData, {
+                    onConflict: 'user_id'
+                  })
+
+                if (upsertError) {
+                  console.error('Erro ao atualizar perfil:', upsertError)
+                  // Tentar sem email e nome_completo se der erro
+                  if (upsertError.message?.includes('email') || upsertError.message?.includes('nome_completo')) {
+                    const { error: simpleUpsertError } = await supabase
+                      .from('user_profiles')
+                      .upsert({
+                        user_id: data.session.user.id,
+                        perfil: perfil
+                      }, {
+                        onConflict: 'user_id'
+                      })
+                    
+                    if (simpleUpsertError) {
+                      console.error('Erro ao atualizar perfil (simples):', simpleUpsertError)
+                    }
+                  }
+                } else {
+                  // Aguardar um pouco para garantir que o perfil foi salvo
+                  await new Promise(resolve => setTimeout(resolve, 500))
+                }
+              } catch (err) {
+                console.error('Erro ao atualizar perfil:', err)
+              }
+            }
+          } catch (profileErr) {
+            console.error('Erro ao verificar perfil:', profileErr)
+            // Continuar mesmo com erro - o usuário pode tentar acessar
+          }
+
+          // Aguardar um pouco antes de redirecionar para garantir que o perfil foi carregado
+          await new Promise(resolve => setTimeout(resolve, 300))
           router.push(redirectPath)
           router.refresh()
         }

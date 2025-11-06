@@ -117,16 +117,6 @@ export default function WellnessTemplatesPage() {
       color: 'bg-purple-500'
     },
     {
-      id: 'daily-wellness',
-      name: 'Tabela: Bem-Estar Diário',
-      description: 'Acompanhe métricas de bem-estar diárias',
-      icon: FileText,
-      type: 'planilha',
-      category: 'Acompanhamento',
-      link: '/pt/wellness/templates/daily-wellness',
-      color: 'bg-teal-500'
-    },
-    {
       id: 'healthy-eating',
       name: 'Quiz: Alimentação Saudável',
       description: 'Avalie hábitos alimentares e oriente nutricionalmente',

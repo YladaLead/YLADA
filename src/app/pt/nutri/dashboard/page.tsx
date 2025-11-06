@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ChatIA from '../../../../components/ChatIA'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
+import NutriNavBar from '../../../../components/nutri/NutriNavBar'
 
 export default function NutriDashboard() {
   return (
@@ -106,19 +107,14 @@ function NutriDashboardContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Barra de Navegação */}
+      <NutriNavBar />
+
+      {/* Header do Dashboard */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-6">
-              <Image
-                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
-                alt="YLADA"
-                width={220}
-                height={70}
-                className="h-14 sm:h-16 w-auto"
-              />
-              <div className="h-14 sm:h-16 w-px bg-gray-300"></div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   Dashboard NUTRI

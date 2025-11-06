@@ -2,28 +2,31 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import ChatIA from '../../../../components/ChatIA'
-import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
-import { useAuth } from '@/hooks/useAuth'
+// TODO: Reativar após migração completa
+// import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
+// import { useAuth } from '@/hooks/useAuth'
 
 export default function WellnessDashboard() {
-  return (
-    <ProtectedRoute perfil="wellness">
-      <WellnessDashboardContent />
-    </ProtectedRoute>
-  )
+  // TODO: Reativar login após migração completa
+  // return (
+  //   <ProtectedRoute perfil="wellness">
+  //     <WellnessDashboardContent />
+  //   </ProtectedRoute>
+  // )
+  return <WellnessDashboardContent />
 }
 
 function WellnessDashboardContent() {
-  const { user, signOut } = useAuth()
+  // TODO: Reativar useAuth após migração
+  // const { user, signOut } = useAuth()
+  const user = null // Temporário durante migração
   
   const [perfil, setPerfil] = useState({
-    nome: '',
+    nome: 'Usuário Teste', // Temporário durante migração
     bio: ''
   })
-  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
+  const [carregandoPerfil, setCarregandoPerfil] = useState(false) // Não carregar durante migração
 
   const [stats, setStats] = useState({
     ferramentasAtivas: 0,
@@ -32,7 +35,8 @@ function WellnessDashboardContent() {
     clientesAtivos: 0
   })
 
-  const [chatAberto, setChatAberto] = useState(false)
+  // TODO: Reativar chat após migração
+  // const [chatAberto, setChatAberto] = useState(false)
 
   const [ferramentasAtivas, setFerramentasAtivas] = useState<Array<{
     id: string
@@ -44,89 +48,20 @@ function WellnessDashboardContent() {
     icon: string
   }>>([])
 
-  const [leadsRecentes, setLeadsRecentes] = useState<Array<{
-    id: number
-    nome: string
-    email: string
-    telefone: string
-    ferramenta: string
-    data: string
-    status: string
-  }>>([])
-
   const [carregandoDados, setCarregandoDados] = useState(true)
 
-  // Carregar todos os dados do dashboard em uma única chamada (otimizado)
+  // TODO: Reativar carregamento de dados após migração
+  // Carregar dados do dashboard (desabilitado durante migração)
   useEffect(() => {
-    const carregarDadosDashboard = async () => {
-      if (!user) return
-      
-      try {
-        setCarregandoPerfil(true)
-        setCarregandoDados(true)
-        
-        // Uma única chamada API que retorna perfil + ferramentas + estatísticas
-        const response = await fetch('/api/wellness/dashboard', {
-          credentials: 'include'
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          
-          // Atualizar perfil
-          if (data.profile) {
-            setPerfil({
-              nome: data.profile.nome || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '',
-              bio: data.profile.bio || ''
-            })
-          } else {
-            // Fallback para dados do usuário logado
-            setPerfil({
-              nome: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
-              bio: ''
-            })
-          }
-          
-          // Atualizar ferramentas (já formatadas no backend)
-          if (data.ferramentas) {
-            setFerramentasAtivas(data.ferramentas)
-          }
-          
-          // Atualizar estatísticas (já calculadas no backend)
-          if (data.stats) {
-            setStats(data.stats)
-          }
-        } else {
-          // Fallback para dados do usuário logado
-          setPerfil({
-            nome: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
-            bio: ''
-          })
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados do dashboard:', error)
-        // Fallback para dados do usuário logado
-        setPerfil({
-          nome: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
-          bio: ''
-        })
-        // Em caso de erro, manter valores padrão
-        setStats({
-          ferramentasAtivas: 0,
-          leadsGerados: 0,
-          conversoes: 0,
-          clientesAtivos: 0
-        })
-      } finally {
-        setCarregandoPerfil(false)
-        setCarregandoDados(false)
-      }
-    }
-    
-    if (user) {
-      carregarDadosDashboard()
-    }
-  }, [user])
+    // Simular dados vazios durante migração
+    setCarregandoDados(false)
+    setStats({
+      ferramentasAtivas: 0,
+      leadsGerados: 0,
+      conversoes: 0,
+      clientesAtivos: 0
+    })
+  }, [])
 
 
   return (
@@ -254,87 +189,10 @@ function WellnessDashboardContent() {
           </div>
         </div>
 
-        {/* Área de Cursos */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 sm:p-6 shadow-sm border-2 border-green-200">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-green-900 mb-1 flex items-center">
-                <span className="text-2xl sm:text-3xl mr-3">📚</span>
-                Meus Cursos
-              </h2>
-              <p className="text-sm text-green-700">Continue aprendendo e desenvolva suas habilidades</p>
-            </div>
-            <Link 
-              href="/pt/wellness/cursos"
-              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg font-medium text-sm sm:text-base"
-            >
-              Ver Cursos →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg p-4 border border-green-100 hover:border-green-300 hover:shadow-md transition-all">
-              <div className="flex items-start space-x-3">
-                <div className="bg-green-100 rounded-lg p-2 flex-shrink-0">
-                  <span className="text-2xl">🎯</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Nutrição Básica</h3>
-                  <p className="text-xs text-gray-600 mt-1">Fundamentos de alimentação saudável</p>
-                  <span className="inline-block mt-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                    Em andamento
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 border border-green-100 hover:border-green-300 hover:shadow-md transition-all">
-              <div className="flex items-start space-x-3">
-                <div className="bg-emerald-100 rounded-lg p-2 flex-shrink-0">
-                  <span className="text-2xl">💪</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Bem-Estar Integral</h3>
-                  <p className="text-xs text-gray-600 mt-1">Mindset e hábitos saudáveis</p>
-                  <span className="inline-block mt-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                    Concluído
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-4 border border-green-100 hover:border-green-300 hover:shadow-md transition-all">
-              <div className="flex items-start space-x-3">
-                <div className="bg-teal-100 rounded-lg p-2 flex-shrink-0">
-                  <span className="text-2xl">🌟</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Transformação Total</h3>
-                  <p className="text-xs text-gray-600 mt-1">Mudança de vida completa</p>
-                  <span className="inline-block mt-2 text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                    Não iniciado
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Chat com IA */}
-      <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
-      
-      {/* Botão Flutuante do Chat */}
-      {!chatAberto && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            onClick={() => setChatAberto(true)}
-            className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-          >
-            <span className="text-2xl">💬</span>
-          </button>
-        </div>
-      )}
+      {/* TODO: Reativar chat após migração */}
+      {/* <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} /> */}
     </div>
   )
 }

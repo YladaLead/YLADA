@@ -39,9 +39,7 @@ const TemplateParasitas = dynamic(() => import('@/app/pt/wellness/templates/para
 const TemplateAlimentacao = dynamic(() => import('@/app/pt/wellness/templates/healthy-eating/page'), { ssr: false })
 const TemplateWellnessProfile = dynamic(() => import('@/app/pt/wellness/templates/wellness-profile/page'), { ssr: false })
 const TemplateNutritionAssessment = dynamic(() => import('@/app/pt/wellness/templates/nutrition-assessment/page'), { ssr: false })
-const TemplateDailyWellness = dynamic(() => import('@/app/pt/wellness/templates/daily-wellness/page'), { ssr: false })
 const TemplateMealPlanner = dynamic(() => import('@/app/pt/wellness/templates/meal-planner/page'), { ssr: false })
-const TemplateFoodTracker = dynamic(() => import('@/app/pt/wellness/templates/food-tracker/page'), { ssr: false })
 const TemplateFoodDiary = dynamic(() => import('@/app/pt/wellness/templates/food-diary/page'), { ssr: false })
 const TemplateWeeklyGoals = dynamic(() => import('@/app/pt/wellness/templates/weekly-goals/page'), { ssr: false })
 const Template7DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/7-day-challenge/page'), { ssr: false })
@@ -170,14 +168,8 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplateWellnessProfile config={config} />
       case 'quiz-nutrition-assessment':
         return <TemplateNutritionAssessment config={config} />
-      case 'tabela-daily-wellness':
-      case 'planilha-daily-wellness':
-        return <TemplateDailyWellness config={config} />
       case 'planilha-meal-planner':
         return <TemplateMealPlanner config={config} />
-      case 'rastreador-alimentar':
-      case 'planilha-rastreador-alimentar':
-        return <TemplateFoodTracker config={config} />
       case 'diario-alimentar':
       case 'planilha-diario-alimentar':
         return <TemplateFoodDiary config={config} />

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth, getAuthenticatedUserId } from '@/lib/api-auth'
+import { translateError } from '@/lib/error-messages'
 
 // GET - Listar ferramentas do usuário ou buscar por ID
 export async function GET(request: NextRequest) {
@@ -93,9 +94,15 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ tools: data })
   } catch (error: any) {
-    console.error('Erro ao buscar ferramentas:', error)
+    console.error('❌ Erro técnico ao buscar ferramentas:', {
+      error,
+      message: error?.message,
+      code: error?.code
+    })
+    
+    const mensagemAmigavel = translateError(error)
     return NextResponse.json(
-      { error: error.message || 'Erro ao buscar ferramentas' },
+      { error: mensagemAmigavel },
       { status: 500 }
     )
   }
@@ -269,9 +276,29 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error: any) {
-    console.error('Erro ao criar ferramenta:', error)
+    console.error('❌ Erro técnico ao criar ferramenta:', {
+      error,
+      message: error?.message,
+      code: error?.code,
+      details: error?.details
+    })
+    
+    // Usar translateError para mensagem amigável em português
+    const mensagemAmigavel = translateError(error)
+    
+    // Se for erro de coluna não encontrada, dar mensagem específica
+    if (error?.message?.includes('column') || error?.message?.includes('schema cache') || error?.code === '42703') {
+      return NextResponse.json(
+        { 
+          error: 'Estamos atualizando o sistema. Por favor, atualize a página (F5) e tente novamente.',
+          technical: error?.message // Para debug
+        },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: error.message || 'Erro ao criar ferramenta' },
+      { error: mensagemAmigavel },
       { status: 500 }
     )
   }
@@ -445,9 +472,29 @@ export async function PUT(request: NextRequest) {
       message: 'Ferramenta atualizada com sucesso!'
     })
   } catch (error: any) {
-    console.error('Erro ao atualizar ferramenta:', error)
+    console.error('❌ Erro técnico ao atualizar ferramenta:', {
+      error,
+      message: error?.message,
+      code: error?.code,
+      details: error?.details
+    })
+    
+    // Usar translateError para mensagem amigável em português
+    const mensagemAmigavel = translateError(error)
+    
+    // Se for erro de coluna não encontrada, dar mensagem específica
+    if (error?.message?.includes('column') || error?.message?.includes('schema cache') || error?.code === '42703') {
+      return NextResponse.json(
+        { 
+          error: 'Estamos atualizando o sistema. Por favor, atualize a página (F5) e tente novamente.',
+          technical: error?.message // Para debug
+        },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: error.message || 'Erro ao atualizar ferramenta' },
+      { error: mensagemAmigavel },
       { status: 500 }
     )
   }
@@ -487,9 +534,15 @@ export async function DELETE(request: NextRequest) {
       message: 'Ferramenta deletada com sucesso!'
     })
   } catch (error: any) {
-    console.error('Erro ao deletar ferramenta:', error)
+    console.error('❌ Erro técnico ao deletar ferramenta:', {
+      error,
+      message: error?.message,
+      code: error?.code
+    })
+    
+    const mensagemAmigavel = translateError(error)
     return NextResponse.json(
-      { error: error.message || 'Erro ao deletar ferramenta' },
+      { error: mensagemAmigavel },
       { status: 500 }
     )
   }
