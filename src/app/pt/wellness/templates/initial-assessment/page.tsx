@@ -7,672 +7,358 @@ import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 
+interface Pergunta {
+  id: number
+  pergunta: string
+  tipo: 'multipla'
+  opcoes: string[]
+}
+
 interface Resultado {
-  nivelAvaliacao: string
-  resumo: {
-    idade?: number
-    genero: string
-    objetivos: string[]
-    historico: string[]
-    sintomas: string[]
-  }
-  necessidades: string[]
+  score: number
+  perfil: string
+  descricao: string
+  cor: string
   recomendacoes: string[]
+  diagnostico: DiagnosticoCompleto | null
 }
 
 export default function AvaliacaoInicial({ config }: TemplateBaseProps) {
-  const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
-  const [dados, setDados] = useState({
-    nome: '',
-    idade: '',
-    genero: '',
-    peso: '',
-    altura: '',
-    objetivo: [] as string[],
-    atividade: '',
-    historico: [] as string[],
-    sintomas: [] as string[],
-    alimentacao: '',
-    hidratacao: '',
-    suplementos: '',
-    medicamentos: '',
-    cirurgias: '',
-    doencas: ''
-  })
+  const [etapa, setEtapa] = useState<'landing' | 'quiz' | 'resultado'>('landing')
+  const [perguntaAtual, setPerguntaAtual] = useState(0)
+  const [respostas, setRespostas] = useState<number[]>([])
   const [resultado, setResultado] = useState<Resultado | null>(null)
-  const [diagnostico, setDiagnostico] = useState<DiagnosticoCompleto | null>(null)
 
-  const objetivosDisponiveis = [
-    'Perder peso',
-    'Ganhar massa muscular',
-    'Melhorar saúde',
-    'Aumentar energia',
-    'Melhorar digestão',
-    'Melhorar sono',
-    'Prevenir doenças',
-    'Melhorar performance esportiva'
+  const perguntas: Pergunta[] = [
+    {
+      id: 1,
+      pergunta: 'Você está pronto(a) para começar uma transformação na sua saúde e bem-estar?',
+      tipo: 'multipla',
+      opcoes: [
+        'Sim, estou muito motivado(a) e pronto(a) para começar',
+        'Sim, mas preciso de orientação para começar',
+        'Talvez, se tiver um acompanhamento adequado',
+        'Ainda não, preciso de mais informações'
+      ]
+    },
+    {
+      id: 2,
+      pergunta: 'Você sente que precisa de ajuda profissional para alcançar seus objetivos?',
+      tipo: 'multipla',
+      opcoes: [
+        'Sim, preciso muito de orientação especializada',
+        'Sim, seria muito útil ter um acompanhamento',
+        'Talvez, se for algo prático e personalizado',
+        'Não, consigo fazer sozinho(a)'
+      ]
+    },
+    {
+      id: 3,
+      pergunta: 'Você valoriza ter um plano personalizado baseado no seu perfil e objetivos?',
+      tipo: 'multipla',
+      opcoes: [
+        'Muito, é essencial para ter resultados',
+        'Bastante, acredito que faria diferença',
+        'Moderadamente, se for algo eficaz',
+        'Pouco, prefiro seguir padrões gerais'
+      ]
+    },
+    {
+      id: 4,
+      pergunta: 'Você acredita que produtos de qualidade e acompanhamento podem acelerar seus resultados?',
+      tipo: 'multipla',
+      opcoes: [
+        'Sim, absolutamente! É o que estou procurando',
+        'Sim, acredito que pode fazer diferença',
+        'Talvez, se for algo comprovado e eficaz',
+        'Não, não vejo necessidade'
+      ]
+    },
+    {
+      id: 5,
+      pergunta: 'Você está aberto(a) para ter um mentor que te guie em sua jornada de transformação?',
+      tipo: 'multipla',
+      opcoes: [
+        'Sim, é exatamente o que preciso!',
+        'Sim, seria muito útil ter um mentor',
+        'Talvez, se for alguém experiente e confiável',
+        'Não, prefiro seguir sozinho(a)'
+      ]
+    }
   ]
 
-  const historicoDisponivel = [
-    'Já tentei dietas anteriormente',
-    'Tenho histórico familiar de doenças',
-    'Já usei suplementos',
-    'Tenho restrições alimentares',
-    'Já fiz acompanhamento nutricional'
+  const pontosPorOpcao = [
+    [3, 2, 1, 0], // Pergunta 1: mais motivação = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
+    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
   ]
 
-  const sintomasDisponiveis = [
-    'Cansaço constante',
-    'Problemas digestivos',
-    'Problemas de sono',
-    'Irritabilidade',
-    'Dificuldade de concentração',
-    'Dor muscular',
-    'Retenção de líquidos',
-    'Problemas de pele'
-  ]
-
-  const iniciarAvaliacao = () => {
-    setEtapa('formulario')
+  const iniciarQuiz = () => {
+    setEtapa('quiz')
+    setPerguntaAtual(0)
+    setRespostas([])
   }
 
-  const toggleObjetivo = (obj: string) => {
-    if (dados.objetivo.includes(obj)) {
-      setDados({
-        ...dados,
-        objetivo: dados.objetivo.filter(o => o !== obj)
-      })
+  const responder = (opcaoIndex: number) => {
+    const novasRespostas = [...respostas, opcaoIndex]
+    setRespostas(novasRespostas)
+
+    if (perguntaAtual < perguntas.length - 1) {
+      setPerguntaAtual(perguntaAtual + 1)
     } else {
-      setDados({
-        ...dados,
-        objetivo: [...dados.objetivo, obj]
-      })
+      calcularResultado(novasRespostas)
     }
   }
 
-  const toggleHistorico = (hist: string) => {
-    if (dados.historico.includes(hist)) {
-      setDados({
-        ...dados,
-        historico: dados.historico.filter(h => h !== hist)
-      })
-    } else {
-      setDados({
-        ...dados,
-        historico: [...dados.historico, hist]
-      })
-    }
-  }
+  const calcularResultado = (resps: number[]) => {
+    let pontuacaoTotal = 0
+    
+    resps.forEach((resposta, index) => {
+      pontuacaoTotal += pontosPorOpcao[index][resposta] || 0
+    })
 
-  const toggleSintoma = (sint: string) => {
-    if (dados.sintomas.includes(sint)) {
-      setDados({
-        ...dados,
-        sintomas: dados.sintomas.filter(s => s !== sint)
-      })
-    } else {
-      setDados({
-        ...dados,
-        sintomas: [...dados.sintomas, sint]
-      })
-    }
-  }
-
-  const processarAvaliacao = () => {
-    if (!dados.idade || !dados.genero || !dados.objetivo.length || !dados.atividade) {
-      alert('Por favor, preencha todos os campos obrigatórios.')
-      return
-    }
-
-    const idadeNum = parseInt(dados.idade)
-    const numObjetivos = dados.objetivo.length
-    const numSintomas = dados.sintomas.length
-    const numHistorico = dados.historico.length
-
-    // Determinar nível de avaliação
-    let nivelAvaliacao = 'avaliacaoBasica'
-    let necessidades: string[] = []
+    // Determinar perfil baseado na pontuação (0-15 pontos)
+    let perfil = 'ProntoParaTransformacao'
+    let descricao = ''
+    let cor = 'green'
     let recomendacoes: string[] = []
+    let diagnosticoId = 'prontoParaTransformacao'
 
-    if (numSintomas >= 5 || numHistorico >= 4 || (numObjetivos >= 4 && dados.medicamentos)) {
-      nivelAvaliacao = 'avaliacaoAvancada'
-      necessidades = [
-        'Avaliação completa e abrangente',
-        'Análise de múltiplos fatores',
-        'Histórico médico detalhado',
-        'Estratégias personalizadas complexas',
-        'Acompanhamento profissional especializado'
-      ]
+    if (pontuacaoTotal >= 12) {
+      perfil = 'Alto Potencial - Pronto para Transformação'
+      descricao = 'Excelente! Você está muito motivado(a) e pronto(a) para uma transformação completa. Um acompanhamento especializado pode potencializar seus resultados e acelerar sua jornada de transformação.'
+      cor = 'green'
       recomendacoes = [
-        'Consulta nutricional completa com exames',
-        'Análise detalhada de histórico médico',
-        'Plano personalizado com múltiplas estratégias',
-        'Acompanhamento regular e ajustes frequentes',
-        'Integração com outros profissionais de saúde'
+        'Acessar programa VIP personalizado',
+        'Ter acompanhamento intensivo especializado',
+        'Utilizar produtos premium de alta qualidade',
+        'Ter mentoria especializada para resultados excepcionais',
+        'Tornar-se referência e inspirar outros'
       ]
-    } else if (numSintomas >= 3 || numHistorico >= 2 || numObjetivos >= 3) {
-      nivelAvaliacao = 'avaliacaoModerada'
-      necessidades = [
-        'Avaliação detalhada e específica',
-        'Análise de padrões e necessidades',
-        'Estratégias direcionadas',
-        'Plano personalizado moderado'
-      ]
+      diagnosticoId = 'altoPotencial'
+    } else if (pontuacaoTotal >= 8) {
+      perfil = 'Pronto para Transformação'
+      descricao = 'Você está pronto(a) para começar sua transformação! Um acompanhamento personalizado pode acelerar seus resultados e te guiar em cada etapa da sua jornada.'
+      cor = 'yellow'
       recomendacoes = [
-        'Consulta nutricional com avaliação detalhada',
-        'Análise de padrões alimentares',
-        'Plano personalizado direcionado',
-        'Acompanhamento para otimização'
+        'Investir em acompanhamento personalizado',
+        'Ter um plano adaptado ao seu perfil',
+        'Acessar produtos adequados aos seus objetivos',
+        'Ter suporte constante para manter motivação',
+        'Aprender estratégias eficazes de transformação'
       ]
+      diagnosticoId = 'prontoParaTransformacao'
     } else {
-      nivelAvaliacao = 'avaliacaoBasica'
-      necessidades = [
-        'Avaliação inicial completa',
-        'Identificação de necessidades básicas',
-        'Plano alimentar fundamental',
-        'Orientação inicial personalizada'
-      ]
+      perfil = 'Precisa de Mais Informações'
+      descricao = 'Você está no início da sua jornada. Um acompanhamento pode te ajudar a entender melhor suas necessidades e criar um plano adequado para você começar com segurança.'
+      cor = 'blue'
       recomendacoes = [
-        'Consulta nutricional inicial',
-        'Avaliação de hábitos alimentares',
-        'Plano básico personalizado',
-        'Orientação sobre mudanças fundamentais'
+        'Buscar orientação para entender suas necessidades',
+        'Receber informações sobre opções disponíveis',
+        'Ter uma conversa inicial sem compromisso',
+        'Aprender sobre produtos e estratégias',
+        'Descobrir como podemos te ajudar'
       ]
+      diagnosticoId = 'precisaMaisInformacoes'
     }
 
-    const diagnosticoCompleto = getDiagnostico('template-avaliacao-inicial', 'nutri', nivelAvaliacao)
-    setDiagnostico(diagnosticoCompleto)
+    const diagnostico = getDiagnostico('avaliacao-inicial', 'wellness', diagnosticoId)
 
     setResultado({
-      nivelAvaliacao,
-      resumo: {
-        idade: idadeNum,
-        genero: dados.genero,
-        objetivos: dados.objetivo,
-        historico: dados.historico,
-        sintomas: dados.sintomas
-      },
-      necessidades,
-      recomendacoes
+      score: pontuacaoTotal,
+      perfil,
+      descricao,
+      cor,
+      recomendacoes,
+      diagnostico
     })
     setEtapa('resultado')
   }
 
+  const voltar = () => {
+    if (perguntaAtual > 0) {
+      setPerguntaAtual(perguntaAtual - 1)
+      setRespostas(respostas.slice(0, -1))
+    } else {
+      setEtapa('landing')
+      setPerguntaAtual(0)
+      setRespostas([])
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
       <WellnessHeader
         title={config?.title}
         description={config?.description}
         defaultTitle="Avaliação Inicial"
-        defaultDescription="Avalie sua saúde de forma completa"
+        defaultDescription="Descubra como podemos ajudar na sua transformação"
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {etapa === 'landing' && (
           <WellnessLanding
             config={config}
-            defaultEmoji="📋"
+            defaultEmoji="🌟"
             defaultTitle="Avaliação Inicial"
             defaultDescription={
               <>
                 <p className="text-xl text-gray-600 mb-2">
-                  Avalie sua saúde de forma completa
+                  Descubra como podemos ajudar na sua transformação
                 </p>
                 <p className="text-gray-600">
-                  Formulário completo para avaliação inicial e identificação de necessidades nutricionais
+                  Uma avaliação rápida para entender seu perfil e criar um plano personalizado
                 </p>
               </>
             }
             benefits={[
-              'Avaliação completa do seu perfil nutricional',
-              'Identificação de necessidades específicas',
-              'Recomendações personalizadas',
-              'Base sólida para plano nutricional'
+              'Identifique seu perfil e necessidades',
+              'Descubra como podemos te ajudar',
+              'Receba recomendações personalizadas',
+              'Tenha acesso a produtos adequados',
+              'Comece sua jornada de transformação'
             ]}
-            onStart={iniciarAvaliacao}
-            buttonText="📋 Começar Avaliação - É Grátis"
+            onStart={iniciarQuiz}
+            buttonText="🌟 Começar Avaliação Inicial - É Grátis"
           />
         )}
 
-        {etapa === 'formulario' && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">
+        {etapa === 'quiz' && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-green-200">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Avaliação Inicial Completa</h2>
-              <p className="text-gray-600">Preencha todas as informações para uma avaliação nutricional completa.</p>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm text-gray-500">Pergunta {perguntaAtual + 1} de {perguntas.length}</span>
+                <span className="text-sm text-gray-500">{Math.round(((perguntaAtual + 1) / perguntas.length) * 100)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div 
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all" 
+                  style={{ width: `${((perguntaAtual + 1) / perguntas.length) * 100}%` }}
+                ></div>
+              </div>
             </div>
 
             <div className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome <span className="text-gray-500 text-xs">(opcional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={dados.nome}
-                    onChange={(e) => setDados({ ...dados, nome: e.target.value })}
-                    placeholder="Seu nome"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                  />
-                </div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {perguntas[perguntaAtual].pergunta}
+              </h2>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Idade <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={dados.idade}
-                    onChange={(e) => setDados({ ...dados, idade: e.target.value })}
-                    placeholder="Ex: 30"
-                    required
-                    min="1"
-                    max="120"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Gênero <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={dados.genero}
-                    onChange={(e) => setDados({ ...dados, genero: e.target.value })}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+              <div className="space-y-3">
+                {perguntas[perguntaAtual].opcoes.map((opcao, index) => (
+                  <button
+                    key={index}
+                    onClick={() => responder(index)}
+                    className="w-full text-left p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all transform hover:scale-[1.02]"
                   >
-                    <option value="">Selecione</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="feminino">Feminino</option>
-                    <option value="outro">Outro</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Peso atual (kg) <span className="text-gray-500 text-xs">(opcional)</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={dados.peso}
-                    onChange={(e) => setDados({ ...dados, peso: e.target.value })}
-                    placeholder="Ex: 70"
-                    min="1"
-                    step="0.1"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                  />
-                </div>
+                    <span className="text-gray-700">{opcao}</span>
+                  </button>
+                ))}
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Altura (cm) <span className="text-gray-500 text-xs">(opcional)</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={dados.altura}
-                    onChange={(e) => setDados({ ...dados, altura: e.target.value })}
-                    placeholder="Ex: 170"
-                    min="100"
-                    max="250"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nível de atividade física <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={dados.atividade}
-                    onChange={(e) => setDados({ ...dados, atividade: e.target.value })}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="sedentario">Sedentário - Pouco ou nenhum exercício</option>
-                    <option value="leve">Leve - Exercício leve 1-3x por semana</option>
-                    <option value="moderado">Moderado - Exercício moderado 3-5x por semana</option>
-                    <option value="intenso">Intenso - Exercício intenso 5-7x por semana</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quais são seus principais objetivos? <span className="text-red-500">*</span> (selecione todos que se aplicam)
-                </label>
-                <div className="grid md:grid-cols-2 gap-3 mt-2">
-                  {objetivosDisponiveis.map((obj) => (
-                    <button
-                      key={obj}
-                      type="button"
-                      onClick={() => toggleObjetivo(obj)}
-                      className={`px-4 py-2 rounded-lg border-2 transition-colors text-left ${
-                        dados.objetivo.includes(obj)
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300'
-                      }`}
-                    >
-                      {dados.objetivo.includes(obj) && '✓ '}{obj}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Histórico de saúde (selecione todos que se aplicam)
-                </label>
-                <div className="grid md:grid-cols-2 gap-3 mt-2">
-                  {historicoDisponivel.map((hist) => (
-                    <button
-                      key={hist}
-                      type="button"
-                      onClick={() => toggleHistorico(hist)}
-                      className={`px-4 py-2 rounded-lg border-2 transition-colors text-left ${
-                        dados.historico.includes(hist)
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300'
-                      }`}
-                    >
-                      {dados.historico.includes(hist) && '✓ '}{hist}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sintomas que você sente (selecione todos que se aplicam)
-                </label>
-                <div className="grid md:grid-cols-2 gap-3 mt-2">
-                  {sintomasDisponiveis.map((sint) => (
-                    <button
-                      key={sint}
-                      type="button"
-                      onClick={() => toggleSintoma(sint)}
-                      className={`px-4 py-2 rounded-lg border-2 transition-colors text-left ${
-                        dados.sintomas.includes(sint)
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300'
-                      }`}
-                    >
-                      {dados.sintomas.includes(sint) && '✓ '}{sint}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Como você descreveria sua alimentação atual?
-                </label>
-                <select
-                  value={dados.alimentacao}
-                  onChange={(e) => setDados({ ...dados, alimentacao: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+              {perguntaAtual > 0 && (
+                <button
+                  onClick={voltar}
+                  className="mt-4 text-gray-600 hover:text-gray-800 flex items-center"
                 >
-                  <option value="">Selecione (opcional)</option>
-                  <option value="balanceada">Balanceada e saudável</option>
-                  <option value="irregular">Irregular - como o que tenho tempo</option>
-                  <option value="restritiva">Muito restritiva</option>
-                  <option value="excessiva">Excessiva - como demais</option>
-                  <option value="processados">Muitos alimentos processados</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Consumo de água diário
-                </label>
-                <select
-                  value={dados.hidratacao}
-                  onChange={(e) => setDados({ ...dados, hidratacao: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                >
-                  <option value="">Selecione (opcional)</option>
-                  <option value="pouco">Pouco - menos de 1L</option>
-                  <option value="medio">Moderado - 1-2L</option>
-                  <option value="bom">Bom - 2-3L</option>
-                  <option value="otimo">Ótimo - mais de 3L</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Você usa suplementos atualmente?
-                </label>
-                <select
-                  value={dados.suplementos}
-                  onChange={(e) => setDados({ ...dados, suplementos: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                >
-                  <option value="">Selecione (opcional)</option>
-                  <option value="nao">Não uso</option>
-                  <option value="as-vezes">Às vezes - multivitamínico</option>
-                  <option value="regularmente">Regularmente - alguns suplementos</option>
-                  <option value="muitos">Muitos suplementos</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Medicamentos em uso <span className="text-gray-500 text-xs">(opcional)</span>
-                </label>
-                <textarea
-                  value={dados.medicamentos}
-                  onChange={(e) => setDados({ ...dados, medicamentos: e.target.value })}
-                  placeholder="Liste os medicamentos que você usa regularmente"
-                  rows={2}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cirurgias ou procedimentos anteriores <span className="text-gray-500 text-xs">(opcional)</span>
-                </label>
-                <textarea
-                  value={dados.cirurgias}
-                  onChange={(e) => setDados({ ...dados, cirurgias: e.target.value })}
-                  placeholder="Descreva cirurgias ou procedimentos relevantes"
-                  rows={2}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Doenças ou condições de saúde <span className="text-gray-500 text-xs">(opcional)</span>
-                </label>
-                <textarea
-                  value={dados.doencas}
-                  onChange={(e) => setDados({ ...dados, doencas: e.target.value })}
-                  placeholder="Descreva doenças ou condições de saúde relevantes"
-                  rows={2}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                />
-              </div>
+                  ← Voltar
+                </button>
+              )}
             </div>
-
-            <button
-              onClick={processarAvaliacao}
-              className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
-              style={config?.custom_colors
-                ? {
-                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                  }
-                : {
-                    background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
-                  }}
-            >
-              Processar Avaliação →
-            </button>
           </div>
         )}
 
         {etapa === 'resultado' && resultado && (
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-8 border-4 border-blue-300">
+            <div className={`bg-white rounded-2xl shadow-lg p-8 border-4 ${
+              resultado.cor === 'green' ? 'border-green-300' : 
+              resultado.cor === 'yellow' ? 'border-yellow-300' : 
+              'border-blue-300'
+            }`}>
               <div className="text-center mb-6">
-                <div className="text-5xl mb-4">📋</div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Sua Avaliação Inicial</h2>
-                <p className="text-gray-600 text-lg">
-                  {resultado.nivelAvaliacao === 'avaliacaoBasica' && 'Nível: Avaliação Básica - Identificação de Necessidades Fundamentais'}
-                  {resultado.nivelAvaliacao === 'avaliacaoModerada' && 'Nível: Avaliação Moderada - Análise Detalhada e Específica'}
-                  {resultado.nivelAvaliacao === 'avaliacaoAvancada' && 'Nível: Avaliação Avançada - Análise Completa e Abrangente'}
-                </p>
-              </div>
-
-              <div className="bg-blue-50 rounded-xl p-6 mb-6">
-                <h3 className="font-semibold text-blue-900 mb-4 flex items-center">
-                  <span className="text-2xl mr-2">👤</span>
-                  Resumo do Seu Perfil
-                </h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {resultado.resumo.idade && (
-                    <div className="bg-white rounded-lg p-3">
-                      <p className="text-xs text-blue-600 font-semibold mb-1">Idade</p>
-                      <p className="text-blue-900 font-medium">{resultado.resumo.idade} anos</p>
-                    </div>
-                  )}
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="text-xs text-blue-600 font-semibold mb-1">Gênero</p>
-                    <p className="text-blue-900 font-medium capitalize">{resultado.resumo.genero}</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="text-xs text-blue-600 font-semibold mb-1">Objetivos</p>
-                    <p className="text-blue-900 font-medium">{resultado.resumo.objetivos.length} objetivo(s) identificado(s)</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="text-xs text-blue-600 font-semibold mb-1">Sintomas</p>
-                    <p className="text-blue-900 font-medium">{resultado.resumo.sintomas.length} sintoma(s) relatado(s)</p>
-                  </div>
+                <div className="text-5xl mb-4">🌟</div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Seu Perfil de Transformação</h2>
+                <div className={`inline-block px-6 py-2 rounded-full text-lg font-semibold ${
+                  resultado.cor === 'green' ? 'bg-green-100 text-green-800' : 
+                  resultado.cor === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 
+                  'bg-blue-100 text-blue-800'
+                }`}>
+                  {resultado.perfil}
                 </div>
               </div>
 
               <div className="bg-gray-50 rounded-xl p-6 mb-6">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <span className="text-2xl mr-2">🎯</span>
-                  Necessidades Identificadas
-                </h3>
-                <ul className="space-y-2">
-                  {resultado.necessidades.map((nec, index) => (
-                    <li key={index} className="flex items-start text-gray-700 bg-white rounded-lg p-3">
-                      <span className="text-blue-600 mr-2">•</span>
-                      <span>{nec}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-gray-800 text-lg leading-relaxed">
+                  {resultado.descricao}
+                </p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-6">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <span className="text-2xl mr-2">💡</span>
-                  Recomendações
+                  <span className="text-2xl mr-2">✨</span>
+                  Recomendações Personalizadas
                 </h3>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {resultado.recomendacoes.map((rec, index) => (
                     <li key={index} className="flex items-start text-gray-700 bg-white rounded-lg p-3">
-                      <span className="text-green-600 mr-2">✓</span>
+                      <span className="text-green-600 mr-2">•</span>
                       <span>{rec}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Diagnósticos Nutricionais */}
-              {diagnostico && (
+              {/* Diagnóstico Completo */}
+              {resultado.diagnostico && (
                 <div className="space-y-4 mb-6">
-                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
                     <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
                       <span className="text-2xl mr-2">📋</span>
-                      Diagnóstico Nutricional Completo
+                      Diagnóstico Completo
                     </h3>
                     <div className="space-y-4">
                       <div className="bg-white rounded-lg p-4">
-                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.diagnostico}</p>
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.diagnostico}</p>
                       </div>
                       <div className="bg-white rounded-lg p-4">
-                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.causaRaiz}</p>
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.causaRaiz}</p>
                       </div>
                       <div className="bg-white rounded-lg p-4">
-                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.acaoImediata}</p>
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.acaoImediata}</p>
                       </div>
                       <div className="bg-white rounded-lg p-4">
-                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.plano7Dias}</p>
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.plano7Dias}</p>
                       </div>
                       <div className="bg-white rounded-lg p-4">
-                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.suplementacao}</p>
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.suplementacao}</p>
                       </div>
                       <div className="bg-white rounded-lg p-4">
-                        <p className="text-gray-800 whitespace-pre-line">{diagnostico.alimentacao}</p>
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.alimentacao}</p>
                       </div>
-                      {diagnostico.proximoPasso && (
-                        <div className="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg p-4 border-l-4 border-blue-500">
-                          <p className="text-gray-900 font-semibold whitespace-pre-line">{diagnostico.proximoPasso}</p>
+                      {resultado.diagnostico.proximoPasso && (
+                        <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg p-4 border-l-4 border-green-500">
+                          <p className="text-gray-900 font-semibold whitespace-pre-line">{resultado.diagnostico.proximoPasso}</p>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
               )}
-
-              <div className="bg-gray-50 rounded-xl p-6">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <span className="text-2xl mr-2">📝</span>
-                  Próximos Passos
-                </h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-start">
-                    <span className="text-blue-600 mr-2">✓</span>
-                    <span>Esta avaliação é o primeiro passo para um plano nutricional personalizado</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-600 mr-2">✓</span>
-                    <span>Com base nos dados coletados, será desenvolvido um plano específico para você</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-blue-600 mr-2">✓</span>
-                    <span>Considere uma consulta profissional para análise detalhada e acompanhamento</span>
-                  </li>
-                </ul>
-              </div>
             </div>
 
             <WellnessCTAButton
               config={config}
-              resultadoTexto={`Avaliação: ${resultado.nivelAvaliacao === 'avaliacaoBasica' ? 'Básica' : resultado.nivelAvaliacao === 'avaliacaoModerada' ? 'Moderada' : 'Avançada'} | Objetivos: ${resultado.resumo.objetivos.length}`}
+              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
             />
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => {
-                  setDados({
-                    nome: '',
-                    idade: '',
-                    genero: '',
-                    peso: '',
-                    altura: '',
-                    objetivo: [],
-                    atividade: '',
-                    historico: [],
-                    sintomas: [],
-                    alimentacao: '',
-                    hidratacao: '',
-                    suplementos: '',
-                    medicamentos: '',
-                    cirurgias: '',
-                    doencas: ''
-                  })
+                  setPerguntaAtual(0)
+                  setRespostas([])
                   setResultado(null)
-                  setDiagnostico(null)
-                  setEtapa('formulario')
+                  setEtapa('quiz')
                 }}
                 className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
@@ -680,28 +366,12 @@ export default function AvaliacaoInicial({ config }: TemplateBaseProps) {
               </button>
               <button
                 onClick={() => {
-                  setDados({
-                    nome: '',
-                    idade: '',
-                    genero: '',
-                    peso: '',
-                    altura: '',
-                    objetivo: [],
-                    atividade: '',
-                    historico: [],
-                    sintomas: [],
-                    alimentacao: '',
-                    hidratacao: '',
-                    suplementos: '',
-                    medicamentos: '',
-                    cirurgias: '',
-                    doencas: ''
-                  })
+                  setPerguntaAtual(0)
+                  setRespostas([])
                   setResultado(null)
-                  setDiagnostico(null)
                   setEtapa('landing')
                 }}
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                className="flex-1 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
               >
                 🏠 Voltar ao Início
               </button>
@@ -712,4 +382,3 @@ export default function AvaliacaoInicial({ config }: TemplateBaseProps) {
     </div>
   )
 }
-

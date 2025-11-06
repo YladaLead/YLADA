@@ -29,6 +29,7 @@ import QuizEnergeticoPreview from '@/components/wellness-previews/quizzes/QuizEn
 import QuizEmocionalPreview from '@/components/wellness-previews/quizzes/QuizEmocionalPreview'
 import QuizIntoleranciaPreview from '@/components/wellness-previews/quizzes/QuizIntoleranciaPreview'
 import QuizPerfilMetabolicoPreview from '@/components/wellness-previews/quizzes/QuizPerfilMetabolicoPreview'
+import QuizAvaliacaoInicialPreview from '@/components/wellness-previews/quizzes/QuizAvaliacaoInicialPreview'
 import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
 import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
 import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
@@ -62,6 +63,7 @@ export default function WellnessTemplatesPage() {
   const [etapaPreviewQuizEmocional, setEtapaPreviewQuizEmocional] = useState(0) // Para quiz-emocional: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizIntolerancia, setEtapaPreviewQuizIntolerancia] = useState(0) // Para quiz-intolerancia: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizPerfilMetabolico, setEtapaPreviewQuizPerfilMetabolico] = useState(0) // Para quiz-perfil-metabolico: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizAvaliacaoInicial, setEtapaPreviewQuizAvaliacaoInicial] = useState(0) // Para quiz-avaliacao-inicial: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewGuiaHidratacao, setEtapaPreviewGuiaHidratacao] = useState(0) // Para guia-hidratacao: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewDesafio7Dias, setEtapaPreviewDesafio7Dias] = useState(0) // Para desafio-7-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
   const [etapaPreviewDesafio21Dias, setEtapaPreviewDesafio21Dias] = useState(0) // Para desafio-21-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
@@ -637,6 +639,7 @@ export default function WellnessTemplatesPage() {
                           setEtapaPreviewQuizEmocional(0)
                           setEtapaPreviewQuizIntolerancia(0)
                           setEtapaPreviewQuizPerfilMetabolico(0)
+                          setEtapaPreviewQuizAvaliacaoInicial(0)
                           setEtapaPreviewGuiaHidratacao(0)
                           setEtapaPreviewDesafio7Dias(0)
                           setEtapaPreviewDesafio21Dias(0)
@@ -759,6 +762,17 @@ export default function WellnessTemplatesPage() {
                         (templateNameLower.includes('avaliação') && templateNameLower.includes('metabólico'))
                       )
                       
+                      const isQuizAvaliacaoInicial = isQuizType && (
+                        templateIdLower.includes('quiz-avaliacao-inicial') || 
+                        templateIdLower.includes('avaliacao-inicial') ||
+                        templateIdLower.includes('avaliação-inicial') ||
+                        templateIdLower.includes('avaliacao inicial') ||
+                        templateIdLower.includes('avaliação inicial') ||
+                        templateNameLower.includes('avaliação inicial') ||
+                        templateNameLower.includes('avaliacao inicial') ||
+                        (templateNameLower.includes('avaliação') && templateNameLower.includes('inicial'))
+                      )
+                      
                       const isChecklistAlimentar = templateIdLower.includes('checklist-alimentar') || 
                                                    templateIdLower === 'checklist-alimentar' ||
                                                    templateNameLower === 'checklist alimentar' ||
@@ -815,7 +829,7 @@ export default function WellnessTemplatesPage() {
                                              (templateNameLower.includes('desafio') && templateNameLower.includes('21'))
                       
                       // Log de detecção para debug - TODOS os templates modulares
-                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico ||
+                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial ||
                                        isChecklistAlimentar || isChecklistDetox || isGuiaHidratacao || isDesafio7Dias || isDesafio21Dias
                       
                       if (isModular) {
@@ -912,6 +926,16 @@ export default function WellnessTemplatesPage() {
                           <QuizPerfilMetabolicoPreview
                             etapa={etapaPreviewQuizPerfilMetabolico}
                             onEtapaChange={setEtapaPreviewQuizPerfilMetabolico}
+                          />
+                        )
+                      }
+                      
+                      // Quiz Avaliação Inicial - Componente Modular
+                      if (isQuizAvaliacaoInicial) {
+                        return (
+                          <QuizAvaliacaoInicialPreview
+                            etapa={etapaPreviewQuizAvaliacaoInicial}
+                            onEtapaChange={setEtapaPreviewQuizAvaliacaoInicial}
                           />
                         )
                       }
@@ -2563,6 +2587,7 @@ export default function WellnessTemplatesPage() {
                     setEtapaPreviewQuizEmocional(0)
                     setEtapaPreviewQuizIntolerancia(0)
                     setEtapaPreviewQuizPerfilMetabolico(0)
+                    setEtapaPreviewQuizAvaliacaoInicial(0)
                     setEtapaPreviewGuiaHidratacao(0)
                     setEtapaPreviewDesafio7Dias(0)
                     setEtapaPreviewDesafio21Dias(0)
