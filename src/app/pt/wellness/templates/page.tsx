@@ -853,6 +853,16 @@ export default function WellnessTemplatesPage() {
                         )
                       }
                       
+                      // Quiz Emocional - Componente Modular
+                      if (isQuizEmocional) {
+                        return (
+                          <QuizEmocionalPreview 
+                            etapa={etapaPreviewQuizEmocional}
+                            onEtapaChange={setEtapaPreviewQuizEmocional}
+                          />
+                        )
+                      }
+                      
                       // Checklist Alimentar - Componente Modular
                       if (isChecklistAlimentar) {
                         return (
