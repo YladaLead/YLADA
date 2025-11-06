@@ -125,5 +125,5 @@ SELECT
   rowsecurity as rls_enabled
 FROM pg_tables
 WHERE schemaname = 'public'
-AND table_name = 'user_profiles';
+AND tablename = 'user_profiles';
 
