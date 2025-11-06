@@ -40,6 +40,7 @@ ORDER BY total_registros DESC;
 -- =====================================================
 
 -- Para cada user_id, manter apenas o registro mais recente (ou com mais dados)
+-- Usar apenas colunas que existem na tabela
 CREATE TEMP TABLE user_profiles_clean AS
 SELECT DISTINCT ON (user_id)
   id,
@@ -51,21 +52,11 @@ SELECT DISTINCT ON (user_id)
   bio,
   user_slug,
   country_code,
-  crn,
-  especialidade_nutri,
-  nivel_herbalife,
-  cidade,
-  estado,
-  certificacoes,
-  area_coaching,
-  idioma_preferido,
-  timezone,
   is_admin,
   is_support,
   created_at,
   updated_at,
-  last_login,
-  is_active
+  last_login
 FROM user_profiles
 ORDER BY user_id, 
   -- Priorizar registros com mais dados preenchidos
