@@ -24,27 +24,57 @@ export default function QuizEmocionalPreview({ etapa, onEtapaChange }: QuizEmoci
     {
       numero: 1,
       texto: 'Como você se sente em relação à sua autoestima hoje?',
-      cor: 'pink'
+      cor: 'pink',
+      opcoes: [
+        'Baixa, tenho dificuldades com minha imagem',
+        'Média, algumas vezes me sinto inseguro(a)',
+        'Boa, geralmente me sinto bem comigo mesmo(a)',
+        'Excelente, me sinto muito confiante'
+      ]
     },
     {
       numero: 2,
       texto: 'Quanto você se sente motivado(a) para cuidar da sua saúde e bem-estar?',
-      cor: 'purple'
+      cor: 'purple',
+      opcoes: [
+        'Pouco motivado(a), tenho dificuldades para começar',
+        'Moderadamente, mas preciso de incentivo',
+        'Muito motivado(a), já tenho alguns hábitos',
+        'Extremamente motivado(a), estou sempre buscando melhorar'
+      ]
     },
     {
       numero: 3,
       texto: 'Como você lida com os desafios e obstáculos da vida?',
-      cor: 'rose'
+      cor: 'rose',
+      opcoes: [
+        'Tenho dificuldades, me sinto sobrecarregado(a)',
+        'Às vezes consigo, mas preciso de suporte',
+        'Consigo lidar bem na maioria das vezes',
+        'Lido muito bem, vejo desafios como oportunidades'
+      ]
     },
     {
       numero: 4,
       texto: 'Você sente que tem o suporte necessário para alcançar seus objetivos de bem-estar?',
-      cor: 'fuchsia'
+      cor: 'fuchsia',
+      opcoes: [
+        'Não, sinto que estou sozinho(a) nessa jornada',
+        'Parcialmente, mas preciso de mais orientação',
+        'Sim, tenho algum suporte, mas poderia ser melhor',
+        'Sim, tenho um excelente suporte e acompanhamento'
+      ]
     },
     {
       numero: 5,
       texto: 'O quanto você valoriza ter um acompanhamento personalizado para sua transformação?',
-      cor: 'pink'
+      cor: 'pink',
+      opcoes: [
+        'Não valorizo muito, prefiro fazer sozinho(a)',
+        'Valorizo um pouco, mas não é essencial',
+        'Valorizo bastante, faria toda diferença',
+        'Valorizo muito, é essencial para meu sucesso'
+      ]
     }
   ]
 
@@ -118,12 +148,7 @@ export default function QuizEmocionalPreview({ etapa, onEtapaChange }: QuizEmoci
                       {pergunta.numero}. {pergunta.texto}
                     </h4>
                     <div className="space-y-2">
-                      {[
-                        'Primeira opção (exemplo)',
-                        'Segunda opção (exemplo)',
-                        'Terceira opção (exemplo)',
-                        'Quarta opção (exemplo)'
-                      ].map((opcao, idx) => (
+                      {pergunta.opcoes.map((opcao, idx) => (
                         <label
                           key={idx}
                           className={`flex items-center p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:${borderColor}`}
