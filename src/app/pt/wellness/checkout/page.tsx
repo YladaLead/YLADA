@@ -8,11 +8,35 @@ import Image from 'next/image'
 import { useAuth } from '@/hooks/useAuth'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR || 
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US || 
-  ''
-)
+// Detectar qual chave usar baseado no país (padrão: BR para Brasil)
+// Suporta variáveis com sufixo _TEST para desenvolvimento
+const getPublishableKey = () => {
+  const isTest = process.env.NODE_ENV !== 'production'
+  
+  // Tentar BR primeiro (padrão para Brasil)
+  // Prioridade: _TEST (se em desenvolvimento) > sem sufixo
+  const brKey = isTest 
+    ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR)
+    : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR
+    
+  const usKey = isTest
+    ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US)
+    : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US
+  
+  if (brKey && brKey.startsWith('pk_')) {
+    return brKey
+  }
+  
+  if (usKey && usKey.startsWith('pk_')) {
+    return usKey
+  }
+  
+  // Se nenhuma chave válida, retornar vazio (vai dar erro, mas melhor que string vazia)
+  console.error('❌ Nenhuma chave pública do Stripe configurada! Configure NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST ou NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR')
+  return ''
+}
+
+const stripePromise = loadStripe(getPublishableKey())
 
 export default function WellnessCheckoutPage() {
   return (
@@ -39,6 +63,28 @@ function WellnessCheckoutContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const canceled = searchParams.get('canceled') === 'true'
+  
+  // Verificar se Stripe está configurado
+  useEffect(() => {
+    const isTest = process.env.NODE_ENV !== 'production'
+    
+    // Verificar variáveis com sufixo _TEST primeiro (se em desenvolvimento)
+    const brKey = isTest 
+      ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR)
+      : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR
+      
+    const usKey = isTest
+      ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US)
+      : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US
+    
+    if (!brKey && !usKey) {
+      setError('Stripe não está configurado. Configure NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST ou NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR no arquivo .env.local')
+    } else if (brKey && !brKey.startsWith('pk_')) {
+      setError('Chave pública do Stripe BR inválida. Deve começar com "pk_test_" ou "pk_live_"')
+    } else if (usKey && !usKey.startsWith('pk_')) {
+      setError('Chave pública do Stripe US inválida. Deve começar com "pk_test_" ou "pk_live_"')
+    }
+  }, [])
 
   useEffect(() => {
     // Detectar tipo de plano da URL

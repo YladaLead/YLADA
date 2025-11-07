@@ -265,12 +265,36 @@ export async function getStripeInstance(country: StripeAccount, isTest: boolean 
   const config = getStripeConfig(country, isTest)
   
   if (!config.secretKey) {
-    throw new Error(`Stripe Secret Key não configurada para ${country}. Configure STRIPE_SECRET_KEY_${country.toUpperCase()} no .env`)
+    const prefix = isTest ? 'TEST' : 'LIVE'
+    const varName = `STRIPE_SECRET_KEY_${country.toUpperCase()}_${prefix}`
+    const fallbackVarName = `STRIPE_SECRET_KEY_${country.toUpperCase()}`
+    throw new Error(
+      `Stripe Secret Key não configurada para ${country}. ` +
+      `Configure ${varName} ou ${fallbackVarName} no .env.local. ` +
+      `Variáveis encontradas: ${varName}=${process.env[varName] ? 'SIM' : 'NÃO'}, ${fallbackVarName}=${process.env[fallbackVarName] ? 'SIM' : 'NÃO'}`
+    )
+  }
+  
+  // Validar formato da chave
+  if (!config.secretKey.startsWith('sk_test_') && !config.secretKey.startsWith('sk_live_')) {
+    throw new Error(
+      `Stripe Secret Key inválida para ${country}. ` +
+      `A chave deve começar com "sk_test_" (teste) ou "sk_live_" (produção). ` +
+      `Chave recebida começa com: "${config.secretKey.substring(0, 10)}..."`
+    )
   }
 
   // Importar Stripe dinamicamente
   const Stripe = (await import('stripe')).default
-  return new Stripe(config.secretKey, {
-    apiVersion: '2024-11-20.acacia',
-  })
+  
+  try {
+    return new Stripe(config.secretKey.trim(), {
+      apiVersion: '2025-04-30.basil', // ✅ Versão que suporta Pix nas configurações de métodos de pagamento
+    })
+  } catch (error: any) {
+    throw new Error(
+      `Erro ao criar instância do Stripe para ${country}: ${error.message}. ` +
+      `Verifique se a chave está completa e válida.`
+    )
+  }
 }

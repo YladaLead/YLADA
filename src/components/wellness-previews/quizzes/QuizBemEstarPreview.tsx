@@ -228,3 +228,10 @@ export default function QuizBemEstarPreview({ etapa, onEtapaChange }: QuizBemEst
 
 
 
+
+
+
+
+
+
+

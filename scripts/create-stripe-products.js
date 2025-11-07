@@ -8,7 +8,70 @@
  *   node scripts/create-stripe-products.js --mode live
  */
 
-require('dotenv').config({ path: '.env.local' })
+const path = require('path')
+const fs = require('fs')
+
+// Tentar diferentes caminhos
+const envPaths = [
+  path.join(process.cwd(), '.env.local'),
+  path.join(__dirname, '..', '.env.local'),
+  '.env.local'
+]
+
+let envPath = null
+for (const p of envPaths) {
+  if (fs.existsSync(p)) {
+    envPath = p
+    break
+  }
+}
+
+if (!envPath) {
+  console.error('❌ Arquivo .env.local não encontrado')
+  console.error('   Procurou em:', envPaths)
+  process.exit(1)
+}
+
+console.log(`📁 Carregando variáveis de: ${envPath}`)
+
+const result = require('dotenv').config({ path: envPath })
+
+if (result.error) {
+  console.error('❌ Erro ao carregar .env.local:', result.error.message)
+  process.exit(1)
+}
+
+// Debug: mostrar TODAS as variáveis carregadas do .env.local
+const allEnvVars = Object.keys(result.parsed || {})
+console.log(`\n📋 Total de variáveis carregadas do .env.local: ${allEnvVars.length}`)
+if (allEnvVars.length > 0) {
+  console.log('   Variáveis encontradas:')
+  allEnvVars.forEach(key => {
+    const value = result.parsed[key]
+    const preview = value ? (value.length > 20 ? `${value.substring(0, 20)}...` : value) : 'vazia'
+    console.log(`   - ${key}: ${preview}`)
+  })
+}
+
+// Debug: mostrar variáveis Stripe encontradas
+const stripeVars = Object.keys(process.env).filter(key => 
+  key.includes('STRIPE') && key.includes('BR')
+)
+console.log(`\n🔍 Variáveis Stripe no process.env:`)
+if (stripeVars.length === 0) {
+  console.log('   ⚠️  Nenhuma variável Stripe encontrada!')
+  console.log('   Verifique se as variáveis estão no formato correto:')
+  console.log('   STRIPE_SECRET_KEY_BR=sk_test_xxxxx')
+  console.log('   (Sem espaços antes ou depois do =)')
+} else {
+  stripeVars.forEach(key => {
+    const value = process.env[key]
+    const preview = value ? `${value.substring(0, 15)}...` : 'não definida'
+    console.log(`   ${key}: ${preview}`)
+  })
+}
+console.log('')
+
 const Stripe = require('stripe')
 
 const mode = process.argv.includes('--mode') 
@@ -21,15 +84,38 @@ if (!['test', 'live'].includes(mode)) {
 }
 
 const isTest = mode === 'test'
-const stripeKey = isTest 
-  ? process.env.STRIPE_SECRET_KEY_BR
-  : process.env.STRIPE_SECRET_KEY_BR_LIVE || process.env.STRIPE_SECRET_KEY_BR
+
+// Tentar diferentes nomes de variáveis
+const possibleKeys = isTest
+  ? [
+      process.env.STRIPE_SECRET_KEY_BR,
+      process.env.STRIPE_SECRET_KEY_BR_TEST,
+      process.env.STRIPE_SECRET_KEY_BR_TEST_MODE,
+    ]
+  : [
+      process.env.STRIPE_SECRET_KEY_BR_LIVE,
+      process.env.STRIPE_SECRET_KEY_BR,
+      process.env.STRIPE_SECRET_KEY_BR_PRODUCTION,
+    ]
+
+const stripeKey = possibleKeys.find(key => key && key.startsWith('sk_'))
 
 if (!stripeKey) {
   console.error(`❌ Chave Stripe não encontrada para modo ${mode}`)
-  console.error(`   Configure STRIPE_SECRET_KEY_BR${isTest ? '' : '_LIVE'} no .env.local`)
+  console.error(`\n   Variáveis verificadas:`)
+  if (isTest) {
+    console.error(`   - STRIPE_SECRET_KEY_BR: ${process.env.STRIPE_SECRET_KEY_BR ? '✅ encontrada' : '❌ não encontrada'}`)
+    console.error(`   - STRIPE_SECRET_KEY_BR_TEST: ${process.env.STRIPE_SECRET_KEY_BR_TEST ? '✅ encontrada' : '❌ não encontrada'}`)
+  } else {
+    console.error(`   - STRIPE_SECRET_KEY_BR_LIVE: ${process.env.STRIPE_SECRET_KEY_BR_LIVE ? '✅ encontrada' : '❌ não encontrada'}`)
+    console.error(`   - STRIPE_SECRET_KEY_BR: ${process.env.STRIPE_SECRET_KEY_BR ? '✅ encontrada' : '❌ não encontrada'}`)
+  }
+  console.error(`\n   Configure STRIPE_SECRET_KEY_BR${isTest ? '' : '_LIVE'} no .env.local`)
+  console.error(`   A chave deve começar com 'sk_test_' (teste) ou 'sk_live_' (produção)`)
   process.exit(1)
 }
+
+console.log(`✅ Chave Stripe encontrada: ${stripeKey.substring(0, 12)}...`)
 
 const stripe = new Stripe(stripeKey, {
   apiVersion: '2024-11-20.acacia',

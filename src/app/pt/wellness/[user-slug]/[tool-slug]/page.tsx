@@ -65,7 +65,7 @@ const TemplatePurposeAndBalance = dynamic(() => import('@/app/pt/wellness/templa
 const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
-const TemplateDetoxMenu = dynamic(() => import('@/app/pt/wellness/templates/detox-menu/page'), { ssr: false })
+// ⚠️ Template "Cardápio Detox" removido conforme solicitado
 const TemplateInitialAssessment = dynamic(() => import('@/app/pt/wellness/templates/initial-assessment/page'), { ssr: false })
 const TemplateRecommendationForm = dynamic(() => import('@/app/pt/wellness/templates/recommendation-form/page'), { ssr: false })
 
@@ -303,8 +303,7 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplateRecipes config={config} />
       case 'template-story-interativo':
         return <TemplateStory config={config} />
-      case 'cardapio-detox':
-        return <TemplateDetoxMenu config={config} />
+      // ⚠️ Template "Cardápio Detox" removido conforme solicitado
       case 'template-avaliacao-inicial':
         return <TemplateInitialAssessment config={config} />
       case 'formulario-recomendacao':

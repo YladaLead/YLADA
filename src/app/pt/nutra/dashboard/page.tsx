@@ -2,27 +2,32 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import ChatIA from '../../../../components/ChatIA'
+import { useRouter } from 'next/navigation'
+import NutraNavBar from '@/components/nutra/NutraNavBar'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
+import RequireSubscription from '@/components/auth/RequireSubscription'
+import { useAuth } from '@/hooks/useAuth'
+import ChatIA from '@/components/ChatIA'
 
 export default function NutraDashboard() {
   return (
-    <ProtectedRoute perfil="nutra">
-      <NutraDashboardContent />
+    <ProtectedRoute perfil="nutra" allowAdmin={true}>
+      <RequireSubscription area="nutra">
+        <NutraDashboardContent />
+      </RequireSubscription>
     </ProtectedRoute>
   )
 }
 
 function NutraDashboardContent() {
-  // Dados do usuário (simulados - depois virão do banco de dados)
-  const usuarioNutra = {
-    nome: 'Roberto Santos',
-    certificacao: 'Consultor Nutra Certificado',
-    email: 'roberto@nutra.com',
-    especialidade: 'Suplementos e Nutraceuticos',
-    experiencia: '6 anos'
-  }
+  const { user, userProfile, signOut } = useAuth()
+  const router = useRouter()
+  
+  const [perfil, setPerfil] = useState({
+    nome: '',
+    bio: ''
+  })
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
 
   const [stats, setStats] = useState({
     ferramentasAtivas: 0,
@@ -33,403 +38,463 @@ function NutraDashboardContent() {
 
   const [chatAberto, setChatAberto] = useState(false)
 
-  const [ferramentasAtivas, setFerramentasAtivas] = useState([
-    {
-      id: 'quiz-interativo',
-      nome: 'Quiz Interativo',
-      categoria: 'Quiz',
-      leads: 45,
-      conversoes: 12,
-      status: 'ativo',
-      icon: '🧬'
-    },
-    {
-      id: 'calculadora-imc',
-      nome: 'Calculadora de IMC',
-      categoria: 'Calculadora',
-      leads: 32,
-      conversoes: 8,
-      status: 'ativo',
-      icon: '📊'
-    },
-    {
-      id: 'post-curiosidades',
-      nome: 'Post de Curiosidades',
-      categoria: 'Conteúdo',
-      leads: 28,
-      conversoes: 6,
-      status: 'ativo',
-      icon: '📱'
-    }
-  ])
+  const [ferramentasAtivas, setFerramentasAtivas] = useState<Array<{
+    id: string
+    nome: string
+    categoria: string
+    leads: number
+    conversoes: number
+    status: string
+    icon: string
+  }>>([])
 
-  const [leadsRecentes, setLeadsRecentes] = useState([
-    {
-      id: 1,
-      nome: 'Maria Silva',
-      email: 'maria@email.com',
-      telefone: '(11) 99999-9999',
-      ferramenta: 'Quiz Interativo',
-      data: '2024-01-15',
-      status: 'novo'
-    },
-    {
-      id: 2,
-      nome: 'João Santos',
-      email: 'joao@email.com',
-      telefone: '(11) 88888-8888',
-      ferramenta: 'Calculadora de IMC',
-      data: '2024-01-14',
-      status: 'contatado'
-    },
-    {
-      id: 3,
-      nome: 'Ana Costa',
-      email: 'ana@email.com',
-      telefone: '(11) 77777-7777',
-      ferramenta: 'Post de Curiosidades',
-      data: '2024-01-13',
-      status: 'convertido'
-    }
-  ])
+  const [carregandoDados, setCarregandoDados] = useState(true)
+  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
+  const [mensagemErro, setMensagemErro] = useState<string | null>(null)
+  const [excluindoId, setExcluindoId] = useState<string | null>(null)
+  const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState<string | null>(null)
+  const [alterandoStatusId, setAlterandoStatusId] = useState<string | null>(null)
 
+  // Carregar perfil do usuário
   useEffect(() => {
-    // Simular carregamento de dados
-    setStats({
-      ferramentasAtivas: ferramentasAtivas.length,
-      leadsGerados: ferramentasAtivas.reduce((acc, f) => acc + f.leads, 0),
-      conversoes: ferramentasAtivas.reduce((acc, f) => acc + f.conversoes, 0),
-      clientesAtivos: leadsRecentes.filter(l => l.status === 'convertido').length
-    })
-  }, [ferramentasAtivas, leadsRecentes])
+    const carregarPerfil = async () => {
+      if (!user) return
+      
+      try {
+        setCarregandoPerfil(true)
+        const response = await fetch('/api/nutra/profile', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile) {
+            setPerfil({
+              nome: data.profile.nome || userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+              bio: data.profile.bio || ''
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+        setPerfil({
+          nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+          bio: ''
+        })
+      } finally {
+        setCarregandoPerfil(false)
+      }
+    }
 
+    carregarPerfil()
+  }, [user, userProfile])
+
+  // Carregar dados do dashboard
+  useEffect(() => {
+    const carregarDados = async () => {
+      if (!user) return
+      
+      try {
+        setCarregandoDados(true)
+        
+        // Carregar ferramentas
+        const response = await fetch('/api/nutra/ferramentas', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          // A API retorna 'tools' ou 'ferramentas'
+          const ferramentas = data.tools || data.ferramentas || []
+          
+          // IMPORTANTE: Mostrar TODAS as ferramentas, não apenas ativas
+          setFerramentasAtivas(ferramentas.map((f: any) => {
+            // Determinar categoria baseado no template_slug
+            let categoria = 'Geral'
+            if (f.template_slug?.startsWith('calc-')) {
+              categoria = 'Calculadora'
+            } else if (f.template_slug?.startsWith('quiz-')) {
+              categoria = 'Quiz'
+            } else if (f.template_slug?.startsWith('planilha-') || f.template_slug?.startsWith('template-')) {
+              categoria = 'Planilha'
+            }
+            
+            return {
+              id: f.id,
+              nome: f.title || f.nome, // API retorna 'title'
+              categoria: categoria,
+              leads: f.leads_count || f.views || 0,
+              conversoes: 0, // TODO: calcular conversões
+              status: f.status,
+              icon: f.emoji || '🔗'
+            }
+          }))
+          
+          // Filtrar apenas ativas para estatísticas
+          const ativas = ferramentas.filter((f: any) => 
+            f.status === 'active' || f.status === 'ativa'
+          )
+          
+          // Calcular estatísticas
+          setStats({
+            ferramentasAtivas: ativas.length,
+            leadsGerados: ferramentas.reduce((acc: number, f: any) => acc + (f.views || 0), 0),
+            conversoes: 0, // TODO: calcular conversões
+            clientesAtivos: 0 // TODO: calcular clientes ativos
+          })
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+      } finally {
+        setCarregandoDados(false)
+      }
+    }
+
+    carregarDados()
+  }, [user])
+
+  // Alternar status de uma ferramenta
+  const alternarStatus = async (ferramentaId: string, statusAtual: string) => {
+    try {
+      setAlterandoStatusId(ferramentaId)
+      const novoStatus = statusAtual === 'active' || statusAtual === 'ativa' ? 'inactive' : 'active'
+      
+      const response = await fetch('/api/nutra/ferramentas', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          id: ferramentaId,
+          status: novoStatus
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao alterar status')
+      }
+
+      // Atualizar estado local
+      setFerramentasAtivas(prev => prev.map(f => 
+        f.id === ferramentaId 
+          ? { ...f, status: novoStatus }
+          : f
+      ))
+      
+      setMensagemSucesso(`Ferramenta ${novoStatus === 'active' ? 'ativada' : 'desativada'} com sucesso!`)
+      setTimeout(() => setMensagemSucesso(null), 3000)
+    } catch (error: any) {
+      console.error('Erro ao alterar status:', error)
+      setMensagemErro(error.message || 'Erro ao alterar status. Tente novamente.')
+      setTimeout(() => setMensagemErro(null), 5000)
+    } finally {
+      setAlterandoStatusId(null)
+    }
+  }
+
+  // Excluir ferramenta
+  const excluirFerramenta = async (ferramentaId: string) => {
+    try {
+      setExcluindoId(ferramentaId)
+      
+      const response = await fetch(`/api/nutra/ferramentas?id=${ferramentaId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao excluir ferramenta')
+      }
+
+      // Remover da lista local
+      setFerramentasAtivas(prev => prev.filter(f => f.id !== ferramentaId))
+      
+      setMensagemSucesso('Ferramenta excluída com sucesso!')
+      setTimeout(() => setMensagemSucesso(null), 3000)
+      setMostrarConfirmacaoExclusao(null)
+    } catch (error: any) {
+      console.error('Erro ao excluir ferramenta:', error)
+      setMensagemErro(error.message || 'Erro ao excluir ferramenta. Tente novamente.')
+      setTimeout(() => setMensagemErro(null), 5000)
+      setMostrarConfirmacaoExclusao(null)
+    } finally {
+      setExcluindoId(null)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-6">
-              <Image
-                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
-                alt="YLADA"
-                width={220}
-                height={70}
-                className="h-14 sm:h-16 w-auto"
-              />
-              <div className="h-14 sm:h-16 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Dashboard CONSULTOR NUTRA
-                </h1>
-                <div className="flex items-center space-x-4 mt-2">
-                  <p className="text-base sm:text-lg font-medium text-gray-700">{usuarioNutra.nome}</p>
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                    {usuarioNutra.certificacao}
+      <NutraNavBar />
+      
+      {/* Mensagens de Sucesso/Erro */}
+      {mensagemSucesso && (
+        <div className="fixed top-4 right-4 bg-green-50 border-2 border-green-400 rounded-lg shadow-lg p-4 z-50 max-w-md" style={{ animation: 'slideInRight 0.3s ease-out' }}>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <span className="text-green-600 text-2xl">✅</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-green-900 mb-1">Sucesso!</h3>
+              <p className="text-xs text-green-700">{mensagemSucesso}</p>
+            </div>
+            <button 
+              onClick={() => setMensagemSucesso(null)}
+              className="text-green-600 hover:text-green-800 text-lg font-bold"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mensagemErro && (
+        <div className="fixed top-4 right-4 bg-red-50 border-2 border-red-400 rounded-lg shadow-lg p-4 z-50 max-w-md" style={{ animation: 'slideInRight 0.3s ease-out' }}>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <span className="text-red-600 text-2xl">❌</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-red-900 mb-1">Erro</h3>
+              <p className="text-xs text-red-700">{mensagemErro}</p>
+            </div>
+            <button 
+              onClick={() => setMensagemErro(null)}
+              className="text-red-600 hover:text-red-800 text-lg font-bold"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      {mostrarConfirmacaoExclusao && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-start space-x-4 mb-6">
+              <div className="flex-shrink-0">
+                <span className="text-red-600 text-4xl">⚠️</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Confirmar Exclusão</h3>
+                <p className="text-sm text-gray-600">
+                  Tem certeza que deseja excluir esta ferramenta? Esta ação não pode ser desfeita.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMostrarConfirmacaoExclusao(null)}
+                className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                disabled={excluindoId !== null}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => excluirFerramenta(mostrarConfirmacaoExclusao)}
+                disabled={excluindoId !== null}
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {excluindoId === mostrarConfirmacaoExclusao ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Info do Usuário */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+            {carregandoPerfil ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-pulse bg-gray-200 h-5 w-32 rounded"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm sm:text-base font-medium text-gray-700">{perfil.nome || 'Usuário'}</p>
+                {perfil.bio && (
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-orange-100 text-orange-800 mt-1 sm:mt-0 w-fit">
+                    {perfil.bio}
                   </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/pt/nutra/suporte"
-                className="text-gray-600 hover:text-gray-900 text-sm"
-              >
-                Suporte
-              </Link>
-              <Link 
-                href="/pt/nutra/quiz-personalizado"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
-              >
-                🎯 Criar Quiz Personalizado
-              </Link>
-              <Link 
-                href="/pt/nutra/ferramentas/nova"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Nova Ferramenta
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Ações Rápidas - Movido para cima */}
-        <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Ações Rápidas</h2>
-          
-          {/* Quiz Personalizado - Destaque */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl">🎯</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-purple-900">Quiz Personalizado</h3>
-                  <p className="text-sm text-purple-700">Crie quizzes únicos com perguntas dissertativas e alternativas</p>
-                </div>
-              </div>
-              <Link 
-                href="/pt/nutra/quiz-personalizado"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg font-medium"
-              >
-                Criar Agora
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Link 
-              href="/pt/nutra/ferramentas/templates"
-              className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <span className="text-2xl mr-3">🎨</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Templates Prontos</h3>
-                <p className="text-sm text-gray-600">Usar templates testados e otimizados</p>
-              </div>
-            </Link>
-            
-            <Link 
-              href="/pt/nutra/ferramentas"
-              className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-            >
-              <span className="text-2xl mr-3">🛠️</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Minhas Ferramentas</h3>
-                <p className="text-sm text-gray-600">Gerenciar ferramentas ativas</p>
-              </div>
-            </Link>
-            
-            <Link 
-              href="/pt/nutra/leads"
-              className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-            >
-              <span className="text-2xl mr-3">👥</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Meus Leads</h3>
-                <p className="text-sm text-gray-600">Ver leads capturados</p>
-              </div>
-            </Link>
-            
-            <Link 
-              href="/pt/nutra/relatorios"
-              className="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
-            >
-              <span className="text-2xl mr-3">📊</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Relatórios</h3>
-                <p className="text-sm text-gray-600">Ver analytics detalhados</p>
-              </div>
-            </Link>
-            
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Ferramentas Ativas</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.ferramentasAtivas}</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🛠️</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">+2 esta semana</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Leads Gerados</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.leadsGerados}</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">📈</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">+15% vs mês anterior</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Conversões</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.conversoes}</p>
-              </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🎯</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">26% taxa de conversão</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Clientes Ativos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.clientesAtivos}</p>
-              </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">👥</span>
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-green-600 font-medium">+3 novos clientes</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Ferramentas Ativas */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Ferramentas Ativas</h2>
-              <Link 
-                href="/pt/nutra/ferramentas" 
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Ver todas
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {ferramentasAtivas.map((ferramenta) => (
-                <div key={ferramenta.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{ferramenta.icon}</span>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{ferramenta.nome}</h3>
-                      <p className="text-sm text-gray-600">{ferramenta.categoria}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{ferramenta.leads} leads</p>
-                    <p className="text-xs text-gray-600">{ferramenta.conversoes} conversões</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Leads Recentes */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Leads Recentes</h2>
-              <Link 
-                href="/pt/nutra/leads" 
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Ver todos
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {leadsRecentes.map((lead) => (
-                <div key={lead.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{lead.nome}</h3>
-                    <p className="text-sm text-gray-600">{lead.email}</p>
-                    <p className="text-xs text-gray-500">{lead.ferramenta}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      lead.status === 'novo' ? 'bg-blue-100 text-blue-800' :
-                      lead.status === 'contatado' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {lead.status}
-                    </span>
-                    <p className="text-xs text-gray-500 mt-1">{lead.data}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Como os Leads são Gerados */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <span className="text-2xl mr-3">📈</span>
-            Como os Leads são Gerados e Medidos
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-medium text-gray-900 mb-3">🔄 Processo de Geração de Leads</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">1.</span>
-                  <p><strong>Cliente acessa sua ferramenta</strong> através do link personalizado</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">2.</span>
-                  <p><strong>Interage com a ferramenta</strong> (quiz, calculadora, conteúdo)</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">3.</span>
-                  <p><strong>Fornece dados de contato</strong> para receber o resultado</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">4.</span>
-                  <p><strong>Lead é capturado automaticamente</strong> no seu dashboard</p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900 mb-3">📊 Métricas de Conversão</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <div className="flex justify-between">
-                  <span><strong>Taxa de Conversão:</strong></span>
-                  <span className="text-green-600 font-bold">26%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>Tempo Médio de Conversão:</strong></span>
-                  <span className="text-blue-600 font-bold">3-7 dias</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>Ticket Médio:</strong></span>
-                  <span className="text-purple-600 font-bold">R$ 180</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>ROI das Ferramentas:</strong></span>
-                  <span className="text-orange-600 font-bold">400%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
-            <h4 className="font-medium text-gray-900 mb-2">💡 Dica Importante:</h4>
-            <p className="text-sm text-gray-700">
-              Cada ferramenta funciona 24/7 capturando leads qualificados. Quanto mais ferramentas você ativar, 
-              mais leads receberá. O sistema mede automaticamente todas as interações e conversões.
-            </p>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Chat com IA */}
-      <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
-      
-      {/* Botão Flutuante do Chat */}
-      {!chatAberto && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            onClick={() => setChatAberto(true)}
-            className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-          >
-            <span className="text-2xl">💬</span>
-          </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Ações Rápidas - Otimizado Mobile First */}
+        <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
+          {/* Cards de Acesso Rápido - Grid Responsivo */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <Link 
+              href="/pt/nutra/portals"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg hover:from-orange-100 hover:to-amber-100 transition-colors border border-orange-200"
+            >
+              <span className="text-2xl sm:text-3xl mb-2">🌿</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Portal Nutra</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Criar portal</p>
+            </Link>
+            
+            <Link 
+              href="/pt/nutra/templates"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+            >
+              <span className="text-2xl sm:text-3xl mb-2">🎨</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Ver Templates</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Explorar modelos</p>
+            </Link>
+            
+            <Link 
+              href="/pt/nutra/ferramentas"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+            >
+              <span className="text-2xl sm:text-3xl mb-2">🔗</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Meus Links</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Links criados</p>
+            </Link>
+
+            <Link 
+              href="/pt/nutra/quiz-personalizado"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-rose-50 rounded-lg hover:bg-rose-100 transition-colors"
+            >
+              <span className="text-2xl sm:text-3xl mb-2">🎯</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Quiz</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Personalizado</p>
+            </Link>
+            
+            <Link 
+              href="/pt/nutra/cursos"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+            >
+              <span className="text-2xl sm:text-3xl mb-2">📚</span>
+              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Cursos</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Educação</p>
+            </Link>
+          </div>
         </div>
-      )}
+
+        {/* Links Ativos - Expandido */}
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Links Ativos</h2>
+            <Link 
+              href="/pt/nutra/ferramentas" 
+              className="text-orange-600 hover:text-orange-700 font-medium text-sm sm:text-base"
+            >
+              Ver todos →
+            </Link>
+          </div>
+          <div className="space-y-3 sm:space-y-4">
+            {carregandoDados ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600 text-sm">Carregando ferramentas...</p>
+              </div>
+            ) : ferramentasAtivas.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600 text-sm mb-4">Você ainda não criou nenhuma ferramenta</p>
+                <Link 
+                  href="/pt/nutra/ferramentas/nova"
+                  className="inline-block bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
+                >
+                  Criar Primeira Ferramenta
+                </Link>
+              </div>
+            ) : (
+              ferramentasAtivas.map((ferramenta) => {
+                const isActive = ferramenta.status === 'active' || ferramenta.status === 'ativa'
+                const isAlterandoStatus = alterandoStatusId === ferramenta.id
+                const isExcluindo = excluindoId === ferramenta.id
+                
+                return (
+                  <div 
+                    key={ferramenta.id} 
+                    className="group relative flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-transparent hover:border-orange-200"
+                  >
+                    {/* Card clicável para editar */}
+                    <Link 
+                      href={`/pt/nutra/ferramentas/${ferramenta.id}/editar`}
+                      className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer"
+                    >
+                      <span className="text-xl sm:text-2xl flex-shrink-0">{ferramenta.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{ferramenta.nome}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            isActive 
+                              ? 'bg-orange-100 text-orange-800' 
+                              : 'bg-gray-200 text-gray-600'
+                          }`}>
+                            {isActive ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">{ferramenta.categoria}</p>
+                      </div>
+                    </Link>
+                    
+                    {/* Estatísticas */}
+                    <div className="text-right flex-shrink-0 ml-3 mr-3">
+                      <p className="text-sm font-medium text-gray-900">{ferramenta.leads} leads</p>
+                      <p className="text-xs text-gray-600">{ferramenta.conversoes} conversões</p>
+                    </div>
+                    
+                    {/* Botões de Ação */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Toggle Ativo/Inativo */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          alternarStatus(ferramenta.id, ferramenta.status)
+                        }}
+                        disabled={isAlterandoStatus || isExcluindo}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                          isActive ? 'bg-orange-600' : 'bg-gray-300'
+                        } ${isAlterandoStatus || isExcluindo ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={isActive ? 'Desativar ferramenta' : 'Ativar ferramenta'}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            isActive ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      
+                      {/* Botão Excluir */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          setMostrarConfirmacaoExclusao(ferramenta.id)
+                        }}
+                        disabled={isAlterandoStatus || isExcluindo}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Excluir ferramenta"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* Chat IA */}
+      <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
     </div>
   )
 }

@@ -266,3 +266,10 @@ export default function QuizInterativoPreview({ etapa, onEtapaChange }: QuizInte
 
 
 
+
+
+
+
+
+
+
