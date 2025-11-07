@@ -186,7 +186,7 @@ async function handleOneTimePayment(
   }
 
   // Criar registro de pagamento
-  await supabaseAdmin
+  const { error: paymentError } = await supabaseAdmin
     .from('payments')
     .insert({
       subscription_id: subscription.id,
@@ -201,6 +201,11 @@ async function handleOneTimePayment(
       receipt_url: session.customer_details?.email ? null : null, // Receipt será gerado pelo Stripe
       payment_method: paymentIntent.payment_method_types?.[0] || 'card',
     })
+
+  if (paymentError) {
+    console.error('❌ Erro ao salvar pagamento único:', paymentError)
+    throw paymentError
+  }
 
   console.log('✅ Pagamento único processado e acesso ativado:', session.id)
   console.log(`📅 Acesso válido até: ${expiresAt.toISOString()}`)
