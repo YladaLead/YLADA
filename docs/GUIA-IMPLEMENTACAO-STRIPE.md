@@ -571,7 +571,50 @@ src/
 
 ---
 
-## 6. WEBHOOKS
+## 6. SISTEMA DE NÍVEIS DE AFILIADOS (FUTURO)
+
+### 📊 Estrutura de Níveis
+
+O sistema de afiliados terá três níveis baseados em vendas mensais:
+
+| Nível | Vendas Mensais | Descrição |
+|-------|----------------|-----------|
+| **Bronze** | 0 a 9 vendas | Nível inicial para novos afiliados |
+| **Prata** | 10 a 49 vendas | Nível intermediário |
+| **Ouro** | 50+ vendas | Nível máximo |
+
+### 🔄 Regras de Progressão
+
+1. **Progressão Permanente**: Quando um afiliado atinge a meta de um nível superior, ele é promovido e **nunca volta ao nível anterior**.
+
+2. **Promoção Automática**: 
+   - Ao atingir **10 vendas** no mês → promovido para **Prata**
+   - Ao atingir **50 vendas** no mês → promovido para **Ouro**
+
+3. **Cálculo Mensal**: O nível é calculado com base no número de vendas do mês atual.
+
+4. **Comissões**: Cada nível terá uma taxa de comissão diferente (a definir):
+   - Bronze: X%
+   - Prata: Y%
+   - Ouro: Z%
+
+### 📋 Implementação Futura
+
+**Status**: Planejado para implementação futura
+
+**O que será necessário:**
+- [ ] Adicionar coluna `affiliate_tier` na tabela `affiliates` (bronze, silver, gold)
+- [ ] Adicionar coluna `monthly_sales_count` para rastrear vendas do mês
+- [ ] Criar função/job para calcular e atualizar níveis mensalmente
+- [ ] Implementar lógica de promoção automática
+- [ ] Criar dashboard para afiliados verem seu nível atual
+- [ ] Configurar taxas de comissão por nível no Stripe Connect
+
+**Nota**: As taxas de comissão específicas por nível serão definidas posteriormente.
+
+---
+
+## 7. WEBHOOKS
 
 ### 🔴 Configuração de Webhooks:
 
