@@ -46,27 +46,34 @@ export async function POST(request: NextRequest) {
                     process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
                     'http://localhost:3000'
 
+    // Determinar modo de checkout baseado no tipo de plano
+    // Plano anual no Brasil = pagamento único (permite parcelamento)
+    // Plano mensal = assinatura (recorrente)
+    const isAnnualPlan = planType === 'annual'
+    const isBrazil = stripeAccount === 'br' || countryCode === 'BR'
+    const usePaymentMode = isAnnualPlan && isBrazil // Anual no Brasil = pagamento único parcelado
+
     // Determinar métodos de pagamento baseado no país
     // Para Brasil: card (com parcelamento) + link (Pix)
     // Para outros países: apenas card
     const paymentMethodTypes: string[] = ['card']
     
     // Adicionar 'link' (Pix) para Brasil
-    if (stripeAccount === 'br' || countryCode === 'BR') {
+    if (isBrazil) {
       paymentMethodTypes.push('link')
     }
 
-    // Configurações de parcelamento para Brasil (apenas para pagamentos únicos)
-    // Para assinaturas, o Stripe não oferece parcelamento tradicional
+    // Configurações de parcelamento para Brasil
     const paymentMethodOptions: any = {}
     
-    // Habilitar parcelamento para cartão no Brasil (se for pagamento único)
-    // Para assinaturas, isso não se aplica - o cliente paga mensalmente ou anualmente
-    if (stripeAccount === 'br' || countryCode === 'BR') {
+    // Habilitar parcelamento para cartão no Brasil
+    // Funciona para pagamentos únicos (plano anual)
+    // Para assinaturas (plano mensal), não há parcelamento tradicional
+    if (isBrazil) {
       paymentMethodOptions.card = {
         installments: {
           enabled: true, // Habilita opção de parcelamento
-          // O Stripe mostra automaticamente as opções disponíveis
+          // O Stripe mostra automaticamente as opções disponíveis (até 12x)
         }
       }
     }
@@ -81,7 +88,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: usePaymentMode ? 'payment' : 'subscription', // Pagamento único para anual BR, assinatura para mensal
       customer_email: user.email || undefined,
       client_reference_id: user.id,
       metadata: {
@@ -90,6 +97,7 @@ export async function POST(request: NextRequest) {
         plan_type: planType,
         stripe_account: stripeAccount,
         country_code: countryCode,
+        payment_mode: usePaymentMode ? 'one_time' : 'subscription', // Indica se é pagamento único ou assinatura
       },
       success_url: `${baseUrl}/pt/wellness/pagamento-sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pt/wellness/checkout?canceled=true`,

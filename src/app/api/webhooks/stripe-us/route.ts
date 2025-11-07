@@ -110,12 +110,100 @@ async function handleCheckoutSessionCompleted(
     return
   }
 
-  // Buscar assinatura criada
-  if (session.subscription && typeof session.subscription === 'string') {
+  // Verificar se é pagamento único ou assinatura
+  const paymentMode = session.metadata?.payment_mode || (session.mode === 'payment' ? 'one_time' : 'subscription')
+  
+  if (paymentMode === 'one_time' || session.mode === 'payment') {
+    // Pagamento único (plano anual parcelado)
+    await handleOneTimePayment(session, stripeAccount)
+  } else if (session.subscription && typeof session.subscription === 'string') {
+    // Assinatura (plano mensal)
     const stripe = await getStripeInstance(stripeAccount, process.env.NODE_ENV !== 'production')
     const subscription = await stripe.subscriptions.retrieve(session.subscription)
     await handleSubscriptionUpdated(subscription, stripeAccount)
   }
+}
+
+/**
+ * Processa pagamento único (plano anual parcelado)
+ */
+async function handleOneTimePayment(
+  session: Stripe.Checkout.Session,
+  stripeAccount: 'br' | 'us'
+) {
+  console.log('💳 Processando pagamento único:', session.id)
+
+  const userId = session.client_reference_id || session.metadata?.user_id
+  if (!userId) {
+    console.error('❌ User ID não encontrado na sessão')
+    return
+  }
+
+  const area = session.metadata?.area || 'wellness'
+  const planType = session.metadata?.plan_type || 'annual'
+
+  // Obter informações do pagamento
+  const stripe = await getStripeInstance(stripeAccount, process.env.NODE_ENV !== 'production')
+  const paymentIntentId = session.payment_intent as string
+
+  if (!paymentIntentId) {
+    console.error('❌ Payment Intent não encontrado na sessão')
+    return
+  }
+
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+  const amount = paymentIntent.amount
+  const currency = paymentIntent.currency
+
+  // Calcular data de expiração (12 meses a partir de agora)
+  const expiresAt = new Date()
+  expiresAt.setMonth(expiresAt.getMonth() + 12)
+
+  // Criar "assinatura" no banco (mas é pagamento único)
+  const { data: subscription, error } = await supabaseAdmin
+    .from('subscriptions')
+    .insert({
+      user_id: userId,
+      area: area,
+      plan_type: planType,
+      stripe_account: stripeAccount,
+      stripe_subscription_id: `one_time_${session.id}`, // ID único para pagamento único
+      stripe_customer_id: session.customer as string || null,
+      stripe_price_id: session.metadata?.price_id || null,
+      amount: amount,
+      currency: currency,
+      status: 'active',
+      current_period_start: new Date().toISOString(),
+      current_period_end: expiresAt.toISOString(),
+      cancel_at_period_end: false,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('❌ Erro ao criar subscription para pagamento único:', error)
+    throw error
+  }
+
+  // Criar registro de pagamento
+  await supabaseAdmin
+    .from('payments')
+    .insert({
+      subscription_id: subscription.id,
+      user_id: userId,
+      stripe_account: stripeAccount,
+      stripe_payment_intent_id: paymentIntentId,
+      stripe_invoice_id: session.invoice as string || null,
+      stripe_charge_id: paymentIntent.latest_charge as string || null,
+      amount: amount,
+      currency: currency,
+      status: 'succeeded',
+      receipt_url: session.customer_details?.email ? null : null, // Receipt será gerado pelo Stripe
+      payment_method: paymentIntent.payment_method_types?.[0] || 'card',
+    })
+
+  console.log('✅ Pagamento único processado e acesso ativado:', session.id)
+  console.log(`📅 Acesso válido até: ${expiresAt.toISOString()}`)
 }
 
 /**

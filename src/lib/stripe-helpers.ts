@@ -186,6 +186,24 @@ export function getStripePriceId(
   stripeAccount: StripeAccount,
   countryCode?: string
 ): string {
+  // Para plano anual no Brasil, usar produto one-time (permite parcelamento)
+  const isAnnualPlan = planType === 'annual'
+  const isBrazil = stripeAccount === 'br' || countryCode === 'BR'
+  
+  if (isAnnualPlan && isBrazil) {
+    // Tentar usar Price ID do produto one-time (parcelado)
+    const oneTimeEnvKey = `STRIPE_PRICE_${area.toUpperCase()}_ANNUAL_ONETIME_${stripeAccount.toUpperCase()}`
+    const oneTimePriceId = process.env[oneTimeEnvKey]
+    
+    if (oneTimePriceId) {
+      console.log(`💰 Usando preço one-time (parcelado) para ${area} anual BR: ${oneTimeEnvKey}`)
+      return oneTimePriceId
+    }
+    
+    // Fallback: usar preço normal (se não tiver one-time configurado)
+    console.log(`⚠️ Price ID one-time não encontrado (${oneTimeEnvKey}), usando preço padrão`)
+  }
+
   // Se tem código de país específico, tentar buscar preço específico
   if (countryCode && countryCode !== 'UNKNOWN') {
     const countryKey = `${countryCode}_${area.toUpperCase()}_${planType.toUpperCase()}`
