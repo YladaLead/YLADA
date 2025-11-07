@@ -67,7 +67,7 @@ ORDER BY name;
 SELECT 
   '⚠️ FERRAMENTAS USANDO ESSES TEMPLATES' as info,
   ut.id as ferramenta_id,
-  ut.tool_name as nome_ferramenta,
+  ut.title as nome_ferramenta,
   ut.template_id,
   t.name as nome_template,
   ut.user_id,
