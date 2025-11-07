@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
         stripe_account: stripeAccount,
         country_code: countryCode,
         payment_mode: usePaymentMode ? 'one_time' : 'subscription', // Indica se é pagamento único ou assinatura
+        price_id: priceId, // Price ID para referência no webhook
       },
       success_url: `${baseUrl}/pt/wellness/pagamento-sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pt/wellness/checkout?canceled=true`,

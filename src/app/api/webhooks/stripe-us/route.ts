@@ -169,7 +169,7 @@ async function handleOneTimePayment(
       stripe_account: stripeAccount,
       stripe_subscription_id: `one_time_${session.id}`, // ID único para pagamento único
       stripe_customer_id: session.customer as string || null,
-      stripe_price_id: session.metadata?.price_id || null,
+      stripe_price_id: session.metadata?.price_id || session.line_items?.data[0]?.price?.id || null,
       amount: amount,
       currency: currency,
       status: 'active',

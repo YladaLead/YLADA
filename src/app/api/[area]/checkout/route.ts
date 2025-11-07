@@ -112,6 +112,7 @@ export async function POST(
         stripe_account: stripeAccount,
         country_code: countryCode,
         payment_mode: usePaymentMode ? 'one_time' : 'subscription', // Indica se é pagamento único ou assinatura
+        price_id: priceId, // Price ID para referência no webhook
       },
       success_url: `${baseUrl}/pt/${area}/pagamento-sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pt/${area}/checkout?canceled=true`,
