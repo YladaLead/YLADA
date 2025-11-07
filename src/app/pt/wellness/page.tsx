@@ -269,7 +269,7 @@ export default function WellnessPage() {
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Mensal</h3>
                 <p className="text-gray-600 text-center mb-6">Distribuidores, Supervisores e Líderes de Equipe</p>
                 <div className="text-center mb-6">
-                  <span className="text-4xl font-bold text-green-600">R$ 60</span>
+                  <span className="text-4xl font-bold text-green-600">R$ 59,90</span>
                   <span className="text-gray-600">/mês</span>
                 </div>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">

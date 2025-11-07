@@ -100,8 +100,8 @@ function WellnessCheckoutContent() {
 
   const planDetails = {
     monthly: {
-      price: 60,
-      priceFormatted: 'R$ 60',
+      price: 59.90,
+      priceFormatted: 'R$ 59,90',
       period: 'mês',
       description: 'Plano Mensal',
     },
@@ -184,7 +184,7 @@ function WellnessCheckoutContent() {
                     Mensal
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 60
+                    R$ 59,90
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                 </div>
