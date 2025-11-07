@@ -46,9 +46,35 @@ export async function POST(request: NextRequest) {
                     process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
                     'http://localhost:3000'
 
+    // Determinar métodos de pagamento baseado no país
+    // Para Brasil: card (com parcelamento) + link (Pix)
+    // Para outros países: apenas card
+    const paymentMethodTypes: string[] = ['card']
+    
+    // Adicionar 'link' (Pix) para Brasil
+    if (stripeAccount === 'br' || countryCode === 'BR') {
+      paymentMethodTypes.push('link')
+    }
+
+    // Configurações de parcelamento para Brasil (apenas para pagamentos únicos)
+    // Para assinaturas, o Stripe não oferece parcelamento tradicional
+    const paymentMethodOptions: any = {}
+    
+    // Habilitar parcelamento para cartão no Brasil (se for pagamento único)
+    // Para assinaturas, isso não se aplica - o cliente paga mensalmente ou anualmente
+    if (stripeAccount === 'br' || countryCode === 'BR') {
+      paymentMethodOptions.card = {
+        installments: {
+          enabled: true, // Habilita opção de parcelamento
+          // O Stripe mostra automaticamente as opções disponíveis
+        }
+      }
+    }
+
     // Criar sessão de checkout
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: paymentMethodTypes,
+      payment_method_options: Object.keys(paymentMethodOptions).length > 0 ? paymentMethodOptions : undefined,
       line_items: [
         {
           price: priceId,
