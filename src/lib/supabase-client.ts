@@ -18,12 +18,20 @@ export function createClient() {
   return createBrowserClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
+        // Verificar se estamos no browser antes de acessar document
+        if (typeof document === 'undefined') {
+          return []
+        }
         return document.cookie.split(';').map(cookie => {
           const [name, ...rest] = cookie.split('=')
           return { name: name.trim(), value: rest.join('=') }
         })
       },
       setAll(cookiesToSet) {
+        // Verificar se estamos no browser antes de acessar document
+        if (typeof document === 'undefined') {
+          return
+        }
         cookiesToSet.forEach(({ name, value, options }) => {
           document.cookie = `${name}=${value}; path=${options?.path || '/'}; ${options?.maxAge ? `max-age=${options.maxAge};` : ''} ${options?.domain ? `domain=${options.domain};` : ''} ${options?.sameSite ? `SameSite=${options.sameSite};` : ''} ${options?.secure ? 'Secure;' : ''}`
         })
