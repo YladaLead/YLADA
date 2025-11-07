@@ -7,9 +7,10 @@
 3. [Schema do Banco de Dados](#3-schema-do-banco-de-dados)
 4. [Variáveis de Ambiente](#4-variáveis-de-ambiente)
 5. [Implementação Técnica](#5-implementação-técnica)
-6. [Webhooks](#6-webhooks)
-7. [Testes](#7-testes)
-8. [Checklist Final](#8-checklist-final)
+6. [Sistema de Níveis de Afiliados (Futuro)](#6-sistema-de-níveis-de-afiliados-futuro)
+7. [Webhooks](#7-webhooks)
+8. [Testes](#8-testes)
+9. [Checklist Final](#9-checklist-final)
 
 ---
 
@@ -647,7 +648,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe-us --account US_AC
 
 ---
 
-## 7. TESTES
+## 8. TESTES
 
 ### ✅ Checklist de Testes:
 
@@ -683,7 +684,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe-us --account US_AC
 
 ---
 
-## 8. CHECKLIST FINAL
+## 9. CHECKLIST FINAL
 
 ### 📋 Antes de Começar:
 
