@@ -34,6 +34,22 @@ Antes de começar, você precisa ter:
 
 ## 🔴 PASSO 2: CRIAR NOVO WEBHOOK
 
+### Opção A: Interface Nova (Event Destinations)
+
+1. **Clique no botão:** `Add endpoint` ou "Criar destino de evento" (Create event destination)
+
+2. **Você verá um fluxo de 3 etapas:**
+   - Etapa 1: "Selecionar eventos" (Select events) ← **Você está aqui**
+   - Etapa 2: "Escolher tipo de destino" (Choose destination type)
+   - Etapa 3: "Configure o destino" (Configure destination)
+
+3. **Na etapa 1 - Selecionar eventos:**
+   - **Escolha:** "Sua conta" (Your account) - card da esquerda com borda roxa
+   - **Versão da API:** Deixe como está (ex: "2025-10-29.clover")
+   - **Na aba "Todos os eventos":** Use a busca para encontrar os eventos
+
+### Opção B: Interface Antiga (Webhooks Diretos)
+
 1. **Clique no botão:** `Add endpoint` (ou "Adicionar endpoint" em português)
 
 2. **Você verá um formulário com:**
@@ -95,7 +111,15 @@ Você precisa selecionar quais eventos o Stripe vai enviar. **Selecione os segui
 7. ✅ `payment_intent.succeeded` - Confirmação de pagamento
 8. ✅ `payment_intent.payment_failed` - Falha no pagamento
 
-### Como Selecionar:
+### Como Selecionar (Interface Nova):
+
+1. **Na busca:** Digite o nome do evento (ex: "checkout.session")
+2. **Marque cada evento** clicando na checkbox ao lado
+3. **Repita para todos os 8 eventos** listados acima
+4. **Verifique na aba:** "Eventos selecionados" deve mostrar 8 eventos
+5. **Clique em:** "Continuar →" (Continue →) no canto inferior direito
+
+### Como Selecionar (Interface Antiga):
 
 1. **Clique em:** "Select events" ou "Selecionar eventos"
 2. **Escolha:** "Select events to listen to" (não use "Send all events")
@@ -104,32 +128,54 @@ Você precisa selecionar quais eventos o Stripe vai enviar. **Selecione os segui
 
 ---
 
-## 🔴 PASSO 5: SALVAR E COPIAR SECRET
+## 🔴 PASSO 5: CONFIGURAR TIPO DE DESTINO E URL
 
-1. **Clique em:** `Add endpoint` (ou "Adicionar endpoint")
+### Se estiver na Interface Nova (Event Destinations):
 
-2. **Aguarde alguns segundos** - O Stripe vai criar o webhook
+1. **Após selecionar eventos, clique em:** "Continuar →"
 
-3. **Você verá a página do webhook criado** com:
+2. **Na etapa 2 - Escolher tipo de destino:**
+   - **Selecione:** "Webhook endpoint" ou "Endpoint de webhook"
+   - **Clique em:** "Continuar →"
+
+3. **Na etapa 3 - Configure o destino:**
+   - **Endpoint URL:** Cole a URL do webhook:
+     - BR: `https://ylada.app/api/webhooks/stripe-br`
+     - US: `https://ylada.app/api/webhooks/stripe-us`
+   - **Descrição (opcional):** "Webhook YLADA [BR/US]"
+   - **Clique em:** "Criar destino" ou "Create destination"
+
+4. **Aguarde alguns segundos** - O Stripe vai criar o webhook
+
+### Se estiver na Interface Antiga:
+
+1. **Cole a URL** no campo "Endpoint URL"
+2. **Clique em:** `Add endpoint` (ou "Adicionar endpoint")
+
+---
+
+## 🔴 PASSO 6: COPIAR SIGNING SECRET
+
+1. **Após criar o webhook, você verá a página do webhook criado** com:
    - Status: "Enabled" (habilitado)
    - URL do endpoint
    - Lista de eventos
    - **⚠️ IMPORTANTE: "Signing secret"**
 
-4. **Clique em:** "Reveal" ou "Revelar" ao lado de "Signing secret"
+2. **Clique em:** "Reveal" ou "Revelar" ao lado de "Signing secret"
 
-5. **Copie o Signing Secret:**
+3. **Copie o Signing Secret:**
    - Formato: `whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
    - **⚠️ COPIE AGORA!** Você só vê uma vez (ou precisa gerar novo)
 
-6. **Salve em local seguro:**
+4. **Salve em local seguro:**
    - Planilha
    - Arquivo de texto
    - Variáveis de ambiente (próximo passo)
 
 ---
 
-## 🔴 PASSO 6: ADICIONAR SECRET NAS VARIÁVEIS DE AMBIENTE
+## 🔴 PASSO 7: ADICIONAR SECRET NAS VARIÁVEIS DE AMBIENTE
 
 ### No Vercel (Produção):
 
@@ -163,7 +209,7 @@ STRIPE_WEBHOOK_SECRET_US=whsec_xxxxxxxxxxxxx
 
 ---
 
-## 🔴 PASSO 7: TESTAR WEBHOOK
+## 🔴 PASSO 8: TESTAR WEBHOOK
 
 ### Opção A: Testar com Stripe CLI (Recomendado para Desenvolvimento)
 
@@ -200,7 +246,7 @@ STRIPE_WEBHOOK_SECRET_US=whsec_xxxxxxxxxxxxx
 
 ---
 
-## 🔴 PASSO 8: VERIFICAR SE ESTÁ FUNCIONANDO
+## 🔴 PASSO 9: VERIFICAR SE ESTÁ FUNCIONANDO
 
 ### No Stripe Dashboard:
 
