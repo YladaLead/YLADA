@@ -39,3 +39,4 @@ echo "   2. Terminal do 'stripe listen' (se estiver rodando)"
 echo ""
 
 
+

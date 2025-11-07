@@ -194,6 +194,8 @@ export default function LoginForm({
 
   const logoSrc = logoPath || (perfil === 'wellness' 
     ? '/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png'
+    : perfil === 'nutra' || logoColor === 'laranja'
+    ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
     : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png')
 
   return (
@@ -303,6 +305,8 @@ export default function LoginForm({
             className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 ${
               perfil === 'wellness'
                 ? 'bg-green-600 hover:bg-green-700'
+                : perfil === 'nutra' || logoColor === 'laranja'
+                ? 'bg-orange-600 hover:bg-orange-700'
                 : 'bg-blue-600 hover:bg-blue-700'
             } ${loading ? 'opacity-50 cursor-not-allowed' : 'shadow-md hover:shadow-lg'}`}
           >
