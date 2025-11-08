@@ -25,6 +25,7 @@ export default function WellnessModuloPlayerPage() {
   const [materialAtual, setMaterialAtual] = useState<WellnessCursoMaterial | null>(null)
   const [urlMaterialAtual, setUrlMaterialAtual] = useState<string | null>(null)
   const [topicoAberto, setTopicoAberto] = useState<string | null>(null)
+  const [sidebarAberto, setSidebarAberto] = useState(false) // Mobile sidebar
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -232,16 +233,57 @@ export default function WellnessModuloPlayerPage() {
     <div className="min-h-screen bg-gray-50">
       <WellnessNavBar showTitle={true} title={modulo.titulo} />
 
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)]">
+        {/* Botão Mobile para abrir sidebar - Posicionado no header */}
+        <button
+          onClick={() => setSidebarAberto(!sidebarAberto)}
+          className="lg:hidden fixed top-[56px] sm:top-16 right-4 z-50 bg-white border-2 border-green-600 rounded-lg p-2.5 shadow-lg hover:bg-green-50 transition-colors"
+          aria-label="Abrir menu"
+        >
+          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        {/* Overlay Mobile */}
+        {sidebarAberto && (
+          <div
+            className="lg:hidden fixed inset-0 bg-black/50 z-40"
+            onClick={() => setSidebarAberto(false)}
+          />
+        )}
+
         {/* Sidebar - Lista de Tópicos e Materiais */}
-        <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+        <div className={`
+          fixed lg:static
+          top-[56px] sm:top-16 left-0
+          w-80 max-w-[85vw]
+          h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)]
+          bg-white border-r border-gray-200
+          overflow-y-auto
+          z-40
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarAberto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
           <div className="p-4">
-            <Link
-              href="/pt/wellness/cursos"
-              className="text-sm text-gray-600 hover:text-gray-900 mb-4 inline-block"
-            >
-              ← Voltar para biblioteca
-            </Link>
+            <div className="flex items-center justify-between mb-4">
+              <Link
+                href="/pt/wellness/cursos"
+                className="text-sm text-gray-600 hover:text-gray-900 inline-block"
+                onClick={() => setSidebarAberto(false)}
+              >
+                ← Voltar para biblioteca
+              </Link>
+              <button
+                onClick={() => setSidebarAberto(false)}
+                className="lg:hidden text-gray-500 hover:text-gray-700"
+                aria-label="Fechar menu"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             
             {/* Informações do Módulo */}
             <div className="mb-6 p-4 bg-green-50 rounded-lg">
@@ -287,11 +329,14 @@ export default function WellnessModuloPlayerPage() {
                           return (
                             <button
                               key={material.id}
-                              onClick={() => selecionarMaterial(material)}
-                              className={`w-full px-4 py-2 text-left text-sm transition-colors ${
+                              onClick={() => {
+                                selecionarMaterial(material)
+                                setSidebarAberto(false) // Fechar sidebar no mobile ao selecionar
+                              }}
+                              className={`w-full px-3 sm:px-4 py-2 text-left text-xs sm:text-sm transition-colors ${
                                 isAtual
                                   ? 'bg-green-50 border-l-4 border-green-600'
-                                  : 'hover:bg-gray-100'
+                                  : 'hover:bg-gray-100 active:bg-gray-100'
                               }`}
                             >
                               <div className="flex items-center space-x-2">
@@ -323,16 +368,16 @@ export default function WellnessModuloPlayerPage() {
         </div>
 
         {/* Área Principal - Player */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col w-full lg:w-auto pt-12 lg:pt-0">
           {materialAtual ? (
             <>
               {/* Header do Material */}
-              <div className="bg-white border-b border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <div className="bg-white border-b border-gray-200 p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                   {materialAtual.titulo}
                 </h2>
                 {materialAtual.descricao && (
-                  <p className="text-gray-600">{materialAtual.descricao}</p>
+                  <p className="text-sm sm:text-base text-gray-600">{materialAtual.descricao}</p>
                 )}
                 {error && (
                   <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -342,7 +387,7 @@ export default function WellnessModuloPlayerPage() {
               </div>
 
               {/* Player/Visualizador */}
-              <div className="flex-1 bg-gray-900 flex items-center justify-center p-8">
+              <div className="flex-1 bg-gray-900 flex items-center justify-center p-2 sm:p-4 lg:p-8">
                 {urlMaterialAtual ? (
                   materialAtual.tipo === 'video' ? (
                     <div className="w-full max-w-4xl">
@@ -350,7 +395,7 @@ export default function WellnessModuloPlayerPage() {
                         controls
                         controlsList="nodownload"
                         preload="metadata"
-                        className="w-full rounded-lg shadow-lg"
+                        className="w-full h-auto rounded-lg shadow-lg"
                         src={urlMaterialAtual}
                         crossOrigin="anonymous"
                         onLoadedMetadata={(e) => {
@@ -423,7 +468,7 @@ export default function WellnessModuloPlayerPage() {
                       </video>
                     </div>
                   ) : (
-                    <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-4">
+                    <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-2 sm:p-4">
                       {/* Verificar se é imagem ou PDF */}
                       {materialAtual.arquivo_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                         // É uma imagem
@@ -431,7 +476,7 @@ export default function WellnessModuloPlayerPage() {
                           <img
                             src={urlMaterialAtual}
                             alt={materialAtual.titulo}
-                            className="max-w-full max-h-[calc(100vh-300px)] rounded-lg shadow-md"
+                            className="max-w-full max-h-[calc(100vh-200px)] sm:max-h-[calc(100vh-300px)] rounded-lg shadow-md"
                             onError={(e) => {
                               console.error('Erro ao carregar imagem:', e)
                               setError('Erro ao carregar imagem. Verifique se o arquivo existe.')
@@ -442,7 +487,7 @@ export default function WellnessModuloPlayerPage() {
                         // É um PDF
                         <iframe
                           src={urlMaterialAtual}
-                          className="w-full h-[calc(100vh-300px)] rounded"
+                          className="w-full h-[calc(100vh-200px)] sm:h-[calc(100vh-300px)] rounded"
                           title={materialAtual.titulo}
                           onError={(e) => {
                             console.error('Erro ao carregar PDF:', e)

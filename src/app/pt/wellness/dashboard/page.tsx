@@ -229,7 +229,10 @@ function WellnessDashboardContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <WellnessNavBar />
+      <WellnessNavBar 
+        userName={perfil.nome || userProfile?.nome_completo || undefined}
+        userBio={perfil.bio || undefined}
+      />
       
       {/* Mensagens de Sucesso/Erro */}
       {mensagemSucesso && (
@@ -307,75 +310,65 @@ function WellnessDashboardContent() {
         </div>
       )}
       
-      {/* Info do Usuário */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
-            {carregandoPerfil ? (
-              <div className="flex items-center space-x-2">
-                <div className="animate-pulse bg-gray-200 h-5 w-32 rounded"></div>
-              </div>
-            ) : (
-              <>
-                <p className="text-sm sm:text-base font-medium text-gray-700">{perfil.nome || 'Usuário'}</p>
-                {perfil.bio && (
-                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-teal-100 text-teal-800 mt-1 sm:mt-0 w-fit">
-                    {perfil.bio}
-                  </span>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Ações Rápidas - Otimizado Mobile First */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Seção: Ferramentas do seu negócio */}
         <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
-          {/* Cards de Acesso Rápido - Grid Responsivo */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            <Link 
-              href="/pt/wellness/portals"
-              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg hover:from-emerald-100 hover:to-green-100 transition-colors border border-emerald-200"
-            >
-              <span className="text-2xl sm:text-3xl mb-2">🌿</span>
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Portal do Bem-Estar</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Criar portal</p>
-            </Link>
-            
-            <Link 
-              href="/pt/wellness/templates"
-              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <span className="text-2xl sm:text-3xl mb-2">🎨</span>
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Ver Templates</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Explorar modelos</p>
-            </Link>
-            
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
+            <span>🔧</span>
+            <span>Ferramentas do seu negócio</span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Link 
               href="/pt/wellness/ferramentas"
-              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
-              <span className="text-2xl sm:text-3xl mb-2">🔗</span>
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Meus Links</h3>
+              <span className="text-3xl sm:text-4xl mb-2">🔗</span>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Meus Links</h3>
               <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Links criados</p>
             </Link>
 
             <Link 
               href="/pt/wellness/quiz-personalizado"
-              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
             >
-              <span className="text-2xl sm:text-3xl mb-2">🎯</span>
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Quiz</h3>
+              <span className="text-3xl sm:text-4xl mb-2">🎯</span>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Quiz</h3>
               <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Personalizado</p>
             </Link>
             
             <Link 
-              href="/pt/wellness/cursos"
-              className="flex flex-col items-center justify-center p-3 sm:p-4 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+              href="/pt/wellness/portals"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg hover:from-emerald-100 hover:to-green-100 transition-colors border border-emerald-200"
             >
-              <span className="text-2xl sm:text-3xl mb-2">📚</span>
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm text-center">Cursos</h3>
+              <span className="text-3xl sm:text-4xl mb-2">🌿</span>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Portal do Bem-Estar</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Criar portal</p>
+            </Link>
+          </div>
+        </div>
+
+        {/* Seção: Recursos e Materiais */}
+        <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
+            <span>🎨</span>
+            <span>Recursos e Materiais</span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Link 
+              href="/pt/wellness/templates"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <span className="text-3xl sm:text-4xl mb-2">🎨</span>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Ver Templates</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Explorar modelos</p>
+            </Link>
+            
+            <Link 
+              href="/pt/wellness/cursos"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+            >
+              <span className="text-3xl sm:text-4xl mb-2">📚</span>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Cursos</h3>
               <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Educação</p>
             </Link>
           </div>

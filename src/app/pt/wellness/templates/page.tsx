@@ -437,10 +437,10 @@ export default function WellnessTemplatesPage() {
         {/* Intro */}
         <div className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-2xl p-8 mb-8 border border-teal-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            Ferramentas Prontas para Crescer 📈
+            Transforme Leads em Clientes com Ferramentas Profissionais 🚀
           </h2>
           <p className="text-gray-600 text-base leading-relaxed">
-            Templates validados e otimizados para captura de leads, avaliações profissionais e acompanhamento de clientes em bem-estar.
+            Use templates prontos e testados para criar links personalizados, gerar mais leads qualificados e converter visitantes em clientes. Tudo otimizado para resultados reais no seu negócio de bem-estar.
           </p>
         </div>
 
