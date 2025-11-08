@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
@@ -12,7 +12,7 @@ const supabase = createClient()
 
 type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'todos'
 
-export default function AdminCursosPage() {
+function AdminCursosContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const areaFiltro = (searchParams.get('area') as Area) || 'todos'
@@ -453,8 +453,7 @@ export default function AdminCursosPage() {
   }
 
   return (
-    <AdminProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
@@ -1046,6 +1045,22 @@ export default function AdminCursosPage() {
           )}
         </div>
       </div>
+  )
+}
+
+export default function AdminCursosPage() {
+  return (
+    <AdminProtectedRoute>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      }>
+        <AdminCursosContent />
+      </Suspense>
     </AdminProtectedRoute>
   )
 }
