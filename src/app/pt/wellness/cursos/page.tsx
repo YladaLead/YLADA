@@ -1,195 +1,186 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
+import { useAuth } from '@/hooks/useAuth'
+import { createClient } from '@/lib/supabase-client'
+import type { WellnessCursoModulo, WellnessModuloTopico, WellnessCursoMaterial } from '@/types/wellness-cursos'
 
-interface Curso {
-  id: string
-  titulo: string
-  descricao: string
-  nivel: 'iniciante' | 'intermediario' | 'avancado'
-  categoria: string
-  preco: number
-  preco_com_desconto?: number
-  duracao_horas: number
-  total_aulas: number
-  total_matriculados: number
-  avaliacao_media: number
-  status: 'draft' | 'published'
-  is_gratuito: boolean
+const supabase = createClient()
+
+type ModuloCompleto = WellnessCursoModulo & {
+  topicos?: (WellnessModuloTopico & {
+    cursos?: WellnessCursoMaterial[]
+  })[]
 }
 
 export default function WellnessCursosPage() {
-  const [filtro, setFiltro] = useState<'todos' | 'disponiveis'>('todos')
+  const { user } = useAuth()
+  const [modulos, setModulos] = useState<ModuloCompleto[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const cursos: Curso[] = [
-    {
-      id: '1',
-      titulo: 'Bem-Estar Integral com Suplementação',
-      descricao: 'Aprenda como integrar suplementos naturais no seu dia a dia para melhorar energia e saúde',
-      nivel: 'iniciante',
-      categoria: 'Bem-Estar',
-      preco: 497,
-      duracao_horas: 30,
-      total_aulas: 20,
-      total_matriculados: 120,
-      avaliacao_media: 4.8,
-      status: 'published',
-      is_gratuito: false
-    },
-    {
-      id: '2',
-      titulo: 'Emagrecimento e Vitalidade',
-      descricao: 'Estratégias práticas para perder peso com saúde usando nutrição completa',
-      nivel: 'intermediario',
-      categoria: 'Emagrecimento',
-      preco: 597,
-      duracao_horas: 45,
-      total_aulas: 28,
-      total_matriculados: 85,
-      avaliacao_media: 4.9,
-      status: 'published',
-      is_gratuito: false
-    },
-    {
-      id: '3',
-      titulo: 'Introdução à Nutrição Saudável',
-      descricao: 'Fundamentos básicos de alimentação equilibrada e suplementação inteligente',
-      nivel: 'iniciante',
-      categoria: 'Educação',
-      preco: 0,
-      duracao_horas: 12,
-      total_aulas: 8,
-      total_matriculados: 350,
-      avaliacao_media: 4.6,
-      status: 'published',
-      is_gratuito: true
-    },
-    {
-      id: '4',
-      titulo: 'Transformação Total - 90 Dias',
-      descricao: 'Jornada completa de transformação física e mental com suporte exclusivo',
-      nivel: 'avancado',
-      categoria: 'Transformação',
-      preco: 997,
-      preco_com_desconto: 797,
-      duracao_horas: 90,
-      total_aulas: 60,
-      total_matriculados: 45,
-      avaliacao_media: 5.0,
-      status: 'published',
-      is_gratuito: false
+  useEffect(() => {
+    carregarModulos()
+  }, [])
+
+  const carregarModulos = async () => {
+    try {
+      setLoading(true)
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setLoading(false)
+        return
+      }
+
+      // Buscar módulos da biblioteca
+      const modulosResponse = await fetch('/api/wellness/modulos', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      if (!modulosResponse.ok) {
+        throw new Error('Erro ao carregar módulos')
+      }
+
+      const modulosData = await modulosResponse.json()
+      const modulosList = modulosData.modulos || []
+
+      // Para cada módulo, carregar tópicos e materiais
+      const modulosCompletos = await Promise.all(
+        modulosList.map(async (modulo: WellnessCursoModulo) => {
+          // Carregar tópicos
+          const topicosResponse = await fetch(`/api/wellness/modulos/${modulo.id}/topicos`, {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          })
+
+          let topicos: (WellnessModuloTopico & { cursos?: WellnessCursoMaterial[] })[] = []
+          
+          if (topicosResponse.ok) {
+            const topicosData = await topicosResponse.json()
+            topicos = await Promise.all(
+              (topicosData.topicos || []).map(async (topico: WellnessModuloTopico) => {
+                // Carregar materiais do tópico
+                const materiaisResponse = await fetch(`/api/wellness/modulos/${modulo.id}/topicos/${topico.id}/cursos`, {
+                  headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                  }
+                })
+
+                let cursos: WellnessCursoMaterial[] = []
+                if (materiaisResponse.ok) {
+                  const materiaisData = await materiaisResponse.json()
+                  cursos = materiaisData.cursos || []
+                }
+
+                return { ...topico, cursos }
+              })
+            )
+          }
+
+          return { ...modulo, topicos }
+        })
+      )
+
+      setModulos(modulosCompletos)
+    } catch (error: any) {
+      console.error('Erro ao carregar módulos:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
 
-  const cursosFiltrados = filtro === 'todos' ? cursos : cursos.filter(c => c.status === 'published')
+  // Calcular total de materiais em um módulo
+  const calcularTotalMateriais = (modulo: ModuloCompleto) => {
+    return modulo.topicos?.reduce((acc, topico) => {
+      return acc + (topico.cursos?.length || 0)
+    }, 0) || 0
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <WellnessNavBar showTitle={true} title="Área de Cursos" />
+      <WellnessNavBar showTitle={true} title="Cursos" />
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Banner */}
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 mb-8 text-white shadow-lg">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">📚 Meus Cursos</h2>
-              <p className="text-green-100 text-lg">
-                Cursos que você adquiriu para se tornar um especialista em bem-estar e nutrição
-              </p>
-            </div>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">📚 Biblioteca de Conteúdo</h1>
+          <p className="text-gray-600 text-lg">
+            Acesse materiais práticos, vídeos e documentos para seu desenvolvimento pessoal
+          </p>
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Carregando conteúdo...</p>
           </div>
-        </div>
+        )}
 
-        {/* Filtros */}
-        <div className="mb-6 flex gap-2">
-          <button
-            onClick={() => setFiltro('todos')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtro === 'todos' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => setFiltro('disponiveis')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtro === 'disponiveis' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Disponíveis
-          </button>
-        </div>
-
-        {/* Grid de Cursos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cursosFiltrados.map((curso) => (
-            <div key={curso.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-              {/* Imagem do Curso */}
-              <div className="h-48 bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                <span className="text-6xl">📚</span>
+        {/* Grid de Módulos */}
+        {!loading && (
+          <>
+            {modulos.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+                <div className="text-6xl mb-4">📚</div>
+                <p className="text-gray-500 text-lg mb-2">Nenhum conteúdo disponível no momento.</p>
+                <p className="text-gray-400 text-sm">Novos materiais serão adicionados em breve.</p>
               </div>
-
-              {/* Conteúdo */}
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded mb-2 capitalize">
-                      {curso.nivel}
-                    </span>
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">{curso.titulo}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{curso.descricao}</p>
-                  </div>
-                </div>
-
-                {/* Estatísticas */}
-                <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                  <span>⏱️ {curso.duracao_horas}h</span>
-                  <span>📖 {curso.total_aulas} aulas</span>
-                  <span>👥 {curso.total_matriculados}</span>
-                </div>
-
-                {/* Avaliação */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i}>{i < Math.floor(curso.avaliacao_media) ? '★' : '☆'}</span>
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">{curso.avaliacao_media}</span>
-                </div>
-
-                {/* Preço e Ação */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    {curso.is_gratuito ? (
-                      <span className="text-2xl font-bold text-green-600">Grátis</span>
-                    ) : curso.preco_com_desconto ? (
-                      <div>
-                        <span className="text-sm text-gray-400 line-through">R$ {curso.preco.toFixed(2)}</span>
-                        <span className="text-2xl font-bold text-green-600 ml-2">R$ {curso.preco_com_desconto.toFixed(2)}</span>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {modulos.map((modulo) => {
+                  const totalMateriais = calcularTotalMateriais(modulo)
+                  const totalTopicos = modulo.topicos?.length || 0
+                  
+                  return (
+                    <Link
+                      key={modulo.id}
+                      href={`/pt/wellness/modulos/${modulo.id}`}
+                      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-green-300 transition-all group"
+                    >
+                      {/* Thumbnail */}
+                      <div className="relative h-48 bg-gradient-to-br from-green-400 to-emerald-600 overflow-hidden">
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-6xl">📚</span>
+                        </div>
+                        {/* Overlay no hover */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                       </div>
-                    ) : (
-                      <span className="text-2xl font-bold text-gray-900">R$ {curso.preco.toFixed(2)}</span>
-                    )}
-                  </div>
-                  <button className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all">
-                    Ver Curso
-                  </button>
-                </div>
+
+                      {/* Conteúdo */}
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
+                          {modulo.titulo}
+                        </h3>
+                        {modulo.descricao && (
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                            {modulo.descricao}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>{totalTopicos} {totalTopicos === 1 ? 'tópico' : 'tópicos'}</span>
+                            <span>•</span>
+                            <span>{totalMateriais} {totalMateriais === 1 ? 'material' : 'materiais'}</span>
+                          </div>
+                          <span className="text-sm font-medium text-green-600 group-hover:text-green-700 transition-colors">
+                            Acessar →
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </>
+        )}
       </main>
     </div>
   )
 }
-
