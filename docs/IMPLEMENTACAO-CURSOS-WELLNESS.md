@@ -1,8 +1,15 @@
 # 📚 Implementação: Área de Cursos Wellness
 
+> **📌 Nota:** Este documento descreve a implementação específica para a área Wellness. Para duplicar este sistema para outras áreas (Nutri, Coach, Nutra), consulte o guia: [`GUIA-DUPLICACAO-CURSOS-PARA-OUTRAS-AREAS.md`](./GUIA-DUPLICACAO-CURSOS-PARA-OUTRAS-AREAS.md)
+
 ## 📋 Visão Geral
 
-Sistema completo de cursos wellness com hierarquia de Módulos → Materiais (PDFs e Vídeos), incluindo área administrativa para gerenciamento e área do usuário para consumo.
+Sistema completo de cursos wellness com hierarquia de **Módulo → Tópico → Material (Curso)**, incluindo área administrativa para gerenciamento e área do usuário para consumo.
+
+**Estrutura hierárquica:**
+- **Módulo** (biblioteca independente)
+  - **Tópico** (dentro do módulo)
+    - **Material/Curso** (PDF, vídeo ou imagem dentro do tópico)
 
 ---
 
