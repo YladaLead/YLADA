@@ -1,9 +1,30 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { diagnosticosNutri, calculadoraAguaDiagnosticos, calculadoraCaloriasDiagnosticos, checklistDetoxDiagnosticos, checklistAlimentarDiagnosticos, miniEbookDiagnosticos, guiaNutraceuticoDiagnosticos, guiaProteicoDiagnosticos, tabelaComparativaDiagnosticos, tabelaSubstituicoesDiagnosticos, planoAlimentarBaseDiagnosticos } from '@/lib/diagnosticos-nutri'
+import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
+
+interface Template {
+  id: string
+  nome: string
+  categoria: string
+  descricao: string
+  icon?: string
+  cor?: string
+  perguntas?: number
+  tempoEstimado?: string
+  leadsMedio?: string
+  conversao?: string
+  preview?: string
+  slug?: string
+  content?: any
+  type?: string
+}
+
 export default function TemplatesNutri() {
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [carregandoTemplates, setCarregandoTemplates] = useState(true)
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas')
   const [busca, setBusca] = useState('')
   const [templatePreviewAberto, setTemplatePreviewAberto] = useState<string | null>(null)
@@ -43,54 +64,140 @@ export default function TemplatesNutri() {
   const [etapaPreviewNutridoAlimentado, setEtapaPreviewNutridoAlimentado] = useState(0) // Para nutrido-alimentado
   const [etapaPreviewPerfilIntestino, setEtapaPreviewPerfilIntestino] = useState(0) // Para perfil-intestino
 
-  // Todos os 38 templates validados da área admin-diagnosticos
-  const templates = [
-    // QUIZES INTERATIVOS (5)
-    { id: 'quiz-interativo', nome: 'Quiz Interativo', categoria: 'Quiz', descricao: 'Quiz com perguntas estratégicas para capturar informações dos clientes', icon: '🎯', cor: 'blue', perguntas: 6, tempoEstimado: '3 min', leadsMedio: '45/mês', conversao: '26%', preview: 'Perguntas estratégicas para atrair leads frios' },
-    { id: 'quiz-bem-estar', nome: 'Quiz de Bem-Estar', categoria: 'Quiz', descricao: 'Avalie o bem-estar geral do cliente', icon: '🧘‍♀️', cor: 'purple', perguntas: 6, tempoEstimado: '2 min', leadsMedio: '38/mês', conversao: '28%', preview: 'Avaliação completa de bem-estar' },
-    { id: 'quiz-perfil-nutricional', nome: 'Quiz de Perfil Nutricional', categoria: 'Quiz', descricao: 'Identifique o perfil nutricional do cliente', icon: '🥗', cor: 'green', perguntas: 7, tempoEstimado: '3 min', leadsMedio: '42/mês', conversao: '27%', preview: 'Diagnóstico inicial do perfil nutricional' },
-    { id: 'quiz-detox', nome: 'Quiz Detox', categoria: 'Quiz', descricao: 'Avalie a necessidade de processo detox', icon: '🧽', cor: 'blue', perguntas: 5, tempoEstimado: '2 min', leadsMedio: '35/mês', conversao: '24%', preview: 'Captação através de curiosidade sobre detox' },
-    { id: 'quiz-energetico', nome: 'Quiz Energético', categoria: 'Quiz', descricao: 'Identifique níveis de energia e cansaço', icon: '⚡', cor: 'yellow', perguntas: 6, tempoEstimado: '2 min', leadsMedio: '40/mês', conversao: '25%', preview: 'Segmentação por níveis de energia' },
+  // Mapear tipo para categoria
+  const categoryMap: { [key: string]: string } = {
+    quiz: 'Quiz',
+    calculadora: 'Calculadora',
+    planilha: 'Planilha',
+    checklist: 'Checklist',
+    conteudo: 'Conteúdo',
+    diagnostico: 'Diagnóstico',
+    default: 'Outros'
+  }
+
+  // Mapear categoria para ícone padrão
+  const iconMap: { [key: string]: string } = {
+    'Quiz': '🎯',
+    'Calculadora': '🧮',
+    'Planilha': '📊',
+    'Checklist': '📋',
+    'Conteúdo': '📚',
+    'Diagnóstico': '🔍'
+  }
+
+  // Mapear categoria para cor padrão
+  const corMap: { [key: string]: string } = {
+    'Quiz': 'blue',
+    'Calculadora': 'green',
+    'Planilha': 'purple',
+    'Checklist': 'blue',
+    'Conteúdo': 'purple',
+    'Diagnóstico': 'red'
+  }
+
+  // Carregar templates do banco
+  useEffect(() => {
+    let cancelled = false
     
-    // CALCULADORAS (4)
-    { id: 'calculadora-imc', nome: 'Calculadora de IMC', categoria: 'Calculadora', descricao: 'Calcule o Índice de Massa Corporal com interpretação personalizada', icon: '📊', cor: 'green', perguntas: 3, tempoEstimado: '1 min', leadsMedio: '50/mês', conversao: '30%', preview: 'Altura, peso e análise completa do resultado' },
-    { id: 'calculadora-proteina', nome: 'Calculadora de Proteína', categoria: 'Calculadora', descricao: 'Calcule a necessidade proteica diária do cliente', icon: '🥩', cor: 'orange', perguntas: 5, tempoEstimado: '2 min', leadsMedio: '45/mês', conversao: '28%', preview: 'Recomendação nutricional baseada em peso e objetivos' },
-    { id: 'calculadora-agua', nome: 'Calculadora de Água', categoria: 'Calculadora', descricao: 'Calcule a necessidade diária de hidratação', icon: '💧', cor: 'blue', perguntas: 4, tempoEstimado: '1 min', leadsMedio: '35/mês', conversao: '22%', preview: 'Engajamento leve através de hidratação' },
-    { id: 'calculadora-calorias', nome: 'Calculadora de Calorias', categoria: 'Calculadora', descricao: 'Calcule o gasto calórico diário e necessidades energéticas', icon: '🔥', cor: 'red', perguntas: 6, tempoEstimado: '2 min', leadsMedio: '42/mês', conversao: '26%', preview: 'Diagnóstico completo de necessidades energéticas' },
+    const carregarTemplates = async () => {
+      try {
+        setCarregandoTemplates(true)
+        const response = await fetch('/api/nutri/templates', {
+          cache: 'no-store',
+          signal: AbortSignal.timeout(10000) // Timeout de 10 segundos
+        })
+        
+        if (cancelled) return
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.templates && data.templates.length > 0) {
+            console.log('📦 Templates Nutri carregados do banco:', data.templates.length)
+            
+            // Transformar templates do banco para formato da página
+            const templatesFormatados = data.templates
+              .filter((t: any) => {
+                // Apenas garantir que o template tem nome
+                if (!t.nome || !t.nome.trim()) {
+                  console.log('⚠️ Template sem nome ignorado:', t.id)
+                  return false
+                }
+                return true
+              })
+              .map((t: any) => {
+                // Normalizar ID para detecção (slug ou nome em lowercase com hífens)
+                const normalizedId = (t.slug || t.id || '').toLowerCase().replace(/\s+/g, '-')
+                const normalizedName = (t.nome || '').toLowerCase()
+                
+                // Determinar categoria
+                const categoria = t.categoria || categoryMap[t.type] || categoryMap.default
+                
+                // Determinar ícone e cor
+                const icon = t.icon || iconMap[categoria] || '📋'
+                const cor = t.cor || corMap[categoria] || 'blue'
+                
+                // Extrair número de perguntas do content se disponível
+                let perguntas = 0
+                if (t.content && typeof t.content === 'object') {
+                  if (t.content.questions && Array.isArray(t.content.questions)) {
+                    perguntas = t.content.questions.length
+                  } else if (t.content.items && Array.isArray(t.content.items)) {
+                    perguntas = t.content.items.length
+                  }
+                }
+                
+                // Estimar tempo baseado no tipo e número de perguntas
+                let tempoEstimado = '2 min'
+                if (t.type === 'calculadora') {
+                  tempoEstimado = '1-2 min'
+                } else if (perguntas > 0) {
+                  tempoEstimado = `${Math.ceil(perguntas * 0.3)} min`
+                }
+                
+                return {
+                  id: normalizedId || t.slug || t.id,
+                  nome: t.nome,
+                  categoria,
+                  descricao: t.descricao || t.description || '',
+                  icon,
+                  cor,
+                  perguntas,
+                  tempoEstimado,
+                  leadsMedio: '40/mês', // Valor padrão
+                  conversao: '25%', // Valor padrão
+                  preview: t.descricao || t.description || '',
+                  slug: t.slug || normalizedId,
+                  content: t.content, // Incluir content para preview dinâmico
+                  type: t.type // Incluir type para preview dinâmico
+                }
+              })
+            
+            setTemplates(templatesFormatados)
+            console.log(`✅ ${templatesFormatados.length} templates Nutri formatados e carregados`)
+          } else {
+            console.warn('⚠️ Nenhum template Nutri encontrado na API')
+            setTemplates([])
+          }
+        } else {
+          console.error('❌ Erro ao carregar templates Nutri:', response.status)
+          setTemplates([])
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar templates Nutri:', error)
+        setTemplates([])
+      } finally {
+        if (!cancelled) {
+          setCarregandoTemplates(false)
+        }
+      }
+    }
+
+    carregarTemplates()
     
-    // CHECKLISTS (2)
-    { id: 'checklist-detox', nome: 'Checklist Detox', categoria: 'Checklist', descricao: 'Lista de verificação para processo de detox', icon: '📋', cor: 'green', perguntas: 10, tempoEstimado: '2 min', leadsMedio: '32/mês', conversao: '24%', preview: 'Educação rápida sobre detox' },
-    { id: 'checklist-alimentar', nome: 'Checklist Alimentar', categoria: 'Checklist', descricao: 'Avalie hábitos alimentares do cliente', icon: '🍽️', cor: 'blue', perguntas: 12, tempoEstimado: '3 min', leadsMedio: '38/mês', conversao: '26%', preview: 'Avaliação completa de hábitos alimentares' },
-    
-    // CONTEÚDO EDUCATIVO (6)
-    { id: 'mini-ebook', nome: 'Mini E-book Educativo', categoria: 'Conteúdo', descricao: 'E-book compacto para demonstrar expertise e autoridade', icon: '📚', cor: 'purple', perguntas: 0, tempoEstimado: 'Download', leadsMedio: '55/mês', conversao: '32%', preview: 'Demonstração de autoridade através de conteúdo educativo' },
-    { id: 'guia-nutraceutico', nome: 'Guia Nutracêutico', categoria: 'Conteúdo', descricao: 'Guia completo sobre suplementos e nutracêuticos', icon: '💊', cor: 'blue', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '48/mês', conversao: '29%', preview: 'Atração de interesse por suplementação' },
-    { id: 'guia-proteico', nome: 'Guia Proteico', categoria: 'Conteúdo', descricao: 'Guia especializado sobre proteínas e fontes proteicas', icon: '🥛', cor: 'orange', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '44/mês', conversao: '27%', preview: 'Especialização em nutrição proteica' },
-    { id: 'tabela-comparativa', nome: 'Tabela Comparativa', categoria: 'Conteúdo', descricao: 'Tabelas comparativas de alimentos e nutrientes', icon: '📊', cor: 'green', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '40/mês', conversao: '25%', preview: 'Ferramenta de conversão através de comparações' },
-    { id: 'tabela-substituicoes', nome: 'Tabela de Substituições', categoria: 'Conteúdo', descricao: 'Tabela de substituições de alimentos para mais variedade', icon: '🔄', cor: 'blue', perguntas: 5, tempoEstimado: '3 min', leadsMedio: '36/mês', conversao: '23%', preview: 'Valor agregado através de substituições inteligentes' },
-    
-    
-    // DIAGNÓSTICOS ESPECÍFICOS (19)
-    { id: 'template-diagnostico-parasitose', nome: 'Diagnóstico de Parasitose', categoria: 'Diagnóstico', descricao: 'Ferramenta para diagnóstico de parasitose intestinal', icon: '🦠', cor: 'red', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '41/mês', conversao: '27%', preview: 'Diagnóstico específico de parasitose' },
-    { id: 'diagnostico-eletritos', nome: 'Diagnóstico de Eletrólitos', categoria: 'Diagnóstico', descricao: 'Avalie sinais de desequilíbrio de sódio, potássio, magnésio e cálcio', icon: '⚡', cor: 'yellow', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '39/mês', conversao: '25%', preview: 'Detecta necessidade de reposição de eletrólitos' },
-    { id: 'diagnostico-perfil-metabolico', nome: 'Avaliação do Perfil Metabólico', categoria: 'Diagnóstico', descricao: 'Identifique sinais de metabolismo acelerado, equilibrado ou lento', icon: '🔥', cor: 'orange', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '42/mês', conversao: '28%', preview: 'Classifica seu perfil metabólico e orienta próximos passos' },
-    { id: 'diagnostico-sintomas-intestinais', nome: 'Diagnóstico de Sintomas Intestinais', categoria: 'Diagnóstico', descricao: 'Identifique sinais de constipação, disbiose, inflamação e irregularidade', icon: '💩', cor: 'purple', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '45/mês', conversao: '29%', preview: 'Detecta desequilíbrio intestinal e orienta próximos passos' },
-    { id: 'avaliacao-sono-energia', nome: 'Avaliação do Sono e Energia', categoria: 'Diagnóstico', descricao: 'Avalie se o sono está restaurando sua energia diária', icon: '😴', cor: 'blue', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '40/mês', conversao: '26%', preview: 'Classifica o descanso e energia (baixo/moderado/alto comprometimento)' },
-    { id: 'teste-retencao-liquidos', nome: 'Teste de Retenção de Líquidos', categoria: 'Diagnóstico', descricao: 'Avalie sinais de retenção hídrica e desequilíbrio mineral', icon: '💧', cor: 'teal', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '38/mês', conversao: '25%', preview: 'Detecta retenção hídrica e orienta próximos passos' },
-    { id: 'avaliacao-fome-emocional', nome: 'Avaliação de Fome Emocional', categoria: 'Diagnóstico', descricao: 'Identifique se a alimentação está sendo influenciada por emoções e estresse', icon: '🧠', cor: 'pink', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '43/mês', conversao: '27%', preview: 'Avalia influência emocional na alimentação' },
-    { id: 'diagnostico-tipo-metabolismo', nome: 'Diagnóstico do Tipo de Metabolismo', categoria: 'Diagnóstico', descricao: 'Avalie se seu metabolismo é lento, normal ou acelerado', icon: '⚙️', cor: 'gray', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '41/mês', conversao: '26%', preview: 'Classifica o tipo metabólico por sintomas e hábitos' },
-    { id: 'disciplinado-emocional', nome: 'Você é mais disciplinado ou emocional com a comida?', categoria: 'Diagnóstico', descricao: 'Avalie se o comportamento alimentar é guiado mais por razão ou emoções', icon: '❤️‍🔥', cor: 'pink', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '43/mês', conversao: '28%', preview: 'Identifica perfil comportamental: disciplinado, intermediário ou emocional' },
-    { id: 'nutrido-alimentado', nome: 'Você está nutrido ou apenas alimentado?', categoria: 'Diagnóstico', descricao: 'Descubra se está nutrido em nível celular ou apenas comendo calorias vazias', icon: '🍎', cor: 'orange', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '45/mês', conversao: '29%', preview: 'Avalia qualidade nutricional e deficiências celulares' },
-    { id: 'perfil-intestino', nome: 'Qual é seu perfil de intestino?', categoria: 'Diagnóstico', descricao: 'Identifique o tipo de funcionamento intestinal e saúde digestiva', icon: '💩', cor: 'purple', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '42/mês', conversao: '27%', preview: 'Classifica perfil intestinal: equilibrado, preso/sensível ou disbiose' },
-    { id: 'avaliacao-sensibilidades', nome: 'Avaliação de Intolerâncias/Sensibilidades', categoria: 'Diagnóstico', descricao: 'Detecte sinais de sensibilidades alimentares não diagnosticadas', icon: '⚠️', cor: 'red', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '44/mês', conversao: '28%', preview: 'Identifica possíveis reações alimentares e orienta próximos passos' },
-    { id: 'avaliacao-sindrome-metabolica', nome: 'Risco de Síndrome Metabólica', categoria: 'Diagnóstico', descricao: 'Avalie fatores de risco ligados à resistência à insulina e inflamação', icon: '🚨', cor: 'gray', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '46/mês', conversao: '30%', preview: 'Sinaliza risco metabólico e orienta condutas' },
-    { id: 'descoberta-perfil-bem-estar', nome: 'Descubra seu Perfil de Bem-Estar', categoria: 'Diagnóstico', descricao: 'Identifique se seu perfil é Estético, Equilibrado ou Saúde/Performance', icon: '🧭', cor: 'purple', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '47/mês', conversao: '31%', preview: 'Diagnóstico leve com convite à avaliação personalizada' },
-    { id: 'quiz-tipo-fome', nome: 'Qual é o seu Tipo de Fome?', categoria: 'Diagnóstico', descricao: 'Identifique Fome Física, por Hábito ou Emocional', icon: '🍽️', cor: 'pink', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '44/mês', conversao: '29%', preview: 'Provoca curiosidade e direciona para avaliação' },
-    { id: 'quiz-pedindo-detox', nome: 'Seu corpo está pedindo Detox?', categoria: 'Diagnóstico', descricao: 'Avalie sinais de sobrecarga e acúmulo de toxinas', icon: '💧', cor: 'teal', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '46/mês', conversao: '30%', preview: 'Sinaliza necessidade de detox guiado' },
-    { id: 'avaliacao-rotina-alimentar', nome: 'Você está se alimentando conforme sua rotina?', categoria: 'Diagnóstico', descricao: 'Descubra se sua rotina alimentar está adequada aos horários e demandas', icon: '⏰', cor: 'blue', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '43/mês', conversao: '28%', preview: 'Aponta alinhamento da rotina e sugere reeducação' },
-    { id: 'pronto-emagrecer', nome: 'Pronto para Emagrecer com Saúde?', categoria: 'Diagnóstico', descricao: 'Avalie seu nível de prontidão física e emocional', icon: '🏁', cor: 'green', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '48/mês', conversao: '32%', preview: 'Identifica prontidão e direciona para preparação personalizada' },
-    { id: 'autoconhecimento-corporal', nome: 'Você conhece o seu corpo?', categoria: 'Diagnóstico', descricao: 'Avalie seu nível de autoconhecimento corporal e nutricional', icon: '🧠', cor: 'purple', perguntas: 10, tempoEstimado: '3 min', leadsMedio: '45/mês', conversao: '30%', preview: 'Mostra o quanto você entende seus sinais físicos e emocionais' }
-  ]
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const categorias = ['todas', 'Quiz', 'Calculadora', 'Checklist', 'Conteúdo', 'Plano', 'Desafio', 'Guia', 'Receita', 'Simulador', 'Formulário', 'Social', 'Catálogo', 'Diagnóstico']
 
@@ -228,8 +335,20 @@ export default function TemplatesNutri() {
         </div>
 
         {/* Grid de Templates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templatesFiltrados.map((template) => (
+        {carregandoTemplates ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+              <p className="text-gray-600">Carregando templates...</p>
+            </div>
+          </div>
+        ) : templatesFiltrados.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Nenhum template encontrado.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {templatesFiltrados.map((template) => (
             <div key={template.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -323,7 +442,8 @@ export default function TemplatesNutri() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Ações Rápidas */}
         <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -6251,22 +6371,40 @@ export default function TemplatesNutri() {
                 </div>
               )}
 
-              {templatePreviewSelecionado.id !== 'quiz-interativo' && templatePreviewSelecionado.id !== 'calculadora-imc' && templatePreviewSelecionado.id !== 'quiz-bem-estar' && templatePreviewSelecionado.id !== 'quiz-perfil-nutricional' && templatePreviewSelecionado.id !== 'quiz-detox' && templatePreviewSelecionado.id !== 'quiz-energetico' && templatePreviewSelecionado.id !== 'calculadora-proteina' && templatePreviewSelecionado.id !== 'calculadora-agua' && templatePreviewSelecionado.id !== 'calculadora-calorias' && templatePreviewSelecionado.id !== 'checklist-detox' && templatePreviewSelecionado.id !== 'checklist-alimentar' && templatePreviewSelecionado.id !== 'mini-ebook' && templatePreviewSelecionado.id !== 'guia-nutraceutico' && templatePreviewSelecionado.id !== 'guia-proteico' && templatePreviewSelecionado.id !== 'tabela-comparativa' && templatePreviewSelecionado.id !== 'tabela-substituicoes' && templatePreviewSelecionado.id !== 'template-diagnostico-parasitose' && (
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    {templatePreviewSelecionado.icon} Preview do {templatePreviewSelecionado.nome}
-                  </h3>
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
-                    <h4 className="text-xl font-bold text-gray-900 mb-2">{templatePreviewSelecionado.nome}</h4>
-                    <p className="text-gray-700 mb-3">{templatePreviewSelecionado.descricao}</p>
-                    <p className="text-blue-600 font-semibold">{templatePreviewSelecionado.preview}</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600 text-center">
-                      Preview completo em desenvolvimento. Este template está disponível para uso.
-                    </p>
-                  </div>
-                </div>
+              {/* Preview dinâmico para templates sem preview customizado */}
+              {templatePreviewSelecionado && ![
+                'quiz-interativo',
+                'calculadora-imc',
+                'quiz-bem-estar',
+                'quiz-perfil-nutricional',
+                'quiz-detox',
+                'quiz-energetico',
+                'calculadora-proteina',
+                'calculadora-agua',
+                'calculadora-calorias',
+                'checklist-detox',
+                'checklist-alimentar',
+                'mini-ebook',
+                'guia-nutraceutico',
+                'guia-proteico',
+                'tabela-comparativa',
+                'tabela-substituicoes',
+                'template-diagnostico-parasitose',
+                'diagnostico-eletritos',
+                'diagnostico-perfil-metabolico',
+                'diagnostico-sintomas-intestinais',
+                'avaliacao-sono-energia',
+                'teste-retencao-liquidos',
+                'avaliacao-fome-emocional',
+                'diagnostico-tipo-metabolismo',
+                'avaliacao-sensibilidades',
+                'avaliacao-sindrome-metabolica'
+              ].includes(templatePreviewSelecionado.id) && (
+                <DynamicTemplatePreview
+                  template={templatePreviewSelecionado}
+                  profession="nutri"
+                  onClose={() => setTemplatePreviewAberto(null)}
+                />
               )}
             </div>
 

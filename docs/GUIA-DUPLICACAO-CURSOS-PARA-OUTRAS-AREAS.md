@@ -460,3 +460,4 @@ const replacements = {
 
 **Status:** ✅ Guia criado - Pronto para duplicação
 
+

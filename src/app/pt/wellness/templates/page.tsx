@@ -21,8 +21,6 @@ import {
   desafio7DiasDiagnosticos,
   desafio21DiasDiagnosticos
 } from '@/lib/diagnostics'
-import QuizInterativoPreview from '@/components/wellness-previews/quizzes/QuizInterativoPreview'
-import QuizBemEstarPreview from '@/components/wellness-previews/quizzes/QuizBemEstarPreview'
 import QuizPerfilNutricionalPreview from '@/components/wellness-previews/quizzes/QuizPerfilNutricionalPreview'
 import QuizDetoxPreview from '@/components/wellness-previews/quizzes/QuizDetoxPreview'
 import QuizEnergeticoPreview from '@/components/wellness-previews/quizzes/QuizEnergeticoPreview'
@@ -46,6 +44,7 @@ import QuizPropositoEquilibrioPreview from '@/components/wellness-previews/quizz
 import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
 import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
 import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
+import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
 
 interface Template {
   id: string
@@ -56,6 +55,7 @@ interface Template {
   category: string
   link: string
   color: string
+  content?: any
 }
 
 export default function WellnessTemplatesPage() {
@@ -68,8 +68,6 @@ export default function WellnessTemplatesPage() {
   const [etapaPreview, setEtapaPreview] = useState<number>(0) // 0 = landing, 1+ = formulário/perguntas, último = resultado
   const [etapaPreviewChecklistAlimentar, setEtapaPreviewChecklistAlimentar] = useState(0) // Para checklist-alimentar: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewChecklistDetox, setEtapaPreviewChecklistDetox] = useState(0) // Para checklist-detox: 0 = landing, 1-5 = perguntas, 6 = resultados
-  const [etapaPreviewQuizInterativo, setEtapaPreviewQuizInterativo] = useState(0) // Para quiz-interativo: 0 = landing, 1-6 = perguntas, 7 = resultados
-  const [etapaPreviewQuizBemEstar, setEtapaPreviewQuizBemEstar] = useState(0) // Para quiz-bem-estar: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizPerfilNutricional, setEtapaPreviewQuizPerfilNutricional] = useState(0) // Para quiz-perfil-nutricional: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizDetox, setEtapaPreviewQuizDetox] = useState(0) // Para quiz-detox: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizEnergetico, setEtapaPreviewQuizEnergetico] = useState(0) // Para quiz-energetico: 0 = landing, 1-5 = perguntas, 6 = resultados
@@ -353,7 +351,8 @@ export default function WellnessTemplatesPage() {
                   type: tipoFinal,
                   category: categoriaFinal, // ✅ Sempre usar categoria correta (não specialization)
                   link: `/pt/wellness/ferramentas/nova?template=${t.templateId || t.slug || t.id}`,
-                  color: colorMap[tipoFinal?.toLowerCase()] || colorMap[t.categoria?.toLowerCase()] || colorMap['default']
+                  color: colorMap[tipoFinal?.toLowerCase()] || colorMap[t.categoria?.toLowerCase()] || colorMap['default'],
+                  content: t.content // Incluir content para preview dinâmico
                 }
               })
             
@@ -681,7 +680,6 @@ export default function WellnessTemplatesPage() {
                           setEtapaPreview(0)
                           setEtapaPreviewChecklistAlimentar(0)
                           setEtapaPreviewChecklistDetox(0)
-                          setEtapaPreviewQuizInterativo(0)
                           setEtapaPreviewQuizBemEstar(0)
                           setEtapaPreviewQuizPerfilNutricional(0)
                           setEtapaPreviewQuizDetox(0)
@@ -1050,15 +1048,13 @@ export default function WellnessTemplatesPage() {
                                              (templateNameLower.includes('desafio') && templateNameLower.includes('21'))
                       
                       // Log de detecção para debug - TODOS os templates modulares
-                      const isModular = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial || isQuizEletrolitos || isQuizSintomasIntestinais || isQuizProntoEmagrecer || isQuizTipoFome || isQuizAlimentacaoSaudavel || isQuizSindromeMetabolica || isQuizRetencaoLiquidos || isQuizConheceSeuCorpo || isQuizNutridoVsAlimentado || isQuizAlimentacaoRotina ||
+                      const isModular = isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional || isQuizIntolerancia || isQuizPerfilMetabolico || isQuizAvaliacaoInicial || isQuizEletrolitos || isQuizSintomasIntestinais || isQuizProntoEmagrecer || isQuizTipoFome || isQuizAlimentacaoSaudavel || isQuizSindromeMetabolica || isQuizRetencaoLiquidos || isQuizConheceSeuCorpo || isQuizNutridoVsAlimentado || isQuizAlimentacaoRotina ||
                                        isChecklistAlimentar || isChecklistDetox || isGuiaHidratacao || isDesafio7Dias || isDesafio21Dias
                       
                       if (isModular) {
                         console.log('[DEBUG Modular] Detecção:', {
                           templateName: template.name,
                           templateId: template.id,
-                          isQuizInterativo,
-                          isQuizBemEstar,
                           isQuizPerfilNutricional,
                           isQuizDetox,
                           isQuizEnergetico,
@@ -1069,26 +1065,6 @@ export default function WellnessTemplatesPage() {
                           isDesafio7Dias,
                           isDesafio21Dias
                         })
-                      }
-                      
-                      // Quiz Interativo - Componente Modular
-                      if (isQuizInterativo) {
-                        return (
-                          <QuizInterativoPreview 
-                            etapa={etapaPreviewQuizInterativo}
-                            onEtapaChange={setEtapaPreviewQuizInterativo}
-                          />
-                        )
-                      }
-                      
-                      // Quiz Bem-Estar - Componente Modular
-                      if (isQuizBemEstar) {
-                        return (
-                          <QuizBemEstarPreview 
-                            etapa={etapaPreviewQuizBemEstar}
-                            onEtapaChange={setEtapaPreviewQuizBemEstar}
-                          />
-                        )
                       }
                       
                       // Quiz Perfil Nutricional - Componente Modular
@@ -1462,6 +1438,13 @@ export default function WellnessTemplatesPage() {
                                               onClick={() => responderDesafio7(idx)}
                                               className="w-full text-left flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300 hover:bg-teal-50 transition-colors"
                                             >
+                                              <input 
+                                                type="radio" 
+                                                name={`desafio7-pergunta-${etapaPreviewDesafio7Dias}`} 
+                                                className="mr-3 w-4 h-4 text-teal-600 focus:ring-teal-500 focus:ring-2" 
+                                                checked={false}
+                                                readOnly
+                                              />
                                               <span className="text-gray-700">{opcao}</span>
                                             </button>
                                           ))}
@@ -1771,6 +1754,13 @@ export default function WellnessTemplatesPage() {
                                               onClick={() => responderDesafio21(idx)}
                                               className="w-full text-left flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:border-teal-300 hover:bg-teal-50 transition-colors"
                                             >
+                                              <input 
+                                                type="radio" 
+                                                name={`desafio21-pergunta-${etapaPreviewDesafio21Dias}`} 
+                                                className="mr-3 w-4 h-4 text-teal-600 focus:ring-teal-500 focus:ring-2" 
+                                                checked={false}
+                                                readOnly
+                                              />
                                               <span className="text-gray-700">{opcao}</span>
                                             </button>
                                           ))}
@@ -1958,6 +1948,47 @@ export default function WellnessTemplatesPage() {
                           // Checklist Alimentar usa estado próprio, não mostrar landing genérico aqui
                           if (isAlimentar) {
                             return null // Landing do Checklist Alimentar está dentro da seção específica
+                          }
+                          
+                          // Verificar se o template tem content e vai usar DynamicTemplatePreview
+                          // Se sim, não mostrar o fallback genérico
+                          const templatesComPreviewCustomizado = [
+                            'quiz-bem-estar',
+                            'quiz-perfil-nutricional',
+                            'quiz-detox',
+                            'quiz-energetico',
+                            'quiz-emocional',
+                            'quiz-intolerancia',
+                            'quiz-perfil-metabolico',
+                            'quiz-avaliacao-inicial',
+                            'quiz-eletrolitos',
+                            'quiz-sintomas-intestinais',
+                            'quiz-pronto-emagrecer',
+                            'quiz-tipo-fome',
+                            'quiz-alimentacao-saudavel',
+                            'quiz-sindrome-metabolica',
+                            'quiz-retencao-liquidos',
+                            'quiz-conhece-seu-corpo',
+                            'quiz-nutrido-vs-alimentado',
+                            'quiz-alimentacao-rotina',
+                            'quiz-ganhos-prosperidade',
+                            'quiz-potencial-crescimento',
+                            'quiz-proposito-equilibrio',
+                            'checklist-alimentar',
+                            'checklist-detox',
+                            'guia-hidratacao',
+                            'desafio-7-dias',
+                            'desafio-21-dias'
+                          ]
+                          const templateIdLower = (template.id || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                          const temPreviewCustomizado = templatesComPreviewCustomizado.some(id => 
+                            templateIdLower.includes(id) || templateIdLower === id
+                          )
+                          
+                          // Se tem content e não tem preview customizado, vai usar DynamicTemplatePreview
+                          // Não mostrar o fallback genérico
+                          if (template.content && !temPreviewCustomizado) {
+                            return null
                           }
                           
                           // Para outros templates, mostrar landing normal quando etapaPreview === 0
@@ -2856,6 +2887,84 @@ export default function WellnessTemplatesPage() {
                             )}
                           </>
                         )}
+
+                        {/* Preview dinâmico como fallback para templates sem preview customizado */}
+                        {(() => {
+                          // Lista de templates com preview customizado
+                          const templatesComPreviewCustomizado = [
+                            'quiz-bem-estar',
+                            'quiz-perfil-nutricional',
+                            'quiz-detox',
+                            'quiz-energetico',
+                            'quiz-emocional',
+                            'quiz-intolerancia',
+                            'quiz-perfil-metabolico',
+                            'quiz-avaliacao-inicial',
+                            'quiz-eletrolitos',
+                            'quiz-sintomas-intestinais',
+                            'quiz-pronto-emagrecer',
+                            'quiz-tipo-fome',
+                            'quiz-alimentacao-saudavel',
+                            'quiz-sindrome-metabolica',
+                            'quiz-retencao-liquidos',
+                            'quiz-conhece-seu-corpo',
+                            'quiz-nutrido-vs-alimentado',
+                            'quiz-alimentacao-rotina',
+                            'quiz-ganhos-prosperidade',
+                            'quiz-potencial-crescimento',
+                            'quiz-proposito-equilibrio',
+                            'checklist-alimentar',
+                            'checklist-detox',
+                            'guia-hidratacao',
+                            'desafio-7-dias',
+                            'desafio-21-dias'
+                          ]
+                          
+                          const templateIdLower = (template.id || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                          const temPreviewCustomizado = templatesComPreviewCustomizado.some(id => 
+                            templateIdLower.includes(id) || templateIdLower === id
+                          )
+                          
+                          // Se não tem preview customizado e tem content, usar preview dinâmico
+                          if (!temPreviewCustomizado && template.content) {
+                            console.log('[Wellness Templates] Usando DynamicTemplatePreview para:', {
+                              id: template.id,
+                              name: template.name,
+                              type: template.type,
+                              hasContent: !!template.content,
+                              contentType: typeof template.content,
+                              contentKeys: template.content ? Object.keys(template.content) : []
+                            })
+                            return (
+                              <div className="p-6">
+                                <DynamicTemplatePreview
+                                  template={{
+                                    id: template.id,
+                                    name: template.name,
+                                    slug: template.id,
+                                    type: template.type,
+                                    content: template.content
+                                  }}
+                                  profession="wellness"
+                                  onClose={() => setTemplatePreviewAberto(null)}
+                                />
+                              </div>
+                            )
+                          }
+                          
+                          // Debug: Se não tem content ou tem preview customizado
+                          if (temPreviewCustomizado) {
+                            console.log('[Wellness Templates] Template tem preview customizado:', template.id)
+                          } else if (!template.content) {
+                            console.warn('[Wellness Templates] Template sem content:', {
+                              id: template.id,
+                              name: template.name,
+                              type: template.type
+                            })
+                          }
+                          
+                          return null
+                        })()}
                       </div>
 
                       {/* Navegação por Etapas - Só mostrar se NÃO for componente modular */}
@@ -2868,7 +2977,7 @@ export default function WellnessTemplatesPage() {
                                              nameCheck.includes('checklist alimentar')
                         const isDetox = idCheck.includes('checklist-detox') || 
                                        nameCheck.includes('checklist detox')
-                        const isQuiz = isQuizInterativo || isQuizBemEstar || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional
+                        const isQuiz = isQuizInterativo || isQuizPerfilNutricional || isQuizDetox || isQuizEnergetico || isQuizEmocional
                         const isGuia = isGuiaHidratacao
                         const isDesafio = isDesafio7Dias || isDesafio21Dias
                         
@@ -2927,7 +3036,6 @@ export default function WellnessTemplatesPage() {
                     setEtapaPreview(0)
                     setEtapaPreviewChecklistAlimentar(0)
                     setEtapaPreviewChecklistDetox(0)
-                    setEtapaPreviewQuizInterativo(0)
                     setEtapaPreviewQuizBemEstar(0)
                     setEtapaPreviewQuizPerfilNutricional(0)
                     setEtapaPreviewQuizDetox(0)

@@ -23,3 +23,4 @@ WHERE profession = 'wellness'
   AND is_active = true
 ORDER BY name;
 
+

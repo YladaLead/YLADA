@@ -66,3 +66,4 @@ LEFT JOIN templates_ativos ta ON te.name = ta.name AND te.type = ta.type
 WHERE ta.name IS NULL
 ORDER BY te.type, te.name;
 
+

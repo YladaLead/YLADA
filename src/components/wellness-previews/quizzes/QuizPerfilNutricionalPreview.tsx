@@ -236,3 +236,5 @@ export default function QuizPerfilNutricionalPreview({ etapa, onEtapaChange }: Q
 
 
 
+
+

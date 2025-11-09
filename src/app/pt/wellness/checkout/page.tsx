@@ -2,41 +2,10 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/hooks/useAuth'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-
-// Detectar qual chave usar baseado no país (padrão: BR para Brasil)
-// Suporta variáveis com sufixo _TEST para desenvolvimento
-const getPublishableKey = () => {
-  const isTest = process.env.NODE_ENV !== 'production'
-  
-  // Tentar BR primeiro (padrão para Brasil)
-  // Prioridade: _TEST (se em desenvolvimento) > sem sufixo
-  const brKey = isTest 
-    ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR)
-    : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR
-    
-  const usKey = isTest
-    ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US)
-    : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US
-  
-  if (brKey && brKey.startsWith('pk_')) {
-    return brKey
-  }
-  
-  if (usKey && usKey.startsWith('pk_')) {
-    return usKey
-  }
-  
-  // Se nenhuma chave válida, retornar vazio (vai dar erro, mas melhor que string vazia)
-  console.error('❌ Nenhuma chave pública do Stripe configurada! Configure NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST ou NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR')
-  return ''
-}
-
-const stripePromise = loadStripe(getPublishableKey())
 
 export default function WellnessCheckoutPage() {
   return (
@@ -63,28 +32,6 @@ function WellnessCheckoutContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const canceled = searchParams.get('canceled') === 'true'
-  
-  // Verificar se Stripe está configurado
-  useEffect(() => {
-    const isTest = process.env.NODE_ENV !== 'production'
-    
-    // Verificar variáveis com sufixo _TEST primeiro (se em desenvolvimento)
-    const brKey = isTest 
-      ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR)
-      : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR
-      
-    const usKey = isTest
-      ? (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US_TEST || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US)
-      : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_US
-    
-    if (!brKey && !usKey) {
-      setError('Stripe não está configurado. Configure NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR_TEST ou NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BR no arquivo .env.local')
-    } else if (brKey && !brKey.startsWith('pk_')) {
-      setError('Chave pública do Stripe BR inválida. Deve começar com "pk_test_" ou "pk_live_"')
-    } else if (usKey && !usKey.startsWith('pk_')) {
-      setError('Chave pública do Stripe US inválida. Deve começar com "pk_test_" ou "pk_live_"')
-    }
-  }, [])
 
   useEffect(() => {
     // Detectar tipo de plano da URL
@@ -104,13 +51,17 @@ function WellnessCheckoutContent() {
     setError(null)
 
     try {
+      // Usar a nova API unificada que detecta automaticamente o gateway (Mercado Pago ou Stripe)
       const response = await fetch('/api/wellness/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ planType }),
+        body: JSON.stringify({ 
+          planType,
+          language: 'pt', // Idioma português para Brasil
+        }),
       })
 
       if (!response.ok) {
@@ -118,25 +69,15 @@ function WellnessCheckoutContent() {
         throw new Error(data.error || 'Erro ao criar sessão de checkout')
       }
 
-      const { sessionId, url } = await response.json()
+      const { url, gateway } = await response.json()
 
-      if (url) {
-        // Redirecionar para checkout do Stripe
-        window.location.href = url
-      } else {
-        // Se não tiver URL, usar Stripe.js para redirecionar
-        const stripe = await stripePromise
-        if (stripe && sessionId) {
-          const { error: stripeError } = await stripe.redirectToCheckout({
-            sessionId,
-          })
-          if (stripeError) {
-            throw stripeError
-          }
-        } else {
-          throw new Error('Stripe não configurado')
-        }
+      if (!url) {
+        throw new Error('URL de checkout não retornada')
       }
+
+      // Redirecionar para checkout (Mercado Pago ou Stripe, dependendo do país)
+      console.log(`🔄 Redirecionando para checkout: ${gateway}`)
+      window.location.href = url
     } catch (err: any) {
       console.error('Erro no checkout:', err)
       setError(err.message || 'Erro ao processar checkout. Tente novamente.')
@@ -315,7 +256,7 @@ function WellnessCheckoutContent() {
           {/* Informações de Segurança */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              🔒 Pagamento seguro processado pelo Stripe
+              🔒 Pagamento seguro processado pelo Mercado Pago
             </p>
             <p className="text-xs text-gray-500 mt-2">
               Ao continuar, você será redirecionado para a página de pagamento segura

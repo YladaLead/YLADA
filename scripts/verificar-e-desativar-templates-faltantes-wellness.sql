@@ -78,3 +78,4 @@ WHERE profession = 'wellness'
   AND language = 'pt'
   AND is_active = true;
 
+

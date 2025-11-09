@@ -163,3 +163,4 @@ USING (
 -- auth.users.raw_user_meta_data->>'role' = 'admin'
 -- Isso está alinhado com o resto do sistema que usa user_profiles.is_admin
 
+

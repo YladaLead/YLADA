@@ -1,0 +1,92 @@
+# ✅ RESUMO: Migração Checklist Alimentar e Checklist Detox
+
+## 📋 Templates Migrados
+
+### ✅ **1. Checklist Alimentar** (CONCLUÍDO)
+- ✅ Script SQL criado (`scripts/criar-content-checklist-alimentar-wellness.sql`)
+- ✅ Content JSONB completo com 5 perguntas em `items`
+- ✅ Introdução adicionada em `getPreviewTitle()` e `getIntroContent()`
+- ✅ Seção "O que você vai descobrir" implementada (4 benefícios)
+- ✅ Estilo visual: Gradiente teal/azul (`from-teal-50 to-blue-50`)
+- ✅ Preview dinâmico pronto para uso
+
+**Benefícios:**
+- Como está sua alimentação atual
+- Hábitos que podem ser melhorados
+- Orientações personalizadas
+- Estratégias para transformação
+
+### ✅ **2. Checklist Detox** (CONCLUÍDO)
+- ✅ Script SQL criado (`scripts/criar-content-checklist-detox-wellness.sql`)
+- ✅ Content JSONB completo com 5 perguntas em `items` (inclui `alert` para cada pergunta)
+- ✅ Introdução adicionada em `getPreviewTitle()` e `getIntroContent()`
+- ✅ Seção "O que você vai descobrir" implementada (4 benefícios)
+- ✅ Estilo visual: Gradiente roxo/rosa (`from-purple-50 to-pink-50`)
+- ✅ Preview dinâmico pronto para uso
+
+**Benefícios:**
+- Sinais de sobrecarga tóxica no seu organismo
+- Como toxinas podem estar afetando sua energia e saúde
+- Orientações para um processo de detox eficaz
+- Estratégias para aumentar sua vitalidade
+
+---
+
+## 🔧 Arquivos Modificados
+
+### 1. `src/components/shared/DynamicTemplatePreview.tsx`
+- ✅ Adicionado suporte para Checklist Alimentar em `getPreviewTitle()`
+- ✅ Adicionado suporte para Checklist Detox em `getPreviewTitle()`
+- ✅ Adicionado conteúdo de introdução para Checklist Alimentar em `getIntroContent()`
+- ✅ Adicionado conteúdo de introdução para Checklist Detox em `getIntroContent()`
+- ✅ Adicionado estilo visual específico para ambos os templates (cores teal/azul e roxo/rosa)
+- ✅ Componente já tinha suporte para renderizar checklists via `content.items`
+
+### 2. Scripts SQL Criados
+- ✅ `scripts/criar-content-checklist-alimentar-wellness.sql`
+- ✅ `scripts/criar-content-checklist-detox-wellness.sql`
+
+---
+
+## 📊 Estatísticas Atualizadas
+
+- **Templates migrados:** 24/37 (64.9%)
+- **Progresso:** +2 templates nesta iteração
+
+---
+
+## ⏭️ Próximos Passos
+
+1. **Executar scripts SQL no Supabase:**
+   - Executar `scripts/criar-content-checklist-alimentar-wellness.sql`
+   - Executar `scripts/criar-content-checklist-detox-wellness.sql`
+
+2. **Testar no localhost:**
+   - Verificar se preview dinâmico funciona corretamente
+   - Verificar se diagnósticos aparecem corretamente
+   - Verificar se seção "O que você vai descobrir" está visível
+   - Verificar se checklists renderizam corretamente com `content.items`
+
+3. **Remover previews customizados (após validação):**
+   - Remover import de `ChecklistAlimentarPreview` em `src/app/pt/wellness/templates/page.tsx`
+   - Remover import de `ChecklistDetoxPreview` em `src/app/pt/wellness/templates/page.tsx`
+   - Remover renderização condicional dos previews customizados
+   - Remover estados específicos (`etapaPreviewChecklistAlimentar`, `etapaPreviewChecklistDetox`)
+
+---
+
+## 📝 Notas
+
+- Ambos os templates seguem o padrão estabelecido: Etapa 0 (Landing) → Etapa 1+ (Perguntas) → Etapa Final (Resultados)
+- Ambos têm a seção "O que você vai descobrir" implementada
+- Estilos visuais específicos foram aplicados para melhor identificação visual
+- Os diagnósticos já existem em `src/lib/diagnostics` e serão carregados automaticamente
+- O Checklist Detox inclui `alert` em cada pergunta para destacar informações importantes
+- O componente `DynamicTemplatePreview` já tinha suporte para renderizar checklists via `content.items`
+
+---
+
+**Data:** 2025-01-XX  
+**Status:** ✅ Pronto para execução SQL e testes
+
+
