@@ -27,11 +27,14 @@ export default function WellnessCheckoutPage() {
 function WellnessCheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
+  const { user, userProfile, loading: authLoading } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const canceled = searchParams.get('canceled') === 'true'
+  
+  // Verificar se está pronto para checkout
+  const isReady = !authLoading && !!user && !!userProfile
 
   useEffect(() => {
     // Detectar tipo de plano da URL
@@ -42,10 +45,27 @@ function WellnessCheckoutContent() {
   }, [searchParams])
 
   const handleCheckout = async () => {
-    console.log('🔘 Botão de checkout clicado', { hasUser: !!user, userId: user?.id })
+    console.log('🔘 Botão de checkout clicado', { 
+      hasUser: !!user, 
+      userId: user?.id,
+      hasProfile: !!userProfile,
+      profilePerfil: userProfile?.perfil,
+      isReady 
+    })
     
-    if (!user) {
-      console.error('❌ Usuário não encontrado, redirecionando para login')
+    // Verificar se está pronto
+    if (!isReady) {
+      console.error('❌ Não está pronto para checkout', { 
+        authLoading, 
+        hasUser: !!user, 
+        hasProfile: !!userProfile 
+      })
+      setError('Aguarde enquanto carregamos suas informações...')
+      return
+    }
+    
+    if (!user || !userProfile) {
+      console.error('❌ Usuário ou perfil não encontrado, redirecionando para login')
       router.push('/pt/wellness/login')
       return
     }
@@ -257,13 +277,22 @@ function WellnessCheckoutContent() {
           </div>
 
           {/* Botão de Checkout */}
-          <button
-            onClick={handleCheckout}
-            disabled={loading}
-            className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Processando...' : '💚 Continuar para Pagamento'}
-          </button>
+          {!isReady ? (
+            <button
+              disabled
+              className="w-full bg-gray-400 text-white py-4 rounded-lg font-semibold text-lg cursor-not-allowed"
+            >
+              ⏳ Carregando informações...
+            </button>
+          ) : (
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Processando...' : '💚 Continuar para Pagamento'}
+            </button>
+          )}
 
           {/* Informações de Segurança */}
           <div className="mt-6 text-center">
