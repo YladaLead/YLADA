@@ -89,6 +89,30 @@ async function createMercadoPagoCheckout(
   const amount = getPrice(request.area, request.planType, request.countryCode || 'BR')
   console.log(`💰 Valor: R$ ${amount}`)
   
+  // Validar baseUrl
+  if (!baseUrl || baseUrl === 'undefined' || baseUrl.includes('undefined')) {
+    throw new Error(
+      `baseUrl inválido: "${baseUrl}". ` +
+      `Configure NEXT_PUBLIC_APP_URL ou NEXT_PUBLIC_APP_URL_PRODUCTION no .env`
+    )
+  }
+  
+  // Construir URLs de retorno (remover trailing slash do baseUrl)
+  const cleanBaseUrl = baseUrl.replace(/\/$/, '')
+  const language = request.language || 'pt'
+  const area = request.area
+  
+  const successUrl = `${cleanBaseUrl}/${language}/${area}/pagamento-sucesso?payment_id={payment_id}&gateway=mercadopago`
+  const failureUrl = `${cleanBaseUrl}/${language}/${area}/checkout?canceled=true`
+  const pendingUrl = `${cleanBaseUrl}/${language}/${area}/pagamento-sucesso?payment_id={payment_id}&gateway=mercadopago&status=pending`
+  
+  console.log('🔗 URLs de retorno:', {
+    baseUrl: cleanBaseUrl,
+    successUrl,
+    failureUrl,
+    pendingUrl,
+  })
+  
   const preferenceRequest: CreatePreferenceRequest = {
     area: request.area,
     planType: request.planType,
@@ -96,9 +120,9 @@ async function createMercadoPagoCheckout(
     userEmail: request.userEmail,
     amount,
     description: `YLADA ${request.area.toUpperCase()} - Plano ${request.planType === 'monthly' ? 'Mensal' : 'Anual'}`,
-    successUrl: `${baseUrl}/${request.language || 'pt'}/${request.area}/pagamento-sucesso?payment_id={payment_id}&gateway=mercadopago`,
-    failureUrl: `${baseUrl}/${request.language || 'pt'}/${request.area}/checkout?canceled=true`,
-    pendingUrl: `${baseUrl}/${request.language || 'pt'}/${request.area}/pagamento-sucesso?payment_id={payment_id}&gateway=mercadopago&status=pending`,
+    successUrl,
+    failureUrl,
+    pendingUrl,
   }
 
   const isTest = process.env.NODE_ENV !== 'production'
@@ -211,10 +235,40 @@ export async function createCheckout(
     gateway = countryCode === 'BR' ? 'mercadopago' : 'stripe'
   }
 
-  // Obter URL base
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                  process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
-                  'http://localhost:3000'
+  // Obter URL base (prioridade: env > request origin > localhost)
+  let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                process.env.NEXT_PUBLIC_APP_URL_PRODUCTION
+  
+  // Se não tiver no env, tentar pegar do request
+  if (!baseUrl && httpRequest) {
+    try {
+      // Tentar pegar origin do header
+      const origin = httpRequest.headers.get('origin')
+      const host = httpRequest.headers.get('host')
+      
+      if (origin) {
+        baseUrl = origin
+      } else if (host) {
+        // Se tiver host mas não origin, construir URL
+        baseUrl = `https://${host}`
+      }
+      
+      // Se ainda não tiver, tentar pegar da URL do request
+      if (!baseUrl && 'url' in httpRequest) {
+        const url = new URL((httpRequest as any).url)
+        baseUrl = `${url.protocol}//${url.host}`
+      }
+    } catch (err) {
+      console.warn('⚠️ Erro ao detectar baseUrl do request:', err)
+    }
+  }
+  
+  // Fallback para localhost
+  if (!baseUrl) {
+    baseUrl = 'http://localhost:3000'
+  }
+  
+  console.log('🌐 Base URL detectada:', baseUrl)
 
   // Criar checkout no gateway apropriado
   if (gateway === 'mercadopago') {

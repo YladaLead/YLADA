@@ -64,6 +64,16 @@ export async function createPreference(
   // Calcular valor em centavos (Mercado Pago usa centavos)
   const amountInCents = Math.round(request.amount * 100)
 
+  // Validar URLs de retorno (obrigatórias para auto_return)
+  if (!request.successUrl || !request.failureUrl || !request.pendingUrl) {
+    throw new Error(
+      `URLs de retorno não definidas. ` +
+      `success: ${request.successUrl ? 'OK' : 'FALTANDO'}, ` +
+      `failure: ${request.failureUrl ? 'OK' : 'FALTANDO'}, ` +
+      `pending: ${request.pendingUrl ? 'OK' : 'FALTANDO'}`
+    )
+  }
+
   // Configurar itens da preferência
   const preferenceData = {
     items: [
@@ -109,6 +119,11 @@ export async function createPreference(
       currency: 'BRL',
       items: preferenceData.items.length,
       hasPayer: !!preferenceData.payer.email,
+      back_urls: {
+        success: preferenceData.back_urls.success,
+        failure: preferenceData.back_urls.failure,
+        pending: preferenceData.back_urls.pending,
+      },
     })
     
     const response = await preference.create({ body: preferenceData })
