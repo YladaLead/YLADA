@@ -87,7 +87,18 @@ async function createMercadoPagoCheckout(
 ): Promise<CheckoutResponse> {
   console.log('💳 Criando checkout Mercado Pago...')
   const amount = getPrice(request.area, request.planType, request.countryCode || 'BR')
-  console.log(`💰 Valor: R$ ${amount}`)
+  
+  // Validação: garantir que o valor está correto
+  if (amount <= 0) {
+    throw new Error(`Valor inválido para ${request.area} ${request.planType}: ${amount}`)
+  }
+  
+  // Validação: se o valor for muito alto, pode estar errado
+  if (amount > 1000 && request.planType === 'monthly') {
+    console.warn(`⚠️ Valor mensal muito alto: R$ ${amount}`)
+  }
+  
+  console.log(`💰 Valor: R$ ${amount.toFixed(2)} (${Math.round(amount * 100)} centavos)`)
   
   // Validar baseUrl
   if (!baseUrl || baseUrl === 'undefined' || baseUrl.includes('undefined')) {
