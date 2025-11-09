@@ -62,7 +62,14 @@ export async function createPreference(
   const preference = new Preference(client)
 
   // Calcular valor em centavos (Mercado Pago usa centavos)
+  // IMPORTANTE: request.amount vem em reais (ex: 59.90), precisa converter para centavos
   const amountInCents = Math.round(request.amount * 100)
+  
+  console.log('💰 Conversão de valor:', {
+    valorOriginal: request.amount,
+    valorEmCentavos: amountInCents,
+    esperado: `R$ ${request.amount.toFixed(2)} = ${amountInCents} centavos`
+  })
 
   // Validar URLs de retorno (obrigatórias para auto_return)
   if (!request.successUrl || !request.failureUrl || !request.pendingUrl) {
@@ -80,7 +87,7 @@ export async function createPreference(
       {
         title: request.description,
         quantity: 1,
-        unit_price: amountInCents,
+        unit_price: amountInCents, // Valor em centavos (ex: 5990 = R$ 59,90)
         currency_id: 'BRL',
       },
     ],
@@ -99,8 +106,11 @@ export async function createPreference(
     },
     auto_return: 'approved' as const, // Redireciona automaticamente quando aprovado
     payment_methods: {
+      // Não excluir nenhum tipo de pagamento para habilitar PIX, Boleto, etc.
       excluded_payment_types: [],
       excluded_payment_methods: [],
+      // Habilitar PIX explicitamente (não é necessário excluir, mas vamos garantir)
+      // PIX é habilitado automaticamente se não excluirmos 'account_money'
       // Parcelamento: configurar apenas para plano anual
       ...(request.planType === 'annual' ? {
         installments: {
@@ -115,10 +125,17 @@ export async function createPreference(
 
   try {
     console.log('📤 Enviando preferência para Mercado Pago:', {
-      amount: amountInCents,
+      valorOriginal: request.amount,
+      valorEmCentavos: amountInCents,
       currency: 'BRL',
       items: preferenceData.items.length,
+      itemUnitPrice: preferenceData.items[0].unit_price,
       hasPayer: !!preferenceData.payer.email,
+      paymentMethods: {
+        excluded_types: preferenceData.payment_methods.excluded_payment_types,
+        excluded_methods: preferenceData.payment_methods.excluded_payment_methods,
+        installments: preferenceData.payment_methods.installments || 'N/A',
+      },
       back_urls: {
         success: preferenceData.back_urls.success,
         failure: preferenceData.back_urls.failure,
