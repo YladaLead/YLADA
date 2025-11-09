@@ -91,25 +91,61 @@ export async function createPreference(
     payment_methods: {
       excluded_payment_types: [],
       excluded_payment_methods: [],
-      installments: request.planType === 'annual' ? 12 : 1, // Parcelamento apenas para anual
+      // Parcelamento: configurar apenas para plano anual
+      ...(request.planType === 'annual' ? {
+        installments: {
+          default_installments: 1, // Padrão: à vista
+          max_installments: 12, // Máximo: 12x
+        }
+      } : {}),
     },
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
     external_reference: `${request.area}_${request.planType}_${request.userId}`, // Referência externa
   }
 
   try {
+    console.log('📤 Enviando preferência para Mercado Pago:', {
+      amount: amountInCents,
+      currency: 'BRL',
+      items: preferenceData.items.length,
+      hasPayer: !!preferenceData.payer.email,
+    })
+    
     const response = await preference.create({ body: preferenceData })
+    
+    console.log('✅ Preferência criada com sucesso:', {
+      id: response.id,
+      hasInitPoint: !!response.init_point,
+    })
+
+    if (!response.init_point && !response.sandbox_init_point) {
+      throw new Error('Mercado Pago não retornou URL de checkout')
+    }
 
     return {
       id: response.id || '',
-      initPoint: response.init_point || '',
+      initPoint: response.init_point || response.sandbox_init_point || '',
       sandboxInitPoint: response.sandbox_init_point,
     }
   } catch (error: any) {
-    console.error('❌ Erro ao criar preferência Mercado Pago:', error)
-    throw new Error(
-      `Erro ao criar preferência Mercado Pago: ${error.message || 'Erro desconhecido'}`
-    )
+    console.error('❌ Erro ao criar preferência Mercado Pago:', {
+      message: error.message,
+      status: error.status,
+      statusCode: error.statusCode,
+      cause: error.cause,
+      stack: error.stack,
+    })
+    
+    // Mensagem de erro mais específica
+    let errorMessage = error.message || 'Erro desconhecido'
+    
+    if (errorMessage.includes('UNAUTHORIZED') || errorMessage.includes('unauthorized')) {
+      errorMessage = 'Access Token do Mercado Pago inválido ou sem permissões. Verifique as credenciais no painel do Mercado Pago.'
+    } else if (errorMessage.includes('policy')) {
+      errorMessage = 'Erro de permissão no Mercado Pago. Verifique se o Access Token tem as permissões necessárias.'
+    }
+    
+    throw new Error(`Erro ao criar preferência Mercado Pago: ${errorMessage}`)
   }
 }
 
