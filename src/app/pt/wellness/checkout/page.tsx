@@ -42,13 +42,17 @@ function WellnessCheckoutContent() {
   }, [searchParams])
 
   const handleCheckout = async () => {
+    console.log('🔘 Botão de checkout clicado', { hasUser: !!user, userId: user?.id })
+    
     if (!user) {
+      console.error('❌ Usuário não encontrado, redirecionando para login')
       router.push('/pt/wellness/login')
       return
     }
 
     setLoading(true)
     setError(null)
+    console.log('📤 Enviando requisição de checkout...')
 
     try {
       // Usar a nova API unificada que detecta automaticamente o gateway (Mercado Pago ou Stripe)
@@ -66,6 +70,14 @@ function WellnessCheckoutContent() {
 
       if (!response.ok) {
         const data = await response.json()
+        
+        // Se for erro 401 (não autenticado), redirecionar para login
+        if (response.status === 401) {
+          console.error('❌ Não autenticado, redirecionando para login')
+          router.push('/pt/wellness/login')
+          return
+        }
+        
         throw new Error(data.error || 'Erro ao criar sessão de checkout')
       }
 

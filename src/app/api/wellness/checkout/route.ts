@@ -9,12 +9,19 @@ import { detectCountryCode } from '@/lib/payment-helpers'
  */
 export async function POST(request: NextRequest) {
   try {
+    console.log('📥 Checkout request recebido')
+    
     // Verificar autenticação
     const authResult = await requireApiAuth(request, ['wellness', 'admin'])
     if (authResult instanceof NextResponse) {
+      console.error('❌ Autenticação falhou:', {
+        status: authResult.status,
+        statusText: authResult.statusText,
+      })
       return authResult
     }
     const { user } = authResult
+    console.log('✅ Usuário autenticado:', user.id)
 
     const body = await request.json()
     const { planType, language } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es'

@@ -85,7 +85,9 @@ async function createMercadoPagoCheckout(
   request: CheckoutRequest,
   baseUrl: string
 ): Promise<CheckoutResponse> {
+  console.log('💳 Criando checkout Mercado Pago...')
   const amount = getPrice(request.area, request.planType, request.countryCode || 'BR')
+  console.log(`💰 Valor: R$ ${amount}`)
   
   const preferenceRequest: CreatePreferenceRequest = {
     area: request.area,
@@ -100,18 +102,26 @@ async function createMercadoPagoCheckout(
   }
 
   const isTest = process.env.NODE_ENV !== 'production'
-  const preference = await createPreference(preferenceRequest, isTest)
+  console.log(`🧪 Modo teste: ${isTest}`)
+  
+  try {
+    const preference = await createPreference(preferenceRequest, isTest)
+    console.log('✅ Preferência Mercado Pago criada:', preference.id)
 
-  return {
-    gateway: 'mercadopago',
-    checkoutUrl: preference.initPoint,
-    sessionId: preference.id,
-    metadata: {
-      area: request.area,
-      planType: request.planType,
-      countryCode: request.countryCode || 'BR',
+    return {
       gateway: 'mercadopago',
-    },
+      checkoutUrl: preference.initPoint,
+      sessionId: preference.id,
+      metadata: {
+        area: request.area,
+        planType: request.planType,
+        countryCode: request.countryCode || 'BR',
+        gateway: 'mercadopago',
+      },
+    }
+  } catch (error: any) {
+    console.error('❌ Erro ao criar preferência Mercado Pago:', error)
+    throw new Error(`Erro ao criar checkout Mercado Pago: ${error.message || 'Erro desconhecido'}`)
   }
 }
 
