@@ -12,16 +12,31 @@ function WellnessPagamentoSucessoContent() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Aceitar tanto session_id (Stripe) quanto payment_id (Mercado Pago)
   const sessionId = searchParams.get('session_id')
+  const paymentId = searchParams.get('payment_id')
+  const gateway = searchParams.get('gateway') || 'stripe'
+  const status = searchParams.get('status') // 'pending' para pagamentos pendentes
+  
+  const paymentIdentifier = sessionId || paymentId
 
   useEffect(() => {
     // Verificar se a sessão foi processada corretamente
     const verifySession = async () => {
-      if (!sessionId) {
+      if (!paymentIdentifier) {
+        console.warn('⚠️ Nenhum ID de pagamento encontrado na URL')
         setError('Sessão de pagamento não encontrada')
         setLoading(false)
         return
       }
+
+      console.log('✅ Pagamento identificado:', {
+        id: paymentIdentifier,
+        gateway,
+        status,
+        tipo: sessionId ? 'Stripe (session_id)' : 'Mercado Pago (payment_id)'
+      })
 
       // Aguardar alguns segundos para o webhook processar
       setTimeout(() => {
@@ -30,7 +45,7 @@ function WellnessPagamentoSucessoContent() {
     }
 
     verifySession()
-  }, [sessionId])
+  }, [paymentIdentifier, gateway, status])
 
   if (loading) {
     return (
@@ -78,7 +93,10 @@ function WellnessPagamentoSucessoContent() {
 
           {/* Mensagem */}
           <p className="text-lg text-gray-600 mb-8">
-            Sua assinatura foi ativada com sucesso. Agora você tem acesso completo ao YLADA Wellness.
+            {status === 'pending' 
+              ? 'Seu pagamento está sendo processado. Você receberá um e-mail quando for confirmado.'
+              : 'Sua assinatura foi ativada com sucesso. Agora você tem acesso completo ao YLADA Wellness.'
+            }
           </p>
 
           {/* Informações */}
@@ -87,6 +105,15 @@ function WellnessPagamentoSucessoContent() {
               <p className="text-sm">{error}</p>
               <p className="text-xs mt-2">
                 Se o pagamento foi processado, sua assinatura será ativada em alguns instantes.
+              </p>
+            </div>
+          ) : status === 'pending' ? (
+            <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
+              <p className="text-sm font-medium">
+                ⏳ Pagamento Pendente
+              </p>
+              <p className="text-xs mt-2">
+                Estamos processando seu pagamento. Você receberá um e-mail de confirmação em breve.
               </p>
             </div>
           ) : (
