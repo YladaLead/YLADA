@@ -34,7 +34,9 @@ function WellnessCheckoutContent() {
   const canceled = searchParams.get('canceled') === 'true'
   
   // Verificar se está pronto para checkout
-  const isReady = !authLoading && !!user && !!userProfile
+  // Para checkout, não precisamos do perfil completo, apenas do user
+  // O perfil será verificado na API
+  const isReady = !authLoading && !!user
 
   useEffect(() => {
     // Detectar tipo de plano da URL
@@ -53,20 +55,13 @@ function WellnessCheckoutContent() {
       isReady 
     })
     
-    // Verificar se está pronto
-    if (!isReady) {
+    // Verificar se está pronto (apenas user, perfil será verificado na API)
+    if (!isReady || !user) {
       console.error('❌ Não está pronto para checkout', { 
         authLoading, 
-        hasUser: !!user, 
-        hasProfile: !!userProfile 
+        hasUser: !!user
       })
       setError('Aguarde enquanto carregamos suas informações...')
-      return
-    }
-    
-    if (!user || !userProfile) {
-      console.error('❌ Usuário ou perfil não encontrado, redirecionando para login')
-      router.push('/pt/wellness/login')
       return
     }
 
