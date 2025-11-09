@@ -63,12 +63,19 @@ export async function createPreference(
 
   // Calcular valor em centavos (Mercado Pago usa centavos)
   // IMPORTANTE: request.amount vem em reais (ex: 59.90), precisa converter para centavos
-  const amountInCents = Math.round(request.amount * 100)
+  // Garantir que o valor está correto (evitar problemas de ponto flutuante)
+  const amountInCents = Math.round(Number((request.amount * 100).toFixed(2)))
+  
+  // Validação: se o valor original for muito grande, pode estar errado
+  if (request.amount > 1000) {
+    console.warn('⚠️ Valor muito alto detectado:', request.amount)
+  }
   
   console.log('💰 Conversão de valor:', {
     valorOriginal: request.amount,
     valorEmCentavos: amountInCents,
-    esperado: `R$ ${request.amount.toFixed(2)} = ${amountInCents} centavos`
+    esperado: `R$ ${request.amount.toFixed(2)} = ${amountInCents} centavos`,
+    validacao: amountInCents === 5990 ? '✅ Correto para R$ 59,90' : '⚠️ Verificar'
   })
 
   // Validar URLs de retorno (obrigatórias para auto_return)
@@ -121,6 +128,9 @@ export async function createPreference(
     },
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
     external_reference: `${request.area}_${request.planType}_${request.userId}`, // Referência externa
+    // Personalização do checkout (opções limitadas no Checkout Pro)
+    // Nota: Personalização visual é limitada no checkout hospedado do Mercado Pago
+    // Para mais controle visual, seria necessário usar Checkout Transparente (mais complexo)
   }
 
   try {
