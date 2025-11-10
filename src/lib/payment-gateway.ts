@@ -203,6 +203,7 @@ async function createMercadoPagoCheckout(
         successUrl,
         failureUrl,
         pendingUrl,
+        maxInstallments: 1, // Plano mensal: sem parcelamento (apenas à vista)
       }
 
       try {
@@ -241,6 +242,7 @@ async function createMercadoPagoCheckout(
       successUrl,
       failureUrl,
       pendingUrl,
+      maxInstallments: 12, // Plano anual: permite parcelamento até 12x
     }
 
     try {

@@ -15,6 +15,7 @@ export interface CreatePreferenceRequest {
   successUrl: string
   failureUrl: string
   pendingUrl: string
+  maxInstallments?: number // Número máximo de parcelas (padrão: 1 para mensal, 12 para anual)
   backUrls?: {
     success?: string
     failure?: string
@@ -122,7 +123,9 @@ export async function createPreference(
       // Ver: docs/TROUBLESHOOTING-PIX-NAO-CRIA-PAGAMENTO.md
       // Parcelamento: Configurar installments como número (não objeto)
       // Formato correto segundo documentação: installments: número máximo de parcelas
-      installments: 12, // Permite até 12 parcelas
+      // Plano mensal: 1x (sem parcelamento)
+      // Plano anual: 12x (com parcelamento)
+      installments: request.maxInstallments || (request.planType === 'annual' ? 12 : 1),
       default_installments: 1, // Parcela padrão (1x = à vista)
     },
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
