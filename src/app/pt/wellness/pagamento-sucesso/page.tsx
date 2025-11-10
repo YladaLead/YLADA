@@ -178,12 +178,27 @@ function WellnessPagamentoSucessoContent() {
 
           {/* Botões */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/pt/wellness/dashboard"
-              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center"
-            >
-              🚀 Acessar Dashboard
-            </Link>
+            {user ? (
+              <Link
+                href="/pt/wellness/dashboard"
+                className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center"
+              >
+                🚀 Acessar Dashboard
+              </Link>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-4">
+                  <p className="text-sm font-medium mb-1">📧 Verifique seu e-mail!</p>
+                  <p className="text-xs">Enviamos um link de acesso para seu e-mail. Clique no link para acessar o dashboard.</p>
+                </div>
+                <Link
+                  href="/pt/wellness/recuperar-acesso"
+                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center block"
+                >
+                  📧 Recuperar Acesso
+                </Link>
+              </div>
+            )}
             
             {user?.email && status !== 'pending' && (
               <button

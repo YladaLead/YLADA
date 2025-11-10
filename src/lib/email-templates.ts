@@ -1,4 +1,4 @@
-import { resend, FROM_EMAIL, FROM_NAME } from './resend'
+import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from './resend'
 
 export interface WelcomeEmailData {
   email: string
@@ -39,11 +39,19 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
   const planName = data.planType === 'monthly' ? 'Mensal' : 'Anual'
   const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}`
 
+  // Verificar se Resend está configurado
+  if (!isResendConfigured() || !resend) {
+    const errorMsg = 'Resend não está configurado. Verifique RESEND_API_KEY.'
+    console.error('❌', errorMsg)
+    throw new Error(errorMsg)
+  }
+
   console.log('📧 Enviando e-mail de boas-vindas via Resend:', {
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: data.email,
     subject: '🎉 Bem-vindo ao YLADA! Seu acesso está pronto',
     accessUrl,
+    hasResend: !!resend,
   })
 
   const { error, data: emailData } = await resend.emails.send({
@@ -142,6 +150,13 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
     baseUrl: data.baseUrl,
   })
 
+  // Verificar se Resend está configurado
+  if (!isResendConfigured() || !resend) {
+    const errorMsg = 'Resend não está configurado. Verifique RESEND_API_KEY.'
+    console.error('❌', errorMsg)
+    throw new Error(errorMsg)
+  }
+
   const areaName = {
     wellness: 'Wellness',
     nutri: 'Nutri',
@@ -156,6 +171,7 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
     to: data.email,
     subject: `🔐 Acesso ao seu YLADA ${areaName}`,
     accessUrl,
+    hasResend: !!resend,
   })
 
   const { error, data: emailData } = await resend.emails.send({

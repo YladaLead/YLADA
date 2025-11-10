@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resend, FROM_EMAIL, FROM_NAME } from '@/lib/resend'
+import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '@/lib/resend'
 
 /**
  * POST /api/email/test
@@ -17,11 +17,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verificar se Resend está configurado
+    if (!isResendConfigured() || !resend) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Resend não está configurado. Verifique RESEND_API_KEY no .env.local e Vercel.',
+        },
+        { status: 500 }
+      )
+    }
+
     console.log('🧪 Teste de envio de e-mail:', {
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: email,
       hasApiKey: !!process.env.RESEND_API_KEY,
       apiKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 10) + '...',
+      hasResend: !!resend,
     })
 
     // Tentar enviar e-mail de teste

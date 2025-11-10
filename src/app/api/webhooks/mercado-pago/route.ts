@@ -300,24 +300,63 @@ async function handlePaymentEvent(data: any) {
     }
 
     // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado)
+    console.log('📧 Verificando condições para enviar e-mail de boas-vindas:', {
+      hasSubscription: !!subscription,
+      welcomeEmailSent: subscription?.welcome_email_sent,
+      hasPayerEmail: !!payerEmail,
+      payerEmail: payerEmail,
+      userId,
+      area,
+      planType,
+    })
+
     if (subscription && !subscription.welcome_email_sent && payerEmail) {
       try {
+        console.log('📧 Iniciando envio de e-mail de boas-vindas...')
+        
         // Obter base URL
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
                        process.env.NEXT_PUBLIC_APP_URL || 
                        'https://www.ylada.com'
+        
+        console.log('📧 Base URL configurada:', baseUrl)
 
         // Criar token de acesso
+        console.log('📧 Criando token de acesso para userId:', userId)
         const accessToken = await createAccessToken(userId, 30)
+        console.log('📧 Token de acesso criado:', accessToken.substring(0, 20) + '...')
 
         // Obter nome do usuário (se disponível)
-        const { data: userProfile } = await supabaseAdmin
+        const { data: userProfile, error: profileError } = await supabaseAdmin
           .from('user_profiles')
           .select('nome_completo')
           .eq('id', userId)
           .single()
+        
+        if (profileError) {
+          console.warn('⚠️ Erro ao buscar perfil do usuário:', profileError)
+        } else {
+          console.log('📧 Perfil do usuário encontrado:', userProfile?.nome_completo || 'sem nome')
+        }
+
+        // Verificar se Resend está configurado
+        const resendApiKey = process.env.RESEND_API_KEY
+        if (!resendApiKey) {
+          console.error('❌ RESEND_API_KEY não configurada!')
+          throw new Error('RESEND_API_KEY não configurada')
+        }
+        console.log('📧 RESEND_API_KEY configurada:', resendApiKey.substring(0, 10) + '...')
 
         // Enviar e-mail
+        console.log('📧 Chamando sendWelcomeEmail com:', {
+          email: payerEmail,
+          userName: userProfile?.nome_completo || undefined,
+          area,
+          planType,
+          hasAccessToken: !!accessToken,
+          baseUrl,
+        })
+        
         await sendWelcomeEmail({
           email: payerEmail,
           userName: userProfile?.nome_completo || undefined,
@@ -328,7 +367,7 @@ async function handlePaymentEvent(data: any) {
         })
 
         // Marcar como enviado
-        await supabaseAdmin
+        const { error: updateError } = await supabaseAdmin
           .from('subscriptions')
           .update({
             welcome_email_sent: true,
@@ -336,16 +375,35 @@ async function handlePaymentEvent(data: any) {
           })
           .eq('id', subscription.id)
 
-        console.log('✅ E-mail de boas-vindas enviado para:', payerEmail)
+        if (updateError) {
+          console.error('❌ Erro ao marcar e-mail como enviado:', updateError)
+        } else {
+          console.log('✅ E-mail de boas-vindas enviado e marcado como enviado para:', payerEmail)
+        }
       } catch (emailError: any) {
         // Não bloquear o fluxo se o e-mail falhar
-        console.error('❌ Erro ao enviar e-mail de boas-vindas:', emailError)
+        console.error('❌ Erro ao enviar e-mail de boas-vindas:', {
+          message: emailError.message,
+          stack: emailError.stack,
+          name: emailError.name,
+          details: JSON.stringify(emailError, null, 2),
+          payerEmail,
+          userId,
+        })
         // Continuar normalmente - o usuário pode solicitar novo link depois
       }
-    } else if (subscription?.welcome_email_sent) {
-      console.log('ℹ️ E-mail de boas-vindas já foi enviado anteriormente')
-    } else if (!payerEmail) {
-      console.warn('⚠️ E-mail do pagador não disponível, não foi possível enviar e-mail de boas-vindas')
+    } else {
+      if (subscription?.welcome_email_sent) {
+        console.log('ℹ️ E-mail de boas-vindas já foi enviado anteriormente para:', payerEmail)
+      } else if (!payerEmail) {
+        console.warn('⚠️ E-mail do pagador não disponível, não foi possível enviar e-mail de boas-vindas. Dados do webhook:', {
+          payer: data.payer,
+          payer_email: data.payer_email,
+          payment: data.payment,
+        })
+      } else if (!subscription) {
+        console.warn('⚠️ Subscription não encontrada, não foi possível enviar e-mail de boas-vindas')
+      }
     }
 
     console.log('✅ Pagamento processado e acesso ativado:', paymentId)
