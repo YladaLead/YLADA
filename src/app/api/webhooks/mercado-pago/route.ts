@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
         break
 
       case 'subscription':
+      case 'preapproval':
         await handleSubscriptionEvent(body.data)
         break
 
@@ -171,11 +172,82 @@ async function handleMerchantOrderEvent(data: any) {
 }
 
 /**
- * Processa evento de assinatura
+ * Processa evento de assinatura recorrente (Preapproval)
  */
 async function handleSubscriptionEvent(data: any) {
-  console.log('🔄 Processando subscription:', data.id)
-  // Mercado Pago tem suporte a assinaturas, mas vamos implementar depois
-  // Por enquanto, tratamos cada pagamento como único
+  const subscriptionId = data.id
+  console.log('🔄 Processando assinatura recorrente (Preapproval):', subscriptionId)
+
+  try {
+    // Obter metadata da assinatura
+    const metadata = data.metadata || {}
+    const userId = metadata.user_id
+    const area = metadata.area || 'wellness'
+    const planType = metadata.plan_type || 'monthly'
+
+    if (!userId) {
+      console.error('❌ User ID não encontrado no metadata da assinatura')
+      return
+    }
+
+    // Status da assinatura
+    const status = data.status // 'authorized', 'paused', 'cancelled'
+    
+    // Mapear status do Mercado Pago para nosso status
+    const statusMap: Record<string, string> = {
+      authorized: 'active',
+      paused: 'paused',
+      cancelled: 'canceled',
+      pending: 'pending',
+    }
+    
+    const mappedStatus = statusMap[status] || 'pending'
+
+    // Obter informações financeiras
+    const amount = data.auto_recurring?.transaction_amount || 0
+    const currency = data.auto_recurring?.currency_id || 'BRL'
+
+    // Calcular datas de período
+    const now = new Date()
+    const periodEnd = new Date()
+    periodEnd.setMonth(periodEnd.getMonth() + 1) // Próximo mês
+
+    // Criar ou atualizar assinatura no banco
+    const subscriptionIdDb = `mp_sub_${subscriptionId}`
+    
+    const { data: subscription, error: subError } = await supabaseAdmin
+      .from('subscriptions')
+      .upsert({
+        user_id: userId,
+        area: area,
+        plan_type: planType,
+        stripe_account: null, // Mercado Pago não usa stripe_account
+        stripe_subscription_id: subscriptionIdDb, // Usar como ID único
+        stripe_customer_id: data.payer_id?.toString() || 'mp_customer',
+        stripe_price_id: 'mp_recurring', // Placeholder para assinatura recorrente
+        amount: Math.round(amount * 100), // Converter para centavos
+        currency: currency.toLowerCase(),
+        status: mappedStatus,
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        cancel_at_period_end: status === 'cancelled',
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'stripe_subscription_id',
+      })
+      .select()
+      .single()
+
+    if (subError) {
+      console.error('❌ Erro ao salvar subscription recorrente:', subError)
+      throw subError
+    }
+
+    console.log('✅ Assinatura recorrente processada:', subscriptionId)
+    console.log(`📅 Status: ${mappedStatus}, Próxima cobrança: ${periodEnd.toISOString()}`)
+  } catch (error: any) {
+    console.error('❌ Erro ao processar assinatura recorrente:', error)
+    throw error
+  }
 }
 

@@ -5,6 +5,7 @@
 
 import { PaymentGateway, detectPaymentGateway, detectCountryCode } from './payment-helpers'
 import { createPreference, CreatePreferenceRequest } from './mercado-pago'
+import { createRecurringSubscription, CreateSubscriptionRequest } from './mercado-pago-subscriptions'
 import { getStripeInstance, getStripePriceId } from './stripe-helpers'
 import Stripe from 'stripe'
 
@@ -124,39 +125,82 @@ async function createMercadoPagoCheckout(
     pendingUrl,
   })
   
-  const preferenceRequest: CreatePreferenceRequest = {
-    area: request.area,
-    planType: request.planType,
-    userId: request.userId,
-    userEmail: request.userEmail,
-    amount,
-    description: `YLADA ${request.area.toUpperCase()} - Plano ${request.planType === 'monthly' ? 'Mensal' : 'Anual'}`,
-    successUrl,
-    failureUrl,
-    pendingUrl,
-  }
-
   const isTest = process.env.NODE_ENV !== 'production'
   console.log(`🧪 Modo teste: ${isTest}`)
-  
-  try {
-    const preference = await createPreference(preferenceRequest, isTest)
-    console.log('✅ Preferência Mercado Pago criada:', preference.id)
 
-    return {
-      gateway: 'mercadopago',
-      checkoutUrl: preference.initPoint,
-      sessionId: preference.id,
-      metadata: {
-        area: request.area,
-        planType: request.planType,
-        countryCode: request.countryCode || 'BR',
-        gateway: 'mercadopago',
-      },
+  // Se for plano mensal, usar assinatura recorrente (Preapproval)
+  // Se for plano anual, usar pagamento único (Preference)
+  if (request.planType === 'monthly') {
+    console.log('🔄 Criando assinatura recorrente (Preapproval) para plano mensal')
+    
+    const subscriptionRequest: CreateSubscriptionRequest = {
+      area: request.area,
+      planType: request.planType,
+      userId: request.userId,
+      userEmail: request.userEmail,
+      amount,
+      description: `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
+      successUrl,
+      failureUrl,
+      pendingUrl,
     }
-  } catch (error: any) {
-    console.error('❌ Erro ao criar preferência Mercado Pago:', error)
-    throw new Error(`Erro ao criar checkout Mercado Pago: ${error.message || 'Erro desconhecido'}`)
+
+    try {
+      const subscription = await createRecurringSubscription(subscriptionRequest, isTest)
+      console.log('✅ Assinatura recorrente Mercado Pago criada:', subscription.id)
+
+      return {
+        gateway: 'mercadopago',
+        checkoutUrl: subscription.initPoint,
+        sessionId: subscription.id,
+        metadata: {
+          area: request.area,
+          planType: request.planType,
+          countryCode: request.countryCode || 'BR',
+          gateway: 'mercadopago',
+          isRecurring: true, // Marcar como recorrente
+        },
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao criar assinatura recorrente Mercado Pago:', error)
+      throw new Error(`Erro ao criar assinatura recorrente Mercado Pago: ${error.message || 'Erro desconhecido'}`)
+    }
+  } else {
+    // Plano anual: usar pagamento único (permite PIX e parcelamento)
+    console.log('💳 Criando pagamento único (Preference) para plano anual')
+    
+    const preferenceRequest: CreatePreferenceRequest = {
+      area: request.area,
+      planType: request.planType,
+      userId: request.userId,
+      userEmail: request.userEmail,
+      amount,
+      description: `YLADA ${request.area.toUpperCase()} - Plano Anual`,
+      successUrl,
+      failureUrl,
+      pendingUrl,
+    }
+
+    try {
+      const preference = await createPreference(preferenceRequest, isTest)
+      console.log('✅ Preferência Mercado Pago criada:', preference.id)
+
+      return {
+        gateway: 'mercadopago',
+        checkoutUrl: preference.initPoint,
+        sessionId: preference.id,
+        metadata: {
+          area: request.area,
+          planType: request.planType,
+          countryCode: request.countryCode || 'BR',
+          gateway: 'mercadopago',
+          isRecurring: false, // Pagamento único
+        },
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao criar preferência Mercado Pago:', error)
+      throw new Error(`Erro ao criar checkout Mercado Pago: ${error.message || 'Erro desconhecido'}`)
+    }
   }
 }
 
