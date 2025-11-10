@@ -475,7 +475,21 @@ async function handleSubscriptionEvent(data: any) {
     const currency = data.auto_recurring?.currency_id || 'BRL'
     
     // Obter e-mail do pagador (importante para suporte)
-    const payerEmail = data.payer_email || data.payer?.email || null
+    // Tentar múltiplas fontes de e-mail do webhook
+    const payerEmail = data.payer_email || 
+                      data.payer?.email || 
+                      data.payer?.identification?.email ||
+                      data.collector?.email ||
+                      null
+    
+    console.log('📧 [Subscription] Tentando capturar e-mail do pagador:', {
+      'data.payer_email': data.payer_email,
+      'data.payer?.email': data.payer?.email,
+      'data.payer?.identification?.email': data.payer?.identification?.email,
+      'data.collector?.email': data.collector?.email,
+      'payerEmail final': payerEmail,
+      'payer completo': data.payer,
+    })
     
     // Salvar/atualizar e-mail do usuário no perfil (se disponível e diferente)
     if (payerEmail && payerEmail.includes('@')) {
