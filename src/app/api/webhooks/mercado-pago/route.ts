@@ -81,8 +81,39 @@ async function handlePaymentEvent(data: any) {
     // Obter metadata do pagamento
     const metadata = data.metadata || {}
     let userId = metadata.user_id
-    const area = metadata.area || 'wellness'
-    const planType = metadata.plan_type || 'monthly'
+    
+    // Se não tiver user_id no metadata, tentar extrair do external_reference
+    // Formato: area_planType_userId (ex: wellness_monthly_temp_oanfaol@gmail.com)
+    if (!userId && data.external_reference) {
+      const parts = data.external_reference.split('_')
+      if (parts.length >= 3) {
+        userId = parts.slice(2).join('_') // Pega tudo depois de area_planType_
+        console.log('📋 User ID extraído do external_reference:', userId)
+      }
+    }
+    
+    // Se ainda não tiver, tentar usar o e-mail do pagador como temp_email
+    if (!userId) {
+      const payerEmail = data.payer?.email || data.payer_email || null
+      if (payerEmail && payerEmail.includes('@')) {
+        userId = `temp_${payerEmail}`
+        console.log('📋 User ID criado a partir do e-mail do pagador:', userId)
+      }
+    }
+    
+    if (!userId) {
+      console.error('❌ User ID não encontrado no metadata do pagamento')
+      console.log('📋 Dados disponíveis:', {
+        metadata,
+        external_reference: data.external_reference,
+        payer: data.payer,
+        payer_email: data.payer_email,
+      })
+      // Não retornar erro - continuar processamento para não bloquear
+    }
+    
+    const area = metadata.area || (data.external_reference?.split('_')[0]) || 'wellness'
+    const planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || 'monthly'
     const paymentMethod = data.payment_method_id || 'unknown'
 
     // Obter informações do pagamento
@@ -112,15 +143,27 @@ async function handlePaymentEvent(data: any) {
       const tempEmail = userId.replace('temp_', '')
       console.log('🆕 Criando usuário automaticamente após pagamento:', tempEmail)
       
-      if (!payerEmail || !payerEmail.includes('@')) {
+      // Usar o e-mail do temp_ ou o payerEmail
+      const emailParaCriar = tempEmail.includes('@') ? tempEmail : (payerEmail || tempEmail)
+      
+      if (!emailParaCriar || !emailParaCriar.includes('@')) {
         console.error('❌ E-mail do pagador não encontrado. Não é possível criar usuário.')
+        console.log('📋 Dados disponíveis:', {
+          tempEmail,
+          payerEmail,
+          emailParaCriar,
+          userId,
+        })
         return
       }
+      
+      // Atualizar payerEmail com o e-mail correto
+      const emailFinal = emailParaCriar
       
       // Verificar se usuário já existe
       const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
       const existingUser = existingUsers?.users?.find(
-        u => u.email?.toLowerCase() === payerEmail.toLowerCase()
+        u => u.email?.toLowerCase() === emailFinal.toLowerCase()
       )
       
       if (existingUser) {
@@ -130,16 +173,16 @@ async function handlePaymentEvent(data: any) {
       } else {
         // Criar novo usuário
         const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12) + 'A1!'
-        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-          email: payerEmail,
-          password: randomPassword,
-          email_confirm: true, // Confirmar email automaticamente
-          user_metadata: {
-            full_name: data.payer?.first_name || data.payer?.name || '',
-            name: data.payer?.first_name || data.payer?.name || '',
-            perfil: area
-          }
-        })
+          const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+            email: emailFinal,
+            password: randomPassword,
+            email_confirm: true, // Confirmar email automaticamente
+            user_metadata: {
+              full_name: data.payer?.first_name || data.payer?.name || '',
+              name: data.payer?.first_name || data.payer?.name || '',
+              perfil: area
+            }
+          })
         
         if (createError || !newUser.user) {
           console.error('❌ Erro ao criar usuário automaticamente:', createError)
@@ -191,16 +234,19 @@ async function handlePaymentEvent(data: any) {
             .eq('user_id', userId)
             .single()
           
-          await sendWelcomeEmail({
-            email: payerEmail,
-            userName: userProfile?.nome_completo || data.payer?.first_name || data.payer?.name || undefined,
-            area: area as 'wellness' | 'nutri' | 'coach' | 'nutra',
-            planType: planType as 'monthly' | 'annual',
-            accessToken,
-            baseUrl,
-          })
-          
-          console.log('✅ E-mail de boas-vindas enviado para novo usuário:', payerEmail)
+              await sendWelcomeEmail({
+                email: emailFinal,
+                userName: userProfile?.nome_completo || data.payer?.first_name || data.payer?.name || undefined,
+                area: area as 'wellness' | 'nutri' | 'coach' | 'nutra',
+                planType: planType as 'monthly' | 'annual',
+                accessToken,
+                baseUrl,
+              })
+              
+              console.log('✅ E-mail de boas-vindas enviado para novo usuário:', emailFinal)
+              
+              // Atualizar payerEmail para usar no resto do código
+              payerEmail = emailFinal
         } catch (emailError: any) {
           console.error('❌ Erro ao enviar e-mail de boas-vindas:', emailError)
           // Não bloquear o processo se o e-mail falhar
