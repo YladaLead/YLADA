@@ -29,7 +29,6 @@ function WellnessCheckoutContent() {
   const searchParams = useSearchParams()
   const { user, userProfile, loading: authLoading } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly')
-  const [paymentMethod, setPaymentMethod] = useState<'auto' | 'pix'>('auto') // Novo: escolha de método
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const canceled = searchParams.get('canceled') === 'true'
@@ -81,7 +80,8 @@ function WellnessCheckoutContent() {
         body: JSON.stringify({ 
           planType,
           language: 'pt', // Idioma português para Brasil
-          paymentMethod: planType === 'monthly' ? paymentMethod : undefined, // Enviar método apenas para mensal
+          // Plano mensal sempre usa assinatura automática (cartão)
+          // Plano anual sempre usa assinatura recorrente (cartão)
         }),
       })
 
@@ -186,51 +186,6 @@ function WellnessCheckoutContent() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Escolha seu plano
             </h2>
-            
-            {/* Seleção de Método de Pagamento (apenas para plano mensal) */}
-            {planType === 'monthly' && (
-              <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-blue-900 mb-3">
-                  Como prefere pagar?
-                </h3>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setPaymentMethod('auto')}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      paymentMethod === 'auto'
-                        ? 'border-blue-500 bg-blue-100'
-                        : 'border-gray-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-bold text-gray-900">💳 Assinatura Automática</span>
-                      {paymentMethod === 'auto' && <span className="text-blue-600">✓</span>}
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      Cobrança automática todo mês no cartão. Mais conveniente!
-                    </p>
-                  </button>
-                  
-                  <button
-                    onClick={() => setPaymentMethod('pix')}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      paymentMethod === 'pix'
-                        ? 'border-blue-500 bg-blue-100'
-                        : 'border-gray-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-bold text-gray-900">💰 Pagar via PIX</span>
-                      {paymentMethod === 'pix' && <span className="text-blue-600">✓</span>}
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      Recebe aviso 7 dias antes. Paga quando quiser via PIX.
-                    </p>
-                  </button>
-                </div>
-              </div>
-            )}
-            
             <div className="grid sm:grid-cols-2 gap-4">
               {/* Plano Mensal */}
               <button
