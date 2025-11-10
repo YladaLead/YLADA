@@ -5,22 +5,21 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/hooks/useAuth'
-import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 export default function WellnessCheckoutPage() {
+  // Checkout pode ser visualizado sem login
+  // Login será exigido apenas ao clicar em "Continuar para Pagamento"
   return (
-    <ProtectedRoute perfil="wellness" allowAdmin={false}>
-      <Suspense fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando...</p>
-          </div>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
         </div>
-      }>
-        <WellnessCheckoutContent />
-      </Suspense>
-    </ProtectedRoute>
+      </div>
+    }>
+      <WellnessCheckoutContent />
+    </Suspense>
   )
 }
 
@@ -36,6 +35,8 @@ function WellnessCheckoutContent() {
   // Verificar se está pronto para checkout
   // Para checkout, não precisamos do perfil completo, apenas do user
   // O perfil será verificado na API
+  // IMPORTANTE: Permitir visualizar a página sem login
+  // Login será exigido apenas ao clicar em "Continuar para Pagamento"
   const isReady = !authLoading && !!user
 
   useEffect(() => {
@@ -55,8 +56,17 @@ function WellnessCheckoutContent() {
       isReady 
     })
     
+    // Verificar se está autenticado - se não estiver, redirecionar para login
+    if (!user || authLoading) {
+      console.log('⚠️ Usuário não autenticado, redirecionando para login...')
+      // Salvar o plano escolhido na URL para redirecionar de volta após login
+      const redirectUrl = `/pt/wellness/checkout${planType === 'annual' ? '?plan=annual' : ''}`
+      router.push(`/pt/wellness/login?redirect=${encodeURIComponent(redirectUrl)}`)
+      return
+    }
+    
     // Verificar se está pronto (apenas user, perfil será verificado na API)
-    if (!isReady || !user) {
+    if (!isReady) {
       console.error('❌ Não está pronto para checkout', { 
         authLoading, 
         hasUser: !!user
@@ -289,17 +299,27 @@ function WellnessCheckoutContent() {
           </div>
 
           {/* Botão de Checkout */}
-          {!isReady ? (
+          {authLoading ? (
             <button
               disabled
               className="w-full bg-gray-400 text-white py-4 rounded-lg font-semibold text-lg cursor-not-allowed"
             >
               ⏳ Carregando informações...
             </button>
+          ) : !user ? (
+            <button
+              onClick={() => {
+                const redirectUrl = `/pt/wellness/checkout${planType === 'annual' ? '?plan=annual' : ''}`
+                router.push(`/pt/wellness/login?redirect=${encodeURIComponent(redirectUrl)}`)
+              }}
+              className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors"
+            >
+              🔐 Fazer Login para Continuar
+            </button>
           ) : (
             <button
               onClick={handleCheckout}
-              disabled={loading}
+              disabled={loading || !isReady}
               className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
             >
               {loading ? 'Processando...' : '💚 Continuar para Pagamento'}

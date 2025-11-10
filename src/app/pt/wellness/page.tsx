@@ -46,10 +46,10 @@ export default function WellnessPage() {
               </p>
               
               <Link
-                href="/pt/wellness/dashboard"
+                href="/pt/wellness/checkout"
                 className="inline-flex items-center px-8 py-4 bg-green-600 text-white text-lg font-semibold rounded-xl hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
-                ✨ Criar meu link de bem-estar
+                ✨ Começar agora - Escolher plano
               </Link>
             </div>
           </div>
@@ -122,10 +122,10 @@ export default function WellnessPage() {
               
               <div className="text-center">
                 <Link
-                  href="/pt/wellness/dashboard"
+                  href="/pt/wellness/checkout"
                   className="inline-flex items-center px-8 py-4 bg-green-600 text-white text-lg font-semibold rounded-xl hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
-                  🚀 Quero meu link personalizado
+                  🚀 Escolher meu plano
                 </Link>
               </div>
             </div>
@@ -376,10 +376,10 @@ export default function WellnessPage() {
                 Com o YLADA Wellness, você transforma sua presença digital em resultados reais — atraindo com propósito, inspirando com autenticidade e crescendo com consistência.
               </p>
               <Link
-                href="/pt/wellness/dashboard"
+                href="/pt/wellness/checkout"
                 className="inline-flex items-center px-10 py-5 bg-white text-green-600 text-xl font-bold rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
               >
-                🌿 Criar meu link e começar agora
+                🌿 Escolher plano e começar agora
               </Link>
             </div>
           </div>
