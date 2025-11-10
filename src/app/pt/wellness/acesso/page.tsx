@@ -44,9 +44,8 @@ function AcessoPorTokenContent() {
           
           // Aguardar um pouco antes de redirecionar
           setTimeout(() => {
-            // Redirecionar para dashboard
-            // Se não estiver logado, será redirecionado para login
-            router.push('/pt/wellness/dashboard')
+            // Redirecionar para página de bem-vindo para completar cadastro
+            router.push('/pt/wellness/bem-vindo')
           }, 2000)
         } else {
           setError(data.error || 'Token inválido ou expirado')

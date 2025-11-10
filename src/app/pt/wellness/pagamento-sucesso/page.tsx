@@ -177,25 +177,44 @@ function WellnessPagamentoSucessoContent() {
           )}
 
           {/* Botões */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col gap-4 justify-center">
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
+              <h3 className="text-sm font-semibold text-blue-900 mb-2">
+                🎉 Parabéns! Seu pagamento foi confirmado
+              </h3>
+              <p className="text-sm text-blue-800 mb-3">
+                Sua conta foi criada automaticamente! Agora você precisa completar seu cadastro e acessar a plataforma.
+              </p>
+              <div className="space-y-2 text-sm text-blue-700">
+                <p>📧 <strong>Verifique seu e-mail</strong> - Enviamos um link de acesso seguro</p>
+                <p>✅ <strong>Complete seu cadastro</strong> - Adicione seu nome para personalizar sua experiência</p>
+                <p>🚀 <strong>Comece a usar</strong> - Crie suas primeiras ferramentas e gere leads</p>
+              </div>
+            </div>
+
             {user ? (
               <Link
-                href="/pt/wellness/dashboard"
-                className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center"
+                href="/pt/wellness/bem-vindo?payment=success"
+                className="px-6 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center text-lg"
               >
-                🚀 Acessar Dashboard
+                ✨ Continuar e Completar Cadastro
               </Link>
             ) : (
               <div className="space-y-3">
-                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-4">
+                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
                   <p className="text-sm font-medium mb-1">📧 Verifique seu e-mail!</p>
-                  <p className="text-xs">Enviamos um link de acesso para seu e-mail. Clique no link para acessar o dashboard.</p>
+                  <p className="text-xs mb-3">
+                    Enviamos um e-mail para você com um link de acesso seguro. Clique no link do e-mail para completar seu cadastro e acessar a plataforma.
+                  </p>
+                  <p className="text-xs font-semibold">
+                    💡 Não recebeu o e-mail? Verifique sua pasta de spam ou solicite um novo link abaixo.
+                  </p>
                 </div>
                 <Link
                   href="/pt/wellness/recuperar-acesso"
                   className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center block"
                 >
-                  📧 Recuperar Acesso
+                  📧 Solicitar Novo Link de Acesso
                 </Link>
               </div>
             )}
