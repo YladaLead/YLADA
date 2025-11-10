@@ -53,6 +53,11 @@ export async function createRecurringSubscription(
     userEmail: request.userEmail,
   })
 
+  // Validar email do pagador (obrigatório)
+  if (!request.userEmail || !request.userEmail.includes('@')) {
+    throw new Error(`Email do pagador inválido: ${request.userEmail}`)
+  }
+
   // Validar URLs de retorno
   if (!request.successUrl || !request.failureUrl || !request.pendingUrl) {
     throw new Error('URLs de retorno não definidas')
@@ -70,19 +75,23 @@ export async function createRecurringSubscription(
 
   // Configurar Preapproval (assinatura recorrente)
   // IMPORTANTE: Preapproval requer back_url (singular) para URL de retorno após autorização
-  const preapprovalData = {
+  // IMPORTANTE: Não enviar end_date se for null (omitir campo) e não enviar status no create
+  const startDate = new Date(Date.now() + 60000) // 1 minuto no futuro
+  
+  const preapprovalData: any = {
     reason: request.description,
     external_reference: `${request.area}_${request.planType}_${request.userId}`,
     payer_email: request.userEmail,
     auto_recurring: {
       frequency: frequency, // 12 para anual, 1 para mensal
       frequency_type: frequencyType,
-      transaction_amount: unitPrice, // Valor em reais (ex: 59.90 ou 470.72)
+      transaction_amount: unitPrice, // Valor em reais (ex: 59.90 ou 574.80)
       currency_id: 'BRL' as const,
       // IMPORTANTE: start_date deve ser no futuro (pelo menos 1 minuto à frente)
       // Mercado Pago não aceita datas no passado
-      start_date: new Date(Date.now() + 60000).toISOString(), // 1 minuto no futuro
-      end_date: null, // Sem data de término (cobrança infinita)
+      start_date: startDate.toISOString(),
+      // end_date: omitir se for null (assinatura infinita)
+      // Se quiser definir data de término, usar: end_date: new Date(...).toISOString()
     },
     back_url: request.successUrl, // URL de retorno após autorização (obrigatório)
     metadata: {
@@ -90,7 +99,7 @@ export async function createRecurringSubscription(
       area: request.area,
       plan_type: request.planType,
     },
-    status: 'authorized' as const, // Status inicial
+    // status: NÃO enviar no create - o Mercado Pago define o status inicial
   }
 
   try {
@@ -127,12 +136,22 @@ export async function createRecurringSubscription(
       status: error.status,
       statusCode: error.statusCode,
       cause: error.cause,
+      // Log do payload enviado para debug
+      payload: {
+        reason: preapprovalData.reason,
+        payer_email: preapprovalData.payer_email,
+        auto_recurring: preapprovalData.auto_recurring,
+        back_url: preapprovalData.back_url,
+      },
     })
 
     let errorMessage = error.message || 'Erro desconhecido'
 
+    // Mensagens de erro mais específicas
     if (errorMessage.includes('UNAUTHORIZED') || errorMessage.includes('unauthorized')) {
       errorMessage = 'Access Token do Mercado Pago inválido ou sem permissões. Verifique as credenciais no painel do Mercado Pago.'
+    } else if (errorMessage.includes('Invalid request data') || errorMessage.includes('invalid')) {
+      errorMessage = `Dados inválidos na requisição. Verifique: email (${preapprovalData.payer_email}), valor (${preapprovalData.auto_recurring.transaction_amount}), data de início (${preapprovalData.auto_recurring.start_date}).`
     }
 
     throw new Error(`Erro ao criar assinatura recorrente Mercado Pago: ${errorMessage}`)

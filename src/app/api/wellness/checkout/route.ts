@@ -33,16 +33,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validar email do usuário (obrigatório para Mercado Pago)
+    const userEmail = user.email
+    if (!userEmail || !userEmail.includes('@')) {
+      console.error('❌ Email do usuário inválido:', userEmail)
+      return NextResponse.json(
+        { error: 'Email do usuário é obrigatório para realizar o pagamento. Verifique seu perfil.' },
+        { status: 400 }
+      )
+    }
+
     // Detectar país
     const countryCode = detectCountryCode(request)
     console.log(`🌍 País detectado: ${countryCode}`)
+
+    console.log('📋 Dados do checkout:', {
+      area: 'wellness',
+      planType,
+      userId: user.id,
+      userEmail,
+      countryCode,
+      language: language || 'pt',
+    })
 
     // Criar checkout usando gateway abstraction (detecta automaticamente Mercado Pago ou Stripe)
     const checkout = await createCheckout({
       area: 'wellness',
       planType,
       userId: user.id,
-      userEmail: user.email || '',
+      userEmail,
       countryCode,
       language: language || 'pt',
       paymentMethod: paymentMethod, // 'auto' ou 'pix' para plano mensal
