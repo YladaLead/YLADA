@@ -118,13 +118,6 @@ export async function createPreference(
       excluded_payment_methods: [],
       // Habilitar PIX explicitamente (não é necessário excluir, mas vamos garantir)
       // PIX é habilitado automaticamente se não excluirmos 'account_money'
-      // Parcelamento: configurar apenas para plano anual
-      ...(request.planType === 'annual' ? {
-        installments: {
-          default_installments: 1, // Padrão: à vista
-          max_installments: 12, // Máximo: 12x
-        }
-      } : {}),
     },
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
     external_reference: `${request.area}_${request.planType}_${request.userId}`, // Referência externa
