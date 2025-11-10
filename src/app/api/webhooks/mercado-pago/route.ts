@@ -18,6 +18,8 @@ export async function POST(request: NextRequest) {
       type: body.type,
       action: body.action,
       requestId,
+      hasData: !!body.data,
+      dataKeys: body.data ? Object.keys(body.data) : [],
     })
 
     // Validar webhook secret (se configurado)
@@ -31,30 +33,60 @@ export async function POST(request: NextRequest) {
     // Processar evento baseado no tipo
     const eventType = body.type || body.action
 
-    switch (eventType) {
-      case 'payment':
-        await handlePaymentEvent(body.data)
-        break
+    console.log('🔄 Processando evento:', eventType)
 
-      case 'merchant_order':
-        await handleMerchantOrderEvent(body.data)
-        break
+    // Verificar se body.data existe
+    if (!body.data) {
+      console.warn('⚠️ Webhook sem data, retornando sucesso (pode ser teste)')
+      return NextResponse.json({ received: true, message: 'Webhook recebido sem data' })
+    }
 
-      case 'subscription':
-      case 'preapproval':
-        await handleSubscriptionEvent(body.data)
-        break
+    try {
+      switch (eventType) {
+        case 'payment':
+          await handlePaymentEvent(body.data)
+          break
 
-      default:
-        console.log(`⚠️ Evento não processado: ${eventType}`)
+        case 'merchant_order':
+          await handleMerchantOrderEvent(body.data)
+          break
+
+        case 'subscription':
+        case 'preapproval':
+          await handleSubscriptionEvent(body.data)
+          break
+
+        default:
+          console.log(`⚠️ Evento não processado: ${eventType}`)
+      }
+    } catch (eventError: any) {
+      // Logar erro mas não falhar o webhook (para não bloquear notificações)
+      console.error('❌ Erro ao processar evento:', {
+        eventType,
+        error: eventError.message,
+        stack: eventError.stack,
+        data: body.data,
+      })
+      // Continuar e retornar sucesso para não bloquear webhook
     }
 
     return NextResponse.json({ received: true })
   } catch (error: any) {
-    console.error('❌ Erro no webhook Mercado Pago:', error)
+    console.error('❌ Erro no webhook Mercado Pago:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    })
+
+    // Retornar 200 mesmo com erro para não bloquear webhook
+    // O Mercado Pago vai continuar tentando se retornar 500
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
+      { 
+        received: true, 
+        error: error.message || 'Internal server error',
+        note: 'Erro logado, mas webhook aceito para não bloquear notificações'
+      },
+      { status: 200 }
     )
   }
 }
