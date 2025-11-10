@@ -61,21 +61,21 @@ export async function createPreference(
   const client = createMercadoPagoClient(isTest)
   const preference = new Preference(client)
 
-  // Calcular valor em centavos (Mercado Pago usa centavos)
-  // IMPORTANTE: request.amount vem em reais (ex: 59.90), precisa converter para centavos
-  // Garantir que o valor está correto (evitar problemas de ponto flutuante)
-  const amountInCents = Math.round(Number((request.amount * 100).toFixed(2)))
+  // IMPORTANTE: Mercado Pago espera unit_price como número decimal (não centavos!)
+  // Para BRL: enviar 59.90 (não 5990)
+  // A documentação diz "centavos" mas na prática funciona com decimal
+  const unitPrice = Number(request.amount.toFixed(2))
   
   // Validação: se o valor original for muito grande, pode estar errado
   if (request.amount > 1000) {
     console.warn('⚠️ Valor muito alto detectado:', request.amount)
   }
   
-  console.log('💰 Conversão de valor:', {
+  console.log('💰 Valor para Mercado Pago:', {
     valorOriginal: request.amount,
-    valorEmCentavos: amountInCents,
-    esperado: `R$ ${request.amount.toFixed(2)} = ${amountInCents} centavos`,
-    validacao: amountInCents === 5990 ? '✅ Correto para R$ 59,90' : '⚠️ Verificar'
+    unitPrice: unitPrice,
+    esperado: `R$ ${unitPrice.toFixed(2)}`,
+    validacao: unitPrice === 59.90 ? '✅ Correto para R$ 59,90' : '⚠️ Verificar'
   })
 
   // Validar URLs de retorno (obrigatórias para auto_return)
@@ -94,7 +94,7 @@ export async function createPreference(
       {
         title: request.description,
         quantity: 1,
-        unit_price: amountInCents, // Valor em centavos (ex: 5990 = R$ 59,90)
+        unit_price: unitPrice, // Valor em reais (ex: 59.90)
         currency_id: 'BRL',
       },
     ],
@@ -136,7 +136,7 @@ export async function createPreference(
   try {
     console.log('📤 Enviando preferência para Mercado Pago:', {
       valorOriginal: request.amount,
-      valorEmCentavos: amountInCents,
+      unitPrice: unitPrice,
       currency: 'BRL',
       items: preferenceData.items.length,
       itemUnitPrice: preferenceData.items[0].unit_price,
