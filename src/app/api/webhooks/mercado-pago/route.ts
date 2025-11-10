@@ -104,9 +104,15 @@ async function handlePaymentEvent(data: any) {
       expiresAt.setMonth(expiresAt.getMonth() + 1)
     }
 
-    // Verificar se é PIX (para assinaturas mensais PIX, marcar reminder_sent como false)
-    const isPix = paymentMethod === 'account_money' || paymentMethod === 'pix'
-    const reminderSent = planType === 'monthly' && isPix ? false : null // PIX mensal precisa de aviso
+    // Verificar se é PIX ou Boleto (para assinaturas mensais manuais, marcar reminder_sent como false)
+    // PIX: account_money, pix
+    // Boleto: ticket, boleto
+    const isManualPayment = 
+      paymentMethod === 'account_money' || 
+      paymentMethod === 'pix' || 
+      paymentMethod === 'ticket' || 
+      paymentMethod === 'boleto'
+    const reminderSent = planType === 'monthly' && isManualPayment ? false : null // PIX/Boleto mensal precisa de aviso
 
     // Criar ou atualizar assinatura no banco
     // Usar stripe_subscription_id temporariamente até atualizar o schema
