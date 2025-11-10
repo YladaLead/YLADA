@@ -37,7 +37,8 @@ function WellnessCheckoutContent() {
   // O perfil será verificado na API
   // IMPORTANTE: Permitir visualizar a página sem login
   // Login será exigido apenas ao clicar em "Continuar para Pagamento"
-  const isReady = !authLoading && !!user
+  // Não travar a página esperando authLoading - permitir visualizar sempre
+  const isReady = !!user && !authLoading
 
   useEffect(() => {
     // Detectar tipo de plano da URL
@@ -299,14 +300,7 @@ function WellnessCheckoutContent() {
           </div>
 
           {/* Botão de Checkout */}
-          {authLoading ? (
-            <button
-              disabled
-              className="w-full bg-gray-400 text-white py-4 rounded-lg font-semibold text-lg cursor-not-allowed"
-            >
-              ⏳ Carregando informações...
-            </button>
-          ) : !user ? (
+          {!user ? (
             <button
               onClick={() => {
                 const redirectUrl = `/pt/wellness/checkout${planType === 'annual' ? '?plan=annual' : ''}`
@@ -314,15 +308,15 @@ function WellnessCheckoutContent() {
               }}
               className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors"
             >
-              🔐 Fazer Login para Continuar
+              {authLoading ? '⏳ Carregando...' : '🔐 Fazer Login para Continuar'}
             </button>
           ) : (
             <button
               onClick={handleCheckout}
-              disabled={loading || !isReady}
+              disabled={loading || authLoading || !isReady}
               className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
             >
-              {loading ? 'Processando...' : '💚 Continuar para Pagamento'}
+              {loading ? 'Processando...' : authLoading ? 'Carregando...' : '💚 Continuar para Pagamento'}
             </button>
           )}
 
