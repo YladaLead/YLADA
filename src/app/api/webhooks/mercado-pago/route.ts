@@ -535,8 +535,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
 /**
  * Processa evento de ordem do comerciante
  */
-async function handleMerchantOrderEvent(data: any) {
-  console.log('📦 Processando merchant order:', data.id)
+async function handleMerchantOrderEvent(data: any, isTest: boolean = false) {
+  console.log('📦 Processando merchant order:', data?.id, 'isTest:', isTest)
   // Merchant order geralmente contém informações sobre múltiplos pagamentos
   // Por enquanto, vamos processar apenas os pagamentos individuais
 }
