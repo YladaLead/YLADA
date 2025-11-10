@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { verifyPayment } from '@/lib/mercado-pago'
+import { createAccessToken } from '@/lib/email-tokens'
+import { sendWelcomeEmail } from '@/lib/email-templates'
 
 /**
  * POST /api/webhooks/mercado-pago
@@ -91,6 +93,32 @@ async function handlePaymentEvent(data: any) {
     // Obter informações do pagamento
     const amount = data.transaction_amount || 0
     const currency = data.currency_id || 'BRL'
+    
+    // Obter e-mail do pagador (importante para suporte)
+    const payerEmail = data.payer?.email || data.payer_email || null
+    
+    // Salvar/atualizar e-mail do usuário no perfil (se disponível e diferente)
+    if (payerEmail && payerEmail.includes('@')) {
+      try {
+        const { error: emailError } = await supabaseAdmin
+          .from('user_profiles')
+          .update({ 
+            email: payerEmail,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId)
+        
+        if (emailError) {
+          console.warn('⚠️ Erro ao atualizar e-mail do usuário:', emailError)
+        } else {
+          console.log('✅ E-mail do pagador salvo no perfil:', payerEmail)
+        }
+      } catch (error: any) {
+        console.warn('⚠️ Erro ao salvar e-mail do pagador:', error.message)
+      }
+    } else {
+      console.warn('⚠️ E-mail do pagador não encontrado ou inválido no webhook')
+    }
 
     // Calcular data de expiração
     // Para assinaturas recorrentes (mensal e anual), calcular baseado na frequência
@@ -170,6 +198,55 @@ async function handlePaymentEvent(data: any) {
       throw paymentError
     }
 
+    // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado)
+    if (subscription && !subscription.welcome_email_sent && payerEmail) {
+      try {
+        // Obter base URL
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
+                       process.env.NEXT_PUBLIC_APP_URL || 
+                       'https://www.ylada.com'
+
+        // Criar token de acesso
+        const accessToken = await createAccessToken(userId, 30)
+
+        // Obter nome do usuário (se disponível)
+        const { data: userProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('nome_completo')
+          .eq('id', userId)
+          .single()
+
+        // Enviar e-mail
+        await sendWelcomeEmail({
+          email: payerEmail,
+          userName: userProfile?.nome_completo || undefined,
+          area: area,
+          planType: planType,
+          accessToken,
+          baseUrl,
+        })
+
+        // Marcar como enviado
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            welcome_email_sent: true,
+            welcome_email_sent_at: new Date().toISOString(),
+          })
+          .eq('id', subscription.id)
+
+        console.log('✅ E-mail de boas-vindas enviado para:', payerEmail)
+      } catch (emailError: any) {
+        // Não bloquear o fluxo se o e-mail falhar
+        console.error('❌ Erro ao enviar e-mail de boas-vindas:', emailError)
+        // Continuar normalmente - o usuário pode solicitar novo link depois
+      }
+    } else if (subscription?.welcome_email_sent) {
+      console.log('ℹ️ E-mail de boas-vindas já foi enviado anteriormente')
+    } else if (!payerEmail) {
+      console.warn('⚠️ E-mail do pagador não disponível, não foi possível enviar e-mail de boas-vindas')
+    }
+
     console.log('✅ Pagamento processado e acesso ativado:', paymentId)
     console.log(`📅 Acesso válido até: ${expiresAt.toISOString()}`)
   } catch (error: any) {
@@ -222,6 +299,32 @@ async function handleSubscriptionEvent(data: any) {
     // Obter informações financeiras
     const amount = data.auto_recurring?.transaction_amount || 0
     const currency = data.auto_recurring?.currency_id || 'BRL'
+    
+    // Obter e-mail do pagador (importante para suporte)
+    const payerEmail = data.payer_email || data.payer?.email || null
+    
+    // Salvar/atualizar e-mail do usuário no perfil (se disponível e diferente)
+    if (payerEmail && payerEmail.includes('@')) {
+      try {
+        const { error: emailError } = await supabaseAdmin
+          .from('user_profiles')
+          .update({ 
+            email: payerEmail,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId)
+        
+        if (emailError) {
+          console.warn('⚠️ Erro ao atualizar e-mail do usuário:', emailError)
+        } else {
+          console.log('✅ E-mail do pagador salvo no perfil:', payerEmail)
+        }
+      } catch (error: any) {
+        console.warn('⚠️ Erro ao salvar e-mail do pagador:', error.message)
+      }
+    } else {
+      console.warn('⚠️ E-mail do pagador não encontrado ou inválido no webhook de assinatura')
+    }
 
            // Calcular datas de período baseado no tipo de plano
            const now = new Date()
@@ -263,6 +366,50 @@ async function handleSubscriptionEvent(data: any) {
     if (subError) {
       console.error('❌ Erro ao salvar subscription recorrente:', subError)
       throw subError
+    }
+
+    // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado e status é authorized)
+    if (subscription && !subscription.welcome_email_sent && mappedStatus === 'active' && payerEmail) {
+      try {
+        // Obter base URL
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
+                       process.env.NEXT_PUBLIC_APP_URL || 
+                       'https://www.ylada.com'
+
+        // Criar token de acesso
+        const accessToken = await createAccessToken(userId, 30)
+
+        // Obter nome do usuário (se disponível)
+        const { data: userProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('nome_completo')
+          .eq('id', userId)
+          .single()
+
+        // Enviar e-mail
+        await sendWelcomeEmail({
+          email: payerEmail,
+          userName: userProfile?.nome_completo || undefined,
+          area: area,
+          planType: planType,
+          accessToken,
+          baseUrl,
+        })
+
+        // Marcar como enviado
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            welcome_email_sent: true,
+            welcome_email_sent_at: new Date().toISOString(),
+          })
+          .eq('id', subscription.id)
+
+        console.log('✅ E-mail de boas-vindas enviado para assinatura recorrente:', payerEmail)
+      } catch (emailError: any) {
+        // Não bloquear o fluxo se o e-mail falhar
+        console.error('❌ Erro ao enviar e-mail de boas-vindas (recorrente):', emailError)
+      }
     }
 
     console.log('✅ Assinatura recorrente processada:', subscriptionId)

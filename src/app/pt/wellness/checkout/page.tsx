@@ -132,13 +132,13 @@ function WellnessCheckoutContent() {
       description: 'Plano Mensal',
     },
     annual: {
-      price: 470.72, // Preço à vista
-      priceFormatted: 'R$ 470,72',
+      price: 574.80, // Valor total (12x de R$ 47,90) - Parcelado Vendedor
+      priceFormatted: 'R$ 574,80',
       period: 'ano',
       description: 'Plano Anual',
-      monthlyEquivalent: 47.90, // Equivalente mensal com juros do MP (12x R$ 47,90 = R$ 574,80)
-      totalParcelado: 574.80, // Total se parcelar em 12x
-      savings: 248.08, // (59.90 * 12) - 470.72 = 718.80 - 470.72 = 248.08
+      monthlyEquivalent: 47.90, // 12x de R$ 47,90 (sem juros para cliente)
+      totalParcelado: 574.80, // Total parcelado
+      savings: 144.00, // (59.90 * 12) - 574.80 = 718.80 - 574.80 = 144.00
     },
   }
 
@@ -238,10 +238,7 @@ function WellnessCheckoutContent() {
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                   <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 574,80/ano (12x)
-                  </div>
-                  <div className="text-xs text-green-600 mt-1 font-semibold">
-                    ou R$ 470,72 à vista
+                    Total: R$ 574,80/ano (12x sem juros)
                   </div>
                 </div>
               </button>
@@ -264,14 +261,14 @@ function WellnessCheckoutContent() {
                 <span className="text-gray-600">Valor:</span>
                 <span className="font-bold text-green-600 text-lg">
                   {planType === 'annual' 
-                    ? `R$ 47,90/mês (12x) ou R$ ${currentPlan.priceFormatted} à vista`
+                    ? `R$ 47,90/mês (12x sem juros)`
                     : `${currentPlan.priceFormatted}/mês`
                   }
                 </span>
               </div>
               {planType === 'annual' && (
                 <div className="text-xs text-gray-500">
-                  Total parcelado: R$ {(currentPlan as any).totalParcelado?.toFixed(2) || '574,80'}
+                  Total: R$ {(currentPlan as any).totalParcelado?.toFixed(2) || '574,80'}
                 </div>
               )}
               {planType === 'annual' && (
@@ -284,14 +281,17 @@ function WellnessCheckoutContent() {
               )}
               <div className="border-t border-gray-200 pt-3 mt-3">
                 <div className="flex justify-between">
-                  <span className="font-semibold text-gray-900">Total à vista:</span>
+                  <span className="font-semibold text-gray-900">Total:</span>
                   <span className="font-bold text-gray-900 text-xl">
-                    {currentPlan.priceFormatted}
+                    {planType === 'annual' 
+                      ? `R$ ${currentPlan.priceFormatted}`
+                      : currentPlan.priceFormatted
+                    }
                   </span>
                 </div>
                 {planType === 'annual' && (
                   <div className="text-xs text-gray-500 mt-1 text-right">
-                    ou 12x de R$ {currentPlan.monthlyEquivalent?.toFixed(2)}
+                    12x de R$ {currentPlan.monthlyEquivalent?.toFixed(2)} sem juros
                   </div>
                 )}
               </div>

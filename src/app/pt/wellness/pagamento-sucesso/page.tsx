@@ -153,12 +153,6 @@ function WellnessPagamentoSucessoContent() {
             >
               🚀 Acessar Dashboard
             </Link>
-            <Link
-              href="/pt/wellness/templates"
-              className="px-6 py-3 bg-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
-            >
-              Ver Templates
-            </Link>
           </div>
 
           {/* Ajuda */}

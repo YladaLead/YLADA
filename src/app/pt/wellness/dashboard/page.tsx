@@ -58,13 +58,33 @@ function WellnessDashboardContent() {
   // Carregar perfil do usuário
   useEffect(() => {
     const carregarPerfil = async () => {
-      if (!user) return
+      if (!user) {
+        // Se não tem user, definir perfil padrão e parar loading
+        setPerfil({
+          nome: userProfile?.nome_completo || 'Usuário',
+          bio: ''
+        })
+        setCarregandoPerfil(false)
+        return
+      }
+      
+      // Timeout de segurança (10 segundos)
+      const timeoutId = setTimeout(() => {
+        console.warn('⚠️ Timeout ao carregar perfil, usando dados padrão')
+        setPerfil({
+          nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+          bio: ''
+        })
+        setCarregandoPerfil(false)
+      }, 10000)
       
       try {
         setCarregandoPerfil(true)
         const response = await fetch('/api/wellness/profile', {
           credentials: 'include'
         })
+        
+        clearTimeout(timeoutId)
         
         if (response.ok) {
           const data = await response.json()
@@ -73,9 +93,23 @@ function WellnessDashboardContent() {
               nome: data.profile.nome || userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
               bio: data.profile.bio || ''
             })
+          } else {
+            // Se não tem profile, usar dados do user
+            setPerfil({
+              nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+              bio: ''
+            })
           }
+        } else {
+          // Se resposta não foi ok, usar dados disponíveis
+          console.warn('⚠️ Resposta não OK ao carregar perfil:', response.status)
+          setPerfil({
+            nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+            bio: ''
+          })
         }
       } catch (error) {
+        clearTimeout(timeoutId)
         console.error('Erro ao carregar perfil:', error)
         setPerfil({
           nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',

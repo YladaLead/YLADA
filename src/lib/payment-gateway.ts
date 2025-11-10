@@ -40,7 +40,7 @@ function getPrice(area: string, planType: 'monthly' | 'annual', countryCode: str
     const prices: Record<string, Record<string, number>> = {
       wellness: {
         monthly: 59.90,
-        annual: 470.72, // R$ 470,72 (valor à vista) - Mercado Pago calcula parcelado automaticamente
+        annual: 574.80, // R$ 574,80 (12x de R$ 47,90) - Parcelado Vendedor (sem juros para cliente)
       },
       nutri: {
         monthly: 97.00,
