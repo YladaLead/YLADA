@@ -22,6 +22,17 @@ export default function WellnessCheckoutPage() {
   // Não travar a página esperando authLoading - permitir visualizar sempre
   const isReady = !!user && !authLoading
 
+  // Log de debug para verificar estado de autenticação
+  useEffect(() => {
+    console.log('🔍 Checkout - Estado de autenticação:', {
+      hasUser: !!user,
+      userId: user?.id,
+      authLoading,
+      isReady,
+      timestamp: new Date().toISOString()
+    })
+  }, [user, authLoading, isReady])
+
   // Detectar parâmetros da URL usando window.location (mais confiável)
   useEffect(() => {
     if (typeof window !== 'undefined') {
