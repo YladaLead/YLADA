@@ -14,16 +14,16 @@
 
 **Status:** ✅ **CONFIGURADO CORRETAMENTE**
 
-- **Valor configurado:** R$ 570,00
-- **Valor esperado:** R$ 570,00
-- **Formato:** Decimal (570.00)
+- **Valor configurado:** R$ 470,00
+- **Valor esperado:** R$ 470,00 (aproximadamente R$ 39,17/mês)
+- **Formato:** Decimal (470.00)
 
 ### **Verificação no Código:**
 
 ```typescript
 wellness: {
   monthly: 59.90,  // ✅ R$ 59,90
-  annual: 570.00,  // ✅ R$ 570,00
+  annual: 470.00,  // ✅ R$ 470,00 (aproximadamente R$ 39,17/mês)
 }
 ```
 
@@ -32,7 +32,7 @@ wellness: {
 1. Acessar `/pt/wellness/checkout`
 2. Selecionar **"Plano Anual"**
 3. Clicar em **"Continuar para Pagamento"**
-4. Verificar se o valor aparece como **R$ 570,00** no Mercado Pago
+4. Verificar se o valor aparece como **R$ 470,00** no Mercado Pago
 
 ---
 
@@ -55,7 +55,7 @@ O erro "Não é possível continuar o pagamento com este cartão" persiste mesmo
 ## 📝 CHECKLIST DE VALORES
 
 - [x] Valor mensal: R$ 59,90 ✅
-- [ ] Valor anual: R$ 570,00 (verificar no checkout)
+- [ ] Valor anual: R$ 470,00 (aproximadamente R$ 39,17/mês - verificar no checkout)
 - [ ] PIX funciona
 - [ ] Boleto funciona
 - [ ] Cartão funciona (ainda com erro)
@@ -68,7 +68,7 @@ O erro "Não é possível continuar o pagamento com este cartão" persiste mesmo
 
 1. Acessar checkout
 2. Selecionar "Plano Anual"
-3. Verificar se valor aparece como R$ 570,00
+3. Verificar se valor aparece como R$ 470,00 (aproximadamente R$ 39,17/mês)
 4. Tentar pagar com PIX (não cartão)
 
 ### **2. Testar PIX**

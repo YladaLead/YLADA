@@ -38,7 +38,7 @@ function getPrice(area: string, planType: 'monthly' | 'annual', countryCode: str
     const prices: Record<string, Record<string, number>> = {
       wellness: {
         monthly: 59.90,
-        annual: 570.00,
+        annual: 470.00, // R$ 470,00 (aproximadamente R$ 39,17/mês)
       },
       nutri: {
         monthly: 97.00,
