@@ -161,6 +161,35 @@ async function handlePaymentEvent(data: any) {
             console.log('✅ Perfil criado manualmente')
           }
         }
+        
+        // Criar token de acesso e enviar e-mail de boas-vindas
+        try {
+          const { createAccessToken } = await import('@/lib/email-tokens')
+          const { sendWelcomeEmail } = await import('@/lib/email-templates')
+          
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
+          const accessToken = await createAccessToken(userId, 30)
+          
+          const { data: userProfile } = await supabaseAdmin
+            .from('user_profiles')
+            .select('nome_completo')
+            .eq('user_id', userId)
+            .single()
+          
+          await sendWelcomeEmail({
+            email: payerEmail,
+            userName: userProfile?.nome_completo || data.payer?.first_name || data.payer?.name || undefined,
+            area: area as 'wellness' | 'nutri' | 'coach' | 'nutra',
+            planType: planType as 'monthly' | 'annual',
+            accessToken,
+            baseUrl,
+          })
+          
+          console.log('✅ E-mail de boas-vindas enviado para novo usuário:', payerEmail)
+        } catch (emailError: any) {
+          console.error('❌ Erro ao enviar e-mail de boas-vindas:', emailError)
+          // Não bloquear o processo se o e-mail falhar
+        }
       }
     }
     
