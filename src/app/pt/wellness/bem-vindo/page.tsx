@@ -11,7 +11,7 @@ import RequireSubscription from '@/components/auth/RequireSubscription'
 function BemVindoContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, userProfile } = useAuth()
+  const { user, userProfile, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [nomeCompleto, setNomeCompleto] = useState('')
@@ -23,15 +23,20 @@ function BemVindoContent() {
   const fromPayment = searchParams.get('payment') === 'success'
 
   useEffect(() => {
-    // Carregar nome do perfil se já existir
-    if (userProfile?.nome_completo) {
-      setNomeCompleto(userProfile.nome_completo)
-    } else if (user?.email) {
-      // Tentar extrair nome do e-mail como fallback
-      const emailName = user.email.split('@')[0]
-      setNomeCompleto(emailName.charAt(0).toUpperCase() + emailName.slice(1))
-    }
-    setLoading(false)
+    // Aguardar um pouco para o auth carregar
+    const timer = setTimeout(() => {
+      // Carregar nome do perfil se já existir
+      if (userProfile?.nome_completo) {
+        setNomeCompleto(userProfile.nome_completo)
+      } else if (user?.email) {
+        // Tentar extrair nome do e-mail como fallback
+        const emailName = user.email.split('@')[0]
+        setNomeCompleto(emailName.charAt(0).toUpperCase() + emailName.slice(1))
+      }
+      setLoading(false)
+    }, 1000) // Aguardar 1s para auth carregar
+
+    return () => clearTimeout(timer)
   }, [user, userProfile])
 
   const handleCompleteProfile = async (e: React.FormEvent) => {
@@ -80,7 +85,9 @@ function BemVindoContent() {
     router.push('/pt/wellness/dashboard')
   }
 
-  if (loading) {
+  // Se não está logado e não veio do pagamento, permitir acesso mesmo assim
+  // (usuário pode ter acabado de pagar e ainda não estar logado)
+  if (loading && !fromPayment) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -279,11 +286,7 @@ export default function BemVindoPage() {
         </div>
       </div>
     }>
-      <ProtectedRoute perfil="wellness" allowAdmin={true}>
-        <RequireSubscription area="wellness">
-          <BemVindoContent />
-        </RequireSubscription>
-      </ProtectedRoute>
+      <BemVindoContent />
     </Suspense>
   )
 }
