@@ -90,7 +90,22 @@ async function handlePaymentEvent(data: any) {
     const currency = data.currency_id || 'BRL'
     
     // Obter e-mail do pagador (importante para suporte)
-    const payerEmail = data.payer?.email || data.payer_email || null
+    // Tentar múltiplas fontes de e-mail do webhook
+    const payerEmail = data.payer?.email || 
+                      data.payer_email || 
+                      data.payer?.identification?.email ||
+                      data.collector?.email ||
+                      data.external_reference?.split('email:')[1] ||
+                      null
+    
+    console.log('📧 Tentando capturar e-mail do pagador:', {
+      'data.payer?.email': data.payer?.email,
+      'data.payer_email': data.payer_email,
+      'data.payer?.identification?.email': data.payer?.identification?.email,
+      'data.collector?.email': data.collector?.email,
+      'payerEmail final': payerEmail,
+      'payer completo': data.payer,
+    })
     
     // NOVO: Se userId começar com "temp_", criar usuário automaticamente
     if (userId && userId.startsWith('temp_')) {
