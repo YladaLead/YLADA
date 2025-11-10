@@ -65,6 +65,14 @@ export async function POST(request: NextRequest) {
 
     // Enviar e-mail
     try {
+      console.log('📧 Tentando enviar e-mail de recuperação:', {
+        email,
+        userId: user.id,
+        area: subscription.area,
+        hasToken: !!accessToken,
+        baseUrl,
+      })
+      
       await sendRecoveryEmail({
         email,
         userName: userProfile?.nome_completo || undefined,
@@ -73,14 +81,24 @@ export async function POST(request: NextRequest) {
         baseUrl,
       })
 
+      console.log('✅ E-mail de recuperação enviado com sucesso para:', email)
+
       return NextResponse.json({
         success: true,
         message: 'Link de acesso enviado para seu e-mail!',
       })
     } catch (emailError: any) {
-      console.error('❌ Erro ao enviar e-mail de recuperação:', emailError)
+      console.error('❌ Erro ao enviar e-mail de recuperação:', {
+        email,
+        error: emailError.message,
+        stack: emailError.stack,
+        details: emailError,
+      })
       return NextResponse.json(
-        { error: 'Erro ao enviar e-mail. Tente novamente mais tarde.' },
+        { 
+          error: 'Erro ao enviar e-mail. Tente novamente mais tarde.',
+          details: process.env.NODE_ENV === 'development' ? emailError.message : undefined
+        },
         { status: 500 }
       )
     }

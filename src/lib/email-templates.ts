@@ -106,17 +106,35 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
   })
 
   if (error) {
-    console.error('❌ Erro ao enviar e-mail de boas-vindas:', error)
-    throw new Error(`Erro ao enviar e-mail: ${error.message}`)
+    console.error('❌ Erro ao enviar e-mail de boas-vindas:', {
+      error,
+      message: error.message,
+      name: error.name,
+      details: JSON.stringify(error, null, 2),
+      email: data.email,
+    })
+    throw new Error(`Erro ao enviar e-mail: ${error.message || 'Erro desconhecido'}`)
   }
 
-  console.log('✅ E-mail de boas-vindas enviado:', data.email)
+  console.log('✅ E-mail de boas-vindas enviado com sucesso:', {
+    email: data.email,
+    emailId: emailData?.id,
+    area: data.area,
+    planType: data.planType,
+  })
 }
 
 /**
  * Envia e-mail de recuperação de acesso
  */
 export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> {
+  console.log('📧 sendRecoveryEmail chamado:', {
+    email: data.email,
+    area: data.area,
+    hasToken: !!data.accessToken,
+    baseUrl: data.baseUrl,
+  })
+
   const areaName = {
     wellness: 'Wellness',
     nutri: 'Nutri',
@@ -126,7 +144,14 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
 
   const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}`
 
-  const { error } = await resend.emails.send({
+  console.log('📧 Enviando e-mail via Resend:', {
+    from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    to: data.email,
+    subject: `🔐 Acesso ao seu YLADA ${areaName}`,
+    accessUrl,
+  })
+
+  const { error, data: emailData } = await resend.emails.send({
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: data.email,
     subject: `🔐 Acesso ao seu YLADA ${areaName}`,
@@ -179,11 +204,20 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
   })
 
   if (error) {
-    console.error('❌ Erro ao enviar e-mail de recuperação:', error)
-    throw new Error(`Erro ao enviar e-mail: ${error.message}`)
+    console.error('❌ Erro ao enviar e-mail de recuperação:', {
+      error,
+      message: error.message,
+      name: error.name,
+      details: JSON.stringify(error, null, 2),
+    })
+    throw new Error(`Erro ao enviar e-mail: ${error.message || 'Erro desconhecido'}`)
   }
 
-  console.log('✅ E-mail de recuperação enviado:', data.email)
+  console.log('✅ E-mail de recuperação enviado com sucesso:', {
+    email: data.email,
+    emailId: emailData?.id,
+    area: data.area,
+  })
 }
 
 /**
