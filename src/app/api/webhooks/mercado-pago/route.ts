@@ -14,10 +14,15 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-signature')
     const requestId = request.headers.get('x-request-id')
 
+    // Detectar se é teste ou produção baseado no live_mode do webhook
+    const isTest = body.live_mode === false || body.live_mode === 'false'
+    
     console.log('📥 Webhook Mercado Pago recebido:', {
       type: body.type,
       action: body.action,
       requestId,
+      live_mode: body.live_mode,
+      isTest: isTest, // Baseado em live_mode, não NODE_ENV
       hasData: !!body.data,
       dataKeys: body.data ? Object.keys(body.data) : [],
     })
@@ -44,16 +49,16 @@ export async function POST(request: NextRequest) {
     try {
       switch (eventType) {
         case 'payment':
-          await handlePaymentEvent(body.data)
+          await handlePaymentEvent(body.data, isTest)
           break
 
         case 'merchant_order':
-          await handleMerchantOrderEvent(body.data)
+          await handleMerchantOrderEvent(body.data, isTest)
           break
 
         case 'subscription':
         case 'preapproval':
-          await handleSubscriptionEvent(body.data)
+          await handleSubscriptionEvent(body.data, isTest)
           break
 
         default:
@@ -94,7 +99,7 @@ export async function POST(request: NextRequest) {
 /**
  * Processa evento de pagamento
  */
-async function handlePaymentEvent(data: any) {
+async function handlePaymentEvent(data: any, isTest: boolean = false) {
   if (!data || !data.id) {
     console.error('❌ handlePaymentEvent: data inválida ou sem ID')
     console.log('📋 Data recebida:', JSON.stringify(data, null, 2))
@@ -107,20 +112,20 @@ async function handlePaymentEvent(data: any) {
     id: data.id,
     status: data.status,
     status_detail: data.status_detail,
+    live_mode: data.live_mode,
+    isTest: isTest,
     hasPayer: !!data.payer,
     hasMetadata: !!data.metadata,
     hasExternalReference: !!data.external_reference,
   })
 
   try {
-    // Verificar status do pagamento
-    const isTest = process.env.NODE_ENV !== 'production'
-    
     // Se for teste do Mercado Pago (payment.id = "123456"), pular verificação
     if (paymentId === '123456' || paymentId === 123456) {
       console.log('🧪 Teste do Mercado Pago detectado, processando sem verificação')
       // Continuar processamento mesmo sendo teste
     } else {
+      // Usar isTest passado como parâmetro (baseado em live_mode do webhook)
       const paymentStatus = await verifyPayment(paymentId, isTest)
       console.log('📊 Status do pagamento:', paymentStatus)
 
@@ -539,9 +544,9 @@ async function handleMerchantOrderEvent(data: any) {
 /**
  * Processa evento de assinatura recorrente (Preapproval)
  */
-async function handleSubscriptionEvent(data: any) {
+async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
   const subscriptionId = data.id
-  console.log('🔄 Processando assinatura recorrente (Preapproval):', subscriptionId)
+  console.log('🔄 Processando assinatura recorrente (Preapproval):', subscriptionId, 'isTest:', isTest)
 
   try {
     // Obter metadata da assinatura
