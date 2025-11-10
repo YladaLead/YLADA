@@ -80,15 +80,10 @@ async function handlePaymentEvent(data: any) {
 
     // Obter metadata do pagamento
     const metadata = data.metadata || {}
-    const userId = metadata.user_id
+    let userId = metadata.user_id
     const area = metadata.area || 'wellness'
     const planType = metadata.plan_type || 'monthly'
     const paymentMethod = data.payment_method_id || 'unknown'
-
-    if (!userId) {
-      console.error('❌ User ID não encontrado no metadata do pagamento')
-      return
-    }
 
     // Obter informações do pagamento
     const amount = data.transaction_amount || 0
@@ -96,6 +91,83 @@ async function handlePaymentEvent(data: any) {
     
     // Obter e-mail do pagador (importante para suporte)
     const payerEmail = data.payer?.email || data.payer_email || null
+    
+    // NOVO: Se userId começar com "temp_", criar usuário automaticamente
+    if (userId && userId.startsWith('temp_')) {
+      const tempEmail = userId.replace('temp_', '')
+      console.log('🆕 Criando usuário automaticamente após pagamento:', tempEmail)
+      
+      if (!payerEmail || !payerEmail.includes('@')) {
+        console.error('❌ E-mail do pagador não encontrado. Não é possível criar usuário.')
+        return
+      }
+      
+      // Verificar se usuário já existe
+      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+      const existingUser = existingUsers?.users?.find(
+        u => u.email?.toLowerCase() === payerEmail.toLowerCase()
+      )
+      
+      if (existingUser) {
+        // Usuário já existe, usar o ID existente
+        console.log('✅ Usuário já existe, usando ID existente:', existingUser.id)
+        userId = existingUser.id
+      } else {
+        // Criar novo usuário
+        const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12) + 'A1!'
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: payerEmail,
+          password: randomPassword,
+          email_confirm: true, // Confirmar email automaticamente
+          user_metadata: {
+            full_name: data.payer?.first_name || data.payer?.name || '',
+            name: data.payer?.first_name || data.payer?.name || '',
+            perfil: area
+          }
+        })
+        
+        if (createError || !newUser.user) {
+          console.error('❌ Erro ao criar usuário automaticamente:', createError)
+          return
+        }
+        
+        userId = newUser.user.id
+        console.log('✅ Usuário criado automaticamente:', userId)
+        
+        // Aguardar trigger criar perfil (ou criar manualmente se necessário)
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Verificar se perfil foi criado pelo trigger
+        const { data: profile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('id')
+          .eq('user_id', userId)
+          .single()
+        
+        if (!profile) {
+          // Criar perfil manualmente se trigger não funcionou
+          const { error: profileError } = await supabaseAdmin
+            .from('user_profiles')
+            .insert({
+              user_id: userId,
+              email: payerEmail,
+              nome_completo: data.payer?.first_name || data.payer?.name || '',
+              perfil: area
+            })
+          
+          if (profileError) {
+            console.error('❌ Erro ao criar perfil:', profileError)
+          } else {
+            console.log('✅ Perfil criado manualmente')
+          }
+        }
+      }
+    }
+    
+    if (!userId) {
+      console.error('❌ User ID não encontrado no metadata do pagamento')
+      return
+    }
     
     // Salvar/atualizar e-mail do usuário no perfil (se disponível e diferente)
     if (payerEmail && payerEmail.includes('@')) {

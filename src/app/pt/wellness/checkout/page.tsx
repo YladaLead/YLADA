@@ -13,6 +13,7 @@ export default function WellnessCheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
+  const [email, setEmail] = useState('')
   
   // Verificar se está pronto para checkout
   // Para checkout, não precisamos do perfil completo, apenas do user
@@ -54,27 +55,22 @@ export default function WellnessCheckoutPage() {
     console.log('🔘 Botão de checkout clicado', { 
       hasUser: !!user, 
       userId: user?.id,
-      hasProfile: !!userProfile,
-      profilePerfil: userProfile?.perfil,
-      isReady 
+      email: email || user?.email,
     })
     
-    // Verificar se está autenticado - se não estiver, redirecionar para login
+    // NOVO: Se não estiver autenticado, verificar se tem e-mail
     if (!user || authLoading) {
-      console.log('⚠️ Usuário não autenticado, redirecionando para login...')
-      // Salvar o plano escolhido na URL para redirecionar de volta após login
-      const redirectUrl = `/pt/wellness/checkout${planType === 'annual' ? '?plan=annual' : ''}`
-      router.push(`/pt/wellness/login?redirect=${encodeURIComponent(redirectUrl)}`)
-      return
+      // Validar e-mail se não estiver autenticado
+      if (!email || !email.includes('@')) {
+        setError('Por favor, informe seu e-mail para continuar.')
+        return
+      }
     }
     
-    // Verificar se está pronto (apenas user, perfil será verificado na API)
-    if (!isReady) {
-      console.error('❌ Não está pronto para checkout', { 
-        authLoading, 
-        hasUser: !!user
-      })
-      setError('Aguarde enquanto carregamos suas informações...')
+    // Se estiver autenticado, usar e-mail do usuário
+    const userEmail = user?.email || email
+    if (!userEmail || !userEmail.includes('@')) {
+      setError('E-mail inválido. Por favor, verifique.')
       return
     }
 
@@ -84,6 +80,7 @@ export default function WellnessCheckoutPage() {
 
     try {
       // Usar a nova API unificada que detecta automaticamente o gateway (Mercado Pago ou Stripe)
+      // AGORA ACEITA CHECKOUT SEM AUTENTICAÇÃO (apenas e-mail)
       const response = await fetch('/api/wellness/checkout', {
         method: 'POST',
         headers: {
@@ -93,6 +90,7 @@ export default function WellnessCheckoutPage() {
         body: JSON.stringify({ 
           planType,
           language: 'pt', // Idioma português para Brasil
+          email: userEmail, // E-mail (obrigatório mesmo se autenticado)
           // Plano mensal sempre usa assinatura automática (cartão)
           // Plano anual sempre usa assinatura recorrente (cartão)
         }),
@@ -301,31 +299,35 @@ export default function WellnessCheckoutPage() {
             </div>
           </div>
 
-          {/* Botão de Checkout */}
-          {!user ? (
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  const redirectUrl = `/pt/wellness/checkout${planType === 'annual' ? '?plan=annual' : ''}`
-                  router.push(`/pt/wellness/login?redirect=${encodeURIComponent(redirectUrl)}`)
-                }}
-                className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors"
-              >
-                {authLoading ? '⏳ Carregando...' : '🔐 Criar Conta ou Fazer Login'}
-              </button>
-              <p className="text-center text-sm text-gray-600">
-                Não tem conta? Você pode criar uma agora mesmo!
+          {/* Campo de E-mail (se não estiver logado) */}
+          {!user && (
+            <div className="mb-6">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                E-mail
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Seu e-mail será usado para criar sua conta automaticamente após o pagamento.
               </p>
             </div>
-          ) : (
-            <button
-              onClick={handleCheckout}
-              disabled={loading || authLoading || !isReady}
-              className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Processando...' : authLoading ? 'Carregando...' : '💚 Continuar para Pagamento'}
-            </button>
           )}
+
+          {/* Botão de Checkout */}
+          <button
+            onClick={handleCheckout}
+            disabled={loading || authLoading || (!user && !email)}
+            className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Processando...' : authLoading ? 'Carregando...' : '💚 Continuar para Pagamento'}
+          </button>
 
           {/* Informações de Segurança */}
           <div className="mt-6 text-center">

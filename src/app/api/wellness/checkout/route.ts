@@ -2,29 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { createCheckout } from '@/lib/payment-gateway'
 import { detectCountryCode } from '@/lib/payment-helpers'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * POST /api/wellness/checkout
  * Cria sessão de checkout unificada (Mercado Pago para BR, Stripe para resto)
+ * AGORA ACEITA CHECKOUT SEM AUTENTICAÇÃO (apenas e-mail)
  */
 export async function POST(request: NextRequest) {
   try {
     console.log('📥 Checkout request recebido')
     
-    // Verificar autenticação
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
-    if (authResult instanceof NextResponse) {
-      console.error('❌ Autenticação falhou:', {
-        status: authResult.status,
-        statusText: authResult.statusText,
-      })
-      return authResult
-    }
-    const { user } = authResult
-    console.log('✅ Usuário autenticado:', user.id)
-
     const body = await request.json()
-    const { planType, language, paymentMethod } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es', 'auto' | 'pix'
+    const { planType, language, paymentMethod, email } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es', 'auto' | 'pix', email
 
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
@@ -33,14 +23,41 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar email do usuário (obrigatório para Mercado Pago)
-    const userEmail = user.email
-    if (!userEmail || !userEmail.includes('@')) {
-      console.error('❌ Email do usuário inválido:', userEmail)
-      return NextResponse.json(
-        { error: 'Email do usuário é obrigatório para realizar o pagamento. Verifique seu perfil.' },
-        { status: 400 }
-      )
+    // NOVO: Aceitar checkout sem autenticação (apenas e-mail)
+    // Tentar autenticação opcional - se não tiver, usar e-mail fornecido
+    let userEmail: string
+    let userId: string | null = null
+    
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    if (authResult instanceof NextResponse) {
+      // Não autenticado - usar e-mail fornecido
+      console.log('ℹ️ Checkout sem autenticação - usando e-mail fornecido')
+      
+      if (!email || !email.includes('@')) {
+        return NextResponse.json(
+          { error: 'E-mail é obrigatório para realizar o pagamento.' },
+          { status: 400 }
+        )
+      }
+      
+      userEmail = email
+      // userId será null - será criado no webhook após pagamento
+      console.log('📧 E-mail fornecido:', userEmail)
+    } else {
+      // Autenticado - usar dados do usuário
+      const { user } = authResult
+      userId = user.id
+      userEmail = user.email || email || ''
+      
+      if (!userEmail || !userEmail.includes('@')) {
+        console.error('❌ Email do usuário inválido:', userEmail)
+        return NextResponse.json(
+          { error: 'Email do usuário é obrigatório para realizar o pagamento. Verifique seu perfil.' },
+          { status: 400 }
+        )
+      }
+      
+      console.log('✅ Usuário autenticado:', userId)
     }
 
     // Detectar país
@@ -50,17 +67,18 @@ export async function POST(request: NextRequest) {
     console.log('📋 Dados do checkout:', {
       area: 'wellness',
       planType,
-      userId: user.id,
+      userId: userId || 'null (será criado após pagamento)',
       userEmail,
       countryCode,
       language: language || 'pt',
     })
 
     // Criar checkout usando gateway abstraction (detecta automaticamente Mercado Pago ou Stripe)
+    // Se userId for null, usar e-mail como identificador temporário
     const checkout = await createCheckout({
       area: 'wellness',
       planType,
-      userId: user.id,
+      userId: userId || `temp_${userEmail}`, // ID temporário baseado em e-mail
       userEmail,
       countryCode,
       language: language || 'pt',
