@@ -90,17 +90,9 @@ function WellnessPagamentoSucessoContent() {
           </div>
 
           {/* Título */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">
             Pagamento Confirmado!
           </h1>
-
-          {/* Mensagem */}
-          <p className="text-lg text-gray-600 mb-8">
-            {status === 'pending' 
-              ? 'Seu pagamento está sendo processado. Você receberá um e-mail quando for confirmado.'
-              : 'Sua assinatura foi ativada com sucesso. Agora você tem acesso completo ao YLADA Wellness.'
-            }
-          </p>
 
           {/* Informações */}
           {error ? (
@@ -119,47 +111,7 @@ function WellnessPagamentoSucessoContent() {
                 Estamos processando seu pagamento. Você receberá um e-mail de confirmação em breve.
               </p>
             </div>
-          ) : (
-            <>
-              <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
-                <p className="text-sm font-medium">
-                  🎉 Bem-vindo ao YLADA Wellness!
-                </p>
-              </div>
-              
-              {/* Mensagem sobre e-mail */}
-              <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
-                <p className="text-sm font-medium mb-2">
-                  📧 E-mail de boas-vindas enviado!
-                </p>
-                <p className="text-xs">
-                  Enviamos um e-mail com seu link de acesso ao dashboard. 
-                  Verifique sua caixa de entrada e spam.
-                </p>
-              </div>
-            </>
-          )}
-
-          {/* Próximos Passos */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-8 text-left">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Próximos Passos:
-            </h2>
-            <ul className="space-y-3 text-gray-600">
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">1.</span>
-                <span>Acesse seu dashboard para criar suas primeiras ferramentas</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">2.</span>
-                <span>Personalize seu perfil com seu nome e cidade</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">3.</span>
-                <span>Comece a compartilhar seus links e gerar novos contatos</span>
-              </li>
-            </ul>
-          </div>
+          ) : null}
 
           {/* Mensagem de reenvio */}
           {emailSent && (
@@ -200,23 +152,12 @@ function WellnessPagamentoSucessoContent() {
                 ✨ Continuar e Completar Cadastro
               </Link>
             ) : (
-              <div className="space-y-3">
-                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
-                  <p className="text-sm font-medium mb-1">📧 Verifique seu e-mail!</p>
-                  <p className="text-xs mb-3">
-                    Enviamos um e-mail para você com um link de acesso seguro. Clique no link do e-mail para completar seu cadastro e acessar a plataforma.
-                  </p>
-                  <p className="text-xs font-semibold">
-                    💡 Não recebeu o e-mail? Verifique sua pasta de spam ou solicite um novo link abaixo.
-                  </p>
-                </div>
-                <Link
-                  href="/pt/wellness/recuperar-acesso"
-                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center block"
-                >
-                  📧 Solicitar Novo Link de Acesso
-                </Link>
-              </div>
+              <Link
+                href="/pt/wellness/bem-vindo?payment=success"
+                className="px-6 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center text-lg block"
+              >
+                ✨ Preencher seu Cadastro
+              </Link>
             )}
             
             {user?.email && status !== 'pending' && (
