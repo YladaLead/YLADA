@@ -79,7 +79,9 @@ export async function createRecurringSubscription(
       frequency_type: frequencyType,
       transaction_amount: unitPrice, // Valor em reais (ex: 59.90 ou 470.72)
       currency_id: 'BRL' as const,
-      start_date: new Date().toISOString(), // Começar imediatamente
+      // IMPORTANTE: start_date deve ser no futuro (pelo menos 1 minuto à frente)
+      // Mercado Pago não aceita datas no passado
+      start_date: new Date(Date.now() + 60000).toISOString(), // 1 minuto no futuro
       end_date: null, // Sem data de término (cobrança infinita)
     },
     back_url: request.successUrl, // URL de retorno após autorização (obrigatório)
@@ -98,6 +100,7 @@ export async function createRecurringSubscription(
       frequency: preapprovalData.auto_recurring.frequency,
       frequency_type: preapprovalData.auto_recurring.frequency_type,
       currency: preapprovalData.auto_recurring.currency_id,
+      start_date: preapprovalData.auto_recurring.start_date,
       back_url: preapprovalData.back_url,
       payer_email: preapprovalData.payer_email,
     })
