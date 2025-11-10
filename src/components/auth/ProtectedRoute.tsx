@@ -37,17 +37,17 @@ export default function ProtectedRoute({
     }
   }, [loading])
 
-  // Timeout para verificação de autenticação - aguardar 3 segundos antes de redirecionar
+  // Timeout para verificação de autenticação - aguardar 5 segundos antes de redirecionar
   // Isso dá tempo suficiente para o useAuth detectar a sessão após redirecionamento
   useEffect(() => {
     if (!isAuthenticated || !user) {
       const timer = setTimeout(() => {
         // Verificar novamente antes de marcar timeout (pode ter mudado)
         if (!isAuthenticated || !user) {
-          console.log('❌ Não autenticado após 3s, marcando para redirecionar...')
+          console.log('❌ Não autenticado após 5s, marcando para redirecionar...')
           setAuthCheckTimeout(true)
         }
-      }, 3000)
+      }, 5000) // Aumentado para 5 segundos para dar mais tempo
       return () => clearTimeout(timer)
     } else {
       // Se autenticado, resetar o timeout
