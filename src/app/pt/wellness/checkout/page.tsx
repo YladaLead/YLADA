@@ -9,7 +9,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 export default function WellnessCheckoutPage() {
   return (
-    <ProtectedRoute perfil="wellness" allowAdmin={true}>
+    <ProtectedRoute perfil="wellness" allowAdmin={false}>
       <Suspense fallback={
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">

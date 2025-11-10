@@ -24,13 +24,13 @@ export default function ProtectedRoute({
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   const [authCheckTimeout, setAuthCheckTimeout] = useState(false)
 
-  // Timeout de loading - após 1 segundo, marcar como timeout
+  // Timeout de loading - após 2 segundos, marcar como timeout (aumentado para dar mais tempo)
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
-        console.warn('⚠️ Loading demorou mais de 1s, continuando mesmo assim...')
+        console.warn('⚠️ Loading demorou mais de 2s, continuando mesmo assim...')
         setLoadingTimeout(true)
-      }, 1000)
+      }, 2000) // Aumentado de 1s para 2s
       return () => clearTimeout(timer)
     } else {
       setLoadingTimeout(false)
@@ -190,9 +190,18 @@ export default function ProtectedRoute({
     )
   }
 
-  // Se timeout mas ainda loading, continuar mesmo assim
+  // Se timeout mas ainda loading, aguardar mais um pouco antes de continuar
   if (loading && loadingTimeout) {
-    console.warn('⚠️ Continuando apesar do loading timeout')
+    // Aguardar mais 500ms antes de permitir acesso temporário
+    // Isso evita múltiplos re-renders
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando perfil...</p>
+        </div>
+      </div>
+    )
   }
 
   // Verificar autenticação - se não autenticado, aguardar um pouco antes de redirecionar
@@ -253,11 +262,18 @@ export default function ProtectedRoute({
         return <>{children}</>
       }
       
-      // Se ainda não carregou mas já passou timeout, permitir temporariamente
-      // O useEffect vai verificar novamente quando o perfil carregar
+      // Se ainda não carregou mas já passou timeout, aguardar mais um pouco
+      // Não permitir acesso temporário imediatamente para evitar múltiplos re-renders
       if (!userProfile && loadingTimeout) {
-        console.warn('⚠️ Render: Perfil não carregou ainda, mas permitindo acesso temporário (allowAdmin ativo)')
-        return <>{children}</>
+        // Mostrar loading enquanto aguarda perfil carregar
+        return (
+          <div className="min-h-screen bg-white flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Verificando permissões...</p>
+            </div>
+          </div>
+        )
       }
     }
 
