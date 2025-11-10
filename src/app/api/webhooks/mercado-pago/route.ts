@@ -203,15 +203,15 @@ async function handlePaymentEvent(data: any) {
           .single()
         
         if (!profile) {
-          // Criar perfil manualmente se trigger não funcionou
-          const { error: profileError } = await supabaseAdmin
-            .from('user_profiles')
-            .insert({
-              user_id: userId,
-              email: payerEmail,
-              nome_completo: data.payer?.first_name || data.payer?.name || '',
-              perfil: area
-            })
+            // Criar perfil manualmente se trigger não funcionou
+            const { error: profileError } = await supabaseAdmin
+              .from('user_profiles')
+              .insert({
+                user_id: userId,
+                email: emailFinal,
+                nome_completo: data.payer?.first_name || data.payer?.name || '',
+                perfil: area
+              })
           
           if (profileError) {
             console.error('❌ Erro ao criar perfil:', profileError)
