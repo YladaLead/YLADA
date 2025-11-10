@@ -58,6 +58,16 @@ export async function createRecurringSubscription(
     throw new Error('URLs de retorno não definidas')
   }
 
+  // Validar que successUrl é uma URL válida
+  try {
+    // Tentar criar URL object para validar formato
+    // Substituir placeholder {payment_id} temporariamente para validação
+    const testUrl = request.successUrl.replace('{payment_id}', 'test')
+    new URL(testUrl)
+  } catch (error) {
+    throw new Error(`URL de retorno inválida: ${request.successUrl}. Erro: ${error}`)
+  }
+
   // Configurar Preapproval (assinatura recorrente)
   // IMPORTANTE: Preapproval requer back_url (singular) para URL de retorno após autorização
   const preapprovalData = {

@@ -115,9 +115,21 @@ async function createMercadoPagoCheckout(
   const language = request.language || 'pt'
   const area = request.area
   
-  const successUrl = `${cleanBaseUrl}/${language}/${area}/pagamento-sucesso?payment_id={payment_id}&gateway=mercadopago`
+  // IMPORTANTE: Para Preapproval, não usar {payment_id} no back_url
+  // O Mercado Pago não substitui placeholders no back_url de Preapproval
+  // Usar URL simples sem placeholders
+  const successUrl = `${cleanBaseUrl}/${language}/${area}/pagamento-sucesso?gateway=mercadopago`
   const failureUrl = `${cleanBaseUrl}/${language}/${area}/checkout?canceled=true`
-  const pendingUrl = `${cleanBaseUrl}/${language}/${area}/pagamento-sucesso?payment_id={payment_id}&gateway=mercadopago&status=pending`
+  const pendingUrl = `${cleanBaseUrl}/${language}/${area}/pagamento-sucesso?gateway=mercadopago&status=pending`
+  
+  // Validar que as URLs são válidas
+  try {
+    new URL(successUrl)
+    new URL(failureUrl)
+    new URL(pendingUrl)
+  } catch (error) {
+    throw new Error(`URL inválida construída: ${error}. Base URL: ${cleanBaseUrl}`)
+  }
   
   console.log('🔗 URLs de retorno:', {
     baseUrl: cleanBaseUrl,
