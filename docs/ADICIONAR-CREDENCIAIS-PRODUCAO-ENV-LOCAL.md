@@ -6,28 +6,30 @@ Baseado na imagem que você mostrou, aqui estão as credenciais de produção:
 
 ### **1. Public Key:**
 ```
-APP_USR-43c7d8de-3b47-43b9-b223-f182b9ef320d
+APP_USR-xxxxxxxxxxxxx
 ```
 
 ### **2. Access Token:**
 ```
-APP_USR-6484673849752001-110918-6331ae5a16982fa7a6c9873607376f24-2974173459
+APP_USR-xxxxxxxxxxxxx
 ```
 
 ### **3. Client ID:**
 ```
-6484673849752001
+xxxxxxxxxxxxx
 ```
 
 ### **4. Client Secret:**
 ```
-9ybwRxRVE0aF2kruoM7WwnQ0E1D7LFz5
+xxxxxxxxxxxxx
 ```
 
-### **5. Webhook Secret (da configuração anterior):**
+### **5. Webhook Secret:**
 ```
-b7946e2f5ac52d76b182edd416d124cea5238d245b861897abc8de6596197120
+xxxxxxxxxxxxx
 ```
+
+⚠️ **IMPORTANTE:** Substitua os `xxxxxxxxxxxxx` pelas suas credenciais reais do painel do Mercado Pago.
 
 ---
 
@@ -41,11 +43,12 @@ No diretório raiz do projeto (`/Users/air/ylada-app`), abra o arquivo `.env.loc
 
 ```env
 # MERCADO PAGO - PRODUÇÃO
-MERCADOPAGO_ACCESS_TOKEN_LIVE=APP_USR-6484673849752001-110918-6331ae5a16982fa7a6c9873607376f24-2974173459
-MERCADOPAGO_PUBLIC_KEY_LIVE=APP_USR-43c7d8de-3b47-43b9-b223-f182b9ef320d
-MERCADOPAGO_CLIENT_ID=6484673849752001
-MERCADOPAGO_CLIENT_SECRET=9ybwRxRVE0aF2kruoM7WwnQ0E1D7LFz5
-MERCADOPAGO_WEBHOOK_SECRET_LIVE=b7946e2f5ac52d76b182edd416d124cea5238d245b861897abc8de6596197120
+# ⚠️ NUNCA COMMITE ESTAS CREDENCIAIS NO GIT!
+MERCADOPAGO_ACCESS_TOKEN_LIVE=APP_USR-xxxxxxxxxxxxx
+MERCADOPAGO_PUBLIC_KEY_LIVE=APP_USR-xxxxxxxxxxxxx
+MERCADOPAGO_CLIENT_ID=xxxxxxxxxxxxx
+MERCADOPAGO_CLIENT_SECRET=xxxxxxxxxxxxx
+MERCADOPAGO_WEBHOOK_SECRET_LIVE=xxxxxxxxxxxxx
 ```
 
 ### **3. Exemplo completo da seção Mercado Pago no `.env.local`:**
@@ -61,11 +64,12 @@ MERCADOPAGO_PUBLIC_KEY=TEST-xxxxxxxxxxxxx
 MERCADOPAGO_WEBHOOK_SECRET=xxxxxxxxxxxxx
 
 # PRODUÇÃO (Quando estiver pronto para receber pagamentos reais)
-MERCADOPAGO_ACCESS_TOKEN_LIVE=APP_USR-6484673849752001-110918-6331ae5a16982fa7a6c9873607376f24-2974173459
-MERCADOPAGO_PUBLIC_KEY_LIVE=APP_USR-43c7d8de-3b47-43b9-b223-f182b9ef320d
-MERCADOPAGO_CLIENT_ID=6484673849752001
-MERCADOPAGO_CLIENT_SECRET=9ybwRxRVE0aF2kruoM7WwnQ0E1D7LFz5
-MERCADOPAGO_WEBHOOK_SECRET_LIVE=b7946e2f5ac52d76b182edd416d124cea5238d245b861897abc8de6596197120
+# ⚠️ NUNCA COMMITE ESTAS CREDENCIAIS NO GIT!
+MERCADOPAGO_ACCESS_TOKEN_LIVE=APP_USR-xxxxxxxxxxxxx
+MERCADOPAGO_PUBLIC_KEY_LIVE=APP_USR-xxxxxxxxxxxxx
+MERCADOPAGO_CLIENT_ID=xxxxxxxxxxxxx
+MERCADOPAGO_CLIENT_SECRET=xxxxxxxxxxxxx
+MERCADOPAGO_WEBHOOK_SECRET_LIVE=xxxxxxxxxxxxx
 ```
 
 ---

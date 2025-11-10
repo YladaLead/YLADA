@@ -116,8 +116,10 @@ export async function createPreference(
       // Não excluir nenhum tipo de pagamento para habilitar PIX, Boleto, etc.
       excluded_payment_types: [],
       excluded_payment_methods: [],
-      // Habilitar PIX explicitamente (não é necessário excluir, mas vamos garantir)
+      // Habilitar PIX explicitamente
       // PIX é habilitado automaticamente se não excluirmos 'account_money'
+      // IMPORTANTE: Para PIX funcionar, a conta do Mercado Pago precisa ter uma chave PIX cadastrada
+      // Ver: docs/TROUBLESHOOTING-PIX-NAO-CRIA-PAGAMENTO.md
     },
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
     external_reference: `${request.area}_${request.planType}_${request.userId}`, // Referência externa
