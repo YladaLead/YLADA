@@ -76,14 +76,30 @@ export default function ProtectedRoute({
       is_admin: userProfile?.is_admin,
       is_support: userProfile?.is_support,
       allowAdmin,
-      allowSupport
+      allowSupport,
+      loading,
+      loadingTimeout
     })
 
-    // Verificar autenticação
+    // Verificar autenticação - aguardar mais tempo antes de redirecionar
+    // Isso dá tempo para o useAuth detectar a sessão
     if (!isAuthenticated || !user) {
-      const redirectPath = redirectTo || (perfil === 'admin' ? '/admin/login' : `/pt/${perfil || 'nutri'}/login`)
-      console.log('❌ Não autenticado, redirecionando para:', redirectPath)
-      router.push(redirectPath)
+      // Se ainda está carregando, aguardar mais
+      if (loading && !loadingTimeout) {
+        console.log('⏳ ProtectedRoute: Ainda carregando, aguardando...')
+        return
+      }
+      
+      // Se já passou o timeout de auth check, redirecionar
+      if (authCheckTimeout) {
+        const redirectPath = redirectTo || (perfil === 'admin' ? '/admin/login' : `/pt/${perfil || 'nutri'}/login`)
+        console.log('❌ Não autenticado após timeout, redirecionando para:', redirectPath)
+        router.push(redirectPath)
+        return
+      }
+      
+      // Se não passou o timeout, aguardar mais
+      console.log('⏳ ProtectedRoute: Aguardando autenticação...')
       return
     }
 
@@ -182,6 +198,18 @@ export default function ProtectedRoute({
   // Verificar autenticação - se não autenticado, aguardar um pouco antes de redirecionar
   // Isso dá tempo para o useAuth detectar a sessão após redirecionamento
   if (!isAuthenticated || !user) {
+    // Se ainda está carregando, aguardar mais
+    if (loading && !loadingTimeout) {
+      return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      )
+    }
+    
     // Se já passou o timeout, redirecionar
     if (authCheckTimeout) {
       const redirectPath = redirectTo || (perfil === 'admin' ? '/admin/login' : `/pt/${perfil || 'nutri'}/login`)
