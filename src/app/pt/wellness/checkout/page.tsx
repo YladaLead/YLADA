@@ -120,12 +120,12 @@ function WellnessCheckoutContent() {
       description: 'Plano Mensal',
     },
     annual: {
-      price: 570,
-      priceFormatted: 'R$ 570',
+      price: 574.80,
+      priceFormatted: 'R$ 574,80',
       period: 'ano',
       description: 'Plano Anual',
-      monthlyEquivalent: 47.50,
-      savings: 150,
+      monthlyEquivalent: 47.90,
+      savings: 144.00,
     },
   }
 
@@ -214,18 +214,18 @@ function WellnessCheckoutContent() {
                 }`}
               >
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
-                  ECONOMIA DE 21%
+                  ECONOMIA DE 20%
                 </div>
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
                     Anual
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 47,50
+                    R$ 47,90
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                   <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 570/ano
+                    Total: R$ 574,80/ano
                   </div>
                 </div>
               </button>
