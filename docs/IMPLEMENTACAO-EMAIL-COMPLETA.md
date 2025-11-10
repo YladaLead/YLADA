@@ -49,10 +49,12 @@ Toda a estrutura do sistema de e-mail foi implementada. Agora você precisa:
 ### 1. Adicionar API Key no `.env.local`
 
 ```env
-RESEND_API_KEY=re_9XRiCdTz_GPphuZGNyfRb3xeCpuf1AkE6
+RESEND_API_KEY=re_xxxxxxxxxxxxx
 RESEND_FROM_EMAIL=noreply@ylada.com
 RESEND_FROM_NAME=YLADA
 ```
+
+⚠️ **IMPORTANTE:** Substitua `re_xxxxxxxxxxxxx` pela sua API Key real do Resend.
 
 ### 2. Adicionar no Vercel
 
@@ -60,7 +62,7 @@ RESEND_FROM_NAME=YLADA
 2. Selecione o projeto `ylada-app`
 3. Vá em **Settings** → **Environment Variables**
 4. Adicione:
-   - `RESEND_API_KEY` = `re_9XRiCdTz_GPphuZGNyfRb3xeCpuf1AkE6`
+   - `RESEND_API_KEY` = `sua_api_key_aqui` (obtenha em https://resend.com/api-keys)
    - `RESEND_FROM_EMAIL` = `noreply@ylada.com`
    - `RESEND_FROM_NAME` = `YLADA`
 
