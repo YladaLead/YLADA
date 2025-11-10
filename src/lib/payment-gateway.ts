@@ -143,9 +143,13 @@ async function createMercadoPagoCheckout(
 
   // Determinar método de pagamento
   // paymentMethod: 'auto' = cartão automático (Preapproval), 'pix' ou 'boleto' = manual (Preference)
-  const paymentMethod = request.paymentMethod || 'auto'
+  // Se não especificado, usar Preference para mostrar todos os métodos (PIX, Boleto, Cartão)
+  const paymentMethod = request.paymentMethod
   
-  // Plano mensal: cartão automático (Preapproval) ou PIX/Boleto manual (Preference)
+  // Plano mensal: 
+  // - Se paymentMethod === 'auto' → Preapproval (cartão automático, só cartão)
+  // - Se paymentMethod === 'pix' ou 'boleto' → Preference (manual, mostra todos)
+  // - Se paymentMethod não especificado → Preference (mostra todos para escolha)
   if (request.planType === 'monthly') {
     if (paymentMethod === 'auto') {
       // Assinatura automática (cartão) - Preapproval
@@ -185,8 +189,9 @@ async function createMercadoPagoCheckout(
         throw new Error(`Erro ao criar assinatura recorrente Mercado Pago: ${error.message || 'Erro desconhecido'}`)
       }
     } else {
-      // PIX ou Boleto manual - Preference (pagamento único)
-      console.log(`💳 Criando pagamento manual (Preference) para plano mensal - ${paymentMethod.toUpperCase()}`)
+      // PIX, Boleto ou não especificado - Preference (pagamento único, mostra todos os métodos)
+      const methodDescription = paymentMethod ? paymentMethod.toUpperCase() : 'TODOS (PIX/Boleto/Cartão)'
+      console.log(`💳 Criando pagamento manual (Preference) para plano mensal - ${methodDescription}`)
       
       const preferenceRequest: CreatePreferenceRequest = {
         area: request.area,
@@ -214,7 +219,7 @@ async function createMercadoPagoCheckout(
             countryCode: request.countryCode || 'BR',
             gateway: 'mercadopago',
             isRecurring: false, // Pagamento único (manual)
-            paymentMethod: paymentMethod, // 'pix' ou 'boleto'
+            paymentMethod: paymentMethod || 'any', // 'pix', 'boleto' ou 'any' (todos)
           },
         }
       } catch (error: any) {
