@@ -39,7 +39,14 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
   const planName = data.planType === 'monthly' ? 'Mensal' : 'Anual'
   const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}`
 
-  const { error } = await resend.emails.send({
+  console.log('📧 Enviando e-mail de boas-vindas via Resend:', {
+    from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    to: data.email,
+    subject: '🎉 Bem-vindo ao YLADA! Seu acesso está pronto',
+    accessUrl,
+  })
+
+  const { error, data: emailData } = await resend.emails.send({
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: data.email,
     subject: '🎉 Bem-vindo ao YLADA! Seu acesso está pronto',

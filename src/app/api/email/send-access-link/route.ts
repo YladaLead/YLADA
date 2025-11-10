@@ -21,10 +21,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar usuário pelo e-mail
-    const { data: authUser } = await supabaseAdmin.auth.admin.listUsers()
-    const user = authUser.users.find(u => u.email === email)
+    console.log('🔍 Buscando usuário pelo e-mail:', email)
+    const { data: authUser, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+    
+    if (listError) {
+      console.error('❌ Erro ao listar usuários:', listError)
+      return NextResponse.json(
+        { error: 'Erro ao buscar usuário' },
+        { status: 500 }
+      )
+    }
+
+    // Buscar usuário (case-insensitive)
+    const user = authUser?.users?.find(u => 
+      u.email?.toLowerCase() === email.toLowerCase()
+    )
+
+    console.log('🔍 Resultado da busca:', {
+      totalUsers: authUser?.users?.length || 0,
+      found: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+    })
 
     if (!user) {
+      console.warn('⚠️ Usuário não encontrado para o e-mail:', email)
       // Não revelar se o e-mail existe ou não (segurança)
       return NextResponse.json({
         success: true,
