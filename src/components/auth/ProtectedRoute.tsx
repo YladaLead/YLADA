@@ -37,23 +37,29 @@ export default function ProtectedRoute({
     }
   }, [loading])
 
-  // Timeout para verificação de autenticação - aguardar 5 segundos antes de redirecionar
+  // Timeout para verificação de autenticação - aguardar 8 segundos antes de redirecionar
   // Isso dá tempo suficiente para o useAuth detectar a sessão após redirecionamento
   useEffect(() => {
     if (!isAuthenticated || !user) {
+      // Se ainda está carregando, não iniciar timeout ainda
+      if (loading) {
+        console.log('⏳ ProtectedRoute: Ainda carregando, aguardando antes de iniciar timeout...')
+        return
+      }
+      
       const timer = setTimeout(() => {
         // Verificar novamente antes de marcar timeout (pode ter mudado)
         if (!isAuthenticated || !user) {
-          console.log('❌ Não autenticado após 5s, marcando para redirecionar...')
+          console.log('❌ Não autenticado após 8s, marcando para redirecionar...')
           setAuthCheckTimeout(true)
         }
-      }, 5000) // Aumentado para 5 segundos para dar mais tempo
+      }, 8000) // Aumentado para 8 segundos para dar mais tempo
       return () => clearTimeout(timer)
     } else {
       // Se autenticado, resetar o timeout
       setAuthCheckTimeout(false)
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user, loading])
 
   useEffect(() => {
     // Não fazer nada se ainda está carregando (será tratado no render)
@@ -207,27 +213,27 @@ export default function ProtectedRoute({
   // Verificar autenticação - se não autenticado, aguardar um pouco antes de redirecionar
   // Isso dá tempo para o useAuth detectar a sessão após redirecionamento
   if (!isAuthenticated || !user) {
-    // Se ainda está carregando, aguardar mais
-    if (loading && !loadingTimeout) {
+    // Se ainda está carregando, aguardar mais (dar mais tempo)
+    if (loading) {
       return (
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando...</p>
+            <p className="text-gray-600">Carregando autenticação...</p>
           </div>
         </div>
       )
     }
     
-    // Se já passou o timeout, redirecionar
-    if (authCheckTimeout) {
+    // Se já passou o timeout E não está mais carregando, redirecionar
+    if (authCheckTimeout && !loading) {
       const redirectPath = redirectTo || (perfil === 'admin' ? '/admin/login' : `/pt/${perfil || 'nutri'}/login`)
       console.log('❌ Não autenticado após timeout, redirecionando para:', redirectPath)
       router.push(redirectPath)
       return null
     }
     
-    // Enquanto aguarda, mostrar loading
+    // Enquanto aguarda, mostrar loading (mesmo que não esteja carregando, aguardar timeout)
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
