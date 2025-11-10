@@ -120,9 +120,10 @@ export async function createPreference(
       // PIX é habilitado automaticamente se não excluirmos 'account_money'
       // IMPORTANTE: Para PIX funcionar, a conta do Mercado Pago precisa ter uma chave PIX cadastrada
       // Ver: docs/TROUBLESHOOTING-PIX-NAO-CRIA-PAGAMENTO.md
-      // Parcelamento: O Mercado Pago oferece parcelamento automaticamente para cartões de crédito
-      // quando o valor é suficiente. Não é necessário configurar installments aqui.
-      // O parcelamento aparece automaticamente no checkout do Mercado Pago.
+      // Parcelamento: Configurar installments como número (não objeto)
+      // Formato correto segundo documentação: installments: número máximo de parcelas
+      installments: 12, // Permite até 12 parcelas
+      default_installments: 1, // Parcela padrão (1x = à vista)
     },
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
     external_reference: `${request.area}_${request.planType}_${request.userId}`, // Referência externa
