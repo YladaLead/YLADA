@@ -303,15 +303,20 @@ export default function WellnessCheckoutPage() {
 
           {/* Botão de Checkout */}
           {!user ? (
-            <button
-              onClick={() => {
-                const redirectUrl = `/pt/wellness/checkout${planType === 'annual' ? '?plan=annual' : ''}`
-                router.push(`/pt/wellness/login?redirect=${encodeURIComponent(redirectUrl)}`)
-              }}
-              className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors"
-            >
-              {authLoading ? '⏳ Carregando...' : '🔐 Fazer Login para Continuar'}
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  const redirectUrl = `/pt/wellness/checkout${planType === 'annual' ? '?plan=annual' : ''}`
+                  router.push(`/pt/wellness/login?redirect=${encodeURIComponent(redirectUrl)}`)
+                }}
+                className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors"
+              >
+                {authLoading ? '⏳ Carregando...' : '🔐 Criar Conta ou Fazer Login'}
+              </button>
+              <p className="text-center text-sm text-gray-600">
+                Não tem conta? Você pode criar uma agora mesmo!
+              </p>
+            </div>
           ) : (
             <button
               onClick={handleCheckout}

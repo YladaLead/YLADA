@@ -12,20 +12,22 @@ interface LoginFormProps {
   redirectPath: string
   logoColor?: 'azul-claro' | 'verde' | 'laranja' | 'roxo'
   logoPath?: string
+  initialSignUpMode?: boolean // Iniciar em modo cadastro
 }
 
 export default function LoginForm({ 
   perfil, 
   redirectPath,
   logoColor = 'azul-claro',
-  logoPath
+  logoPath,
+  initialSignUpMode = false
 }: LoginFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isSignUp, setIsSignUp] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(initialSignUpMode)
   const [name, setName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
