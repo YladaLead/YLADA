@@ -68,7 +68,7 @@ function WellnessDashboardContent() {
         return
       }
       
-      // Timeout de segurança (10 segundos)
+      // Timeout de segurança (5 segundos - otimizado)
       const timeoutId = setTimeout(() => {
         console.warn('⚠️ Timeout ao carregar perfil, usando dados padrão')
         setPerfil({
@@ -76,7 +76,7 @@ function WellnessDashboardContent() {
           bio: ''
         })
         setCarregandoPerfil(false)
-      }, 10000)
+      }, 5000) // Reduzido de 10s para 5s
       
       try {
         setCarregandoPerfil(true)

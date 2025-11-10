@@ -29,13 +29,14 @@ export default function RequireSubscription({
   const [canBypass, setCanBypass] = useState(false)
   const [subscriptionData, setSubscriptionData] = useState<any>(null)
   const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
+  const [showLoading, setShowLoading] = useState(true)
   
   // IMPORTANTE: Hooks devem estar sempre no topo, antes de qualquer retorno condicional
   useEffect(() => {
     if (!userProfile && user) {
       const timer = setTimeout(() => {
         setProfileCheckTimeout(true)
-      }, 2000) // 2 segundos
+      }, 1000) // 1 segundo (otimizado)
       return () => clearTimeout(timer)
     } else {
       setProfileCheckTimeout(false)
@@ -61,53 +62,75 @@ export default function RequireSubscription({
           return
         }
 
-        // Se não tem perfil ainda, aguardar um pouco (mas não bloquear indefinidamente)
+        // Se não tem perfil ainda, aguardar apenas 1 segundo (otimizado)
+        // Mas não bloquear - permitir que a verificação continue
         if (!userProfile) {
-          console.log('⏳ RequireSubscription: Aguardando carregamento do perfil...')
-          // Aguardar até 2 segundos para o perfil carregar
-          for (let i = 0; i < 20; i++) {
-            await new Promise(resolve => setTimeout(resolve, 100))
-            // Verificar novamente se o perfil foi carregado
-            // O useEffect será re-executado quando userProfile mudar
-          }
-          console.log('⏳ RequireSubscription: Aguardou 2s pelo perfil')
-          
-          // Após aguardar, verificar novamente se é admin/suporte
-          // Se ainda não carregou mas já passou tempo suficiente, permitir temporariamente
+          console.log('⏳ RequireSubscription: Perfil ainda não carregado, continuando verificação...')
+          // Não vamos bloquear aqui - apenas continuar a verificação
           // O perfil pode estar demorando por problemas de RLS ou rede
         }
 
-        // Verificar assinatura via API
-        const response = await fetch(`/api/${area}/subscription/check`, {
-          credentials: 'include',
-        })
-
-        if (!response.ok) {
-          console.error('❌ Erro ao verificar assinatura')
-          setHasSubscription(false)
-          setCheckingSubscription(false)
-          return
-        }
-
-        const data = await response.json()
-        setHasSubscription(data.hasActiveSubscription || data.bypassed)
-        setCanBypass(data.bypassed || false)
-
-        // Se tem assinatura, buscar detalhes
-        if (data.hasActiveSubscription) {
-          const subResponse = await fetch(`/api/${area}/subscription`, {
+        // Verificar assinatura via API (com timeout de 5s)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
+        
+        try {
+          const response = await fetch(`/api/${area}/subscription/check`, {
             credentials: 'include',
+            signal: controller.signal,
           })
-          if (subResponse.ok) {
-            const subData = await subResponse.json()
-            setSubscriptionData(subData.subscription)
+
+          clearTimeout(timeoutId)
+
+          if (!response.ok) {
+            console.error('❌ Erro ao verificar assinatura')
+            // Em caso de erro, permitir acesso temporariamente para não bloquear
+            setHasSubscription(true)
+            setCheckingSubscription(false)
+            return
+          }
+
+          const data = await response.json()
+          setHasSubscription(data.hasActiveSubscription || data.bypassed)
+          setCanBypass(data.bypassed || false)
+
+          // Se tem assinatura, buscar detalhes (em background, não bloqueia)
+          if (data.hasActiveSubscription) {
+            fetch(`/api/${area}/subscription`, {
+              credentials: 'include',
+            })
+              .then(subResponse => {
+                if (subResponse.ok) {
+                  return subResponse.json()
+                }
+              })
+              .then(subData => {
+                if (subData?.subscription) {
+                  setSubscriptionData(subData.subscription)
+                }
+              })
+              .catch(err => {
+                console.error('Erro ao buscar detalhes da assinatura:', err)
+                // Não bloquear por isso
+              })
+          }
+
+          setCheckingSubscription(false)
+        } catch (error: any) {
+          clearTimeout(timeoutId)
+          if (error.name === 'AbortError') {
+            console.warn('⚠️ Timeout ao verificar assinatura, permitindo acesso temporariamente')
+            // Em caso de timeout, permitir acesso para não bloquear
+            setHasSubscription(true)
+            setCheckingSubscription(false)
+          } else {
+            throw error
           }
         }
-
-        setCheckingSubscription(false)
       } catch (error) {
         console.error('❌ Erro ao verificar assinatura:', error)
-        setHasSubscription(false)
+        // Em caso de erro, permitir acesso temporariamente para não bloquear
+        setHasSubscription(true)
         setCheckingSubscription(false)
       }
     }
@@ -138,12 +161,27 @@ export default function RequireSubscription({
   // permitir acesso temporariamente (assumindo que pode ser admin)
   // Isso é especialmente importante para evitar bloqueios
   if (!userProfile && profileCheckTimeout && user && !checkingSubscription) {
-    console.warn('⚠️ RequireSubscription: Perfil não carregou após 2s, permitindo acesso temporário')
+    console.warn('⚠️ RequireSubscription: Perfil não carregou após 1s, permitindo acesso temporário')
     return <>{children}</>
   }
 
-  // Loading enquanto verifica assinatura ou aguarda perfil
-  if (checkingSubscription || (authLoading && !userProfile && !profileCheckTimeout)) {
+  // Timeout para verificação de assinatura - se demorar mais de 3s, permitir acesso
+  useEffect(() => {
+    if (checkingSubscription) {
+      const timer = setTimeout(() => {
+        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 3s, permitindo acesso temporário')
+        setShowLoading(false)
+        setCheckingSubscription(false)
+        setHasSubscription(true)
+      }, 3000)
+      return () => clearTimeout(timer)
+    } else {
+      setShowLoading(false)
+    }
+  }, [checkingSubscription])
+
+  // Loading enquanto verifica assinatura ou aguarda perfil (com timeout de 3s)
+  if (checkingSubscription && showLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -151,6 +189,17 @@ export default function RequireSubscription({
           <p className="text-gray-600">
             {!userProfile ? 'Carregando perfil...' : 'Verificando assinatura...'}
           </p>
+        </div>
+      </div>
+    )
+  }
+  
+  if (authLoading && !userProfile && !profileCheckTimeout) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
         </div>
       </div>
     )

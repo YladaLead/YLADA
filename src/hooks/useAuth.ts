@@ -110,32 +110,22 @@ export function useAuth() {
       console.log('🔄 useAuth: Iniciando carregamento...')
       
       // Aguardar um pouco para garantir que a página carregou completamente
-      // Isso é importante após redirecionamentos
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // Isso é importante após redirecionamentos (reduzido para ser mais rápido)
+      await new Promise(resolve => setTimeout(resolve, 100))
       
-      // Tentar obter sessão múltiplas vezes se necessário
-      let session = null
-      let attempts = 0
-      const maxAttempts = 3
+      // Tentar obter sessão (otimizado - apenas 1 tentativa inicial, depois o listener cuida)
+      console.log('🔍 useAuth: Tentando obter sessão...')
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
       
-      while (!session && attempts < maxAttempts) {
-        attempts++
-        console.log(`🔍 useAuth: Tentativa ${attempts} de obter sessão...`)
-        
-        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
-        
-        if (currentSession) {
-          session = currentSession
-          console.log('✅ useAuth: Sessão encontrada na tentativa', attempts)
-          break
-        } else {
-          console.log(`⚠️ useAuth: Sessão não encontrada na tentativa ${attempts}`, {
-            error: sessionError?.message
-          })
-          if (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 300))
-          }
-        }
+      let session = currentSession
+      
+      if (session) {
+        console.log('✅ useAuth: Sessão encontrada imediatamente')
+      } else {
+        console.log('⚠️ useAuth: Sessão não encontrada inicialmente', {
+          error: sessionError?.message
+        })
+        // Não fazer múltiplas tentativas - o listener onAuthStateChange vai cuidar disso
       }
       
       console.log('📋 useAuth: Sessão final:', {

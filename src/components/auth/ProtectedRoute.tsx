@@ -24,21 +24,21 @@ export default function ProtectedRoute({
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   const [authCheckTimeout, setAuthCheckTimeout] = useState(false)
 
-  // Timeout de loading - após 2 segundos, marcar como timeout (aumentado para dar mais tempo)
+  // Timeout de loading - após 1 segundo, marcar como timeout (otimizado)
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
-        console.warn('⚠️ Loading demorou mais de 2s, continuando mesmo assim...')
+        console.warn('⚠️ Loading demorou mais de 1s, continuando mesmo assim...')
         setLoadingTimeout(true)
-      }, 2000) // Aumentado de 1s para 2s
+      }, 1000) // Reduzido para 1s para ser mais rápido
       return () => clearTimeout(timer)
     } else {
       setLoadingTimeout(false)
     }
   }, [loading])
 
-  // Timeout para verificação de autenticação - aguardar 8 segundos antes de redirecionar
-  // Isso dá tempo suficiente para o useAuth detectar a sessão após redirecionamento
+  // Timeout para verificação de autenticação - aguardar 3 segundos antes de redirecionar
+  // Otimizado para ser mais rápido e não travar a UI
   useEffect(() => {
     if (!isAuthenticated || !user) {
       // Se ainda está carregando, não iniciar timeout ainda
@@ -50,10 +50,10 @@ export default function ProtectedRoute({
       const timer = setTimeout(() => {
         // Verificar novamente antes de marcar timeout (pode ter mudado)
         if (!isAuthenticated || !user) {
-          console.log('❌ Não autenticado após 8s, marcando para redirecionar...')
+          console.log('❌ Não autenticado após 3s, marcando para redirecionar...')
           setAuthCheckTimeout(true)
         }
-      }, 8000) // Aumentado para 8 segundos para dar mais tempo
+      }, 3000) // Reduzido para 3 segundos para ser mais rápido
       return () => clearTimeout(timer)
     } else {
       // Se autenticado, resetar o timeout
