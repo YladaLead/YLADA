@@ -1,12 +1,10 @@
 # 💳 CONFIGURAR PARCELAMENTO NO MERCADO PAGO
 
-## 🎯 PROBLEMA
+## 🎯 CONFIGURAÇÃO RECOMENDADA
 
-O plano anual está configurado como **pagamento único** (Preference), mas o parcelamento não está aparecendo no checkout.
+O plano anual está configurado como **pagamento único** (Preference), que permite parcelamento.
 
-## ✅ SOLUÇÃO
-
-O parcelamento no Mercado Pago precisa ser **configurado no painel do vendedor**, não apenas via API.
+**Configuração correta:** **Parcelado Cliente (com juros)**
 
 ---
 
@@ -24,21 +22,20 @@ O parcelamento no Mercado Pago precisa ser **configurado no painel do vendedor**
 1. Procure por **"Checkout"** ou **"Formas de pagamento"**
 2. Clique em **"Configurar parcelamento"** ou **"Parcelamento"**
 3. Você verá opções como:
-   - **"Oferecer parcelado vendedor"** (parcelamento sem juros)
-   - **"Número máximo de parcelas"**
-   - **"Parcelamento com juros"**
+   - **"Oferecer parcelado vendedor"** (parcelamento sem juros - você absorve taxas)
+   - **"Parcelado cliente"** (parcelamento com juros - cliente paga os juros)
 
-### 3. Habilitar Parcelamento
+### 3. Habilitar Parcelamento Cliente (RECOMENDADO) ✅
 
-**Opção A: Parcelamento sem juros (recomendado para começar)**
-- ✅ Habilite **"Oferecer parcelado vendedor"**
+**Configuração correta:**
+- ✅ **NÃO habilite** "Oferecer parcelado vendedor"
+- ✅ **Mantenha** "Parcelado cliente" habilitado (padrão)
 - Defina o número máximo de parcelas (ex: 12x)
-- ⚠️ **Atenção:** As taxas serão descontadas do valor recebido
 
-**Opção B: Parcelamento com juros**
-- Habilite **"Parcelamento com juros"**
-- O cliente paga os juros, você recebe o valor integral
-- Mais atraente para o cliente
+**Como funciona:**
+- Cliente escolhe: **À vista** (R$ 470,72) ou **Parcelado** (12x de R$ 47,90 = R$ 574,80)
+- Se escolher parcelado, o **cliente paga os juros**
+- Você recebe o valor integral (sem descontar taxas de parcelamento)
 
 ### 4. Salvar Configurações
 
@@ -77,7 +74,22 @@ O parcelamento no Mercado Pago precisa ser **configurado no painel do vendedor**
 
 - ✅ O código está correto (usando Preference para plano anual)
 - ✅ O código não precisa de configuração adicional de `installments`
+- ✅ Valores configurados:
+  - **À vista:** R$ 470,72
+  - **Parcelado:** R$ 574,80 (12x de R$ 47,90)
 - ⚠️ O parcelamento é controlado pelo **painel do Mercado Pago**, não pela API
+
+### Diferença entre Parcelado Cliente e Parcelado Vendedor:
+
+**Parcelado Cliente (RECOMENDADO) ✅**
+- Cliente paga os juros
+- Você recebe o valor integral
+- Cliente escolhe: à vista (mais barato) ou parcelado (com juros)
+
+**Parcelado Vendedor (NÃO RECOMENDADO) ❌**
+- Você absorve as taxas de parcelamento
+- Você recebe menos que o valor cobrado
+- Cliente paga sem juros (mas você perde dinheiro)
 
 ### Limitações:
 
@@ -92,9 +104,10 @@ O parcelamento no Mercado Pago precisa ser **configurado no painel do vendedor**
 | Item | Status |
 |------|--------|
 | **Código** | ✅ Correto (Preference para plano anual) |
-| **Configuração no Painel** | ⚠️ **PRECISA SER FEITA** |
+| **Configuração no Painel** | ✅ **Parcelado Cliente (com juros)** |
 | **Parcelamento via API** | ❌ Não disponível no Checkout Pro |
-| **Parcelamento no Painel** | ✅ Disponível e necessário |
+| **Parcelamento no Painel** | ✅ Habilitado (Parcelado Cliente) |
+| **Valores** | ✅ R$ 470,72 à vista / R$ 574,80 parcelado |
 
 ---
 
