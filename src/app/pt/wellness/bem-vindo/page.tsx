@@ -47,6 +47,15 @@ function BemVindoContent() {
       return
     }
 
+    // Se não estiver logado, redirecionar para login
+    if (!user) {
+      setError('Você precisa estar logado para completar o cadastro. Redirecionando para login...')
+      setTimeout(() => {
+        router.push('/pt/wellness/login?redirect=/pt/wellness/bem-vindo&signup=true')
+      }, 2000)
+      return
+    }
+
     setSaving(true)
     setError(null)
 
