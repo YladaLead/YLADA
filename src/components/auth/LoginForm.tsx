@@ -28,6 +28,43 @@ export default function LoginForm({
   const [isSignUp, setIsSignUp] = useState(false)
   const [name, setName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
+  const [lastInputTime, setLastInputTime] = useState(Date.now())
+
+  // Verificar se já está autenticado - mas NÃO redirecionar enquanto está digitando
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Aguardar um pouco antes de verificar (evitar verificação imediata)
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          // Verificar se o usuário está digitando (última entrada foi há menos de 3 segundos)
+          const timeSinceLastInput = Date.now() - lastInputTime
+          if (timeSinceLastInput > 3000) {
+            // Só redirecionar se não está digitando há mais de 3 segundos
+            console.log('✅ Já autenticado, redirecionando para:', redirectPath)
+            window.location.href = redirectPath
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao verificar autenticação:', err)
+      } finally {
+        setCheckingAuth(false)
+      }
+    }
+
+    checkAuth()
+  }, [redirectPath, lastInputTime])
+
+  // Atualizar timestamp quando usuário digita
+  const handleInputChange = (setter: (value: string) => void) => {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLastInputTime(Date.now())
+      setter(e.target.value)
+    }
+  }
 
   const perfilLabels = {
     nutri: 'Nutricionista',
@@ -235,7 +272,7 @@ export default function LoginForm({
                 id="name"
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleInputChange(setName)}
                 required={isSignUp}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Seu nome"
@@ -251,7 +288,7 @@ export default function LoginForm({
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleInputChange(setEmail)}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="seu@email.com"
@@ -267,7 +304,7 @@ export default function LoginForm({
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handleInputChange(setPassword)}
                 required
                 minLength={6}
                 className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
