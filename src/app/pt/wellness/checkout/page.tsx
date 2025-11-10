@@ -1,36 +1,18 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function WellnessCheckoutPage() {
-  // Checkout pode ser visualizado sem login
-  // Login será exigido apenas ao clicar em "Continuar para Pagamento"
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
-        </div>
-      </div>
-    }>
-      <WellnessCheckoutContent />
-    </Suspense>
-  )
-}
-
-function WellnessCheckoutContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { user, userProfile, loading: authLoading } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const canceled = searchParams.get('canceled') === 'true'
+  const [canceled, setCanceled] = useState(false)
   
   // Verificar se está pronto para checkout
   // Para checkout, não precisamos do perfil completo, apenas do user
@@ -40,13 +22,22 @@ function WellnessCheckoutContent() {
   // Não travar a página esperando authLoading - permitir visualizar sempre
   const isReady = !!user && !authLoading
 
+  // Detectar parâmetros da URL usando window.location (mais confiável)
   useEffect(() => {
-    // Detectar tipo de plano da URL
-    const plan = searchParams.get('plan')
-    if (plan === 'annual') {
-      setPlanType('annual')
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const plan = params.get('plan')
+      const canceledParam = params.get('canceled')
+      
+      if (plan === 'annual') {
+        setPlanType('annual')
+      }
+      
+      if (canceledParam === 'true') {
+        setCanceled(true)
+      }
     }
-  }, [searchParams])
+  }, [])
 
   const handleCheckout = async () => {
     console.log('🔘 Botão de checkout clicado', { 
