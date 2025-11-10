@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
       await sendRecoveryEmail({
         email,
         userName: userProfile?.nome_completo || undefined,
+        area: subscription.area as 'wellness' | 'nutri' | 'coach' | 'nutra',
         accessToken,
         baseUrl,
       })

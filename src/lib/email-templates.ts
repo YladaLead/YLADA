@@ -12,6 +12,7 @@ export interface WelcomeEmailData {
 export interface RecoveryEmailData {
   email: string
   userName?: string
+  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
   accessToken: string
   baseUrl: string
 }
@@ -116,12 +117,19 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
  * Envia e-mail de recuperação de acesso
  */
 export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> {
-  const accessUrl = `${data.baseUrl}/pt/wellness/acesso?token=${data.accessToken}`
+  const areaName = {
+    wellness: 'Wellness',
+    nutri: 'Nutri',
+    coach: 'Coach',
+    nutra: 'Nutra',
+  }[data.area]
+
+  const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}`
 
   const { error } = await resend.emails.send({
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: data.email,
-    subject: '🔐 Acesso ao seu YLADA Wellness',
+    subject: `🔐 Acesso ao seu YLADA ${areaName}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -140,7 +148,7 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
             </p>
             
             <p style="font-size: 16px; margin-bottom: 20px;">
-              Você solicitou um link de acesso ao seu YLADA Wellness. Clique no botão abaixo para acessar seu dashboard:
+              Você solicitou um link de acesso ao seu YLADA ${areaName}. Clique no botão abaixo para acessar seu dashboard:
             </p>
             
             <div style="text-align: center; margin: 30px 0;">
