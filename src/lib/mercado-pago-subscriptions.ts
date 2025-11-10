@@ -59,6 +59,7 @@ export async function createRecurringSubscription(
   }
 
   // Configurar Preapproval (assinatura recorrente)
+  // IMPORTANTE: Preapproval requer back_url (singular) para URL de retorno após autorização
   const preapprovalData = {
     reason: request.description,
     external_reference: `${request.area}_${request.planType}_${request.userId}`,
@@ -71,11 +72,7 @@ export async function createRecurringSubscription(
       start_date: new Date().toISOString(), // Começar imediatamente
       end_date: null, // Sem data de término (cobrança infinita)
     },
-    back_urls: {
-      success: request.successUrl,
-      failure: request.failureUrl,
-      pending: request.pendingUrl,
-    },
+    back_url: request.successUrl, // URL de retorno após autorização (obrigatório)
     metadata: {
       user_id: request.userId,
       area: request.area,
@@ -91,6 +88,8 @@ export async function createRecurringSubscription(
       frequency: preapprovalData.auto_recurring.frequency,
       frequency_type: preapprovalData.auto_recurring.frequency_type,
       currency: preapprovalData.auto_recurring.currency_id,
+      back_url: preapprovalData.back_url,
+      payer_email: preapprovalData.payer_email,
     })
 
     const response = await preapproval.create({ body: preapprovalData })
