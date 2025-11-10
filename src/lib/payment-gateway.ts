@@ -16,6 +16,7 @@ export interface CheckoutRequest {
   userEmail: string
   countryCode?: string
   language?: 'pt' | 'en' | 'es'
+  paymentMethod?: 'auto' | 'pix' // Novo: método de pagamento para plano mensal
 }
 
 export interface CheckoutResponse {
@@ -128,48 +129,89 @@ async function createMercadoPagoCheckout(
   const isTest = process.env.NODE_ENV !== 'production'
   console.log(`🧪 Modo teste: ${isTest}`)
 
-  // Se for plano mensal, usar assinatura recorrente (Preapproval)
-  // Se for plano anual, usar pagamento único (Preference)
+  // Se for plano mensal, verificar método de pagamento escolhido
+  // Se for plano anual, sempre usar pagamento único (permite PIX e parcelamento)
   if (request.planType === 'monthly') {
-    console.log('🔄 Criando assinatura recorrente (Preapproval) para plano mensal')
-    
-    const subscriptionRequest: CreateSubscriptionRequest = {
-      area: request.area,
-      planType: request.planType,
-      userId: request.userId,
-      userEmail: request.userEmail,
-      amount,
-      description: `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
-      successUrl,
-      failureUrl,
-      pendingUrl,
-    }
-
-    try {
-      const subscription = await createRecurringSubscription(subscriptionRequest, isTest)
-      console.log('✅ Assinatura recorrente Mercado Pago criada:', subscription.id)
-
-      return {
-        gateway: 'mercadopago',
-        checkoutUrl: subscription.initPoint,
-        sessionId: subscription.id,
-        metadata: {
-          area: request.area,
-          planType: request.planType,
-          countryCode: request.countryCode || 'BR',
-          gateway: 'mercadopago',
-          isRecurring: true, // Marcar como recorrente
-        },
+    // Se escolheu PIX manual, usar Preference (pagamento único)
+    // Se escolheu automático (ou não especificou), usar Preapproval (assinatura recorrente)
+    if (request.paymentMethod === 'pix') {
+      console.log('💰 Criando pagamento único PIX para plano mensal (com avisos)')
+      
+      const preferenceRequest: CreatePreferenceRequest = {
+        area: request.area,
+        planType: request.planType,
+        userId: request.userId,
+        userEmail: request.userEmail,
+        amount,
+        description: `YLADA ${request.area.toUpperCase()} - Plano Mensal (PIX)`,
+        successUrl,
+        failureUrl,
+        pendingUrl,
       }
-    } catch (error: any) {
-      console.error('❌ Erro ao criar assinatura recorrente Mercado Pago:', error)
-      throw new Error(`Erro ao criar assinatura recorrente Mercado Pago: ${error.message || 'Erro desconhecido'}`)
+
+      try {
+        const preference = await createPreference(preferenceRequest, isTest)
+        console.log('✅ Preferência PIX criada:', preference.id)
+
+        return {
+          gateway: 'mercadopago',
+          checkoutUrl: preference.initPoint,
+          sessionId: preference.id,
+          metadata: {
+            area: request.area,
+            planType: request.planType,
+            countryCode: request.countryCode || 'BR',
+            gateway: 'mercadopago',
+            isRecurring: false, // PIX manual
+            paymentMethod: 'pix',
+          },
+        }
+      } catch (error: any) {
+        console.error('❌ Erro ao criar preferência PIX:', error)
+        throw new Error(`Erro ao criar checkout PIX: ${error.message || 'Erro desconhecido'}`)
+      }
+    } else {
+      // Assinatura automática (cartão)
+      console.log('🔄 Criando assinatura recorrente (Preapproval) para plano mensal')
+      
+      const subscriptionRequest: CreateSubscriptionRequest = {
+        area: request.area,
+        planType: request.planType,
+        userId: request.userId,
+        userEmail: request.userEmail,
+        amount,
+        description: `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
+        successUrl,
+        failureUrl,
+        pendingUrl,
+      }
+
+      try {
+        const subscription = await createRecurringSubscription(subscriptionRequest, isTest)
+        console.log('✅ Assinatura recorrente Mercado Pago criada:', subscription.id)
+
+        return {
+          gateway: 'mercadopago',
+          checkoutUrl: subscription.initPoint,
+          sessionId: subscription.id,
+          metadata: {
+            area: request.area,
+            planType: request.planType,
+            countryCode: request.countryCode || 'BR',
+            gateway: 'mercadopago',
+            isRecurring: true, // Marcar como recorrente
+          },
+        }
+      } catch (error: any) {
+        console.error('❌ Erro ao criar assinatura recorrente Mercado Pago:', error)
+        throw new Error(`Erro ao criar assinatura recorrente Mercado Pago: ${error.message || 'Erro desconhecido'}`)
+      }
     }
   } else {
-    // Plano anual: usar pagamento único (permite PIX e parcelamento)
-    console.log('💳 Criando pagamento único (Preference) para plano anual')
+    // Plano anual: usar assinatura recorrente (renovação automática a cada 12 meses)
+    console.log('🔄 Criando assinatura recorrente anual (Preapproval) para plano anual')
     
-    const preferenceRequest: CreatePreferenceRequest = {
+    const subscriptionRequest: CreateSubscriptionRequest = {
       area: request.area,
       planType: request.planType,
       userId: request.userId,
@@ -182,24 +224,24 @@ async function createMercadoPagoCheckout(
     }
 
     try {
-      const preference = await createPreference(preferenceRequest, isTest)
-      console.log('✅ Preferência Mercado Pago criada:', preference.id)
+      const subscription = await createRecurringSubscription(subscriptionRequest, isTest)
+      console.log('✅ Assinatura recorrente anual Mercado Pago criada:', subscription.id)
 
       return {
         gateway: 'mercadopago',
-        checkoutUrl: preference.initPoint,
-        sessionId: preference.id,
+        checkoutUrl: subscription.initPoint,
+        sessionId: subscription.id,
         metadata: {
           area: request.area,
           planType: request.planType,
           countryCode: request.countryCode || 'BR',
           gateway: 'mercadopago',
-          isRecurring: false, // Pagamento único
+          isRecurring: true, // Assinatura recorrente anual
         },
       }
     } catch (error: any) {
-      console.error('❌ Erro ao criar preferência Mercado Pago:', error)
-      throw new Error(`Erro ao criar checkout Mercado Pago: ${error.message || 'Erro desconhecido'}`)
+      console.error('❌ Erro ao criar assinatura recorrente anual Mercado Pago:', error)
+      throw new Error(`Erro ao criar assinatura recorrente anual Mercado Pago: ${error.message || 'Erro desconhecido'}`)
     }
   }
 }

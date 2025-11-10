@@ -81,6 +81,7 @@ async function handlePaymentEvent(data: any) {
     const userId = metadata.user_id
     const area = metadata.area || 'wellness'
     const planType = metadata.plan_type || 'monthly'
+    const paymentMethod = data.payment_method_id || 'unknown'
 
     if (!userId) {
       console.error('❌ User ID não encontrado no metadata do pagamento')
@@ -92,12 +93,20 @@ async function handlePaymentEvent(data: any) {
     const currency = data.currency_id || 'BRL'
 
     // Calcular data de expiração
+    // Para assinaturas recorrentes (mensal e anual), calcular baseado na frequência
     const expiresAt = new Date()
     if (planType === 'monthly') {
       expiresAt.setMonth(expiresAt.getMonth() + 1)
+    } else if (planType === 'annual') {
+      expiresAt.setMonth(expiresAt.getMonth() + 12) // 12 meses para plano anual
     } else {
-      expiresAt.setMonth(expiresAt.getMonth() + 12)
+      // Fallback (não deveria acontecer)
+      expiresAt.setMonth(expiresAt.getMonth() + 1)
     }
+
+    // Verificar se é PIX (para assinaturas mensais PIX, marcar reminder_sent como false)
+    const isPix = paymentMethod === 'account_money' || paymentMethod === 'pix'
+    const reminderSent = planType === 'monthly' && isPix ? false : null // PIX mensal precisa de aviso
 
     // Criar ou atualizar assinatura no banco
     // Usar stripe_subscription_id temporariamente até atualizar o schema
@@ -119,6 +128,7 @@ async function handlePaymentEvent(data: any) {
         current_period_start: new Date().toISOString(),
         current_period_end: expiresAt.toISOString(),
         cancel_at_period_end: false,
+        reminder_sent: reminderSent, // false para PIX mensal (precisa aviso), null para outros
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'stripe_subscription_id',
@@ -207,10 +217,16 @@ async function handleSubscriptionEvent(data: any) {
     const amount = data.auto_recurring?.transaction_amount || 0
     const currency = data.auto_recurring?.currency_id || 'BRL'
 
-    // Calcular datas de período
-    const now = new Date()
-    const periodEnd = new Date()
-    periodEnd.setMonth(periodEnd.getMonth() + 1) // Próximo mês
+           // Calcular datas de período baseado no tipo de plano
+           const now = new Date()
+           const periodEnd = new Date()
+           if (planType === 'monthly') {
+             periodEnd.setMonth(periodEnd.getMonth() + 1) // Próximo mês
+           } else if (planType === 'annual') {
+             periodEnd.setMonth(periodEnd.getMonth() + 12) // Próximo ano
+           } else {
+             periodEnd.setMonth(periodEnd.getMonth() + 1) // Fallback
+           }
 
     // Criar ou atualizar assinatura no banco
     const subscriptionIdDb = `mp_sub_${subscriptionId}`

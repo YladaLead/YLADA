@@ -37,18 +37,19 @@ export async function createRecurringSubscription(
   const client = createMercadoPagoClient(isTest)
   const preapproval = new PreApproval(client)
 
-  // Validar que é plano mensal (anual não precisa de assinatura recorrente)
-  if (request.planType !== 'monthly') {
-    throw new Error('Assinaturas recorrentes são apenas para planos mensais')
-  }
-
   // Valor em reais (decimal)
   const unitPrice = Number(request.amount.toFixed(2))
+
+  // Determinar frequência baseado no tipo de plano
+  const frequency = request.planType === 'annual' ? 12 : 1 // 12 meses para anual, 1 mês para mensal
+  const frequencyType = 'months' as const
 
   console.log('🔄 Criando assinatura recorrente Mercado Pago:', {
     area: request.area,
     planType: request.planType,
     amount: unitPrice,
+    frequency: frequency,
+    frequencyType: frequencyType,
     userEmail: request.userEmail,
   })
 
@@ -63,9 +64,9 @@ export async function createRecurringSubscription(
     external_reference: `${request.area}_${request.planType}_${request.userId}`,
     payer_email: request.userEmail,
     auto_recurring: {
-      frequency: 1, // 1 = mensal
-      frequency_type: 'months' as const,
-      transaction_amount: unitPrice, // Valor em reais (ex: 59.90)
+      frequency: frequency, // 12 para anual, 1 para mensal
+      frequency_type: frequencyType,
+      transaction_amount: unitPrice, // Valor em reais (ex: 59.90 ou 470.72)
       currency_id: 'BRL' as const,
       start_date: new Date().toISOString(), // Começar imediatamente
       end_date: null, // Sem data de término (cobrança infinita)

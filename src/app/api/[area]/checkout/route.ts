@@ -32,7 +32,7 @@ export async function POST(
     const { user } = authResult
 
     const body = await request.json()
-    const { planType, language } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es'
+    const { planType, language, paymentMethod } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es', 'auto' | 'pix'
 
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
@@ -53,6 +53,7 @@ export async function POST(
       userEmail: user.email || '',
       countryCode,
       language: language || 'pt',
+      paymentMethod: paymentMethod, // 'auto' ou 'pix' para plano mensal
     }, request)
 
     console.log(`✅ Checkout criado: ${checkout.gateway} - ${checkout.sessionId}`)
