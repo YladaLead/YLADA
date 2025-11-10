@@ -20,6 +20,29 @@ Agora vamos testar!
 4. Cole e execute:
 
 ```javascript
+fetch('https://www.ylada.com/api/email/test', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'falaandre@gmail.com' })
+})
+.then(r => r.json())
+.then(data => {
+  console.log('📧 Resultado:', data)
+  if (data.success) {
+    alert('✅ E-mail enviado! Verifique sua caixa de entrada.')
+  } else {
+    alert('❌ Erro: ' + data.error)
+  }
+})
+.catch(err => {
+  console.error('❌ Erro:', err)
+  alert('❌ Erro ao testar: ' + err.message)
+})
+```
+
+**OU se estiver na página `/pt/wellness/...`:**
+
+```javascript
 fetch('/api/email/test', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
