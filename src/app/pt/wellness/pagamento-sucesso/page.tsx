@@ -12,6 +12,9 @@ function WellnessPagamentoSucessoContent() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [resendingEmail, setResendingEmail] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
   
   // Aceitar tanto session_id (Stripe) quanto payment_id (Mercado Pago)
   const sessionId = searchParams.get('session_id')
@@ -117,11 +120,24 @@ function WellnessPagamentoSucessoContent() {
               </p>
             </div>
           ) : (
-            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
-              <p className="text-sm font-medium">
-                🎉 Bem-vindo ao YLADA Wellness!
-              </p>
-            </div>
+            <>
+              <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
+                <p className="text-sm font-medium">
+                  🎉 Bem-vindo ao YLADA Wellness!
+                </p>
+              </div>
+              
+              {/* Mensagem sobre e-mail */}
+              <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
+                <p className="text-sm font-medium mb-2">
+                  📧 E-mail de boas-vindas enviado!
+                </p>
+                <p className="text-xs">
+                  Enviamos um e-mail com seu link de acesso ao dashboard. 
+                  Verifique sua caixa de entrada e spam.
+                </p>
+              </div>
+            </>
           )}
 
           {/* Próximos Passos */}
@@ -145,15 +161,79 @@ function WellnessPagamentoSucessoContent() {
             </ul>
           </div>
 
+          {/* Mensagem de reenvio */}
+          {emailSent && (
+            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
+              <p className="text-sm">
+                ✅ E-mail reenviado com sucesso! Verifique sua caixa de entrada.
+              </p>
+            </div>
+          )}
+
+          {emailError && (
+            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
+              <p className="text-sm">{emailError}</p>
+            </div>
+          )}
+
           {/* Botões */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/pt/wellness/dashboard"
-              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center"
             >
               🚀 Acessar Dashboard
             </Link>
+            
+            {user?.email && status !== 'pending' && (
+              <button
+                onClick={async () => {
+                  setResendingEmail(true)
+                  setEmailError(null)
+                  setEmailSent(false)
+                  
+                  try {
+                    const response = await fetch('/api/email/send-access-link', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ email: user.email }),
+                    })
+
+                    const data = await response.json()
+
+                    if (response.ok) {
+                      setEmailSent(true)
+                    } else {
+                      setEmailError(data.error || 'Erro ao reenviar e-mail')
+                    }
+                  } catch (err: any) {
+                    setEmailError('Erro ao reenviar e-mail. Tente novamente.')
+                    console.error('Erro:', err)
+                  } finally {
+                    setResendingEmail(false)
+                  }
+                }}
+                disabled={resendingEmail}
+                className="px-6 py-3 bg-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-300 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {resendingEmail ? '⏳ Enviando...' : '📧 Reenviar E-mail'}
+              </button>
+            )}
           </div>
+
+          {/* Link de recuperação */}
+          {status !== 'pending' && (
+            <div className="mt-4 text-center">
+              <Link
+                href="/pt/wellness/recuperar-acesso"
+                className="text-sm text-green-600 hover:text-green-700"
+              >
+                Não recebeu o e-mail? Recuperar acesso
+              </Link>
+            </div>
+          )}
 
           {/* Ajuda */}
           <div className="mt-8 pt-6 border-t border-gray-200">
