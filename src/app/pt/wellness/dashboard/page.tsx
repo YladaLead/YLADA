@@ -29,38 +29,19 @@ function WellnessDashboardContent() {
   const { user, userProfile, signOut, loading } = useAuth()
   const router = useRouter()
   
+  // TODOS OS HOOKS DEVEM ESTAR NO TOPO, ANTES DE QUALQUER RETORNO CONDICIONAL
   const [perfil, setPerfil] = useState({
     nome: '',
     bio: ''
   })
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
-  
-  // Aguardar autenticação carregar antes de renderizar
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
-        </div>
-      </div>
-    )
-  }
-  
-  // Se não houver usuário após carregar, não renderizar (ProtectedRoute deve redirecionar)
-  if (!user) {
-    return null
-  }
-
   const [stats, setStats] = useState({
     ferramentasAtivas: 0,
     leadsGerados: 0,
     conversoes: 0,
     clientesAtivos: 0
   })
-
   const [chatAberto, setChatAberto] = useState(false)
-
   const [ferramentasAtivas, setFerramentasAtivas] = useState<Array<{
     id: string
     nome: string
@@ -70,14 +51,13 @@ function WellnessDashboardContent() {
     status: string
     icon: string
   }>>([])
-
   const [carregandoDados, setCarregandoDados] = useState(true)
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
   const [mensagemErro, setMensagemErro] = useState<string | null>(null)
   const [excluindoId, setExcluindoId] = useState<string | null>(null)
   const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState<string | null>(null)
   const [alterandoStatusId, setAlterandoStatusId] = useState<string | null>(null)
-
+  
   // Carregar perfil do usuário - otimizado com timeout menor e fallback rápido
   useEffect(() => {
     // Só executar se houver usuário autenticado
@@ -192,6 +172,23 @@ function WellnessDashboardContent() {
 
     carregarDados()
   }, [user])
+
+  // Aguardar autenticação carregar antes de renderizar
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Se não houver usuário após carregar, não renderizar (ProtectedRoute deve redirecionar)
+  if (!user) {
+    return null
+  }
 
   // Alternar status de uma ferramenta
   const alternarStatus = async (ferramentaId: string, statusAtual: string) => {
