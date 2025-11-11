@@ -52,13 +52,14 @@ export default function RequireSubscription({
       try {
         setCheckingSubscription(true)
 
-        // IMPORTANTE: Se admin/suporte, permitir acesso imediatamente mesmo sem perfil carregado
+        // IMPORTANTE: Se admin/suporte, permitir acesso imediatamente
         // Isso evita bloqueio quando o perfil está demorando para carregar
         if (userProfile?.is_admin || userProfile?.is_support) {
           console.log('✅ RequireSubscription: Admin/Suporte detectado, bypassando verificação de assinatura')
           setCanBypass(true)
           setHasSubscription(true)
           setCheckingSubscription(false)
+          setShowLoading(false)
           return
         }
 
@@ -160,8 +161,14 @@ export default function RequireSubscription({
   // Se passou timeout e ainda não tem perfil, mas tem usuário autenticado,
   // permitir acesso temporariamente (assumindo que pode ser admin)
   // Isso é especialmente importante para evitar bloqueios
-  if (!userProfile && profileCheckTimeout && user && !checkingSubscription) {
+  if (!userProfile && profileCheckTimeout && user) {
     console.warn('⚠️ RequireSubscription: Perfil não carregou após 1s, permitindo acesso temporário')
+    // Se está verificando assinatura, permitir acesso mesmo assim para não bloquear
+    if (checkingSubscription) {
+      setHasSubscription(true)
+      setCanBypass(true)
+      setCheckingSubscription(false)
+    }
     return <>{children}</>
   }
 
@@ -179,6 +186,21 @@ export default function RequireSubscription({
       setShowLoading(false)
     }
   }, [checkingSubscription])
+
+  // Se perfil carregou e é admin/suporte, permitir acesso imediatamente
+  useEffect(() => {
+    if (userProfile && (userProfile.is_admin || userProfile.is_support) && checkingSubscription) {
+      setCanBypass(true)
+      setHasSubscription(true)
+      setCheckingSubscription(false)
+      setShowLoading(false)
+    }
+  }, [userProfile, checkingSubscription])
+
+  // Se perfil carregou e é admin/suporte, permitir acesso imediatamente (useEffect já atualizou o estado)
+  if (userProfile && (userProfile.is_admin || userProfile.is_support)) {
+    return <>{children}</>
+  }
 
   // Loading enquanto verifica assinatura ou aguarda perfil (com timeout de 3s)
   if (checkingSubscription && showLoading) {
