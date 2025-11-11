@@ -342,37 +342,12 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           }
         }
         
-        // Criar token de acesso e enviar e-mail de boas-vindas
-        try {
-          const { createAccessToken } = await import('@/lib/email-tokens')
-          const { sendWelcomeEmail } = await import('@/lib/email-templates')
-          
-          const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
-          const accessToken = await createAccessToken(userId, 30)
-          
-          const { data: userProfile } = await supabaseAdmin
-            .from('user_profiles')
-            .select('nome_completo')
-            .eq('user_id', userId)
-            .single()
-          
-              await sendWelcomeEmail({
-                email: emailFinal,
-                userName: userProfile?.nome_completo || fullData.payer?.first_name || fullData.payer?.name || undefined,
-                area: area as 'wellness' | 'nutri' | 'coach' | 'nutra',
-                planType: planType as 'monthly' | 'annual',
-                accessToken,
-                baseUrl,
-              })
-              
-              console.log('✅ E-mail de boas-vindas enviado para novo usuário:', emailFinal)
-              
-              // Atualizar payerEmail para usar no resto do código
-              payerEmail = emailFinal
-        } catch (emailError: any) {
-          console.error('❌ Erro ao enviar e-mail de boas-vindas:', emailError)
-          // Não bloquear o processo se o e-mail falhar
-        }
+        // NÃO enviar e-mail aqui - será enviado após criar a subscription
+        // Isso evita envios duplicados quando o webhook é chamado múltiplas vezes
+        console.log('✅ Usuário criado. E-mail será enviado após criar subscription.')
+        
+        // Atualizar payerEmail para usar no resto do código
+        payerEmail = emailFinal
       }
     }
     
@@ -482,6 +457,16 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       throw paymentError
     }
 
+    // IMPORTANTE: Verificar ANTES de enviar se já foi enviado (proteção contra duplicação)
+    // Re-buscar subscription para garantir que temos os dados mais recentes
+    const { data: currentSubscription } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id, welcome_email_sent, welcome_email_sent_at')
+      .eq('id', subscription.id)
+      .single()
+    
+    const alreadySent = currentSubscription?.welcome_email_sent === true
+    
     // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado)
     console.log('📧 ========================================')
     console.log('📧 VERIFICAÇÃO DE ENVIO DE E-MAIL')
@@ -489,8 +474,9 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     console.log('📧 Condições para enviar e-mail:', {
       hasSubscription: !!subscription,
       subscriptionId: subscription?.id,
-      welcomeEmailSent: subscription?.welcome_email_sent,
-      welcomeEmailSentAt: subscription?.welcome_email_sent_at,
+      welcomeEmailSent: currentSubscription?.welcome_email_sent,
+      welcomeEmailSentAt: currentSubscription?.welcome_email_sent_at,
+      alreadySent: alreadySent,
       hasPayerEmail: !!payerEmail,
       payerEmail: payerEmail,
       userId,
@@ -499,7 +485,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     })
     console.log('📧 ========================================')
 
-    if (subscription && !subscription.welcome_email_sent && payerEmail) {
+    if (subscription && !alreadySent && payerEmail) {
       try {
         console.log('📧 ✅ TODAS AS CONDIÇÕES ATENDIDAS - INICIANDO ENVIO')
         console.log('📧 Iniciando envio de e-mail de boas-vindas...')
@@ -577,8 +563,9 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
 
         console.log('📧 ✅ sendWelcomeEmail executado sem erros')
 
-        // Marcar como enviado
-        console.log('📧 Marcando e-mail como enviado no banco...')
+        // Marcar como enviado ANTES de confirmar (proteção contra duplicação)
+        // Usar UPDATE com verificação para evitar condições de corrida
+        console.log('📧 Marcando e-mail como enviado no banco (proteção contra duplicação)...')
         const { error: updateError } = await supabaseAdmin
           .from('subscriptions')
           .update({
@@ -586,9 +573,22 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
             welcome_email_sent_at: new Date().toISOString(),
           })
           .eq('id', subscription.id)
+          .eq('welcome_email_sent', false) // Apenas atualizar se ainda não foi enviado
 
         if (updateError) {
           console.error('❌ Erro ao marcar e-mail como enviado:', updateError)
+          // Verificar se foi porque já estava marcado (não é erro crítico)
+          const { data: checkSub } = await supabaseAdmin
+            .from('subscriptions')
+            .select('welcome_email_sent')
+            .eq('id', subscription.id)
+            .single()
+          
+          if (checkSub?.welcome_email_sent) {
+            console.log('ℹ️ E-mail já estava marcado como enviado (outro processo pode ter enviado)')
+          } else {
+            console.error('❌ Erro real ao marcar e-mail como enviado')
+          }
         } else {
           console.log('📧 ✅ E-mail marcado como enviado no banco')
           console.log('📧 ✅ ✅ ✅ E-MAIL DE BOAS-VINDAS ENVIADO COM SUCESSO! ✅ ✅ ✅')
