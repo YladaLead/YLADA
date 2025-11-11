@@ -10,10 +10,13 @@ import { supabaseAdmin } from '@/lib/supabase'
  * AGORA ACEITA CHECKOUT SEM AUTENTICAÇÃO (apenas e-mail)
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
   try {
     console.log('📥 Checkout request recebido')
     
     const body = await request.json()
+    console.log('📋 Body recebido:', { planType: body.planType, hasEmail: !!body.email })
+    
     const { planType, language, paymentMethod, email } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es', 'auto' | 'pix', email
 
     if (!planType || !['monthly', 'annual'].includes(planType)) {
@@ -75,6 +78,15 @@ export async function POST(request: NextRequest) {
 
     // Criar checkout usando gateway abstraction (detecta automaticamente Mercado Pago ou Stripe)
     // Se userId for null, usar e-mail como identificador temporário
+    console.log('🔄 Iniciando criação de checkout...', {
+      area: 'wellness',
+      planType,
+      userId: userId || `temp_${userEmail}`,
+      userEmail,
+      countryCode,
+    })
+    
+    const checkoutStartTime = Date.now()
     const checkout = await createCheckout({
       area: 'wellness',
       planType,
@@ -85,7 +97,11 @@ export async function POST(request: NextRequest) {
       paymentMethod: paymentMethod, // 'auto' ou 'pix' para plano mensal
     }, request)
 
-    console.log(`✅ Checkout criado: ${checkout.gateway} - ${checkout.sessionId}`)
+    const checkoutDuration = Date.now() - checkoutStartTime
+    console.log(`✅ Checkout criado em ${checkoutDuration}ms: ${checkout.gateway} - ${checkout.sessionId}`)
+
+    const totalDuration = Date.now() - startTime
+    console.log(`⏱️ Tempo total do request: ${totalDuration}ms`)
 
     return NextResponse.json({
       sessionId: checkout.sessionId,
@@ -94,9 +110,18 @@ export async function POST(request: NextRequest) {
       countryCode: checkout.metadata.countryCode,
     })
   } catch (error: any) {
-    console.error('❌ Erro ao criar checkout:', error)
+    const totalDuration = Date.now() - startTime
+    console.error('❌ Erro ao criar checkout:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      duration: `${totalDuration}ms`,
+    })
     return NextResponse.json(
-      { error: error.message || 'Erro ao criar sessão de checkout' },
+      { 
+        error: error.message || 'Erro ao criar sessão de checkout',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
