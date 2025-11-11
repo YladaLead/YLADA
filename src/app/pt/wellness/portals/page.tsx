@@ -292,7 +292,7 @@ function PortalsWellnessContent() {
                   ) : userSlug ? (
                     <div className="flex items-center gap-1 flex-wrap">
                       <span className="text-xs text-gray-600 font-mono break-all">
-                        ylada.app/pt/wellness/<span className="text-green-600 font-semibold">{userSlug}</span>/portal/{portal.slug}
+                        {typeof window !== 'undefined' ? window.location.hostname : 'ylada.app'}/pt/wellness/<span className="text-green-600 font-semibold">{userSlug}</span>/portal/{portal.slug}
                       </span>
                       <button
                         onClick={() => {
@@ -326,6 +326,12 @@ function PortalsWellnessContent() {
                       className="text-sm text-blue-600 hover:text-blue-700"
                     >
                       Ver
+                    </Link>
+                    <Link
+                      href={`/pt/wellness/portals/${portal.id}/editar`}
+                      className="text-sm text-green-600 hover:text-green-700"
+                    >
+                      Editar
                     </Link>
                     <button
                       onClick={() => deletarPortal(portal.id)}
