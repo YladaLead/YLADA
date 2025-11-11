@@ -90,13 +90,37 @@ export default function LoginForm({
 
     try {
       // VALIDAÇÃO: Verificar perfil antes de fazer login/cadastro
-      const checkResponse = await fetch('/api/auth/check-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      })
+      // Adicionar timeout para evitar travamento
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos
 
-      const checkData = await checkResponse.json()
+      let checkResponse
+      let checkData
+
+      try {
+        checkResponse = await fetch('/api/auth/check-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
+        checkData = await checkResponse.json()
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
+        if (fetchError.name === 'AbortError') {
+          setError('A verificação está demorando muito. Tente novamente.')
+          setLoading(false)
+          return
+        }
+        throw fetchError
+      }
+
+      if (!checkResponse.ok) {
+        // Se a API falhar, continuar com login/cadastro mesmo assim (não bloquear)
+        console.warn('⚠️ Erro ao verificar perfil, continuando mesmo assim:', checkData.error)
+        checkData = { exists: false, hasProfile: false, canCreate: true }
+      }
 
       if (isSignUp) {
         // CADASTRO: Verificar se email já existe

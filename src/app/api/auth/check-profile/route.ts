@@ -16,21 +16,41 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar usuário no Supabase Auth pelo email (método mais eficiente)
-    const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers()
+    // Buscar usuário diretamente pelo email (mais eficiente que listUsers)
+    // Usar getUserByEmail se disponível, senão tentar listUsers com limite
+    let authUser = null
     
-    if (authError) {
-      console.error('Erro ao buscar usuários:', authError)
-      return NextResponse.json(
-        { error: 'Erro ao verificar email' },
-        { status: 500 }
-      )
-    }
+    try {
+      // Tentar buscar usuário diretamente (método mais eficiente)
+      // Nota: Supabase Admin API não tem getUserByEmail, então vamos usar listUsers com filtro
+      const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers({
+        page: 1,
+        perPage: 1000 // Limitar para melhor performance
+      })
+      
+      if (authError) {
+        console.error('Erro ao buscar usuários:', authError)
+        // Se falhar, retornar como se não existisse (não bloquear login)
+        return NextResponse.json({
+          exists: false,
+          hasProfile: false,
+          canCreate: true
+        })
+      }
 
-    // Encontrar usuário pelo email (case-insensitive)
-    const authUser = authUsers.users.find(u => 
-      u.email?.toLowerCase() === email.toLowerCase()
-    )
+      // Encontrar usuário pelo email (case-insensitive)
+      authUser = authUsers.users.find(u => 
+        u.email?.toLowerCase() === email.toLowerCase()
+      )
+    } catch (error: any) {
+      console.error('Erro ao verificar email:', error)
+      // Se der erro, retornar como se não existisse (não bloquear login)
+      return NextResponse.json({
+        exists: false,
+        hasProfile: false,
+        canCreate: true
+      })
+    }
 
     if (!authUser) {
       // Email não existe - pode criar conta
