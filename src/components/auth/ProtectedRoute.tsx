@@ -23,6 +23,7 @@ export default function ProtectedRoute({
   const router = useRouter()
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   const [authCheckTimeout, setAuthCheckTimeout] = useState(false)
+  const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
 
   // Timeout de loading - após 2 segundos, continuar mesmo assim
   useEffect(() => {
@@ -53,6 +54,21 @@ export default function ProtectedRoute({
       setAuthCheckTimeout(false)
     }
   }, [isAuthenticated, user, loading])
+
+  // Timeout para verificação de perfil - após 5 segundos, permitir acesso mesmo sem perfil
+  useEffect(() => {
+    if (user && !userProfile && !loading) {
+      const timer = setTimeout(() => {
+        if (user && !userProfile) {
+          console.warn('⚠️ ProtectedRoute: Perfil não carregou após 5s, permitindo acesso temporário')
+          setProfileCheckTimeout(true)
+        }
+      }, 5000)
+      return () => clearTimeout(timer)
+    } else {
+      setProfileCheckTimeout(false)
+    }
+  }, [user, userProfile, loading])
 
   useEffect(() => {
     // Se ainda está carregando, aguardar
@@ -151,7 +167,7 @@ export default function ProtectedRoute({
     } else {
       console.log('✅ Perfil corresponde, permitindo acesso')
     }
-  }, [loading, isAuthenticated, user, userProfile, perfil, router, redirectTo, allowAdmin, allowSupport, loadingTimeout])
+  }, [loading, isAuthenticated, user, userProfile, perfil, router, redirectTo, allowAdmin, allowSupport, loadingTimeout, profileCheckTimeout])
 
   // Timeout de loading - após 1 segundo, continuar mesmo sem perfil completo
   if (loading && !loadingTimeout) {
@@ -166,7 +182,7 @@ export default function ProtectedRoute({
   }
 
   // Se timeout mas ainda loading, aguardar mais um pouco antes de continuar
-  if (loading && loadingTimeout) {
+  if (loading && loadingTimeout && !profileCheckTimeout) {
     // Aguardar mais 500ms antes de permitir acesso temporário
     // Isso evita múltiplos re-renders
     return (
@@ -237,9 +253,14 @@ export default function ProtectedRoute({
         return <>{children}</>
       }
       
-      // Se ainda não carregou mas já passou timeout, aguardar mais um pouco
-      // Não permitir acesso temporário imediatamente para evitar múltiplos re-renders
-      if (!userProfile && loadingTimeout) {
+      // Se passou timeout do perfil e allowAdmin está ativo, permitir acesso
+      if (!userProfile && profileCheckTimeout) {
+        console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true, permitindo acesso temporário')
+        return <>{children}</>
+      }
+      
+      // Se ainda não carregou mas já passou timeout inicial, aguardar mais um pouco
+      if (!userProfile && loadingTimeout && !profileCheckTimeout) {
         // Mostrar loading enquanto aguarda perfil carregar
         return (
           <div className="min-h-screen bg-white flex items-center justify-center">
@@ -259,16 +280,28 @@ export default function ProtectedRoute({
     }
 
     // Se ainda está carregando o perfil e não temos certeza de admin/suporte, aguardar
-    if (!userProfile && !loadingTimeout) {
+    if (!userProfile && !loadingTimeout && !profileCheckTimeout) {
       // Retornar loading (já está sendo tratado acima)
       return null
     }
 
+    // Se passou timeout do perfil e não temos perfil, permitir acesso (perfil pode ser criado depois)
+    if (!userProfile && profileCheckTimeout) {
+      console.warn('⚠️ Render: Perfil não carregou após timeout, permitindo acesso temporário')
+      return <>{children}</>
+    }
+
     // Verificar se perfil corresponde
     if (userProfile?.perfil !== perfil) {
-      // Se allowAdmin está ativo e ainda não temos certeza, aguardar
-      if (allowAdmin && !userProfile) {
-        return null
+      // Se allowAdmin está ativo e ainda não temos certeza, aguardar ou permitir após timeout
+      if (allowAdmin) {
+        if (!userProfile && profileCheckTimeout) {
+          console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true, permitindo acesso')
+          return <>{children}</>
+        }
+        if (!userProfile) {
+          return null
+        }
       }
       return null
     }
