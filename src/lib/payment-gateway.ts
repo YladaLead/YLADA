@@ -17,6 +17,9 @@ export interface CheckoutRequest {
   countryCode?: string
   language?: 'pt' | 'en' | 'es'
   paymentMethod?: 'auto' | 'pix' | 'boleto' // 'auto' = cartão automático, 'pix'/'boleto' = manual
+  // Campos opcionais para melhorar qualidade da integração
+  payerFirstName?: string
+  payerLastName?: string
 }
 
 export interface CheckoutResponse {
@@ -243,6 +246,8 @@ async function createMercadoPagoCheckout(
       failureUrl,
       pendingUrl,
       maxInstallments: 12, // Plano anual: permite parcelamento até 12x
+      payerFirstName: request.payerFirstName,
+      payerLastName: request.payerLastName,
     }
 
     try {

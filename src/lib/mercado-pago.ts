@@ -21,6 +21,9 @@ export interface CreatePreferenceRequest {
     failure?: string
     pending?: string
   }
+  // Campos opcionais para melhorar qualidade da integração
+  payerFirstName?: string
+  payerLastName?: string
 }
 
 export interface CreatePreferenceResponse {
@@ -89,18 +92,48 @@ export async function createPreference(
     )
   }
 
-  // Configurar itens da preferência
+  // Extrair nome do e-mail se não tiver first_name/last_name
+  // Formato comum: "joao.silva@email.com" -> first_name: "Joao", last_name: "Silva"
+  let payerFirstName = request.payerFirstName
+  let payerLastName = request.payerLastName
+  
+  if (!payerFirstName && !payerLastName && request.userEmail) {
+    const emailName = request.userEmail.split('@')[0]
+    const nameParts = emailName.split(/[._-]/)
+    if (nameParts.length >= 2) {
+      payerFirstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1)
+      payerLastName = nameParts.slice(1).join(' ').charAt(0).toUpperCase() + nameParts.slice(1).join(' ').slice(1)
+    } else if (nameParts.length === 1) {
+      payerFirstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1)
+    }
+  }
+
+  // Configurar categoria do item baseado na área
+  const categoryMap: Record<string, string> = {
+    wellness: 'health',
+    nutri: 'health',
+    coach: 'education',
+    nutra: 'health',
+  }
+  const categoryId = categoryMap[request.area] || 'other'
+
+  // Configurar itens da preferência com informações completas
   const preferenceData = {
     items: [
       {
-        title: request.description,
-        quantity: 1,
-        unit_price: unitPrice, // Valor em reais (ex: 59.90)
+        id: `${request.area}-${request.planType}`, // Código do item (OBRIGATÓRIO)
+        title: request.description, // Nome do item (RECOMENDADO)
+        description: `Assinatura ${request.planType === 'monthly' ? 'Mensal' : 'Anual'} - YLADA ${request.area.toUpperCase()}`, // Descrição do item (RECOMENDADO)
+        category_id: categoryId, // Categoria do item (RECOMENDADO)
+        quantity: 1, // Quantidade (RECOMENDADO)
+        unit_price: unitPrice, // Preço do item (RECOMENDADO) - Valor em reais (ex: 59.90)
         currency_id: 'BRL',
       },
     ],
     payer: {
-      email: request.userEmail,
+      email: request.userEmail, // E-mail do comprador (OBRIGATÓRIO) ✅
+      first_name: payerFirstName || undefined, // Nome do comprador (RECOMENDADO)
+      last_name: payerLastName || undefined, // Sobrenome do comprador (RECOMENDADO)
     },
     metadata: {
       user_id: request.userId,
