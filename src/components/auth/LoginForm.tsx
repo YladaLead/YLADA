@@ -212,34 +212,14 @@ export default function LoginForm({
           console.log('👤 User ID:', data.session.user.id)
           console.log('📧 Email:', data.session.user.email)
           
-          // IMPORTANTE: Aguardar um pouco para garantir que a sessão foi salva nos cookies
-          // O createBrowserClient precisa de tempo para persistir a sessão
-          console.log('⏳ Aguardando persistência da sessão...')
-          await new Promise(resolve => setTimeout(resolve, 800))
-          
-          // Verificar se a sessão foi realmente salva
-          const { data: { session: verifySession } } = await supabase.auth.getSession()
-          console.log('🔍 Verificando sessão salva:', {
-            hasSession: !!verifySession,
-            hasUser: !!verifySession?.user,
-            userId: verifySession?.user?.id
-          })
-          
-          if (!verifySession) {
-            console.error('❌ Sessão não foi salva! Tentando novamente...')
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            const { data: { session: retrySession } } = await supabase.auth.getSession()
-            if (!retrySession) {
-              setError('Erro ao salvar sessão. Tente fazer login novamente.')
-              setLoading(false)
-              return
-            }
-            console.log('✅ Sessão salva após retry!')
-          }
-          
-          // Redirecionar usando window.location.href para garantir reload completo
+          // O Supabase client gerencia a sessão automaticamente
+          // Redirecionar imediatamente - a sessão já está salva
           console.log('🔄 Redirecionando para:', redirectPath)
-          window.location.href = redirectPath
+          
+          // Usar setTimeout para garantir que o estado seja atualizado antes do redirecionamento
+          setTimeout(() => {
+            window.location.href = redirectPath
+          }, 100)
           
           return
         } else {
