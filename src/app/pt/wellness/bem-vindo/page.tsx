@@ -15,6 +15,10 @@ function BemVindoContent() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [nomeCompleto, setNomeCompleto] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [senha, setSenha] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
+  const [mostrarSenha, setMostrarSenha] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
@@ -26,13 +30,18 @@ function BemVindoContent() {
     // Aguardar mais tempo para o auth carregar após callback do Supabase
     // O callback pode levar alguns segundos para sincronizar a sessão
     const timer = setTimeout(() => {
-      // Carregar nome do perfil se já existir
+      // Carregar dados do perfil se já existirem
       if (userProfile?.nome_completo) {
         setNomeCompleto(userProfile.nome_completo)
       } else if (user?.email) {
         // Tentar extrair nome do e-mail como fallback
         const emailName = user.email.split('@')[0]
         setNomeCompleto(emailName.charAt(0).toUpperCase() + emailName.slice(1))
+      }
+      
+      // Carregar telefone se já existir (vem de whatsapp no banco)
+      if (userProfile?.whatsapp) {
+        setTelefone(userProfile.whatsapp)
       }
       setLoading(false)
     }, fromPayment ? 2000 : 1000) // Aguardar mais se veio do pagamento
@@ -43,8 +52,36 @@ function BemVindoContent() {
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Validações
     if (!nomeCompleto.trim()) {
       setError('Por favor, informe seu nome completo')
+      return
+    }
+    
+    if (!telefone.trim()) {
+      setError('Por favor, informe seu telefone/WhatsApp')
+      return
+    }
+    
+    // Validar formato de telefone (básico)
+    const telefoneLimpo = telefone.replace(/\D/g, '')
+    if (telefoneLimpo.length < 10) {
+      setError('Por favor, informe um telefone válido (com DDD)')
+      return
+    }
+    
+    if (!senha) {
+      setError('Por favor, crie uma senha para sua conta')
+      return
+    }
+    
+    if (senha.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres')
+      return
+    }
+    
+    if (senha !== confirmarSenha) {
+      setError('As senhas não coincidem')
       return
     }
 
@@ -88,6 +125,23 @@ function BemVindoContent() {
     setError(null)
 
     try {
+      // Primeiro, atualizar a senha no Supabase Auth
+      if (senha) {
+        const { createClient } = await import('@/lib/supabase-client')
+        const supabase = createClient()
+        
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: senha
+        })
+        
+        if (passwordError) {
+          console.error('Erro ao atualizar senha:', passwordError)
+          setError('Erro ao definir senha. Tente novamente.')
+          return
+        }
+      }
+      
+      // Depois, atualizar o perfil
       const response = await fetch('/api/wellness/profile', {
         method: 'PUT',
         headers: {
@@ -96,6 +150,7 @@ function BemVindoContent() {
         credentials: 'include',
         body: JSON.stringify({
           nome: nomeCompleto.trim(),
+          whatsapp: telefone.replace(/\D/g, ''), // Apenas números
         }),
       })
 
@@ -219,10 +274,10 @@ function BemVindoContent() {
                     ✨ Último passo para começar!
                   </h2>
                   <p className="text-gray-700 mb-4">
-                    Precisamos apenas do seu nome completo para personalizar sua experiência na plataforma.
+                    Complete seu cadastro com seus dados para personalizar sua experiência na plataforma.
                   </p>
                   <p className="text-sm text-gray-600">
-                    ⏱️ <strong>Leva menos de 1 minuto</strong> - depois você já pode começar a criar suas ferramentas!
+                    ⏱️ <strong>Leva menos de 2 minutos</strong> - depois você já pode começar a criar suas ferramentas!
                   </p>
                 </div>
 
@@ -246,6 +301,82 @@ function BemVindoContent() {
                     </p>
                   </div>
 
+                  <div className="mb-6">
+                    <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-2">
+                      Telefone/WhatsApp *
+                    </label>
+                    <input
+                      id="telefone"
+                      type="tel"
+                      value={telefone}
+                      onChange={(e) => setTelefone(e.target.value)}
+                      placeholder="Ex: (11) 98765-4321"
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
+                      disabled={saving}
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 Seu telefone será usado para contato e suporte.
+                    </p>
+                  </div>
+
+                  <div className="mb-6">
+                    <label htmlFor="senha" className="block text-sm font-medium text-gray-700 mb-2">
+                      Criar Senha *
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="senha"
+                        type={mostrarSenha ? "text" : "password"}
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        placeholder="Mínimo 6 caracteres"
+                        required
+                        minLength={6}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg pr-12"
+                        disabled={saving}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMostrarSenha(!mostrarSenha)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        tabIndex={-1}
+                      >
+                        {mostrarSenha ? '👁️' : '👁️‍🗨️'}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      🔒 Use uma senha forte com pelo menos 6 caracteres.
+                    </p>
+                  </div>
+
+                  <div className="mb-6">
+                    <label htmlFor="confirmarSenha" className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirmar Senha *
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="confirmarSenha"
+                        type={mostrarSenha ? "text" : "password"}
+                        value={confirmarSenha}
+                        onChange={(e) => setConfirmarSenha(e.target.value)}
+                        placeholder="Digite a senha novamente"
+                        required
+                        minLength={6}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg pr-12"
+                        disabled={saving}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMostrarSenha(!mostrarSenha)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        tabIndex={-1}
+                      >
+                        {mostrarSenha ? '👁️' : '👁️‍🗨️'}
+                      </button>
+                    </div>
+                  </div>
+
                   {error && (
                     <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
                       <p className="text-sm">{error}</p>
@@ -255,13 +386,13 @@ function BemVindoContent() {
                   <div className="flex flex-col gap-4">
                     <button
                       type="submit"
-                      disabled={saving || !nomeCompleto.trim()}
+                      disabled={saving || !nomeCompleto.trim() || !telefone.trim() || !senha || senha !== confirmarSenha}
                       className="w-full px-6 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-center text-lg"
                     >
-                      {saving ? '⏳ Salvando...' : '✨ Continuar para a Plataforma'}
+                      {saving ? '⏳ Salvando...' : '✨ Finalizar Cadastro e Continuar'}
                     </button>
                     <p className="text-xs text-center text-gray-500">
-                      Este passo é obrigatório para personalizar sua experiência
+                      Todos os campos são obrigatórios para completar seu cadastro
                     </p>
                   </div>
                 </form>
