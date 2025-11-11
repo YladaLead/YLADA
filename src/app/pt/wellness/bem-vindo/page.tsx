@@ -397,42 +397,12 @@ function BemVindoContent() {
                   </div>
                 </form>
               </div>
-
-              {/* O que vem a seguir */}
-              <div className="border-t border-gray-200 pt-6 mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  🚀 O que você pode fazer agora:
-                </h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-2xl mb-2">📝</div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Criar Ferramentas</h4>
-                    <p className="text-sm text-gray-600">
-                      Crie questionários e formulários personalizados para seus clientes
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-2xl mb-2">📊</div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Gerar Leads</h4>
-                    <p className="text-sm text-gray-600">
-                      Capture informações e converta visitantes em clientes
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-2xl mb-2">🎯</div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Acompanhar Resultados</h4>
-                    <p className="text-sm text-gray-600">
-                      Veja estatísticas e métricas de suas ferramentas
-                    </p>
-                  </div>
-                </div>
-              </div>
             </>
           )}
         </div>
 
         {/* Link de ajuda */}
-        <div className="text-center">
+        <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
             Precisa de ajuda?{' '}
             <Link href="/pt/wellness/suporte" className="text-green-600 hover:text-green-700 font-medium">
