@@ -61,10 +61,6 @@ export default function WellnessCheckoutPage() {
       setError('Por favor, informe seu e-mail para continuar.')
       return
     }
-    if (!userEmail || !userEmail.includes('@')) {
-      setError('E-mail inválido. Por favor, verifique.')
-      return
-    }
 
     setLoading(true)
     setError(null)
