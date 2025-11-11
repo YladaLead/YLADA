@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
 
     // 6. Verificar últimas subscriptions sem e-mail enviado
     try {
+      // Buscar subscriptions primeiro
       const { data: subscriptions, error: subError } = await supabaseAdmin
         .from('subscriptions')
         .select(`
@@ -67,27 +68,51 @@ export async function GET(request: NextRequest) {
           plan_type,
           welcome_email_sent,
           welcome_email_sent_at,
-          created_at,
-          user_profiles!inner(email, nome_completo)
+          created_at
         `)
         .order('created_at', { ascending: false })
-        .limit(5)
+        .limit(10)
 
       if (subError) {
         diagnostics.warnings.push(`Erro ao buscar subscriptions: ${subError.message}`)
       } else {
+        // Buscar perfis dos usuários separadamente
+        const userIds = subscriptions?.map((sub: any) => sub.user_id) || []
+        const { data: profiles } = await supabaseAdmin
+          .from('user_profiles')
+          .select('id, email, nome_completo')
+          .in('id', userIds)
+        
+        // Criar mapa de userId -> profile
+        const profileMap = new Map()
+        profiles?.forEach((profile: any) => {
+          profileMap.set(profile.id, profile)
+        })
+        
         diagnostics.checks.recentSubscriptions = {
           count: subscriptions?.length || 0,
-          subscriptions: subscriptions?.map((sub: any) => ({
-            id: sub.id,
-            email: sub.user_profiles?.email,
-            nome: sub.user_profiles?.nome_completo,
-            area: sub.area,
-            planType: sub.plan_type,
-            welcomeEmailSent: sub.welcome_email_sent,
-            welcomeEmailSentAt: sub.welcome_email_sent_at,
-            createdAt: sub.created_at,
-          })) || [],
+          subscriptions: subscriptions?.map((sub: any) => {
+            const profile = profileMap.get(sub.user_id)
+            return {
+              id: sub.id,
+              userId: sub.user_id,
+              email: profile?.email || 'N/A',
+              nome: profile?.nome_completo || 'N/A',
+              area: sub.area,
+              planType: sub.plan_type,
+              welcomeEmailSent: sub.welcome_email_sent,
+              welcomeEmailSentAt: sub.welcome_email_sent_at,
+              createdAt: sub.created_at,
+            }
+          }) || [],
+        }
+        
+        // Adicionar estatísticas
+        const withoutEmail = subscriptions?.filter((sub: any) => !sub.welcome_email_sent) || []
+        diagnostics.checks.subscriptionStats = {
+          total: subscriptions?.length || 0,
+          withoutWelcomeEmail: withoutEmail.length,
+          withWelcomeEmail: (subscriptions?.length || 0) - withoutEmail.length,
         }
       }
     } catch (error: any) {
