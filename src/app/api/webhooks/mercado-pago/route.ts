@@ -183,7 +183,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     // Usar dados completos do pagamento em vez de apenas data do webhook
     const fullData = paymentDataFull || data
 
-    // Obter metadata do pagamento (usar dados completos obtidos via API)
+    try {
+      // Obter metadata do pagamento (usar dados completos obtidos via API)
     const metadata = fullData.metadata || {}
     let userId = metadata.user_id
     
