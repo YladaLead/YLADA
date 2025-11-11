@@ -299,8 +299,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
             password: randomPassword,
             email_confirm: true, // Confirmar email automaticamente
             user_metadata: {
-              full_name: data.payer?.first_name || data.payer?.name || '',
-              name: data.payer?.first_name || data.payer?.name || '',
+              full_name: fullData.payer?.first_name || fullData.payer?.name || '',
+              name: fullData.payer?.first_name || fullData.payer?.name || '',
               perfil: area
             }
           })
@@ -330,7 +330,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
               .insert({
                 user_id: userId,
                 email: emailFinal,
-                nome_completo: data.payer?.first_name || data.payer?.name || '',
+                nome_completo: fullData.payer?.first_name || fullData.payer?.name || '',
                 perfil: area
               })
           
@@ -357,7 +357,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           
               await sendWelcomeEmail({
                 email: emailFinal,
-                userName: userProfile?.nome_completo || data.payer?.first_name || data.payer?.name || undefined,
+                userName: userProfile?.nome_completo || fullData.payer?.first_name || fullData.payer?.name || undefined,
                 area: area as 'wellness' | 'nutri' | 'coach' | 'nutra',
                 planType: planType as 'monthly' | 'annual',
                 accessToken,
@@ -437,7 +437,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         plan_type: planType,
         stripe_account: null, // Mercado Pago não usa stripe_account
         stripe_subscription_id: subscriptionId, // Usar como ID único temporariamente
-        stripe_customer_id: data.payer?.id?.toString() || 'mp_customer',
+        stripe_customer_id: fullData.payer?.id?.toString() || 'mp_customer',
         stripe_price_id: 'mp_price', // Placeholder
         amount: Math.round(amount * 100), // Converter para centavos
         currency: currency.toLowerCase(),
@@ -473,7 +473,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         currency: currency.toLowerCase(),
         status: 'succeeded',
         receipt_url: fullData.external_resource_url || null,
-        payment_method: data.payment_method_id || 'unknown',
+        payment_method: fullData.payment_method_id || 'unknown',
       })
 
     if (paymentError) {
@@ -615,10 +615,10 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       } else if (!payerEmail) {
         console.warn('⚠️ E-mail do pagador não disponível, não foi possível enviar e-mail de boas-vindas.')
         console.warn('⚠️ Dados do webhook disponíveis:', {
-          'data.payer': data.payer,
-          'data.payer_email': data.payer_email,
-          'data.payer?.email': data.payer?.email,
-          'data.payer?.identification?.email': data.payer?.identification?.email,
+          'fullData.payer': fullData.payer,
+          'fullData.payer_email': fullData.payer_email,
+          'fullData.payer?.email': fullData.payer?.email,
+          'fullData.payer?.identification?.email': fullData.payer?.identification?.email,
         })
       } else if (!subscription) {
         console.warn('⚠️ Subscription não encontrada, não foi possível enviar e-mail de boas-vindas')
