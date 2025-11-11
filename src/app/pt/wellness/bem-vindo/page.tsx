@@ -23,7 +23,8 @@ function BemVindoContent() {
   const fromPayment = searchParams.get('payment') === 'success'
 
   useEffect(() => {
-    // Aguardar um pouco para o auth carregar
+    // Aguardar mais tempo para o auth carregar após callback do Supabase
+    // O callback pode levar alguns segundos para sincronizar a sessão
     const timer = setTimeout(() => {
       // Carregar nome do perfil se já existir
       if (userProfile?.nome_completo) {
@@ -34,10 +35,10 @@ function BemVindoContent() {
         setNomeCompleto(emailName.charAt(0).toUpperCase() + emailName.slice(1))
       }
       setLoading(false)
-    }, 1000) // Aguardar 1s para auth carregar
+    }, fromPayment ? 2000 : 1000) // Aguardar mais se veio do pagamento
 
     return () => clearTimeout(timer)
-  }, [user, userProfile])
+  }, [user, userProfile, fromPayment])
 
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,20 +48,40 @@ function BemVindoContent() {
       return
     }
 
-    // Se não estiver logado, aguardar um pouco mais (pode estar carregando)
+    // Se não estiver logado, aguardar mais tempo (pode estar carregando após callback)
     if (!user && authLoading) {
       setError('Aguarde, estamos verificando seu acesso...')
       return
     }
     
-    // Se ainda não estiver logado após aguardar, tentar recarregar
+    // Se ainda não estiver logado após aguardar, tentar recarregar ou verificar novamente
     if (!user && !authLoading) {
-      setError('Você precisa estar logado. Verificando seu acesso...')
-      // Recarregar a página para tentar pegar a sessão
-      setTimeout(() => {
-        window.location.reload()
-      }, 2000)
-      return
+      // Se veio do pagamento, pode ser que a sessão ainda esteja sendo sincronizada
+      if (fromPayment) {
+        setError('Aguarde, estamos finalizando seu login...')
+        // Aguardar mais um pouco e tentar novamente
+        setTimeout(async () => {
+          // Tentar buscar sessão novamente
+          const { createClient } = await import('@/lib/supabase-client')
+          const supabase = createClient()
+          const { data: { session } } = await supabase.auth.getSession()
+          
+          if (session) {
+            // Recarregar para pegar a sessão
+            window.location.reload()
+          } else {
+            setError('Não foi possível fazer login automaticamente. Por favor, faça login manualmente.')
+          }
+        }, 3000)
+        return
+      } else {
+        setError('Você precisa estar logado. Verificando seu acesso...')
+        // Recarregar a página para tentar pegar a sessão
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+        return
+      }
     }
 
     setSaving(true)

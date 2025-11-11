@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 /**
@@ -32,21 +32,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Criar cliente Supabase no servidor
+    // Criar cliente Supabase SSR (gerencia cookies automaticamente)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     
     const cookieStore = await cookies()
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
+        getAll() {
+          return cookieStore.getAll()
         },
-        set(name: string, value: string, options: any) {
-          cookieStore.set(name, value, options)
-        },
-        remove(name: string, options: any) {
-          cookieStore.delete(name)
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          } catch (error) {
+            // Pode falhar em alguns casos, mas não é crítico
+            console.warn('⚠️ Erro ao salvar cookie:', error)
+          }
         },
       },
     })
@@ -89,20 +94,25 @@ export async function GET(request: NextRequest) {
 
     console.log('🔄 Redirecionando para:', redirectPath)
 
-    // Redirecionar para a página correta
+    // Criar resposta de redirecionamento
     const redirectUrl = new URL(redirectPath, request.url)
     const response = NextResponse.redirect(redirectUrl)
     
-    // Garantir que os cookies de sessão sejam salvos
-    const sessionCookie = cookieStore.get('sb-access-token')
-    if (sessionCookie) {
-      response.cookies.set('sb-access-token', sessionCookie.value, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-      })
-    }
+    // Os cookies já foram salvos pelo createServerClient acima
+    // Mas vamos garantir que sejam persistidos na resposta
+    const allCookies = cookieStore.getAll()
+    allCookies.forEach(cookie => {
+      // Verificar se é um cookie do Supabase
+      if (cookie.name.startsWith('sb-') || cookie.name.includes('supabase')) {
+        response.cookies.set(cookie.name, cookie.value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7, // 7 dias
+        })
+      }
+    })
     
     return response
   } catch (error: any) {
