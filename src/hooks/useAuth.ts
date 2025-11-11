@@ -107,25 +107,67 @@ export function useAuth() {
 
   useEffect(() => {
     const loadAuthData = async () => {
-      console.log('🔄 useAuth: Iniciando carregamento...')
+      console.log('🔄 useAuth: Iniciando carregamento...', {
+        isBrowser: typeof window !== 'undefined',
+        hasCookies: typeof document !== 'undefined' && document.cookie.length > 0
+      })
       
       // Aguardar um pouco para garantir que a página carregou completamente
       await new Promise(resolve => setTimeout(resolve, 200))
       
-      // Tentar obter sessão
-      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
+      // Tentar obter sessão - com múltiplas tentativas para produção
+      let session = null
+      let sessionError = null
       
-      let session = currentSession
+      // Tentativa 1: Buscar sessão imediatamente
+      try {
+        const { data: { session: currentSession }, error: error1 } = await supabase.auth.getSession()
+        session = currentSession
+        sessionError = error1
+        
+        if (session) {
+          console.log('✅ useAuth: Sessão encontrada na primeira tentativa')
+        } else if (error1) {
+          console.warn('⚠️ useAuth: Erro na primeira tentativa:', error1.message)
+        }
+      } catch (err: any) {
+        console.error('❌ useAuth: Exceção na primeira tentativa:', err)
+        sessionError = err
+      }
       
-      if (session) {
-        console.log('✅ useAuth: Sessão encontrada')
-      } else {
-        // Se não encontrou, tentar novamente após mais tempo (pode estar sincronizando)
-        await new Promise(resolve => setTimeout(resolve, 800))
-        const { data: { session: retrySession } } = await supabase.auth.getSession()
-        if (retrySession) {
-          console.log('✅ useAuth: Sessão encontrada após retry')
-          session = retrySession
+      // Tentativa 2: Se não encontrou, tentar novamente após mais tempo (pode estar sincronizando)
+      if (!session) {
+        await new Promise(resolve => setTimeout(resolve, 500))
+        try {
+          const { data: { session: retrySession }, error: error2 } = await supabase.auth.getSession()
+          if (retrySession) {
+            console.log('✅ useAuth: Sessão encontrada após retry')
+            session = retrySession
+            sessionError = null
+          } else if (error2) {
+            console.warn('⚠️ useAuth: Erro na segunda tentativa:', error2.message)
+            sessionError = error2
+          }
+        } catch (err: any) {
+          console.error('❌ useAuth: Exceção na segunda tentativa:', err)
+        }
+      }
+      
+      // Tentativa 3: Última tentativa (especialmente importante em produção)
+      if (!session) {
+        await new Promise(resolve => setTimeout(resolve, 500))
+        try {
+          const { data: { session: finalSession }, error: error3 } = await supabase.auth.getSession()
+          if (finalSession) {
+            console.log('✅ useAuth: Sessão encontrada na terceira tentativa')
+            session = finalSession
+            sessionError = null
+          } else if (error3) {
+            console.warn('⚠️ useAuth: Erro na terceira tentativa:', error3.message)
+            sessionError = error3
+          }
+        } catch (err: any) {
+          console.error('❌ useAuth: Exceção na terceira tentativa:', err)
         }
       }
       
@@ -133,13 +175,16 @@ export function useAuth() {
         hasSession: !!session,
         hasUser: !!session?.user,
         userId: session?.user?.id,
-        email: session?.user?.email
+        email: session?.user?.email,
+        error: sessionError?.message || null,
+        cookieCount: typeof document !== 'undefined' ? document.cookie.split(';').length : 0
       })
       
       setSession(session)
       setUser(session?.user ?? null)
 
-      // Marcar como não loading imediatamente para não bloquear UI
+      // IMPORTANTE: Só marcar como não loading DEPOIS de tentar todas as tentativas
+      // Isso evita que ProtectedRoute/RequireSubscription bloqueiem antes de detectar a sessão
       setLoading(false)
       console.log('✅ useAuth: Loading marcado como false')
 
@@ -154,7 +199,12 @@ export function useAuth() {
           console.error('❌ useAuth: Erro ao buscar perfil em background:', err)
         })
       } else {
-        console.log('⚠️ useAuth: Nenhuma sessão encontrada após todas as tentativas')
+        console.log('⚠️ useAuth: Nenhuma sessão encontrada após todas as tentativas', {
+          error: sessionError?.message || 'Sem erro específico',
+          hasCookies: typeof document !== 'undefined' && document.cookie.length > 0
+        })
+        // Se não há sessão, garantir que userProfile também seja null
+        setUserProfile(null)
       }
     }
 

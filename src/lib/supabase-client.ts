@@ -15,6 +15,9 @@ export function createClient() {
 
   // createBrowserClient do @supabase/ssr gerencia cookies automaticamente
   // Ele usa localStorage para persistir a sessão e sincroniza com cookies
+  const isProduction = process.env.NODE_ENV === 'production'
+  const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
+  
   return createBrowserClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -22,19 +25,52 @@ export function createClient() {
         if (typeof document === 'undefined') {
           return []
         }
-        return document.cookie.split(';').map(cookie => {
-          const [name, ...rest] = cookie.split('=')
-          return { name: name.trim(), value: rest.join('=') }
-        })
+        try {
+          return document.cookie.split(';').map(cookie => {
+            const [name, ...rest] = cookie.split('=')
+            return { name: name.trim(), value: rest.join('=') }
+          }).filter(cookie => cookie.name && cookie.value)
+        } catch (err) {
+          console.error('❌ Erro ao ler cookies:', err)
+          return []
+        }
       },
       setAll(cookiesToSet) {
         // Verificar se estamos no browser antes de acessar document
         if (typeof document === 'undefined') {
           return
         }
-        cookiesToSet.forEach(({ name, value, options }) => {
-          document.cookie = `${name}=${value}; path=${options?.path || '/'}; ${options?.maxAge ? `max-age=${options.maxAge};` : ''} ${options?.domain ? `domain=${options.domain};` : ''} ${options?.sameSite ? `SameSite=${options.sameSite};` : ''} ${options?.secure ? 'Secure;' : ''}`
-        })
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // Configurações padrão para produção
+            const path = options?.path || '/'
+            const maxAge = options?.maxAge || (60 * 60 * 24 * 7) // 7 dias padrão
+            const sameSite = options?.sameSite || (isProduction ? 'lax' : 'lax')
+            const secure = options?.secure !== undefined ? options.secure : (isSecure || isProduction)
+            
+            // Construir string do cookie
+            let cookieString = `${name}=${value}; path=${path}; max-age=${maxAge}; SameSite=${sameSite}`
+            
+            // Adicionar Secure apenas se necessário (HTTPS ou produção)
+            if (secure) {
+              cookieString += '; Secure'
+            }
+            
+            // Adicionar domain apenas se especificado
+            if (options?.domain) {
+              cookieString += `; domain=${options.domain}`
+            }
+            
+            document.cookie = cookieString
+            
+            // Log apenas em desenvolvimento para debug
+            if (!isProduction && name.startsWith('sb-')) {
+              console.log('🍪 Cookie setado:', { name, path, secure, sameSite })
+            }
+          })
+        } catch (err) {
+          console.error('❌ Erro ao setar cookies:', err)
+        }
       },
     },
   })
