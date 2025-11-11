@@ -33,6 +33,7 @@ const TemplateIMC = dynamic(() => import('@/app/pt/wellness/templates/imc/page')
 const TemplateProteina = dynamic(() => import('@/app/pt/wellness/templates/proteina/page'), { ssr: false })
 const TemplateHidratacao = dynamic(() => import('@/app/pt/wellness/templates/hidratacao/page'), { ssr: false })
 const TemplateComposicao = dynamic(() => import('@/app/pt/wellness/templates/composicao/page'), { ssr: false })
+const TemplateCalorias = dynamic(() => import('@/app/pt/wellness/templates/calorias/page'), { ssr: false })
 const TemplateGanhos = dynamic(() => import('@/app/pt/wellness/templates/ganhos/page'), { ssr: false })
 const TemplatePotencial = dynamic(() => import('@/app/pt/wellness/templates/potencial/page'), { ssr: false })
 const TemplateProposito = dynamic(() => import('@/app/pt/wellness/templates/proposito/page'), { ssr: false })
@@ -189,30 +190,7 @@ export default function FerramentaPersonalizadaPage() {
       case 'calc-composicao':
         return <TemplateComposicao config={config} />
       case 'calc-calorias':
-        // Template de calorias ainda não implementado - usar IMC como fallback temporário
-        // TODO: Criar template específico de calorias
-        return (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-            <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 border-yellow-200">
-              <div className="mb-4">
-                <span className="text-yellow-600 text-5xl">⚠️</span>
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Template em desenvolvimento</h2>
-              <p className="text-gray-600 mb-4">
-                A Calculadora de Calorias está sendo implementada e estará disponível em breve.
-              </p>
-              <p className="text-sm text-gray-500 mb-6">
-                Entre em contato com o suporte se precisar de acesso imediato.
-              </p>
-              <button
-                onClick={() => router.push('/pt/wellness/ferramentas')}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-              >
-                Voltar para Meus Links
-              </button>
-            </div>
-          </div>
-        )
+        return <TemplateCalorias config={config} />
       case 'quiz-ganhos':
         return <TemplateGanhos config={config} />
       case 'quiz-potencial':
