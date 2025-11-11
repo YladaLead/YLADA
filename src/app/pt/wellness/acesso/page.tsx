@@ -37,18 +37,22 @@ function AcessoPorTokenContent() {
         const data = await response.json()
 
         if (response.ok && data.success) {
-          // Token válido - usuário foi logado automaticamente no backend
+          // Token válido - fazer login automático usando magic link se disponível
           setSuccess(true)
           
-          // Obter redirect da URL se existir
-          const redirect = searchParams.get('redirect')
-          const redirectPath = redirect ? decodeURIComponent(redirect) : '/pt/wellness/bem-vindo?payment=success'
-          
-          // Aguardar um pouco para garantir que a sessão foi criada
-          setTimeout(() => {
-            // Recarregar a página para garantir que o auth está atualizado
-            window.location.href = redirectPath
-          }, 1500)
+          if (data.loginUrl) {
+            // Usar magic link para login automático
+            console.log('🔐 Fazendo login automático via magic link...')
+            window.location.href = data.loginUrl
+          } else {
+            // Fallback: redirecionar para bem-vindo (usuário pode precisar fazer login manualmente)
+            const redirect = searchParams.get('redirect')
+            const redirectPath = redirect ? decodeURIComponent(redirect) : '/pt/wellness/bem-vindo?payment=success'
+            
+            setTimeout(() => {
+              window.location.href = redirectPath
+            }, 1500)
+          }
         } else {
           setError(data.error || 'Token inválido ou expirado')
         }
