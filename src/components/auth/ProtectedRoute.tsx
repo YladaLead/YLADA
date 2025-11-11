@@ -55,15 +55,15 @@ export default function ProtectedRoute({
     }
   }, [isAuthenticated, user, loading])
 
-  // Timeout para verificação de perfil - após 5 segundos, permitir acesso mesmo sem perfil
+  // Timeout para verificação de perfil - após 3 segundos, permitir acesso mesmo sem perfil
   useEffect(() => {
     if (user && !userProfile && !loading) {
       const timer = setTimeout(() => {
         if (user && !userProfile) {
-          console.warn('⚠️ ProtectedRoute: Perfil não carregou após 5s, permitindo acesso temporário')
+          console.warn('⚠️ ProtectedRoute: Perfil não carregou após 3s, permitindo acesso temporário')
           setProfileCheckTimeout(true)
         }
-      }, 5000)
+      }, 3000) // Reduzido de 5s para 3s
       return () => clearTimeout(timer)
     } else {
       setProfileCheckTimeout(false)
@@ -126,11 +126,10 @@ export default function ProtectedRoute({
         return
       }
       
-      // Se o perfil ainda não carregou mas já passou o timeout, fazer uma busca rápida
-      // para verificar se é admin antes de bloquear
-      if (!userProfile && loadingTimeout && user?.id) {
-        console.log('🔍 Perfil não carregou ainda, verificando se é admin...')
-        // Não bloquear aqui - deixar o render decidir
+      // Se o perfil ainda não carregou mas já passou o timeout de loading (2s), permitir acesso
+      // Isso evita bloqueios desnecessários quando o perfil demora para carregar
+      if (!userProfile && loadingTimeout) {
+        console.log('⚠️ Perfil não carregou ainda, mas allowAdmin=true e loadingTimeout passou, permitindo acesso temporário')
         return
       }
     }
@@ -259,17 +258,11 @@ export default function ProtectedRoute({
         return <>{children}</>
       }
       
-      // Se ainda não carregou mas já passou timeout inicial, aguardar mais um pouco
-      if (!userProfile && loadingTimeout && !profileCheckTimeout) {
-        // Mostrar loading enquanto aguarda perfil carregar
-        return (
-          <div className="min-h-screen bg-white flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Verificando permissões...</p>
-            </div>
-          </div>
-        )
+      // Se allowAdmin está ativo e já passou o timeout de loading (2s), permitir acesso imediatamente
+      // Não precisa esperar o profileCheckTimeout (3s)
+      if (!userProfile && loadingTimeout) {
+        console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true e loadingTimeout passou, permitindo acesso')
+        return <>{children}</>
       }
     }
 
@@ -295,6 +288,11 @@ export default function ProtectedRoute({
     if (userProfile?.perfil !== perfil) {
       // Se allowAdmin está ativo e ainda não temos certeza, aguardar ou permitir após timeout
       if (allowAdmin) {
+        // Se já passou o timeout de loading (2s), permitir acesso mesmo sem perfil
+        if (!userProfile && loadingTimeout) {
+          console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true e loadingTimeout passou, permitindo acesso')
+          return <>{children}</>
+        }
         if (!userProfile && profileCheckTimeout) {
           console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true, permitindo acesso')
           return <>{children}</>
