@@ -400,17 +400,19 @@ export default function WellnessCheckoutPage() {
           <button
             onClick={(e) => {
               e.preventDefault()
-              console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, hasEmail: !!email })
-              if (!loading && !authLoading) {
+              console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, hasEmail: !!email, emailValue: email || user?.email })
+              // Permitir checkout se tiver e-mail, mesmo que authLoading seja true
+              const hasEmail = email || user?.email
+              if (!loading && hasEmail) {
                 handleCheckout()
               } else {
-                console.warn('⚠️ Botão clicado mas está desabilitado:', { loading, authLoading })
+                console.warn('⚠️ Botão clicado mas está desabilitado:', { loading, authLoading, hasEmail })
               }
             }}
-            disabled={loading || authLoading || (!user && !email)}
+            disabled={loading || (!user && !email)}
             className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
           >
-            {loading ? 'Processando...' : authLoading ? 'Carregando autenticação...' : '💚 Continuar para Pagamento'}
+            {loading ? 'Processando...' : '💚 Continuar para Pagamento'}
           </button>
 
           {/* Informações de Segurança */}
