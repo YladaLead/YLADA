@@ -166,37 +166,44 @@ function BemVindoContent() {
             </div>
           ) : (
             <>
-              {/* Informações sobre o e-mail */}
-              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                    </svg>
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <h3 className="text-sm font-semibold text-blue-900 mb-1">
-                      📧 Verifique seu e-mail
-                    </h3>
-                    <p className="text-sm text-blue-800 mb-2">
-                      Enviamos um e-mail para <strong>{user?.email}</strong> com um link de acesso seguro à plataforma.
-                    </p>
-                    <p className="text-xs text-blue-700">
-                      💡 <strong>Dica:</strong> Verifique também sua pasta de spam. O link é válido por 30 dias.
-                    </p>
+              {/* Informações sobre o e-mail - apenas se não veio do pagamento */}
+              {!fromPayment && user?.email && (
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <h3 className="text-sm font-semibold text-blue-900 mb-1">
+                        📧 Verifique seu e-mail
+                      </h3>
+                      <p className="text-sm text-blue-800 mb-2">
+                        Enviamos um e-mail para <strong>{user.email}</strong> com um link de acesso seguro à plataforma.
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        💡 <strong>Dica:</strong> Verifique também sua pasta de spam. O link é válido por 30 dias.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Formulário de completar perfil */}
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Complete seu cadastro
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Preencha seu nome completo para personalizar sua experiência na plataforma.
-                </p>
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    ✨ Último passo para começar!
+                  </h2>
+                  <p className="text-gray-700 mb-4">
+                    Precisamos apenas do seu nome completo para personalizar sua experiência na plataforma.
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    ⏱️ <strong>Leva menos de 1 minuto</strong> - depois você já pode começar a criar suas ferramentas!
+                  </p>
+                </div>
 
                 <form onSubmit={handleCompleteProfile}>
                   <div className="mb-6">
@@ -214,7 +221,7 @@ function BemVindoContent() {
                       disabled={saving}
                     />
                     <p className="text-xs text-gray-500 mt-2">
-                      Este nome será usado em suas ferramentas e comunicações.
+                      💡 Este nome será usado em suas ferramentas e comunicações com seus clientes.
                     </p>
                   </div>
 
