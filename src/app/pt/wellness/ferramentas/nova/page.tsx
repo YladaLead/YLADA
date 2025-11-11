@@ -60,15 +60,13 @@ function NovaFerramentaWellnessContent() {
   const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
   const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null) // WhatsApp do perfil
   const [perfilCountryCode, setPerfilCountryCode] = useState<string>('BR') // Código do país do perfil
+  const [userSlug, setUserSlug] = useState<string | null>(null) // user_slug do perfil
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
   const [erroUrlWhatsapp, setErroUrlWhatsapp] = useState(false) // Flag para erro de URL do WhatsApp
   const [erroSalvamento, setErroSalvamento] = useState<string | null>(null) // Erro ao salvar ferramenta
   const [salvando, setSalvando] = useState(false) // Estado de salvamento
   const [templates, setTemplates] = useState<Template[]>([]) // Templates do banco de dados
   const [carregandoTemplates, setCarregandoTemplates] = useState(true) // Estado de carregamento dos templates
-
-  // Nome do usuário logado (simulado - depois virá do sistema)
-  const nomeDoUsuario = 'Carlos Oliveira'
 
   // Carregar templates do banco de dados
   useEffect(() => {
@@ -153,7 +151,7 @@ function NovaFerramentaWellnessContent() {
            urlLower.includes('api.whatsapp.com')
   }
 
-  // Carregar WhatsApp do perfil
+  // Carregar WhatsApp e user_slug do perfil
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
@@ -166,6 +164,9 @@ function NovaFerramentaWellnessContent() {
           }
           if (data.profile?.countryCode) {
             setPerfilCountryCode(data.profile.countryCode)
+          }
+          if (data.profile?.userSlug) {
+            setUserSlug(data.profile.userSlug)
           }
         }
       } catch (error) {
@@ -318,7 +319,8 @@ function NovaFerramentaWellnessContent() {
   useEffect(() => {
     if (configuracao.urlPersonalizada && templateSelecionado) {
       const slugTratado = tratarUrl(configuracao.urlPersonalizada)
-      const urlNome = tratarUrl(nomeDoUsuario)
+      // Usar user_slug do perfil, ou fallback se não tiver
+      const urlNome = userSlug || 'seu-usuario' // Fallback temporário até ter user_slug
       const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
       const url = `${baseUrl}/pt/wellness/${urlNome}/${slugTratado}`
       
@@ -336,7 +338,7 @@ function NovaFerramentaWellnessContent() {
 
       return () => clearTimeout(timeoutId)
     }
-  }, [configuracao.urlPersonalizada, templateSelecionado])
+  }, [configuracao.urlPersonalizada, templateSelecionado, userSlug])
 
   // Validar URL disponível usando API
   const validarUrl = async (url: string): Promise<boolean> => {
