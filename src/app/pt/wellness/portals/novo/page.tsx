@@ -326,9 +326,22 @@ function NovoPortalWellnessContent() {
 
           {/* Seleção de Ferramentas */}
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Selecionar Ferramentas ({selectedTools.length} selecionadas)
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Selecionar Ferramentas ({selectedTools.length} selecionadas)
+              </h2>
+            </div>
+
+            {/* Nota informativa discreta */}
+            <div className="mb-4 bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+              <p className="text-sm text-blue-700">
+                <span className="font-medium">ℹ️ Informação:</span> As ferramentas disponíveis são apenas as que você criou. 
+                Para adicionar mais ferramentas ao portal,{' '}
+                <Link href="/pt/wellness/ferramentas/nova" className="text-blue-600 hover:underline font-medium">
+                  crie-as individualmente primeiro
+                </Link>.
+              </p>
+            </div>
 
             {tools.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
