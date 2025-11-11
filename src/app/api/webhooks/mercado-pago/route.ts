@@ -157,13 +157,24 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     const metadata = data.metadata || {}
     let userId = metadata.user_id
     
+    console.log('🔍 Tentando extrair user_id:', {
+      'metadata.user_id': metadata.user_id,
+      'metadata completo': metadata,
+      'external_reference': data.external_reference,
+      'payer.email': data.payer?.email,
+      'payer_email': data.payer_email,
+    })
+    
     // Se não tiver user_id no metadata, tentar extrair do external_reference
-    // Formato: area_planType_userId (ex: wellness_monthly_temp_oanfaol@gmail.com)
+    // Formato: area_planType_userId (ex: wellness_monthly_temp_portalmagra@gmail.com)
     if (!userId && data.external_reference) {
       const parts = data.external_reference.split('_')
+      console.log('📋 Partes do external_reference:', parts)
       if (parts.length >= 3) {
         userId = parts.slice(2).join('_') // Pega tudo depois de area_planType_
-        console.log('📋 User ID extraído do external_reference:', userId)
+        console.log('✅ User ID extraído do external_reference:', userId)
+      } else {
+        console.warn('⚠️ external_reference não tem formato esperado:', data.external_reference)
       }
     }
     
@@ -172,20 +183,25 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       const payerEmail = data.payer?.email || data.payer_email || null
       if (payerEmail && payerEmail.includes('@')) {
         userId = `temp_${payerEmail}`
-        console.log('📋 User ID criado a partir do e-mail do pagador:', userId)
+        console.log('✅ User ID criado a partir do e-mail do pagador:', userId)
       }
     }
     
     if (!userId) {
       console.error('❌ User ID não encontrado no metadata do pagamento')
-      console.log('📋 Dados disponíveis:', {
+      console.log('📋 Dados disponíveis para debug:', {
         metadata,
         external_reference: data.external_reference,
         payer: data.payer,
         payer_email: data.payer_email,
+        'data completo (primeiros 500 chars)': JSON.stringify(data).substring(0, 500),
       })
-      // Não retornar erro - continuar processamento para não bloquear
+      // NÃO retornar - continuar processamento para não bloquear webhook
+      // Mas não criar usuário/subscription sem userId
+      return
     }
+    
+    console.log('✅ User ID encontrado/criado:', userId)
     
     const area = metadata.area || (data.external_reference?.split('_')[0]) || 'wellness'
     const planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || 'monthly'
