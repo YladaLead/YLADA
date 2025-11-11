@@ -70,10 +70,12 @@ export default function WellnessCheckoutPage() {
       hasUser: !!user,
     })
 
+    // Criar AbortController para timeout (fora do try para estar disponível no catch)
+    const controller = new AbortController()
+    let timeoutId: NodeJS.Timeout | null = null
+
     try {
-      // Criar AbortController para timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos
+      timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos
 
       // Usar a nova API unificada que detecta automaticamente o gateway (Mercado Pago ou Stripe)
       // AGORA ACEITA CHECKOUT SEM AUTENTICAÇÃO (apenas e-mail)
@@ -93,7 +95,7 @@ export default function WellnessCheckoutPage() {
         }),
       })
 
-      clearTimeout(timeoutId)
+      if (timeoutId) clearTimeout(timeoutId)
 
       console.log('📥 Resposta recebida:', {
         ok: response.ok,
