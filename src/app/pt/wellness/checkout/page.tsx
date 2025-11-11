@@ -47,20 +47,31 @@ export default function WellnessCheckoutPage() {
   }, [])
 
   const handleCheckout = async () => {
-    console.log('🔘 Botão de checkout clicado', { 
+    console.log('🔘 ========================================')
+    console.log('🔘 BOTÃO DE CHECKOUT CLICADO')
+    console.log('🔘 ========================================')
+    console.log('🔘 Estado:', { 
       hasUser: !!user, 
       userId: user?.id,
-      email: email || user?.email,
+      userEmail: user?.email,
+      emailField: email,
+      planType,
+      authLoading,
     })
     
     // Determinar e-mail a usar (prioridade: campo email > user.email)
     const userEmail = email || user?.email || ''
+    console.log('🔘 E-mail a usar:', userEmail)
     
     // Validar e-mail (obrigatório sempre)
     if (!userEmail || !userEmail.includes('@')) {
+      console.error('❌ E-mail inválido:', userEmail)
       setError('Por favor, informe seu e-mail para continuar.')
+      setLoading(false)
       return
     }
+    
+    console.log('🔘 ✅ Validações passadas, iniciando checkout...')
 
     setLoading(true)
     setError(null)
@@ -371,11 +382,19 @@ export default function WellnessCheckoutPage() {
 
           {/* Botão de Checkout */}
           <button
-            onClick={handleCheckout}
+            onClick={(e) => {
+              e.preventDefault()
+              console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, hasEmail: !!email })
+              if (!loading && !authLoading) {
+                handleCheckout()
+              } else {
+                console.warn('⚠️ Botão clicado mas está desabilitado:', { loading, authLoading })
+              }
+            }}
             disabled={loading || authLoading || (!user && !email)}
             className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
           >
-            {loading ? 'Processando...' : authLoading ? 'Carregando...' : '💚 Continuar para Pagamento'}
+            {loading ? 'Processando...' : authLoading ? 'Carregando autenticação...' : '💚 Continuar para Pagamento'}
           </button>
 
           {/* Informações de Segurança */}
