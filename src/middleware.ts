@@ -16,6 +16,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/cursos') ||
     pathname.startsWith('/create') ||
     pathname.startsWith('/api/') ||
+    pathname.startsWith('/auth/') || // Callback do Supabase
     pathname.startsWith('/_next/') ||
     pathname.includes('.') ||
     pathname === '/favicon.ico'
