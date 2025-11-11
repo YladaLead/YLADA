@@ -89,37 +89,23 @@ export default function LoginForm({
     setError(null)
 
     try {
-      // VALIDAÇÃO: Verificar perfil antes de fazer login/cadastro
-      // Adicionar timeout para evitar travamento
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos
-
-      let checkResponse
-      let checkData
-
+      // VALIDAÇÃO: Verificar perfil antes de fazer login/cadastro (opcional - não bloqueia)
+      let checkData = { exists: false, hasProfile: false, canCreate: true }
+      
       try {
-        checkResponse = await fetch('/api/auth/check-profile', {
+        const checkResponse = await fetch('/api/auth/check-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-          signal: controller.signal
+          body: JSON.stringify({ email })
         })
-        clearTimeout(timeoutId)
-        checkData = await checkResponse.json()
-      } catch (fetchError: any) {
-        clearTimeout(timeoutId)
-        if (fetchError.name === 'AbortError') {
-          setError('A verificação está demorando muito. Tente novamente.')
-          setLoading(false)
-          return
+        
+        if (checkResponse.ok) {
+          checkData = await checkResponse.json()
         }
-        throw fetchError
-      }
-
-      if (!checkResponse.ok) {
-        // Se a API falhar, continuar com login/cadastro mesmo assim (não bloquear)
-        console.warn('⚠️ Erro ao verificar perfil, continuando mesmo assim:', checkData.error)
-        checkData = { exists: false, hasProfile: false, canCreate: true }
+        // Se falhar, continuar mesmo assim (não bloquear login)
+      } catch (err) {
+        // Ignorar erro e continuar com login
+        console.warn('⚠️ Erro ao verificar perfil, continuando mesmo assim')
       }
 
       if (isSignUp) {
@@ -209,22 +195,11 @@ export default function LoginForm({
 
         if (data.session) {
           console.log('✅ Login bem-sucedido!')
-          console.log('👤 User ID:', data.session.user.id)
-          console.log('📧 Email:', data.session.user.email)
           
-          // O Supabase client gerencia a sessão automaticamente
-          // Aguardar um pouco para garantir que a sessão foi persistida antes de redirecionar
-          console.log('⏳ Aguardando persistência da sessão antes de redirecionar...')
-          
-          // Aguardar 500ms para garantir que cookies/sessão foram salvos
-          await new Promise(resolve => setTimeout(resolve, 500))
-          
-          console.log('🔄 Redirecionando para:', redirectPath)
+          // Redirecionar imediatamente - Supabase gerencia sessão automaticamente
           window.location.href = redirectPath
-          
           return
         } else {
-          console.error('❌ Nenhuma sessão retornada após login!')
           setError('Erro ao criar sessão. Tente novamente.')
           setLoading(false)
         }

@@ -24,88 +24,57 @@ export default function ProtectedRoute({
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   const [authCheckTimeout, setAuthCheckTimeout] = useState(false)
 
-  // Timeout de loading - após 1 segundo, marcar como timeout (otimizado)
+  // Timeout de loading - após 2 segundos, continuar mesmo assim
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
-        console.warn('⚠️ Loading demorou mais de 1s, continuando mesmo assim...')
         setLoadingTimeout(true)
-      }, 1000) // Reduzido para 1s para ser mais rápido
+      }, 2000)
       return () => clearTimeout(timer)
     } else {
       setLoadingTimeout(false)
     }
   }, [loading])
 
-  // Timeout para verificação de autenticação - aguardar 5 segundos antes de redirecionar
-  // Aumentado para dar mais tempo após redirecionamento do login
+  // Timeout para verificação de autenticação - aguardar 3 segundos antes de redirecionar
   useEffect(() => {
     if (!isAuthenticated || !user) {
-      // Se ainda está carregando, não iniciar timeout ainda
       if (loading) {
-        console.log('⏳ ProtectedRoute: Ainda carregando, aguardando antes de iniciar timeout...')
-        return
+        return // Aguardar enquanto carrega
       }
       
       const timer = setTimeout(() => {
-        // Verificar novamente antes de marcar timeout (pode ter mudado)
         if (!isAuthenticated || !user) {
-          console.log('❌ Não autenticado após 5s, marcando para redirecionar...')
           setAuthCheckTimeout(true)
         }
-      }, 5000) // Aumentado para 5 segundos para dar tempo após redirecionamento
+      }, 3000)
       return () => clearTimeout(timer)
     } else {
-      // Se autenticado, resetar o timeout
       setAuthCheckTimeout(false)
     }
   }, [isAuthenticated, user, loading])
 
   useEffect(() => {
-    // Não fazer nada se ainda está carregando (será tratado no render)
+    // Se ainda está carregando, aguardar
     if (loading && !loadingTimeout) {
-      console.log('⏳ ProtectedRoute: Aguardando carregamento...')
       return
     }
-    
-    // Se loading timeout, continuar mesmo sem perfil completo
-    if (loading && loadingTimeout) {
-      console.log('⚠️ ProtectedRoute: Timeout de loading, continuando mesmo assim...')
-    }
 
-    console.log('🔐 ProtectedRoute: Verificando acesso...', {
-      isAuthenticated,
-      hasUser: !!user,
-      hasProfile: !!userProfile,
-      perfilRequerido: perfil,
-      perfilUsuario: userProfile?.perfil,
-      is_admin: userProfile?.is_admin,
-      is_support: userProfile?.is_support,
-      allowAdmin,
-      allowSupport,
-      loading,
-      loadingTimeout
-    })
-
-    // Verificar autenticação - aguardar mais tempo antes de redirecionar
-    // Isso dá tempo para o useAuth detectar a sessão
+    // Verificar autenticação - simples e direto
     if (!isAuthenticated || !user) {
-      // Se ainda está carregando, aguardar mais
-      if (loading && !loadingTimeout) {
-        console.log('⏳ ProtectedRoute: Ainda carregando, aguardando...')
+      // Se ainda está carregando, aguardar
+      if (loading) {
         return
       }
       
-      // Se já passou o timeout de auth check, redirecionar
+      // Se passou o timeout, redirecionar
       if (authCheckTimeout) {
         const redirectPath = redirectTo || (perfil === 'admin' ? '/admin/login' : `/pt/${perfil || 'nutri'}/login`)
-        console.log('❌ Não autenticado após timeout, redirecionando para:', redirectPath)
         router.push(redirectPath)
         return
       }
       
-      // Se não passou o timeout, aguardar mais
-      console.log('⏳ ProtectedRoute: Aguardando autenticação...')
+      // Aguardar timeout
       return
     }
 
