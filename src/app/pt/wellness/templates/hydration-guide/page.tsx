@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Resultado {
   nivelHidratacao: string
@@ -175,31 +176,30 @@ export default function GuiaHidratacao({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="💧"
-            defaultTitle="Guia de Hidratação"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra seu nível ideal de hidratação
-                </p>
-                <p className="text-gray-600">
-                  Aprenda como a água pode transformar sua energia e performance
-                </p>
-              </>
-            }
-            benefits={[
-              'Cálculo personalizado da sua necessidade hídrica',
-              'Estratégias práticas de hidratação',
-              'Cronograma diário de consumo de água',
-              'Diagnóstico nutricional completo'
-            ]}
-            onStart={iniciarGuia}
-            buttonText="💧 Começar Guia de Hidratação - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          const templateBenefits = getTemplateBenefits('hydration-guide')
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="💧"
+              defaultTitle="Guia de Hidratação"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra seu nível ideal de hidratação
+                  </p>
+                  <p className="text-gray-600">
+                    Aprenda como a água pode transformar sua energia e performance
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover}
+              benefits={templateBenefits.whyUse}
+              onStart={iniciarGuia}
+              buttonText="💧 Começar Guia de Hidratação - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'formulario' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">

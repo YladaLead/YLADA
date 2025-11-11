@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Resultado {
   nivelDesafio: string
@@ -157,31 +158,30 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="🏆"
-            defaultTitle="Desafio 7 Dias"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Transforme sua vida em apenas 7 dias
-                </p>
-                <p className="text-gray-600">
-                  Um desafio gamificado para criar hábitos duradouros e resultados reais
-                </p>
-              </>
-            }
-            benefits={[
-              'Desafio estruturado de 7 dias',
-              'Hábitos simples e mensuráveis',
-              'Check-ins diários para manter motivação',
-              'Diagnóstico personalizado por nível'
-            ]}
-            onStart={iniciarDesafio}
-            buttonText="▶️ Aceitar Desafio - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          const templateBenefits = getTemplateBenefits('7-day-challenge')
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="🏆"
+              defaultTitle="Desafio 7 Dias"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Transforme sua vida em apenas 7 dias
+                  </p>
+                  <p className="text-gray-600">
+                    Um desafio gamificado para criar hábitos duradouros e resultados reais
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover}
+              benefits={templateBenefits.whyUse}
+              onStart={iniciarDesafio}
+              buttonText="▶️ Aceitar Desafio - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'formulario' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200">

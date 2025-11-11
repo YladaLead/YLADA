@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function TesteRetencaoLiquidos({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="💧"
-            defaultTitle="Teste de Retenção de Líquidos"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra seu nível de retenção e como reduzir
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para identificar retenção de líquidos
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique seu nível de retenção de líquidos',
-              'Descubra como reduzir inchaço e desconforto',
-              'Receba recomendações personalizadas',
-              'Tenha acesso a produtos específicos',
-              'Melhore seu equilíbrio hidroeletrolítico'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="💧 Começar Teste - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('retencao-liquidos')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="💧"
+              defaultTitle="Teste de Retenção de Líquidos"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra seu nível de retenção e como reduzir
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para identificar retenção de líquidos
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="💧 Começar Teste - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">

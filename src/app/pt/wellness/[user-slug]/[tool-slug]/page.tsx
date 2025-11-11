@@ -32,22 +32,15 @@ interface Tool {
 const TemplateIMC = dynamic(() => import('@/app/pt/wellness/templates/imc/page'), { ssr: false })
 const TemplateProteina = dynamic(() => import('@/app/pt/wellness/templates/proteina/page'), { ssr: false })
 const TemplateHidratacao = dynamic(() => import('@/app/pt/wellness/templates/hidratacao/page'), { ssr: false })
-const TemplateComposicao = dynamic(() => import('@/app/pt/wellness/templates/composicao/page'), { ssr: false })
 const TemplateCalorias = dynamic(() => import('@/app/pt/wellness/templates/calorias/page'), { ssr: false })
 const TemplateGanhos = dynamic(() => import('@/app/pt/wellness/templates/ganhos/page'), { ssr: false })
 const TemplatePotencial = dynamic(() => import('@/app/pt/wellness/templates/potencial/page'), { ssr: false })
 const TemplateProposito = dynamic(() => import('@/app/pt/wellness/templates/proposito/page'), { ssr: false })
-const TemplateParasitas = dynamic(() => import('@/app/pt/wellness/templates/parasitas/page'), { ssr: false })
 const TemplateAlimentacao = dynamic(() => import('@/app/pt/wellness/templates/healthy-eating/page'), { ssr: false })
 const TemplateWellnessProfile = dynamic(() => import('@/app/pt/wellness/templates/wellness-profile/page'), { ssr: false })
-const TemplateNutritionAssessment = dynamic(() => import('@/app/pt/wellness/templates/nutrition-assessment/page'), { ssr: false })
-const TemplateMealPlanner = dynamic(() => import('@/app/pt/wellness/templates/meal-planner/page'), { ssr: false })
-const TemplateFoodDiary = dynamic(() => import('@/app/pt/wellness/templates/food-diary/page'), { ssr: false })
-const TemplateWeeklyGoals = dynamic(() => import('@/app/pt/wellness/templates/weekly-goals/page'), { ssr: false })
 const Template7DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/7-day-challenge/page'), { ssr: false })
 const Template21DayChallenge = dynamic(() => import('@/app/pt/wellness/templates/21-day-challenge/page'), { ssr: false })
 const TemplateHydrationGuide = dynamic(() => import('@/app/pt/wellness/templates/hydration-guide/page'), { ssr: false })
-const TemplateEmotionalAssessment = dynamic(() => import('@/app/pt/wellness/templates/emotional-assessment/page'), { ssr: false })
 const TemplateIntoleranceAssessment = dynamic(() => import('@/app/pt/wellness/templates/intolerance-assessment/page'), { ssr: false })
 const TemplateMetabolicProfileAssessment = dynamic(() => import('@/app/pt/wellness/templates/metabolic-profile-assessment/page'), { ssr: false })
 const TemplateElectrolyteDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/electrolyte-diagnosis/page'), { ssr: false })
@@ -63,12 +56,9 @@ const TemplateEatingRoutine = dynamic(() => import('@/app/pt/wellness/templates/
 const TemplateGainsAndProsperity = dynamic(() => import('@/app/pt/wellness/templates/gains-and-prosperity/page'), { ssr: false })
 const TemplatePotentialAndGrowth = dynamic(() => import('@/app/pt/wellness/templates/potential-and-growth/page'), { ssr: false })
 const TemplatePurposeAndBalance = dynamic(() => import('@/app/pt/wellness/templates/purpose-and-balance/page'), { ssr: false })
-const TemplateInfographic = dynamic(() => import('@/app/pt/wellness/templates/infographic/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
-const TemplateRecipes = dynamic(() => import('@/app/pt/wellness/templates/recipes/page'), { ssr: false })
 // ⚠️ Template "Cardápio Detox" removido conforme solicitado
 const TemplateInitialAssessment = dynamic(() => import('@/app/pt/wellness/templates/initial-assessment/page'), { ssr: false })
-const TemplateRecommendationForm = dynamic(() => import('@/app/pt/wellness/templates/recommendation-form/page'), { ssr: false })
 
 export default function FerramentaPersonalizadaPage() {
   const params = useParams()
@@ -187,8 +177,6 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplateProteina config={config} />
       case 'calc-hidratacao':
         return <TemplateHidratacao config={config} />
-      case 'calc-composicao':
-        return <TemplateComposicao config={config} />
       case 'calc-calorias':
         return <TemplateCalorias config={config} />
       case 'quiz-ganhos':
@@ -197,22 +185,10 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplatePotencial config={config} />
       case 'quiz-proposito':
         return <TemplateProposito config={config} />
-      case 'quiz-parasitas':
-        return <TemplateParasitas config={config} />
       case 'quiz-alimentacao':
         return <TemplateAlimentacao config={config} />
       case 'quiz-wellness-profile':
         return <TemplateWellnessProfile config={config} />
-      case 'quiz-nutrition-assessment':
-        return <TemplateNutritionAssessment config={config} />
-      case 'planilha-meal-planner':
-        return <TemplateMealPlanner config={config} />
-      case 'diario-alimentar':
-      case 'planilha-diario-alimentar':
-        return <TemplateFoodDiary config={config} />
-      case 'tabela-metas-semanais':
-      case 'planilha-metas-semanais':
-        return <TemplateWeeklyGoals config={config} />
       case 'template-desafio-7dias':
       case 'desafio-7-dias':
         return <Template7DayChallenge config={config} />
@@ -221,9 +197,6 @@ export default function FerramentaPersonalizadaPage() {
         return <Template21DayChallenge config={config} />
       case 'guia-hidratacao':
         return <TemplateHydrationGuide config={config} />
-      case 'avaliacao-emocional':
-      case 'quiz-emocional':
-        return <TemplateEmotionalAssessment config={config} />
       case 'avaliacao-intolerancia':
       case 'quiz-intolerancia':
       case 'intolerancia':
@@ -251,6 +224,10 @@ export default function FerramentaPersonalizadaPage() {
       case 'quiz-tipo-fome':
       case 'qual-e-o-seu-tipo-de-fome':
       case 'tipo de fome':
+      case 'quiz-fome-emocional':
+      case 'avaliacao-fome-emocional':
+      case 'avaliação-fome-emocional':
+      case 'fome-emocional':
         return <TemplateHungerType config={config} />
       case 'alimentacao-saudavel':
       case 'quiz-alimentacao-saudavel':
@@ -300,17 +277,15 @@ export default function FerramentaPersonalizadaPage() {
       case 'propósito e equilíbrio':
       case 'quiz-proposito':
         return <TemplatePurposeAndBalance config={config} />
-      case 'infografico-educativo':
-        return <TemplateInfographic config={config} />
-      case 'template-receitas':
-        return <TemplateRecipes config={config} />
       case 'template-story-interativo':
+      case 'story-interativo':
+      case 'quiz-interativo':
         return <TemplateStory config={config} />
       // ⚠️ Template "Cardápio Detox" removido conforme solicitado
       case 'template-avaliacao-inicial':
+      case 'avaliacao-inicial':
+      case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
-      case 'formulario-recomendacao':
-        return <TemplateRecommendationForm config={config} />
       default:
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

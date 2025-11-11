@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoHidratacao {
   aguaDiaria: number
@@ -115,31 +116,32 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="💧"
-            defaultTitle="Calculadora de Hidratação"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra quanta água você precisa beber por dia
-                </p>
-                <p className="text-gray-600">
-                  Para manter seu corpo hidratado e saudável
-                </p>
-              </>
-            }
-            benefits={[
-              'Aumente energia e disposição durante o dia',
-              'Melhore recuperação após atividades físicas',
-              'Otimize metabolismo e queima de gordura',
-              'Mantenha pele e cabelo saudáveis'
-            ]}
-            onStart={iniciarCalculo}
-            buttonText="▶️ Calcular Minha Hidratação - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('calc-hidratacao')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="💧"
+              defaultTitle="Calculadora de Hidratação"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra quanta água você precisa beber por dia
+                  </p>
+                  <p className="text-gray-600">
+                    Para manter seu corpo hidratado e saudável
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarCalculo}
+              buttonText="▶️ Calcular Minha Hidratação - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'formulario' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-cyan-200">

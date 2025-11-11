@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoCalorias {
   tmb: number // Taxa Metabólica Basal
@@ -114,16 +115,29 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
   }
 
   if (etapa === 'landing') {
+    // Obter benefícios automaticamente baseado no template
+    const templateBenefits = getTemplateBenefits('calc-calorias')
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-orange-100">
-        <WellnessHeader />
-        <WellnessLanding
-          emoji={config.emoji || '🔥'}
-          title={config.title || 'Calculadora de Calorias Diárias'}
-          description={config.description || 'Descubra exatamente quantas calorias seu corpo precisa por dia — e receba orientações personalizadas baseadas em seu objetivo: emagrecer, manter ou ganhar peso.'}
-          onStart={iniciarCalculo}
-          customColors={config.custom_colors}
+        <WellnessHeader
+          title={config?.title}
+          description={config?.description}
+          defaultTitle="Calculadora de Calorias"
+          defaultDescription="Descubra exatamente quantas calorias seu corpo precisa por dia"
         />
+        <main className="max-w-4xl mx-auto px-4 py-8">
+          <WellnessLanding
+            config={config}
+            defaultEmoji="🔥"
+            defaultTitle="Calculadora de Calorias Diárias"
+            defaultDescription="Descubra exatamente quantas calorias seu corpo precisa por dia — e receba orientações personalizadas baseadas em seu objetivo: emagrecer, manter ou ganhar peso."
+            discover={templateBenefits.discover || []}
+            benefits={templateBenefits.whyUse || []}
+            onStart={iniciarCalculo}
+            buttonText="▶️ Calcular Agora - É Grátis"
+          />
+        </main>
       </div>
     )
   }

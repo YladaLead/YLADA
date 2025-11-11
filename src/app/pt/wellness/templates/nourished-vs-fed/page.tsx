@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function VoceNutridoOuApenasAlimentado({ config }: TemplateBasePr
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="🍎"
-            defaultTitle="Você está Nutrido ou Apenas Alimentado?"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra se você está realmente nutrido
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para entender nutrição adequada
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique se você está nutrido ou apenas alimentado',
-              'Descubra como transformar alimentação em nutrição',
-              'Receba recomendações personalizadas',
-              'Tenha acesso a produtos para nutrição completa',
-              'Melhore sua saúde nutricional'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="🍎 Começar Avaliação - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('nutrido-vs-alimentado')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="🍎"
+              defaultTitle="Você está Nutrido ou Apenas Alimentado?"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra se você está realmente nutrido
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para entender nutrição adequada
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="🍎 Começar Avaliação - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200">

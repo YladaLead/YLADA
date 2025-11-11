@@ -68,6 +68,8 @@ function NovaFerramentaWellnessContent() {
   const [salvando, setSalvando] = useState(false) // Estado de salvamento
   const [templates, setTemplates] = useState<Template[]>([]) // Templates do banco de dados
   const [carregandoTemplates, setCarregandoTemplates] = useState(true) // Estado de carregamento dos templates
+  const [mostrarIntroducao, setMostrarIntroducao] = useState(true) // Controla se mostra a introdução
+  const [naoMostrarNovamente, setNaoMostrarNovamente] = useState(false) // Checkbox "não mostrar novamente"
 
   // Carregar templates do banco de dados
   useEffect(() => {
@@ -550,12 +552,122 @@ function NovaFerramentaWellnessContent() {
     }
   }
 
+  // Carregar preferência de não mostrar introdução do localStorage
+  useEffect(() => {
+    const preferencia = localStorage.getItem('wellness_nao_mostrar_introducao')
+    if (preferencia === 'true') {
+      setMostrarIntroducao(false)
+    }
+  }, [])
+
+  // Salvar preferência quando checkbox for marcado
+  const handleNaoMostrarNovamente = (checked: boolean) => {
+    setNaoMostrarNovamente(checked)
+    if (checked) {
+      localStorage.setItem('wellness_nao_mostrar_introducao', 'true')
+    } else {
+      localStorage.removeItem('wellness_nao_mostrar_introducao')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <WellnessNavBar showTitle={true} title={templateSelecionado ? `Configurar: ${templateSelecionado.nome}` : 'Criar Novo Link'} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Introdução Opcional - Só mostra se não tiver template selecionado */}
+        {!templateSelecionado && mostrarIntroducao && (
+          <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 shadow-lg">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-900 mb-3 flex items-center">
+                  <span className="text-3xl mr-3">👋</span>
+                  Bem-vindo ao Criador de Ferramentas Wellness!
+                </h2>
+                <p className="text-gray-700 mb-4 text-lg">
+                  Crie links personalizados para suas ferramentas de forma rápida e fácil. 
+                  Cada ferramenta que você criar terá uma <strong>página de apresentação inicial</strong> 
+                  explicando por que ela é importante e o que o cliente vai descobrir.
+                </p>
+                
+                <div className="bg-white rounded-lg p-5 mb-4 border border-green-200">
+                  <h3 className="font-semibold text-gray-900 mb-3 text-lg flex items-center">
+                    <span className="text-xl mr-2">💡</span>
+                    Como funciona:
+                  </h3>
+                  <ol className="space-y-3 text-gray-700 list-decimal list-inside">
+                    <li className="pl-2">
+                      <strong>Escolha uma ferramenta</strong> da lista abaixo (Calculadora, Quiz ou Planilha)
+                    </li>
+                    <li className="pl-2">
+                      <strong>Personalize</strong> o nome, emoji, cores e botão de ação
+                    </li>
+                    <li className="pl-2">
+                      <strong>Configure</strong> para onde o cliente será redirecionado (WhatsApp ou URL externa)
+                    </li>
+                    <li className="pl-2">
+                      <strong>Compartilhe</strong> o link gerado com seus clientes
+                    </li>
+                  </ol>
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-5 mb-4 border border-blue-200">
+                  <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+                    <span className="text-xl mr-2">✨</span>
+                    O que torna especial:
+                  </h3>
+                  <ul className="space-y-2 text-blue-800">
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 font-bold">✓</span>
+                      <span><strong>Página de apresentação inicial:</strong> Cada ferramenta terá uma landing page explicando por que ela é importante e o que o cliente vai descobrir</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 font-bold">✓</span>
+                      <span><strong>Totalmente personalizável:</strong> Cores, emoji, título, descrição e botão de ação</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 font-bold">✓</span>
+                      <span><strong>URL personalizada:</strong> Crie links fáceis de compartilhar e memorizar</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 font-bold">✓</span>
+                      <span><strong>Integração com WhatsApp:</strong> Redirecione clientes diretamente para conversar com você</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-green-200">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={naoMostrarNovamente}
+                      onChange={(e) => handleNaoMostrarNovamente(e.target.checked)}
+                      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Não mostrar esta introdução novamente
+                    </span>
+                  </label>
+                  <button
+                    onClick={() => setMostrarIntroducao(false)}
+                    className="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md"
+                  >
+                    Criar Meu Link →
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={() => setMostrarIntroducao(false)}
+                className="ml-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                title="Fechar introdução"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Escolher Template */}
         {!templateSelecionado && (
           <>
@@ -741,40 +853,8 @@ function NovaFerramentaWellnessContent() {
                             placeholder="Ex: calculadora-imc"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           />
-                          {slugNormalizado && (
-                            <div className="mt-2 px-4 py-3 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
-                              <div className="flex items-start">
-                                <span className="text-blue-600 text-xl mr-2">ℹ️</span>
-                                <div className="flex-1">
-                                  <p className="text-sm font-semibold text-blue-900 mb-1">
-                                    Normalização automática aplicada
-                                  </p>
-                                  <p className="text-xs text-blue-800">
-                                    <strong>Regras aplicadas:</strong> Letras maiúsculas convertidas para minúsculas, espaços substituídos por hífens, acentos removidos, caracteres especiais removidos.
-                                  </p>
-                                  <p className="text-xs text-blue-700 mt-2 font-medium">
-                                    ✅ Seu link funcionará perfeitamente com este formato!
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          <div className="mt-3 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
-                            <p className="text-xs font-semibold text-yellow-900 mb-2">
-                              📋 Regras de formatação automática:
-                            </p>
-                            <ul className="text-xs text-yellow-800 space-y-1 list-disc list-inside">
-                              <li>Letras maiúsculas → minúsculas (ex: "Calculadora" → "calculadora")</li>
-                              <li>Espaços → hífens (ex: "calculadora imc" → "calculadora-imc")</li>
-                              <li>Acentos removidos (ex: "composição" → "composicao")</li>
-                              <li>Caracteres especiais removidos (ex: "calculadora@imc" → "calculadoraimc")</li>
-                            </ul>
-                            <p className="text-xs text-yellow-700 mt-2 font-medium">
-                              💡 <strong>Dica:</strong> Você pode digitar normalmente, o sistema ajusta automaticamente!
-                            </p>
-                          </div>
                           <p className="text-xs text-gray-500 mt-2">
-                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos". Será tratado automaticamente enquanto você digita.
+                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos". O sistema ajusta automaticamente enquanto você digita.
                           </p>
                           {configuracao.urlCompleta && (
                             <div className={`mt-2 px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>

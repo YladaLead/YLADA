@@ -7,7 +7,13 @@ import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
 import { useAuth } from '@/hooks/useAuth'
-import ChatIA from '@/components/ChatIA'
+import dynamic from 'next/dynamic'
+
+// Lazy load ChatIA para melhorar performance inicial
+const ChatIA = dynamic(() => import('@/components/ChatIA'), {
+  ssr: false,
+  loading: () => null
+})
 
 export default function WellnessDashboard() {
   return (
@@ -55,33 +61,33 @@ function WellnessDashboardContent() {
   const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState<string | null>(null)
   const [alterandoStatusId, setAlterandoStatusId] = useState<string | null>(null)
 
-  // Carregar perfil do usuário
+  // Carregar perfil do usuário - otimizado com timeout menor e fallback rápido
   useEffect(() => {
+    if (!user) {
+      setPerfil({
+        nome: userProfile?.nome_completo || 'Usuário',
+        bio: ''
+      })
+      setCarregandoPerfil(false)
+      return
+    }
+    
+    // Usar dados disponíveis imediatamente (não bloquear renderização)
+    setPerfil({
+      nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+      bio: ''
+    })
+    setCarregandoPerfil(false)
+    
+    // Carregar perfil completo em background (não bloquear UI)
     const carregarPerfil = async () => {
-      if (!user) {
-        // Se não tem user, definir perfil padrão e parar loading
-        setPerfil({
-          nome: userProfile?.nome_completo || 'Usuário',
-          bio: ''
-        })
-        setCarregandoPerfil(false)
-        return
-      }
-      
-      // Timeout de segurança (5 segundos - otimizado)
-      const timeoutId = setTimeout(() => {
-        console.warn('⚠️ Timeout ao carregar perfil, usando dados padrão')
-        setPerfil({
-          nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
-          bio: ''
-        })
-        setCarregandoPerfil(false)
-      }, 5000) // Reduzido de 10s para 5s
-      
       try {
-        setCarregandoPerfil(true)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3000) // 3s timeout
+        
         const response = await fetch('/api/wellness/profile', {
-          credentials: 'include'
+          credentials: 'include',
+          signal: controller.signal
         })
         
         clearTimeout(timeoutId)
@@ -93,57 +99,42 @@ function WellnessDashboardContent() {
               nome: data.profile.nome || userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
               bio: data.profile.bio || ''
             })
-          } else {
-            // Se não tem profile, usar dados do user
-            setPerfil({
-              nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
-              bio: ''
-            })
           }
-        } else {
-          // Se resposta não foi ok, usar dados disponíveis
-          console.warn('⚠️ Resposta não OK ao carregar perfil:', response.status)
-          setPerfil({
-            nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
-            bio: ''
-          })
         }
-      } catch (error) {
-        clearTimeout(timeoutId)
-        console.error('Erro ao carregar perfil:', error)
-        setPerfil({
-          nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
-          bio: ''
-        })
-      } finally {
-        setCarregandoPerfil(false)
+      } catch (error: any) {
+        // Ignorar erros silenciosamente - já temos dados do userProfile
+        if (error.name !== 'AbortError') {
+          console.warn('Erro ao carregar perfil (não crítico):', error)
+        }
       }
     }
 
     carregarPerfil()
   }, [user, userProfile])
 
-  // Carregar dados do dashboard
+  // Carregar dados do dashboard - otimizado com timeout e abort controller
   useEffect(() => {
-    const carregarDados = async () => {
-      if (!user) return
+    if (!user) return
       
+    const carregarDados = async () => {
       try {
         setCarregandoDados(true)
         
-        // Carregar ferramentas
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
+        
         const response = await fetch('/api/wellness/ferramentas', {
-          credentials: 'include'
+          credentials: 'include',
+          signal: controller.signal
         })
+        
+        clearTimeout(timeoutId)
         
         if (response.ok) {
           const data = await response.json()
-          // A API retorna 'tools' ou 'ferramentas'
           const ferramentas = data.tools || data.ferramentas || []
           
-          // IMPORTANTE: Mostrar TODAS as ferramentas, não apenas ativas
           setFerramentasAtivas(ferramentas.map((f: any) => {
-            // Determinar categoria baseado no template_slug
             let categoria = 'Geral'
             if (f.template_slug?.startsWith('calc-')) {
               categoria = 'Calculadora'
@@ -155,30 +146,30 @@ function WellnessDashboardContent() {
             
             return {
               id: f.id,
-              nome: f.title || f.nome, // API retorna 'title'
+              nome: f.title || f.nome,
               categoria: categoria,
               leads: f.leads_count || f.views || 0,
-              conversoes: 0, // TODO: calcular conversões
+              conversoes: 0,
               status: f.status,
               icon: f.emoji || '🔗'
             }
           }))
           
-          // Filtrar apenas ativas para estatísticas
           const ativas = ferramentas.filter((f: any) => 
             f.status === 'active' || f.status === 'ativa'
           )
           
-          // Calcular estatísticas
           setStats({
             ferramentasAtivas: ativas.length,
             leadsGerados: ferramentas.reduce((acc: number, f: any) => acc + (f.views || 0), 0),
-            conversoes: 0, // TODO: calcular conversões
-            clientesAtivos: 0 // TODO: calcular clientes ativos
+            conversoes: 0,
+            clientesAtivos: 0
           })
         }
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error)
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Erro ao carregar dados:', error)
+        }
       } finally {
         setCarregandoDados(false)
       }
@@ -520,8 +511,8 @@ function WellnessDashboardContent() {
 
       </div>
 
-      {/* Chat IA */}
-      <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
+      {/* Chat IA - só renderizar quando aberto */}
+      {chatAberto && <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />}
     </div>
   )
 }

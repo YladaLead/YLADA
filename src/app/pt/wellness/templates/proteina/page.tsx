@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoProteina {
   proteinaDiaria: number
@@ -138,31 +139,32 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="💪"
-            defaultTitle="Calculadora de Proteína"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra quantas gramas de proteína você precisa por dia
-                </p>
-                <p className="text-gray-600">
-                  Para atingir seus objetivos com saúde e resultados
-                </p>
-              </>
-            }
-            benefits={[
-              'Entenda suas necessidades individuais baseadas no seu perfil',
-              'Saiba quanto consumir por refeição para melhores resultados',
-              'Otimize recuperação muscular e ganho de massa',
-              'Receba recomendações personalizadas de fontes proteicas'
-            ]}
-            onStart={iniciarCalculo}
-            buttonText="▶️ Calcular Minha Proteína - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('calc-proteina')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="💪"
+              defaultTitle="Calculadora de Proteína"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra quantas gramas de proteína você precisa por dia
+                  </p>
+                  <p className="text-gray-600">
+                    Para atingir seus objetivos com saúde e resultados
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarCalculo}
+              buttonText="▶️ Calcular Minha Proteína - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'formulario' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200">

@@ -176,16 +176,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar se o slug já existe
+    // Verificar se o slug já existe PARA ESTE USUÁRIO
     const { data: existing } = await supabaseAdmin
       .from('wellness_portals')
       .select('id')
       .eq('slug', slug)
-      .single()
+      .eq('user_id', user.id) // ✅ Verificar apenas para o usuário atual
+      .maybeSingle()
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Este nome de URL já está em uso. Escolha outro.' },
+        { error: 'Este nome de URL já está em uso por você. Escolha outro.' },
         { status: 409 }
       )
     }
@@ -283,17 +284,18 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Se slug mudou, verificar disponibilidade
+    // Se slug mudou, verificar disponibilidade PARA ESTE USUÁRIO
     if (updates.slug && updates.slug !== existing.slug) {
       const { data: slugExists } = await supabaseAdmin
         .from('wellness_portals')
         .select('id')
         .eq('slug', updates.slug)
-        .single()
+        .eq('user_id', user.id) // ✅ Verificar apenas para o usuário atual
+        .maybeSingle()
 
       if (slugExists) {
         return NextResponse.json(
-          { error: 'Este nome de URL já está em uso. Escolha outro.' },
+          { error: 'Este nome de URL já está em uso por você. Escolha outro.' },
           { status: 409 }
         )
       }

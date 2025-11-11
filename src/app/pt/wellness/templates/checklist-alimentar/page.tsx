@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { checklistAlimentarDiagnosticos } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -251,21 +252,21 @@ export default function ChecklistAlimentar({ config }: TemplateBaseProps) {
       <WellnessHeader config={config} />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="🍽️"
-            defaultTitle="Checklist Alimentar"
-            defaultDescription="Avalie seus hábitos alimentares em 12 pontos essenciais e descubra oportunidades de melhoria na sua nutrição"
-            benefits={[
-              'Avalie seus hábitos alimentares em 12 pontos essenciais',
-              'Descubra oportunidades de melhoria na sua nutrição',
-              'Receba orientações personalizadas para otimizar sua alimentação'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="▶️ Começar Avaliação - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          const templateBenefits = getTemplateBenefits('checklist-alimentar')
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="🍽️"
+              defaultTitle="Checklist Alimentar"
+              defaultDescription="Avalie seus hábitos alimentares em 12 pontos essenciais e descubra oportunidades de melhoria na sua nutrição"
+              discover={templateBenefits.discover}
+              benefits={templateBenefits.whyUse}
+              onStart={iniciarQuiz}
+              buttonText="▶️ Começar Avaliação - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && pergunta && (
           <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">

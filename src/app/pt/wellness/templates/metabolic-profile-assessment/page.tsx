@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="⚡"
-            defaultTitle="Avaliação do Perfil Metabólico"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra seu perfil metabólico e como otimizá-lo
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para entender seu metabolismo e criar estratégias eficazes
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique seu perfil metabólico',
-              'Descubra como acelerar seu metabolismo',
-              'Receba orientações personalizadas',
-              'Tenha acesso a produtos otimizados para seu perfil',
-              'Transforme seus resultados com estratégias eficazes'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="⚡ Começar Avaliação Metabólica - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('avaliacao-perfil-metabolico')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="⚡"
+              defaultTitle="Avaliação do Perfil Metabólico"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra seu perfil metabólico e como otimizá-lo
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para entender seu metabolismo e criar estratégias eficazes
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="⚡ Começar Avaliação Metabólica - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">

@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -180,31 +181,32 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="⭐"
-            defaultTitle="Propósito e Equilíbrio"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra se seu dia a dia está alinhado com seus sonhos
-                </p>
-                <p className="text-gray-600">
-                  Avalie o equilíbrio entre sua vida profissional, pessoal e propósito
-                </p>
-              </>
-            }
-            benefits={[
-              'Se vive com propósito ou apenas sobrevive',
-              'O equilíbrio entre trabalho, vida pessoal e sonhos',
-              'Como realinhar seu dia a dia com seus valores',
-              'Estratégias para viver com propósito e equilíbrio'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="▶️ Iniciar Quiz - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('quiz-proposito')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="⭐"
+              defaultTitle="Propósito e Equilíbrio"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra se seu dia a dia está alinhado com seus sonhos
+                  </p>
+                  <p className="text-gray-600">
+                    Avalie o equilíbrio entre sua vida profissional, pessoal e propósito
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="▶️ Iniciar Quiz - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-violet-200">

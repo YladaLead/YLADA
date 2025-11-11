@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function DiagnosticoSintomasIntestinais({ config }: TemplateBaseP
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="🌿"
-            defaultTitle="Diagnóstico de Sintomas Intestinais"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra sua saúde intestinal e como otimizá-la
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para identificar problemas e criar estratégias eficazes
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique possíveis problemas intestinais',
-              'Descubra como melhorar sua saúde digestiva',
-              'Receba orientações personalizadas',
-              'Tenha acesso a produtos adequados ao seu perfil',
-              'Otimize seu bem-estar digestivo'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="🌿 Começar Diagnóstico Intestinal - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('diagnostico-sintomas-intestinais')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="🌿"
+              defaultTitle="Diagnóstico de Sintomas Intestinais"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra sua saúde intestinal e como otimizá-la
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para identificar problemas e criar estratégias eficazes
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="🌿 Começar Diagnóstico Intestinal - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-teal-200">

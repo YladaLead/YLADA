@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoIMC {
   imc: number
@@ -145,31 +146,32 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="📊"
-            defaultTitle="Calculadora de IMC"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra seu Índice de Massa Corporal em segundos
-                </p>
-                <p className="text-gray-600">
-                  Com orientações personalizadas para alcançar seu peso ideal
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique se você está no peso ideal para sua altura',
-              'Receba orientações personalizadas baseadas no seu resultado',
-              'Entenda sua saúde corporal atual em menos de 2 minutos',
-              'Conecte-se com quem pode te ajudar a alcançar seus objetivos'
-            ]}
-            onStart={iniciarCalculo}
-            buttonText="▶️ Calcular Agora - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('calc-imc')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="📊"
+              defaultTitle="Calculadora de IMC"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra seu Índice de Massa Corporal em segundos
+                  </p>
+                  <p className="text-gray-600">
+                    Com orientações personalizadas para alcançar seu peso ideal
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarCalculo}
+              buttonText="▶️ Calcular Agora - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'formulario' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">

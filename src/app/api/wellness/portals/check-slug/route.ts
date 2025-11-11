@@ -30,21 +30,22 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Verificar se o slug já existe (apenas para o mesmo usuário)
-    // Slugs devem ser únicos globalmente, mas podemos verificar se é do próprio usuário
+    // Verificar se o slug já existe PARA ESTE USUÁRIO (slugs podem ser repetidos entre usuários diferentes)
     let query = supabaseAdmin
       .from('wellness_portals')
-      .select('id, user_id')
+      .select('id, slug')
       .eq('slug', slug)
+      .eq('user_id', user.id) // ✅ Verificar apenas para o usuário atual
     
     // Se excludeId foi fornecido, excluir esse ID da verificação (útil para edição)
     if (excludeId) {
       query = query.neq('id', excludeId)
     }
     
-    const { data: existing, error } = await query.maybeSingle()
+    const { data, error } = await query.maybeSingle()
 
-    if (error) {
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 = no rows returned (é o que queremos)
       console.error('Erro ao verificar slug:', error)
       return NextResponse.json(
         { error: 'Erro ao verificar disponibilidade' },
@@ -52,26 +53,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Se não existe, está disponível
-    if (!existing) {
-      return NextResponse.json({
-        available: true,
-        isOwn: false
-      })
-    }
+    const available = !data
 
-    // Se existe e é do próprio usuário, permitir (para edição)
-    if (existing.user_id === user.id) {
-      return NextResponse.json({
-        available: true,
-        isOwn: true
-      })
-    }
-
-    // Se existe e é de outro usuário, não está disponível
     return NextResponse.json({
-      available: false,
-      isOwn: false
+      slug,
+      available,
+      message: available 
+        ? 'URL disponível!' 
+        : 'Esta URL já está em uso por você. Escolha outra.'
     })
   } catch (error: any) {
     console.error('Erro ao verificar slug do portal:', error)

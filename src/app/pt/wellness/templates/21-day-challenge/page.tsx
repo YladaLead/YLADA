@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Semana {
   numero: number
@@ -246,31 +247,30 @@ export default function Desafio21Dias({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="📅"
-            defaultTitle="Desafio 21 Dias"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Crie hábitos duradouros em apenas 21 dias
-                </p>
-                <p className="text-gray-600">
-                  O tempo científico para formação de hábitos - transforme temporário em permanente
-                </p>
-              </>
-            }
-            benefits={[
-              '21 dias estruturados em 3 semanas progressivas',
-              'Formação de hábitos duradouros e sustentáveis',
-              'Check-ins semanais para manter motivação',
-              'Diagnóstico personalizado por nível de experiência'
-            ]}
-            onStart={iniciarDesafio}
-            buttonText="▶️ Aceitar Desafio de 21 Dias - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          const templateBenefits = getTemplateBenefits('21-day-challenge')
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="📅"
+              defaultTitle="Desafio 21 Dias"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Crie hábitos duradouros em apenas 21 dias
+                  </p>
+                  <p className="text-gray-600">
+                    O tempo científico para formação de hábitos - transforme temporário em permanente
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover}
+              benefits={templateBenefits.whyUse}
+              onStart={iniciarDesafio}
+              buttonText="▶️ Aceitar Desafio de 21 Dias - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'formulario' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-green-200">

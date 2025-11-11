@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -180,31 +181,32 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="💰"
-            defaultTitle="Ganhos e Prosperidade"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Avalie se seu estilo de vida permite ganhar mais
-                </p>
-                <p className="text-gray-600">
-                  Descubra como seu estilo de vida impacta sua capacidade de gerar renda
-                </p>
-              </>
-            }
-            benefits={[
-              'Se suas fontes de renda estão aproveitando seu potencial',
-              'Como otimizar seu tempo para gerar mais renda',
-              'Oportunidades de crescimento que você está perdendo',
-              'Estratégias para multiplicar sua prosperidade'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="▶️ Iniciar Quiz - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('quiz-ganhos')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="💰"
+              defaultTitle="Ganhos e Prosperidade"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Avalie se seu estilo de vida permite ganhar mais
+                  </p>
+                  <p className="text-gray-600">
+                    Descubra como seu estilo de vida impacta sua capacidade de gerar renda
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="▶️ Iniciar Quiz - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-yellow-200">

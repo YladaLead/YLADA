@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function VoceConheceSeuCorpo({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="🧠"
-            defaultTitle="Você Conhece o Seu Corpo?"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra seu nível de autoconhecimento corporal
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para entender seu autoconhecimento
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique seu nível de conhecimento sobre seu corpo',
-              'Descubra como conhecer melhor seus sinais',
-              'Receba recomendações personalizadas',
-              'Tenha acesso a produtos e estratégias adequadas',
-              'Melhore seu autoconhecimento corporal'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="🧠 Começar Avaliação - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('conhece-seu-corpo')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="🧠"
+              defaultTitle="Você Conhece o Seu Corpo?"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra seu nível de autoconhecimento corporal
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para entender seu autoconhecimento
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="🧠 Começar Avaliação - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-200">

@@ -9,7 +9,8 @@ interface WellnessLandingProps {
   defaultEmoji?: string
   defaultTitle?: string
   defaultDescription?: string | React.ReactNode
-  benefits?: string[]
+  benefits?: string[] // "Por que usar esta ferramenta"
+  discover?: string[] // "O que você vai descobrir"
   onStart: () => void
   buttonText?: string
 }
@@ -19,7 +20,8 @@ export default function WellnessLanding({
   defaultEmoji = '📊',
   defaultTitle = 'Ferramenta Wellness',
   defaultDescription,
-  benefits = [],
+  benefits = [], // "Por que usar esta ferramenta"
+  discover = [], // "O que você vai descobrir"
   onStart,
   buttonText = '▶️ Começar Agora - É Grátis'
 }: WellnessLandingProps) {
@@ -39,13 +41,29 @@ export default function WellnessLanding({
         )}
       </div>
 
+      {/* Seção: O que você vai descobrir */}
+      {discover.length > 0 && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-6 border-2 border-green-200">
+          <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 O que você vai descobrir:</h3>
+          <ul className="text-left space-y-3 text-gray-700">
+            {discover.map((item, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-green-600 mr-2 font-bold">✓</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Seção: Por que usar esta ferramenta */}
       {benefits.length > 0 && (
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8 border-2 border-blue-200">
           <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 Por que usar esta ferramenta?</h3>
           <ul className="text-left space-y-3 text-gray-700">
             {benefits.map((benefit, index) => (
               <li key={index} className="flex items-start">
-                <span className="text-blue-600 mr-2">✓</span>
+                <span className="text-blue-600 mr-2 font-bold">✓</span>
                 <span>{benefit}</span>
               </li>
             ))}

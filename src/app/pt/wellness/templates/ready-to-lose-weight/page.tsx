@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function ProntoEmagrecer({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="🎯"
-            defaultTitle="Pronto para Emagrecer com Saúde"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra se você está pronto para começar sua jornada de emagrecimento
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação rápida para entender seu perfil e criar um plano personalizado
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique sua prontidão para emagrecer',
-              'Descubra como podemos te ajudar',
-              'Receba recomendações personalizadas',
-              'Tenha acesso a produtos adequados',
-              'Comece sua transformação com segurança'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="🎯 Começar Avaliação - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('pronto-emagrecer')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="🎯"
+              defaultTitle="Pronto para Emagrecer com Saúde"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra se você está pronto para começar sua jornada de emagrecimento
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação rápida para entender seu perfil e criar um plano personalizado
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="🎯 Começar Avaliação - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-200">

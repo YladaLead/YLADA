@@ -72,6 +72,12 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   'quiz-alimentacao-saudavel': 'quiz-alimentacao',
   'alimentacao-saudavel': 'quiz-alimentacao',
   
+  // Quiz Fome Emocional / Tipo de Fome
+  'quiz-fome-emocional': 'tipo-fome',
+  'avaliacao-fome-emocional': 'tipo-fome',
+  'avaliação-fome-emocional': 'tipo-fome',
+  'fome-emocional': 'tipo-fome',
+  
   // Planilhas
   'planilha-meal-planner': 'planilha-meal-planner',
   'diario-alimentar': 'planilha-diario-alimentar',

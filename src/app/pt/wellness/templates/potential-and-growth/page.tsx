@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function QuizPotencialCrescimento({ config }: TemplateBaseProps) 
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="🌱"
-            defaultTitle="Quiz: Potencial e Crescimento"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra seu potencial de crescimento
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para entender suas oportunidades de desenvolvimento
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique seu potencial de crescimento',
-              'Descubra oportunidades de desenvolvimento',
-              'Receba insights personalizados',
-              'Conheça caminhos para acelerar seu crescimento',
-              'Explore possibilidades de expansão'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="🌱 Começar Quiz - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('quiz-potencial')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="🌱"
+              defaultTitle="Quiz: Potencial e Crescimento"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra seu potencial de crescimento
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para entender suas oportunidades de desenvolvimento
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="🌱 Começar Quiz - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-green-200">

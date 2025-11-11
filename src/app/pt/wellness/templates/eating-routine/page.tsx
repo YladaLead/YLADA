@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,30 @@ export default function VoceAlimentandoConformeRotina({ config }: TemplateBasePr
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="⏰"
-            defaultTitle="Você está se Alimentando Conforme sua Rotina?"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra se sua alimentação está adequada à sua rotina
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para entender adequação alimentar
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique se sua alimentação está adequada à rotina',
-              'Descubra como adequar alimentação ao seu estilo de vida',
-              'Receba recomendações personalizadas',
-              'Tenha acesso a produtos adaptados à rotina',
-              'Melhore sua saúde através de alimentação adequada'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="⏰ Começar Avaliação - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          const templateBenefits = getTemplateBenefits('eating-routine')
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="⏰"
+              defaultTitle="Você está se Alimentando Conforme sua Rotina?"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra se sua alimentação está adequada à sua rotina
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para entender adequação alimentar
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover}
+              benefits={templateBenefits.whyUse}
+              onStart={iniciarQuiz}
+              buttonText="⏰ Começar Avaliação - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-indigo-200">

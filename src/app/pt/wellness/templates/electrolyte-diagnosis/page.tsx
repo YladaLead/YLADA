@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
   id: number
@@ -198,32 +199,32 @@ export default function DiagnosticoEletrolitos({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="⚡"
-            defaultTitle="Diagnóstico de Eletrólitos"
-            defaultDescription={
-              <>
-                <p className="text-xl text-gray-600 mb-2">
-                  Descubra seu equilíbrio eletrolítico e como otimizá-lo
-                </p>
-                <p className="text-gray-600">
-                  Uma avaliação personalizada para identificar desequilíbrios e criar estratégias eficazes
-                </p>
-              </>
-            }
-            benefits={[
-              'Identifique possíveis desequilíbrios eletrolíticos',
-              'Descubra como melhorar seu equilíbrio',
-              'Receba orientações personalizadas',
-              'Tenha acesso a produtos adequados ao seu perfil',
-              'Otimize sua hidratação e bem-estar'
-            ]}
-            onStart={iniciarQuiz}
-            buttonText="⚡ Começar Diagnóstico de Eletrólitos - É Grátis"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          // Obter benefícios automaticamente baseado no template
+          const templateBenefits = getTemplateBenefits('diagnostico-eletrolitos')
+          
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="⚡"
+              defaultTitle="Diagnóstico de Eletrólitos"
+              defaultDescription={
+                <>
+                  <p className="text-xl text-gray-600 mb-2">
+                    Descubra seu equilíbrio eletrolítico e como otimizá-lo
+                  </p>
+                  <p className="text-gray-600">
+                    Uma avaliação personalizada para identificar desequilíbrios e criar estratégias eficazes
+                  </p>
+                </>
+              }
+              discover={templateBenefits.discover || []}
+              benefits={templateBenefits.whyUse || []}
+              onStart={iniciarQuiz}
+              buttonText="⚡ Começar Diagnóstico de Eletrólitos - É Grátis"
+            />
+          )
+        })()}
 
         {etapa === 'quiz' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-cyan-200">

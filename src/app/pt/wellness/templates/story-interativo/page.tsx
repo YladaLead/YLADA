@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface StoryTela {
   titulo: string
@@ -78,17 +79,21 @@ export default function StoryInterativo({ config }: TemplateBaseProps) {
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {etapa === 'landing' && (
-          <WellnessLanding
-            config={config}
-            defaultEmoji="📱"
-            defaultTitle="Story Interativo"
-            defaultDescription={<p className="text-gray-600">Crie um roteiro de stories em 1 minuto</p>}
-            benefits={['Hooks prontos', 'Roteiro por nível', 'CTA de alta conversão']}
-            onStart={iniciar}
-            buttonText="📱 Começar Story"
-          />
-        )}
+        {etapa === 'landing' && (() => {
+          const templateBenefits = getTemplateBenefits('story-interativo')
+          return (
+            <WellnessLanding
+              config={config}
+              defaultEmoji="📱"
+              defaultTitle="Story Interativo"
+              defaultDescription={<p className="text-gray-600">Crie um roteiro de stories em 1 minuto</p>}
+              discover={templateBenefits.discover}
+              benefits={templateBenefits.whyUse}
+              onStart={iniciar}
+              buttonText="📱 Começar Story"
+            />
+          )
+        })()}
 
         {etapa === 'formulario' && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-200">

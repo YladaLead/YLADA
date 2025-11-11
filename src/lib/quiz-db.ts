@@ -85,7 +85,15 @@ export const quizDB = {
   // Salvar quiz completo (com perguntas)
   async saveQuiz(quizData: Partial<QuizDatabase>, perguntas: any[]) {
     try {
-      // 1. Inserir quiz
+      // 1. Validar se o slug está disponível para este usuário
+      if (quizData.slug && quizData.user_id) {
+        const slugDisponivel = await this.checkSlugAvailability(quizData.slug, quizData.user_id)
+        if (!slugDisponivel) {
+          throw new Error(`Este nome de URL já está em uso por você. Escolha outro.`)
+        }
+      }
+
+      // 2. Inserir quiz
       const { data: quiz, error: quizError } = await supabaseAdmin
         .from('quizzes')
         .insert({
@@ -104,10 +112,14 @@ export const quizDB = {
 
       if (quizError) {
         console.error('Erro ao salvar quiz:', quizError)
+        // Se for erro de constraint única, retornar mensagem mais clara
+        if (quizError.code === '23505') {
+          throw new Error('Este nome de URL já está em uso por você. Escolha outro.')
+        }
         throw quizError
       }
 
-      // 2. Inserir perguntas
+      // 3. Inserir perguntas
       if (perguntas && perguntas.length > 0) {
         const perguntasData = perguntas.map((p, index) => ({
           quiz_id: quiz.id,
@@ -307,26 +319,28 @@ export const quizDB = {
     }
   },
 
-  // Verificar se slug está disponível
-  async checkSlugAvailability(slug: string): Promise<boolean> {
+  // Verificar se slug está disponível PARA O USUÁRIO ATUAL
+  async checkSlugAvailability(slug: string, userId?: string): Promise<boolean> {
     try {
-      const { data, error } = await supabaseAdmin
+      let query = supabaseAdmin
         .from('quizzes')
         .select('id')
         .eq('slug', slug)
-        .single()
-
-      if (error && error.code === 'PGRST116') {
-        // Nenhum registro encontrado = disponível
-        return true
+      
+      // Se userId foi fornecido, verificar apenas para esse usuário
+      if (userId) {
+        query = query.eq('user_id', userId)
       }
+      
+      const { data, error } = await query.maybeSingle()
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (é o que queremos)
         console.error('Erro ao verificar slug:', error)
         return false
       }
 
-      // Se encontrou dados, slug não está disponível
+      // Se não encontrou dados, slug está disponível
       return !data
     } catch (error) {
       console.error('Erro ao verificar slug:', error)
