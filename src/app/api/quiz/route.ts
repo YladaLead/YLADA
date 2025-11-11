@@ -3,6 +3,7 @@ import { quizDB } from '@/lib/quiz-db'
 import { supabaseAdmin } from '@/lib/supabase'
 import { CreateQuizSchema, UpdateQuizSchema } from '@/lib/validation'
 import { withRateLimit } from '@/lib/rate-limit'
+import { requireApiAuth } from '@/lib/api-auth'
 
 // GET: Buscar quizzes (público para slugs, privado para userQuizzes)
 export async function GET(request: NextRequest) {
@@ -52,22 +53,52 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return withRateLimit(request, 'quiz-post', async () => {
     try {
+      // 🔒 Verificar autenticação
+      const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+      if (authResult instanceof NextResponse) {
+        return authResult
+      }
+      const { user } = authResult
+
       const body = await request.json()
 
-      // Validar com Zod
-      const validated = CreateQuizSchema.parse({
-        titulo: body.quizData?.titulo,
-        descricao: body.quizData?.descricao,
-        emoji: body.quizData?.emoji,
-        cores: body.quizData?.cores,
-        configuracoes: body.quizData?.configuracao,
-        entrega: body.quizData?.entrega,
-        slug: body.quizData?.slug,
+      // Normalizar cores para formato hex se necessário
+      const coresNormalizadas = body.quizData?.cores ? {
+        primaria: normalizarCor(body.quizData.cores.primaria || '#3B82F6'),
+        secundaria: normalizarCor(body.quizData.cores.secundaria || '#1E40AF'),
+        texto: normalizarCor(body.quizData.cores.texto || '#1F2937'),
+        fundo: normalizarCor(body.quizData.cores.fundo || '#FFFFFF'),
+      } : {
+        primaria: '#3B82F6',
+        secundaria: '#1E40AF',
+        texto: '#1F2937',
+        fundo: '#FFFFFF',
+      }
+
+      // Preparar dados para validação
+      const dadosParaValidar = {
+        titulo: body.quizData?.titulo || '',
+        descricao: body.quizData?.descricao || '',
+        emoji: body.quizData?.emoji || '',
+        cores: coresNormalizadas,
+        configuracoes: body.quizData?.configuracao || {},
+        entrega: body.quizData?.entrega || {},
+        slug: body.quizData?.slug || '',
         perguntas: body.perguntas || [],
-      })
+      }
+
+      // Validar com Zod
+      const validated = CreateQuizSchema.parse(dadosParaValidar)
+
+      // Adicionar user_id ao quizData
+      const quizDataComUserId = {
+        ...body.quizData,
+        user_id: user.id,
+        cores: coresNormalizadas,
+      }
 
       // Salvar quiz
-      const quiz = await quizDB.saveQuiz(body.quizData, body.perguntas)
+      const quiz = await quizDB.saveQuiz(quizDataComUserId, body.perguntas || [])
 
       return NextResponse.json({
         success: true,
@@ -78,21 +109,47 @@ export async function POST(request: NextRequest) {
 
       // Retornar erro de validação específico
       if (error.name === 'ZodError') {
+        console.error('Erros de validação:', error.errors)
         return NextResponse.json(
           { 
             error: 'Dados inválidos',
-            details: error.errors 
+            details: error.errors.map((e: any) => ({
+              path: e.path.join('.'),
+              message: e.message
+            }))
           },
           { status: 400 }
         )
       }
 
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: error.message || 'Erro interno do servidor' },
         { status: 500 }
       )
     }
   }, { limit: 10, window: 60 })
+}
+
+// Função helper para normalizar cores para formato hex
+function normalizarCor(cor: string): string {
+  if (!cor) return '#000000'
+  
+  // Se já está em formato hex, retornar
+  if (/^#[0-9A-Fa-f]{6}$/.test(cor)) {
+    return cor.toUpperCase()
+  }
+  
+  // Se está em formato rgb/rgba, converter
+  const rgbMatch = cor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (rgbMatch) {
+    const r = parseInt(rgbMatch[1]).toString(16).padStart(2, '0')
+    const g = parseInt(rgbMatch[2]).toString(16).padStart(2, '0')
+    const b = parseInt(rgbMatch[3]).toString(16).padStart(2, '0')
+    return `#${r}${g}${b}`.toUpperCase()
+  }
+  
+  // Se não reconhece, retornar cor padrão
+  return '#000000'
 }
 
 // PUT: Atualizar quiz

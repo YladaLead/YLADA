@@ -16,10 +16,10 @@ export const CreateQuizSchema = z.object({
   slug: z.string().min(3).max(255).regex(/^[a-z0-9-]+$/),
   perguntas: z.array(z.object({
     tipo: z.enum(['multipla', 'dissertativa', 'escala', 'simnao']),
-    titulo: z.string().min(5).max(500),
+    titulo: z.string().min(1).max(500), // Reduzido de min(5) para min(1) para permitir perguntas mais curtas
     opcoes: z.array(z.string()).max(10).optional(),
     obrigatoria: z.boolean().default(true),
-  })).min(1).max(20),
+  })).min(0).max(20), // Alterado de min(1) para min(0) para permitir salvar quiz sem perguntas inicialmente
 })
 
 // Schema para captura de leads

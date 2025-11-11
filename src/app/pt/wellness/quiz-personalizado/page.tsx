@@ -36,6 +36,7 @@ interface QuizPersonalizado {
     ctaPersonalizado: string
     urlRedirecionamento: string
     coletarDados: boolean
+    mensagemWhatsapp?: string // Mensagem do WhatsApp (apenas para Wellness)
     camposColeta: {
       nome: boolean
       email: boolean
@@ -66,6 +67,35 @@ export default function QuizPersonalizadoPage() {
   const [paginaPreviewAtual, setPaginaPreviewAtual] = useState(0)
   const [salvando, setSalvando] = useState(false)
   const [slugQuiz, setSlugQuiz] = useState<string>('')
+  const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null) // WhatsApp do perfil
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true) // Estado de carregamento do perfil
+  const [mensagemWhatsapp, setMensagemWhatsapp] = useState<string>('') // Mensagem do WhatsApp
+  const [userSlug, setUserSlug] = useState<string | null>(null) // user_slug do perfil
+
+  // Carregar WhatsApp e user_slug do perfil
+  useEffect(() => {
+    const carregarPerfil = async () => {
+      try {
+        setCarregandoPerfil(true)
+        const response = await fetch('/api/wellness/profile')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile?.whatsapp) {
+            setPerfilWhatsapp(data.profile.whatsapp)
+          }
+          if (data.profile?.userSlug) {
+            setUserSlug(data.profile.userSlug)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+      } finally {
+        setCarregandoPerfil(false)
+      }
+    }
+    carregarPerfil()
+  }, [])
+
   // Função para calcular total de páginas do preview
   const calcularTotalPaginas = () => {
     let total = 1 // Página inicial
@@ -189,38 +219,6 @@ export default function QuizPersonalizadoPage() {
             })}
           </div>
           
-          {quiz.entrega.coletarDados && (
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3">Receba seu resultado:</h4>
-              <div className="space-y-3 max-w-xs mx-auto">
-                {quiz.entrega.camposColeta.nome && (
-                  <input
-                    type="text"
-                    placeholder="Seu nome"
-                    className="w-full p-2 border border-gray-300 rounded"
-                    disabled
-                  />
-                )}
-                {quiz.entrega.camposColeta.email && (
-                  <input
-                    type="email"
-                    placeholder="Seu email"
-                    className="w-full p-2 border border-gray-300 rounded"
-                    disabled
-                  />
-                )}
-                {quiz.entrega.camposColeta.telefone && (
-                  <input
-                    type="tel"
-                    placeholder="Seu telefone"
-                    className="w-full p-2 border border-gray-300 rounded"
-                    disabled
-                  />
-                )}
-              </div>
-            </div>
-          )}
-          
           <div className="text-center">
             <button
               className="py-3 px-6 rounded-lg text-white font-medium"
@@ -228,8 +226,8 @@ export default function QuizPersonalizadoPage() {
               disabled
             >
               {quiz.entrega.ctaPersonalizado || 
-               (quiz.entrega.coletarDados ? 'Enviar Dados' : 
-                (quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos') ? 'Continuar' : 'OK')}
+               (quiz.entrega.tipoEntrega === 'whatsapp' ? 'Conversar no WhatsApp' : 
+                quiz.entrega.tipoEntrega === 'url' ? 'Continuar' : 'OK')}
             </button>
           </div>
         </div>
@@ -253,15 +251,15 @@ export default function QuizPersonalizadoPage() {
       permitirVoltar: true
     },
     entrega: {
-      tipoEntrega: 'pagina',
-      ctaPersonalizado: 'Receber Meu Resultado',
+      tipoEntrega: 'whatsapp',
+      ctaPersonalizado: 'Conversar no WhatsApp',
       urlRedirecionamento: '',
-      coletarDados: true,
+      coletarDados: false, // Wellness não coleta dados
       camposColeta: {
-        nome: true,
-        email: true,
+        nome: false,
+        email: false,
         telefone: false,
-        mensagemPersonalizada: 'Obrigado por completar o quiz!'
+        mensagemPersonalizada: ''
       },
       customizacao: {
         tamanhoFonte: 'medio',
@@ -291,7 +289,7 @@ export default function QuizPersonalizadoPage() {
           tamanho: 'medio'
         }
       ],
-      acaoAposCaptura: 'ambos'
+      acaoAposCaptura: 'redirecionar' // Wellness sempre redireciona
     }
   })
 
@@ -361,7 +359,7 @@ export default function QuizPersonalizadoPage() {
   const salvarQuiz = async () => {
     setSalvando(true)
     try {
-      // Gerar slug único
+      // Gerar slug único (sem prefixo quiz- para evitar duplicação no link)
       const slugBase = quiz.titulo
         .toLowerCase()
         .normalize('NFD')
@@ -370,7 +368,8 @@ export default function QuizPersonalizadoPage() {
         .replace(/-+/g, '-')
         .trim()
       
-      const slug = `quiz-${slugBase}-${Date.now()}`
+      // Slug sem prefixo quiz- pois o link já inclui /quiz/
+      const slug = slugBase ? `${slugBase}-${Date.now()}` : `quiz-${Date.now()}`
       
       // Preparar dados para salvar
       const quizData = {
@@ -379,7 +378,11 @@ export default function QuizPersonalizadoPage() {
         emoji: quiz.emoji,
         cores: quiz.cores,
         configuracoes: quiz.configuracao,
-        entrega: quiz.entrega,
+        entrega: {
+          ...quiz.entrega,
+          // Incluir mensagem do WhatsApp se tipoEntrega for 'whatsapp'
+          mensagemWhatsapp: quiz.entrega.tipoEntrega === 'whatsapp' ? mensagemWhatsapp : '',
+        },
         slug: slug,
       }
 
@@ -404,6 +407,11 @@ export default function QuizPersonalizadoPage() {
       const data = await response.json()
 
       if (!response.ok) {
+        // Mostrar detalhes do erro de validação se disponível
+        if (data.details && Array.isArray(data.details)) {
+          const detalhesErro = data.details.map((d: any) => `${d.path}: ${d.message}`).join('\n')
+          throw new Error(`Erro de validação:\n${detalhesErro}`)
+        }
         throw new Error(data.error || 'Erro ao salvar quiz')
       }
 
@@ -422,10 +430,23 @@ export default function QuizPersonalizadoPage() {
       // Atualizar slug
       setSlugQuiz(slug)
       
+      // Aguardar um pouco para garantir que o user_slug foi carregado
+      if (!userSlug) {
+        // Tentar carregar novamente se ainda não tiver
+        const perfilResponse = await fetch('/api/wellness/profile')
+        if (perfilResponse.ok) {
+          const perfilData = await perfilResponse.json()
+          if (perfilData.profile?.userSlug) {
+            setUserSlug(perfilData.profile.userSlug)
+          }
+        }
+      }
+      
       alert('Quiz salvo e publicado com sucesso!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar quiz:', error)
-      alert('Erro ao salvar quiz. Tente novamente.')
+      const mensagemErro = error.message || 'Erro ao salvar quiz. Tente novamente.'
+      alert(mensagemErro)
     } finally {
       setSalvando(false)
     }
@@ -488,12 +509,30 @@ export default function QuizPersonalizadoPage() {
                         <input
                           type="text"
                           placeholder="Ex: Quiz de Avaliação Nutricional Completa"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:border-transparent ${
+                            quiz.titulo.length > 0 && quiz.titulo.length < 3
+                              ? 'border-red-400 focus:ring-red-500 bg-red-50'
+                              : 'border-gray-300 focus:ring-blue-500'
+                          }`}
                           value={quiz.titulo}
                           onChange={(e) => setQuiz({ ...quiz, titulo: e.target.value })}
                         />
-                        <p className="text-xs text-gray-500 mt-1">
-                          💡 Dica: Use um título claro que desperte curiosidade
+                        {quiz.titulo.length > 0 && quiz.titulo.length < 3 && (
+                          <div className="mt-2 px-3 py-2 bg-red-50 border-l-4 border-red-400 rounded">
+                            <p className="text-xs text-red-800 font-semibold">
+                              ⚠️ O título deve ter pelo menos 3 caracteres
+                            </p>
+                            <p className="text-xs text-red-700 mt-1">
+                              Você digitou {quiz.titulo.length} caractere{quiz.titulo.length !== 1 ? 's' : ''}. Faltam {3 - quiz.titulo.length} caractere{3 - quiz.titulo.length !== 1 ? 's' : ''}.
+                            </p>
+                          </div>
+                        )}
+                        <p className={`text-xs mt-1 ${
+                          quiz.titulo.length > 0 && quiz.titulo.length < 3
+                            ? 'text-red-600'
+                            : 'text-gray-500'
+                        }`}>
+                          💡 Dica: Use um título claro que desperte curiosidade {quiz.titulo.length > 0 && `(${quiz.titulo.length}/3 mínimo)`}
                         </p>
                       </div>
                     </div>
@@ -551,7 +590,7 @@ export default function QuizPersonalizadoPage() {
                 <div className="flex justify-end">
                   <button
                     onClick={() => setEtapaAtual(2)}
-                    disabled={!quiz.titulo.trim()}
+                    disabled={!quiz.titulo.trim() || quiz.titulo.trim().length < 3}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     Próximo: Criar Perguntas
@@ -1030,92 +1069,127 @@ export default function QuizPersonalizadoPage() {
                       )}
                     </div>
 
-                 {/* Configurações de Coleta de Dados */}
+                 {/* Configurações de Redirecionamento (Wellness - sem coleta de dados) */}
                  <div className="bg-blue-50 rounded-lg p-4">
-                   <h3 className="text-sm font-medium text-blue-900 mb-3">📊 Configurações de Coleta de Dados</h3>
+                   <h3 className="text-sm font-medium text-blue-900 mb-3">🔗 Configurações de Redirecionamento</h3>
                    
                    <div className="space-y-4">
-                     {/* Coletar Dados */}
+                     {/* Tipo de Redirecionamento */}
                      <div>
-                       <label className="flex items-center space-x-2">
-                         <input
-                           type="checkbox"
-                           checked={quiz.entrega.coletarDados}
-                           onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, coletarDados: e.target.checked } })}
-                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                         />
-                         <span className="text-sm text-blue-800">Coletar dados do cliente na página de resultado</span>
+                       <label className="block text-sm font-medium text-gray-700 mb-2">
+                         Depois do resultado, o cliente vai para:
                        </label>
-                       
-                       {quiz.entrega.coletarDados && (
-                         <div className="ml-6 mt-3 space-y-2">
-                           <h4 className="text-xs font-medium text-blue-700">Campos para coletar:</h4>
-                           <div className="space-y-2">
-                             <div className="flex items-center space-x-2">
-                               <input
-                                 type="checkbox"
-                                 checked={quiz.entrega.camposColeta.nome}
-                                 onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, camposColeta: { ...quiz.entrega.camposColeta, nome: e.target.checked } } })}
-                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                               />
-                               <span className="text-sm text-blue-700">Nome</span>
-                             </div>
-                             <div className="flex items-center space-x-2">
-                               <input
-                                 type="checkbox"
-                                 checked={quiz.entrega.camposColeta.email}
-                                 onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, camposColeta: { ...quiz.entrega.camposColeta, email: e.target.checked } } })}
-                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                               />
-                               <span className="text-sm text-blue-700">Email</span>
-                             </div>
-                             <div className="flex items-center space-x-2">
-                               <input
-                                 type="checkbox"
-                                 checked={quiz.entrega.camposColeta.telefone}
-                                 onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, camposColeta: { ...quiz.entrega.camposColeta, telefone: e.target.checked } } })}
-                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                               />
-                               <span className="text-sm text-blue-700">Telefone</span>
-                             </div>
-                           </div>
-                         </div>
-                       )}
-                     </div>
-
-                     {/* Redirecionamento */}
-                     <div>
-                       <label className="flex items-center space-x-2">
-                         <input
-                           type="checkbox"
-                           checked={quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos'}
-                           onChange={(e) => {
-                             const novoValor = e.target.checked ? 
-                               (quiz.entrega.coletarDados ? 'ambos' : 'redirecionar') : 
-                               (quiz.entrega.coletarDados ? 'manter_pagina' : 'manter_pagina')
-                             setQuiz({ ...quiz, entrega: { ...quiz.entrega, acaoAposCaptura: novoValor as any } })
-                           }}
-                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                         />
-                         <span className="text-sm text-blue-800">Redirecionar para WhatsApp ou URL</span>
-                       </label>
-                       
-                       {(quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos') && (
-                         <div className="ml-6 mt-3">
-                           <input
-                             type="url"
-                             placeholder="https://wa.me/5511999999999 ou https://seusite.com/contato"
-                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                             value={quiz.entrega.urlRedirecionamento}
-                             onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, urlRedirecionamento: e.target.value } })}
-                           />
-                         </div>
-                       )}
-                       
-                       <p className="text-xs text-blue-600 mt-2 ml-6">
-                         💡 Dica: Se ativado junto com "Coletar dados", captura os dados e depois redireciona
+                       <select
+                         value={quiz.entrega.tipoEntrega === 'pagina' ? 'whatsapp' : quiz.entrega.tipoEntrega}
+                         onChange={(e) => {
+                           const novoTipo = e.target.value as 'whatsapp' | 'url'
+                           setQuiz({ 
+                             ...quiz, 
+                             entrega: { 
+                               ...quiz.entrega, 
+                               tipoEntrega: novoTipo,
+                               urlRedirecionamento: novoTipo === 'url' ? quiz.entrega.urlRedirecionamento : ''
+                             } 
+                           })
+                         }}
+                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       >
+                         <option value="whatsapp">WhatsApp (recomendado)</option>
+                         <option value="url">URL Externa</option>
+                       </select>
+                       <p className="text-xs text-gray-500 mt-1">
+                         💡 <strong>O que é?</strong> Para onde o cliente será redirecionado após ver o resultado
                        </p>
                      </div>
+
+                     {/* Configuração WhatsApp */}
+                     {quiz.entrega.tipoEntrega === 'whatsapp' && (
+                       <>
+                         {carregandoPerfil ? (
+                           <div className="animate-pulse bg-gray-100 h-20 rounded-lg"></div>
+                         ) : perfilWhatsapp ? (
+                           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                             <div className="flex items-start space-x-3">
+                               <span className="text-2xl">✅</span>
+                               <div className="flex-1">
+                                 <p className="text-sm font-medium text-gray-900 mb-1">
+                                   WhatsApp do Perfil
+                                 </p>
+                                 <p className="text-sm text-gray-700 font-mono mb-2">
+                                   {perfilWhatsapp}
+                                 </p>
+                                 <p className="text-xs text-gray-600">
+                                   Este número será usado no quiz. Para alterar, acesse{' '}
+                                   <Link href="/pt/wellness/configuracao" className="text-green-600 underline font-semibold">
+                                     Configurações → Perfil
+                                   </Link>
+                                 </p>
+                               </div>
+                             </div>
+                           </div>
+                         ) : (
+                           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                             <div className="flex items-start space-x-3">
+                               <span className="text-2xl">⚠️</span>
+                               <div className="flex-1">
+                                 <p className="text-sm font-medium text-yellow-900 mb-2">
+                                   WhatsApp não configurado
+                                 </p>
+                                 <p className="text-xs text-yellow-800 mb-3">
+                                   Configure seu WhatsApp no perfil para usar esta opção.
+                                 </p>
+                                 <Link
+                                   href="/pt/wellness/configuracao"
+                                   className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
+                                 >
+                                   Ir para Configurações
+                                 </Link>
+                               </div>
+                             </div>
+                           </div>
+                         )}
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">
+                             Mensagem pré-formatada <span className="text-red-500">*</span>
+                           </label>
+                           <textarea
+                             value={mensagemWhatsapp}
+                             onChange={(e) => setMensagemWhatsapp(e.target.value)}
+                             placeholder="Olá! Completei o quiz através do YLADA e gostaria de saber mais sobre como alcançar meu objetivo. Pode me ajudar?"
+                             rows={4}
+                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                             disabled={!perfilWhatsapp}
+                           />
+                           <div className="mt-2 bg-blue-50 rounded-lg p-3">
+                             <p className="text-xs text-blue-700 font-medium mb-1">💡 Placeholders disponíveis:</p>
+                             <p className="text-xs text-blue-600">
+                               [RESULTADO] - Resultado obtido no quiz<br/>
+                               [NOME_CLIENTE] - Nome do cliente (se coletado)<br/>
+                               [DATA] - Data/hora do uso
+                             </p>
+                           </div>
+                         </div>
+                       </>
+                     )}
+
+                     {/* Configuração URL Externa */}
+                     {quiz.entrega.tipoEntrega === 'url' && (
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">
+                           URL de Redirecionamento <span className="text-red-500">*</span>
+                         </label>
+                         <input
+                           type="url"
+                           value={quiz.entrega.urlRedirecionamento}
+                           onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, urlRedirecionamento: e.target.value } })}
+                           placeholder="https://seu-site.com/contato"
+                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                         />
+                         <p className="text-xs text-gray-500 mt-1">
+                           💡 <strong>O que é?</strong> URL para onde o cliente será redirecionado após ver o resultado (ex: site, formulário, página de agendamento)
+                         </p>
+                       </div>
+                     )}
                    </div>
                  </div>
 
@@ -1126,9 +1200,8 @@ export default function QuizPersonalizadoPage() {
                       </label>
                       <input
                         type="text"
-                        placeholder={quiz.entrega.coletarDados ? 'Ex: Enviar Dados' : 
-                                     quiz.entrega.acaoAposCaptura === 'redirecionar' ? 'Ex: Continuar' :
-                                     quiz.entrega.acaoAposCaptura === 'ambos' ? 'Ex: Ver Resultado' : 'Ex: OK'}
+                        placeholder={quiz.entrega.tipoEntrega === 'whatsapp' ? 'Ex: Conversar no WhatsApp' : 
+                                     quiz.entrega.tipoEntrega === 'url' ? 'Ex: Continuar' : 'Ex: OK'}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         value={quiz.entrega.ctaPersonalizado}
                         onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, ctaPersonalizado: e.target.value } })}
@@ -1137,22 +1210,6 @@ export default function QuizPersonalizadoPage() {
                         💡 Dica: Use textos que incentivem a ação (Ex: "Ver Meu Resultado", "Continuar", "Próximo Passo")
                       </p>
                     </div>
-
-                    {/* URL de Redirecionamento */}
-                    {(quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          URL de Redirecionamento
-                        </label>
-                        <input
-                          type="url"
-                          placeholder="https://wa.me/5511999999999 ou https://seusite.com/contato"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={quiz.entrega.urlRedirecionamento}
-                          onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, urlRedirecionamento: e.target.value } })}
-                        />
-                      </div>
-                    )}
                   </div>
 
                   <div className="mt-8 flex justify-between">
@@ -1222,39 +1279,6 @@ export default function QuizPersonalizadoPage() {
                        })}
                      </div>
                         
-                     {/* Formulário de Captura (se ativado) */}
-                     {quiz.entrega.coletarDados && (
-                       <div className="mb-6 text-center">
-                         <h4 className="font-semibold mb-3">Receba seu resultado:</h4>
-                         <div className="space-y-3 max-w-xs mx-auto">
-                           {quiz.entrega.camposColeta.nome && (
-                             <input
-                               type="text"
-                               placeholder="Seu nome"
-                               className="w-full p-2 border border-gray-300 rounded"
-                               disabled
-                             />
-                           )}
-                           {quiz.entrega.camposColeta.email && (
-                             <input
-                               type="email"
-                               placeholder="Seu email"
-                               className="w-full p-2 border border-gray-300 rounded"
-                               disabled
-                             />
-                           )}
-                           {quiz.entrega.camposColeta.telefone && (
-                             <input
-                               type="tel"
-                               placeholder="Seu telefone"
-                               className="w-full p-2 border border-gray-300 rounded"
-                               disabled
-                             />
-                           )}
-                         </div>
-                       </div>
-                     )}
-                     
                      {/* Botão Principal */}
                      <div className="text-center">
                        <button
@@ -1263,17 +1287,23 @@ export default function QuizPersonalizadoPage() {
                          disabled
                        >
                          {quiz.entrega.ctaPersonalizado || 
-                          (quiz.entrega.coletarDados ? 'Enviar Dados' : 
-                           (quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos') ? 'Continuar' : 'OK')}
+                          (quiz.entrega.tipoEntrega === 'whatsapp' ? 'Conversar no WhatsApp' : 
+                           quiz.entrega.tipoEntrega === 'url' ? 'Continuar' : 'OK')}
                        </button>
                      </div>
-                        
-                        {/* Mensagem de Agradecimento */}
-                        {quiz.entrega.coletarDados && (
-                          <p className="text-sm text-gray-500 mt-3 text-center">
-                            {quiz.entrega.camposColeta.mensagemPersonalizada}
-                          </p>
-                        )}
+                     
+                     {/* Informação de Redirecionamento */}
+                     {quiz.entrega.tipoEntrega === 'whatsapp' && (
+                       <p className="text-xs text-gray-500 mt-3 text-center">
+                         📱 Abrirá WhatsApp: {perfilWhatsapp || 'Configure no perfil'}
+                       </p>
+                     )}
+                     
+                     {quiz.entrega.tipoEntrega === 'url' && quiz.entrega.urlRedirecionamento && (
+                       <p className="text-xs text-gray-500 mt-3 text-center break-all">
+                         🌐 Redirecionará para: {quiz.entrega.urlRedirecionamento}
+                       </p>
+                     )}
                       </div>
                     </div>
                   </div>
@@ -1288,11 +1318,7 @@ export default function QuizPersonalizadoPage() {
                    <div className="text-sm text-blue-800 space-y-2">
                      <div className="flex items-center space-x-2">
                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                       <span>Captura de dados: {quiz.entrega.coletarDados ? 'Ativada' : 'Desativada'}</span>
-                     </div>
-                     <div className="flex items-center space-x-2">
-                       <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                       <span>Redirecionamento: {(quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos') ? 'Ativado' : 'Desativado'}</span>
+                       <span>Redirecionamento: {quiz.entrega.tipoEntrega === 'whatsapp' ? 'WhatsApp' : quiz.entrega.tipoEntrega === 'url' ? 'URL Externa' : 'Não configurado'}</span>
                      </div>
                      <div className="flex items-center space-x-2">
                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -1309,7 +1335,9 @@ export default function QuizPersonalizadoPage() {
                    <div className="text-sm text-green-800">
                      <p className="mb-2">Seu quiz estará disponível em:</p>
                      <code className="text-xs bg-white p-2 rounded border block break-all">
-                       ylada.app/pt/wellness/seu-nome/quiz-personalizado
+                       {userSlug 
+                         ? `ylada.app/pt/wellness/${userSlug}/quiz/[slug-do-quiz]`
+                         : 'ylada.app/pt/wellness/seu-usuario/quiz/[slug-do-quiz]'}
                      </code>
                      <p className="text-xs text-green-600 mt-2">
                        💡 Este link será gerado após finalizar
@@ -1336,9 +1364,20 @@ export default function QuizPersonalizadoPage() {
                  
                 <div className="bg-gray-50 rounded-lg p-4 mb-6 max-w-md mx-auto">
                   <p className="text-sm text-gray-500 mb-2">Link do seu quiz:</p>
-                  <code className="text-blue-600 font-mono text-sm break-all">
-                    {slugQuiz ? `ylada.app/pt/quiz/${slugQuiz}` : 'Gerando link...'}
-                  </code>
+                  {slugQuiz && userSlug ? (
+                    <a
+                      href={`${typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.host : 'https://ylada.app'}/pt/wellness/${userSlug}/quiz/${slugQuiz}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 font-mono text-sm break-all hover:text-blue-800 hover:underline block"
+                    >
+                      {typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.host : 'https://ylada.app'}/pt/wellness/{userSlug}/quiz/{slugQuiz}
+                    </a>
+                  ) : slugQuiz ? (
+                    <code className="text-gray-500 font-mono text-sm">Carregando user_slug...</code>
+                  ) : (
+                    <code className="text-gray-500 font-mono text-sm">Gerando link...</code>
+                  )}
                 </div>
                  
                  <div className="flex justify-center space-x-4">
@@ -1350,8 +1389,9 @@ export default function QuizPersonalizadoPage() {
                    </button>
                   <button
                     onClick={async () => {
-                      if (slugQuiz) {
-                        const linkText = `ylada.app/pt/quiz/${slugQuiz}`
+                      if (slugQuiz && userSlug) {
+                        const baseUrl = typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.host : 'https://ylada.app'
+                        const linkText = `${baseUrl}/pt/wellness/${userSlug}/quiz/${slugQuiz}`
                         navigator.clipboard.writeText(linkText).then(() => {
                           alert('Link copiado para a área de transferência!')
                         }).catch(() => {
@@ -1364,15 +1404,17 @@ export default function QuizPersonalizadoPage() {
                           document.body.removeChild(textArea)
                           alert('Link copiado para a área de transferência!')
                         })
+                      } else if (slugQuiz) {
+                        alert('Aguardando carregamento do user_slug...')
                       } else {
                         // Salvar quiz primeiro
                         await salvarQuiz()
                       }
                     }}
-                    disabled={salvando}
+                    disabled={salvando || !userSlug}
                     className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    {salvando ? '⏳ Salvando...' : slugQuiz ? '📋 Copiar Link' : '💾 Salvar e Publicar Quiz'}
+                    {salvando ? '⏳ Salvando...' : slugQuiz && userSlug ? '📋 Copiar Link' : slugQuiz ? '⏳ Carregando...' : '💾 Salvar e Publicar Quiz'}
                   </button>
                  </div>
                </div>
