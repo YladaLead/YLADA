@@ -190,14 +190,32 @@ export function useAuth() {
 
       // Buscar perfil em background (não bloqueia)
       if (session?.user) {
-        console.log('🔍 useAuth: Buscando perfil em background...')
+        console.log('🔍 useAuth: Buscando perfil em background para user_id:', session.user.id)
         // Não esperar - buscar em background
-        fetchUserProfile(session.user.id).then(profile => {
-          console.log('✅ useAuth: Perfil carregado:', profile ? 'Sim' : 'Não')
-          setUserProfile(profile)
-        }).catch(err => {
-          console.error('❌ useAuth: Erro ao buscar perfil em background:', err)
-        })
+        fetchUserProfile(session.user.id)
+          .then(profile => {
+            if (profile) {
+              console.log('✅ useAuth: Perfil carregado com sucesso:', {
+                id: profile.id,
+                perfil: profile.perfil,
+                is_admin: profile.is_admin,
+                is_support: profile.is_support,
+                nome_completo: profile.nome_completo
+              })
+            } else {
+              console.warn('⚠️ useAuth: Perfil não encontrado (retornou null)')
+            }
+            setUserProfile(profile)
+          })
+          .catch(err => {
+            console.error('❌ useAuth: Erro ao buscar perfil em background:', {
+              error: err,
+              message: err?.message,
+              stack: err?.stack
+            })
+            // Mesmo com erro, não bloquear - permitir acesso sem perfil
+            setUserProfile(null)
+          })
       } else {
         console.log('⚠️ useAuth: Nenhuma sessão encontrada após todas as tentativas', {
           error: sessionError?.message || 'Sem erro específico',
@@ -225,10 +243,29 @@ export function useAuth() {
       setUser(session?.user ?? null)
 
       if (session?.user) {
-        console.log('🔍 useAuth: Buscando perfil após auth change...')
-        const profile = await fetchUserProfile(session.user.id)
-        console.log('✅ useAuth: Perfil carregado após auth change:', profile ? 'Sim' : 'Não')
-        setUserProfile(profile)
+        console.log('🔍 useAuth: Buscando perfil após auth change para user_id:', session.user.id)
+        try {
+          const profile = await fetchUserProfile(session.user.id)
+          if (profile) {
+            console.log('✅ useAuth: Perfil carregado após auth change:', {
+              id: profile.id,
+              perfil: profile.perfil,
+              is_admin: profile.is_admin,
+              is_support: profile.is_support
+            })
+          } else {
+            console.warn('⚠️ useAuth: Perfil não encontrado após auth change (retornou null)')
+          }
+          setUserProfile(profile)
+        } catch (err: any) {
+          console.error('❌ useAuth: Erro ao buscar perfil após auth change:', {
+            error: err,
+            message: err?.message,
+            stack: err?.stack
+          })
+          // Mesmo com erro, não bloquear - permitir acesso sem perfil
+          setUserProfile(null)
+        }
       } else {
         console.log('⚠️ useAuth: Sessão removida')
         setUserProfile(null)
