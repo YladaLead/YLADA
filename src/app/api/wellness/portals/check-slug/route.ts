@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get('slug')
+    const excludeId = searchParams.get('excludeId')
 
     if (!slug) {
       return NextResponse.json(
@@ -31,11 +32,17 @@ export async function GET(request: NextRequest) {
 
     // Verificar se o slug já existe (apenas para o mesmo usuário)
     // Slugs devem ser únicos globalmente, mas podemos verificar se é do próprio usuário
-    const { data: existing, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('wellness_portals')
       .select('id, user_id')
       .eq('slug', slug)
-      .maybeSingle()
+    
+    // Se excludeId foi fornecido, excluir esse ID da verificação (útil para edição)
+    if (excludeId) {
+      query = query.neq('id', excludeId)
+    }
+    
+    const { data: existing, error } = await query.maybeSingle()
 
     if (error) {
       console.error('Erro ao verificar slug:', error)

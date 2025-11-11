@@ -21,12 +21,35 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
     const status = searchParams.get('status') || 'all'
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
     // 🔒 Sempre usar user_id do token (seguro)
     const authenticatedUserId = user.id
+
+    // Se ID foi fornecido, retornar portal específico
+    if (id) {
+      const { data: portal, error } = await supabaseAdmin
+        .from('wellness_portals')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', authenticatedUserId)
+        .single()
+
+      if (error || !portal) {
+        return NextResponse.json(
+          { error: 'Portal não encontrado' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: { portal }
+      })
+    }
 
     // Primeiro buscar portais
     let query = supabaseAdmin
