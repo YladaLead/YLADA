@@ -167,7 +167,7 @@ export default function ProtectedRoute({
     } else {
       console.log('✅ Perfil corresponde, permitindo acesso')
     }
-  }, [loading, isAuthenticated, user, userProfile, perfil, router, redirectTo, allowAdmin, allowSupport, loadingTimeout, profileCheckTimeout])
+  }, [loading, isAuthenticated, user, userProfile, perfil, router, redirectTo, allowAdmin, allowSupport, loadingTimeout, profileCheckTimeout, authCheckTimeout])
 
   // Timeout de loading - após 1 segundo, continuar mesmo sem perfil completo
   if (loading && !loadingTimeout) {
