@@ -207,6 +207,8 @@ async function createMercadoPagoCheckout(
         failureUrl,
         pendingUrl,
         maxInstallments: 1, // Plano mensal: sem parcelamento (apenas à vista)
+        payerFirstName: request.payerFirstName,
+        payerLastName: request.payerLastName,
       }
 
       try {
