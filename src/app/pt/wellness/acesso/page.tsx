@@ -198,7 +198,7 @@ function AcessoPorTokenContent() {
                   📧 Solicitar Novo Link de Acesso
                 </Link>
                 <Link
-                  href="/pt/wellness/login?redirect=/pt/wellness/bem-vindo&signup=true"
+                  href="/pt/wellness/login"
                   className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
                 >
                   🔑 Fazer Login (se já tem conta)
