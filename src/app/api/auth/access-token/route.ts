@@ -61,8 +61,12 @@ export async function POST(request: NextRequest) {
       finalRedirect = '/pt/wellness/dashboard'
     }
     
+    // IMPORTANTE: O Supabase precisa que o redirectTo seja uma URL completa e válida
+    // E deve estar configurado nas URLs permitidas do Supabase
     // Usar /auth/callback que vai redirecionar corretamente
     const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(finalRedirect)}`
+    
+    console.log('🔗 Gerando magic link com redirectTo:', redirectTo)
     
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
