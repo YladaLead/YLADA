@@ -64,9 +64,17 @@ export default function WellnessCheckoutPage() {
 
     setLoading(true)
     setError(null)
-    console.log('📤 Enviando requisição de checkout...')
+    console.log('📤 Enviando requisição de checkout...', {
+      planType,
+      userEmail,
+      hasUser: !!user,
+    })
 
     try {
+      // Criar AbortController para timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos
+
       // Usar a nova API unificada que detecta automaticamente o gateway (Mercado Pago ou Stripe)
       // AGORA ACEITA CHECKOUT SEM AUTENTICAÇÃO (apenas e-mail)
       const response = await fetch('/api/wellness/checkout', {
@@ -75,6 +83,7 @@ export default function WellnessCheckoutPage() {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
+        signal: controller.signal,
         body: JSON.stringify({ 
           planType,
           language: 'pt', // Idioma português para Brasil
@@ -84,27 +93,57 @@ export default function WellnessCheckoutPage() {
         }),
       })
 
+      clearTimeout(timeoutId)
+
+      console.log('📥 Resposta recebida:', {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+      })
+
       if (!response.ok) {
-        const data = await response.json()
+        let errorMessage = 'Erro ao criar sessão de checkout'
         
-        // IMPORTANTE: Não redirecionar para login em caso de 401
-        // O checkout funciona sem autenticação (apenas com e-mail)
-        // Se der erro, mostrar mensagem de erro ao usuário
-        throw new Error(data.error || 'Erro ao criar sessão de checkout')
+        try {
+          const data = await response.json()
+          errorMessage = data.error || errorMessage
+          console.error('❌ Erro da API:', data)
+        } catch (parseError) {
+          console.error('❌ Erro ao parsear resposta:', parseError)
+          errorMessage = `Erro ${response.status}: ${response.statusText}`
+        }
+        
+        throw new Error(errorMessage)
       }
 
-      const { url, gateway } = await response.json()
+      const data = await response.json()
+      console.log('✅ Dados recebidos:', {
+        hasUrl: !!data.url,
+        gateway: data.gateway,
+        sessionId: data.sessionId,
+      })
 
-      if (!url) {
-        throw new Error('URL de checkout não retornada')
+      if (!data.url) {
+        throw new Error('URL de checkout não retornada pela API')
       }
 
       // Redirecionar para checkout (Mercado Pago ou Stripe, dependendo do país)
-      console.log(`🔄 Redirecionando para checkout: ${gateway}`)
-      window.location.href = url
+      console.log(`🔄 Redirecionando para checkout: ${data.gateway}`)
+      window.location.href = data.url
     } catch (err: any) {
-      console.error('Erro no checkout:', err)
-      setError(err.message || 'Erro ao processar checkout. Tente novamente.')
+      if (timeoutId) clearTimeout(timeoutId)
+      
+      if (err.name === 'AbortError') {
+        console.error('⏱️ Timeout na requisição de checkout')
+        setError('A requisição demorou muito. Por favor, verifique sua conexão e tente novamente.')
+      } else {
+        console.error('❌ Erro no checkout:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        })
+        setError(err.message || 'Erro ao processar checkout. Tente novamente.')
+      }
       setLoading(false)
     }
   }
