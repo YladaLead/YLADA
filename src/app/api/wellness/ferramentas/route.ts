@@ -185,16 +185,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Verificar se o slug já existe
+    // Verificar se o slug já existe PARA ESTE USUÁRIO (slugs podem ser repetidos entre usuários diferentes)
     const { data: existing } = await supabaseAdmin
       .from('user_templates')
       .select('id')
       .eq('slug', slug)
-      .single()
+      .eq('user_id', authenticatedUserId) // ✅ Verificar apenas para o usuário atual
+      .maybeSingle()
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Este nome de URL já está em uso. Escolha outro.' },
+        { error: 'Este nome de URL já está em uso por você. Escolha outro.' },
         { status: 409 }
       )
     }
@@ -460,18 +461,19 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Verificar se o slug mudou e se já existe
+    // Verificar se o slug mudou e se já existe PARA ESTE USUÁRIO
     if (slug) {
       const { data: existing } = await supabaseAdmin
         .from('user_templates')
         .select('id')
         .eq('slug', slug)
+        .eq('user_id', authenticatedUserId) // ✅ Verificar apenas para o usuário atual
         .neq('id', id)
-        .single()
+        .maybeSingle()
 
       if (existing) {
         return NextResponse.json(
-          { error: 'Este nome de URL já está em uso. Escolha outro.' },
+          { error: 'Este nome de URL já está em uso por você. Escolha outro.' },
           { status: 409 }
         )
       }

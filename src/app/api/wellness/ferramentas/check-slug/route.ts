@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireApiAuth } from '@/lib/api-auth'
 
 // Verificar disponibilidade de slug
 export async function GET(request: NextRequest) {
   try {
+    // 🔒 Verificar autenticação para obter user_id
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { user } = authResult
+
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get('slug')
+    const excludeId = searchParams.get('excludeId') // Para edição
 
     if (!slug) {
       return NextResponse.json(
@@ -14,12 +23,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Verificar se já existe
-    const { data, error } = await supabaseAdmin
+    // Verificar se já existe PARA ESTE USUÁRIO (slugs podem ser repetidos entre usuários diferentes)
+    let query = supabaseAdmin
       .from('user_templates')
       .select('id, slug')
       .eq('slug', slug)
-      .single()
+      .eq('user_id', user.id) // ✅ Verificar apenas para o usuário atual
+    
+    // Se excludeId foi fornecido, excluir esse ID da verificação (útil para edição)
+    if (excludeId) {
+      query = query.neq('id', excludeId)
+    }
+    
+    const { data, error } = await query.maybeSingle()
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = no rows returned (é o que queremos)
@@ -33,7 +49,7 @@ export async function GET(request: NextRequest) {
       available,
       message: available 
         ? 'URL disponível!' 
-        : 'Esta URL já está em uso. Escolha outra.'
+        : 'Esta URL já está em uso por você. Escolha outra.'
     })
   } catch (error: any) {
     console.error('Erro ao verificar slug:', error)
