@@ -196,8 +196,21 @@ export default function LoginForm({
         if (data.session) {
           console.log('✅ Login bem-sucedido!')
           
-          // Redirecionar imediatamente - Supabase gerencia sessão automaticamente
-          window.location.href = redirectPath
+          // Aguardar um pouco para garantir que a sessão foi salva
+          // O createBrowserClient precisa de tempo para persistir cookies
+          await new Promise(resolve => setTimeout(resolve, 300))
+          
+          // Verificar se a sessão foi salva
+          const { data: { session: verifySession } } = await supabase.auth.getSession()
+          
+          if (verifySession) {
+            console.log('✅ Sessão confirmada, redirecionando...')
+            window.location.href = redirectPath
+          } else {
+            // Se não salvou, tentar novamente após mais tempo
+            await new Promise(resolve => setTimeout(resolve, 500))
+            window.location.href = redirectPath
+          }
           return
         } else {
           setError('Erro ao criar sessão. Tente novamente.')

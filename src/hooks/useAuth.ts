@@ -110,24 +110,18 @@ export function useAuth() {
       console.log('🔄 useAuth: Iniciando carregamento...')
       
       // Aguardar um pouco para garantir que a página carregou completamente
-      // Isso é importante após redirecionamentos - aumentado para dar mais tempo
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => setTimeout(resolve, 200))
       
-      // Tentar obter sessão (otimizado - apenas 1 tentativa inicial, depois o listener cuida)
-      console.log('🔍 useAuth: Tentando obter sessão...')
+      // Tentar obter sessão
       const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
       
       let session = currentSession
       
       if (session) {
-        console.log('✅ useAuth: Sessão encontrada imediatamente')
+        console.log('✅ useAuth: Sessão encontrada')
       } else {
-        console.log('⚠️ useAuth: Sessão não encontrada inicialmente', {
-          error: sessionError?.message
-        })
-        // Se não encontrou sessão, tentar novamente após um pouco mais de tempo
-        // Isso ajuda após redirecionamentos do login
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Se não encontrou, tentar novamente após mais tempo (pode estar sincronizando)
+        await new Promise(resolve => setTimeout(resolve, 800))
         const { data: { session: retrySession } } = await supabase.auth.getSession()
         if (retrySession) {
           console.log('✅ useAuth: Sessão encontrada após retry')
