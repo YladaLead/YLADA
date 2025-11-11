@@ -19,15 +19,31 @@ export default function WellnessCheckoutPage() {
   // Permitir visualizar sempre, mesmo sem login
   // O checkout funciona apenas com e-mail
 
+  // Resetar loading se travar por mais de 30 segundos
+  useEffect(() => {
+    if (loading) {
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.warn('⚠️ Loading travado há mais de 30s, resetando...')
+          setLoading(false)
+          setError('O processo demorou muito. Por favor, verifique sua conexão e tente novamente.')
+        }
+      }, 30000) // 30 segundos
+      return () => clearTimeout(timeout)
+    }
+  }, [loading])
+
   // Log de debug para verificar estado de autenticação
   useEffect(() => {
     console.log('🔍 Checkout - Estado de autenticação:', {
       hasUser: !!user,
       userId: user?.id,
       authLoading,
+      loading,
+      email,
       timestamp: new Date().toISOString()
     })
-  }, [user, authLoading])
+  }, [user, authLoading, loading, email])
 
   // Detectar parâmetros da URL usando window.location (mais confiável)
   useEffect(() => {
