@@ -53,17 +53,14 @@ export default function WellnessCheckoutPage() {
       email: email || user?.email,
     })
     
-    // NOVO: Se não estiver autenticado, verificar se tem e-mail
-    if (!user || authLoading) {
-      // Validar e-mail se não estiver autenticado
-      if (!email || !email.includes('@')) {
-        setError('Por favor, informe seu e-mail para continuar.')
-        return
-      }
-    }
+    // Determinar e-mail a usar (prioridade: campo email > user.email)
+    const userEmail = email || user?.email || ''
     
-    // Se estiver autenticado, usar e-mail do usuário
-    const userEmail = user?.email || email
+    // Validar e-mail (obrigatório sempre)
+    if (!userEmail || !userEmail.includes('@')) {
+      setError('Por favor, informe seu e-mail para continuar.')
+      return
+    }
     if (!userEmail || !userEmail.includes('@')) {
       setError('E-mail inválido. Por favor, verifique.')
       return
@@ -290,23 +287,26 @@ export default function WellnessCheckoutPage() {
             </div>
           </div>
 
-          {/* Campo de E-mail (se não estiver logado) */}
-          {!user && (
+          {/* Campo de E-mail (se não estiver logado ou ainda carregando) */}
+          {(!user || authLoading) && (
             <div className="mb-6">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                E-mail
+                E-mail {user && '(você está logado, mas pode alterar se necessário)'}
               </label>
               <input
                 id="email"
                 type="email"
-                value={email}
+                value={email || user?.email || ''}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               />
               <p className="text-xs text-gray-500 mt-2">
-                Seu e-mail será usado para criar sua conta automaticamente após o pagamento.
+                {user 
+                  ? 'Seu e-mail será usado para o pagamento. Você pode alterar se necessário.'
+                  : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'
+                }
               </p>
             </div>
           )}
