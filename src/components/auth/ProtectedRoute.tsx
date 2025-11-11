@@ -37,8 +37,8 @@ export default function ProtectedRoute({
     }
   }, [loading])
 
-  // Timeout para verificação de autenticação - aguardar 3 segundos antes de redirecionar
-  // Otimizado para ser mais rápido e não travar a UI
+  // Timeout para verificação de autenticação - aguardar 5 segundos antes de redirecionar
+  // Aumentado para dar mais tempo após redirecionamento do login
   useEffect(() => {
     if (!isAuthenticated || !user) {
       // Se ainda está carregando, não iniciar timeout ainda
@@ -50,10 +50,10 @@ export default function ProtectedRoute({
       const timer = setTimeout(() => {
         // Verificar novamente antes de marcar timeout (pode ter mudado)
         if (!isAuthenticated || !user) {
-          console.log('❌ Não autenticado após 3s, marcando para redirecionar...')
+          console.log('❌ Não autenticado após 5s, marcando para redirecionar...')
           setAuthCheckTimeout(true)
         }
-      }, 3000) // Reduzido para 3 segundos para ser mais rápido
+      }, 5000) // Aumentado para 5 segundos para dar tempo após redirecionamento
       return () => clearTimeout(timer)
     } else {
       // Se autenticado, resetar o timeout

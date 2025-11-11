@@ -213,13 +213,14 @@ export default function LoginForm({
           console.log('📧 Email:', data.session.user.email)
           
           // O Supabase client gerencia a sessão automaticamente
-          // Redirecionar imediatamente - a sessão já está salva
-          console.log('🔄 Redirecionando para:', redirectPath)
+          // Aguardar um pouco para garantir que a sessão foi persistida antes de redirecionar
+          console.log('⏳ Aguardando persistência da sessão antes de redirecionar...')
           
-          // Usar setTimeout para garantir que o estado seja atualizado antes do redirecionamento
-          setTimeout(() => {
-            window.location.href = redirectPath
-          }, 100)
+          // Aguardar 500ms para garantir que cookies/sessão foram salvos
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          console.log('🔄 Redirecionando para:', redirectPath)
+          window.location.href = redirectPath
           
           return
         } else {
