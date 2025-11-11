@@ -9,10 +9,11 @@ import { useAuth } from '@/hooks/useAuth'
 function AcessoPorTokenContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { signIn } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [errorType, setErrorType] = useState<'invalid' | 'expired' | 'used' | 'network' | null>(null)
 
   useEffect(() => {
     const validateToken = async () => {
@@ -20,7 +21,19 @@ function AcessoPorTokenContent() {
 
       if (!token) {
         setError('Token não fornecido na URL')
+        setErrorType('invalid')
         setLoading(false)
+        return
+      }
+
+      // Se o usuário já está logado, verificar se pode pular a validação do token
+      if (user && !authLoading) {
+        console.log('✅ Usuário já está logado, redirecionando direto para bem-vindo')
+        const redirect = searchParams.get('redirect')
+        const redirectPath = redirect ? decodeURIComponent(redirect) : '/pt/wellness/bem-vindo?payment=success'
+        setTimeout(() => {
+          window.location.href = redirectPath
+        }, 500)
         return
       }
 
@@ -54,18 +67,35 @@ function AcessoPorTokenContent() {
             }, 1500)
           }
         } else {
-          setError(data.error || 'Token inválido ou expirado')
+          // Detectar tipo de erro para melhorar mensagem
+          const errorMsg = data.error || 'Token inválido ou expirado'
+          if (errorMsg.includes('expirado') || errorMsg.includes('expired')) {
+            setErrorType('expired')
+          } else if (errorMsg.includes('usado') || errorMsg.includes('used')) {
+            setErrorType('used')
+          } else if (errorMsg.includes('inválido') || errorMsg.includes('invalid')) {
+            setErrorType('invalid')
+          } else {
+            setErrorType('invalid')
+          }
+          setError(errorMsg)
         }
       } catch (err: any) {
         console.error('Erro ao validar token:', err)
-        setError('Erro ao processar token. Tente novamente.')
+        setErrorType('network')
+        setError('Erro de conexão. Verifique sua internet e tente novamente.')
       } finally {
         setLoading(false)
       }
     }
 
-    validateToken()
-  }, [searchParams, router])
+    // Aguardar um pouco para verificar se o usuário já está logado
+    const timer = setTimeout(() => {
+      validateToken()
+    }, authLoading ? 1000 : 500)
+
+    return () => clearTimeout(timer)
+  }, [searchParams, router, user, authLoading])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -125,37 +155,64 @@ function AcessoPorTokenContent() {
             <>
               <div className="mb-6">
                 <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-4xl">❌</span>
+                  <span className="text-4xl">
+                    {errorType === 'expired' ? '⏰' : errorType === 'used' ? '🔒' : '❌'}
+                  </span>
                 </div>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Link Inválido
+                {errorType === 'expired' 
+                  ? 'Link Expirado' 
+                  : errorType === 'used' 
+                  ? 'Link Já Utilizado' 
+                  : errorType === 'network'
+                  ? 'Erro de Conexão'
+                  : 'Link Inválido'}
               </h1>
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
-                <p className="text-sm">{error}</p>
+              
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                <p className="text-sm text-blue-800 mb-2">
+                  {errorType === 'expired' 
+                    ? '⏰ Este link de acesso expirou. Links são válidos por 30 dias.'
+                    : errorType === 'used' 
+                    ? '🔒 Este link já foi usado. Por segurança, cada link só pode ser usado uma vez.'
+                    : errorType === 'network'
+                    ? '🌐 Não foi possível conectar ao servidor. Verifique sua conexão com a internet.'
+                    : '❌ Este link não é válido ou está corrompido.'}
+                </p>
+                <p className="text-sm text-blue-700 font-semibold">
+                  💡 Não se preocupe! Você pode solicitar um novo link ou fazer login normalmente.
+                </p>
               </div>
+
               <div className="space-y-3">
                 <Link
                   href="/pt/wellness/recuperar-acesso"
-                  className="block w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                  className="block w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-center"
                 >
-                  📧 Solicitar Novo Link
+                  📧 Solicitar Novo Link de Acesso
                 </Link>
                 <Link
-                  href="/pt/wellness/login"
-                  className="block w-full bg-gray-200 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  href="/pt/wellness/login?redirect=/pt/wellness/bem-vindo&signup=true"
+                  className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
                 >
-                  Voltar para o Login
+                  🔑 Fazer Login (se já tem conta)
+                </Link>
+                <Link
+                  href="/pt/wellness/login?signup=true"
+                  className="block w-full bg-gray-200 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center"
+                >
+                  ✨ Criar Nova Conta
                 </Link>
               </div>
-              <div className="mt-6 text-sm text-gray-500">
-                <p>Possíveis motivos:</p>
-                <ul className="list-disc list-inside mt-2 text-left">
-                  <li>Link já foi usado</li>
-                  <li>Link expirou (válido por 30 dias)</li>
-                  <li>Link inválido ou corrompido</li>
-                </ul>
-              </div>
+
+              {errorType === 'expired' && (
+                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="text-sm text-yellow-800">
+                    <strong>💡 Dica:</strong> Links de acesso são válidos por 30 dias. Se você recebeu este e-mail há mais de 30 dias, solicite um novo link.
+                  </p>
+                </div>
+              )}
             </>
           )}
         </div>
