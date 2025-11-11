@@ -137,50 +137,80 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     hasExternalReference: !!data.external_reference,
   })
 
-  try {
-    // Se for teste do Mercado Pago (payment.id = "123456"), pular verificação
-    if (paymentId === '123456' || paymentId === 123456) {
-      console.log('🧪 Teste do Mercado Pago detectado, processando sem verificação')
-      // Continuar processamento mesmo sendo teste
-    } else {
-      // Usar isTest passado como parâmetro (baseado em live_mode do webhook)
-      const paymentStatus = await verifyPayment(paymentId, isTest)
-      console.log('📊 Status do pagamento:', paymentStatus)
-
-      if (!paymentStatus.approved) {
-        console.log('⚠️ Pagamento não aprovado:', paymentStatus.status)
-        return
+    // IMPORTANTE: O webhook do Mercado Pago envia apenas { id: '...' } no data
+    // Precisamos buscar os dados completos do pagamento via API
+    let paymentDataFull: any = null
+    
+    try {
+      // Se for teste do Mercado Pago (payment.id = "123456"), pular verificação
+      if (paymentId === '123456' || paymentId === 123456) {
+        console.log('🧪 Teste do Mercado Pago detectado, processando sem verificação')
+        // Continuar processamento mesmo sendo teste
+        paymentDataFull = data // Usar dados do webhook diretamente
+      } else {
+        // Buscar dados completos do pagamento via API do Mercado Pago
+        console.log('🔍 Buscando dados completos do pagamento via API...')
+        const { Payment } = await import('mercadopago')
+        const { createMercadoPagoClient } = await import('@/lib/mercado-pago')
+        const client = createMercadoPagoClient(isTest)
+        const payment = new Payment(client)
+        
+        try {
+          paymentDataFull = await payment.get({ id: paymentId })
+          console.log('✅ Dados completos do pagamento obtidos:', {
+            hasMetadata: !!paymentDataFull.metadata,
+            hasExternalReference: !!paymentDataFull.external_reference,
+            hasPayer: !!paymentDataFull.payer,
+            status: paymentDataFull.status,
+          })
+        } catch (apiError: any) {
+          console.error('❌ Erro ao buscar dados completos do pagamento:', apiError)
+          // Tentar usar dados do webhook como fallback
+          paymentDataFull = data
+        }
+        
+        // Verificar status do pagamento
+        if (!paymentDataFull.status || paymentDataFull.status !== 'approved') {
+          console.log('⚠️ Pagamento não aprovado:', paymentDataFull.status)
+          return
+        }
       }
+    } catch (error: any) {
+      console.error('❌ Erro ao processar pagamento:', error)
+      return
     }
+    
+    // Usar dados completos do pagamento em vez de apenas data do webhook
+    const fullData = paymentDataFull || data
 
-    // Obter metadata do pagamento
-    const metadata = data.metadata || {}
+    // Obter metadata do pagamento (usar dados completos obtidos via API)
+    const metadata = fullData.metadata || {}
     let userId = metadata.user_id
     
     console.log('🔍 Tentando extrair user_id:', {
       'metadata.user_id': metadata.user_id,
       'metadata completo': metadata,
-      'external_reference': data.external_reference,
-      'payer.email': data.payer?.email,
-      'payer_email': data.payer_email,
+      'external_reference': fullData.external_reference,
+      'payer.email': fullData.payer?.email,
+      'payer_email': fullData.payer_email,
     })
     
     // Se não tiver user_id no metadata, tentar extrair do external_reference
     // Formato: area_planType_userId (ex: wellness_monthly_temp_portalmagra@gmail.com)
-    if (!userId && data.external_reference) {
-      const parts = data.external_reference.split('_')
+    if (!userId && fullData.external_reference) {
+      const parts = fullData.external_reference.split('_')
       console.log('📋 Partes do external_reference:', parts)
       if (parts.length >= 3) {
         userId = parts.slice(2).join('_') // Pega tudo depois de area_planType_
         console.log('✅ User ID extraído do external_reference:', userId)
       } else {
-        console.warn('⚠️ external_reference não tem formato esperado:', data.external_reference)
+        console.warn('⚠️ external_reference não tem formato esperado:', fullData.external_reference)
       }
     }
     
     // Se ainda não tiver, tentar usar o e-mail do pagador como temp_email
     if (!userId) {
-      const payerEmail = data.payer?.email || data.payer_email || null
+      const payerEmail = fullData.payer?.email || fullData.payer_email || null
       if (payerEmail && payerEmail.includes('@')) {
         userId = `temp_${payerEmail}`
         console.log('✅ User ID criado a partir do e-mail do pagador:', userId)
@@ -191,10 +221,10 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       console.error('❌ User ID não encontrado no metadata do pagamento')
       console.log('📋 Dados disponíveis para debug:', {
         metadata,
-        external_reference: data.external_reference,
-        payer: data.payer,
-        payer_email: data.payer_email,
-        'data completo (primeiros 500 chars)': JSON.stringify(data).substring(0, 500),
+        external_reference: fullData.external_reference,
+        payer: fullData.payer,
+        payer_email: fullData.payer_email,
+        'fullData completo (primeiros 1000 chars)': JSON.stringify(fullData).substring(0, 1000),
       })
       // NÃO retornar - continuar processamento para não bloquear webhook
       // Mas não criar usuário/subscription sem userId
@@ -203,30 +233,30 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     
     console.log('✅ User ID encontrado/criado:', userId)
     
-    const area = metadata.area || (data.external_reference?.split('_')[0]) || 'wellness'
-    const planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || 'monthly'
-    const paymentMethod = data.payment_method_id || 'unknown'
+    const area = metadata.area || (fullData.external_reference?.split('_')[0]) || 'wellness'
+    const planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || 'monthly'
+    const paymentMethod = fullData.payment_method_id || 'unknown'
 
     // Obter informações do pagamento
-    const amount = data.transaction_amount || 0
-    const currency = data.currency_id || 'BRL'
+    const amount = fullData.transaction_amount || 0
+    const currency = fullData.currency_id || 'BRL'
     
     // Obter e-mail do pagador (importante para suporte)
     // Tentar múltiplas fontes de e-mail do webhook
-    let payerEmail = data.payer?.email || 
-                     data.payer_email || 
-                     data.payer?.identification?.email ||
-                     data.collector?.email ||
-                     data.external_reference?.split('email:')[1] ||
+    let payerEmail = fullData.payer?.email || 
+                     fullData.payer_email || 
+                     fullData.payer?.identification?.email ||
+                     fullData.collector?.email ||
+                     fullData.external_reference?.split('email:')[1] ||
                      null
     
     console.log('📧 Tentando capturar e-mail do pagador:', {
-      'data.payer?.email': data.payer?.email,
-      'data.payer_email': data.payer_email,
-      'data.payer?.identification?.email': data.payer?.identification?.email,
-      'data.collector?.email': data.collector?.email,
+      'fullData.payer?.email': fullData.payer?.email,
+      'fullData.payer_email': fullData.payer_email,
+      'fullData.payer?.identification?.email': fullData.payer?.identification?.email,
+      'fullData.collector?.email': fullData.collector?.email,
       'payerEmail final': payerEmail,
-      'payer completo': data.payer,
+      'payer completo': fullData.payer,
     })
     
     // NOVO: Se userId começar com "temp_", criar usuário automaticamente
