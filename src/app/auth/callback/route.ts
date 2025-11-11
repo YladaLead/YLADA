@@ -72,7 +72,8 @@ export async function GET(request: NextRequest) {
     })
 
     // Determinar para onde redirecionar
-    let redirectPath = '/pt/wellness/bem-vindo?payment=success'
+    // Padrão: dashboard (recuperação de acesso)
+    let redirectPath = '/pt/wellness/dashboard'
 
     // Se houver parâmetro 'next' ou 'redirect_to', usar ele
     if (next) {
@@ -81,15 +82,15 @@ export async function GET(request: NextRequest) {
         // Validar que é uma URL relativa (segurança)
         if (decodedNext.startsWith('/')) {
           redirectPath = decodedNext
+          console.log('✅ Usando redirect do parâmetro next:', redirectPath)
         }
       } catch (e) {
         console.warn('⚠️ Erro ao decodificar next:', e)
       }
-    }
-
-    // Se não houver 'next', sempre redirecionar para bem-vindo (pagamento)
-    if (!next) {
-      redirectPath = '/pt/wellness/bem-vindo?payment=success'
+    } else {
+      // Se não houver 'next', usar padrão: dashboard (recuperação)
+      console.log('ℹ️ Sem parâmetro next, usando padrão: dashboard')
+      redirectPath = '/pt/wellness/dashboard'
     }
 
     console.log('🔄 Redirecionando para:', redirectPath)

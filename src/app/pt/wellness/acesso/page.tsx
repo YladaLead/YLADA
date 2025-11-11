@@ -58,10 +58,15 @@ function AcessoPorTokenContent() {
             console.log('🔐 Fazendo login automático via magic link...')
             window.location.href = data.loginUrl
           } else {
-            // Fallback: redirecionar para bem-vindo (usuário pode precisar fazer login manualmente)
+            // Fallback: verificar redirect ou usar padrão baseado no contexto
             const redirect = searchParams.get('redirect')
-            const redirectPath = redirect ? decodeURIComponent(redirect) : '/pt/wellness/bem-vindo?payment=success'
+            // Se tem redirect, usar ele (pode ser dashboard ou bem-vindo)
+            // Se não tem, assumir recuperação e ir para dashboard
+            const redirectPath = redirect 
+              ? decodeURIComponent(redirect) 
+              : '/pt/wellness/dashboard'
             
+            console.log('🔄 Redirecionando para (fallback):', redirectPath)
             setTimeout(() => {
               window.location.href = redirectPath
             }, 1500)
