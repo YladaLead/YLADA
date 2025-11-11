@@ -17,6 +17,24 @@ export async function POST(request: NextRequest) {
     // Detectar se é teste ou produção baseado no live_mode do webhook
     const isTest = body.live_mode === false || body.live_mode === 'false'
     
+    // Em produção, ignorar webhooks de teste se NODE_ENV for production
+    // Isso evita processar pagamentos de teste como se fossem reais
+    if (process.env.NODE_ENV === 'production' && isTest) {
+      console.log('⚠️ Webhook de TESTE recebido em PRODUÇÃO - Ignorando para evitar conflitos')
+      console.log('📋 Dados do webhook de teste:', {
+        type: body.type,
+        action: body.action,
+        live_mode: body.live_mode,
+        requestId,
+      })
+      // Retornar sucesso mas não processar (para não bloquear webhook)
+      return NextResponse.json({ 
+        received: true, 
+        message: 'Webhook de teste ignorado em produção',
+        note: 'Configure URL de teste diferente ou deixe vazio no Mercado Pago Dashboard'
+      })
+    }
+    
     console.log('📥 Webhook Mercado Pago recebido:', {
       type: body.type,
       action: body.action,
