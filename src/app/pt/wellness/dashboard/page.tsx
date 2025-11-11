@@ -26,7 +26,7 @@ export default function WellnessDashboard() {
 }
 
 function WellnessDashboardContent() {
-  const { user, userProfile, signOut } = useAuth()
+  const { user, userProfile, signOut, loading } = useAuth()
   const router = useRouter()
   
   const [perfil, setPerfil] = useState({
@@ -34,6 +34,23 @@ function WellnessDashboardContent() {
     bio: ''
   })
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
+  
+  // Aguardar autenticação carregar antes de renderizar
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Se não houver usuário após carregar, não renderizar (ProtectedRoute deve redirecionar)
+  if (!user) {
+    return null
+  }
 
   const [stats, setStats] = useState({
     ferramentasAtivas: 0,
@@ -70,7 +87,7 @@ function WellnessDashboardContent() {
     }
     
     // Usar dados disponíveis imediatamente (não bloquear renderização)
-    const nomeInicial = userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário'
+    const nomeInicial = userProfile?.nome_completo || (user?.email ? user.email.split('@')[0] : null) || 'Usuário'
     setPerfil({
       nome: nomeInicial,
       bio: ''
@@ -94,7 +111,7 @@ function WellnessDashboardContent() {
           const data = await response.json()
           if (data.profile) {
             setPerfil({
-              nome: data.profile.nome || userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+              nome: data.profile.nome || userProfile?.nome_completo || (user?.email ? user.email.split('@')[0] : null) || 'Usuário',
               bio: data.profile.bio || ''
             })
           }
@@ -250,15 +267,10 @@ function WellnessDashboardContent() {
     }
   }
 
-  // Não renderizar se não houver usuário autenticado
-  if (!user) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <WellnessNavBar 
-        userName={perfil.nome || userProfile?.nome_completo || user?.email?.split('@')[0] || undefined}
+        userName={perfil.nome || userProfile?.nome_completo || (user?.email ? user.email.split('@')[0] : null) || undefined}
         userBio={perfil.bio || undefined}
       />
       
