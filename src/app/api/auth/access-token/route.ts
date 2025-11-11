@@ -41,8 +41,28 @@ export async function POST(request: NextRequest) {
 
     // Criar magic link para login automático
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
-    // Usar /auth/callback que vai redirecionar corretamente para bem-vindo
-    const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent('/pt/wellness/bem-vindo?payment=success')}`
+    
+    // Verificar se veio de recuperação de acesso ou de pagamento
+    // Por padrão, recuperação vai para dashboard (usuário já tem conta)
+    // Pagamento vai para bem-vindo (novo usuário precisa completar cadastro)
+    // O redirect será passado via query param na URL do e-mail
+    const url = new URL(request.url)
+    const redirectParam = url.searchParams.get('redirect')
+    
+    // Se tem redirect no parâmetro, usar ele
+    // Se não tem, verificar se é recuperação (padrão: dashboard) ou pagamento
+    let finalRedirect = '/pt/wellness/dashboard' // Padrão: dashboard (recuperação)
+    
+    if (redirectParam) {
+      finalRedirect = decodeURIComponent(redirectParam)
+    } else {
+      // Se não tem redirect, assumir que é recuperação e ir para dashboard
+      // (pagamento sempre terá redirect=/pt/wellness/bem-vindo no e-mail)
+      finalRedirect = '/pt/wellness/dashboard'
+    }
+    
+    // Usar /auth/callback que vai redirecionar corretamente
+    const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(finalRedirect)}`
     
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',

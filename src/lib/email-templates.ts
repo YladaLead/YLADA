@@ -165,8 +165,11 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
     nutra: 'Nutra',
   }[data.area]
 
-  // Link vai para página de acesso que redireciona para bem-vindo após login
-  const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}&redirect=/pt/${data.area}/bem-vindo`
+  // Link vai para página de acesso
+  // Para recuperação: redireciona para dashboard (usuário já tem conta)
+  // Para pagamento: redireciona para bem-vindo (novo usuário)
+  // Como este é e-mail de recuperação, vai para dashboard
+  const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}&redirect=/pt/${data.area}/dashboard`
 
   console.log('📧 Enviando e-mail via Resend:', {
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
