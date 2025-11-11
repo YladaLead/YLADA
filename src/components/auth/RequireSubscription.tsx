@@ -64,11 +64,21 @@ export default function RequireSubscription({
         }
 
         // Se não tem perfil ainda, aguardar apenas 1 segundo (otimizado)
-        // Mas não bloquear - permitir que a verificação continue
+        // Se passou timeout, permitir acesso (ProtectedRoute já permitiu, assumindo admin)
         if (!userProfile) {
-          console.log('⏳ RequireSubscription: Perfil ainda não carregado, continuando verificação...')
-          // Não vamos bloquear aqui - apenas continuar a verificação
-          // O perfil pode estar demorando por problemas de RLS ou rede
+          // Se já passou timeout do perfil, permitir acesso sem verificar assinatura
+          // (ProtectedRoute já permitiu acesso, assumindo que é admin)
+          if (profileCheckTimeout) {
+            console.log('⚠️ RequireSubscription: Perfil não carregou, mas timeout passou. Permitindo acesso (assumindo admin).')
+            setCanBypass(true)
+            setHasSubscription(true)
+            setCheckingSubscription(false)
+            setShowLoading(false)
+            return
+          }
+          console.log('⏳ RequireSubscription: Perfil ainda não carregado, aguardando...')
+          // Aguardar perfil carregar antes de verificar assinatura
+          return
         }
 
         // Verificar assinatura via API (com timeout de 5s)
@@ -137,7 +147,7 @@ export default function RequireSubscription({
     }
 
     checkSubscription()
-  }, [user, userProfile, authLoading, area])
+  }, [user, userProfile, authLoading, area, profileCheckTimeout])
 
   // Loading enquanto verifica autenticação
   if (authLoading) {
@@ -163,12 +173,7 @@ export default function RequireSubscription({
   // Isso é especialmente importante para evitar bloqueios
   if (!userProfile && profileCheckTimeout && user) {
     console.warn('⚠️ RequireSubscription: Perfil não carregou após 1s, permitindo acesso temporário')
-    // Se está verificando assinatura, permitir acesso mesmo assim para não bloquear
-    if (checkingSubscription) {
-      setHasSubscription(true)
-      setCanBypass(true)
-      setCheckingSubscription(false)
-    }
+    // O useEffect já atualizou o estado, então podemos permitir acesso
     return <>{children}</>
   }
 
@@ -197,9 +202,33 @@ export default function RequireSubscription({
     }
   }, [userProfile, checkingSubscription])
 
+  // Se passou timeout do perfil, permitir acesso (ProtectedRoute já permitiu, assumindo admin)
+  useEffect(() => {
+    if (profileCheckTimeout && !userProfile && user && checkingSubscription) {
+      console.log('⚠️ RequireSubscription: Timeout do perfil passou, permitindo acesso (assumindo admin)')
+      setCanBypass(true)
+      setHasSubscription(true)
+      setCheckingSubscription(false)
+      setShowLoading(false)
+    }
+  }, [profileCheckTimeout, userProfile, user, checkingSubscription])
+
   // Se perfil carregou e é admin/suporte, permitir acesso imediatamente (useEffect já atualizou o estado)
   if (userProfile && (userProfile.is_admin || userProfile.is_support)) {
     return <>{children}</>
+  }
+
+  // Se tem assinatura ou pode bypassar, mostrar conteúdo (verificar ANTES do loading)
+  if (hasSubscription || canBypass) {
+    return (
+      <>
+        {children}
+        {/* Mostrar banner de vencimento se próximo */}
+        {subscriptionData && !canBypass && (
+          <SubscriptionExpiryBanner subscription={subscriptionData} area={area} />
+        )}
+      </>
+    )
   }
 
   // Loading enquanto verifica assinatura ou aguarda perfil (com timeout de 3s)
@@ -224,19 +253,6 @@ export default function RequireSubscription({
           <p className="text-gray-600">Carregando...</p>
         </div>
       </div>
-    )
-  }
-
-  // Se tem assinatura ou pode bypassar, mostrar conteúdo
-  if (hasSubscription || canBypass) {
-    return (
-      <>
-        {children}
-        {/* Mostrar banner de vencimento se próximo */}
-        {subscriptionData && !canBypass && (
-          <SubscriptionExpiryBanner subscription={subscriptionData} area={area} />
-        )}
-      </>
     )
   }
 
