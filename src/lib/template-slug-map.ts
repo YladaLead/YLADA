@@ -18,8 +18,14 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   // Calculadora IMC
   'calculadora-imc': 'calc-imc',
   'calculadora-de-imc': 'calc-imc',
+  'calculadora imc': 'calc-imc',
+  'calculadora de imc': 'calc-imc',
   'calc-imc': 'calc-imc',
   'imc': 'calc-imc',
+  // Variações com números (ex: calculadora-de-imc1)
+  'calculadora-de-imc1': 'calc-imc',
+  'calculadora-imc1': 'calc-imc',
+  'calculadora de imc1': 'calc-imc',
   
   // Calculadora de Proteína
   'calculadora-proteina': 'calc-proteina',
@@ -30,8 +36,18 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   // Calculadora de Composição
   'calculadora-composicao': 'calc-composicao',
   'calculadora-de-composicao': 'calc-composicao',
+  'calculadora composicao': 'calc-composicao',
+  'calculadora de composicao': 'calc-composicao',
   'calc-composicao': 'calc-composicao',
   'composicao-corporal': 'calc-composicao',
+  
+  // Calculadora de Calorias
+  'calculadora-calorias': 'calc-calorias',
+  'calculadora-de-calorias': 'calc-calorias',
+  'calculadora calorias': 'calc-calorias',
+  'calculadora de calorias': 'calc-calorias',
+  'calc-calorias': 'calc-calorias',
+  'calorias': 'calc-calorias',
   
   // Quiz Ganhos
   'quiz-ganhos': 'quiz-ganhos',
@@ -70,8 +86,19 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
  */
 export function normalizeTemplateSlug(slug: string | null | undefined): string {
   if (!slug) return ''
-  const normalized = slug.toLowerCase().trim()
-  return TEMPLATE_SLUG_MAP[normalized] || normalized
+  // Normalizar: lowercase, trim, substituir espaços por hífens, remover múltiplos hífens
+  let normalized = slug.toLowerCase().trim()
+    .replace(/\s+/g, '-') // Espaços para hífens
+    .replace(/-+/g, '-') // Múltiplos hífens para um único
+    .replace(/^-|-$/g, '') // Remover hífens no início/fim
+  
+  // Tentar encontrar no mapeamento
+  if (TEMPLATE_SLUG_MAP[normalized]) {
+    return TEMPLATE_SLUG_MAP[normalized]
+  }
+  
+  // Se não encontrou, retornar normalizado (sem espaços)
+  return normalized
 }
 
 /**
