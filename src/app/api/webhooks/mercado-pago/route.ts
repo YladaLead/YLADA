@@ -467,7 +467,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         user_id: userId,
         stripe_account: null, // Mercado Pago não usa stripe_account
         stripe_payment_intent_id: paymentId, // Usar como ID único
-        stripe_invoice_id: data.order?.id?.toString() || null,
+        stripe_invoice_id: fullData.order?.id?.toString() || null,
         stripe_charge_id: null,
         amount: Math.round(amount * 100),
         currency: currency.toLowerCase(),
