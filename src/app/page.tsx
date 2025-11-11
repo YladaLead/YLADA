@@ -1,17 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 
 export default function HomePage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     nome: '',
     profissao: '',
     pais: '',
     email: ''
   })
+
+  // Capturar access_token do hash do Supabase e redirecionar
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash
+      
+      // Se tiver access_token no hash, é um callback do Supabase
+      if (hash && hash.includes('access_token=')) {
+        console.log('🔐 Access token detectado no hash, redirecionando para callback...')
+        
+        // Extrair o access_token do hash
+        const params = new URLSearchParams(hash.substring(1)) // Remove o #
+        const accessToken = params.get('access_token')
+        const type = params.get('type')
+        
+        if (accessToken && type === 'recovery') {
+          // É um magic link de recuperação - redirecionar para dashboard
+          console.log('🔄 Redirecionando para dashboard (recuperação)')
+          router.push('/pt/wellness/dashboard')
+        } else if (accessToken) {
+          // Outro tipo de token - verificar se tem redirect
+          const redirectTo = params.get('redirect_to') || '/pt/wellness/dashboard'
+          console.log('🔄 Redirecionando para:', redirectTo)
+          router.push(redirectTo)
+        }
+      }
+    }
+  }, [router])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
