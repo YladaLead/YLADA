@@ -472,7 +472,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         amount: Math.round(amount * 100),
         currency: currency.toLowerCase(),
         status: 'succeeded',
-        receipt_url: data.external_resource_url || null,
+        receipt_url: fullData.external_resource_url || null,
         payment_method: data.payment_method_id || 'unknown',
       })
 
