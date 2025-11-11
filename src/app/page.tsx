@@ -15,30 +15,43 @@ export default function HomePage() {
     email: ''
   })
 
-  // Capturar access_token do hash do Supabase e redirecionar
+  // Capturar access_token do hash do Supabase e processar sessão
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash
       
       // Se tiver access_token no hash, é um callback do Supabase
       if (hash && hash.includes('access_token=')) {
-        console.log('🔐 Access token detectado no hash, redirecionando para callback...')
+        console.log('🔐 Access token detectado no hash, processando sessão...')
         
-        // Extrair o access_token do hash
-        const params = new URLSearchParams(hash.substring(1)) // Remove o #
-        const accessToken = params.get('access_token')
-        const type = params.get('type')
-        
-        if (accessToken && type === 'recovery') {
-          // É um magic link de recuperação - redirecionar para dashboard
-          console.log('🔄 Redirecionando para dashboard (recuperação)')
-          router.push('/pt/wellness/dashboard')
-        } else if (accessToken) {
-          // Outro tipo de token - verificar se tem redirect
-          const redirectTo = params.get('redirect_to') || '/pt/wellness/dashboard'
-          console.log('🔄 Redirecionando para:', redirectTo)
-          router.push(redirectTo)
+        // Processar sessão do Supabase e redirecionar
+        const processSession = async () => {
+          try {
+            const { createClient } = await import('@/lib/supabase-client')
+            const supabase = createClient()
+            
+            // O Supabase client deve processar o hash automaticamente
+            // Aguardar um pouco para a sessão ser processada
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            
+            // Verificar se a sessão foi criada
+            const { data: { session } } = await supabase.auth.getSession()
+            
+            if (session) {
+              console.log('✅ Sessão criada, redirecionando para dashboard')
+              // Redirecionar para dashboard (recuperação de acesso)
+              window.location.href = '/pt/wellness/dashboard'
+            } else {
+              console.warn('⚠️ Sessão não criada, redirecionando para login')
+              window.location.href = '/pt/wellness/login'
+            }
+          } catch (error) {
+            console.error('❌ Erro ao processar sessão:', error)
+            window.location.href = '/pt/wellness/login'
+          }
         }
+        
+        processSession()
       }
     }
   }, [router])
