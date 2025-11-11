@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { getAppUrl } from '@/lib/url-utils'
+import { normalizeTemplateSlug, CANONICAL_TEMPLATE_SLUGS } from '@/lib/template-slug-map'
 
 interface Template {
   id: string
@@ -429,8 +430,21 @@ function NovaFerramentaWellnessContent() {
       // Converter slug para nome amigável usando função melhorada
       const nomeAmigavel = gerarTituloDoSlug(configuracao.urlPersonalizada)
 
+      // ✅ NORMALIZAR template_slug para garantir que sempre use o slug canônico
+      const templateSlugNormalizado = normalizeTemplateSlug(templateSelecionado.slug)
+      
+      // ✅ VALIDAR se o template existe na lista de templates válidos
+      if (!CANONICAL_TEMPLATE_SLUGS.includes(templateSlugNormalizado as any)) {
+        console.warn('⚠️ Template slug não encontrado na lista canônica:', {
+          original: templateSelecionado.slug,
+          normalizado: templateSlugNormalizado,
+          template: templateSelecionado
+        })
+        // Continuar mesmo assim, mas logar o problema
+      }
+
       const payload = {
-        template_slug: templateSelecionado.slug,
+        template_slug: templateSlugNormalizado, // ✅ Usar slug normalizado
         title: nomeAmigavel, // Usar o nome do projeto formatado como título
         description: descricao || templateSelecionado.descricao, // Usar descrição personalizada ou padrão
         slug: configuracao.urlPersonalizada,
@@ -728,13 +742,38 @@ function NovaFerramentaWellnessContent() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           />
                           {slugNormalizado && (
-                            <div className="mt-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                              <p className="text-xs text-blue-800">
-                                ℹ️ <strong>Normalizado automaticamente:</strong> Acentos, espaços e caracteres especiais foram convertidos para formato de URL válido.
-                              </p>
+                            <div className="mt-2 px-4 py-3 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
+                              <div className="flex items-start">
+                                <span className="text-blue-600 text-xl mr-2">ℹ️</span>
+                                <div className="flex-1">
+                                  <p className="text-sm font-semibold text-blue-900 mb-1">
+                                    Normalização automática aplicada
+                                  </p>
+                                  <p className="text-xs text-blue-800">
+                                    <strong>Regras aplicadas:</strong> Letras maiúsculas convertidas para minúsculas, espaços substituídos por hífens, acentos removidos, caracteres especiais removidos.
+                                  </p>
+                                  <p className="text-xs text-blue-700 mt-2 font-medium">
+                                    ✅ Seu link funcionará perfeitamente com este formato!
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           )}
-                          <p className="text-xs text-gray-500 mt-1">
+                          <div className="mt-3 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
+                            <p className="text-xs font-semibold text-yellow-900 mb-2">
+                              📋 Regras de formatação automática:
+                            </p>
+                            <ul className="text-xs text-yellow-800 space-y-1 list-disc list-inside">
+                              <li>Letras maiúsculas → minúsculas (ex: "Calculadora" → "calculadora")</li>
+                              <li>Espaços → hífens (ex: "calculadora imc" → "calculadora-imc")</li>
+                              <li>Acentos removidos (ex: "composição" → "composicao")</li>
+                              <li>Caracteres especiais removidos (ex: "calculadora@imc" → "calculadoraimc")</li>
+                            </ul>
+                            <p className="text-xs text-yellow-700 mt-2 font-medium">
+                              💡 <strong>Dica:</strong> Você pode digitar normalmente, o sistema ajusta automaticamente!
+                            </p>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
                             💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos". Será tratado automaticamente enquanto você digita.
                           </p>
                           {configuracao.urlCompleta && (
