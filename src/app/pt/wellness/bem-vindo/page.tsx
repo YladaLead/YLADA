@@ -47,11 +47,18 @@ function BemVindoContent() {
       return
     }
 
-    // Se não estiver logado, redirecionar para login
-    if (!user) {
-      setError('Você precisa estar logado para completar o cadastro. Redirecionando para login...')
+    // Se não estiver logado, aguardar um pouco mais (pode estar carregando)
+    if (!user && authLoading) {
+      setError('Aguarde, estamos verificando seu acesso...')
+      return
+    }
+    
+    // Se ainda não estiver logado após aguardar, tentar recarregar
+    if (!user && !authLoading) {
+      setError('Você precisa estar logado. Verificando seu acesso...')
+      // Recarregar a página para tentar pegar a sessão
       setTimeout(() => {
-        router.push('/pt/wellness/login?redirect=/pt/wellness/bem-vindo&signup=true')
+        window.location.reload()
       }, 2000)
       return
     }
@@ -90,9 +97,7 @@ function BemVindoContent() {
     }
   }
 
-  const handleSkip = () => {
-    router.push('/pt/wellness/dashboard')
-  }
+  // Removido handleSkip - não permitir pular o cadastro
 
   // Se não está logado e não veio do pagamento, permitir acesso mesmo assim
   // (usuário pode ter acabado de pagar e ainda não estar logado)
@@ -219,21 +224,17 @@ function BemVindoContent() {
                     </div>
                   )}
 
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col gap-4">
                     <button
                       type="submit"
                       disabled={saving || !nomeCompleto.trim()}
-                      className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-center"
+                      className="w-full px-6 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-center text-lg"
                     >
-                      {saving ? '⏳ Salvando...' : '✅ Continuar para a Plataforma'}
+                      {saving ? '⏳ Salvando...' : '✨ Continuar para a Plataforma'}
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleSkip}
-                      className="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Pular por enquanto
-                    </button>
+                    <p className="text-xs text-center text-gray-500">
+                      Este passo é obrigatório para personalizar sua experiência
+                    </p>
                   </div>
                 </form>
               </div>

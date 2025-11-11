@@ -37,7 +37,8 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
   }[data.area]
 
   const planName = data.planType === 'monthly' ? 'Mensal' : 'Anual'
-  const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}`
+  // Link vai para página de acesso que redireciona para bem-vindo após login
+  const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}&redirect=/pt/${data.area}/bem-vindo?payment=success`
 
   // Verificar se Resend está configurado
   if (!isResendConfigured() || !resend) {
@@ -88,16 +89,16 @@ export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
             <div style="text-align: center; margin: 30px 0;">
               <a href="${accessUrl}" 
                  style="display: inline-block; background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                🚀 Acessar Meu Dashboard
+                ✨ Completar meu Cadastro e Começar
               </a>
             </div>
             
-            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 14px;">📋 Próximos Passos:</p>
-              <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #6b7280;">
-                <li style="margin-bottom: 8px;">Acesse seu dashboard usando o botão acima</li>
-                <li style="margin-bottom: 8px;">Complete seu perfil com nome e cidade</li>
-                <li style="margin-bottom: 8px;">Crie suas primeiras ferramentas e comece a gerar leads!</li>
+            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 5px;">
+              <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 14px; color: #065f46;">📋 O que acontece agora:</p>
+              <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #047857;">
+                <li style="margin-bottom: 8px;">Clique no botão acima para acessar a plataforma</li>
+                <li style="margin-bottom: 8px;">Complete seu cadastro com seu nome (leva menos de 1 minuto)</li>
+                <li style="margin-bottom: 8px;">Comece a criar suas ferramentas e gerar leads!</li>
               </ol>
             </div>
             

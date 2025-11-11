@@ -37,16 +37,18 @@ function AcessoPorTokenContent() {
         const data = await response.json()
 
         if (response.ok && data.success) {
-          // Token válido - redirecionar para dashboard
-          // O token já foi validado e usado no backend
-          // O usuário precisa fazer login normalmente, mas já tem acesso garantido
+          // Token válido - usuário foi logado automaticamente no backend
           setSuccess(true)
           
-          // Aguardar um pouco antes de redirecionar
+          // Obter redirect da URL se existir
+          const redirect = searchParams.get('redirect')
+          const redirectPath = redirect ? decodeURIComponent(redirect) : '/pt/wellness/bem-vindo?payment=success'
+          
+          // Aguardar um pouco para garantir que a sessão foi criada
           setTimeout(() => {
-            // Redirecionar para página de bem-vindo para completar cadastro
-            router.push('/pt/wellness/bem-vindo')
-          }, 2000)
+            // Recarregar a página para garantir que o auth está atualizado
+            window.location.href = redirectPath
+          }, 1500)
         } else {
           setError(data.error || 'Token inválido ou expirado')
         }
@@ -106,10 +108,10 @@ function AcessoPorTokenContent() {
                 </div>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Acesso Confirmado!
+                Acesso Confirmado! ✅
               </h1>
               <p className="text-gray-600 mb-6">
-                Redirecionando para seu dashboard...
+                Você foi logado automaticamente. Redirecionando para completar seu cadastro...
               </p>
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
             </>
