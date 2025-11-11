@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
     const { data: userProfile } = await supabaseAdmin
       .from('user_profiles')
       .select('nome_completo')
-      .eq('id', user.id)
-      .single()
+      .eq('user_id', user.id)
+      .maybeSingle()
 
     // Enviar e-mail
     try {
