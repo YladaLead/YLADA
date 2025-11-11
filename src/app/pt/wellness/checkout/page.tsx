@@ -15,13 +15,9 @@ export default function WellnessCheckoutPage() {
   const [canceled, setCanceled] = useState(false)
   const [email, setEmail] = useState('')
   
-  // Verificar se está pronto para checkout
-  // Para checkout, não precisamos do perfil completo, apenas do user
-  // O perfil será verificado na API
-  // IMPORTANTE: Permitir visualizar a página sem login
-  // Login será exigido apenas ao clicar em "Continuar para Pagamento"
-  // Não travar a página esperando authLoading - permitir visualizar sempre
-  const isReady = !!user && !authLoading
+  // IMPORTANTE: Esta página NÃO requer autenticação
+  // Permitir visualizar sempre, mesmo sem login
+  // O checkout funciona apenas com e-mail
 
   // Log de debug para verificar estado de autenticação
   useEffect(() => {
@@ -29,10 +25,9 @@ export default function WellnessCheckoutPage() {
       hasUser: !!user,
       userId: user?.id,
       authLoading,
-      isReady,
       timestamp: new Date().toISOString()
     })
-  }, [user, authLoading, isReady])
+  }, [user, authLoading])
 
   // Detectar parâmetros da URL usando window.location (mais confiável)
   useEffect(() => {
@@ -99,13 +94,9 @@ export default function WellnessCheckoutPage() {
       if (!response.ok) {
         const data = await response.json()
         
-        // Se for erro 401 (não autenticado), redirecionar para login
-        if (response.status === 401) {
-          console.error('❌ Não autenticado, redirecionando para login')
-          router.push('/pt/wellness/login')
-          return
-        }
-        
+        // IMPORTANTE: Não redirecionar para login em caso de 401
+        // O checkout funciona sem autenticação (apenas com e-mail)
+        // Se der erro, mostrar mensagem de erro ao usuário
         throw new Error(data.error || 'Erro ao criar sessão de checkout')
       }
 
