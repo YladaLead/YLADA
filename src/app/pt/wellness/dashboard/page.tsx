@@ -63,18 +63,16 @@ function WellnessDashboardContent() {
 
   // Carregar perfil do usuário - otimizado com timeout menor e fallback rápido
   useEffect(() => {
+    // Só executar se houver usuário autenticado
     if (!user) {
-      setPerfil({
-        nome: userProfile?.nome_completo || 'Usuário',
-        bio: ''
-      })
       setCarregandoPerfil(false)
       return
     }
     
     // Usar dados disponíveis imediatamente (não bloquear renderização)
+    const nomeInicial = userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário'
     setPerfil({
-      nome: userProfile?.nome_completo || user?.email?.split('@')[0] || 'Usuário',
+      nome: nomeInicial,
       bio: ''
     })
     setCarregandoPerfil(false)
@@ -252,10 +250,15 @@ function WellnessDashboardContent() {
     }
   }
 
+  // Não renderizar se não houver usuário autenticado
+  if (!user) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <WellnessNavBar 
-        userName={perfil.nome || userProfile?.nome_completo || undefined}
+        userName={perfil.nome || userProfile?.nome_completo || user?.email?.split('@')[0] || undefined}
         userBio={perfil.bio || undefined}
       />
       
