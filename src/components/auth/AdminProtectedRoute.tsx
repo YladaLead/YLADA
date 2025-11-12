@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-client'
-import { getCachedAdminCheck, setCachedAdminCheck } from '@/lib/auth-cache'
+import { getCachedAdminCheck, setCachedAdminCheck, clearCachedAdminCheck } from '@/lib/auth-cache'
 
 const supabase = createClient()
 
@@ -19,15 +19,6 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
     const checkAdmin = async () => {
       try {
-        // ✅ NOVO: Verificar cache primeiro (muito mais rápido)
-        const cachedAdmin = getCachedAdminCheck()
-        if (cachedAdmin !== null) {
-          console.log('✅ AdminProtectedRoute: Usando cache (muito mais rápido!)')
-          setIsAdmin(cachedAdmin)
-          setLoading(false)
-          return
-        }
-
         console.log('🔐 AdminProtectedRoute: INICIANDO verificação...')
         
         // Verificar sessão primeiro (rápido)
@@ -37,9 +28,21 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
         if (!session || sessionError) {
           console.log('❌ AdminProtectedRoute: Sem sessão')
+          // Limpar cache se não tem sessão
+          clearCachedAdminCheck()
           window.location.href = '/admin/login'
           return
         }
+
+        // ✅ NOVO: Verificar cache APÓS confirmar que tem sessão (mais seguro)
+        const cachedAdmin = getCachedAdminCheck()
+        if (cachedAdmin === true) {
+          console.log('✅ AdminProtectedRoute: Usando cache (muito mais rápido!)')
+          setIsAdmin(true)
+          setLoading(false)
+          return
+        }
+        // Se cache é false, continuar para verificar novamente (pode ter mudado)
 
         console.log('✅ AdminProtectedRoute: Sessão OK! User:', session.user.email)
 
@@ -71,14 +74,14 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
         if (!isAdmin) {
           console.log('❌ AdminProtectedRoute: Não é admin')
-          // ✅ NOVO: Salvar no cache (false) para evitar verificação repetida
-          setCachedAdminCheck(false)
+          // Limpar cache se não é admin (não salvar false, pode mudar)
+          clearCachedAdminCheck()
           await supabase.auth.signOut()
           window.location.href = '/admin/login'
           return
         }
 
-        // ✅ NOVO: Salvar no cache (true) para próximas cargas
+        // ✅ NOVO: Salvar no cache (true) apenas se for admin
         setCachedAdminCheck(true)
         console.log('✅✅✅ AdminProtectedRoute: ACESSO PERMITIDO!')
         setIsAdmin(true)
