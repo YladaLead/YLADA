@@ -85,51 +85,55 @@ function BemVindoContent() {
       return
     }
 
-    // Se não estiver logado, aguardar mais tempo (pode estar carregando após callback)
-    if (!user && authLoading) {
-      setError('Aguarde, estamos verificando seu acesso...')
-      return
-    }
-    
-    // Se ainda não estiver logado após aguardar, tentar recarregar ou verificar novamente
-    if (!user && !authLoading) {
-      // Se veio do pagamento, pode ser que a sessão ainda esteja sendo sincronizada
-      if (fromPayment) {
-        setError('Aguarde, estamos finalizando seu login...')
-        // Aguardar mais um pouco e tentar novamente
-        setTimeout(async () => {
-          // Tentar buscar sessão novamente
-          const { createClient } = await import('@/lib/supabase-client')
-          const supabase = createClient()
-          const { data: { session } } = await supabase.auth.getSession()
-          
-          if (session) {
-            // Recarregar para pegar a sessão
-            window.location.reload()
-          } else {
-            setError('Não foi possível fazer login automaticamente. Por favor, faça login manualmente.')
-          }
-        }, 3000)
-        return
-      } else {
-        setError('Você precisa estar logado. Verificando seu acesso...')
-        // Recarregar a página para tentar pegar a sessão
-        setTimeout(() => {
-          window.location.reload()
-        }, 2000)
-        return
-      }
-    }
-
     setSaving(true)
     setError(null)
 
     try {
+      // Verificar sessão antes de salvar (pode estar sincronizando)
+      const { createClient } = await import('@/lib/supabase-client')
+      const supabase = createClient()
+      
+      // Tentar buscar sessão diretamente do Supabase
+      let currentSession = null
+      let sessionUser = user
+      
+      // Se não tem user do contexto, tentar buscar sessão diretamente
+      if (!user) {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (session && session.user) {
+          currentSession = session
+          sessionUser = session.user
+          console.log('✅ Sessão encontrada diretamente do Supabase')
+        } else {
+          // Se não encontrou, aguardar um pouco e tentar novamente (pode estar sincronizando)
+          console.log('⏳ Sessão não encontrada, aguardando sincronização...')
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          
+          const { data: { session: retrySession } } = await supabase.auth.getSession()
+          if (retrySession && retrySession.user) {
+            currentSession = retrySession
+            sessionUser = retrySession.user
+            console.log('✅ Sessão encontrada após retry')
+          } else {
+            setError('Não foi possível verificar sua sessão. Por favor, faça login novamente e tente completar o cadastro.')
+            setSaving(false)
+            return
+          }
+        }
+      } else {
+        // Se já tem user, buscar sessão para garantir
+        const { data: { session } } = await supabase.auth.getSession()
+        currentSession = session
+      }
+      
+      if (!sessionUser) {
+        setError('Você precisa estar logado para completar o cadastro. Por favor, faça login e tente novamente.')
+        setSaving(false)
+        return
+      }
+
       // Primeiro, atualizar a senha no Supabase Auth
       if (senha) {
-        const { createClient } = await import('@/lib/supabase-client')
-        const supabase = createClient()
-        
         const { error: passwordError } = await supabase.auth.updateUser({
           password: senha
         })
@@ -137,6 +141,7 @@ function BemVindoContent() {
         if (passwordError) {
           console.error('Erro ao atualizar senha:', passwordError)
           setError('Erro ao definir senha. Tente novamente.')
+          setSaving(false)
           return
         }
       }
@@ -153,6 +158,16 @@ function BemVindoContent() {
           whatsapp: telefone.replace(/\D/g, ''), // Apenas números
         }),
       })
+      
+      // Se a resposta for 401 (não autenticado), tentar recarregar a página
+      if (response.status === 401) {
+        setError('Sua sessão expirou. Recarregando a página...')
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+        setSaving(false)
+        return
+      }
 
       const data = await response.json()
 
@@ -421,7 +436,7 @@ function BemVindoContent() {
                       disabled={saving || !nomeCompleto.trim() || !telefone.trim() || !senha || senha !== confirmarSenha}
                       className="w-full px-6 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-center text-lg"
                     >
-                      {saving ? '⏳ Salvando...' : '✨ Finalizar Cadastro e Continuar'}
+                      {saving ? '⏳ Salvando e verificando acesso...' : '✨ Finalizar Cadastro e Continuar'}
                     </button>
                     <p className="text-xs text-center text-gray-500">
                       Todos os campos são obrigatórios para completar seu cadastro
