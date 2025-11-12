@@ -1,42 +1,50 @@
--- Script para verificar se todas as colunas necessárias existem na tabela user_profiles
+-- =====================================================
+-- VERIFICAR ESTRUTURA DA TABELA user_profiles
+-- =====================================================
 
--- Verificar quais colunas existem
+-- 1. VER TODAS AS COLUNAS DA TABELA
 SELECT 
-    column_name, 
-    data_type, 
-    is_nullable,
-    column_default
+  column_name,
+  data_type,
+  is_nullable,
+  column_default
 FROM information_schema.columns
-WHERE table_schema = 'public'
-AND table_name = 'user_profiles'
+WHERE table_schema = 'public' 
+  AND table_name = 'user_profiles'
 ORDER BY ordinal_position;
 
--- Verificar constraints na tabela
+-- 2. VER DIFERENÇA ENTRE 'perfil' E 'profession'
 SELECT 
-    tc.constraint_name,
-    tc.constraint_type,
-    kcu.column_name,
-    ccu.table_name AS foreign_table_name,
-    ccu.column_name AS foreign_column_name
-FROM information_schema.table_constraints AS tc
-JOIN information_schema.key_column_usage AS kcu
-    ON tc.constraint_name = kcu.constraint_name
-LEFT JOIN information_schema.constraint_column_usage AS ccu
-    ON ccu.constraint_name = tc.constraint_name
-WHERE tc.table_schema = 'public'
-AND tc.table_name = 'user_profiles';
+  perfil,
+  profession,
+  COUNT(*) as total
+FROM user_profiles
+GROUP BY perfil, profession
+ORDER BY total DESC;
 
--- Verificar se o perfil do usuário existe
+-- 3. VER USUÁRIOS COM PERFIL 'nutri' (que devem ser atualizados)
 SELECT 
-    up.user_id,
-    up.perfil,
-    up.nome_completo,
-    up.email,
-    up.bio,
-    up.user_slug,
-    up.country_code,
-    au.email as auth_email
-FROM user_profiles up
-LEFT JOIN auth.users au ON au.id = up.user_id
-WHERE au.email = 'faulaandre@gmail.com';
+  id,
+  user_id,
+  email,
+  nome_completo,
+  perfil,
+  profession,
+  created_at
+FROM user_profiles
+WHERE perfil = 'nutri'
+ORDER BY created_at DESC;
 
+-- 4. VER USUÁRIOS COM PERFIL 'wellness' (já atualizados)
+SELECT 
+  id,
+  user_id,
+  email,
+  nome_completo,
+  perfil,
+  profession,
+  created_at
+FROM user_profiles
+WHERE perfil = 'wellness'
+ORDER BY created_at DESC
+LIMIT 10;
