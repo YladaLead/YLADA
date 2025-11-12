@@ -191,7 +191,7 @@ export default function AdminDashboard() {
     //   // Não fazer nada - deixar o checkAuth inicial fazer o trabalho
     // })
     
-    // Timeout de segurança - se não concluir em 10 segundos, redirecionar
+    // Timeout de segurança - se não concluir em 3 segundos, redirecionar
     // Só redireciona se ainda não autenticado
     safetyTimeoutRef.current = setTimeout(() => {
       if (mounted && !isAuthenticatedRef.current) {
@@ -355,6 +355,9 @@ function AdminDashboardContent() {
                       </div>
                       <button
                         onClick={async () => {
+                          // Limpar cache ao fazer logout
+                          const { clearCachedAdminCheck } = await import('@/lib/auth-cache')
+                          clearCachedAdminCheck()
                           await supabase.auth.signOut()
                           window.location.href = '/admin/login'
                         }}
