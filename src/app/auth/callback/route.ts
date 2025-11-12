@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * GET /auth/callback
@@ -73,12 +74,23 @@ export async function GET(request: NextRequest) {
       email: data.session.user.email,
     })
 
+    // Verificar se o usuário tem perfil completo
+    // Se não tiver, redirecionar para completar cadastro
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('nome_completo, whatsapp')
+      .eq('user_id', data.session.user.id)
+      .maybeSingle()
+
     // Determinar para onde redirecionar
-    // Padrão: dashboard (recuperação de acesso)
     let redirectPath = '/pt/wellness/dashboard'
 
-    // Se houver parâmetro 'next' ou 'redirect_to', usar ele
-    if (next) {
+    // Se não tem perfil ou perfil incompleto, redirecionar para bem-vindo
+    if (!profile || !profile.nome_completo || !profile.whatsapp) {
+      console.log('ℹ️ Perfil incompleto, redirecionando para bem-vindo')
+      redirectPath = '/pt/wellness/bem-vindo?migrado=true'
+    } else if (next) {
+      // Se tem perfil completo e tem 'next', usar ele
       try {
         const decodedNext = decodeURIComponent(next)
         // Validar que é uma URL relativa (segurança)
@@ -90,7 +102,7 @@ export async function GET(request: NextRequest) {
         console.warn('⚠️ Erro ao decodificar next:', e)
       }
     } else {
-      // Se não houver 'next', usar padrão: dashboard (recuperação)
+      // Se não houver 'next' e perfil completo, usar padrão: dashboard
       console.log('ℹ️ Sem parâmetro next, usando padrão: dashboard')
       redirectPath = '/pt/wellness/dashboard'
     }

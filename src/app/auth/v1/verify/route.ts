@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * GET /auth/v1/verify
@@ -75,10 +76,23 @@ export async function GET(request: NextRequest) {
       email: data.session.user.email,
     })
 
+    // Verificar se o usuário tem perfil completo
+    // Se não tiver, redirecionar para completar cadastro
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('nome_completo, whatsapp')
+      .eq('user_id', data.session.user.id)
+      .maybeSingle()
+
     // Determinar para onde redirecionar
     let redirectPath = '/pt/wellness/dashboard'
     
-    if (redirectTo) {
+    // Se não tem perfil ou perfil incompleto, redirecionar para bem-vindo
+    if (!profile || !profile.nome_completo || !profile.whatsapp) {
+      console.log('ℹ️ Perfil incompleto, redirecionando para bem-vindo')
+      redirectPath = '/pt/wellness/bem-vindo?migrado=true'
+    } else if (redirectTo) {
+      // Se tem redirectTo explícito, usar ele
       try {
         const decoded = decodeURIComponent(redirectTo)
         if (decoded.startsWith('/')) {
