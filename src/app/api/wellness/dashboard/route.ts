@@ -112,12 +112,23 @@ export async function GET(request: NextRequest) {
     console.error('❌ Erro técnico ao buscar dados do dashboard:', {
       error,
       message: error?.message,
-      code: error?.code
+      code: error?.code,
+      stack: error?.stack
     })
     
+    // Retornar erro mais detalhado em desenvolvimento
     const mensagemAmigavel = translateError(error)
     return NextResponse.json(
-      { error: mensagemAmigavel },
+      { 
+        error: mensagemAmigavel,
+        ...(process.env.NODE_ENV === 'development' && {
+          technical: {
+            message: error?.message,
+            code: error?.code,
+            stack: error?.stack
+          }
+        })
+      },
       { status: 500 }
     )
   }

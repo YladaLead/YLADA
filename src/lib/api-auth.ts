@@ -234,9 +234,23 @@ export async function requireApiAuth(
 
     return { user: session.user, profile }
   } catch (error: any) {
-    console.error('Erro na verificação de autenticação da API:', error)
+    console.error('❌ Erro na verificação de autenticação da API:', {
+      error,
+      message: error?.message,
+      code: error?.code,
+      stack: error?.stack
+    })
     return NextResponse.json(
-      { error: 'Erro interno na verificação de autenticação.' },
+      { 
+        error: 'Erro interno na verificação de autenticação.',
+        ...(process.env.NODE_ENV === 'development' && {
+          technical: {
+            message: error?.message,
+            code: error?.code,
+            stack: error?.stack?.split('\n').slice(0, 5).join('\n')
+          }
+        })
+      },
       { status: 500 }
     )
   }

@@ -55,7 +55,7 @@ export interface QuizDatabase {
 export interface PerguntaDatabase {
   id: string
   quiz_id: string
-  tipo: 'multipla' | 'dissertativa' | 'escala' | 'simnao'
+  tipo: 'multipla' | 'dissertativa'
   titulo: string
   opcoes: string[] | null
   obrigatoria: boolean
@@ -197,9 +197,24 @@ export const quizDB = {
         return null
       }
 
+      // Buscar WhatsApp do perfil do usuário que criou o quiz
+      let whatsappDoPerfil = null
+      if (quiz.user_id) {
+        const { data: profile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('whatsapp')
+          .eq('user_id', quiz.user_id)
+          .maybeSingle()
+        
+        if (profile?.whatsapp) {
+          whatsappDoPerfil = profile.whatsapp
+        }
+      }
+
       return {
         ...quiz,
         perguntas: perguntas || [],
+        whatsappDoPerfil, // Incluir WhatsApp do perfil
       }
     } catch (error) {
       console.error('Erro ao buscar quiz:', error)

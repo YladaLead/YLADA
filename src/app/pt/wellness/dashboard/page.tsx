@@ -16,6 +16,24 @@ const ChatIA = dynamic(() => import('@/components/ChatIA'), {
 })
 
 export default function WellnessDashboard() {
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  // Garantir que só renderiza no cliente
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+  
   return (
     <ProtectedRoute perfil="wellness" allowAdmin={true}>
       <RequireSubscription area="wellness">
@@ -126,83 +144,109 @@ function WellnessDashboardContent() {
         
         clearTimeout(timeoutId)
         
-        if (response.ok) {
-          const data = await response.json()
-          
-          // A API do dashboard retorna ferramentas já processadas com conversões
-          if (data.ferramentas && Array.isArray(data.ferramentas)) {
-            setFerramentasAtivas(data.ferramentas.map((f: any) => ({
-              id: f.id,
-              nome: f.nome,
-              categoria: f.categoria,
-              leads: f.leads || 0,
-              conversoes: f.conversoes || 0, // Usar conversões calculadas pela API
-              status: f.status,
-              icon: f.icon || '🔗'
-            })))
-          } else {
-            // Fallback: buscar ferramentas diretamente se a API não retornar formato esperado
-            const ferramentasResponse = await fetch('/api/wellness/ferramentas', {
-              credentials: 'include',
-              signal: controller.signal
+        if (!response.ok) {
+          // Se a resposta não for OK, tentar ler o erro
+          let errorMessage = 'Erro ao carregar dados do dashboard'
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+            console.error('❌ Erro na API do dashboard:', {
+              status: response.status,
+              error: errorData,
+              technical: errorData.technical
             })
+          } catch (e) {
+            console.error('❌ Erro ao processar resposta de erro:', e)
+          }
+          
+          // Mostrar mensagem de erro ao usuário
+          setMensagemErro(errorMessage)
+          setTimeout(() => setMensagemErro(null), 10000)
+          return
+        }
+        
+        const data = await response.json()
+        
+        if (data.error) {
+          console.error('❌ API retornou erro:', data.error)
+          setMensagemErro(data.error)
+          setTimeout(() => setMensagemErro(null), 10000)
+          return
+        }
+        
+        // A API do dashboard retorna ferramentas já processadas com conversões
+        if (data.ferramentas && Array.isArray(data.ferramentas)) {
+          setFerramentasAtivas(data.ferramentas.map((f: any) => ({
+            id: f.id,
+            nome: f.nome,
+            categoria: f.categoria,
+            leads: f.leads || 0,
+            conversoes: f.conversoes || 0, // Usar conversões calculadas pela API
+            status: f.status,
+            icon: f.icon || '🔗'
+          })))
+        } else {
+          // Fallback: buscar ferramentas diretamente se a API não retornar formato esperado
+          const ferramentasResponse = await fetch('/api/wellness/ferramentas', {
+            credentials: 'include',
+            signal: controller.signal
+          })
+          
+          if (ferramentasResponse.ok) {
+            const ferramentasData = await ferramentasResponse.json()
+            const ferramentas = ferramentasData.tools || ferramentasData.ferramentas || []
             
-            if (ferramentasResponse.ok) {
-              const ferramentasData = await ferramentasResponse.json()
-              const ferramentas = ferramentasData.tools || ferramentasData.ferramentas || []
+            setFerramentasAtivas(ferramentas.map((f: any) => {
+              let categoria = 'Geral'
+              if (f.template_slug?.startsWith('calc-')) {
+                categoria = 'Calculadora'
+              } else if (f.template_slug?.startsWith('quiz-')) {
+                categoria = 'Quiz'
+              } else if (f.template_slug?.startsWith('planilha-') || f.template_slug?.startsWith('template-')) {
+                categoria = 'Planilha'
+              }
               
-              setFerramentasAtivas(ferramentas.map((f: any) => {
-                let categoria = 'Geral'
-                if (f.template_slug?.startsWith('calc-')) {
-                  categoria = 'Calculadora'
-                } else if (f.template_slug?.startsWith('quiz-')) {
-                  categoria = 'Quiz'
-                } else if (f.template_slug?.startsWith('planilha-') || f.template_slug?.startsWith('template-')) {
-                  categoria = 'Planilha'
-                }
-                
-                // Calcular conversões como estimativa (30% dos leads) se não houver dados reais
-                const leads = f.leads_count || f.views || 0
-                const conversoes = Math.round(leads * 0.3) // Estimativa: 30% de conversão
-                
-                return {
-                  id: f.id,
-                  nome: f.title || f.nome,
-                  categoria: categoria,
-                  leads: leads,
-                  conversoes: conversoes,
-                  status: f.status,
-                  icon: f.emoji || '🔗'
-                }
-              }))
-            }
+              // Calcular conversões como estimativa (30% dos leads) se não houver dados reais
+              const leads = f.leads_count || f.views || 0
+              const conversoes = Math.round(leads * 0.3) // Estimativa: 30% de conversão
+              
+              return {
+                id: f.id,
+                nome: f.title || f.nome,
+                categoria: categoria,
+                leads: leads,
+                conversoes: conversoes,
+                status: f.status,
+                icon: f.emoji || '🔗'
+              }
+            }))
           }
+        }
+        
+        // Atualizar estatísticas se a API do dashboard retornar
+        if (data.stats) {
+          setStats({
+            ferramentasAtivas: data.stats.ferramentasAtivas || 0,
+            leadsGerados: data.stats.leadsGerados || 0,
+            conversoes: data.stats.conversoes || 0,
+            clientesAtivos: data.stats.clientesAtivos || 0
+          })
+        } else {
+          // Fallback: calcular estatísticas manualmente
+          const ferramentas = data.ferramentas || []
+          const ativas = ferramentas.filter((f: any) => 
+            f.status === 'active' || f.status === 'ativa' || f.status === 'ativo'
+          )
           
-          // Atualizar estatísticas se a API do dashboard retornar
-          if (data.stats) {
-            setStats({
-              ferramentasAtivas: data.stats.ferramentasAtivas || 0,
-              leadsGerados: data.stats.leadsGerados || 0,
-              conversoes: data.stats.conversoes || 0,
-              clientesAtivos: data.stats.clientesAtivos || 0
-            })
-          } else {
-            // Fallback: calcular estatísticas manualmente
-            const ferramentas = data.ferramentas || []
-            const ativas = ferramentas.filter((f: any) => 
-              f.status === 'active' || f.status === 'ativa' || f.status === 'ativo'
-            )
-            
-            const totalLeads = ferramentas.reduce((acc: number, f: any) => acc + (f.leads || 0), 0)
-            const totalConversoes = ferramentas.reduce((acc: number, f: any) => acc + (f.conversoes || 0), 0)
-            
-            setStats({
-              ferramentasAtivas: ativas.length,
-              leadsGerados: totalLeads,
-              conversoes: totalConversoes,
-              clientesAtivos: totalConversoes
-            })
-          }
+          const totalLeads = ferramentas.reduce((acc: number, f: any) => acc + (f.leads || 0), 0)
+          const totalConversoes = ferramentas.reduce((acc: number, f: any) => acc + (f.conversoes || 0), 0)
+          
+          setStats({
+            ferramentasAtivas: ativas.length,
+            leadsGerados: totalLeads,
+            conversoes: totalConversoes,
+            clientesAtivos: totalConversoes
+          })
         }
       } catch (error: any) {
         if (error.name !== 'AbortError') {

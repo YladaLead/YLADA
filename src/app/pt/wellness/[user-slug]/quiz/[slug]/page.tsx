@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 interface Pergunta {
   id: string
-  tipo: 'multipla' | 'dissertativa' | 'escala' | 'simnao'
+  tipo: 'multipla' | 'dissertativa'
   titulo: string
   opcoes?: string[]
   obrigatoria: boolean
@@ -44,6 +44,7 @@ interface Quiz {
     }>
   }
   perguntas: Pergunta[]
+  whatsappDoPerfil?: string // WhatsApp do perfil do criador do quiz
 }
 
 export default function QuizPublicPage() {
@@ -124,7 +125,23 @@ export default function QuizPublicPage() {
       // Construir URL do WhatsApp com mensagem
       const mensagem = mensagemWhatsapp || 'Olá! Completei o quiz e gostaria de saber mais.'
       const mensagemEncoded = encodeURIComponent(mensagem)
-      const whatsappUrl = urlRedirecionamento || `https://wa.me/5511999999999?text=${mensagemEncoded}`
+      
+      // Se não tiver urlRedirecionamento, usar WhatsApp do perfil
+      let whatsappUrl = urlRedirecionamento
+      if (!whatsappUrl && quiz.whatsappDoPerfil) {
+        const numeroLimpo = quiz.whatsappDoPerfil.replace(/\D/g, '')
+        whatsappUrl = `https://wa.me/${numeroLimpo}?text=${mensagemEncoded}`
+      } else if (!whatsappUrl) {
+        // Fallback apenas se não tiver nenhum WhatsApp disponível
+        console.warn('⚠️ WhatsApp não encontrado no perfil nem na URL de redirecionamento')
+        whatsappUrl = `https://wa.me/5511999999999?text=${mensagemEncoded}`
+      } else {
+        // Se já tiver URL, adicionar mensagem se não tiver
+        if (!whatsappUrl.includes('?text=')) {
+          whatsappUrl = `${whatsappUrl}?text=${mensagemEncoded}`
+        }
+      }
+      
       window.open(whatsappUrl, '_blank')
     } else if (tipoEntrega === 'url' && urlRedirecionamento) {
       window.location.href = urlRedirecionamento
@@ -249,56 +266,6 @@ export default function QuizPublicPage() {
               />
             )}
 
-            {/* Sim/Não */}
-            {pergunta.tipo === 'simnao' && (
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setRespostas({ ...respostas, [perguntaAtual]: 'Sim' })}
-                  className={`flex-1 px-6 py-4 rounded-lg font-semibold transition-all ${
-                    respostas[perguntaAtual] === 'Sim'
-                      ? 'text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  style={{
-                    backgroundColor: respostas[perguntaAtual] === 'Sim' ? quiz.cores.primaria : undefined
-                  }}
-                >
-                  Sim
-                </button>
-                <button
-                  onClick={() => setRespostas({ ...respostas, [perguntaAtual]: 'Não' })}
-                  className={`flex-1 px-6 py-4 rounded-lg font-semibold transition-all ${
-                    respostas[perguntaAtual] === 'Não'
-                      ? 'text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  style={{
-                    backgroundColor: respostas[perguntaAtual] === 'Não' ? quiz.cores.primaria : undefined
-                  }}
-                >
-                  Não
-                </button>
-              </div>
-            )}
-
-            {/* Escala */}
-            {pergunta.tipo === 'escala' && (
-              <div className="space-y-4">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={respostas[perguntaAtual] || '5'}
-                  onChange={(e) => setRespostas({ ...respostas, [perguntaAtual]: e.target.value })}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>1</span>
-                  <span className="text-lg font-bold">{respostas[perguntaAtual] || '5'}</span>
-                  <span>10</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Navegação */}

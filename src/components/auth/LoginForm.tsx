@@ -204,13 +204,36 @@ export default function LoginForm({
           const { data: { session: verifySession } } = await supabase.auth.getSession()
           
           if (verifySession) {
-            console.log('✅ Sessão confirmada, redirecionando...')
-            window.location.href = redirectPath
+            console.log('✅ Sessão confirmada, redirecionando para:', redirectPath)
+            // Usar router.push ao invés de window.location.href para melhor integração com Next.js
+            router.push(redirectPath)
+            // Forçar reload se router.push não funcionar após 1 segundo
+            setTimeout(() => {
+              if (window.location.pathname !== redirectPath) {
+                console.log('⚠️ Router.push não funcionou, usando window.location.href')
+                window.location.href = redirectPath
+              }
+            }, 1000)
           } else {
             // Se não salvou, tentar novamente após mais tempo
+            console.log('⚠️ Sessão não confirmada, aguardando mais tempo...')
             await new Promise(resolve => setTimeout(resolve, 500))
-            window.location.href = redirectPath
+            const { data: { session: retrySession } } = await supabase.auth.getSession()
+            if (retrySession) {
+              console.log('✅ Sessão confirmada na segunda tentativa, redirecionando...')
+              router.push(redirectPath)
+              setTimeout(() => {
+                if (window.location.pathname !== redirectPath) {
+                  window.location.href = redirectPath
+                }
+              }, 1000)
+            } else {
+              // Mesmo sem sessão confirmada, tentar redirecionar (pode ser problema de timing)
+              console.log('⚠️ Sessão não confirmada, mas redirecionando mesmo assim...')
+              router.push(redirectPath)
+            }
           }
+          // Não setar loading como false aqui - o redirecionamento vai acontecer
           return
         } else {
           setError('Erro ao criar sessão. Tente novamente.')

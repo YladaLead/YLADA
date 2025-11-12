@@ -7,7 +7,7 @@ import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 
 interface Pergunta {
   id: string
-  tipo: 'multipla' | 'dissertativa' | 'escala' | 'simnao'
+  tipo: 'multipla' | 'dissertativa'
   titulo: string
   opcoes?: string[]
   obrigatoria: boolean
@@ -310,20 +310,6 @@ export default function QuizPersonalizadoPage() {
       descricao: 'Resposta livre em texto',
       icon: '✍️',
       dica: 'Perfeita para coletar informações detalhadas'
-    },
-    {
-      tipo: 'escala',
-      nome: 'Escala',
-      descricao: 'Avaliação em escala numérica',
-      icon: '📊',
-      dica: 'Ótima para medir intensidade ou frequência'
-    },
-    {
-      tipo: 'simnao',
-      nome: 'Sim/Não',
-      descricao: 'Resposta binária simples',
-      icon: '✅',
-      dica: 'Ideal para perguntas diretas e rápidas'
     }
   ]
 
@@ -372,6 +358,15 @@ export default function QuizPersonalizadoPage() {
       const slug = slugBase ? `${slugBase}-${Date.now()}` : `quiz-${Date.now()}`
       
       // Preparar dados para salvar
+      // Se tipoEntrega for 'whatsapp', construir URL do WhatsApp com telefone do perfil
+      let urlRedirecionamento = quiz.entrega.urlRedirecionamento
+      if (quiz.entrega.tipoEntrega === 'whatsapp' && perfilWhatsapp) {
+        // Limpar número (remover caracteres não numéricos)
+        const numeroLimpo = perfilWhatsapp.replace(/\D/g, '')
+        // Construir URL do WhatsApp
+        urlRedirecionamento = `https://wa.me/${numeroLimpo}`
+      }
+      
       const quizData = {
         titulo: quiz.titulo,
         descricao: quiz.descricao,
@@ -380,6 +375,7 @@ export default function QuizPersonalizadoPage() {
         configuracoes: quiz.configuracao,
         entrega: {
           ...quiz.entrega,
+          urlRedirecionamento: urlRedirecionamento || '',
           // Incluir mensagem do WhatsApp se tipoEntrega for 'whatsapp'
           mensagemWhatsapp: quiz.entrega.tipoEntrega === 'whatsapp' ? mensagemWhatsapp : '',
         },
