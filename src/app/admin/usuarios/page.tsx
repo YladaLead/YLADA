@@ -230,6 +230,44 @@ export default function AdminUsuarios() {
     }
   }
 
+  // Definir senha padrão para usuário migrado
+  const definirSenhaPadrao = async (email: string) => {
+    if (!confirm(`Definir senha padrão (Ylada2025!) para ${email}?`)) {
+      return
+    }
+
+    try {
+      setSalvando(true)
+      setError(null)
+
+      const response = await fetch('/api/admin/usuarios/definir-senha-individual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: email,
+          password: 'Ylada2025!'
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSuccess(`Senha padrão definida com sucesso para ${email}`)
+        setTimeout(() => setSuccess(null), 5000)
+      } else {
+        setError(data.error || 'Erro ao definir senha')
+      }
+    } catch (err: any) {
+      console.error('Erro ao definir senha:', err)
+      setError(err.message || 'Erro ao definir senha')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
   // Deletar usuário
   const confirmarDeletarUsuario = async () => {
     if (!usuarioSelecionado) return
@@ -497,6 +535,15 @@ export default function AdminUsuarios() {
                                 className="text-green-600 hover:text-green-900"
                               >
                                 Assinatura
+                              </button>
+                            )}
+                            {usuario.isMigrado && (
+                              <button
+                                onClick={() => definirSenhaPadrao(usuario.email)}
+                                className="text-purple-600 hover:text-purple-900"
+                                title="Definir senha padrão (Ylada2025!)"
+                              >
+                                🔑 Senha
                               </button>
                             )}
                             <button
