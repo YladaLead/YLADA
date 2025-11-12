@@ -158,10 +158,10 @@ function BemVindoContent() {
 
       if (response.ok) {
         setSuccess(true)
-        // Aguardar um pouco antes de redirecionar
+        // Aguardar um pouco para mostrar a mensagem de sucesso antes de redirecionar
         setTimeout(() => {
-          router.push('/pt/wellness/dashboard')
-        }, 2000)
+          window.location.href = '/pt/wellness/dashboard'
+        }, 3000)
       } else {
         setError(data.error || 'Erro ao salvar perfil. Tente novamente.')
       }
@@ -226,19 +226,51 @@ function BemVindoContent() {
           )}
 
           {success ? (
-            <div className="text-center py-8">
-              <div className="inline-block bg-green-100 rounded-full p-4 mb-4">
-                <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <div className="text-center py-12">
+              {/* Ícone de sucesso grande e destacado */}
+              <div className="inline-block bg-gradient-to-br from-green-400 to-green-600 rounded-full p-6 mb-6 shadow-lg animate-bounce">
+                <svg className="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Perfil atualizado com sucesso!
+              
+              {/* Título principal */}
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                🎉 Cadastro Finalizado com Sucesso!
               </h2>
-              <p className="text-gray-600 mb-4">
-                Redirecionando para sua área de trabalho...
-              </p>
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+              
+              {/* Mensagem de confirmação */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6 mb-6 max-w-md mx-auto">
+                <p className="text-lg text-gray-800 mb-2 font-semibold">
+                  ✅ Tudo pronto para começar!
+                </p>
+                <p className="text-gray-700">
+                  Seu cadastro foi concluído com sucesso. Agora você pode acessar todas as funcionalidades da plataforma.
+                </p>
+              </div>
+              
+              {/* Contador de redirecionamento */}
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6 max-w-md mx-auto">
+                <p className="text-blue-800 font-medium mb-2">
+                  🚀 Redirecionando para o Dashboard...
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <p className="text-sm text-blue-700">
+                    Você será redirecionado automaticamente em instantes
+                  </p>
+                </div>
+              </div>
+              
+              {/* Botão de ação manual (caso o redirecionamento não funcione) */}
+              <div className="mt-6">
+                <button
+                  onClick={() => window.location.href = '/pt/wellness/dashboard'}
+                  className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg text-lg transform hover:scale-105"
+                >
+                  🚀 Ir para o Dashboard Agora
+                </button>
+              </div>
             </div>
           ) : (
             <>
