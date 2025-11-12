@@ -44,6 +44,15 @@ export default function AdminUsuarios() {
   const [mostrarDeletarUsuario, setMostrarDeletarUsuario] = useState(false)
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null)
   const [salvando, setSalvando] = useState(false)
+  
+  // Estados para atualização em massa de área
+  const [bulkUpdateFrom, setBulkUpdateFrom] = useState<'nutri' | 'coach' | 'nutra' | 'wellness' | ''>('')
+  const [bulkUpdateTo, setBulkUpdateTo] = useState<'nutri' | 'coach' | 'nutra' | 'wellness' | ''>('')
+  const [bulkUpdateResult, setBulkUpdateResult] = useState<{
+    success: boolean
+    message: string
+    updated?: number
+  } | null>(null)
 
   // Formulários
   const [formUsuario, setFormUsuario] = useState({
@@ -268,6 +277,107 @@ export default function AdminUsuarios() {
     }
   }
 
+  // Atualizar área em massa
+  const atualizarAreaEmMassa = async () => {
+    if (!bulkUpdateFrom || !bulkUpdateTo) {
+      setError('Selecione a área origem e destino')
+      return
+    }
+
+    if (bulkUpdateFrom === bulkUpdateTo) {
+      setError('A área origem e destino devem ser diferentes')
+      return
+    }
+
+    // Primeiro, verificar quantos usuários serão afetados
+    try {
+      setSalvando(true)
+      setError(null)
+      setBulkUpdateResult(null)
+
+      // Buscar quantos usuários serão afetados
+      const checkResponse = await fetch(`/api/admin/usuarios?area=${bulkUpdateFrom}`, {
+        credentials: 'include'
+      })
+      
+      const checkData = await checkResponse.json()
+      const totalAfetados = checkData.usuarios?.length || 0
+
+      if (totalAfetados === 0) {
+        setBulkUpdateResult({
+          success: false,
+          message: `Nenhum usuário encontrado com área '${bulkUpdateFrom}'`
+        })
+        setSalvando(false)
+        return
+      }
+
+      // Confirmar com o usuário
+      const confirmar = window.confirm(
+        `⚠️ ATENÇÃO: Esta ação irá atualizar ${totalAfetados} usuário(s) de '${bulkUpdateFrom}' para '${bulkUpdateTo}'.\n\n` +
+        `Isso afetará:\n` +
+        `- A área de acesso deles\n` +
+        `- Os dados de análise\n` +
+        `- As assinaturas vinculadas\n\n` +
+        `Deseja continuar?`
+      )
+
+      if (!confirmar) {
+        setSalvando(false)
+        return
+      }
+
+      // Executar atualização
+      const response = await fetch('/api/admin/usuarios/bulk-update-area', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          from_area: bulkUpdateFrom,
+          to_area: bulkUpdateTo
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setBulkUpdateResult({
+          success: true,
+          message: `✅ ${data.message || 'Área atualizada com sucesso!'}`,
+          updated: data.updated || totalAfetados
+        })
+        setSuccess(`Área atualizada: ${data.updated || totalAfetados} usuário(s) de '${bulkUpdateFrom}' para '${bulkUpdateTo}'`)
+        
+        // Limpar seleções
+        setBulkUpdateFrom('')
+        setBulkUpdateTo('')
+        
+        // Recarregar lista
+        setTimeout(() => {
+          carregarUsuarios()
+          setBulkUpdateResult(null)
+        }, 3000)
+      } else {
+        setBulkUpdateResult({
+          success: false,
+          message: data.error || 'Erro ao atualizar área'
+        })
+        setError(data.error || 'Erro ao atualizar área')
+      }
+    } catch (err: any) {
+      console.error('Erro ao atualizar área:', err)
+      setBulkUpdateResult({
+        success: false,
+        message: err.message || 'Erro ao atualizar área'
+      })
+      setError(err.message || 'Erro ao atualizar área')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
   // Definir senha padrão para usuário migrado individual
   const definirSenhaPadrao = async (email: string) => {
     if (!confirm(`Definir senha padrão (Ylada2025!) para ${email}?`)) {
@@ -427,27 +537,98 @@ export default function AdminUsuarios() {
 
         {/* Ações Rápidas */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">🔑 Ações Rápidas - Senhas</h2>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={definirSenhaParaTodosMigrados}
-              disabled={salvando}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {salvando ? (
-                <>
-                  <span className="animate-spin">⏳</span>
-                  Processando...
-                </>
-              ) : (
-                <>
-                  🔑 Definir Senha Padrão para TODOS os Usuários Migrados
-                </>
-              )}
-            </button>
-            <p className="text-sm text-gray-600 self-center">
-              Define a senha padrão <strong>Ylada2025!</strong> para todos os usuários migrados de uma vez
-            </p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">⚡ Ações Rápidas</h2>
+          
+          {/* Seção Senhas */}
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <h3 className="text-md font-medium text-gray-700 mb-3">🔑 Senhas</h3>
+            <div className="flex flex-wrap gap-3 items-center">
+              <button
+                onClick={definirSenhaParaTodosMigrados}
+                disabled={salvando}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {salvando ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    🔑 Definir Senha Padrão para TODOS os Usuários Migrados
+                  </>
+                )}
+              </button>
+              <p className="text-sm text-gray-600">
+                Define a senha padrão <strong>Ylada2025!</strong> para todos os usuários migrados
+              </p>
+            </div>
+          </div>
+
+          {/* Seção Áreas */}
+          <div>
+            <h3 className="text-md font-medium text-gray-700 mb-3">🔄 Atualizar Áreas</h3>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-yellow-800 mb-2">
+                <strong>⚠️ Atenção:</strong> Esta ação atualiza a área (perfil) de múltiplos usuários de uma vez.
+              </p>
+              <p className="text-sm text-yellow-700">
+                Você verá quantos usuários serão afetados antes de confirmar.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 items-center">
+              <select
+                value={bulkUpdateFrom}
+                onChange={(e) => setBulkUpdateFrom(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecione área origem</option>
+                <option value="nutri">Nutri</option>
+                <option value="coach">Coach</option>
+                <option value="nutra">Nutra</option>
+                <option value="wellness">Wellness</option>
+              </select>
+              <span className="text-gray-500">→</span>
+              <select
+                value={bulkUpdateTo}
+                onChange={(e) => setBulkUpdateTo(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecione área destino</option>
+                <option value="nutri">Nutri</option>
+                <option value="coach">Coach</option>
+                <option value="nutra">Nutra</option>
+                <option value="wellness">Wellness</option>
+              </select>
+              <button
+                onClick={atualizarAreaEmMassa}
+                disabled={!bulkUpdateFrom || !bulkUpdateTo || salvando}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {salvando ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    🔄 Atualizar Área em Massa
+                  </>
+                )}
+              </button>
+            </div>
+            {bulkUpdateResult && (
+              <div className={`mt-3 p-3 rounded-lg text-sm ${
+                bulkUpdateResult.success 
+                  ? 'bg-green-50 border border-green-200 text-green-800' 
+                  : 'bg-red-50 border border-red-200 text-red-800'
+              }`}>
+                <p><strong>{bulkUpdateResult.success ? '✅' : '❌'}</strong> {bulkUpdateResult.message}</p>
+                {bulkUpdateResult.updated !== undefined && (
+                  <p className="mt-1">Usuários atualizados: <strong>{bulkUpdateResult.updated}</strong></p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
