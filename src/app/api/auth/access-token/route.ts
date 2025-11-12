@@ -40,7 +40,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar magic link para login automático
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
+    // IMPORTANTE: Sempre usar URL de produção para evitar redirecionamento para localhost
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
+                   process.env.NEXT_PUBLIC_APP_URL || 
+                   'https://www.ylada.com'
+    
+    // Garantir que não seja localhost
+    const productionUrl = baseUrl.includes('localhost') ? 'https://www.ylada.com' : baseUrl
     
     // Verificar se veio de recuperação de acesso ou de pagamento
     // Por padrão, recuperação vai para dashboard (usuário já tem conta)
@@ -63,10 +69,11 @@ export async function POST(request: NextRequest) {
     
     // IMPORTANTE: O Supabase precisa que o redirectTo seja uma URL completa e válida
     // E deve estar configurado nas URLs permitidas do Supabase
-    // Usar /auth/callback que vai redirecionar corretamente
-    const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(finalRedirect)}`
+    // SEMPRE usar URL de produção para evitar redirecionamento para localhost
+    const redirectTo = `${productionUrl}/auth/callback?next=${encodeURIComponent(finalRedirect)}`
     
     console.log('🔗 Gerando magic link com redirectTo:', redirectTo)
+    console.log('🔗 Base URL usado:', productionUrl)
     
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
@@ -89,11 +96,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Retornar o link de magic link para o frontend fazer login automático
+    // IMPORTANTE: Corrigir URL se contiver localhost (pode acontecer se Supabase estiver configurado com localhost)
+    let loginUrl = linkData.properties.action_link
+    if (loginUrl && (loginUrl.includes('localhost') || loginUrl.includes('127.0.0.1'))) {
+      // Substituir localhost pela URL de produção
+      loginUrl = loginUrl.replace(/https?:\/\/[^\/]+/, productionUrl)
+      console.log('⚠️ Magic link corrigido de localhost para produção')
+    }
+    
     return NextResponse.json({
       success: true,
       userId: tokenData.userId,
       email: userData.user.email,
-      loginUrl: linkData.properties.action_link, // URL do magic link para login automático
+      loginUrl, // URL do magic link para login automático (já corrigida se necessário)
       message: 'Token válido. Redirecionando...',
     })
   } catch (error: any) {

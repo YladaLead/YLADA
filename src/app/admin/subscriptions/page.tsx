@@ -8,10 +8,31 @@ import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 
 const supabase = createClient()
 
+interface Subscription {
+  id: string
+  user_id: string
+  usuario: string
+  email: string
+  area: 'nutri' | 'coach' | 'nutra' | 'wellness'
+  tipo: 'mensal' | 'anual' | 'gratuito'
+  valor: number
+  status: 'ativa' | 'cancelada' | 'expirada' | 'atrasada' | 'não paga' | 'trial'
+  dataInicio: string
+  proxVencimento: string
+  is_migrated?: boolean
+  migrated_from?: string | null
+  requires_manual_renewal?: boolean
+  currency?: string
+}
+
 function AdminSubscriptionsContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  
+  // Lista de assinaturas
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
+  const [loadingSubscriptions, setLoadingSubscriptions] = useState(true)
   
   // Formulário para criar plano gratuito
   const [freePlanForm, setFreePlanForm] = useState({
@@ -34,6 +55,31 @@ function AdminSubscriptionsContent() {
   // Formulário para importação em massa
   const [importData, setImportData] = useState('')
   const [importResults, setImportResults] = useState<any>(null)
+
+  // Buscar lista de assinaturas
+  useEffect(() => {
+    const carregarAssinaturas = async () => {
+      try {
+        setLoadingSubscriptions(true)
+        const response = await fetch('/api/admin/receitas?status=active', {
+          credentials: 'include'
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.receitas) {
+            setSubscriptions(data.receitas.slice(0, 20)) // Limitar a 20 mais recentes
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar assinaturas:', err)
+      } finally {
+        setLoadingSubscriptions(false)
+      }
+    }
+
+    carregarAssinaturas()
+  }, [])
 
 
   const handleCreateFreePlan = async (e: React.FormEvent) => {
@@ -613,6 +659,89 @@ function AdminSubscriptionsContent() {
               Envie este link pelo WhatsApp. O usuário digita apenas o email e já acessa para completar o cadastro.
             </p>
           </div>
+        </div>
+
+        {/* Lista de Assinaturas Ativas */}
+        <div className="mt-6 bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">📋 Assinaturas Ativas</h2>
+            <Link
+              href="/admin/receitas"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Ver todas →
+            </Link>
+          </div>
+          
+          {loadingSubscriptions ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-sm text-gray-600">Carregando assinaturas...</p>
+            </div>
+          ) : subscriptions.length === 0 ? (
+            <p className="text-center py-8 text-gray-500">Nenhuma assinatura ativa encontrada</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vencimento</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {subscriptions.map((sub) => (
+                    <tr key={sub.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{sub.usuario}</div>
+                        {sub.email && (
+                          <div className="text-xs text-gray-500">{sub.email}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 capitalize">{sub.area}</span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          sub.tipo === 'mensal' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : sub.tipo === 'anual'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {sub.tipo === 'mensal' ? 'Mensal' : sub.tipo === 'anual' ? 'Anual' : 'Gratuito'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-bold text-gray-900">
+                          {sub.currency === 'brl' ? 'R$' : '$'} {sub.valor.toFixed(2).replace('.', ',')}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {sub.proxVencimento ? new Date(sub.proxVencimento).toLocaleDateString('pt-BR') : '-'}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {sub.status}
+                          </span>
+                          {sub.is_migrated && (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800" title="Migrado">🔄</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
     </div>

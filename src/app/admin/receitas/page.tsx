@@ -2,104 +2,185 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Receita {
   id: string
+  user_id: string
   usuario: string
-  area: 'nutri' | 'coach' | 'consultor' | 'wellness'
-  tipo: 'mensal' | 'anual'
+  email: string
+  area: 'nutri' | 'coach' | 'nutra' | 'wellness'
+  tipo: 'mensal' | 'anual' | 'gratuito'
   valor: number
-  status: 'ativa' | 'cancelada' | 'expirada'
+  status: 'ativa' | 'cancelada' | 'expirada' | 'atrasada' | 'não paga' | 'trial'
   dataInicio: string
   proxVencimento: string
   historico: number
+  is_migrated?: boolean
+  migrated_from?: string | null
+  requires_manual_renewal?: boolean
+  currency?: string
+}
+
+interface Totais {
+  mensal: number
+  anual: number
+  anualMensalizado: number
+  geral: number
+  ativas: number
+  total: number
 }
 
 export default function AdminReceitas() {
-  const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'consultor' | 'wellness'>('todos')
+  const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
+  const [filtroStatus, setFiltroStatus] = useState<'todos' | 'active' | 'canceled' | 'past_due' | 'unpaid'>('todos')
   const [periodo, setPeriodo] = useState<'mes' | 'ano' | 'historico'>('mes')
+  const [receitas, setReceitas] = useState<Receita[]>([])
+  const [totais, setTotais] = useState<Totais>({
+    mensal: 0,
+    anual: 0,
+    anualMensalizado: 0,
+    geral: 0,
+    ativas: 0,
+    total: 0
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const receitas: Receita[] = [
-    {
-      id: '1',
-      usuario: 'Dra. Ana Silva',
-      area: 'nutri',
-      tipo: 'mensal',
-      valor: 97,
-      status: 'ativa',
-      dataInicio: '2024-01-15',
-      proxVencimento: '2024-04-15',
-      historico: 291
-    },
-    {
-      id: '2',
-      usuario: 'Dr. João Santos',
-      area: 'coach',
-      tipo: 'anual',
-      valor: 997,
-      status: 'ativa',
-      dataInicio: '2023-12-01',
-      proxVencimento: '2024-12-01',
-      historico: 997
-    },
-    {
-      id: '3',
-      usuario: 'Maria Costa',
-      area: 'consultor',
-      tipo: 'mensal',
-      valor: 97,
-      status: 'ativa',
-      dataInicio: '2024-02-10',
-      proxVencimento: '2024-05-10',
-      historico: 291
-    },
-    {
-      id: '4',
-      usuario: 'Pedro Oliveira',
-      area: 'wellness',
-      tipo: 'anual',
-      valor: 997,
-      status: 'ativa',
-      dataInicio: '2023-11-20',
-      proxVencimento: '2024-11-20',
-      historico: 997
+  // Buscar dados da API
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const params = new URLSearchParams()
+        if (filtroArea !== 'todos') {
+          params.append('area', filtroArea)
+        }
+        // Se for histórico, buscar todas as assinaturas (não filtrar por status)
+        if (filtroStatus !== 'todos' && periodo !== 'historico') {
+          params.append('status', filtroStatus)
+        }
+
+        const url = `/api/admin/receitas${params.toString() ? `?${params.toString()}` : ''}`
+        const response = await fetch(url, {
+          credentials: 'include'
+        })
+
+        if (!response.ok) {
+          throw new Error('Erro ao carregar receitas')
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.receitas) {
+          setReceitas(data.receitas)
+          setTotais(data.totais || {
+            mensal: 0,
+            anual: 0,
+            anualMensalizado: 0,
+            geral: 0,
+            ativas: 0,
+            total: 0
+          })
+        } else {
+          throw new Error('Formato de dados inválido')
+        }
+      } catch (err: any) {
+        console.error('Erro ao carregar receitas:', err)
+        setError(err.message || 'Erro ao carregar dados')
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
 
-  const receitasFiltradas = receitas.filter(r => filtroArea === 'todos' || r.area === filtroArea)
+    carregarDados()
+  }, [filtroArea, filtroStatus, periodo])
 
-  const totalMensal = receitasFiltradas
-    .filter(r => r.status === 'ativa')
-    .reduce((sum, r) => sum + (r.tipo === 'mensal' ? r.valor : 0), 0)
+  // Filtrar receitas por período (frontend)
+  const receitasFiltradas = receitas.filter(r => {
+    if (periodo === 'mes') {
+      return r.tipo === 'mensal' || r.tipo === 'gratuito'
+    } else if (periodo === 'ano') {
+      return r.tipo === 'anual'
+    }
+    // histórico mostra tudo (todas as assinaturas, independente do tipo)
+    return true
+  })
 
-  const totalAnual = receitasFiltradas
-    .filter(r => r.status === 'ativa')
-    .reduce((sum, r) => sum + (r.tipo === 'anual' ? r.valor : 0), 0)
+  // Calcular totais baseados no período selecionado
+  // No histórico, mostrar totais de todas as assinaturas (ativas e inativas)
+  const totalMensal = periodo === 'mes' || periodo === 'historico' 
+    ? receitasFiltradas
+        .filter(r => {
+          if (periodo === 'historico') {
+            // Histórico: todas as assinaturas mensais/gratuitas
+            return r.tipo === 'mensal' || r.tipo === 'gratuito'
+          } else {
+            // Mensal: apenas ativas
+            return r.status === 'ativa' && (r.tipo === 'mensal' || r.tipo === 'gratuito')
+          }
+        })
+        .reduce((sum, r) => sum + r.valor, 0)
+    : 0
 
-  const totalReceitas = totalMensal + totalAnual
+  const totalAnual = periodo === 'ano' || periodo === 'historico'
+    ? receitasFiltradas
+        .filter(r => {
+          if (periodo === 'historico') {
+            // Histórico: todas as assinaturas anuais
+            return r.tipo === 'anual'
+          } else {
+            // Anual: apenas ativas
+            return r.status === 'ativa' && r.tipo === 'anual'
+          }
+        })
+        .reduce((sum, r) => sum + r.valor, 0)
+    : 0
+
+  // Total geral: no histórico, somar todas as assinaturas (ativas e inativas)
+  const totalReceitas = periodo === 'historico'
+    ? receitasFiltradas.reduce((sum, r) => sum + r.valor, 0)
+    : periodo === 'mes' 
+    ? totais.geral 
+    : periodo === 'ano'
+    ? totalAnual
+    : totais.geral
 
   const getAreaIcon = (area: string) => {
     switch (area) {
       case 'nutri': return '🥗'
       case 'coach': return '💜'
-      case 'consultor': return '🔬'
+      case 'nutra': return '🔬'
       case 'wellness': return '💖'
       default: return '👤'
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ativa':
-        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativa</span>
-      case 'cancelada':
-        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Cancelada</span>
-      case 'expirada':
-        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Expirada</span>
-      default:
-        return null
+  const getStatusBadge = (status: string, isMigrated?: boolean) => {
+    const badges: Record<string, JSX.Element> = {
+      'ativa': <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativa</span>,
+      'cancelada': <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Cancelada</span>,
+      'expirada': <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Expirada</span>,
+      'atrasada': <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Atrasada</span>,
+      'não paga': <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Não Paga</span>,
+      'trial': <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Trial</span>
     }
+
+    return (
+      <div className="flex items-center gap-1">
+        {badges[status] || <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status}</span>}
+        {isMigrated && (
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800" title="Migrado">🔄</span>
+        )}
+      </div>
+    )
+  }
+
+  const formatCurrency = (valor: number, currency: string = 'usd') => {
+    const symbol = currency === 'brl' ? 'R$' : '$'
+    return `${symbol} ${valor.toFixed(2).replace('.', ',')}`
   }
 
   return (
@@ -138,14 +219,21 @@ export default function AdminReceitas() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Mensagens de Erro */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
         {/* Filtros */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Filtro Área */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Filtrar por Área</label>
               <div className="flex flex-wrap gap-2">
-                {['todos', 'nutri', 'coach', 'consultor', 'wellness'].map((area) => (
+                {['todos', 'nutri', 'coach', 'nutra', 'wellness'].map((area) => (
                   <button
                     key={area}
                     onClick={() => setFiltroArea(area as any)}
@@ -156,6 +244,30 @@ export default function AdminReceitas() {
                     }`}
                   >
                     {area === 'todos' ? 'Todos' : area.charAt(0).toUpperCase() + area.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filtro Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filtrar por Status</label>
+              <div className="flex flex-wrap gap-2">
+                {['todos', 'active', 'canceled', 'past_due', 'unpaid'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setFiltroStatus(status as any)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filtroStatus === status
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {status === 'todos' ? 'Todos' : 
+                     status === 'active' ? 'Ativas' :
+                     status === 'canceled' ? 'Canceladas' :
+                     status === 'past_due' ? 'Atrasadas' :
+                     status === 'unpaid' ? 'Não Pagas' : status}
                   </button>
                 ))}
               </div>
@@ -184,115 +296,155 @@ export default function AdminReceitas() {
         </div>
 
         {/* Resumo Financeiro */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Mensal</p>
-                <p className="text-3xl font-bold text-green-700">R$ {totalMensal}</p>
-              </div>
-              <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-2xl text-white">📅</span>
-              </div>
-            </div>
-            <p className="text-xs text-gray-600">
-              {receitasFiltradas.filter(r => r.tipo === 'mensal' && r.status === 'ativa').length} assinaturas ativas
-            </p>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">Carregando receitas...</p>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Mensal</p>
+                    <p className="text-3xl font-bold text-green-700">{formatCurrency(totalMensal)}</p>
+                  </div>
+                  <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
+                    <span className="text-2xl text-white">📅</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600">
+                  {periodo === 'historico' 
+                    ? receitasFiltradas.filter(r => r.tipo === 'mensal' || r.tipo === 'gratuito').length + ' assinaturas'
+                    : receitasFiltradas.filter(r => (r.tipo === 'mensal' || r.tipo === 'gratuito') && r.status === 'ativa').length + ' assinaturas ativas'
+                  }
+                </p>
+              </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Anual</p>
-                <p className="text-3xl font-bold text-blue-700">R$ {totalAnual}</p>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Anual</p>
+                    <p className="text-3xl font-bold text-blue-700">{formatCurrency(totalAnual)}</p>
+                  </div>
+                  <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
+                    <span className="text-2xl text-white">💎</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600">
+                  {periodo === 'historico'
+                    ? receitasFiltradas.filter(r => r.tipo === 'anual').length + ' assinaturas'
+                    : receitasFiltradas.filter(r => r.tipo === 'anual' && r.status === 'ativa').length + ' assinaturas ativas'
+                  }
+                </p>
               </div>
-              <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-2xl text-white">💎</span>
-              </div>
-            </div>
-            <p className="text-xs text-gray-600">
-              {receitasFiltradas.filter(r => r.tipo === 'anual' && r.status === 'ativa').length} assinaturas ativas
-            </p>
-          </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Geral</p>
-                <p className="text-3xl font-bold text-purple-700">R$ {totalReceitas}</p>
-              </div>
-              <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-2xl text-white">💰</span>
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Geral</p>
+                    <p className="text-3xl font-bold text-purple-700">{formatCurrency(totalReceitas)}</p>
+                  </div>
+                  <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                    <span className="text-2xl text-white">💰</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600">
+                  {periodo === 'historico'
+                    ? `${receitasFiltradas.length} assinaturas (todas)`
+                    : `${totais.ativas} ativas de ${totais.total} total`
+                  }
+                </p>
               </div>
             </div>
-            <p className="text-xs text-gray-600">
-              {receitasFiltradas.filter(r => r.status === 'ativa').length} assinaturas
-            </p>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Lista de Receitas */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximo Vencimento</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Histórico</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {receitasFiltradas.map((receita) => (
-                  <tr key={receita.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{receita.usuario}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className="text-xl mr-2">{getAreaIcon(receita.area)}</span>
-                        <span className="text-sm text-gray-900 capitalize">{receita.area}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        receita.tipo === 'mensal' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : 'bg-purple-100 text-purple-800'
-                      }`}>
-                        {receita.tipo === 'mensal' ? 'Mensal' : 'Anual'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">R$ {receita.valor}</div>
-                      <div className="text-xs text-gray-500">
-                        {receita.tipo === 'mensal' ? '/mês' : '/ano'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(receita.status)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{receita.proxVencimento}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">R$ {receita.historico}</div>
-                      <div className="text-xs text-gray-500">Total pago</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-blue-600 hover:text-blue-900">Ver</button>
-                    </td>
+        {loading ? null : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximo Vencimento</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Histórico</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {receitasFiltradas.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                        Nenhuma receita encontrada
+                      </td>
+                    </tr>
+                  ) : (
+                    receitasFiltradas.map((receita) => (
+                      <tr key={receita.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{receita.usuario}</div>
+                          {receita.email && (
+                            <div className="text-xs text-gray-500">{receita.email}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <span className="text-xl mr-2">{getAreaIcon(receita.area)}</span>
+                            <span className="text-sm text-gray-900 capitalize">{receita.area}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            receita.tipo === 'mensal' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : receita.tipo === 'anual'
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {receita.tipo === 'mensal' ? 'Mensal' : receita.tipo === 'anual' ? 'Anual' : 'Gratuito'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-bold text-gray-900">{formatCurrency(receita.valor, receita.currency)}</div>
+                          <div className="text-xs text-gray-500">
+                            {receita.tipo === 'mensal' ? '/mês' : receita.tipo === 'anual' ? '/ano' : 'gratuito'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(receita.status, receita.is_migrated)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{formatCurrency(receita.historico, receita.currency)}</div>
+                          <div className="text-xs text-gray-500">Total pago</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <Link 
+                            href={`/admin/subscriptions?user_id=${receita.user_id}`}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Ver
+                          </Link>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   )

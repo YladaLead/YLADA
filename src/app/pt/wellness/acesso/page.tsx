@@ -54,9 +54,18 @@ function AcessoPorTokenContent() {
           setSuccess(true)
           
           if (data.loginUrl) {
+            // Verificar se o loginUrl contém localhost e substituir pela URL de produção
+            let loginUrl = data.loginUrl
+            if (loginUrl.includes('localhost') || loginUrl.includes('127.0.0.1')) {
+              // Substituir localhost pela URL de produção
+              const productionUrl = 'https://www.ylada.com'
+              loginUrl = loginUrl.replace(/https?:\/\/[^\/]+/, productionUrl)
+              console.log('⚠️ URL corrigida de localhost para produção:', loginUrl)
+            }
+            
             // Usar magic link para login automático
             console.log('🔐 Fazendo login automático via magic link...')
-            window.location.href = data.loginUrl
+            window.location.href = loginUrl
           } else {
             // Fallback: verificar redirect ou usar padrão baseado no contexto
             const redirect = searchParams.get('redirect')
