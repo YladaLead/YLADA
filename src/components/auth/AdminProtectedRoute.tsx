@@ -61,6 +61,8 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
         try {
           console.log('🔍 AdminProtectedRoute: Chamando API /api/admin/check...')
+          const apiStartTime = Date.now()
+          
           const checkAdminResponse = await fetchWithTimeout('/api/admin/check', {
             method: 'GET',
             headers: {
@@ -69,14 +71,18 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
             }
           }, 5000) // 5 segundos de timeout
 
+          const apiDuration = Date.now() - apiStartTime
+          console.log(`⏱️ AdminProtectedRoute: API respondeu em ${apiDuration}ms`)
+
           if (checkAdminResponse.ok) {
             const checkData = await checkAdminResponse.json()
             isAdmin = checkData.isAdmin === true
-            console.log('✅ AdminProtectedRoute: Verificação via API OK:', { isAdmin })
+            console.log('✅ AdminProtectedRoute: Verificação via API OK:', { isAdmin, userId: checkData.userId })
           } else {
             const errorData = await checkAdminResponse.json().catch(() => ({}))
             console.error('❌ AdminProtectedRoute: Erro na API de verificação:', checkAdminResponse.status, errorData)
             // Fallback: tentar query direta
+            console.log('🔄 AdminProtectedRoute: Tentando fallback (query direta)...')
             const { data: profile, error: profileError } = await supabase
               .from('user_profiles')
               .select('is_admin')
@@ -88,6 +94,11 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
               console.log('✅ AdminProtectedRoute: Usando fallback (query direta):', { isAdmin })
             } else {
               console.error('❌ AdminProtectedRoute: Erro no fallback também:', profileError?.message)
+              // Se fallback falhar, redirecionar
+              if (!mounted) return
+              clearCachedAdminCheck()
+              window.location.href = '/admin/login'
+              return
             }
           }
         } catch (apiError: any) {
