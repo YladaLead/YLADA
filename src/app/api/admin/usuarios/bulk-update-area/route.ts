@@ -69,13 +69,28 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Atualizar todos os usuários
+    // Mapear áreas para profession (se necessário)
+    const professionMap: Record<string, string> = {
+      'nutri': 'nutricionista',
+      'wellness': 'wellness',
+      'coach': 'coach',
+      'nutra': 'nutra'
+    }
+
+    // Atualizar todos os usuários (perfil e profession se existir)
+    const updateData: any = { 
+      perfil: to_area,
+      updated_at: new Date().toISOString()
+    }
+
+    // Se a coluna profession existe, atualizar também
+    if (professionMap[to_area]) {
+      updateData.profession = professionMap[to_area]
+    }
+
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('user_profiles')
-      .update({ 
-        perfil: to_area,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('perfil', from_area)
       .select('user_id')
 
