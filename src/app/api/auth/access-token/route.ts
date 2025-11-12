@@ -98,10 +98,26 @@ export async function POST(request: NextRequest) {
     // Retornar o link de magic link para o frontend fazer login automático
     // IMPORTANTE: Corrigir URL se contiver localhost (pode acontecer se Supabase estiver configurado com localhost)
     let loginUrl = linkData.properties.action_link
-    if (loginUrl && (loginUrl.includes('localhost') || loginUrl.includes('127.0.0.1'))) {
-      // Substituir localhost pela URL de produção
-      loginUrl = loginUrl.replace(/https?:\/\/[^\/]+/, productionUrl)
-      console.log('⚠️ Magic link corrigido de localhost para produção')
+    
+    if (loginUrl) {
+      // Se contiver localhost, substituir pela URL de produção
+      if (loginUrl.includes('localhost') || loginUrl.includes('127.0.0.1')) {
+        loginUrl = loginUrl.replace(/https?:\/\/[^\/]+/, productionUrl)
+        console.log('⚠️ Magic link corrigido de localhost para produção')
+      }
+      
+      // IMPORTANTE: Se o link apontar para /auth/v1/verify do Supabase,
+      // substituir pela nossa rota /auth/v1/verify que redireciona para /auth/callback
+      // Isso garante que mesmo se o Supabase gerar link com seu próprio domínio,
+      // vamos interceptar e usar nosso callback
+      if (loginUrl.includes('/auth/v1/verify')) {
+        // Se o link aponta para o domínio do Supabase, substituir pelo nosso domínio
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+        if (loginUrl.includes(supabaseUrl)) {
+          loginUrl = loginUrl.replace(supabaseUrl, productionUrl)
+          console.log('⚠️ Magic link corrigido para usar nosso domínio:', loginUrl)
+        }
+      }
     }
     
     return NextResponse.json({

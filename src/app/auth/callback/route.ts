@@ -9,7 +9,9 @@ import { cookies } from 'next/headers'
  */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
+  
+  // O Supabase pode enviar 'code' (no callback normal) ou 'token' (no magic link verify)
+  const code = requestUrl.searchParams.get('code') || requestUrl.searchParams.get('token')
   const next = requestUrl.searchParams.get('next') || requestUrl.searchParams.get('redirect_to')
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
@@ -25,9 +27,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Se não houver código, redirecionar para login
+  // Se não houver código/token, redirecionar para login
   if (!code) {
-    console.warn('⚠️ Callback sem código, redirecionando para login')
+    console.warn('⚠️ Callback sem código/token, redirecionando para login')
     return NextResponse.redirect(new URL('/pt/wellness/login', request.url))
   }
 
