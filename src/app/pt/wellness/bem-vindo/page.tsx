@@ -89,48 +89,66 @@ function BemVindoContent() {
     setError(null)
 
     try {
-      // Verificar sessão antes de salvar (pode estar sincronizando)
+      // Buscar sessão diretamente do Supabase (não depender do useAuth)
       const { createClient } = await import('@/lib/supabase-client')
       const supabase = createClient()
       
-      // Tentar buscar sessão diretamente do Supabase
+      // Tentar buscar sessão com múltiplas tentativas
       let currentSession = null
-      let sessionUser = user
+      let sessionUser = null
       
-      // Se não tem user do contexto, tentar buscar sessão diretamente
-      if (!user) {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        if (session && session.user) {
-          currentSession = session
-          sessionUser = session.user
-          console.log('✅ Sessão encontrada diretamente do Supabase')
+      // Tentativa 1: Buscar imediatamente
+      const { data: { session: session1 }, error: error1 } = await supabase.auth.getSession()
+      if (session1 && session1.user) {
+        currentSession = session1
+        sessionUser = session1.user
+        console.log('✅ Sessão encontrada na primeira tentativa')
+      } else {
+        console.log('⏳ Primeira tentativa falhou, aguardando 1 segundo...')
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Tentativa 2: Após 1 segundo
+        const { data: { session: session2 } } = await supabase.auth.getSession()
+        if (session2 && session2.user) {
+          currentSession = session2
+          sessionUser = session2.user
+          console.log('✅ Sessão encontrada na segunda tentativa')
         } else {
-          // Se não encontrou, aguardar um pouco e tentar novamente (pode estar sincronizando)
-          console.log('⏳ Sessão não encontrada, aguardando sincronização...')
+          console.log('⏳ Segunda tentativa falhou, aguardando mais 2 segundos...')
           await new Promise(resolve => setTimeout(resolve, 2000))
           
-          const { data: { session: retrySession } } = await supabase.auth.getSession()
-          if (retrySession && retrySession.user) {
-            currentSession = retrySession
-            sessionUser = retrySession.user
-            console.log('✅ Sessão encontrada após retry')
+          // Tentativa 3: Após mais 2 segundos
+          const { data: { session: session3 } } = await supabase.auth.getSession()
+          if (session3 && session3.user) {
+            currentSession = session3
+            sessionUser = session3.user
+            console.log('✅ Sessão encontrada na terceira tentativa')
           } else {
-            setError('Não foi possível verificar sua sessão. Por favor, faça login novamente e tente completar o cadastro.')
+            // Se ainda não encontrou, tentar recarregar a página para sincronizar cookies
+            console.log('⚠️ Sessão não encontrada após 3 tentativas, recarregando página...')
+            setError('Sincronizando sua sessão... Recarregando a página...')
+            setTimeout(() => {
+              window.location.reload()
+            }, 2000)
             setSaving(false)
             return
           }
         }
-      } else {
-        // Se já tem user, buscar sessão para garantir
-        const { data: { session } } = await supabase.auth.getSession()
-        currentSession = session
       }
       
       if (!sessionUser) {
-        setError('Você precisa estar logado para completar o cadastro. Por favor, faça login e tente novamente.')
+        setError('Não foi possível verificar sua sessão. Recarregando a página...')
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
         setSaving(false)
         return
       }
+      
+      console.log('✅ Usuário autenticado:', {
+        id: sessionUser.id,
+        email: sessionUser.email
+      })
 
       // Primeiro, atualizar a senha no Supabase Auth
       if (senha) {
