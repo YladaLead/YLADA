@@ -215,7 +215,8 @@ export async function PUT(request: NextRequest) {
     // Atualizar user_profiles (apenas campos que existem)
     const profileData: any = {
       nome_completo: nome,
-      perfil: 'wellness' // Garantir que o perfil está definido
+      perfil: 'wellness', // Garantir que o perfil está definido
+      updated_at: new Date().toISOString() // Forçar atualização do timestamp
     }
 
     // Adicionar campos opcionais apenas se fornecidos
@@ -304,7 +305,9 @@ export async function PUT(request: NextRequest) {
         console.log('✅ Perfil salvo com sucesso (UPSERT completo):', {
           id: data?.id,
           user_id: data?.user_id,
-          nome_completo: data?.nome_completo
+          nome_completo: data?.nome_completo,
+          whatsapp: data?.whatsapp,
+          updated_at: data?.updated_at
         })
         result = data
       }
@@ -333,7 +336,13 @@ export async function PUT(request: NextRequest) {
           throw error
         }
         result = data
-        console.log('✅ Perfil atualizado manualmente')
+        console.log('✅ Perfil atualizado manualmente:', {
+          id: data?.id,
+          user_id: data?.user_id,
+          nome_completo: data?.nome_completo,
+          whatsapp: data?.whatsapp,
+          updated_at: data?.updated_at
+        })
       } else {
         // Criar novo
         const { data, error } = await supabaseAdmin
@@ -347,7 +356,13 @@ export async function PUT(request: NextRequest) {
           throw error
         }
         result = data
-        console.log('✅ Perfil criado manualmente')
+        console.log('✅ Perfil criado manualmente:', {
+          id: data?.id,
+          user_id: data?.user_id,
+          nome_completo: data?.nome_completo,
+          whatsapp: data?.whatsapp,
+          updated_at: data?.updated_at
+        })
       }
     }
 
