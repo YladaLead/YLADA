@@ -55,33 +55,55 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // O Supabase magic link usa o token como código para trocar por sessão
-    // Tentar trocar token por sessão
-    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(token)
+    // O Supabase magic link retorna um token_hash que precisa ser verificado
+    // Tentar verificar o token usando verifyOtp primeiro
+    let session = null
+    let userId = null
+    let userEmail = null
 
-    if (exchangeError || !data.session) {
-      console.error('❌ Erro ao trocar token por sessão:', exchangeError)
-      // Se falhar, pode ser que o token precise ser usado de outra forma
-      // Redirecionar para callback que tentará processar
-      const callbackUrl = new URL('/auth/callback', requestUrl.origin)
-      callbackUrl.searchParams.set('code', token)
-      if (redirectTo) {
-        callbackUrl.searchParams.set('next', redirectTo)
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash: token,
+      type: (type as any) || 'magiclink',
+    })
+
+    if (!verifyError && verifyData?.session) {
+      session = verifyData.session
+      userId = verifyData.session.user.id
+      userEmail = verifyData.session.user.email
+      console.log('✅ Sessão criada via verifyOtp:', { userId, email: userEmail })
+    } else {
+      // Se falhar, tentar usar como código (fallback)
+      console.log('⚠️ verifyOtp falhou, tentando exchangeCodeForSession como fallback')
+      const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(token)
+      
+      if (!exchangeError && exchangeData?.session) {
+        session = exchangeData.session
+        userId = exchangeData.session.user.id
+        userEmail = exchangeData.session.user.email
+        console.log('✅ Sessão criada via exchangeCodeForSession (fallback):', { userId, email: userEmail })
+      } else {
+        console.error('❌ Erro em ambos os métodos:', verifyError, exchangeError)
+        // Redirecionar para login com erro
+        const loginUrl = new URL('/pt/wellness/login', requestUrl.origin)
+        loginUrl.searchParams.set('error', 'auth_failed')
+        loginUrl.searchParams.set('error_description', 'Token inválido ou expirado')
+        return NextResponse.redirect(loginUrl)
       }
-      return NextResponse.redirect(callbackUrl)
     }
 
-    console.log('✅ Sessão criada via verify:', {
-      userId: data.session.user.id,
-      email: data.session.user.email,
-    })
+    if (!session || !userId) {
+      console.error('❌ Nenhuma sessão foi criada')
+      const loginUrl = new URL('/pt/wellness/login', requestUrl.origin)
+      loginUrl.searchParams.set('error', 'auth_failed')
+      return NextResponse.redirect(loginUrl)
+    }
 
     // Verificar se o usuário tem perfil completo
     // Se não tiver, redirecionar para completar cadastro
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .select('nome_completo, whatsapp')
-      .eq('user_id', data.session.user.id)
+      .eq('user_id', userId)
       .maybeSingle()
 
     // Determinar para onde redirecionar
@@ -109,19 +131,24 @@ export async function GET(request: NextRequest) {
     const redirectUrl = new URL(redirectPath, requestUrl.origin)
     const response = NextResponse.redirect(redirectUrl)
     
-    // Garantir que cookies sejam persistidos
+    // IMPORTANTE: Os cookies já foram salvos pelo createServerClient acima
+    // Mas vamos garantir que sejam persistidos na resposta
+    // O Supabase SSR já gerencia os cookies automaticamente, mas vamos garantir
     const allCookies = cookieStore.getAll()
     allCookies.forEach(cookie => {
-      if (cookie.name.startsWith('sb-') || cookie.name.includes('supabase')) {
+      // Verificar se é um cookie do Supabase
+      if (cookie.name.startsWith('sb-') || cookie.name.includes('supabase') || cookie.name.includes('auth')) {
         response.cookies.set(cookie.name, cookie.value, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/',
-          maxAge: 60 * 60 * 24 * 7,
+          maxAge: 60 * 60 * 24 * 7, // 7 dias
         })
       }
     })
+    
+    console.log('🍪 Cookies salvos:', allCookies.filter(c => c.name.startsWith('sb-')).length)
     
     return response
   } catch (error: any) {
