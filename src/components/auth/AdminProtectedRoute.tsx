@@ -21,20 +21,20 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
       try {
         console.log('🔐 AdminProtectedRoute: INICIANDO verificação...')
         
-        // Verificar sessão primeiro (rápido)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        // ✅ CORRIGIDO: Usar getUser() em vez de getSession() (mais seguro, valida com servidor)
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
         
         if (!mounted) return
 
-        if (!session || sessionError) {
-          console.log('❌ AdminProtectedRoute: Sem sessão')
-          // Limpar cache se não tem sessão
+        if (!user || userError) {
+          console.log('❌ AdminProtectedRoute: Sem usuário autenticado:', userError?.message)
+          // Limpar cache se não tem usuário
           clearCachedAdminCheck()
           window.location.href = '/admin/login'
           return
         }
 
-        // ✅ NOVO: Verificar cache APÓS confirmar que tem sessão (mais seguro)
+        // ✅ NOVO: Verificar cache APÓS confirmar que tem usuário (mais seguro)
         const cachedAdmin = getCachedAdminCheck()
         if (cachedAdmin === true) {
           console.log('✅ AdminProtectedRoute: Usando cache (muito mais rápido!)')
@@ -44,7 +44,16 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
         }
         // Se cache é false, continuar para verificar novamente (pode ter mudado)
 
-        console.log('✅ AdminProtectedRoute: Sessão OK! User:', session.user.email)
+        console.log('✅ AdminProtectedRoute: Usuário autenticado! User:', user.email)
+        
+        // Obter access_token da sessão para usar na API
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.access_token) {
+          console.error('❌ AdminProtectedRoute: Sem access_token')
+          clearCachedAdminCheck()
+          window.location.href = '/admin/login'
+          return
+        }
 
         // Verificar se é admin usando API route (evita problemas de RLS em produção)
         let isAdmin = false
@@ -86,7 +95,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
             const { data: profile, error: profileError } = await supabase
               .from('user_profiles')
               .select('is_admin')
-              .eq('user_id', session.user.id)
+              .eq('user_id', user.id)
               .maybeSingle()
 
             if (!profileError && profile) {
@@ -114,7 +123,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
             const { data: profile, error: profileError } = await supabase
               .from('user_profiles')
               .select('is_admin')
-              .eq('user_id', session.user.id)
+              .eq('user_id', user.id)
               .maybeSingle()
 
             if (!profileError && profile) {
