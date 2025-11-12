@@ -48,21 +48,34 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
         // Verificar se é admin usando API route (evita problemas de RLS em produção)
         let isAdmin = false
+        
+        // Criar promise com timeout de 5 segundos
+        const fetchWithTimeout = (url: string, options: RequestInit, timeout = 5000) => {
+          return Promise.race([
+            fetch(url, options),
+            new Promise<Response>((_, reject) =>
+              setTimeout(() => reject(new Error('Timeout')), timeout)
+            )
+          ])
+        }
+
         try {
-          const checkAdminResponse = await fetch('/api/admin/check', {
+          console.log('🔍 AdminProtectedRoute: Chamando API /api/admin/check...')
+          const checkAdminResponse = await fetchWithTimeout('/api/admin/check', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${session.access_token}`,
               'Content-Type': 'application/json'
             }
-          })
+          }, 5000) // 5 segundos de timeout
 
           if (checkAdminResponse.ok) {
             const checkData = await checkAdminResponse.json()
             isAdmin = checkData.isAdmin === true
             console.log('✅ AdminProtectedRoute: Verificação via API OK:', { isAdmin })
           } else {
-            console.error('❌ AdminProtectedRoute: Erro na API de verificação:', checkAdminResponse.status)
+            const errorData = await checkAdminResponse.json().catch(() => ({}))
+            console.error('❌ AdminProtectedRoute: Erro na API de verificação:', checkAdminResponse.status, errorData)
             // Fallback: tentar query direta
             const { data: profile, error: profileError } = await supabase
               .from('user_profiles')
@@ -79,6 +92,12 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
           }
         } catch (apiError: any) {
           console.error('❌ AdminProtectedRoute: Erro ao chamar API de verificação:', apiError.message)
+          
+          // Se for timeout, tentar fallback imediatamente
+          if (apiError.message === 'Timeout') {
+            console.log('⏳ AdminProtectedRoute: Timeout na API, tentando fallback...')
+          }
+          
           // Fallback: tentar query direta
           try {
             const { data: profile, error: profileError } = await supabase
@@ -92,9 +111,19 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
               console.log('✅ AdminProtectedRoute: Usando fallback após erro de API:', { isAdmin })
             } else {
               console.error('❌ AdminProtectedRoute: Erro no fallback também:', profileError?.message)
+              // Se fallback também falhar, redirecionar para login
+              if (!mounted) return
+              clearCachedAdminCheck()
+              window.location.href = '/admin/login'
+              return
             }
           } catch (fallbackError: any) {
             console.error('❌ AdminProtectedRoute: Erro no fallback:', fallbackError.message)
+            // Se tudo falhar, redirecionar para login
+            if (!mounted) return
+            clearCachedAdminCheck()
+            window.location.href = '/admin/login'
+            return
           }
         }
 
