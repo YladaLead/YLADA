@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 
@@ -15,33 +15,85 @@ function AdminDashboard() {
   return <AdminDashboardContent />
 }
 
+interface StatsData {
+  usuariosTotal: number
+  usuariosAtivos: number
+  cursosTotal: number
+  cursosAtivos: number
+  leadsTotal: number
+  receitaMensal: number
+  assinaturasAtivas: number
+  usuariosPorArea: Record<string, { total: number; ativos: number }>
+  receitasPorArea: Record<string, { mensal: number; anual: number }>
+  atividadesRecentes: Array<{
+    tipo: string
+    descricao: string
+    area?: string
+    timestamp: string
+  }>
+}
+
 function AdminDashboardContent() {
-  const [stats, setStats] = useState({
-    usuariosTotal: 152,
-    usuariosAtivos: 138,
-    cursosTotal: 8,
-    cursosAtivos: 6,
-    templatesTotal: 47,
-    leadsTotal: 5240,
-    receitaMensal: 45230.50,
-    assinaturasAtivas: 138
+  const [stats, setStats] = useState<StatsData>({
+    usuariosTotal: 0,
+    usuariosAtivos: 0,
+    cursosTotal: 0,
+    cursosAtivos: 0,
+    leadsTotal: 0,
+    receitaMensal: 0,
+    assinaturasAtivas: 0,
+    usuariosPorArea: {
+      nutri: { total: 0, ativos: 0 },
+      coach: { total: 0, ativos: 0 },
+      nutra: { total: 0, ativos: 0 },
+      wellness: { total: 0, ativos: 0 }
+    },
+    receitasPorArea: {
+      nutri: { mensal: 0, anual: 0 },
+      coach: { mensal: 0, anual: 0 },
+      nutra: { mensal: 0, anual: 0 },
+      wellness: { mensal: 0, anual: 0 }
+    },
+    atividadesRecentes: []
   })
 
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const usuariosPorArea = {
-    nutri: { total: 45, ativos: 42 },
-    coach: { total: 38, ativos: 35 },
-    nutra: { total: 32, ativos: 28 },
-    wellness: { total: 37, ativos: 33 }
-  }
+  // Buscar dados da API
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        setLoading(true)
+        setError(null)
 
-  const receitasPorArea = {
-    nutri: { mensal: 12000, anual: 144000 },
-    coach: { mensal: 11200, anual: 134400 },
-    nutra: { mensal: 10500, anual: 126000 },
-    wellness: { mensal: 11530.50, anual: 138366 }
-  }
+        const url = `/api/admin/stats${filtroArea !== 'todos' ? `?area=${filtroArea}` : ''}`
+        const response = await fetch(url, {
+          credentials: 'include'
+        })
+
+        if (!response.ok) {
+          throw new Error('Erro ao carregar estatísticas')
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.stats) {
+          setStats(data.stats)
+        } else {
+          throw new Error('Formato de dados inválido')
+        }
+      } catch (err: any) {
+        console.error('Erro ao carregar estatísticas:', err)
+        setError(err.message || 'Erro ao carregar dados')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    carregarDados()
+  }, [filtroArea])
 
   const acoesRapidas = [
     {
@@ -159,11 +211,12 @@ function AdminDashboardContent() {
                 <button
                   key={area}
                   onClick={() => setFiltroArea(area as any)}
+                  disabled={loading}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     filtroArea === area
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {area === 'todos' ? 'Todos' : area.charAt(0).toUpperCase() + area.slice(1)}
                 </button>
@@ -172,139 +225,98 @@ function AdminDashboardContent() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="mb-8 text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Carregando estatísticas...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="mb-8 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-red-800">Erro ao carregar dados: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
         {/* Stats Cards - Visão Macro */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.usuariosTotal}</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">👥</span>
-              </div>
-            </div>
-            <div className="text-sm text-gray-600">
-              <span className="font-medium text-green-600">{stats.usuariosAtivos} ativos</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Cursos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.cursosTotal}</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">📚</span>
-              </div>
-            </div>
-            <div className="text-sm text-gray-600">
-              <span className="font-medium text-green-600">{stats.cursosAtivos} ativos</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Leads Gerados</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.leadsTotal}</p>
-              </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🎯</span>
-              </div>
-            </div>
-            <div className="text-sm text-gray-600">
-              Total acumulado
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Receita Mensal</p>
-                <p className="text-3xl font-bold text-gray-900">R$ {(stats.receitaMensal / 1000).toFixed(1)}k</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">💰</span>
-              </div>
-            </div>
-            <div className="text-sm text-gray-600">
-              <span className="font-medium text-green-600">{stats.assinaturasAtivas} assinaturas</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Distribuição por Área */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Usuários por Área */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Usuários por Área</h2>
-            <div className="space-y-3">
-              {Object.entries(usuariosPorArea).map(([area, dados]) => (
-                <div key={area} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      area === 'nutri' ? 'bg-green-100' :
-                      area === 'coach' ? 'bg-purple-100' :
-                      area === 'nutra' ? 'bg-blue-100' :
-                      'bg-teal-100'
-                    }`}>
-                      <span className="text-xl">{
-                        area === 'nutri' ? '🥗' :
-                        area === 'coach' ? '💜' :
-                        area === 'nutra' ? '🔬' :
-                        '💖'
-                      }</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 capitalize">{area}</p>
-                      <p className="text-sm text-gray-600">{dados.total} usuários</p>
-                    </div>
+        {!loading && !error && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
+                    <p className="text-3xl font-bold text-gray-900">{stats.usuariosTotal.toLocaleString('pt-BR')}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-gray-900">{dados.ativos}</p>
-                    <p className="text-xs text-gray-600">ativos</p>
+                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">👥</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium text-green-600">{stats.usuariosAtivos.toLocaleString('pt-BR')} ativos</span>
+                </div>
+              </div>
 
-          {/* Receitas por Área */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Receitas por Área (Mensal)</h2>
-            <div className="space-y-3">
-              {Object.entries(receitasPorArea).map(([area, receitas]) => (
-                <div key={area} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      area === 'nutri' ? 'bg-green-100' :
-                      area === 'coach' ? 'bg-purple-100' :
-                      area === 'nutra' ? 'bg-blue-100' :
-                      'bg-teal-100'
-                    }`}>
-                      <span className="text-xl">{
-                        area === 'nutri' ? '🥗' :
-                        area === 'coach' ? '💜' :
-                        area === 'nutra' ? '🔬' :
-                        '💖'
-                      }</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 capitalize">{area}</p>
-                      <p className="text-sm text-gray-600">R$ {(receitas.mensal / 1000).toFixed(1)}k/mês</p>
-                    </div>
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Cursos</p>
+                    <p className="text-3xl font-bold text-gray-900">{stats.cursosTotal.toLocaleString('pt-BR')}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-green-600">R$ {(receitas.anual / 1000).toFixed(0)}k</p>
-                    <p className="text-xs text-gray-600">anual</p>
+                  <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">📚</span>
                   </div>
                 </div>
-              ))}
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium text-green-600">{stats.cursosAtivos.toLocaleString('pt-BR')} ativos</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Leads Gerados</p>
+                    <p className="text-3xl font-bold text-gray-900">{stats.leadsTotal.toLocaleString('pt-BR')}</p>
+                  </div>
+                  <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">🎯</span>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Total acumulado
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Receita Mensal</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {stats.receitaMensal >= 1000 
+                        ? `R$ ${(stats.receitaMensal / 1000).toFixed(1)}k`
+                        : `R$ ${stats.receitaMensal.toFixed(2)}`
+                      }
+                    </p>
+                  </div>
+                  <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">💰</span>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium text-green-600">{stats.assinaturasAtivas.toLocaleString('pt-BR')} assinaturas</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Ações Rápidas */}
         <div className="mb-8">
@@ -338,33 +350,132 @@ function AdminDashboardContent() {
           </div>
         </div>
 
-        {/* Atividade Recente */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Atividade Recente</h2>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-              <span className="text-2xl">📚</span>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Novo curso criado</p>
-                <p className="text-xs text-gray-600">Nutrição Clínica Básica • 2 horas atrás</p>
+        {/* Distribuição por Área */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Usuários por Área */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Usuários por Área</h2>
+              <div className="space-y-3">
+                {Object.entries(stats.usuariosPorArea).map(([area, dados]) => (
+                  <div key={area} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        area === 'nutri' ? 'bg-green-100' :
+                        area === 'coach' ? 'bg-purple-100' :
+                        area === 'nutra' ? 'bg-blue-100' :
+                        'bg-teal-100'
+                      }`}>
+                        <span className="text-xl">{
+                          area === 'nutri' ? '🥗' :
+                          area === 'coach' ? '💜' :
+                          area === 'nutra' ? '🔬' :
+                          '💖'
+                        }</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 capitalize">{area}</p>
+                        <p className="text-sm text-gray-600">{dados.total.toLocaleString('pt-BR')} usuários</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-gray-900">{dados.ativos.toLocaleString('pt-BR')}</p>
+                      <p className="text-xs text-gray-600">ativos</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-              <span className="text-2xl">👥</span>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Novo usuário cadastrado</p>
-                <p className="text-xs text-gray-600">Maria Silva • 4 horas atrás</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-              <span className="text-2xl">🎨</span>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Template atualizado</p>
-                <p className="text-xs text-gray-600">Calculadora IMC • 6 horas atrás</p>
+
+            {/* Receitas por Área */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Receitas por Área (Mensal)</h2>
+              <div className="space-y-3">
+                {Object.entries(stats.receitasPorArea).map(([area, receitas]) => (
+                  <div key={area} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        area === 'nutri' ? 'bg-green-100' :
+                        area === 'coach' ? 'bg-purple-100' :
+                        area === 'nutra' ? 'bg-blue-100' :
+                        'bg-teal-100'
+                      }`}>
+                        <span className="text-xl">{
+                          area === 'nutri' ? '🥗' :
+                          area === 'coach' ? '💜' :
+                          area === 'nutra' ? '🔬' :
+                          '💖'
+                        }</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 capitalize">{area}</p>
+                        <p className="text-sm text-gray-600">
+                          {receitas.mensal >= 1000 
+                            ? `R$ ${(receitas.mensal / 1000).toFixed(1)}k/mês`
+                            : `R$ ${receitas.mensal.toFixed(2)}/mês`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-green-600">
+                        {receitas.anual >= 1000 
+                          ? `R$ ${(receitas.anual / 1000).toFixed(0)}k`
+                          : `R$ ${receitas.anual.toFixed(2)}`
+                        }
+                      </p>
+                      <p className="text-xs text-gray-600">anual</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Atividade Recente */}
+        {!loading && !error && (
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Atividade Recente</h2>
+            <div className="space-y-3">
+              {stats.atividadesRecentes.length > 0 ? (
+                stats.atividadesRecentes.map((atividade, index) => {
+                  // Calcular tempo relativo
+                  const timestamp = new Date(atividade.timestamp)
+                  const agora = new Date()
+                  const diffMs = agora.getTime() - timestamp.getTime()
+                  const diffHoras = Math.floor(diffMs / (1000 * 60 * 60))
+                  const diffMinutos = Math.floor(diffMs / (1000 * 60))
+                  
+                  let tempoRelativo = ''
+                  if (diffMinutos < 60) {
+                    tempoRelativo = diffMinutos <= 1 ? 'agora' : `${diffMinutos} minutos atrás`
+                  } else if (diffHoras < 24) {
+                    tempoRelativo = diffHoras === 1 ? '1 hora atrás' : `${diffHoras} horas atrás`
+                  } else {
+                    const diffDias = Math.floor(diffHoras / 24)
+                    tempoRelativo = diffDias === 1 ? '1 dia atrás' : `${diffDias} dias atrás`
+                  }
+
+                  // Ícone baseado no tipo
+                  const icon = atividade.tipo === 'lead' ? '🎯' : atividade.tipo === 'curso' ? '📚' : '📝'
+
+                  return (
+                    <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                      <span className="text-2xl">{icon}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{atividade.descricao}</p>
+                        <p className="text-xs text-gray-600">{tempoRelativo}</p>
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-4">Nenhuma atividade recente</p>
+              )}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

@@ -149,6 +149,14 @@ export default function RequireSubscription({
               .then(subData => {
                 if (isMounted && subData?.subscription) {
                   setSubscriptionData(subData.subscription)
+                  // Calcular dias até vencimento imediatamente
+                  if (subData.subscription?.current_period_end) {
+                    const expiryDate = new Date(subData.subscription.current_period_end)
+                    const now = new Date()
+                    const diffTime = expiryDate.getTime() - now.getTime()
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+                    setDaysUntilExpiry(diffDays)
+                  }
                 }
               })
               .catch(err => {
@@ -331,35 +339,78 @@ function SubscriptionExpiryBanner({
   subscription: any
   canBypass: boolean
 }) {
-  // Mostrar banner apenas se:
-  // 1. Tem dados de vencimento
-  // 2. Faltam 7 dias ou menos
-  // 3. Não é admin/suporte (canBypass)
-  // 4. Tem subscription data
-  if (!daysUntilExpiry || daysUntilExpiry > 7 || canBypass || !subscription) {
+  // Não mostrar se é admin/suporte ou não tem subscription
+  if (canBypass || !subscription) {
     return null
   }
 
+  // Mostrar banner se vence em 30 dias ou menos (para assinaturas migradas)
+  // Ou se vence em 7 dias ou menos (para todas)
+  const isMigrated = subscription?.is_migrated || subscription?.requires_manual_renewal
+  const shouldShow = daysUntilExpiry !== null && (
+    (isMigrated && daysUntilExpiry <= 30) || 
+    (!isMigrated && daysUntilExpiry <= 7)
+  )
+
+  if (!shouldShow) {
+    return null
+  }
+
+  const isUrgent = daysUntilExpiry !== null && daysUntilExpiry <= 3
+  const isCritical = daysUntilExpiry !== null && daysUntilExpiry <= 1
+
+  const bgColor = isCritical 
+    ? 'bg-red-50 border-red-200' 
+    : isUrgent 
+    ? 'bg-orange-50 border-orange-200' 
+    : 'bg-yellow-50 border-yellow-200'
+  
+  const textColor = isCritical 
+    ? 'text-red-800' 
+    : isUrgent 
+    ? 'text-orange-800' 
+    : 'text-yellow-800'
+  
+  const buttonColor = isCritical 
+    ? 'bg-red-600 hover:bg-red-700' 
+    : isUrgent 
+    ? 'bg-orange-600 hover:bg-orange-700' 
+    : 'bg-yellow-600 hover:bg-yellow-700'
+
+  const icon = isCritical ? '🚨' : isUrgent ? '⚠️' : '📅'
+
+  const message = isCritical
+    ? `Sua assinatura vence ${daysUntilExpiry === 0 ? 'hoje' : 'amanhã'}!`
+    : isUrgent
+    ? `Sua assinatura vence em ${daysUntilExpiry} ${daysUntilExpiry === 1 ? 'dia' : 'dias'}`
+    : `Sua assinatura vence em ${daysUntilExpiry} dias`
+
+  const subMessage = isMigrated
+    ? 'Como sua assinatura foi migrada, você precisa refazer o checkout para continuar com renovação automática.'
+    : 'Renove agora para continuar aproveitando todos os recursos'
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-yellow-50 border-t border-yellow-200 p-4 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <span className="text-2xl">⚠️</span>
-          <div>
-            <p className="text-sm font-medium text-yellow-900">
-              Sua assinatura vence em {daysUntilExpiry} {daysUntilExpiry === 1 ? 'dia' : 'dias'}
-            </p>
-            <p className="text-xs text-yellow-700">
-              Renove agora para continuar usando todas as funcionalidades
-            </p>
+    <div className={`fixed bottom-0 left-0 right-0 ${bgColor} border-t shadow-lg z-50`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center space-x-3">
+            <span className={`${textColor} text-2xl`}>{icon}</span>
+            <div>
+              <p className={`text-sm font-medium ${textColor}`}>
+                {message}
+              </p>
+              <p className={`text-xs ${textColor.replace('800', '600')} mt-1`}>
+                {subMessage}
+              </p>
+            </div>
           </div>
+          <Link
+            href={`/pt/${area}/checkout?plan=${subscription?.plan_type || 'monthly'}`}
+            className={`${buttonColor} text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap`}
+          >
+            {isMigrated ? 'Refazer Checkout' : 'Renovar Agora'}
+          </Link>
         </div>
-        <Link
-          href={`/pt/${area}/checkout?plan=${subscription.plan_type === 'annual' ? 'annual' : 'monthly'}`}
-          className="px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors"
-        >
-          Renovar Assinatura
-        </Link>
       </div>
     </div>
   )
