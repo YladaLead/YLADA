@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       // Buscar ferramentas (limitado a 5 para dashboard + todas para estatísticas)
       supabaseAdmin
         .from('user_templates')
-        .select('id, title, template_slug, status, views, leads_count, created_at')
+        .select('id, title, template_slug, status, views, leads_count, conversions_count, created_at')
         .eq('user_id', authenticatedUserId)
         .eq('profession', 'wellness')
         .order('created_at', { ascending: false })
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
           nome: tool.title,
           categoria,
           leads: tool.leads_count || 0,
-          conversoes: Math.round((tool.leads_count || 0) * 0.3), // Estimativa: 30% de conversão
+          conversoes: tool.conversions_count || 0, // Conversões reais (quando botão CTA é clicado)
           status: tool.status === 'active' ? 'ativo' : 'inativo',
           icon
         }
@@ -79,12 +79,13 @@ export async function GET(request: NextRequest) {
     const activeTools = tools.filter((t: any) => t.status === 'active')
     const totalLeads = tools.reduce((acc: number, t: any) => acc + (t.leads_count || 0), 0)
     const totalViews = tools.reduce((acc: number, t: any) => acc + (t.views || 0), 0)
+    const totalConversoes = tools.reduce((acc: number, t: any) => acc + (t.conversions_count || 0), 0)
     
     const stats = {
       ferramentasAtivas: activeTools.length,
       leadsGerados: totalLeads,
-      conversoes: Math.round(totalLeads * 0.3), // Estimativa: 30% de conversão
-      clientesAtivos: Math.round(totalLeads * 0.3) // Mesma estimativa
+      conversoes: totalConversoes, // Conversões reais (quando botão CTA é clicado)
+      clientesAtivos: totalConversoes // Mesmo valor (conversões = clientes que clicaram no CTA)
     }
 
     // Montar resposta completa

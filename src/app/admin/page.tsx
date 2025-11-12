@@ -85,35 +85,71 @@ export default function AdminDashboard() {
 
         console.log('✅ AdminDashboard: Sessão encontrada! User:', session.user.email)
 
-        // Verificar se é admin
-        console.log('🔍 AdminDashboard: Verificando se é admin...')
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('is_admin')
-          .eq('user_id', session.user.id)
-          .single()
+        // Verificar se é admin usando API route (evita problemas de RLS)
+        console.log('🔍 AdminDashboard: Verificando se é admin via API...')
+        let isAdmin = false
+        
+        try {
+          const checkAdminResponse = await fetch('/api/admin/check', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+            }
+          })
 
-        console.log('📋 AdminDashboard: Resultado do perfil:', {
-          hasProfile: !!profile,
-          is_admin: profile?.is_admin,
-          hasError: !!profileError,
-          errorMessage: profileError?.message
-        })
+          if (checkAdminResponse.ok) {
+            const checkData = await checkAdminResponse.json()
+            isAdmin = checkData.isAdmin === true
+            
+            console.log('📋 AdminDashboard: Resultado da verificação de admin:', {
+              isAdmin,
+              hasError: !checkAdminResponse.ok,
+              responseStatus: checkAdminResponse.status
+            })
+          } else {
+            console.error('❌ AdminDashboard: Erro na API de verificação de admin:', checkAdminResponse.status)
+            // Fallback: tentar query direta
+            const { data: profile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('is_admin')
+              .eq('user_id', session.user.id)
+              .maybeSingle()
+
+            if (!profileError && profile) {
+              isAdmin = profile.is_admin === true
+              console.log('📋 AdminDashboard: Usando fallback (query direta):', { isAdmin })
+            } else {
+              console.error('❌ AdminDashboard: Erro no fallback também:', profileError?.message)
+            }
+          }
+        } catch (apiError: any) {
+          console.error('❌ AdminDashboard: Erro ao chamar API de verificação:', apiError.message)
+          // Fallback: tentar query direta
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('is_admin')
+              .eq('user_id', session.user.id)
+              .maybeSingle()
+
+            if (!profileError && profile) {
+              isAdmin = profile.is_admin === true
+              console.log('📋 AdminDashboard: Usando fallback após erro de API:', { isAdmin })
+            } else {
+              console.error('❌ AdminDashboard: Erro no fallback também:', profileError?.message)
+            }
+          } catch (fallbackError: any) {
+            console.error('❌ AdminDashboard: Erro no fallback:', fallbackError.message)
+          }
+        }
 
         if (!mounted) {
           console.log('⚠️ AdminDashboard: Componente desmontado após buscar perfil, cancelando...')
           return
         }
 
-        if (profileError) {
-          console.error('❌ AdminDashboard: Erro ao buscar perfil:', profileError.message)
-          if (mounted) {
-            window.location.href = '/admin/login'
-          }
-          return
-        }
-
-        if (!profile?.is_admin) {
+        if (!isAdmin) {
           console.log('❌ AdminDashboard: Não é admin')
           if (mounted) {
             window.location.href = '/admin/login'

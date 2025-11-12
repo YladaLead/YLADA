@@ -73,12 +73,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body: CreateWellnessCursoModuloDTO = await request.json()
+    const body: CreateWellnessCursoModuloDTO & { areas?: string[] } = await request.json()
 
     // Validações
     if (!body.titulo) {
       return NextResponse.json(
         { error: 'Título é obrigatório' },
+        { status: 400 }
+      )
+    }
+
+    // Validar áreas se fornecidas
+    if (body.areas && (!Array.isArray(body.areas) || body.areas.length === 0)) {
+      return NextResponse.json(
+        { error: 'Selecione pelo menos uma área' },
         { status: 400 }
       )
     }
@@ -100,6 +108,23 @@ export async function POST(request: NextRequest) {
         { error: `Erro ao criar módulo: ${error.message}` },
         { status: 500 }
       )
+    }
+
+    // Salvar áreas do módulo (se fornecido)
+    if (body.areas && Array.isArray(body.areas) && body.areas.length > 0) {
+      const areasToInsert = body.areas.map((area: string) => ({
+        modulo_id: data.id,
+        area: area
+      }))
+
+      const { error: areasError } = await supabaseAdmin
+        .from('curso_modulos_areas')
+        .insert(areasToInsert)
+
+      if (areasError) {
+        console.error('Erro ao salvar áreas do módulo:', areasError)
+        // Não falhar se áreas não salvarem, mas logar erro
+      }
     }
 
     return NextResponse.json({ modulo: data }, { status: 201 })

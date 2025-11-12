@@ -85,25 +85,125 @@ export async function PUT(
       )
     }
 
-    const body: UpdateWellnessCursoModuloDTO = await request.json()
+    const body: UpdateWellnessCursoModuloDTO & { areas?: string[] } = await request.json()
 
     const updateData: any = {}
     if (body.titulo !== undefined) updateData.titulo = body.titulo
     if (body.descricao !== undefined) updateData.descricao = body.descricao
     if (body.ordem !== undefined) updateData.ordem = body.ordem
 
-    const { data, error } = await supabaseAdmin
-      .from('wellness_curso_modulos')
-      .update(updateData)
-      .eq('id', params.id)
-      .select()
-      .single()
-
-    if (error) {
+    // Verificar se há algo para atualizar
+    if (Object.keys(updateData).length === 0 && body.areas === undefined) {
       return NextResponse.json(
-        { error: `Erro ao atualizar módulo: ${error.message}` },
-        { status: 500 }
+        { error: 'Nenhum dado fornecido para atualização' },
+        { status: 400 }
       )
+    }
+
+    // Atualizar módulo (se houver dados para atualizar)
+    let data = null
+    if (Object.keys(updateData).length > 0) {
+      const { data: updatedData, error } = await supabaseAdmin
+        .from('wellness_curso_modulos')
+        .update(updateData)
+        .eq('id', params.id)
+        .select()
+        .maybeSingle() // Usar maybeSingle() em vez de single() para evitar erro se não encontrar
+
+      if (error) {
+        return NextResponse.json(
+          { error: `Erro ao atualizar módulo: ${error.message}` },
+          { status: 500 }
+        )
+      }
+
+      if (!updatedData) {
+        return NextResponse.json(
+          { error: 'Módulo não encontrado' },
+          { status: 404 }
+        )
+      }
+
+      data = updatedData
+    } else {
+      // Se não há dados para atualizar, buscar o módulo atual
+      const { data: currentData, error } = await supabaseAdmin
+        .from('wellness_curso_modulos')
+        .select('*')
+        .eq('id', params.id)
+        .maybeSingle()
+
+      if (error) {
+        return NextResponse.json(
+          { error: `Erro ao buscar módulo: ${error.message}` },
+          { status: 500 }
+        )
+      }
+
+      if (!currentData) {
+        return NextResponse.json(
+          { error: 'Módulo não encontrado' },
+          { status: 404 }
+        )
+      }
+
+      data = currentData
+    }
+
+    // Atualizar áreas do módulo (se fornecido)
+    if (body.areas !== undefined) {
+      // Deletar áreas existentes
+      const { error: deleteError } = await supabaseAdmin
+        .from('curso_modulos_areas')
+        .delete()
+        .eq('modulo_id', params.id)
+
+      if (deleteError) {
+        console.error('Erro ao deletar áreas antigas:', deleteError)
+        return NextResponse.json(
+          { error: `Erro ao atualizar áreas do módulo: ${deleteError.message}` },
+          { status: 500 }
+        )
+      }
+
+      // Inserir novas áreas
+      if (Array.isArray(body.areas) && body.areas.length > 0) {
+        const areasToInsert = body.areas.map((area: string) => ({
+          modulo_id: params.id,
+          area: area
+        }))
+
+        const { error: areasError } = await supabaseAdmin
+          .from('curso_modulos_areas')
+          .insert(areasToInsert)
+
+        if (areasError) {
+          console.error('Erro ao inserir novas áreas:', areasError)
+          return NextResponse.json(
+            { error: `Erro ao salvar áreas do módulo: ${areasError.message}` },
+            { status: 500 }
+          )
+        }
+      }
+    }
+
+    // Garantir que temos os dados do módulo para retornar
+    if (!data) {
+      // Se não temos dados ainda, buscar novamente
+      const { data: finalData, error: fetchError } = await supabaseAdmin
+        .from('wellness_curso_modulos')
+        .select('*')
+        .eq('id', params.id)
+        .maybeSingle()
+
+      if (fetchError || !finalData) {
+        return NextResponse.json(
+          { error: 'Erro ao buscar dados atualizados do módulo' },
+          { status: 500 }
+        )
+      }
+
+      data = finalData
     }
 
     return NextResponse.json({ modulo: data })

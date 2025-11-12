@@ -73,8 +73,8 @@ export default function WellnessModuloPlayerPage() {
         const topicosData = await topicosResponse.json()
         topicos = await Promise.all(
           (topicosData.topicos || []).map(async (topico: WellnessModuloTopico) => {
-            // Buscar materiais do tópico
-            const materiaisResponse = await fetch(`/api/wellness/modulos/${moduloId}/topicos/${topico.id}/cursos`, {
+            // Buscar materiais do tópico (filtrar automaticamente pela área wellness)
+            const materiaisResponse = await fetch(`/api/wellness/modulos/${moduloId}/topicos/${topico.id}/cursos?area=wellness`, {
               headers: {
                 'Authorization': `Bearer ${session.access_token}`
               }

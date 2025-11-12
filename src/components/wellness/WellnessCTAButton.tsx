@@ -1,8 +1,11 @@
+'use client'
+
 // =====================================================
 // YLADA - COMPONENTE CTA BUTTON COMPARTILHADO WELLNESS
 // =====================================================
 
 import { ToolConfig } from '@/types/wellness'
+import { useParams } from 'next/navigation'
 
 interface WellnessCTAButtonProps {
   config?: ToolConfig
@@ -10,6 +13,8 @@ interface WellnessCTAButtonProps {
   resultadoTexto?: string
   nomeCliente?: string
   className?: string
+  template_id?: string // ID do template para rastrear conversões
+  lead_id?: string // ID do lead (opcional)
 }
 
 export default function WellnessCTAButton({
@@ -17,10 +22,40 @@ export default function WellnessCTAButton({
   resultado,
   resultadoTexto,
   nomeCliente,
-  className = ''
+  className = '',
+  template_id,
+  lead_id
 }: WellnessCTAButtonProps) {
   // Se não tem config, não renderiza nada
   if (!config) return null
+
+  // Tentar obter slug da URL se não tiver template_id
+  const params = useParams()
+  const toolSlug = params?.['tool-slug'] as string | undefined
+
+  // Função para rastrear conversão quando botão é clicado
+  const rastrearConversao = async () => {
+    try {
+      // Só rastrear se tiver template_id ou slug
+      if (!template_id && !toolSlug) return
+
+      await fetch('/api/wellness/conversions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          template_id: template_id || undefined,
+          slug: toolSlug || undefined,
+          lead_id: lead_id || undefined
+        }),
+      })
+      // Silencioso - não interrompe o fluxo se falhar
+    } catch (error) {
+      console.error('Erro ao rastrear conversão:', error)
+      // Não mostrar erro para o usuário
+    }
+  }
 
   // Formatar mensagem do WhatsApp com placeholders
   const formatarMensagem = (mensagem: string): string => {
@@ -60,6 +95,7 @@ export default function WellnessCTAButton({
             href={`https://wa.me/${numeroLimpo}?text=${encodeURIComponent(mensagem)}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={rastrearConversao}
             className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
             style={{
               background: config.custom_colors
@@ -94,6 +130,7 @@ export default function WellnessCTAButton({
             href={config.external_url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={rastrearConversao}
             className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
             style={{
               background: config.custom_colors
@@ -119,6 +156,7 @@ export default function WellnessCTAButton({
           href={`https://wa.me/5511999999999?text=${encodeURIComponent('Olá! Gostaria de conversar sobre bem-estar.')}`}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={rastrearConversao}
           className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all transform hover:scale-105 font-semibold shadow-lg"
         >
           📱 Falar no WhatsApp

@@ -33,25 +33,41 @@ export async function getModuloCompleto(moduloId: string, userId?: string) {
     throw new Error(`Erro ao buscar tópicos: ${topicosError.message}`)
   }
 
-  // Buscar materiais (cursos) para cada tópico
-  const topicosComMateriais = await Promise.all(
-    (topicos || []).map(async (topico) => {
-      const { data: materiais, error: materiaisError } = await supabase
-        .from('wellness_curso_materiais')
-        .select('*')
-        .eq('topico_id', topico.id)
-        .order('ordem', { ascending: true })
+      // Buscar materiais (cursos) para cada tópico - filtrar apenas os da área wellness
+      const topicosComMateriais = await Promise.all(
+        (topicos || []).map(async (topico) => {
+          // Primeiro buscar IDs de materiais da área wellness
+          const { data: materiaisAreas } = await supabase
+            .from('curso_materiais_areas')
+            .select('material_id')
+            .eq('area', 'wellness')
 
-      if (materiaisError) {
-        throw new Error(`Erro ao buscar materiais: ${materiaisError.message}`)
-      }
+          let materiais: any[] = []
+          
+          if (materiaisAreas && materiaisAreas.length > 0) {
+            const materialIds = materiaisAreas.map((m: any) => m.material_id)
+            
+            // Buscar apenas materiais que pertencem à área wellness
+            const { data: materiaisData, error: materiaisError } = await supabase
+              .from('wellness_curso_materiais')
+              .select('*')
+              .eq('topico_id', topico.id)
+              .in('id', materialIds)
+              .order('ordem', { ascending: true })
 
-      return {
-        ...topico,
-        cursos: materiais || []
-      }
-    })
-  )
+            if (materiaisError) {
+              throw new Error(`Erro ao buscar materiais: ${materiaisError.message}`)
+            }
+
+            materiais = materiaisData || []
+          }
+
+          return {
+            ...topico,
+            cursos: materiais
+          }
+        })
+      )
 
   return {
     ...modulo,
@@ -93,25 +109,41 @@ export async function getModulosBiblioteca() {
         }
       }
 
-      // Buscar materiais para cada tópico
+      // Buscar materiais para cada tópico - filtrar apenas os da área wellness
       const topicosComMateriais = await Promise.all(
         (topicos || []).map(async (topico) => {
-          const { data: materiais, error: materiaisError } = await supabase
-            .from('wellness_curso_materiais')
-            .select('*')
-            .eq('topico_id', topico.id)
-            .order('ordem', { ascending: true })
+          // Primeiro buscar IDs de materiais da área wellness
+          const { data: materiaisAreas } = await supabase
+            .from('curso_materiais_areas')
+            .select('material_id')
+            .eq('area', 'wellness')
 
-          if (materiaisError) {
-            return {
-              ...topico,
-              cursos: []
+          let materiais: any[] = []
+          
+          if (materiaisAreas && materiaisAreas.length > 0) {
+            const materialIds = materiaisAreas.map((m: any) => m.material_id)
+            
+            // Buscar apenas materiais que pertencem à área wellness
+            const { data: materiaisData, error: materiaisError } = await supabase
+              .from('wellness_curso_materiais')
+              .select('*')
+              .eq('topico_id', topico.id)
+              .in('id', materialIds)
+              .order('ordem', { ascending: true })
+
+            if (materiaisError) {
+              return {
+                ...topico,
+                cursos: []
+              }
             }
+
+            materiais = materiaisData || []
           }
 
           return {
             ...topico,
-            cursos: materiais || []
+            cursos: materiais
           }
         })
       )

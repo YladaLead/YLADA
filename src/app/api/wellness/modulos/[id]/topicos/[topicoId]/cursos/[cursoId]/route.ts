@@ -47,7 +47,14 @@ export async function PUT(
       )
     }
 
-    const body: UpdateWellnessCursoMaterialDTO = await request.json()
+    const body: UpdateWellnessCursoMaterialDTO & { areas?: string[] } = await request.json()
+
+    // Buscar módulo do tópico para herdar áreas
+    const { data: topico } = await supabaseAdmin
+      .from('wellness_modulo_topicos')
+      .select('modulo_id')
+      .eq('id', params.topicoId)
+      .single()
 
     const updateData: any = {}
     if (body.titulo !== undefined) updateData.titulo = body.titulo
@@ -70,6 +77,74 @@ export async function PUT(
         { error: `Erro ao atualizar curso: ${error.message}` },
         { status: 500 }
       )
+    }
+
+    // Atualizar áreas do material (herdadas do módulo ou fornecidas)
+    let areasDoModulo: string[] = []
+    if (body.areas !== undefined && Array.isArray(body.areas) && body.areas.length > 0) {
+      // Se áreas foram fornecidas, usar elas
+      areasDoModulo = body.areas
+    } else if (topico?.modulo_id) {
+      // Se não foram fornecidas, buscar do módulo
+      const { data: modulosAreas, error: modulosAreasError } = await supabaseAdmin
+        .from('curso_modulos_areas')
+        .select('area')
+        .eq('modulo_id', topico.modulo_id)
+
+      if (modulosAreasError) {
+        console.error('Erro ao buscar áreas do módulo:', modulosAreasError)
+        return NextResponse.json(
+          { error: `Erro ao buscar áreas do módulo: ${modulosAreasError.message}` },
+          { status: 500 }
+        )
+      }
+
+      if (modulosAreas && modulosAreas.length > 0) {
+        areasDoModulo = modulosAreas.map((item: any) => item.area)
+      } else {
+        // Se o módulo não tem áreas, retornar erro
+        return NextResponse.json(
+          { error: 'O módulo não possui áreas cadastradas. Por favor, edite o módulo e selecione pelo menos uma área.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validar que há pelo menos uma área
+    if (areasDoModulo.length === 0 && body.areas === undefined) {
+      return NextResponse.json(
+        { error: 'É necessário que o módulo tenha pelo menos uma área cadastrada.' },
+        { status: 400 }
+      )
+    }
+
+    // Atualizar áreas do material (sempre atualizar para garantir consistência)
+    if (areasDoModulo.length > 0 || body.areas !== undefined) {
+      // Deletar áreas antigas
+      await supabaseAdmin
+        .from('curso_materiais_areas')
+        .delete()
+        .eq('material_id', params.cursoId)
+
+      // Inserir novas áreas (do módulo ou fornecidas)
+      if (areasDoModulo.length > 0) {
+        const areasToInsert = areasDoModulo.map((area: string) => ({
+          material_id: params.cursoId,
+          area: area
+        }))
+
+        const { error: areasError } = await supabaseAdmin
+          .from('curso_materiais_areas')
+          .insert(areasToInsert)
+
+        if (areasError) {
+          console.error('Erro ao atualizar áreas do material:', areasError)
+          return NextResponse.json(
+            { error: `Erro ao atualizar áreas do material: ${areasError.message}` },
+            { status: 500 }
+          )
+        }
+      }
     }
 
     return NextResponse.json({ curso: data })

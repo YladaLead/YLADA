@@ -15,7 +15,7 @@ type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'todos'
 function AdminCursosContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const areaFiltro = (searchParams.get('area') as Area) || 'todos'
+  const areaFiltro = (searchParams.get('area') as Area) || 'wellness' // Padrão: wellness
   
   const [modulos, setModulos] = useState<(WellnessCursoModulo & {
     topicos?: (WellnessModuloTopico & {
@@ -34,24 +34,53 @@ function AdminCursosContent() {
   const [moduloEditando, setModuloEditando] = useState<WellnessCursoModulo | null>(null)
   const [topicoEditando, setTopicoEditando] = useState<{ moduloId: string; topico?: WellnessModuloTopico } | null>(null)
   const [mostrarFormCurso, setMostrarFormCurso] = useState(false)
+  const [mostrarSelecaoArea, setMostrarSelecaoArea] = useState(false) // Primeiro passo: selecionar área
   const [cursoEditando, setCursoEditando] = useState<WellnessCursoMaterial | null>(null)
+  const [salvandoTopico, setSalvandoTopico] = useState(false)
 
-  const [formModulo, setFormModulo] = useState({ titulo: '', descricao: '' })
+  const [formModulo, setFormModulo] = useState({ titulo: '', descricao: '', areas: [] as string[] })
+  const [mostrarSelecaoAreaModulo, setMostrarSelecaoAreaModulo] = useState(false) // Primeiro passo: selecionar área do módulo
   const [formTopico, setFormTopico] = useState({ titulo: '', descricao: '' })
-  const [formCurso, setFormCurso] = useState({
+  const [formCurso, setFormCurso] = useState<{
+    modulo_id: string
+    topico_id: string
+    tipo: 'pdf' | 'video'
+    titulo: string
+    descricao: string
+    arquivo_url: string
+    duracao: string
+    gratuito: boolean
+    areas: string[] // Áreas onde o curso vai aparecer
+  }>({
     modulo_id: '',
     topico_id: '',
-    tipo: 'pdf' as 'pdf' | 'video', // Padrão para PDF/Imagem
+    tipo: 'pdf',
     titulo: '',
     descricao: '',
     arquivo_url: '',
     duracao: '',
-    gratuito: false
+    gratuito: false,
+    areas: [] // Sempre inicializar como array vazio
   })
 
   useEffect(() => {
     carregarModulos()
   }, [areaFiltro])
+
+  // Scroll automático para o formulário quando ele aparecer
+  useEffect(() => {
+    if (mostrarFormCurso) {
+      // Aguardar um pouco para o DOM atualizar
+      setTimeout(() => {
+        const formElement = document.querySelector('[data-form-curso]')
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          // Adicionar um pequeno offset para não ficar colado no topo
+          window.scrollBy(0, -20)
+        }
+      }, 100)
+    }
+  }, [mostrarFormCurso])
 
   const carregarModulos = async () => {
     try {
@@ -94,8 +123,11 @@ function AdminCursosContent() {
             const topicosData = await topicosResponse.json()
             topicos = await Promise.all(
               (topicosData.topicos || []).map(async (topico: WellnessModuloTopico) => {
-                // Carregar cursos do tópico
-                const cursosResponse = await fetch(`/api/wellness/modulos/${modulo.id}/topicos/${topico.id}/cursos`, {
+                // Carregar cursos do tópico (com filtro de área se aplicável)
+                const cursosUrl = areaFiltro !== 'todos' 
+                  ? `/api/wellness/modulos/${modulo.id}/topicos/${topico.id}/cursos?area=${areaFiltro}`
+                  : `/api/wellness/modulos/${modulo.id}/topicos/${topico.id}/cursos`
+                const cursosResponse = await fetch(cursosUrl, {
                   headers: {
                     'Authorization': `Bearer ${session.access_token}`
                   }
@@ -145,21 +177,42 @@ function AdminCursosContent() {
   }
 
   const mudarFiltro = (area: Area) => {
+    // Sempre usar uma área específica (não mais 'todos')
     if (area === 'todos') {
-      router.push('/admin/cursos')
+      router.push('/admin/cursos?area=wellness') // Padrão: wellness
     } else {
       router.push(`/admin/cursos?area=${area}`)
     }
   }
+  
+  // Garantir que sempre tenha uma área selecionada
+  useEffect(() => {
+    if (!areaFiltro || areaFiltro === 'todos') {
+      router.push('/admin/cursos?area=wellness')
+    }
+  }, [areaFiltro, router])
 
   const handleNovoModulo = () => {
     setModuloEditando(null)
-    setFormModulo({ titulo: '', descricao: '' })
-    setMostrarFormModulo(true)
+    setFormModulo({ titulo: '', descricao: '', areas: [] })
+    setMostrarFormModulo(false) // Não mostrar formulário ainda
+    setMostrarSelecaoAreaModulo(true) // Mostrar primeiro a seleção de área
   }
 
   const handleSalvarModulo = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validações
+    if (!formModulo.titulo || formModulo.titulo.trim() === '') {
+      alert('Preencha o título do módulo!')
+      return
+    }
+    
+    // Só validar áreas se for um novo módulo (não ao editar)
+    if (!moduloEditando && (!formModulo.areas || formModulo.areas.length === 0)) {
+      alert('Selecione pelo menos uma área!')
+      return
+    }
     
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -177,7 +230,11 @@ function AdminCursosContent() {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formModulo)
+        body: JSON.stringify({
+          titulo: formModulo.titulo,
+          descricao: formModulo.descricao,
+          areas: formModulo.areas // Enviar áreas selecionadas
+        })
       })
 
       const responseData = await response.json()
@@ -194,31 +251,50 @@ function AdminCursosContent() {
       }
       
       setMostrarFormModulo(false)
+      setMostrarSelecaoAreaModulo(false)
       setModuloEditando(null)
-      setFormModulo({ titulo: '', descricao: '' })
+      setFormModulo({ titulo: '', descricao: '', areas: [] })
     } catch (err: any) {
       alert(`Erro: ${err.message}`)
     }
   }
 
   const handleNovoTopico = (moduloId: string) => {
+    // Garantir que modal de área não está aberto (tópicos não precisam de área)
+    setMostrarSelecaoArea(false)
     setTopicoEditando({ moduloId })
     setFormTopico({ titulo: '', descricao: '' })
   }
 
   const handleSalvarTopico = async (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation() // Prevenir propagação do evento
+    
     if (!topicoEditando) return
+    
+    // Proteção contra duplo submit
+    if (salvandoTopico) {
+      console.log('⚠️ Tópico já está sendo salvo, ignorando...')
+      return
+    }
 
     try {
+      setSalvandoTopico(true)
+      console.log('💾 Salvando tópico:', formTopico)
+      
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      if (!session) {
+        setSalvandoTopico(false)
+        return
+      }
 
       const url = topicoEditando.topico
         ? `/api/wellness/modulos/${topicoEditando.moduloId}/topicos/${topicoEditando.topico.id}`
         : `/api/wellness/modulos/${topicoEditando.moduloId}/topicos`
       
       const method = topicoEditando.topico ? 'PUT' : 'POST'
+
+      console.log('📤 Enviando requisição:', { url, method, formTopico })
 
       const response = await fetch(url, {
         method,
@@ -230,6 +306,8 @@ function AdminCursosContent() {
       })
 
       const responseData = await response.json()
+      
+      console.log('📥 Resposta recebida:', responseData)
       
       if (!response.ok) {
         throw new Error(responseData.error || 'Erro ao salvar tópico')
@@ -245,8 +323,13 @@ function AdminCursosContent() {
       
       setTopicoEditando(null)
       setFormTopico({ titulo: '', descricao: '' })
+      // Garantir que modal de área não está aberto após salvar tópico
+      setMostrarSelecaoArea(false)
     } catch (err: any) {
+      console.error('❌ Erro ao salvar tópico:', err)
       alert(`Erro: ${err.message}`)
+    } finally {
+      setSalvandoTopico(false)
     }
   }
 
@@ -256,29 +339,70 @@ function AdminCursosContent() {
       return
     }
     setCursoEditando(null)
-    setMostrarFormCurso(true)
+    setMostrarSelecaoArea(false) // Não mostrar modal de área
+    setMostrarFormCurso(true) // Mostrar formulário direto
     setFormCurso({
-      modulo_id: modulos[0].id,
+      modulo_id: '',
       topico_id: '',
-      tipo: 'pdf', // Mudar padrão para PDF/Imagem
+      tipo: 'pdf',
       titulo: '',
       descricao: '',
       arquivo_url: '',
       duracao: '',
-      gratuito: false
+      gratuito: false,
+      areas: [] // Começar sem áreas selecionadas
     })
   }
 
   const handleSalvarCurso = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validações
     if (!formCurso.modulo_id || !formCurso.topico_id) {
       alert('Selecione módulo e tópico!')
       return
     }
-
+    
+    if (!formCurso.titulo || formCurso.titulo.trim() === '') {
+      alert('Preencha o título do material!')
+      return
+    }
+    
+    if (!formCurso.arquivo_url || formCurso.arquivo_url.trim() === '') {
+      alert('Faça o upload do arquivo antes de salvar!')
+      return
+    }
+    
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
+
+      // Buscar áreas do módulo automaticamente (material herda áreas do módulo)
+      let areasDoModulo: string[] = []
+      if (formCurso.modulo_id) {
+        try {
+          const areasResponse = await fetch(`/api/wellness/modulos/${formCurso.modulo_id}/areas`, {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          })
+          if (areasResponse.ok) {
+            const areasData = await areasResponse.json()
+            areasDoModulo = areasData.areas || []
+          } else {
+            const errorData = await areasResponse.json().catch(() => ({}))
+            console.error('Erro ao buscar áreas do módulo:', errorData)
+          }
+        } catch (err) {
+          console.error('Erro ao buscar áreas do módulo:', err)
+        }
+      }
+
+      // Validar que o módulo tem áreas antes de continuar
+      if (areasDoModulo.length === 0) {
+        alert('O módulo selecionado não possui áreas cadastradas. Por favor, edite o módulo e selecione pelo menos uma área antes de criar materiais.')
+        return
+      }
 
       const url = cursoEditando
         ? `/api/wellness/modulos/${formCurso.modulo_id}/topicos/${formCurso.topico_id}/cursos/${cursoEditando.id}`
@@ -293,7 +417,8 @@ function AdminCursosContent() {
         descricao: formCurso.descricao,
         arquivo_url: formCurso.arquivo_url,
         duracao: formCurso.duracao ? parseInt(formCurso.duracao) : null,
-        gratuito: formCurso.gratuito
+        gratuito: formCurso.gratuito,
+        areas: areasDoModulo // Usar áreas do módulo automaticamente
       }
 
       const response = await fetch(url, {
@@ -321,6 +446,7 @@ function AdminCursosContent() {
       
       setCursoEditando(null)
       setMostrarFormCurso(false)
+      setMostrarSelecaoArea(false) // Garantir que modal de área seja fechado
       setFormCurso({
         modulo_id: '',
         topico_id: '',
@@ -329,7 +455,8 @@ function AdminCursosContent() {
         descricao: '',
         arquivo_url: '',
         duracao: '',
-        gratuito: false
+        gratuito: false,
+        areas: []
       })
     } catch (err: any) {
       alert(`Erro: ${err.message}`)
@@ -490,16 +617,6 @@ function AdminCursosContent() {
           {/* Filtros por Área */}
           <div className="mb-6 flex space-x-2 flex-wrap">
             <button
-              onClick={() => mudarFiltro('todos')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                areaFiltro === 'todos'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Todas as Áreas
-            </button>
-            <button
               onClick={() => mudarFiltro('wellness')}
               className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                 areaFiltro === 'wellness'
@@ -516,8 +633,6 @@ function AdminCursosContent() {
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
-              disabled
-              title="Em breve"
             >
               🔵 Nutri
             </button>
@@ -528,8 +643,6 @@ function AdminCursosContent() {
                   ? 'bg-purple-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
-              disabled
-              title="Em breve"
             >
               🟣 Coach
             </button>
@@ -540,8 +653,6 @@ function AdminCursosContent() {
                   ? 'bg-orange-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
-              disabled
-              title="Em breve"
             >
               🟠 Nutra
             </button>
@@ -562,12 +673,166 @@ function AdminCursosContent() {
             </div>
           )}
 
+          {/* Modal de Seleção de Área do Módulo (primeiro passo ao criar novo módulo ou ao editar) */}
+          {mostrarSelecaoAreaModulo && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 relative z-10">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Selecione a(s) área(s) do módulo
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Escolha em quais áreas este módulo vai aparecer. Você pode selecionar múltiplas áreas.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                {[
+                  { value: 'wellness', label: '🟢 Wellness', selectedClass: 'border-green-500 bg-green-50' },
+                  { value: 'nutri', label: '🔵 Nutri', selectedClass: 'border-blue-500 bg-blue-50' },
+                  { value: 'coach', label: '🟣 Coach', selectedClass: 'border-purple-500 bg-purple-50' },
+                  { value: 'nutra', label: '🟠 Nutra', selectedClass: 'border-orange-500 bg-orange-50' }
+                ].map((area) => (
+                  <label
+                    key={area.value}
+                    className={`flex items-center space-x-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
+                      (formModulo.areas || []).includes(area.value)
+                        ? area.selectedClass
+                        : 'border-gray-300 bg-white hover:border-gray-400'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={(formModulo.areas || []).includes(area.value)}
+                      onChange={(e) => {
+                        const currentAreas = formModulo.areas || []
+                        if (e.target.checked) {
+                          setFormModulo(prev => ({
+                            ...prev,
+                            areas: [...currentAreas, area.value]
+                          }))
+                        } else {
+                          setFormModulo(prev => ({
+                            ...prev,
+                            areas: currentAreas.filter(a => a !== area.value)
+                          }))
+                        }
+                      }}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">{area.label}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const areasSelecionadas = formModulo.areas || []
+                    if (areasSelecionadas.length > 0) {
+                      if (moduloEditando) {
+                        // Se está editando, salvar áreas diretamente
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession()
+                          if (!session) return
+
+                          const response = await fetch(`/api/wellness/modulos/${moduloEditando.id}`, {
+                            method: 'PUT',
+                            headers: {
+                              'Authorization': `Bearer ${session.access_token}`,
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                              areas: areasSelecionadas
+                            })
+                          })
+
+                          if (!response.ok) {
+                            const errorData = await response.json()
+                            throw new Error(errorData.error || 'Erro ao salvar áreas')
+                          }
+
+                          await carregarModulos()
+                          setMostrarSelecaoAreaModulo(false)
+                          setMostrarFormModulo(true)
+                        } catch (err: any) {
+                          alert(`Erro: ${err.message}`)
+                        }
+                      } else {
+                        // Se está criando, apenas continuar para o formulário
+                        setMostrarSelecaoAreaModulo(false)
+                        setMostrarFormModulo(true)
+                      }
+                    } else {
+                      alert('Selecione pelo menos uma área!')
+                    }
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                >
+                  {moduloEditando ? 'Salvar áreas' : 'Continuar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMostrarSelecaoAreaModulo(false)
+                    if (moduloEditando) {
+                      // Se está editando, voltar para o formulário sem limpar áreas
+                      setMostrarFormModulo(true)
+                    } else {
+                      // Se está criando, limpar áreas
+                      setFormModulo(prev => ({ ...prev, areas: [] }))
+                    }
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Formulário de Módulo */}
           {mostrarFormModulo && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
                 {moduloEditando ? 'Editar Módulo' : 'Novo Módulo'}
               </h3>
+              {/* Mostrar áreas selecionadas */}
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-700">Áreas do módulo:</p>
+                  {moduloEditando && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMostrarFormModulo(false)
+                        setMostrarSelecaoAreaModulo(true)
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Editar áreas
+                    </button>
+                  )}
+                </div>
+                {formModulo.areas && formModulo.areas.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {formModulo.areas.map((area) => {
+                      const areaLabels: Record<string, string> = {
+                        wellness: '🟢 Wellness',
+                        nutri: '🔵 Nutri',
+                        coach: '🟣 Coach',
+                        nutra: '🟠 Nutra'
+                      }
+                      return (
+                        <span
+                          key={area}
+                          className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700"
+                        >
+                          {areaLabels[area] || area}
+                        </span>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">Nenhuma área selecionada</p>
+                )}
+              </div>
               <form onSubmit={handleSalvarModulo} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -605,8 +870,9 @@ function AdminCursosContent() {
                     type="button"
                     onClick={() => {
                       setMostrarFormModulo(false)
+                      setMostrarSelecaoAreaModulo(false)
                       setModuloEditando(null)
-                      setFormModulo({ titulo: '', descricao: '' })
+                      setFormModulo({ titulo: '', descricao: '', areas: [] })
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                   >
@@ -619,7 +885,10 @@ function AdminCursosContent() {
 
           {/* Formulário de Curso */}
           {mostrarFormCurso && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div 
+              data-form-curso
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 relative z-10"
+            >
               <h3 className="text-lg font-bold text-gray-900 mb-4">
                 {cursoEditando ? 'Editar Material' : 'Novo Material'}
               </h3>
@@ -647,6 +916,12 @@ function AdminCursosContent() {
                         </option>
                       ))}
                     </select>
+                    {formCurso.modulo_id && (
+                      <p className="mt-1 text-xs text-green-600 flex items-center">
+                        <span className="mr-1">✓</span>
+                        {modulos.find(m => m.id === formCurso.modulo_id)?.titulo}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -657,7 +932,7 @@ function AdminCursosContent() {
                       onChange={(e) => setFormCurso(prev => ({ ...prev, topico_id: e.target.value }))}
                       required
                       disabled={!formCurso.modulo_id}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     >
                       <option value="">Selecione um tópico</option>
                       {modulos
@@ -668,6 +943,14 @@ function AdminCursosContent() {
                           </option>
                         ))}
                     </select>
+                    {formCurso.topico_id && formCurso.modulo_id && (
+                      <p className="mt-1 text-xs text-green-600 flex items-center">
+                        <span className="mr-1">✓</span>
+                        {modulos
+                          .find(m => m.id === formCurso.modulo_id)
+                          ?.topicos?.find(t => t.id === formCurso.topico_id)?.titulo}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div>
@@ -741,6 +1024,22 @@ function AdminCursosContent() {
                     />
                   </div>
                 )}
+                {/* Mostrar áreas do módulo (somente leitura - material herda do módulo) */}
+                {formCurso.modulo_id && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Áreas do material
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Este material aparecerá automaticamente nas mesmas áreas do módulo "{modulos.find(m => m.id === formCurso.modulo_id)?.titulo}".
+                    </p>
+                    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="text-sm text-gray-600">
+                        As áreas são herdadas automaticamente do módulo. Para alterar as áreas, edite o módulo.
+                      </p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex space-x-3">
                   <button
                     type="submit"
@@ -753,15 +1052,17 @@ function AdminCursosContent() {
                     onClick={() => {
                       setCursoEditando(null)
                       setMostrarFormCurso(false)
+                      setMostrarSelecaoArea(false)
                       setFormCurso({
                         modulo_id: '',
                         topico_id: '',
-                        tipo: 'pdf', // Padrão para PDF/Imagem
+                        tipo: 'pdf',
                         titulo: '',
                         descricao: '',
                         arquivo_url: '',
                         duracao: '',
-                        gratuito: false
+                        gratuito: false,
+                        areas: []
                       })
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
@@ -814,12 +1115,46 @@ function AdminCursosContent() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               setModuloEditando(modulo)
-                              setFormModulo({
-                                titulo: modulo.titulo,
-                                descricao: modulo.descricao || ''
-                              })
+                              
+                              // Carregar áreas do módulo
+                              const { data: { session } } = await supabase.auth.getSession()
+                              if (session) {
+                                try {
+                                  const areasResponse = await fetch(`/api/wellness/modulos/${modulo.id}/areas`, {
+                                    headers: {
+                                      'Authorization': `Bearer ${session.access_token}`
+                                    }
+                                  })
+                                  let areas: string[] = []
+                                  if (areasResponse.ok) {
+                                    const areasData = await areasResponse.json()
+                                    areas = areasData.areas || []
+                                  }
+                                  
+                                  setFormModulo({
+                                    titulo: modulo.titulo,
+                                    descricao: modulo.descricao || '',
+                                    areas: areas
+                                  })
+                                } catch (err) {
+                                  console.error('Erro ao carregar áreas:', err)
+                                  setFormModulo({
+                                    titulo: modulo.titulo,
+                                    descricao: modulo.descricao || '',
+                                    areas: []
+                                  })
+                                }
+                              } else {
+                                setFormModulo({
+                                  titulo: modulo.titulo,
+                                  descricao: modulo.descricao || '',
+                                  areas: []
+                                })
+                              }
+                              
+                              setMostrarSelecaoAreaModulo(false) // Não mostrar seleção de área ao editar
                               setMostrarFormModulo(true)
                             }}
                             className="text-gray-600 hover:text-gray-900 p-2"
@@ -845,8 +1180,13 @@ function AdminCursosContent() {
                           <div className="flex items-center justify-between mb-4">
                             <h4 className="text-sm font-bold text-gray-700">Tópicos</h4>
                             <button
-                              onClick={() => handleNovoTopico(modulo.id)}
-                              className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleNovoTopico(modulo.id)
+                              }}
+                              className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg font-medium hover:bg-blue-700 transition-colors cursor-pointer"
                             >
                               + Novo Tópico
                             </button>
@@ -858,7 +1198,16 @@ function AdminCursosContent() {
                               <h4 className="text-md font-bold text-gray-900 mb-3">
                                 {topicoEditando.topico ? 'Editar Tópico' : 'Novo Tópico'}
                               </h4>
-                              <form onSubmit={handleSalvarTopico} className="space-y-3">
+                              <form 
+                                onSubmit={handleSalvarTopico} 
+                                className="space-y-3"
+                                onKeyDown={(e) => {
+                                  // Prevenir Enter de submeter duas vezes
+                                  if (e.key === 'Enter' && salvandoTopico) {
+                                    e.preventDefault()
+                                  }
+                                }}
+                              >
                                 <input
                                   type="text"
                                   value={formTopico.titulo}
@@ -877,14 +1226,21 @@ function AdminCursosContent() {
                                 <div className="flex space-x-2">
                                   <button
                                     type="submit"
-                                    className="bg-green-600 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-green-700"
+                                    disabled={salvandoTopico}
+                                    className="bg-green-600 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                   >
-                                    Salvar
+                                    {salvandoTopico ? 'Salvando...' : 'Salvar'}
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => setTopicoEditando(null)}
-                                    className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50"
+                                    onClick={() => {
+                                      setTopicoEditando(null)
+                                      setFormTopico({ titulo: '', descricao: '' })
+                                      // Garantir que modal de área não está aberto ao cancelar
+                                      setMostrarSelecaoArea(false)
+                                    }}
+                                    disabled={salvandoTopico}
+                                    className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     Cancelar
                                   </button>
@@ -949,21 +1305,41 @@ function AdminCursosContent() {
                                         </p>
                                       </div>
                                       <button
-                                        onClick={() => {
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.preventDefault()
+                                          e.stopPropagation()
+                                          console.log('➕ Criando novo material para:', { moduloId: modulo.id, topicoId: topico.id })
                                           setCursoEditando(null)
-                                          setMostrarFormCurso(true)
-                                        setFormCurso({
-                                          modulo_id: modulo.id,
-                                          topico_id: topico.id,
-                                          tipo: 'pdf', // Padrão para PDF/Imagem
-                                          titulo: '',
-                                          descricao: '',
-                                          arquivo_url: '',
-                                          duracao: '',
-                                          gratuito: false
-                                        })
+                                          // Se já tem módulo e tópico definidos, mostrar formulário direto
+                                          if (modulo.id && topico.id) {
+                                            setMostrarSelecaoArea(false) // Não mostrar modal de área
+                                            setFormCurso({
+                                              modulo_id: modulo.id,
+                                              topico_id: topico.id,
+                                              tipo: 'pdf',
+                                              titulo: '',
+                                              descricao: '',
+                                              arquivo_url: '',
+                                              duracao: '',
+                                              gratuito: false,
+                                              areas: []
+                                            })
+                                            // Mostrar formulário e fazer scroll após um pequeno delay
+                                            setMostrarFormCurso(true)
+                                            setTimeout(() => {
+                                              const formElement = document.querySelector('[data-form-curso]')
+                                              if (formElement) {
+                                                formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                                window.scrollBy(0, -20)
+                                              }
+                                            }, 150)
+                                          } else {
+                                            // Se não tem módulo/tópico, usar o fluxo normal
+                                            handleNovoCurso()
+                                          }
                                         }}
-                                        className="px-2 py-1 bg-green-600 text-white text-xs rounded font-medium hover:bg-green-700 transition-colors"
+                                        className="px-2 py-1 bg-green-600 text-white text-xs rounded font-medium hover:bg-green-700 transition-colors cursor-pointer"
                                         title="Adicionar novo material (PDF, vídeo ou imagem)"
                                       >
                                         + Novo Material
@@ -987,9 +1363,16 @@ function AdminCursosContent() {
                                           </div>
                                           <div className="flex items-center space-x-2">
                                             <button
-                                              onClick={() => {
+                                              type="button"
+                                              onClick={async (e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                console.log('✏️ Editando curso:', curso.id)
                                                 setCursoEditando(curso)
+                                                setMostrarSelecaoArea(false)
                                                 setMostrarFormCurso(true)
+                                                
+                                                // Material herda áreas do módulo, não precisa carregar
                                                 setFormCurso({
                                                   modulo_id: modulo.id,
                                                   topico_id: topico.id,
@@ -998,16 +1381,25 @@ function AdminCursosContent() {
                                                   descricao: curso.descricao || '',
                                                   arquivo_url: curso.arquivo_url,
                                                   duracao: curso.duracao ? curso.duracao.toString() : '',
-                                                  gratuito: curso.gratuito
+                                                  gratuito: curso.gratuito,
+                                                  areas: [] // Áreas serão herdadas do módulo automaticamente
                                                 })
                                               }}
-                                              className="text-gray-600 hover:text-gray-900 text-xs p-1"
+                                              className="text-gray-600 hover:text-gray-900 text-xs p-1 cursor-pointer"
+                                              title="Editar material"
                                             >
                                               ✏️
                                             </button>
                                             <button
-                                              onClick={() => handleDeletarCurso(modulo.id, topico.id, curso.id)}
-                                              className="text-red-600 hover:text-red-700 text-xs p-1"
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                console.log('🗑️ Deletando curso:', curso.id)
+                                                handleDeletarCurso(modulo.id, topico.id, curso.id)
+                                              }}
+                                              className="text-red-600 hover:text-red-700 text-xs p-1 cursor-pointer"
+                                              title="Deletar material"
                                             >
                                               🗑️
                                             </button>

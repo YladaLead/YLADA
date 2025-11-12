@@ -16,17 +16,39 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 /**
  * GET /api/wellness/modulos/[id]/topicos/[topicoId]/cursos
  * Lista todos os cursos (materiais) de um tópico
+ * Suporta filtro por área via query param ?area=wellness
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string; topicoId: string } }
 ) {
   try {
-    const { data, error } = await supabaseAdmin
+    const { searchParams } = new URL(request.url)
+    const areaFiltro = searchParams.get('area')
+
+    let query = supabaseAdmin
       .from('wellness_curso_materiais')
       .select('*')
       .eq('topico_id', params.topicoId)
-      .order('ordem', { ascending: true })
+
+    // Se tem filtro de área, buscar apenas materiais dessa área
+    if (areaFiltro && areaFiltro !== 'todos') {
+      // Buscar IDs de materiais que pertencem à área
+      const { data: materiaisAreas } = await supabaseAdmin
+        .from('curso_materiais_areas')
+        .select('material_id')
+        .eq('area', areaFiltro)
+
+      if (materiaisAreas && materiaisAreas.length > 0) {
+        const materialIds = materiaisAreas.map((m: any) => m.material_id)
+        query = query.in('id', materialIds)
+      } else {
+        // Se não há materiais nessa área, retornar array vazio
+        return NextResponse.json({ cursos: [] })
+      }
+    }
+
+    const { data, error } = await query.order('ordem', { ascending: true })
 
     if (error) {
       return NextResponse.json(
@@ -93,7 +115,7 @@ export async function POST(
       )
     }
 
-    const body: CreateWellnessCursoMaterialDTO = await request.json()
+    const body: CreateWellnessCursoMaterialDTO & { areas?: string[] } = await request.json()
 
     // Validações
     if (!body.titulo || !body.tipo || !body.arquivo_url) {
@@ -106,6 +128,45 @@ export async function POST(
     if (!['pdf', 'video'].includes(body.tipo)) {
       return NextResponse.json(
         { error: 'Tipo deve ser "pdf" ou "video"' },
+        { status: 400 }
+      )
+    }
+
+    // Buscar áreas do módulo (material herda áreas do módulo)
+    let areasDoModulo: string[] = []
+    if (body.areas && Array.isArray(body.areas) && body.areas.length > 0) {
+      // Se áreas foram fornecidas, usar elas
+      areasDoModulo = body.areas
+    } else {
+      // Se não foram fornecidas, buscar do módulo
+      const { data: modulosAreas, error: modulosAreasError } = await supabaseAdmin
+        .from('curso_modulos_areas')
+        .select('area')
+        .eq('modulo_id', topico.modulo_id)
+
+      if (modulosAreasError) {
+        console.error('Erro ao buscar áreas do módulo:', modulosAreasError)
+        return NextResponse.json(
+          { error: `Erro ao buscar áreas do módulo: ${modulosAreasError.message}` },
+          { status: 500 }
+        )
+      }
+
+      if (modulosAreas && modulosAreas.length > 0) {
+        areasDoModulo = modulosAreas.map((item: any) => item.area)
+      } else {
+        // Se o módulo não tem áreas, retornar erro
+        return NextResponse.json(
+          { error: 'O módulo não possui áreas cadastradas. Por favor, edite o módulo e selecione pelo menos uma área.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validar que há pelo menos uma área
+    if (areasDoModulo.length === 0) {
+      return NextResponse.json(
+        { error: 'É necessário que o módulo tenha pelo menos uma área cadastrada para criar o material.' },
         { status: 400 }
       )
     }
@@ -130,6 +191,31 @@ export async function POST(
     if (error) {
       return NextResponse.json(
         { error: `Erro ao criar curso: ${error.message}` },
+        { status: 500 }
+      )
+    }
+
+    // Salvar áreas do material (herdadas do módulo ou fornecidas)
+    // IMPORTANTE: Sempre salvar áreas, pois já validamos que há pelo menos uma
+    const areasToInsert = areasDoModulo.map((area: string) => ({
+      material_id: data.id,
+      area: area
+    }))
+
+    const { error: areasError } = await supabaseAdmin
+      .from('curso_materiais_areas')
+      .insert(areasToInsert)
+
+    if (areasError) {
+      console.error('Erro ao salvar áreas do material:', areasError)
+      // Se falhar ao salvar áreas, deletar o material criado para manter consistência
+      await supabaseAdmin
+        .from('wellness_curso_materiais')
+        .delete()
+        .eq('id', data.id)
+      
+      return NextResponse.json(
+        { error: `Erro ao salvar áreas do material: ${areasError.message}` },
         { status: 500 }
       )
     }
