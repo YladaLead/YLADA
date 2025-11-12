@@ -46,31 +46,59 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
         console.log('✅ AdminProtectedRoute: Sessão OK! User:', session.user.email)
 
-        // Verificar se é admin com timeout de 2 segundos
-        const profilePromise = supabase
-          .from('user_profiles')
-          .select('is_admin')
-          .eq('user_id', session.user.id)
-          .single()
+        // Verificar se é admin usando API route (evita problemas de RLS em produção)
+        let isAdmin = false
+        try {
+          const checkAdminResponse = await fetch('/api/admin/check', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+            }
+          })
 
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 2000)
-        )
+          if (checkAdminResponse.ok) {
+            const checkData = await checkAdminResponse.json()
+            isAdmin = checkData.isAdmin === true
+            console.log('✅ AdminProtectedRoute: Verificação via API OK:', { isAdmin })
+          } else {
+            console.error('❌ AdminProtectedRoute: Erro na API de verificação:', checkAdminResponse.status)
+            // Fallback: tentar query direta
+            const { data: profile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('is_admin')
+              .eq('user_id', session.user.id)
+              .maybeSingle()
 
-        const result = await Promise.race([profilePromise, timeoutPromise]) as any
-        
-        if (!mounted) return
+            if (!profileError && profile) {
+              isAdmin = profile.is_admin === true
+              console.log('✅ AdminProtectedRoute: Usando fallback (query direta):', { isAdmin })
+            } else {
+              console.error('❌ AdminProtectedRoute: Erro no fallback também:', profileError?.message)
+            }
+          }
+        } catch (apiError: any) {
+          console.error('❌ AdminProtectedRoute: Erro ao chamar API de verificação:', apiError.message)
+          // Fallback: tentar query direta
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('is_admin')
+              .eq('user_id', session.user.id)
+              .maybeSingle()
 
-        const { data: profile, error: profileError } = result
-
-        if (profileError) {
-          console.error('❌ AdminProtectedRoute: Erro ao buscar perfil:', profileError.message)
-          await supabase.auth.signOut()
-          window.location.href = '/admin/login'
-          return
+            if (!profileError && profile) {
+              isAdmin = profile.is_admin === true
+              console.log('✅ AdminProtectedRoute: Usando fallback após erro de API:', { isAdmin })
+            } else {
+              console.error('❌ AdminProtectedRoute: Erro no fallback também:', profileError?.message)
+            }
+          } catch (fallbackError: any) {
+            console.error('❌ AdminProtectedRoute: Erro no fallback:', fallbackError.message)
+          }
         }
 
-        const isAdmin = profile?.is_admin === true
+        if (!mounted) return
 
         if (!isAdmin) {
           console.log('❌ AdminProtectedRoute: Não é admin')
@@ -89,15 +117,10 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
       } catch (error: any) {
         if (!mounted) return
         
-        console.error('❌ AdminProtectedRoute: Erro:', error.message)
-        if (error.message === 'Timeout') {
-          console.log('⏳ AdminProtectedRoute: Timeout - tentando novamente...')
-          setTimeout(() => {
-            if (mounted) checkAdmin()
-          }, 500)
-        } else {
-          window.location.href = '/admin/login'
-        }
+        console.error('❌ AdminProtectedRoute: Erro geral:', error.message)
+        // Em caso de erro, redirecionar para login
+        clearCachedAdminCheck()
+        window.location.href = '/admin/login'
       }
     }
 
