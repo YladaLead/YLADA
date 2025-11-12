@@ -9,6 +9,8 @@ export function middleware(request: NextRequest) {
   
   // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)
   if (
+    pathname === '/' || // Página raiz - não redirecionar
+    pathname === '/migrado' || // Página de acesso migrado - não redirecionar
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||
     pathname.startsWith('/calculadora-imc') ||
