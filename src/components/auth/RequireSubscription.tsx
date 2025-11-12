@@ -30,31 +30,62 @@ export default function RequireSubscription({
   const [subscriptionData, setSubscriptionData] = useState<any>(null)
   const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
   const [showLoading, setShowLoading] = useState(true)
+  // Hooks para SubscriptionExpiryBanner - sempre inicializados para manter ordem consistente
+  const [daysUntilExpiry, setDaysUntilExpiry] = useState<number | null>(null)
   
-  // IMPORTANTE: Hooks devem estar sempre no topo, antes de qualquer retorno condicional
+  // IMPORTANTE: TODOS os Hooks devem estar sempre no topo, antes de qualquer retorno condicional
+  // Hook 1: Timeout do perfil
   useEffect(() => {
+    let timer: NodeJS.Timeout | null = null
+    
     if (!userProfile && user) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         setProfileCheckTimeout(true)
-      }, 1000) // 1 segundo (otimizado)
-      return () => clearTimeout(timer)
+      }, 1000)
     } else {
       setProfileCheckTimeout(false)
     }
+    
+    // Sempre retornar função de cleanup (mesma estrutura em todos os casos)
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
+    }
   }, [userProfile, user])
-
+  
+  // Hook para calcular dias até vencimento (movido de SubscriptionExpiryBanner)
+  // IMPORTANTE: Sempre executar, mesmo que subscriptionData seja null
   useEffect(() => {
+    if (subscriptionData?.current_period_end) {
+      const expiryDate = new Date(subscriptionData.current_period_end)
+      const now = new Date()
+      const diffTime = expiryDate.getTime() - now.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      setDaysUntilExpiry(diffDays)
+    } else {
+      setDaysUntilExpiry(null)
+    }
+    return () => {} // Sempre retornar função de cleanup
+  }, [subscriptionData])
+
+  // Hook 2: Verificação principal de assinatura
+  useEffect(() => {
+    let isMounted = true
+    let controller: AbortController | null = null
+    
     const checkSubscription = async () => {
       if (authLoading || !user) {
         return
       }
 
       try {
+        if (!isMounted) return
         setCheckingSubscription(true)
 
         // IMPORTANTE: Se admin/suporte, permitir acesso imediatamente
-        // Isso evita bloqueio quando o perfil está demorando para carregar
         if (userProfile?.is_admin || userProfile?.is_support) {
+          if (!isMounted) return
           console.log('✅ RequireSubscription: Admin/Suporte detectado, bypassando verificação de assinatura')
           setCanBypass(true)
           setHasSubscription(true)
@@ -63,12 +94,10 @@ export default function RequireSubscription({
           return
         }
 
-        // Se não tem perfil ainda, aguardar apenas 1 segundo (otimizado)
-        // Se passou timeout, permitir acesso (ProtectedRoute já permitiu, assumindo admin)
+        // Se não tem perfil ainda, aguardar timeout
         if (!userProfile) {
-          // Se já passou timeout do perfil, permitir acesso sem verificar assinatura
-          // (ProtectedRoute já permitiu acesso, assumindo que é admin)
           if (profileCheckTimeout) {
+            if (!isMounted) return
             console.log('⚠️ RequireSubscription: Perfil não carregou, mas timeout passou. Permitindo acesso (assumindo admin).')
             setCanBypass(true)
             setHasSubscription(true)
@@ -77,13 +106,12 @@ export default function RequireSubscription({
             return
           }
           console.log('⏳ RequireSubscription: Perfil ainda não carregado, aguardando...')
-          // Aguardar perfil carregar antes de verificar assinatura
           return
         }
 
         // Verificar assinatura via API (com timeout de 5s)
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 5000)
+        controller = new AbortController()
+        const timeoutId = setTimeout(() => controller?.abort(), 5000)
         
         try {
           const response = await fetch(`/api/${area}/subscription/check`, {
@@ -93,15 +121,18 @@ export default function RequireSubscription({
 
           clearTimeout(timeoutId)
 
+          if (!isMounted) return
+
           if (!response.ok) {
             console.error('❌ Erro ao verificar assinatura')
-            // Em caso de erro, permitir acesso temporariamente para não bloquear
             setHasSubscription(true)
             setCheckingSubscription(false)
             return
           }
 
           const data = await response.json()
+          if (!isMounted) return
+          
           setHasSubscription(data.hasActiveSubscription || data.bypassed)
           setCanBypass(data.bypassed || false)
 
@@ -116,13 +147,12 @@ export default function RequireSubscription({
                 }
               })
               .then(subData => {
-                if (subData?.subscription) {
+                if (isMounted && subData?.subscription) {
                   setSubscriptionData(subData.subscription)
                 }
               })
               .catch(err => {
                 console.error('Erro ao buscar detalhes da assinatura:', err)
-                // Não bloquear por isso
               })
           }
 
@@ -130,8 +160,8 @@ export default function RequireSubscription({
         } catch (error: any) {
           clearTimeout(timeoutId)
           if (error.name === 'AbortError') {
+            if (!isMounted) return
             console.warn('⚠️ Timeout ao verificar assinatura, permitindo acesso temporariamente')
-            // Em caso de timeout, permitir acesso para não bloquear
             setHasSubscription(true)
             setCheckingSubscription(false)
           } else {
@@ -139,15 +169,73 @@ export default function RequireSubscription({
           }
         }
       } catch (error) {
+        if (!isMounted) return
         console.error('❌ Erro ao verificar assinatura:', error)
-        // Em caso de erro, permitir acesso temporariamente para não bloquear
         setHasSubscription(true)
         setCheckingSubscription(false)
       }
     }
 
     checkSubscription()
+    
+    // Cleanup: cancelar requisições pendentes
+    return () => {
+      isMounted = false
+      if (controller) {
+        controller.abort()
+      }
+    }
   }, [user, userProfile, authLoading, area, profileCheckTimeout])
+
+  // Hook 3: Timeout para verificação de assinatura
+  // IMPORTANTE: Sempre executar, mesmo que checkingSubscription seja false
+  useEffect(() => {
+    // Declarar timer no topo para garantir ordem consistente
+    let timer: NodeJS.Timeout | null = null
+    
+    // Sempre executar lógica, mesmo que seja apenas para resetar estado
+    if (checkingSubscription) {
+      timer = setTimeout(() => {
+        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 3s, permitindo acesso temporário')
+        setShowLoading(false)
+        setCheckingSubscription(false)
+        setHasSubscription(true)
+      }, 3000)
+    } else {
+      // Sempre atualizar estado, mesmo quando não há timer
+      setShowLoading(false)
+    }
+    
+    // SEMPRE retornar função de cleanup com a mesma estrutura
+    return () => {
+      if (timer !== null) {
+        clearTimeout(timer)
+      }
+    }
+  }, [checkingSubscription])
+
+  // Hook 4: Admin/suporte bypass
+  useEffect(() => {
+    if (userProfile && (userProfile.is_admin || userProfile.is_support) && checkingSubscription) {
+      setCanBypass(true)
+      setHasSubscription(true)
+      setCheckingSubscription(false)
+      setShowLoading(false)
+    }
+    return () => {} // Sempre retornar função de cleanup
+  }, [userProfile, checkingSubscription])
+
+  // Hook 5: Timeout do perfil bypass
+  useEffect(() => {
+    if (profileCheckTimeout && !userProfile && user && checkingSubscription) {
+      console.log('⚠️ RequireSubscription: Timeout do perfil passou, permitindo acesso (assumindo admin)')
+      setCanBypass(true)
+      setHasSubscription(true)
+      setCheckingSubscription(false)
+      setShowLoading(false)
+    }
+    return () => {} // Sempre retornar função de cleanup
+  }, [profileCheckTimeout, userProfile, user, checkingSubscription])
 
   // Loading enquanto verifica autenticação
   if (authLoading) {
@@ -178,42 +266,6 @@ export default function RequireSubscription({
     return <>{children}</>
   }
 
-  // Timeout para verificação de assinatura - se demorar mais de 3s, permitir acesso
-  useEffect(() => {
-    if (checkingSubscription) {
-      const timer = setTimeout(() => {
-        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 3s, permitindo acesso temporário')
-        setShowLoading(false)
-        setCheckingSubscription(false)
-        setHasSubscription(true)
-      }, 3000)
-      return () => clearTimeout(timer)
-    } else {
-      setShowLoading(false)
-    }
-  }, [checkingSubscription])
-
-  // Se perfil carregou e é admin/suporte, permitir acesso imediatamente
-  useEffect(() => {
-    if (userProfile && (userProfile.is_admin || userProfile.is_support) && checkingSubscription) {
-      setCanBypass(true)
-      setHasSubscription(true)
-      setCheckingSubscription(false)
-      setShowLoading(false)
-    }
-  }, [userProfile, checkingSubscription])
-
-  // Se passou timeout do perfil, permitir acesso (ProtectedRoute já permitiu, assumindo admin)
-  useEffect(() => {
-    if (profileCheckTimeout && !userProfile && user && checkingSubscription) {
-      console.log('⚠️ RequireSubscription: Timeout do perfil passou, permitindo acesso (assumindo admin)')
-      setCanBypass(true)
-      setHasSubscription(true)
-      setCheckingSubscription(false)
-      setShowLoading(false)
-    }
-  }, [profileCheckTimeout, userProfile, user, checkingSubscription])
-
   // Se perfil carregou e é admin/suporte, permitir acesso imediatamente (useEffect já atualizou o estado)
   if (userProfile && (userProfile.is_admin || userProfile.is_support)) {
     return <>{children}</>
@@ -224,10 +276,13 @@ export default function RequireSubscription({
     return (
       <>
         {children}
-        {/* Mostrar banner de vencimento se próximo */}
-        {subscriptionData && !canBypass && (
-          <SubscriptionExpiryBanner subscription={subscriptionData} area={area} />
-        )}
+        {/* Sempre renderizar banner, mas controlar visibilidade internamente */}
+        <SubscriptionExpiryBanner 
+          daysUntilExpiry={daysUntilExpiry} 
+          area={area} 
+          subscription={subscriptionData}
+          canBypass={canBypass}
+        />
       </>
     )
   }
@@ -272,28 +327,26 @@ export default function RequireSubscription({
 
 /**
  * Banner mostrando quando a assinatura vai vencer
+ * IMPORTANTE: Hooks foram movidos para o componente pai para manter ordem consistente
+ * Este componente agora é "puro" (sem Hooks) e sempre renderizado
  */
 function SubscriptionExpiryBanner({
-  subscription,
+  daysUntilExpiry,
   area,
+  subscription,
+  canBypass,
 }: {
-  subscription: any
+  daysUntilExpiry: number | null
   area: string
+  subscription: any
+  canBypass: boolean
 }) {
-  const [daysUntilExpiry, setDaysUntilExpiry] = useState<number | null>(null)
-
-  useEffect(() => {
-    if (subscription?.current_period_end) {
-      const expiryDate = new Date(subscription.current_period_end)
-      const now = new Date()
-      const diffTime = expiryDate.getTime() - now.getTime()
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      setDaysUntilExpiry(diffDays)
-    }
-  }, [subscription])
-
-  // Mostrar banner apenas se faltam 7 dias ou menos
-  if (!daysUntilExpiry || daysUntilExpiry > 7) {
+  // Mostrar banner apenas se:
+  // 1. Tem dados de vencimento
+  // 2. Faltam 7 dias ou menos
+  // 3. Não é admin/suporte (canBypass)
+  // 4. Tem subscription data
+  if (!daysUntilExpiry || daysUntilExpiry > 7 || canBypass || !subscription) {
     return null
   }
 
