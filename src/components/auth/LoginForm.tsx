@@ -197,15 +197,34 @@ export default function LoginForm({
           console.log('✅ Login bem-sucedido!')
           
           // Aguardar um pouco para garantir que a sessão foi salva
-          // O createBrowserClient precisa de tempo para persistir cookies
-          await new Promise(resolve => setTimeout(resolve, 300))
+          await new Promise(resolve => setTimeout(resolve, 500))
           
           // Verificar se a sessão foi salva
           const { data: { session: verifySession } } = await supabase.auth.getSession()
           
           if (verifySession) {
+            // Verificar se o usuário é migrado e tem perfil incompleto
+            try {
+              const profileResponse = await fetch('/api/wellness/profile', {
+                credentials: 'include'
+              })
+              
+              if (profileResponse.ok) {
+                const profileData = await profileResponse.json()
+                const profile = profileData.profile
+                
+                // Se perfil está incompleto (sem nome ou whatsapp), redirecionar para bem-vindo
+                if (!profile?.nome || !profile?.whatsapp) {
+                  console.log('ℹ️ Perfil incompleto, redirecionando para completar cadastro')
+                  router.push('/pt/wellness/bem-vindo?migrado=true')
+                  return
+                }
+              }
+            } catch (profileError) {
+              console.warn('⚠️ Erro ao verificar perfil, continuando com redirect padrão:', profileError)
+            }
+            
             console.log('✅ Sessão confirmada, redirecionando para:', redirectPath)
-            // Usar router.push ao invés de window.location.href para melhor integração com Next.js
             router.push(redirectPath)
             // Forçar reload se router.push não funcionar após 1 segundo
             setTimeout(() => {
@@ -220,6 +239,26 @@ export default function LoginForm({
             await new Promise(resolve => setTimeout(resolve, 500))
             const { data: { session: retrySession } } = await supabase.auth.getSession()
             if (retrySession) {
+              // Verificar perfil também na segunda tentativa
+              try {
+                const profileResponse = await fetch('/api/wellness/profile', {
+                  credentials: 'include'
+                })
+                
+                if (profileResponse.ok) {
+                  const profileData = await profileResponse.json()
+                  const profile = profileData.profile
+                  
+                  if (!profile?.nome || !profile?.whatsapp) {
+                    console.log('ℹ️ Perfil incompleto, redirecionando para completar cadastro')
+                    router.push('/pt/wellness/bem-vindo?migrado=true')
+                    return
+                  }
+                }
+              } catch (profileError) {
+                console.warn('⚠️ Erro ao verificar perfil:', profileError)
+              }
+              
               console.log('✅ Sessão confirmada na segunda tentativa, redirecionando...')
               router.push(redirectPath)
               setTimeout(() => {
@@ -347,6 +386,22 @@ export default function LoginForm({
               </button>
             </div>
           </div>
+
+          {/* Mensagem para usuários migrados */}
+          {!isSignUp && (
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg text-sm">
+              <p className="text-blue-800 font-medium mb-1">
+                🔑 Usuário migrado?
+              </p>
+              <p className="text-blue-700">
+                Se você foi migrado do sistema anterior, use sua senha padrão: <strong>Ylada2025!</strong>
+                <br />
+                <span className="text-xs text-blue-600 mt-1 block">
+                  Após o primeiro login, você poderá alterar sua senha ao completar o cadastro.
+                </span>
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
