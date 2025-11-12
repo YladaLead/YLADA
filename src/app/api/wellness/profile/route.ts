@@ -301,7 +301,7 @@ export async function PUT(request: NextRequest) {
           throw error
         }
       } else {
-        console.log('✅ Perfil salvo com sucesso (UPSERT):', {
+        console.log('✅ Perfil salvo com sucesso (UPSERT completo):', {
           id: data?.id,
           user_id: data?.user_id,
           nome_completo: data?.nome_completo

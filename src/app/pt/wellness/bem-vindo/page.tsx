@@ -147,6 +147,11 @@ function BemVindoContent() {
       }
       
       // Depois, atualizar o perfil
+      console.log('📤 Enviando dados do perfil:', {
+        nome: nomeCompleto.trim(),
+        whatsapp: telefone.replace(/\D/g, '')
+      })
+      
       const response = await fetch('/api/wellness/profile', {
         method: 'PUT',
         headers: {
@@ -159,6 +164,12 @@ function BemVindoContent() {
         }),
       })
       
+      console.log('📥 Resposta da API:', {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText
+      })
+      
       // Se a resposta for 401 (não autenticado), tentar recarregar a página
       if (response.status === 401) {
         setError('Sua sessão expirou. Recarregando a página...')
@@ -169,16 +180,34 @@ function BemVindoContent() {
         return
       }
 
-      const data = await response.json()
+      // Tentar parsear a resposta
+      let data
+      try {
+        const text = await response.text()
+        console.log('📄 Resposta em texto:', text)
+        data = text ? JSON.parse(text) : {}
+      } catch (parseError) {
+        console.error('❌ Erro ao parsear resposta:', parseError)
+        setError('Erro ao processar resposta do servidor. Tente novamente.')
+        setSaving(false)
+        return
+      }
+
+      console.log('📊 Dados parseados:', data)
 
       if (response.ok) {
+        console.log('✅ Perfil salvo com sucesso!')
         setSuccess(true)
+        setError(null)
         // Aguardar um pouco para mostrar a mensagem de sucesso antes de redirecionar
         setTimeout(() => {
+          console.log('🔄 Redirecionando para dashboard...')
           window.location.href = '/pt/wellness/dashboard'
         }, 3000)
       } else {
+        console.error('❌ Erro ao salvar perfil:', data)
         setError(data.error || 'Erro ao salvar perfil. Tente novamente.')
+        setSaving(false)
       }
     } catch (err: any) {
       console.error('Erro ao salvar perfil:', err)
