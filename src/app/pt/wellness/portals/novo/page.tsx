@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Tool {
   id: string

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import NutraNavBar from '@/components/nutra/NutraNavBar'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 import ChatIA from '@/components/ChatIA'
 
 export default function NutraDashboard() {

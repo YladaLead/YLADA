@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 import dynamic from 'next/dynamic'
 
 // Lazy load ChatIA para melhorar performance inicial

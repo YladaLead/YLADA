@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 import { getCursoCompleto, atualizarProgressoMaterial } from '@/lib/wellness-cursos'
 import type { WellnessCursoCompleto, WellnessCursoMaterial } from '@/types/wellness-cursos'
 

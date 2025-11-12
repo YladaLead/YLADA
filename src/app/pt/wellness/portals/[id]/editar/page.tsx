@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Tool {
   id: string

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 import { translateError } from '@/lib/error-messages'
 
 export default function WellnessConfiguracaoPage() {
