@@ -217,11 +217,11 @@ function BemVindoContent() {
         console.log('✅ Perfil salvo com sucesso!')
         setSuccess(true)
         setError(null)
-        // Aguardar um pouco para mostrar a mensagem de sucesso antes de redirecionar
+        // Aguardar 2 segundos para mostrar a mensagem de sucesso antes de redirecionar
         setTimeout(() => {
           console.log('🔄 Redirecionando para dashboard...')
-          window.location.href = '/pt/wellness/dashboard'
-        }, 3000)
+          router.push('/pt/wellness/dashboard')
+        }, 2000)
       } else {
         console.error('❌ Erro ao salvar perfil:', data)
         setError(data.error || 'Erro ao salvar perfil. Tente novamente.')
@@ -296,43 +296,22 @@ function BemVindoContent() {
                 </svg>
               </div>
               
-              {/* Título principal */}
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                🎉 Cadastro Finalizado com Sucesso!
+              {/* Título principal - MENSAGEM CLARA E DESTACADA */}
+              <h2 className="text-3xl font-bold text-green-600 mb-4 animate-pulse">
+                ✅ Seu Cadastro Foi Feito com Sucesso!
               </h2>
               
-              {/* Mensagem de confirmação */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6 mb-6 max-w-md mx-auto">
-                <p className="text-lg text-gray-800 mb-2 font-semibold">
-                  ✅ Tudo pronto para começar!
-                </p>
-                <p className="text-gray-700">
-                  Seu cadastro foi concluído com sucesso. Agora você pode acessar todas as funcionalidades da plataforma.
-                </p>
-              </div>
+              <p className="text-lg text-gray-700 mb-6">
+                Você será redirecionado para o dashboard em instantes...
+              </p>
               
-              {/* Contador de redirecionamento */}
-              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6 max-w-md mx-auto">
-                <p className="text-blue-800 font-medium mb-2">
-                  🚀 Redirecionando para o Dashboard...
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                  <p className="text-sm text-blue-700">
-                    Você será redirecionado automaticamente em instantes
-                  </p>
-                </div>
-              </div>
-              
-              {/* Botão de ação manual (caso o redirecionamento não funcione) */}
-              <div className="mt-6">
-                <button
-                  onClick={() => window.location.href = '/pt/wellness/dashboard'}
-                  className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg text-lg transform hover:scale-105"
-                >
-                  🚀 Ir para o Dashboard Agora
-                </button>
-              </div>
+              {/* Botão para ir imediatamente */}
+              <button
+                onClick={() => router.push('/pt/wellness/dashboard')}
+                className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg text-lg transform hover:scale-105"
+              >
+                🚀 Ir para o Dashboard Agora
+              </button>
             </div>
           ) : (
             <>

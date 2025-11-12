@@ -782,15 +782,6 @@ export default function AdminUsuarios() {
                                 Assinatura
                               </button>
                             )}
-                            {usuario.isMigrado && (
-                              <button
-                                onClick={() => definirSenhaPadrao(usuario.email)}
-                                className="text-purple-600 hover:text-purple-900"
-                                title="Definir senha padrão (Ylada2025!)"
-                              >
-                                🔑 Senha
-                              </button>
-                            )}
                             <button
                               onClick={() => abrirDeletarUsuario(usuario)}
                               className="text-red-600 hover:text-red-900"
