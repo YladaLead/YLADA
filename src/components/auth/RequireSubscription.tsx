@@ -256,22 +256,21 @@ export default function RequireSubscription({
     return null
   }
 
-  // IMPORTANTE: Se passou timeout e ainda não tem perfil, mas tem usuário autenticado,
-  // permitir acesso temporariamente (assumindo que pode ser admin)
-  // Isso é especialmente importante para evitar bloqueios em produção
-  // Verificar ANTES de qualquer loading state
-  // Os useEffect já atualizaram os estados, então apenas verificar se pode bypassar
-  if (!userProfile && profileCheckTimeout && user && !authLoading && (canBypass || hasSubscription)) {
-    console.warn('⚠️ RequireSubscription: Perfil não carregou após timeout, permitindo acesso temporário (ProtectedRoute já permitiu)')
-    return <>{children}</>
-  }
-
-  // Se perfil carregou e é admin/suporte, permitir acesso imediatamente (useEffect já atualizou o estado)
+  // Se perfil carregou e é admin/suporte, permitir acesso imediatamente
   if (userProfile && (userProfile.is_admin || userProfile.is_support)) {
     return <>{children}</>
   }
 
-  // Se tem assinatura ou pode bypassar, mostrar conteúdo (verificar ANTES do loading)
+  // IMPORTANTE: Se passou timeout do perfil E ProtectedRoute já permitiu acesso (allowAdmin=true),
+  // permitir acesso imediatamente SEM depender de canBypass (que pode não ter sido atualizado ainda)
+  // Isso é CRÍTICO para evitar bloqueios em produção quando o perfil demora para carregar
+  // Verificar ANTES de qualquer loading state
+  if (profileCheckTimeout && !userProfile && user && !authLoading) {
+    console.warn('⚠️ RequireSubscription: Perfil não carregou após timeout, mas ProtectedRoute permitiu acesso (allowAdmin=true). Permitindo acesso temporário.')
+    return <>{children}</>
+  }
+
+  // Se tem assinatura ou pode bypassar, mostrar conteúdo
   if (hasSubscription || canBypass) {
     return (
       <>
@@ -285,15 +284,6 @@ export default function RequireSubscription({
         />
       </>
     )
-  }
-
-  // IMPORTANTE: Se já passou timeout do perfil e ProtectedRoute permitiu acesso,
-  // não mostrar loading - permitir acesso imediatamente
-  // Isso evita o bloqueio em produção quando o perfil demora para carregar
-  // Os useEffect já atualizaram os estados, então apenas verificar se pode bypassar
-  if (profileCheckTimeout && !userProfile && user && !authLoading && (canBypass || hasSubscription)) {
-    console.log('✅ RequireSubscription: Timeout passou, permitindo acesso (não mostrar loading)')
-    return <>{children}</>
   }
 
   // Loading enquanto verifica assinatura ou aguarda perfil (com timeout de 3s)
