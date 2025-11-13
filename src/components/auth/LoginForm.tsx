@@ -196,6 +196,35 @@ export default function LoginForm({
         if (data.session) {
           console.log('✅ Login bem-sucedido!')
           
+          // Verificar se a senha é provisória e se ainda está válida
+          try {
+            const { data: profileData, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('temporary_password_expires_at')
+              .eq('user_id', data.session.user.id)
+              .maybeSingle()
+            
+            if (!profileError && profileData?.temporary_password_expires_at) {
+              const expiresAt = new Date(profileData.temporary_password_expires_at)
+              const now = new Date()
+              
+              if (now > expiresAt) {
+                // Senha provisória expirada
+                await supabase.auth.signOut()
+                setError('Sua senha provisória expirou. Entre em contato com o suporte para gerar uma nova.')
+                setLoading(false)
+                return
+              } else {
+                // Senha provisória ainda válida - mostrar aviso
+                const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+                console.log(`⚠️ Senha provisória válida por mais ${daysLeft} dia(s)`)
+              }
+            }
+          } catch (checkError) {
+            console.warn('⚠️ Não foi possível verificar expiração da senha provisória:', checkError)
+            // Continuar com o login mesmo se não conseguir verificar
+          }
+          
           // Aguardar um pouco para garantir que a sessão foi salva
           await new Promise(resolve => setTimeout(resolve, 500))
           
