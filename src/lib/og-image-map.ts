@@ -31,6 +31,7 @@ export const OG_IMAGE_MAP: Record<string, string> = {
   
   // Guias
   'guia-hidratacao': '/images/og/wellness/guia-hidratacao.jpg',
+  'guia-de-hidratacao': '/images/og/wellness/guia-hidratacao.jpg',
   
   // Avaliações
   'avaliacao-intolerancia': '/images/og/wellness/avaliacao-intolerancia.jpg',
