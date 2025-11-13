@@ -286,10 +286,15 @@ export async function PUT(request: NextRequest) {
           const basicData: any = {
             user_id: user.id,
             nome_completo: nome,
-            perfil: 'wellness'
+            perfil: 'wellness',
+            updated_at: new Date().toISOString()
           }
           if (whatsapp || telefone) {
-            basicData.whatsapp = whatsapp || telefone
+            const whatsappValue = whatsapp || telefone
+            basicData.whatsapp = whatsappValue
+            console.log('📱 WhatsApp (básico) que será salvo:', whatsappValue)
+          } else {
+            console.warn('⚠️ ATENÇÃO: Nenhum whatsapp fornecido no salvamento básico!')
           }
           
           const { data: basicResult, error: basicError } = await supabaseAdmin
