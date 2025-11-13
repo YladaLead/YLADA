@@ -51,6 +51,7 @@ export default function PortalPublicPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [completedTools, setCompletedTools] = useState<Set<string>>(new Set())
+  const [justCompletedToolId, setJustCompletedToolId] = useState<string | null>(null)
 
   // Função para obter chave do localStorage para este portal
   const getPortalProgressKey = (portalId: string) => {
@@ -134,9 +135,15 @@ export default function PortalPublicPage() {
       // Marcar ferramenta como completada
       markToolAsCompleted(completedToolId)
       
+      // Marcar que acabou de completar esta ferramenta (para mostrar banner)
+      setJustCompletedToolId(completedToolId)
+      
       // Limpar URL params
       const newUrl = window.location.pathname
       window.history.replaceState({}, '', newUrl)
+      
+      // Scroll para o topo para ver o banner
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [portal?.id])
 
