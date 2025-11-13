@@ -29,6 +29,12 @@ export default function WellnessConfiguracaoPage() {
   const [showSenhaAtual, setShowSenhaAtual] = useState(false)
   const [showNovaSenha, setShowNovaSenha] = useState(false)
   const [showConfirmarSenha, setShowConfirmarSenha] = useState(false)
+  const [senhaAtual, setSenhaAtual] = useState('')
+  const [novaSenha, setNovaSenha] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
+  const [salvandoSenha, setSalvandoSenha] = useState(false)
+  const [erroSenha, setErroSenha] = useState<string | null>(null)
+  const [sucessoSenha, setSucessoSenha] = useState(false)
 
   // Função para tratar slug (lowercase, sem espaços/acentos, hífens)
   const tratarSlug = (texto: string): string => {
@@ -457,7 +463,10 @@ export default function WellnessConfiguracaoPage() {
               <div className="relative">
                 <input
                   type={showSenhaAtual ? "text" : "password"}
+                  value={senhaAtual}
+                  onChange={(e) => setSenhaAtual(e.target.value)}
                   className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Digite sua senha atual"
                 />
                 <button
                   type="button"
@@ -483,7 +492,10 @@ export default function WellnessConfiguracaoPage() {
               <div className="relative">
                 <input
                   type={showNovaSenha ? "text" : "password"}
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value)}
                   className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Digite sua nova senha (mín. 6 caracteres)"
                 />
                 <button
                   type="button"
@@ -509,7 +521,10 @@ export default function WellnessConfiguracaoPage() {
               <div className="relative">
                 <input
                   type={showConfirmarSenha ? "text" : "password"}
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
                   className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Confirme sua nova senha"
                 />
                 <button
                   type="button"
@@ -530,8 +545,90 @@ export default function WellnessConfiguracaoPage() {
                 </button>
               </div>
             </div>
-            <button className="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-all">
-              Atualizar Senha
+            {erroSenha && (
+              <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                {erroSenha}
+              </div>
+            )}
+            {sucessoSenha && (
+              <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                ✅ Senha atualizada com sucesso!
+              </div>
+            )}
+            <button
+              onClick={async (e) => {
+                e.preventDefault()
+                setErroSenha(null)
+                setSucessoSenha(false)
+
+                if (!senhaAtual) {
+                  setErroSenha('Por favor, informe sua senha atual')
+                  return
+                }
+
+                if (!novaSenha || novaSenha.length < 6) {
+                  setErroSenha('A nova senha deve ter pelo menos 6 caracteres')
+                  return
+                }
+
+                if (novaSenha !== confirmarSenha) {
+                  setErroSenha('As senhas não coincidem')
+                  return
+                }
+
+                if (senhaAtual === novaSenha) {
+                  setErroSenha('A nova senha deve ser diferente da senha atual')
+                  return
+                }
+
+                try {
+                  setSalvandoSenha(true)
+                  const response = await fetch('/api/wellness/change-password', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                      currentPassword: senhaAtual,
+                      newPassword: novaSenha,
+                    }),
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Erro ao alterar senha')
+                  }
+
+                  setSucessoSenha(true)
+                  setSenhaAtual('')
+                  setNovaSenha('')
+                  setConfirmarSenha('')
+
+                  setTimeout(() => {
+                    setSucessoSenha(false)
+                  }, 5000)
+                } catch (err: any) {
+                  console.error('Erro ao alterar senha:', err)
+                  setErroSenha(err.message || 'Erro ao alterar senha')
+                } finally {
+                  setSalvandoSenha(false)
+                }
+              }}
+              disabled={salvandoSenha}
+              className="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {salvandoSenha ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  Atualizando...
+                </>
+              ) : (
+                <>
+                  💾 Atualizar Senha
+                </>
+              )}
             </button>
           </div>
         </div>
