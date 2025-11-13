@@ -73,11 +73,20 @@ export const OG_IMAGE_MAP: Record<string, string> = {
  */
 export function getOGImageUrl(templateSlug: string | null | undefined): string {
   if (!templateSlug) {
+    console.log('[OG Image] No template slug provided, using default')
     return OG_IMAGE_MAP.default
   }
   
   // Normalizar o slug
   const normalized = templateSlug.toLowerCase().trim()
+  
+  // Debug: log para verificar mapeamento
+  console.log('[OG Image] Looking for image:', {
+    originalSlug: templateSlug,
+    normalized,
+    hasMapping: !!OG_IMAGE_MAP[normalized],
+    mappedTo: OG_IMAGE_MAP[normalized] || 'default'
+  })
   
   // Tentar encontrar no mapeamento
   if (OG_IMAGE_MAP[normalized]) {
@@ -85,6 +94,7 @@ export function getOGImageUrl(templateSlug: string | null | undefined): string {
   }
   
   // Fallback para imagem padrão
+  console.log('[OG Image] No mapping found, using default')
   return OG_IMAGE_MAP.default
 }
 

@@ -76,6 +76,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Obter imagem OG com baseUrl correto
     const ogImageUrl = getFullOGImageUrl(normalizedSlug, baseUrl)
     
+    // Debug: log para verificar imagem OG
+    console.log('[OG Metadata] Image URL:', {
+      normalizedSlug,
+      ogImageUrl,
+      imagePath: getOGImageUrl(normalizedSlug)
+    })
+    
     // Obter mensagens estimulantes baseadas no tipo de ferramenta
     const ogMessages = getOGMessages(normalizedSlug)
     
