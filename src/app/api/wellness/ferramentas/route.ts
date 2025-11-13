@@ -229,6 +229,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se o slug conflita com o user_slug do próprio usuário
+    // Buscar userProfile uma vez e reutilizar depois
     const { data: userProfile } = await supabaseAdmin
       .from('user_profiles')
       .select('user_slug')
