@@ -213,8 +213,20 @@ function BemVindoContent() {
 
       console.log('📊 Dados parseados:', data)
 
-      if (response.ok) {
-        console.log('✅ Perfil salvo com sucesso!')
+      if (response.ok && data.success) {
+        console.log('✅ Perfil salvo com sucesso!', data)
+        
+        // Verificar se os dados foram realmente salvos
+        if (data.profile) {
+          console.log('✅ Confirmação: Dados salvos no banco:', {
+            nome: data.profile.nome_completo,
+            whatsapp: data.profile.whatsapp,
+            updated_at: data.profile.updated_at
+          })
+        } else {
+          console.warn('⚠️ Atenção: Resposta OK mas sem dados do perfil')
+        }
+        
         setSaving(false) // Parar o loading primeiro
         setSuccess(true)
         setError(null)
