@@ -44,6 +44,11 @@ export default function AdminUsuarios() {
   const [mostrarDeletarUsuario, setMostrarDeletarUsuario] = useState(false)
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null)
   const [salvando, setSalvando] = useState(false)
+  const [mostrarSenhaProvisoria, setMostrarSenhaProvisoria] = useState(false)
+  const [senhaProvisoriaGerada, setSenhaProvisoriaGerada] = useState<{
+    password: string
+    expiresAt: string
+  } | null>(null)
   
 
   // Formulários
@@ -265,6 +270,45 @@ export default function AdminUsuarios() {
     } catch (err: any) {
       console.error('Erro ao definir senha:', err)
       setError(err.message || 'Erro ao definir senha')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  // Gerar senha provisória
+  const gerarSenhaProvisoria = async (userId: string, email: string) => {
+    if (!confirm(`Gerar senha provisória para ${email}?\n\nA senha expirará em 3 dias.`)) {
+      return
+    }
+
+    try {
+      setSalvando(true)
+      setError(null)
+      setSuccess(null)
+
+      const response = await fetch(`/api/admin/usuarios/${userId}/temporary-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSenhaProvisoriaGerada({
+          password: data.temporaryPassword,
+          expiresAt: data.expiresAtFormatted
+        })
+        setMostrarSenhaProvisoria(true)
+        setSuccess('Senha provisória gerada com sucesso!')
+      } else {
+        setError(data.error || 'Erro ao gerar senha provisória')
+      }
+    } catch (err: any) {
+      console.error('Erro ao gerar senha provisória:', err)
+      setError(err.message || 'Erro ao gerar senha provisória')
     } finally {
       setSalvando(false)
     }
@@ -585,6 +629,28 @@ export default function AdminUsuarios() {
                   <option value="nutra">Nutra</option>
                 </select>
               </div>
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">🔑 Senha Provisória</h3>
+                <p className="text-xs text-gray-600 mb-3">
+                  Gere uma senha provisória que expira em 3 dias. Envie pelo canal de suporte.
+                </p>
+                <button
+                  onClick={() => usuarioSelecionado && gerarSenhaProvisoria(usuarioSelecionado.id, usuarioSelecionado.email)}
+                  disabled={salvando}
+                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {salvando ? (
+                    <>
+                      <span className="animate-spin">⏳</span>
+                      Gerando...
+                    </>
+                  ) : (
+                    <>
+                      🔑 Gerar Senha Provisória
+                    </>
+                  )}
+                </button>
+              </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setMostrarEditarUsuario(false)}
@@ -675,6 +741,83 @@ export default function AdminUsuarios() {
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
               >
                 {salvando ? 'Deletando...' : 'Deletar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Senha Provisória Gerada */}
+      {mostrarSenhaProvisoria && senhaProvisoriaGerada && usuarioSelecionado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">🔑 Senha Provisória Gerada</h2>
+            <div className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-yellow-800 mb-2">
+                  <strong>⚠️ Importante:</strong> Esta senha expira em <strong>3 dias</strong>.
+                </p>
+                <p className="text-sm text-yellow-700">
+                  Envie esta senha pelo canal de suporte (WhatsApp, chat, etc.).
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
+                <p className="text-sm text-gray-900 font-medium">{usuarioSelecionado.nome}</p>
+                <p className="text-sm text-gray-600">{usuarioSelecionado.email}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Senha Provisória</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={senhaProvisoriaGerada.password}
+                    readOnly
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
+                    id="temporary-password-input"
+                  />
+                  <button
+                    onClick={() => {
+                      const input = document.getElementById('temporary-password-input') as HTMLInputElement
+                      input?.select()
+                      document.execCommand('copy')
+                      setSuccess('Senha copiada para a área de transferência!')
+                      setTimeout(() => setSuccess(null), 3000)
+                    }}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  >
+                    📋 Copiar
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Expira em</label>
+                <p className="text-sm text-gray-900">{senhaProvisoriaGerada.expiresAt}</p>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+                <p className="text-xs text-blue-800">
+                  <strong>💡 Dica:</strong> Após copiar, envie pelo canal de suporte com as instruções:
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  "Olá! Sua senha provisória é: <strong>{senhaProvisoriaGerada.password}</strong><br/>
+                  Ela expira em 3 dias. Após fazer login, você poderá alterar sua senha."
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => {
+                  setMostrarSenhaProvisoria(false)
+                  setSenhaProvisoriaGerada(null)
+                  setMostrarEditarUsuario(false)
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Fechar
               </button>
             </div>
           </div>
