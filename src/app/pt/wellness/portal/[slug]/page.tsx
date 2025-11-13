@@ -131,7 +131,7 @@ export default function PortalPublicPage() {
     const completedToolId = urlParams.get('completed_tool_id')
     const portalId = urlParams.get('portal_id')
 
-    if (completedToolId && portalId === portal.id) {
+    if (completedToolId && portalId === portal.id && !completedTools.has(completedToolId)) {
       // Marcar ferramenta como completada
       const newCompleted = new Set(completedTools)
       newCompleted.add(completedToolId)
@@ -148,7 +148,7 @@ export default function PortalPublicPage() {
       // Scroll para o topo para ver o banner
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  }, [portal?.id, portal, completedTools])
+  }, [portal?.id, portal])
 
   const carregarPortal = async () => {
     try {
