@@ -130,11 +130,9 @@ export async function GET(request: NextRequest) {
     // Determinar para onde redirecionar
     let redirectPath = '/pt/wellness/dashboard'
     
-    // Se não tem perfil ou perfil incompleto, redirecionar para bem-vindo
-    if (!profile || !profile.nome_completo || !profile.whatsapp) {
-      console.log('ℹ️ Perfil incompleto, redirecionando para bem-vindo')
-      redirectPath = '/pt/wellness/bem-vindo?migrado=true'
-    } else if (redirectTo) {
+    // Sempre redirecionar para dashboard
+    // O admin já preencheu todos os dados, usuário só precisa trocar senha se necessário
+    if (redirectTo) {
       // Se tem redirectTo explícito, usar ele
       try {
         const decoded = decodeURIComponent(redirectTo)

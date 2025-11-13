@@ -232,27 +232,8 @@ export default function LoginForm({
           const { data: { session: verifySession } } = await supabase.auth.getSession()
           
           if (verifySession) {
-            // Verificar se o usuário é migrado e tem perfil incompleto
-            try {
-              const profileResponse = await fetch('/api/wellness/profile', {
-                credentials: 'include'
-              })
-              
-              if (profileResponse.ok) {
-                const profileData = await profileResponse.json()
-                const profile = profileData.profile
-                
-                // Se perfil está incompleto (sem nome ou whatsapp), redirecionar para bem-vindo
-                if (!profile?.nome || !profile?.whatsapp) {
-                  console.log('ℹ️ Perfil incompleto, redirecionando para completar cadastro')
-                  router.push('/pt/wellness/bem-vindo?migrado=true')
-                  return
-                }
-              }
-            } catch (profileError) {
-              console.warn('⚠️ Erro ao verificar perfil, continuando com redirect padrão:', profileError)
-            }
-            
+            // Sempre redirecionar para o dashboard ou configuracao
+            // O admin já preencheu todos os dados, usuário só precisa trocar senha se necessário
             console.log('✅ Sessão confirmada, redirecionando para:', redirectPath)
             router.push(redirectPath)
             // Forçar reload se router.push não funcionar após 1 segundo
