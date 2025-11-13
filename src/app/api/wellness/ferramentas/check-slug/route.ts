@@ -23,6 +23,21 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Verificar se o slug conflita com o user_slug do próprio usuário
+    const { data: userProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_slug')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (userProfile?.user_slug && userProfile.user_slug.toLowerCase() === slug.toLowerCase()) {
+      return NextResponse.json({
+        slug,
+        available: false,
+        message: 'Este nome não pode ser usado porque é igual ao seu nome de usuário na URL. Escolha outro nome.'
+      })
+    }
+
     // Verificar se já existe PARA ESTE USUÁRIO (slugs podem ser repetidos entre usuários diferentes)
     let query = supabaseAdmin
       .from('user_templates')

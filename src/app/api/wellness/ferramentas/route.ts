@@ -228,6 +228,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Verificar se o slug conflita com o user_slug do próprio usuário
+    const { data: userProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_slug')
+      .eq('user_id', authenticatedUserId)
+      .maybeSingle()
+
+    if (userProfile?.user_slug && userProfile.user_slug.toLowerCase() === slug.toLowerCase()) {
+      return NextResponse.json(
+        { error: 'Este nome não pode ser usado porque é igual ao seu nome de usuário na URL. Escolha outro nome.' },
+        { status: 409 }
+      )
+    }
+
     // Verificar se o slug já existe PARA ESTE USUÁRIO (slugs podem ser repetidos entre usuários diferentes)
     const { data: existing } = await supabaseAdmin
       .from('user_templates')
@@ -506,6 +520,20 @@ export async function PUT(request: NextRequest) {
 
     // Verificar se o slug mudou e se já existe PARA ESTE USUÁRIO
     if (slug) {
+      // Verificar se o slug conflita com o user_slug do próprio usuário
+      const { data: userProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_slug')
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+
+      if (userProfile?.user_slug && userProfile.user_slug.toLowerCase() === slug.toLowerCase()) {
+        return NextResponse.json(
+          { error: 'Este nome não pode ser usado porque é igual ao seu nome de usuário na URL. Escolha outro nome.' },
+          { status: 409 }
+        )
+      }
+
       const { data: existing } = await supabaseAdmin
         .from('user_templates')
         .select('id')
