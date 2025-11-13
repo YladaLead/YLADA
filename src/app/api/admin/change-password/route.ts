@@ -54,26 +54,21 @@ export async function POST(request: NextRequest) {
     })
 
     if (signInError || !signInData.session) {
+      console.error('❌ Erro ao verificar senha atual:', signInError)
       return NextResponse.json(
         { error: 'Senha atual incorreta' },
         { status: 401 }
       )
     }
 
-    // Se a senha atual está correta, usar a sessão para atualizar
-    // Criar cliente com a sessão do usuário
-    const userSupabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: `Bearer ${signInData.session.access_token}`
-        }
+    // Se a senha atual está correta, usar o supabaseAdmin para atualizar diretamente
+    // Isso é mais confiável do que tentar usar a sessão do cliente
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      {
+        password: newPassword
       }
-    })
-
-    // Atualizar senha usando a sessão do usuário
-    const { error: updateError } = await userSupabase.auth.updateUser({
-      password: newPassword
-    })
+    )
 
     if (updateError) {
       console.error('❌ Erro ao atualizar senha:', updateError)
