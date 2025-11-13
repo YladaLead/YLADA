@@ -132,22 +132,31 @@ export default function PortalPublicPageWithUserSlug() {
     const completedToolId = urlParams.get('completed_tool_id')
     const portalId = urlParams.get('portal_id')
 
-    if (completedToolId && portalId === portal.id && !completedTools.has(completedToolId)) {
-      // Marcar ferramenta como completada
-      const newCompleted = new Set(completedTools)
-      newCompleted.add(completedToolId)
-      setCompletedTools(newCompleted)
-      saveProgress(portal.id, newCompleted)
-      
-      // Marcar que acabou de completar esta ferramenta (para mostrar banner)
-      setJustCompletedToolId(completedToolId)
-      
-      // Limpar URL params
-      const newUrl = window.location.pathname
-      window.history.replaceState({}, '', newUrl)
-      
-      // Scroll para o topo para ver o banner
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (completedToolId && portalId === portal.id) {
+      // Usar função de callback para acessar o estado atual
+      setCompletedTools(prevCompleted => {
+        // Se já foi completada, não fazer nada
+        if (prevCompleted.has(completedToolId)) {
+          return prevCompleted
+        }
+        
+        // Marcar ferramenta como completada
+        const newCompleted = new Set(prevCompleted)
+        newCompleted.add(completedToolId)
+        saveProgress(portal.id, newCompleted)
+        
+        // Marcar que acabou de completar esta ferramenta (para mostrar banner)
+        setJustCompletedToolId(completedToolId)
+        
+        // Limpar URL params
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, '', newUrl)
+        
+        // Scroll para o topo para ver o banner
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        
+        return newCompleted
+      })
     }
   }, [portal?.id, portal])
 
