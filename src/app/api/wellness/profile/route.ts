@@ -215,7 +215,9 @@ export async function PUT(request: NextRequest) {
     // Atualizar user_profiles (apenas campos que existem)
     const profileData: any = {
       nome_completo: nome,
+      email: email || user.email, // Sincronizar email também
       perfil: 'wellness', // Garantir que o perfil está definido
+      profession: 'wellness', // Sincronizar profession baseado no perfil
       updated_at: new Date().toISOString() // Forçar atualização do timestamp
     }
 
@@ -295,7 +297,9 @@ export async function PUT(request: NextRequest) {
           const basicData: any = {
             user_id: user.id,
             nome_completo: nome,
+            email: email || user.email, // Sincronizar email também
             perfil: 'wellness',
+            profession: 'wellness', // Sincronizar profession
             updated_at: new Date().toISOString()
           }
           // Garantir que whatsapp seja salvo no salvamento básico também
