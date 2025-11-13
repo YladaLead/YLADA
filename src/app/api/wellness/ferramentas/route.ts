@@ -387,13 +387,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar user_slug separadamente (pode não existir)
-    const { data: userProfile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('user_slug')
-      .eq('user_id', authenticatedUserId)
-      .maybeSingle()
-
+    // userProfile já foi buscado anteriormente (linha 233), reutilizar aqui
     // Buscar dados do usuário
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(authenticatedUserId)
 
