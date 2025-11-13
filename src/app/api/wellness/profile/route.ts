@@ -376,12 +376,36 @@ export async function PUT(request: NextRequest) {
       })
     }
 
+    // Verificar se realmente foi salvo antes de retornar
+    if (!result) {
+      console.error('❌ ERRO CRÍTICO: Perfil não foi salvo, mas não houve erro!')
+      return NextResponse.json(
+        { error: 'Erro ao salvar perfil. Tente novamente.' },
+        { status: 500 }
+      )
+    }
+
+    // Log final de confirmação
+    console.log('✅✅✅ PERFIL SALVO COM SUCESSO - CONFIRMAÇÃO FINAL:', {
+      user_id: result.user_id,
+      email: result.email || 'não fornecido',
+      nome_completo: result.nome_completo,
+      whatsapp: result.whatsapp,
+      updated_at: result.updated_at,
+      perfil: result.perfil
+    })
+
     return NextResponse.json({
       success: true,
       profile: result
     })
   } catch (error: any) {
-    console.error('❌ Erro técnico ao salvar perfil:', {
+    console.error('❌❌❌ ERRO CRÍTICO AO SALVAR PERFIL:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      details: error.details
+    })('❌ Erro técnico ao salvar perfil:', {
       error,
       message: error?.message,
       code: error?.code,
