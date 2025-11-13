@@ -215,13 +215,15 @@ function BemVindoContent() {
 
       if (response.ok) {
         console.log('✅ Perfil salvo com sucesso!')
+        setSaving(false) // Parar o loading primeiro
         setSuccess(true)
         setError(null)
-        // Aguardar 2 segundos para mostrar a mensagem de sucesso antes de redirecionar
+        
+        // Aguardar 3 segundos para garantir que a mensagem seja vista antes de redirecionar
         setTimeout(() => {
           console.log('🔄 Redirecionando para dashboard...')
           router.push('/pt/wellness/dashboard')
-        }, 2000)
+        }, 3000)
       } else {
         console.error('❌ Erro ao salvar perfil:', data)
         setError(data.error || 'Erro ao salvar perfil. Tente novamente.')
@@ -297,13 +299,32 @@ function BemVindoContent() {
               </div>
               
               {/* Título principal - MENSAGEM CLARA E DESTACADA */}
-              <h2 className="text-3xl font-bold text-green-600 mb-4 animate-pulse">
+              <h2 className="text-4xl font-bold text-green-600 mb-4 animate-pulse">
                 ✅ Seu Cadastro Foi Feito com Sucesso!
               </h2>
               
-              <p className="text-lg text-gray-700 mb-6">
-                Você será redirecionado para o dashboard em instantes...
-              </p>
+              {/* Mensagem de confirmação destacada */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6 mb-6 max-w-md mx-auto">
+                <p className="text-xl text-gray-800 mb-2 font-semibold">
+                  🎉 Perfil Atualizado com Sucesso!
+                </p>
+                <p className="text-gray-700">
+                  Seus dados foram salvos corretamente. Agora você pode acessar todas as funcionalidades da plataforma.
+                </p>
+              </div>
+              
+              {/* Contador de redirecionamento */}
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6 max-w-md mx-auto">
+                <p className="text-blue-800 font-medium mb-2">
+                  🚀 Redirecionando para o Dashboard...
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <p className="text-sm text-blue-700">
+                    Você será redirecionado automaticamente em alguns segundos
+                  </p>
+                </div>
+              </div>
               
               {/* Botão para ir imediatamente */}
               <button
