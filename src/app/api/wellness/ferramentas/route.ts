@@ -77,6 +77,19 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error
 
+    // Buscar quizzes personalizados do usuário
+    const { data: quizzesData, error: quizzesError } = await supabaseAdmin
+      .from('quizzes')
+      .select('*')
+      .eq('user_id', authenticatedUserId)
+      .eq('status', 'active') // Apenas quizzes ativos
+      .order('created_at', { ascending: false })
+
+    if (quizzesError) {
+      console.error('Erro ao buscar quizzes:', quizzesError)
+      // Não falhar se houver erro, apenas logar
+    }
+
     // Buscar user_slug uma vez para todas as ferramentas (pode não existir)
     const { data: userProfile } = await supabaseAdmin
       .from('user_profiles')
@@ -88,7 +101,7 @@ export async function GET(request: NextRequest) {
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(authenticatedUserId)
 
     // Montar resposta completa para cada ferramenta
-    const data = (toolsData || []).map(tool => ({
+    const toolsFormatted = (toolsData || []).map(tool => ({
       ...tool,
       user_profiles: userProfile ? { user_slug: userProfile.user_slug } : null,
       users: userData?.user ? {
@@ -97,7 +110,37 @@ export async function GET(request: NextRequest) {
       } : null
     }))
 
-    return NextResponse.json({ tools: data })
+    // Formatar quizzes como ferramentas para exibição
+    const quizzesFormatted = (quizzesData || []).map(quiz => ({
+      id: quiz.id,
+      title: quiz.titulo,
+      description: quiz.descricao,
+      emoji: quiz.emoji,
+      slug: quiz.slug,
+      status: quiz.status,
+      views: quiz.views || 0,
+      leads_count: quiz.leads_count || 0,
+      created_at: quiz.created_at,
+      updated_at: quiz.updated_at,
+      custom_colors: quiz.cores || { primaria: '#8B5CF6', secundaria: '#7C3AED' },
+      template_slug: 'quiz-personalizado', // Identificador para quizzes personalizados
+      profession: profession,
+      user_profiles: userProfile ? { user_slug: userProfile.user_slug } : null,
+      users: userData?.user ? {
+        name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || '',
+        email: userData.user.email || ''
+      } : null,
+      is_quiz: true // Flag para identificar que é um quiz personalizado
+    }))
+
+    // Combinar ferramentas e quizzes, ordenando por data de criação
+    const allTools = [...toolsFormatted, ...quizzesFormatted].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime()
+      const dateB = new Date(b.created_at).getTime()
+      return dateB - dateA // Mais recentes primeiro
+    })
+
+    return NextResponse.json({ tools: allTools })
   } catch (error: any) {
     console.error('❌ Erro técnico ao buscar ferramentas:', {
       error,

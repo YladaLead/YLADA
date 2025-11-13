@@ -170,6 +170,7 @@ function NovoPortalWellnessContent() {
 
       const portalData = await portalResponse.json()
       const portalId = portalData.data?.portal?.id
+      const portalSlug = portalData.data?.portal?.slug
 
       if (!portalId) {
         throw new Error('Portal criado mas ID não retornado')
@@ -190,8 +191,93 @@ function NovoPortalWellnessContent() {
         })
       }
 
-      alert('Portal criado com sucesso!')
-      router.push('/pt/wellness/portals')
+      // Buscar user_slug para construir URL completa
+      const profileResponse = await fetch('/api/wellness/profile', {
+        credentials: 'include'
+      })
+      let userSlug = null
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        userSlug = profileData.profile?.userSlug || null
+      }
+
+      // Construir URL do portal
+      const baseUrl = typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.host : 'https://ylada.app'
+      const portalUrl = userSlug 
+        ? `${baseUrl}/pt/wellness/${userSlug}/portal/${portalSlug}`
+        : `${baseUrl}/pt/wellness/portal/${portalSlug}`
+
+      // Criar mensagem de sucesso bonita
+      const mensagemSucesso = document.createElement('div')
+      mensagemSucesso.className = 'fixed top-4 right-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400 rounded-xl shadow-2xl p-6 z-50 max-w-md animate-slide-in'
+      mensagemSucesso.style.animation = 'slideInRight 0.3s ease-out'
+      mensagemSucesso.innerHTML = `
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-lg font-bold text-green-900 mb-2">🎉 Seu portal foi criado com sucesso!</h3>
+            <p class="text-sm text-green-700 mb-3">Agora você pode compartilhar seu portal com seus clientes.</p>
+            <div class="bg-white rounded-lg p-3 mb-3 border border-green-200 shadow-sm">
+              <p class="text-xs text-gray-500 mb-1 font-medium">Link do seu portal:</p>
+              <p class="text-xs text-gray-800 font-mono break-all">${portalUrl}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                onclick="navigator.clipboard.writeText('${portalUrl}').then(() => { const btn = this; const original = btn.innerHTML; btn.innerHTML = '✓ Copiado!'; btn.classList.add('bg-green-600'); setTimeout(() => { btn.innerHTML = original; btn.classList.remove('bg-green-600'); }, 2000); })"
+                class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+              >
+                📋 Copiar Link
+              </button>
+              <a 
+                href="${portalUrl}"
+                target="_blank"
+                class="flex-1 bg-white hover:bg-green-50 text-green-700 border-2 border-green-600 text-xs font-semibold px-4 py-2 rounded-lg transition-colors text-center shadow-sm"
+              >
+                🔗 Ver Portal
+              </a>
+            </div>
+          </div>
+          <button 
+            onclick="this.closest('div').remove()"
+            class="text-green-600 hover:text-green-800 text-xl font-bold leading-none"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
+        </div>
+      `
+      document.body.appendChild(mensagemSucesso)
+      
+      // Adicionar animação CSS se não existir
+      if (!document.getElementById('portal-success-animation')) {
+        const style = document.createElement('style')
+        style.id = 'portal-success-animation'
+        style.textContent = `
+          @keyframes slideInRight {
+            from {
+              transform: translateX(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateX(0);
+              opacity: 1;
+            }
+          }
+        `
+        document.head.appendChild(style)
+      }
+      
+      // Redirecionar para o portal após 4 segundos
+      setTimeout(() => {
+        mensagemSucesso.remove()
+        window.location.href = portalUrl
+      }, 4000)
     } catch (error: any) {
       console.error('Erro ao criar portal:', error)
       alert(error.message || 'Erro ao criar portal')
@@ -331,6 +417,45 @@ function NovoPortalWellnessContent() {
                 Selecionar Ferramentas ({selectedTools.length} selecionadas)
               </h2>
             </div>
+
+            {/* Mostrar ordem das ferramentas selecionadas */}
+            {selectedTools.length > 0 && (
+              <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-green-900 mb-3 flex items-center gap-2">
+                  <span>📋</span>
+                  <span>Ordem das Ferramentas no Portal:</span>
+                </h3>
+                <div className="space-y-2">
+                  {selectedTools.map((toolId, index) => {
+                    const tool = tools.find(t => t.id === toolId)
+                    if (!tool) return null
+                    return (
+                      <div
+                        key={toolId}
+                        className="flex items-center gap-3 bg-white rounded-lg p-3 border border-green-200 shadow-sm"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
+                          {index + 1}
+                        </div>
+                        <span className="text-xl">{tool.emoji || '🔧'}</span>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 text-sm">{tool.title}</p>
+                          <p className="text-xs text-gray-500">{tool.template_slug}</p>
+                        </div>
+                        <span className="text-xs text-gray-400 font-medium">
+                          {index === 0 ? '1ª Etapa' : index === 1 ? '2ª Etapa' : index === 2 ? '3ª Etapa' : `${index + 1}ª Etapa`}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+                {formData.navigation_type === 'sequential' && (
+                  <p className="text-xs text-green-700 mt-3 italic">
+                    💡 No modo sequencial, os usuários seguirão esta ordem exata. A primeira ferramenta estará sempre liberada.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Nota informativa discreta */}
             <div className="mb-4 bg-blue-50 border-l-4 border-blue-400 p-3 rounded">

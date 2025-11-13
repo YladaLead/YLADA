@@ -55,25 +55,51 @@ export default function FerramentasWellness() {
       const data = await response.json()
       
       // Transformar dados da API para o formato da interface
-      const ferramentasFormatadas: Ferramenta[] = (data.tools || []).map((tool: any) => ({
-        id: tool.id,
-        nome: tool.title,
-        categoria: tool.template_slug?.startsWith('calc-') ? 'Calculadora' : 
-                  tool.template_slug?.startsWith('quiz-') ? 'Quiz' : 'Planilha',
-        objetivo: tool.description || '',
-        url: tool.user_profiles?.user_slug 
-          ? buildWellnessToolUrl(tool.user_profiles.user_slug, tool.slug)
-          : buildWellnessToolUrlFallback(tool.id),
-        shortUrl: tool.short_code ? buildShortUrl(tool.short_code) : undefined,
-        shortCode: tool.short_code,
-        status: tool.status === 'active' ? 'ativa' : 'inativa',
-        leads: tool.leads_count || 0,
-        visualizacoes: tool.views || 0,
-        conversao: tool.views > 0 ? (tool.leads_count || 0) / tool.views * 100 : 0,
-        ultimaAtividade: new Date(tool.updated_at).toLocaleDateString('pt-BR'),
-        cores: tool.custom_colors || { primaria: '#10B981', secundaria: '#059669' },
-        criadaEm: new Date(tool.created_at).toLocaleDateString('pt-BR')
-      }))
+      const ferramentasFormatadas: Ferramenta[] = (data.tools || []).map((tool: any) => {
+        // Determinar categoria
+        let categoria = 'Planilha'
+        if (tool.is_quiz || tool.template_slug === 'quiz-personalizado') {
+          categoria = 'Quiz Personalizado'
+        } else if (tool.template_slug?.startsWith('calc-')) {
+          categoria = 'Calculadora'
+        } else if (tool.template_slug?.startsWith('quiz-')) {
+          categoria = 'Quiz'
+        }
+
+        // Construir URL - quizzes personalizados usam rota diferente
+        let url = ''
+        if (tool.is_quiz || tool.template_slug === 'quiz-personalizado') {
+          // URL para quiz personalizado: /pt/wellness/{user-slug}/quiz/{slug}
+          if (tool.user_profiles?.user_slug) {
+            const baseUrl = typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.host : 'https://ylada.app'
+            url = `${baseUrl}/pt/wellness/${tool.user_profiles.user_slug}/quiz/${tool.slug}`
+          } else {
+            url = buildWellnessToolUrlFallback(tool.id)
+          }
+        } else {
+          // URL padrão para outras ferramentas
+          url = tool.user_profiles?.user_slug 
+            ? buildWellnessToolUrl(tool.user_profiles.user_slug, tool.slug)
+            : buildWellnessToolUrlFallback(tool.id)
+        }
+
+        return {
+          id: tool.id,
+          nome: tool.title,
+          categoria: categoria,
+          objetivo: tool.description || '',
+          url: url,
+          shortUrl: tool.short_code ? buildShortUrl(tool.short_code) : undefined,
+          shortCode: tool.short_code,
+          status: tool.status === 'active' ? 'ativa' : 'inativa',
+          leads: tool.leads_count || 0,
+          visualizacoes: tool.views || 0,
+          conversao: tool.views > 0 ? (tool.leads_count || 0) / tool.views * 100 : 0,
+          ultimaAtividade: new Date(tool.updated_at).toLocaleDateString('pt-BR'),
+          cores: tool.custom_colors || { primaria: '#10B981', secundaria: '#059669' },
+          criadaEm: new Date(tool.created_at).toLocaleDateString('pt-BR')
+        }
+      })
 
       setFerramentas(ferramentasFormatadas)
     } catch (error) {
@@ -241,7 +267,11 @@ export default function FerramentasWellness() {
                         className="w-12 h-12 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: ferramenta.cores.primaria }}
                       >
-                        <span className="text-white text-xl">🎯</span>
+                        <span className="text-white text-xl">
+                          {ferramenta.categoria === 'Quiz Personalizado' ? '🎯' : 
+                           ferramenta.categoria === 'Quiz' ? '📝' :
+                           ferramenta.categoria === 'Calculadora' ? '🧮' : '📊'}
+                        </span>
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-gray-900">{ferramenta.nome}</h3>

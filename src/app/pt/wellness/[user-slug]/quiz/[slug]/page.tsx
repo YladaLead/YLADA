@@ -24,6 +24,11 @@ interface Quiz {
     texto: string
     fundo: string
   }
+  configuracoes?: {
+    tempoLimite?: number
+    mostrarProgresso: boolean
+    permitirVoltar: boolean
+  }
   entrega: {
     tipoEntrega: 'pagina' | 'whatsapp' | 'url'
     ctaPersonalizado: string
@@ -57,6 +62,8 @@ export default function QuizPublicPage() {
   const [etapaAtual, setEtapaAtual] = useState<'landing' | 'perguntas' | 'resultado'>('landing')
   const [perguntaAtual, setPerguntaAtual] = useState(0)
   const [respostas, setRespostas] = useState<Record<number, string>>({})
+  const [respostasSalvas, setRespostasSalvas] = useState<Set<string>>(new Set()) // IDs das perguntas já salvas
+  const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     if (!slug) return
@@ -94,7 +101,45 @@ export default function QuizPublicPage() {
     setPerguntaAtual(0)
   }
 
-  const proximaPergunta = () => {
+  // Função para salvar resposta no banco de dados
+  const salvarResposta = async (perguntaIndex: number) => {
+    if (!quiz || !respostas[perguntaIndex]) return
+
+    const pergunta = quiz.perguntas[perguntaIndex]
+    const respostaTexto = respostas[perguntaIndex]
+
+    // Se já foi salva, não salvar novamente
+    if (respostasSalvas.has(pergunta.id)) return
+
+    try {
+      setSalvando(true)
+      const response = await fetch('/api/quiz/resposta', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quizId: quiz.id,
+          perguntaId: pergunta.id,
+          resposta: {
+            resposta_texto: respostaTexto,
+          },
+        }),
+      })
+
+      if (response.ok) {
+        setRespostasSalvas(new Set([...respostasSalvas, pergunta.id]))
+      } else {
+        console.error('Erro ao salvar resposta:', await response.text())
+      }
+    } catch (error) {
+      console.error('Erro ao salvar resposta:', error)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  const proximaPergunta = async () => {
     if (!quiz) return
     
     const pergunta = quiz.perguntas[perguntaAtual]
@@ -103,9 +148,20 @@ export default function QuizPublicPage() {
       return
     }
 
+    // Salvar resposta atual antes de avançar
+    if (respostas[perguntaAtual]) {
+      await salvarResposta(perguntaAtual)
+    }
+
     if (perguntaAtual < quiz.perguntas.length - 1) {
       setPerguntaAtual(perguntaAtual + 1)
     } else {
+      // Salvar todas as respostas restantes antes de mostrar resultado
+      for (let i = 0; i < quiz.perguntas.length; i++) {
+        if (respostas[i] && !respostasSalvas.has(quiz.perguntas[i].id)) {
+          await salvarResposta(i)
+        }
+      }
       setEtapaAtual('resultado')
     }
   }
@@ -209,22 +265,24 @@ export default function QuizPublicPage() {
       {/* Perguntas */}
       {etapaAtual === 'perguntas' && pergunta && (
         <div className="max-w-2xl mx-auto px-4 py-8">
-          {/* Barra de Progresso */}
-          <div className="mb-6">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Pergunta {perguntaAtual + 1} de {quiz.perguntas.length}</span>
-              <span>{Math.round(progresso)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="h-2 rounded-full transition-all duration-300"
-                style={{ 
-                  width: `${progresso}%`,
-                  backgroundColor: quiz.cores.primaria
-                }}
-              ></div>
-            </div>
-          </div>
+            {/* Barra de Progresso - só aparece se mostrarProgresso estiver habilitado */}
+            {quiz.configuracoes?.mostrarProgresso !== false && (
+              <div className="mb-6">
+                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>Pergunta {perguntaAtual + 1} de {quiz.perguntas.length}</span>
+                  <span>{Math.round(progresso)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${progresso}%`,
+                      backgroundColor: quiz.cores.primaria
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
 
           {/* Pergunta */}
           <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
@@ -269,21 +327,32 @@ export default function QuizPublicPage() {
           </div>
 
           {/* Navegação */}
-          <div className="flex justify-between">
-            <button
-              onClick={perguntaAnterior}
-              disabled={perguntaAtual === 0}
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ← Anterior
-            </button>
-            <button
-              onClick={proximaPergunta}
-              className="px-6 py-3 rounded-lg text-white font-semibold transition-all transform hover:scale-105"
-              style={{ backgroundColor: quiz.cores.primaria }}
-            >
-              {perguntaAtual === quiz.perguntas.length - 1 ? 'Ver Resultado' : 'Próxima →'}
-            </button>
+          <div className="flex justify-between items-center">
+            {/* Botão Voltar - só aparece se permitirVoltar estiver habilitado */}
+            {quiz.configuracoes?.permitirVoltar !== false ? (
+              <button
+                onClick={perguntaAnterior}
+                disabled={perguntaAtual === 0}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Anterior
+              </button>
+            ) : (
+              <div></div> // Espaçador quando botão voltar está oculto
+            )}
+            <div className="flex items-center gap-3">
+              {salvando && (
+                <span className="text-sm text-gray-500">Salvando...</span>
+              )}
+              <button
+                onClick={proximaPergunta}
+                disabled={salvando}
+                className="px-6 py-3 rounded-lg text-white font-semibold transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: quiz.cores.primaria }}
+              >
+                {salvando ? 'Salvando...' : perguntaAtual === quiz.perguntas.length - 1 ? 'Ver Resultado' : 'Próxima →'}
+              </button>
+            </div>
           </div>
         </div>
       )}

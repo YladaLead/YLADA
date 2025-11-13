@@ -390,6 +390,45 @@ function EditarPortalWellnessContent() {
               Selecionar Ferramentas ({selectedTools.length} selecionadas)
             </h2>
 
+            {/* Mostrar ordem das ferramentas selecionadas */}
+            {selectedTools.length > 0 && (
+              <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-green-900 mb-3 flex items-center gap-2">
+                  <span>📋</span>
+                  <span>Ordem das Ferramentas no Portal:</span>
+                </h3>
+                <div className="space-y-2">
+                  {selectedTools.map((toolId, index) => {
+                    const tool = tools.find(t => t.id === toolId)
+                    if (!tool) return null
+                    return (
+                      <div
+                        key={toolId}
+                        className="flex items-center gap-3 bg-white rounded-lg p-3 border border-green-200 shadow-sm"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
+                          {index + 1}
+                        </div>
+                        <span className="text-xl">{tool.emoji || '🔧'}</span>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 text-sm">{tool.title}</p>
+                          <p className="text-xs text-gray-500">{tool.template_slug}</p>
+                        </div>
+                        <span className="text-xs text-gray-400 font-medium">
+                          {index === 0 ? '1ª Etapa' : index === 1 ? '2ª Etapa' : index === 2 ? '3ª Etapa' : `${index + 1}ª Etapa`}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+                {formData.navigation_type === 'sequential' && (
+                  <p className="text-xs text-green-700 mt-3 italic">
+                    💡 No modo sequencial, os usuários seguirão esta ordem exata. A primeira ferramenta estará sempre liberada.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Nota informativa discreta */}
             <div className="mb-4 bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
               <p className="text-sm text-blue-700">

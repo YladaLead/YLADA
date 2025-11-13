@@ -120,8 +120,8 @@ function AcessoPorTokenContent() {
             <Image
               src="/images/logo/wellness/Logo_Wellness_horizontal.png"
               alt="WELLNESS - Your Leading Data System"
-              width={320}
-              height={100}
+              width={572}
+              height={150}
               className="bg-transparent object-contain h-14 sm:h-16 lg:h-20 w-auto"
               style={{ backgroundColor: 'transparent' }}
               priority

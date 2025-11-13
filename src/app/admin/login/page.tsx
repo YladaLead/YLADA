@@ -14,6 +14,15 @@ function AdminLoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordResetSuccess, setShowPasswordResetSuccess] = useState(false)
+
+  // Verificar searchParams no cliente (após hidratação)
+  useEffect(() => {
+    // Verificar password_reset apenas no cliente
+    if (searchParams?.get('password_reset') === 'success') {
+      setShowPasswordResetSuccess(true)
+    }
+  }, [searchParams])
 
   // Limpar cache ao carregar a página
   useEffect(() => {
@@ -103,7 +112,7 @@ function AdminLoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Bem-vindo</h1>
           <p className="text-gray-600">Entre na sua conta de Administrador</p>
-          {searchParams?.get('password_reset') === 'success' && (
+          {showPasswordResetSuccess && (
             <div className="mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
               ✅ Senha redefinida com sucesso! Faça login com sua nova senha.
             </div>

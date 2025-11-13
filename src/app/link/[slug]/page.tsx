@@ -172,9 +172,9 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
                 ? 'WELLNESS - Your Leading Data System'
                 : 'YLADA'
               }
-              width={area === 'wellness' ? 320 : 280}
-              height={area === 'wellness' ? 100 : 84}
-              className={area === 'wellness' ? 'h-14 sm:h-16 w-auto' : 'h-10 w-auto'}
+              width={area === 'wellness' ? 572 : 280}
+              height={area === 'wellness' ? 150 : 84}
+              className={area === 'wellness' ? 'h-14 sm:h-16 w-auto object-contain' : 'h-10 w-auto'}
               style={{ backgroundColor: 'transparent' }}
               priority
             />

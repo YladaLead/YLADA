@@ -31,9 +31,9 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
               <Image
                 src="/images/logo/wellness/Logo_Wellness_horizontal.png"
                 alt="WELLNESS - Your Leading Data System"
-                width={240}
-                height={80}
-                className="h-10 sm:h-12 lg:h-14 w-auto"
+                width={572}
+                height={150}
+                className="h-10 sm:h-12 lg:h-14 w-auto object-contain"
                 style={{ backgroundColor: 'transparent' }}
               />
             </Link>
