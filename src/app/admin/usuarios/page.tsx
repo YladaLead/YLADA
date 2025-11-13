@@ -239,44 +239,6 @@ export default function AdminUsuarios() {
     }
   }
 
-  // Definir senha padrão para TODOS os usuários migrados
-  const definirSenhaParaTodosMigrados = async () => {
-    if (!confirm('Definir senha padrão (Ylada2025!) para TODOS os usuários migrados?\n\nIsso pode levar alguns segundos...')) {
-      return
-    }
-
-    try {
-      setSalvando(true)
-      setError(null)
-      setSuccess(null)
-
-      const response = await fetch('/api/admin/usuarios/set-default-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          defaultPassword: 'Ylada2025!'
-        }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok && data.success) {
-        setSuccess(`✅ ${data.message}\n\nAtualizados: ${data.updated}\nFalharam: ${data.failed}\nTotal: ${data.total}`)
-        setTimeout(() => setSuccess(null), 10000)
-      } else {
-        setError(data.error || 'Erro ao definir senhas')
-      }
-    } catch (err: any) {
-      console.error('Erro ao definir senhas:', err)
-      setError(err.message || 'Erro ao definir senhas')
-    } finally {
-      setSalvando(false)
-    }
-  }
-
   // Atualizar área em massa
   const atualizarAreaEmMassa = async () => {
     if (!bulkUpdateFrom || !bulkUpdateTo) {
@@ -539,32 +501,6 @@ export default function AdminUsuarios() {
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">⚡ Ações Rápidas</h2>
           
-          {/* Seção Senhas */}
-          <div className="mb-6 pb-6 border-b border-gray-200">
-            <h3 className="text-md font-medium text-gray-700 mb-3">🔑 Senhas</h3>
-            <div className="flex flex-wrap gap-3 items-center">
-              <button
-                onClick={definirSenhaParaTodosMigrados}
-                disabled={salvando}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {salvando ? (
-                  <>
-                    <span className="animate-spin">⏳</span>
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    🔑 Definir Senha Padrão para TODOS os Usuários Migrados
-                  </>
-                )}
-              </button>
-              <p className="text-sm text-gray-600">
-                Define a senha padrão <strong>Ylada2025!</strong> para todos os usuários migrados
-              </p>
-            </div>
-          </div>
-
           {/* Seção Áreas */}
           <div>
             <h3 className="text-md font-medium text-gray-700 mb-3">🔄 Atualizar Áreas</h3>
