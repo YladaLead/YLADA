@@ -7,6 +7,11 @@ import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
 import { parse } from 'csv-parse/sync'
+import { config } from 'dotenv'
+
+// Carregar variáveis de ambiente
+config({ path: path.join(process.cwd(), '.env.local') })
+config({ path: path.join(process.cwd(), '.env') })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -166,7 +171,7 @@ async function preencherDados() {
         nome_completo: nomeCompleto || dadosAssinatura.name || email.split('@')[0],
         whatsapp: telefone,
         perfil: 'wellness',
-        profession: 'coach herbalife',
+        profession: 'Coach Herbalife',
         country_code: telefone ? (telefone.startsWith('55') ? 'BR' : telefone.startsWith('1') ? 'US' : 'BR') : 'BR',
         updated_at: new Date().toISOString()
       }
