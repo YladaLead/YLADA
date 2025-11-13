@@ -68,11 +68,11 @@ function WellnessPagamentoSucessoContent() {
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt/wellness">
             <Image
-              src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-              alt="YLADA Logo"
-              width={280}
-              height={84}
-              className="bg-transparent object-contain h-12 sm:h-14 lg:h-16 w-auto"
+              src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+              alt="WELLNESS - Your Leading Data System"
+              width={320}
+              height={100}
+              className="bg-transparent object-contain h-14 sm:h-16 lg:h-20 w-auto"
               style={{ backgroundColor: 'transparent' }}
               priority
             />

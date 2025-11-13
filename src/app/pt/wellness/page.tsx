@@ -12,11 +12,11 @@ export default function WellnessPage() {
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="bg-transparent inline-block">
             <Image
-              src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-              alt="YLADA Logo"
-              width={280}
-              height={84}
-              className="bg-transparent object-contain h-12 sm:h-14 lg:h-16 w-auto"
+              src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+              alt="WELLNESS - Your Leading Data System"
+              width={320}
+              height={100}
+              className="bg-transparent object-contain h-14 sm:h-16 lg:h-20 w-auto"
               style={{ backgroundColor: 'transparent' }}
               priority
             />
@@ -392,17 +392,17 @@ export default function WellnessPage() {
           <div className="flex flex-col items-center justify-center">
             <div className="mb-4 bg-transparent inline-block">
               <Image
-                src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                alt="YLADA Logo"
-                width={280}
-                height={84}
-                className="bg-transparent object-contain"
+                src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+                alt="WELLNESS - Your Leading Data System"
+                width={320}
+                height={100}
+                className="bg-transparent object-contain h-20 w-auto"
                 style={{ backgroundColor: 'transparent' }}
                 priority
               />
             </div>
             <p className="text-gray-600 text-sm mb-2 text-center">
-              YLADA Wellness — Your Lead Advanced Data Assistant
+              Powered by <span className="font-semibold">YLADA</span>
             </p>
             <p className="text-gray-500 text-xs text-center mb-2">
               © {new Date().getFullYear()} YLADA. Todos os direitos reservados.

@@ -29,11 +29,11 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
             <Link href="/pt/wellness/dashboard" className="flex-shrink-0">
               <Image
-                src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-                alt="YLADA"
-                width={180}
-                height={60}
-                className="h-8 sm:h-10 w-auto"
+                src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+                alt="WELLNESS - Your Leading Data System"
+                width={240}
+                height={80}
+                className="h-10 sm:h-12 lg:h-14 w-auto"
                 style={{ backgroundColor: 'transparent' }}
               />
             </Link>

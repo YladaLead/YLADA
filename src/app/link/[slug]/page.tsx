@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import YLADALogo from '@/components/YLADALogo'
+import Image from 'next/image'
 
 export default function LinkPage({ params }: { params: Promise<{ slug: string }> }) {
   const [formData, setFormData] = useState({
@@ -13,6 +13,7 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
   const [isLoading, setIsLoading] = useState(true)
   const [linkData, setLinkData] = useState<any>(null)
   const [slug, setSlug] = useState<string>('')
+  const [area, setArea] = useState<string>('wellness') // Default para wellness
 
   useEffect(() => {
     // Aguardar params e extrair slug
@@ -24,45 +25,55 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
   useEffect(() => {
     if (!slug) return
 
-    // Simular dados do link (sem depender do banco)
-    const mockLinkData = {
-      title: "Quiz: Descubra seu Perfil de Emagrecimento",
-      description: "Responda algumas perguntas e descubra qual é a melhor estratégia de emagrecimento para você!",
-      content: {
-        questions: [
-          {
-            question: "Qual é seu principal objetivo com a alimentação?",
-            options: [
-              "Perder peso de forma saudável",
-              "Ganhar massa muscular",
-              "Melhorar minha energia",
-              "Controlar minha ansiedade"
-            ]
-          },
-          {
-            question: "Como você se sente após as refeições?",
-            options: [
-              "Energizado e satisfeito",
-              "Sonolento e pesado",
-              "Com fome novamente",
-              "Com gases e desconforto"
-            ]
-          },
-          {
-            question: "Qual é sua maior dificuldade na alimentação?",
-            options: [
-              "Controle de porções",
-              "Escolher alimentos saudáveis",
-              "Manter a disciplina",
-              "Não sei o que comer"
-            ]
+    // Buscar dados reais do link
+    const fetchLinkData = async () => {
+      try {
+        const response = await fetch(`/api/link/${slug}`)
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          setLinkData(result.data)
+          // Tentar detectar área do usuário que criou o link
+          // Por enquanto, default para wellness
+          setArea('wellness')
+        } else {
+          // Fallback para dados mock se não encontrar
+          const mockLinkData = {
+            title: "Quiz: Descubra seu Perfil de Emagrecimento",
+            description: "Responda algumas perguntas e descubra qual é a melhor estratégia de emagrecimento para você!",
+            content: {
+              questions: [
+                {
+                  question: "Qual é seu principal objetivo com a alimentação?",
+                  options: [
+                    "Perder peso de forma saudável",
+                    "Ganhar massa muscular",
+                    "Melhorar minha energia",
+                    "Controlar minha ansiedade"
+                  ]
+                }
+              ]
+            }
           }
-        ]
+          setLinkData(mockLinkData)
+        }
+      } catch (error) {
+        console.error('Erro ao buscar link:', error)
+        // Fallback para dados mock em caso de erro
+        const mockLinkData = {
+          title: "Quiz: Descubra seu Perfil de Emagrecimento",
+          description: "Responda algumas perguntas e descubra qual é a melhor estratégia de emagrecimento para você!",
+          content: {
+            questions: []
+          }
+        }
+        setLinkData(mockLinkData)
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    setLinkData(mockLinkData)
-    setIsLoading(false)
+    fetchLinkData()
   }, [slug])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +162,23 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
-          <YLADALogo />
+          <div className="flex items-center">
+            <Image
+              src={area === 'wellness' 
+                ? '/images/logo/wellness/Logo_Wellness_horizontal.png'
+                : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
+              }
+              alt={area === 'wellness' 
+                ? 'WELLNESS - Your Leading Data System'
+                : 'YLADA'
+              }
+              width={area === 'wellness' ? 320 : 280}
+              height={area === 'wellness' ? 100 : 84}
+              className={area === 'wellness' ? 'h-14 sm:h-16 w-auto' : 'h-10 w-auto'}
+              style={{ backgroundColor: 'transparent' }}
+              priority
+            />
+          </div>
         </div>
       </header>
 
