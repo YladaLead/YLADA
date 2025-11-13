@@ -76,8 +76,12 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
   
   // Guias
   'guia-hidratacao': {
-    title: 'Guia completo de hidratação',
-    description: 'Aprenda tudo sobre hidratação e descubra como manter seu corpo sempre hidratado'
+    title: 'Aprenda a beber água corretamente',
+    description: 'Guia completo de hidratação: descubra quanta água seu corpo precisa e melhore sua hidratação diária com orientações personalizadas'
+  },
+  'guia-de-hidratacao': {
+    title: 'Aprenda a beber água corretamente',
+    description: 'Guia completo de hidratação: descubra quanta água seu corpo precisa e melhore sua hidratação diária com orientações personalizadas'
   },
   
   // Avaliações

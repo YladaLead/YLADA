@@ -84,6 +84,12 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   'planilha-diario-alimentar': 'planilha-diario-alimentar',
   'tabela-metas-semanais': 'planilha-metas-semanais',
   'planilha-metas-semanais': 'planilha-metas-semanais',
+  
+  // Guias
+  'guia-de-hidratacao': 'guia-hidratacao',
+  'guia-hidratacao': 'guia-hidratacao',
+  'guia hidratacao': 'guia-hidratacao',
+  'guia hidratação': 'guia-hidratacao',
 }
 
 /**

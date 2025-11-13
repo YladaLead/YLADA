@@ -58,12 +58,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       })
       
       // Fallback para metadata padrão (mas tentando usar imagem específica se possível)
+      let fallbackTitle = inferredMessages.title || 'Ferramenta de Bem-Estar'
+      const fallbackDescription = inferredMessages.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida'
+      
+      // Remover "WELLNESS" duplicado se já estiver no título
+      if (fallbackTitle.includes('WELLNESS')) {
+        fallbackTitle = fallbackTitle.replace(/\s*-\s*WELLNESS\s*/gi, '').trim()
+      }
+      
       return {
-        title: `${inferredMessages.title || 'Ferramenta Wellness'} - WELLNESS`,
-        description: inferredMessages.description || 'Ferramenta personalizada de bem-estar',
+        title: `${fallbackTitle} - WELLNESS`,
+        description: fallbackDescription,
         openGraph: {
-          title: `${inferredMessages.title || 'Ferramenta Wellness'} - WELLNESS`,
-          description: inferredMessages.description || 'Ferramenta personalizada de bem-estar',
+          title: `${fallbackTitle} - WELLNESS`,
+          description: fallbackDescription,
           url: `${baseUrl}/pt/wellness/${userSlug}/${toolSlug}`,
           siteName: 'WELLNESS - Your Leading Data System',
           type: 'website',
@@ -117,8 +125,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     
     // Usar mensagens estimulantes ou título/descrição personalizados do usuário
     // Priorizar mensagens estimulantes para melhor conversão
-    const ogTitle = ogMessages.title || tool.title
-    const ogDescription = ogMessages.description || tool.description || 'Ferramenta personalizada de bem-estar'
+    let ogTitle = ogMessages.title || tool.title || 'Ferramenta de Bem-Estar'
+    const ogDescription = ogMessages.description || tool.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida'
+    
+    // Remover "WELLNESS" duplicado se já estiver no título
+    if (ogTitle.includes('WELLNESS')) {
+      ogTitle = ogTitle.replace(/\s*-\s*WELLNESS\s*/gi, '').trim()
+    }
+    
+    // Garantir que o título não esteja vazio
+    if (!ogTitle || ogTitle.trim() === '') {
+      ogTitle = 'Ferramenta de Bem-Estar'
+    }
 
     // Construir URL completa da página
     const pageUrl = `${baseUrl}/pt/wellness/${userSlug}/${toolSlug}`
@@ -158,11 +176,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Fallback para metadata padrão
     const pageUrl = `${baseUrl}/pt/wellness/${userSlug}/${toolSlug}`
     return {
-      title: 'Ferramenta Wellness - YLADA',
-      description: 'Ferramenta personalizada de bem-estar',
+      title: 'Ferramenta de Bem-Estar - WELLNESS',
+      description: 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida',
       openGraph: {
-        title: 'Ferramenta Wellness - YLADA',
-        description: 'Ferramenta personalizada de bem-estar',
+        title: 'Ferramenta de Bem-Estar - WELLNESS',
+        description: 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida',
         url: pageUrl,
         siteName: 'WELLNESS - Your Leading Data System',
         type: 'website',
