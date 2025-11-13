@@ -4,6 +4,8 @@
  * O usuário pode substituir as imagens depois conforme necessário
  */
 
+import { normalizeTemplateSlug } from './template-slug-map'
+
 export const OG_IMAGE_MAP: Record<string, string> = {
   // Calculadoras
   'calc-imc': '/images/og/wellness/calc-imc.jpg',
@@ -77,8 +79,9 @@ export function getOGImageUrl(templateSlug: string | null | undefined): string {
     return OG_IMAGE_MAP.default
   }
   
-  // Normalizar o slug
-  const normalized = templateSlug.toLowerCase().trim()
+  // IMPORTANTE: Normalizar usando o template-slug-map para garantir consistência
+  // Isso converte variações como "calculadora-de-proteina" para "calc-proteina"
+  const normalized = normalizeTemplateSlug(templateSlug)
   
   // Debug: log para verificar mapeamento
   console.log('[OG Image] Looking for image:', {
