@@ -44,15 +44,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       // Construir URL base para fallback
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
       
-      // Fallback para metadata padrão
+      // Tentar inferir template_slug do tool-slug para usar imagem correta mesmo se ferramenta não for encontrada
+      // Isso ajuda quando o Facebook faz cache antes da ferramenta ser criada
+      const inferredSlug = normalizeTemplateSlug(toolSlug)
+      const inferredImage = getFullOGImageUrl(inferredSlug, baseUrl)
+      const inferredMessages = getOGMessages(inferredSlug)
+      
+      console.log('[OG Metadata] 🔍 Using inferred metadata:', {
+        toolSlug,
+        inferredSlug,
+        inferredImage,
+        hasInferredMessage: !!inferredMessages.title
+      })
+      
+      // Fallback para metadata padrão (mas tentando usar imagem específica se possível)
       return {
-        title: 'Ferramenta Wellness - YLADA',
-        description: 'Ferramenta personalizada de bem-estar',
+        title: `${inferredMessages.title || 'Ferramenta Wellness'} - WELLNESS`,
+        description: inferredMessages.description || 'Ferramenta personalizada de bem-estar',
         openGraph: {
-          title: 'Ferramenta Wellness - YLADA',
-          description: 'Ferramenta personalizada de bem-estar',
+          title: `${inferredMessages.title || 'Ferramenta Wellness'} - WELLNESS`,
+          description: inferredMessages.description || 'Ferramenta personalizada de bem-estar',
+          url: `${baseUrl}/pt/wellness/${userSlug}/${toolSlug}`,
+          siteName: 'WELLNESS - Your Leading Data System',
+          type: 'website',
+          locale: 'pt_BR',
           images: [{
-            url: getFullOGImageUrl('default', baseUrl),
+            url: inferredImage,
             width: 1200,
             height: 630,
             type: 'image/jpeg',
