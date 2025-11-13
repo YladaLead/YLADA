@@ -222,7 +222,11 @@ export async function PUT(request: NextRequest) {
     // Adicionar campos opcionais apenas se fornecidos
     // Usar whatsapp (ou telefone como fallback) - apenas whatsapp existe no banco
     if (whatsapp || telefone) {
-      profileData.whatsapp = whatsapp || telefone
+      const whatsappValue = whatsapp || telefone
+      profileData.whatsapp = whatsappValue
+      console.log('📱 WhatsApp que será salvo:', whatsappValue)
+    } else {
+      console.warn('⚠️ ATENÇÃO: Nenhum whatsapp ou telefone fornecido!')
     }
     
     // Adicionar campos que podem não existir ainda (o Supabase vai ignorar se não existirem)
@@ -246,7 +250,12 @@ export async function PUT(request: NextRequest) {
 
     console.log('📝 Salvando perfil (UPSERT):', {
       userId: user.id,
-      profileData: Object.keys(fullProfileData)
+      profileData: Object.keys(fullProfileData),
+      dadosCompletos: {
+        nome_completo: fullProfileData.nome_completo,
+        whatsapp: fullProfileData.whatsapp,
+        perfil: fullProfileData.perfil
+      }
     })
 
     // Usar UPSERT para evitar duplicatas
