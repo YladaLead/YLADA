@@ -32,10 +32,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (error || !tool) {
       // Debug: log do erro
-      console.error('[OG Metadata] Tool not found:', {
+      console.error('[OG Metadata] ❌ Tool not found:', {
         userSlug,
         toolSlug,
-        error: error?.message || 'Tool not found'
+        error: error?.message || 'Tool not found',
+        errorCode: error?.code,
+        errorDetails: error?.details,
+        errorHint: error?.hint
       })
       
       // Construir URL base para fallback
@@ -65,12 +68,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
     
     // Debug: log para verificar normalização
-    console.log('[OG Metadata] Tool found:', {
+    console.log('[OG Metadata] ✅ Tool found:', {
       userSlug,
       toolSlug,
       template_slug: tool.template_slug,
       normalizedSlug,
-      toolTitle: tool.title
+      toolTitle: tool.title,
+      toolId: tool.id
     })
     
     // Obter imagem OG com baseUrl correto
