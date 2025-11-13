@@ -229,6 +229,69 @@ export default function PortalPublicPage() {
       )}
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Banner de Sucesso - Mostrar quando completar uma ferramenta no modo sequencial */}
+        {justCompletedToolId && portal.navigation_type === 'sequential' && (() => {
+          const completedIndex = portal.tools.findIndex(t => t.tool_id === justCompletedToolId)
+          const nextTool = completedIndex >= 0 && completedIndex < portal.tools.length - 1 
+            ? portal.tools[completedIndex + 1] 
+            : null
+          const completedTool = portal.tools[completedIndex]
+          
+          return (
+            <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 rounded-xl p-6 shadow-lg">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold text-green-900 mb-2">
+                    ✅ {completedTool?.tool.title || 'Etapa'} concluída com sucesso!
+                  </h3>
+                  {nextTool && isToolUnlocked(completedIndex + 1, nextTool.tool_id) ? (
+                    <div>
+                      <p className="text-sm text-green-700 mb-4">
+                        Parabéns! Agora você pode continuar para a próxima etapa.
+                      </p>
+                      <Link
+                        href={`${getToolUrl(nextTool)}?portal_id=${portal.id}&tool_id=${nextTool.tool_id}&return_to=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`}
+                        onClick={() => setJustCompletedToolId(null)}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-md"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        <span>➡️</span>
+                        <span>Continuar para: {nextTool.tool.title}</span>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm text-green-700 mb-4">
+                        🎉 Parabéns! Você completou todas as etapas do portal!
+                      </p>
+                      <button
+                        onClick={() => setJustCompletedToolId(null)}
+                        className="text-sm text-green-700 hover:text-green-900 font-medium underline"
+                      >
+                        Fechar
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setJustCompletedToolId(null)}
+                  className="flex-shrink-0 text-green-600 hover:text-green-800 text-xl font-bold leading-none"
+                  aria-label="Fechar"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )
+        })()}
+
         {/* Título e Descrição */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{portal.name}</h1>
