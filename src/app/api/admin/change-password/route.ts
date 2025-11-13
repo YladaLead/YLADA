@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { createClient } from '@/lib/supabase-client'
+import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * POST /api/admin/change-password
@@ -47,21 +47,31 @@ export async function POST(request: NextRequest) {
     const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
     const tempSupabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
 
-    // Tentar fazer login com a senha atual
-    const { error: signInError } = await tempSupabase.auth.signInWithPassword({
+    // Tentar fazer login com a senha atual para verificar
+    const { data: signInData, error: signInError } = await tempSupabase.auth.signInWithPassword({
       email: user.email!,
       password: currentPassword
     })
 
-    if (signInError) {
+    if (signInError || !signInData.session) {
       return NextResponse.json(
         { error: 'Senha atual incorreta' },
         { status: 401 }
       )
     }
 
-    // Se a senha atual está correta, atualizar para a nova senha
-    const { error: updateError } = await tempSupabase.auth.updateUser({
+    // Se a senha atual está correta, usar a sessão para atualizar
+    // Criar cliente com a sessão do usuário
+    const userSupabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${signInData.session.access_token}`
+        }
+      }
+    })
+
+    // Atualizar senha usando a sessão do usuário
+    const { error: updateError } = await userSupabase.auth.updateUser({
       password: newPassword
     })
 
