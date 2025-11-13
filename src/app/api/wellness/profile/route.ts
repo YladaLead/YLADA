@@ -221,12 +221,21 @@ export async function PUT(request: NextRequest) {
 
     // Adicionar campos opcionais apenas se fornecidos
     // Usar whatsapp (ou telefone como fallback) - apenas whatsapp existe no banco
-    if (whatsapp || telefone) {
-      const whatsappValue = whatsapp || telefone
-      profileData.whatsapp = whatsappValue
-      console.log('📱 WhatsApp que será salvo:', whatsappValue)
+    // IMPORTANTE: Garantir que whatsapp seja salvo mesmo se for string vazia (será tratado como null)
+    const whatsappValue = whatsapp || telefone
+    if (whatsappValue && whatsappValue.trim() !== '') {
+      // Remover caracteres não numéricos e garantir que não está vazio
+      const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
+      if (whatsappLimpo.length > 0) {
+        profileData.whatsapp = whatsappLimpo
+        console.log('📱 WhatsApp que será salvo:', whatsappLimpo)
+      } else {
+        console.warn('⚠️ ATENÇÃO: WhatsApp fornecido mas está vazio após limpeza!')
+        profileData.whatsapp = null // Garantir que seja null se vazio
+      }
     } else {
       console.warn('⚠️ ATENÇÃO: Nenhum whatsapp ou telefone fornecido!')
+      // Não definir whatsapp se não foi fornecido (manter valor atual ou null)
     }
     
     // Adicionar campos que podem não existir ainda (o Supabase vai ignorar se não existirem)
@@ -289,10 +298,16 @@ export async function PUT(request: NextRequest) {
             perfil: 'wellness',
             updated_at: new Date().toISOString()
           }
-          if (whatsapp || telefone) {
-            const whatsappValue = whatsapp || telefone
-            basicData.whatsapp = whatsappValue
-            console.log('📱 WhatsApp (básico) que será salvo:', whatsappValue)
+          // Garantir que whatsapp seja salvo no salvamento básico também
+          const whatsappValue = whatsapp || telefone
+          if (whatsappValue && whatsappValue.toString().trim() !== '') {
+            const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
+            if (whatsappLimpo.length > 0) {
+              basicData.whatsapp = whatsappLimpo
+              console.log('📱 WhatsApp (básico) que será salvo:', whatsappLimpo)
+            } else {
+              console.warn('⚠️ ATENÇÃO: WhatsApp fornecido mas está vazio após limpeza (básico)!')
+            }
           } else {
             console.warn('⚠️ ATENÇÃO: Nenhum whatsapp fornecido no salvamento básico!')
           }
@@ -344,8 +359,14 @@ export async function PUT(request: NextRequest) {
         }
         // Se whatsapp não está em profileData mas foi fornecido, adicionar
         if (!updateData.whatsapp && (whatsapp || telefone)) {
-          updateData.whatsapp = whatsapp || telefone
-          console.log('📱 Adicionando whatsapp no UPDATE manual:', updateData.whatsapp)
+          const whatsappValue = whatsapp || telefone
+          if (whatsappValue && whatsappValue.toString().trim() !== '') {
+            const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
+            if (whatsappLimpo.length > 0) {
+              updateData.whatsapp = whatsappLimpo
+              console.log('📱 Adicionando whatsapp no UPDATE manual:', whatsappLimpo)
+            }
+          }
         }
         
         const { data, error } = await supabaseAdmin
@@ -375,8 +396,14 @@ export async function PUT(request: NextRequest) {
         }
         // Se whatsapp não está em fullProfileData mas foi fornecido, adicionar
         if (!insertData.whatsapp && (whatsapp || telefone)) {
-          insertData.whatsapp = whatsapp || telefone
-          console.log('📱 Adicionando whatsapp no INSERT manual:', insertData.whatsapp)
+          const whatsappValue = whatsapp || telefone
+          if (whatsappValue && whatsappValue.toString().trim() !== '') {
+            const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
+            if (whatsappLimpo.length > 0) {
+              insertData.whatsapp = whatsappLimpo
+              console.log('📱 Adicionando whatsapp no INSERT manual:', whatsappLimpo)
+            }
+          }
         }
         
         const { data, error } = await supabaseAdmin
