@@ -88,16 +88,25 @@ export function getOGImageUrl(templateSlug: string | null | undefined): string {
     originalSlug: templateSlug,
     normalized,
     hasMapping: !!OG_IMAGE_MAP[normalized],
-    mappedTo: OG_IMAGE_MAP[normalized] || 'default'
+    mappedTo: OG_IMAGE_MAP[normalized] || 'default',
+    availableKeys: Object.keys(OG_IMAGE_MAP).filter(k => k.includes('proteina'))
   })
   
-  // Tentar encontrar no mapeamento
+  // Tentar encontrar no mapeamento com o slug normalizado
   if (OG_IMAGE_MAP[normalized]) {
+    console.log('[OG Image] ✅ Found mapping:', OG_IMAGE_MAP[normalized])
     return OG_IMAGE_MAP[normalized]
   }
   
+  // Fallback: tentar buscar diretamente se a normalização não funcionou
+  const directMatch = OG_IMAGE_MAP[templateSlug.toLowerCase().trim()]
+  if (directMatch) {
+    console.log('[OG Image] ✅ Found direct match:', directMatch)
+    return directMatch
+  }
+  
   // Fallback para imagem padrão
-  console.log('[OG Image] No mapping found, using default')
+  console.log('[OG Image] ❌ No mapping found, using default. Normalized:', normalized, 'Original:', templateSlug)
   return OG_IMAGE_MAP.default
 }
 
