@@ -404,13 +404,8 @@ export async function PUT(request: NextRequest) {
       message: error.message,
       stack: error.stack,
       code: error.code,
-      details: error.details
-    })('❌ Erro técnico ao salvar perfil:', {
-      error,
-      message: error?.message,
-      code: error?.code,
-      details: error?.details,
-      hint: error?.hint
+      details: error.details,
+      hint: error.hint
     })
     
     // Se for erro de coluna não encontrada (código PostgreSQL 42703), dar mensagem específica
