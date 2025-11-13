@@ -332,10 +332,20 @@ export async function PUT(request: NextRequest) {
         .maybeSingle()
 
       if (existingProfile) {
-        // Atualizar existente
+        // Atualizar existente - garantir que whatsapp está incluído
+        const updateData = {
+          ...profileData,
+          updated_at: new Date().toISOString()
+        }
+        // Se whatsapp não está em profileData mas foi fornecido, adicionar
+        if (!updateData.whatsapp && (whatsapp || telefone)) {
+          updateData.whatsapp = whatsapp || telefone
+          console.log('📱 Adicionando whatsapp no UPDATE manual:', updateData.whatsapp)
+        }
+        
         const { data, error } = await supabaseAdmin
           .from('user_profiles')
-          .update(profileData)
+          .update(updateData)
           .eq('user_id', user.id)
           .select()
           .single()
@@ -353,10 +363,20 @@ export async function PUT(request: NextRequest) {
           updated_at: data?.updated_at
         })
       } else {
-        // Criar novo
+        // Criar novo - garantir que whatsapp está incluído
+        const insertData = {
+          ...fullProfileData,
+          updated_at: new Date().toISOString()
+        }
+        // Se whatsapp não está em fullProfileData mas foi fornecido, adicionar
+        if (!insertData.whatsapp && (whatsapp || telefone)) {
+          insertData.whatsapp = whatsapp || telefone
+          console.log('📱 Adicionando whatsapp no INSERT manual:', insertData.whatsapp)
+        }
+        
         const { data, error } = await supabaseAdmin
           .from('user_profiles')
-          .insert(fullProfileData)
+          .insert(insertData)
           .select()
           .single()
 
