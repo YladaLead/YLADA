@@ -31,8 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     }
 
-    // Obter imagem OG para quiz personalizado
-    const ogImageUrl = getFullOGImageUrl('quiz-personalizado')
+    // Construir URL base primeiro
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    
+    // Obter imagem OG para quiz personalizado com baseUrl correto
+    const ogImageUrl = getFullOGImageUrl('quiz-personalizado', baseUrl)
     
     // Obter mensagens estimulantes para quiz
     const ogMessages = getOGMessages('quiz-personalizado')
@@ -41,8 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const ogTitle = ogMessages.title || quiz.titulo
     const ogDescription = ogMessages.description || quiz.descricao || 'Quiz personalizado de bem-estar'
 
-    // Construir URL completa
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    // Construir URL completa da página
     const pageUrl = `${baseUrl}/pt/wellness/${resolvedParams['user-slug']}/quiz/${slug}`
 
     return {
@@ -59,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: 'image/jpeg',
+            type: 'image/png',
           },
         ],
         locale: 'pt_BR',

@@ -55,7 +55,9 @@ export async function getSubscriptionsNeedingRenewal(
       const expiryDate = new Date(sub.current_period_end)
       const now = new Date()
       const diffTime = expiryDate.getTime() - now.getTime()
-      const daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      // Usar Math.floor para arredondar para baixo (se faltam 2.1 dias, mostra 2 dias)
+      // Math.ceil estava causando erro: se faltam 2.1 dias, mostrava 3 dias
+      const daysUntilExpiry = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
       return {
         id: sub.id,

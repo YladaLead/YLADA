@@ -43,11 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     }
 
+    // Construir URL base primeiro
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    
     // Normalizar template_slug
     const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
     
-    // Obter imagem OG
-    const ogImageUrl = getFullOGImageUrl(normalizedSlug)
+    // Obter imagem OG com baseUrl correto
+    const ogImageUrl = getFullOGImageUrl(normalizedSlug, baseUrl)
     
     // Obter mensagens estimulantes baseadas no tipo de ferramenta
     const ogMessages = getOGMessages(normalizedSlug)
@@ -57,8 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const ogTitle = ogMessages.title || tool.title
     const ogDescription = ogMessages.description || tool.description || 'Ferramenta personalizada de bem-estar'
 
-    // Construir URL completa
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    // Construir URL completa da página
     const pageUrl = `${baseUrl}/pt/wellness/${userSlug}/${toolSlug}`
 
     return {
@@ -75,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: 'image/jpeg',
+            type: 'image/png',
           },
         ],
         locale: 'pt_BR',

@@ -61,7 +61,9 @@ export default function RequireSubscription({
       const expiryDate = new Date(subscriptionData.current_period_end)
       const now = new Date()
       const diffTime = expiryDate.getTime() - now.getTime()
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      // Usar Math.floor para arredondar para baixo (se faltam 2.1 dias, mostra 2 dias)
+      // Math.ceil estava causando erro: se faltam 2.1 dias, mostrava 3 dias
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
       setDaysUntilExpiry(diffDays)
     } else {
       setDaysUntilExpiry(null)
@@ -154,7 +156,9 @@ export default function RequireSubscription({
                     const expiryDate = new Date(subData.subscription.current_period_end)
                     const now = new Date()
                     const diffTime = expiryDate.getTime() - now.getTime()
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+                    // Usar Math.floor para arredondar para baixo (se faltam 2.1 dias, mostra 2 dias)
+                    // Math.ceil estava causando erro: se faltam 2.1 dias, mostrava 3 dias
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
                     setDaysUntilExpiry(diffDays)
                   }
                 }

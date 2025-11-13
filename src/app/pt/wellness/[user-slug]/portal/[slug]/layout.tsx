@@ -57,8 +57,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     }
 
-    // Obter imagem OG para portal
-    const ogImageUrl = getFullOGImageUrl('portal')
+    // Construir URL base primeiro
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    
+    // Obter imagem OG para portal com baseUrl correto
+    const ogImageUrl = getFullOGImageUrl('portal', baseUrl)
     
     // Obter mensagens estimulantes para portal
     const ogMessages = getOGMessages('portal')
@@ -67,8 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const ogTitle = ogMessages.title || portal.name
     const ogDescription = ogMessages.description || portal.description || 'Portal personalizado de bem-estar'
 
-    // Construir URL completa
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    // Construir URL completa da página
     const pageUrl = `${baseUrl}/pt/wellness/${resolvedParams['user-slug']}/portal/${slug}`
 
     return {
@@ -85,7 +87,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: 'image/jpeg',
+            type: 'image/png',
           },
         ],
         locale: 'pt_BR',
