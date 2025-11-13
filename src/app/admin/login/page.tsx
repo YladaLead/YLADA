@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 
 const supabase = createClient()
 
-export default function AdminLoginPage() {
+function AdminLoginPage() {
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('faulaandre@gmail.com')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -101,6 +103,11 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Bem-vindo</h1>
           <p className="text-gray-600">Entre na sua conta de Administrador</p>
+          {searchParams?.get('password_reset') === 'success' && (
+            <div className="mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+              ✅ Senha redefinida com sucesso! Faça login com sua nova senha.
+            </div>
+          )}
         </div>
 
         {/* Formulário */}
@@ -164,5 +171,20 @@ export default function AdminLoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function AdminLoginPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    }>
+      <AdminLoginPage />
+    </Suspense>
   )
 }

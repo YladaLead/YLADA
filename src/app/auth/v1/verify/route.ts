@@ -17,7 +17,28 @@ export async function GET(request: NextRequest) {
   const redirectTo = requestUrl.searchParams.get('redirect_to')
   const error = requestUrl.searchParams.get('error')
   
-  // Se houver erro, redirecionar para login
+  // Se for tipo 'recovery' (reset de senha), redirecionar para página de reset
+  if (type === 'recovery' && token) {
+    console.log('🔄 Link de recovery detectado, redirecionando para reset de senha')
+    const resetUrl = new URL('/admin/reset-password', requestUrl.origin)
+    resetUrl.searchParams.set('token', token)
+    resetUrl.searchParams.set('type', type)
+    return NextResponse.redirect(resetUrl)
+  }
+  
+  // Se houver erro, verificar se é recovery e redirecionar para reset com erro
+  if (error && type === 'recovery') {
+    console.error('❌ Erro no verify (recovery):', error)
+    const resetUrl = new URL('/admin/reset-password', requestUrl.origin)
+    resetUrl.searchParams.set('error', error)
+    const errorDesc = requestUrl.searchParams.get('error_description')
+    if (errorDesc) {
+      resetUrl.searchParams.set('error_description', errorDesc)
+    }
+    return NextResponse.redirect(resetUrl)
+  }
+  
+  // Se houver erro (não recovery), redirecionar para login
   if (error) {
     console.error('❌ Erro no verify:', error)
     const loginUrl = new URL('/pt/wellness/login', requestUrl)
