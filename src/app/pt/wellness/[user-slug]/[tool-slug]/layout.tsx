@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             url: getFullOGImageUrl('default', baseUrl),
             width: 1200,
             height: 630,
-            type: 'image/png',
+            type: 'image/jpeg',
           }],
         },
       }
@@ -109,7 +109,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: 'image/png',
+            type: 'image/jpeg',
           },
         ],
         locale: 'pt_BR',

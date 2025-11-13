@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: 'image/png',
+            type: 'image/jpeg',
           },
         ],
         locale: 'pt_BR',
