@@ -264,8 +264,10 @@ export async function PUT(request: NextRequest) {
       profileData: Object.keys(fullProfileData),
       dadosCompletos: {
         nome_completo: fullProfileData.nome_completo,
+        email: fullProfileData.email,
         whatsapp: fullProfileData.whatsapp,
-        perfil: fullProfileData.perfil
+        perfil: fullProfileData.perfil,
+        profession: fullProfileData.profession
       }
     })
 
@@ -339,7 +341,10 @@ export async function PUT(request: NextRequest) {
           id: data?.id,
           user_id: data?.user_id,
           nome_completo: data?.nome_completo,
+          email: data?.email,
           whatsapp: data?.whatsapp,
+          perfil: data?.perfil,
+          profession: data?.profession,
           updated_at: data?.updated_at
         })
         result = data
@@ -359,6 +364,8 @@ export async function PUT(request: NextRequest) {
         // Atualizar existente - garantir que whatsapp está incluído
         const updateData = {
           ...profileData,
+          email: email || user.email, // Garantir que email está sincronizado
+          profession: 'wellness', // Garantir que profession está sincronizado
           updated_at: new Date().toISOString()
         }
         // Se whatsapp não está em profileData mas foi fornecido, adicionar
@@ -389,13 +396,18 @@ export async function PUT(request: NextRequest) {
           id: data?.id,
           user_id: data?.user_id,
           nome_completo: data?.nome_completo,
+          email: data?.email,
           whatsapp: data?.whatsapp,
+          perfil: data?.perfil,
+          profession: data?.profession,
           updated_at: data?.updated_at
         })
       } else {
         // Criar novo - garantir que whatsapp está incluído
         const insertData = {
           ...fullProfileData,
+          email: email || user.email, // Garantir que email está sincronizado
+          profession: 'wellness', // Garantir que profession está sincronizado
           updated_at: new Date().toISOString()
         }
         // Se whatsapp não está em fullProfileData mas foi fornecido, adicionar
@@ -425,7 +437,10 @@ export async function PUT(request: NextRequest) {
           id: data?.id,
           user_id: data?.user_id,
           nome_completo: data?.nome_completo,
+          email: data?.email,
           whatsapp: data?.whatsapp,
+          perfil: data?.perfil,
+          profession: data?.profession,
           updated_at: data?.updated_at
         })
       }
