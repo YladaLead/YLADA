@@ -19,6 +19,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const quiz = await quizDB.getQuizBySlug(slug)
 
     if (!quiz) {
+      // Construir URL base para fallback
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
+      const pageUrl = `${baseUrl}/pt/wellness/${resolvedParams['user-slug']}/quiz/${slug}`
+      
       // Fallback para metadata padrão
       return {
         title: 'Quiz Personalizado - WELLNESS',
@@ -26,7 +30,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
           title: 'Quiz Personalizado - WELLNESS',
           description: 'Quiz personalizado de bem-estar',
-          images: [getFullOGImageUrl('quiz-personalizado')],
+          url: pageUrl,
+          siteName: 'WELLNESS - Your Leading Data System',
+          type: 'website',
+          locale: 'pt_BR',
+          images: [{
+            url: getFullOGImageUrl('quiz-personalizado', baseUrl),
+            width: 1200,
+            height: 630,
+            type: 'image/jpeg',
+          }],
         },
       }
     }
@@ -75,7 +88,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     }
   } catch (error) {
-    console.error('Erro ao gerar metadata do quiz:', error)
+    console.error('[OG Metadata] Error generating quiz metadata:', error)
+    // Construir URL base para fallback
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
+    const pageUrl = `${baseUrl}/pt/wellness/${resolvedParams['user-slug']}/quiz/${slug}`
+    
     // Fallback para metadata padrão
     return {
       title: 'Quiz Personalizado - WELLNESS',
@@ -83,7 +100,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: 'Quiz Personalizado - WELLNESS',
         description: 'Quiz personalizado de bem-estar',
-        images: [getFullOGImageUrl('quiz-personalizado')],
+        url: pageUrl,
+        siteName: 'WELLNESS - Your Leading Data System',
+        type: 'website',
+        locale: 'pt_BR',
+        images: [{
+          url: getFullOGImageUrl('quiz-personalizado', baseUrl),
+          width: 1200,
+          height: 630,
+          type: 'image/jpeg',
+        }],
       },
     }
   }

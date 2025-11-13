@@ -23,6 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       .single()
 
     if (portalError || !portal) {
+      // Construir URL base para fallback
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
+      const pageUrl = `${baseUrl}/pt/wellness/portal/${slug}`
+      
       // Fallback para metadata padrão
       return {
         title: 'Portal do Bem-Estar - WELLNESS',
@@ -30,7 +34,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
           title: 'Portal do Bem-Estar - WELLNESS',
           description: 'Portal personalizado de bem-estar',
-          images: [getFullOGImageUrl('portal')],
+          url: pageUrl,
+          siteName: 'WELLNESS - Your Leading Data System',
+          type: 'website',
+          locale: 'pt_BR',
+          images: [{
+            url: getFullOGImageUrl('portal', baseUrl),
+            width: 1200,
+            height: 630,
+            type: 'image/jpeg',
+          }],
         },
       }
     }
@@ -79,7 +92,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     }
   } catch (error) {
-    console.error('Erro ao gerar metadata do portal:', error)
+    console.error('[OG Metadata] Error generating portal metadata:', error)
+    // Construir URL base para fallback
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
+    const pageUrl = `${baseUrl}/pt/wellness/portal/${slug}`
+    
     // Fallback para metadata padrão
     return {
       title: 'Portal do Bem-Estar - WELLNESS',
@@ -87,7 +104,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: 'Portal do Bem-Estar - WELLNESS',
         description: 'Portal personalizado de bem-estar',
-        images: [getFullOGImageUrl('portal')],
+        url: pageUrl,
+        siteName: 'WELLNESS - Your Leading Data System',
+        type: 'website',
+        locale: 'pt_BR',
+        images: [{
+          url: getFullOGImageUrl('portal', baseUrl),
+          width: 1200,
+          height: 630,
+          type: 'image/jpeg',
+        }],
       },
     }
   }

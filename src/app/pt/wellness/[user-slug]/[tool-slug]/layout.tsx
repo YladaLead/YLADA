@@ -128,17 +128,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
     
     // Fallback para metadata padrão
+    const pageUrl = `${baseUrl}/pt/wellness/${userSlug}/${toolSlug}`
     return {
       title: 'Ferramenta Wellness - YLADA',
       description: 'Ferramenta personalizada de bem-estar',
       openGraph: {
         title: 'Ferramenta Wellness - YLADA',
         description: 'Ferramenta personalizada de bem-estar',
+        url: pageUrl,
+        siteName: 'WELLNESS - Your Leading Data System',
+        type: 'website',
+        locale: 'pt_BR',
         images: [{
           url: getFullOGImageUrl('default', baseUrl),
           width: 1200,
           height: 630,
-          type: 'image/png',
+          type: 'image/jpeg',
         }],
       },
     }
