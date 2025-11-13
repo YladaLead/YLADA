@@ -31,8 +31,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     }
 
-    // Construir URL base primeiro
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    // Construir URL base primeiro (usar www.ylada.com como padrão para produção)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
     
     // Obter imagem OG para quiz personalizado com baseUrl correto
     const ogImageUrl = getFullOGImageUrl('quiz-personalizado', baseUrl)

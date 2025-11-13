@@ -31,6 +31,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       .single()
 
     if (error || !tool) {
+      // Debug: log do erro
+      console.error('[OG Metadata] Tool not found:', {
+        userSlug,
+        toolSlug,
+        error: error?.message || 'Tool not found'
+      })
+      
+      // Construir URL base para fallback
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
+      
       // Fallback para metadata padrão
       return {
         title: 'Ferramenta Wellness - YLADA',
@@ -38,22 +48,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
           title: 'Ferramenta Wellness - YLADA',
           description: 'Ferramenta personalizada de bem-estar',
-          images: [getFullOGImageUrl('default')],
+          images: [{
+            url: getFullOGImageUrl('default', baseUrl),
+            width: 1200,
+            height: 630,
+            type: 'image/png',
+          }],
         },
       }
     }
 
-    // Construir URL base primeiro
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    // Construir URL base primeiro (usar www.ylada.com como padrão para produção)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
     
     // Normalizar template_slug
     const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
+    
+    // Debug: log para verificar normalização
+    console.log('[OG Metadata] Tool found:', {
+      userSlug,
+      toolSlug,
+      template_slug: tool.template_slug,
+      normalizedSlug,
+      toolTitle: tool.title
+    })
     
     // Obter imagem OG com baseUrl correto
     const ogImageUrl = getFullOGImageUrl(normalizedSlug, baseUrl)
     
     // Obter mensagens estimulantes baseadas no tipo de ferramenta
     const ogMessages = getOGMessages(normalizedSlug)
+    
+    // Debug: log para verificar mensagens
+    console.log('[OG Metadata] Messages:', {
+      normalizedSlug,
+      hasMessage: !!ogMessages.title,
+      ogTitle: ogMessages.title,
+      fallbackTitle: tool.title
+    })
     
     // Usar mensagens estimulantes ou título/descrição personalizados do usuário
     // Priorizar mensagens estimulantes para melhor conversão
@@ -91,7 +123,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     }
   } catch (error) {
-    console.error('Erro ao gerar metadata:', error)
+    console.error('[OG Metadata] Error generating metadata:', error)
+    // Construir URL base para fallback
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
+    
     // Fallback para metadata padrão
     return {
       title: 'Ferramenta Wellness - YLADA',
@@ -99,7 +134,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: 'Ferramenta Wellness - YLADA',
         description: 'Ferramenta personalizada de bem-estar',
-        images: [getFullOGImageUrl('default')],
+        images: [{
+          url: getFullOGImageUrl('default', baseUrl),
+          width: 1200,
+          height: 630,
+          type: 'image/png',
+        }],
       },
     }
   }
