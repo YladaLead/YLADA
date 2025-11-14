@@ -60,6 +60,7 @@ export default function HomePage() {
   }, [router])
 
   const [submitting, setSubmitting] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,8 +81,8 @@ export default function HomePage() {
         throw new Error(data.error || 'Erro ao enviar formulário')
       }
 
-      alert('Obrigado pelo interesse! Entraremos em contato em breve.')
       setFormData({ nome: '', profissao: '', pais: '', email: '', telefone: '', countryCode: 'BR' })
+      setShowSuccessModal(true)
     } catch (error: any) {
       console.error('Erro ao enviar formulário:', error)
       alert('Erro ao enviar formulário. Por favor, tente novamente.')
@@ -361,6 +362,44 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Modal de Sucesso */}
+        {showSuccessModal && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowSuccessModal(false)}
+          >
+            <div 
+              className="bg-white rounded-xl shadow-2xl max-w-md w-full p-8 animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                {/* Ícone de sucesso */}
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                  <svg className="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                
+                {/* Mensagem */}
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Obrigado pelo interesse!
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Entraremos em contato em breve.
+                </p>
+                
+                {/* Botão */}
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* (7) Footer */}
