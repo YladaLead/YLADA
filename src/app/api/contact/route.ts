@@ -119,7 +119,8 @@ export async function POST(request: NextRequest) {
           </html>
         `
 
-        // Enviar para o email configurado (ou usar um padrão)
+        // Enviar para o email configurado
+        // Se não configurar CONTACT_NOTIFICATION_EMAIL, usa FROM_EMAIL como padrão
         const notificationEmail = process.env.CONTACT_NOTIFICATION_EMAIL || FROM_EMAIL
 
         await resend.emails.send({

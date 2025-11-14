@@ -4,6 +4,7 @@ import { useState } from 'react'
 import YLADALogo from '../../components/YLADALogo'
 import LanguageSelector from '../../components/LanguageSelector'
 import Link from 'next/link'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 export default function HomePage() {
   const [formData, setFormData] = useState({
@@ -11,7 +12,8 @@ export default function HomePage() {
     profissao: '',
     pais: '',
     email: '',
-    telefone: ''
+    telefone: '',
+    countryCode: 'BR' // Código do país para o telefone
   })
   const [submitting, setSubmitting] = useState(false)
 
@@ -35,7 +37,7 @@ export default function HomePage() {
       }
 
       alert('Obrigado pelo interesse! Entraremos em contato em breve.')
-      setFormData({ nome: '', profissao: '', pais: '', email: '', telefone: '' })
+      setFormData({ nome: '', profissao: '', pais: '', email: '', telefone: '', countryCode: 'BR' })
     } catch (error: any) {
       console.error('Erro ao enviar formulário:', error)
       alert('Erro ao enviar formulário. Por favor, tente novamente.')
@@ -295,14 +297,18 @@ export default function HomePage() {
                     <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-2">
                       Telefone
                     </label>
-                    <input
-                      type="tel"
-                      id="telefone"
+                    <PhoneInputWithCountry
                       value={formData.telefone}
-                      onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                      placeholder="(00) 00000-0000"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      onChange={(phone, countryCode) => {
+                        setFormData({ ...formData, telefone: phone, countryCode })
+                      }}
+                      defaultCountryCode={formData.countryCode}
+                      className="w-full"
+                      placeholder="11 99999-9999"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Selecione o país pela bandeira e digite apenas o número (sem DDD/área)
+                    </p>
                   </div>
                   
                   <button

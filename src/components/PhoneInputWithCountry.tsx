@@ -61,7 +61,7 @@ export default function PhoneInputWithCountry({
   const selectedCountry = getCountryByCode(countryCode)
 
   return (
-    <div className={`flex items-stretch border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent bg-white ${className}`}>
+    <div className={`flex items-stretch border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent bg-white ${className}`}>
       {/* Seletor de País Compacto - Apenas Bandeira Visível */}
       <div className="relative flex-shrink-0">
         {/* Select invisível mas clicável */}
