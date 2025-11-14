@@ -12,7 +12,8 @@ export default function HomePage() {
     nome: '',
     profissao: '',
     pais: '',
-    email: ''
+    email: '',
+    telefone: ''
   })
 
   // Capturar access_token do hash do Supabase e processar sessão
@@ -56,12 +57,35 @@ export default function HomePage() {
     }
   }, [router])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implementar envio do formulário
-    console.log('Formulário enviado:', formData)
-    alert('Obrigado pelo interesse! Entraremos em contato em breve.')
-    setFormData({ nome: '', profissao: '', pais: '', email: '' })
+    setSubmitting(true)
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao enviar formulário')
+      }
+
+      alert('Obrigado pelo interesse! Entraremos em contato em breve.')
+      setFormData({ nome: '', profissao: '', pais: '', email: '', telefone: '' })
+    } catch (error: any) {
+      console.error('Erro ao enviar formulário:', error)
+      alert('Erro ao enviar formulário. Por favor, tente novamente.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -305,11 +329,26 @@ export default function HomePage() {
                     />
                   </div>
                   
+                  <div>
+                    <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-2">
+                      Telefone
+                    </label>
+                    <input
+                      type="tel"
+                      id="telefone"
+                      value={formData.telefone}
+                      onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                      placeholder="(00) 00000-0000"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                    disabled={submitting}
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Enviar
+                    {submitting ? 'Enviando...' : 'Enviar'}
                   </button>
                 </div>
               </form>
