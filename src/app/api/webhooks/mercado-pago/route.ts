@@ -379,59 +379,128 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       console.warn('⚠️ E-mail do pagador não encontrado ou inválido no webhook')
     }
 
+    // 🚀 CORREÇÃO: Verificar se usuário já tem subscription ativa para ESTENDER em vez de criar nova
+    const { data: existingSubscription } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id, current_period_end, welcome_email_sent, status')
+      .eq('user_id', userId)
+      .eq('area', area)
+      .eq('status', 'active')
+      .order('current_period_end', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
     // Calcular data de expiração
-    // Para assinaturas recorrentes (mensal e anual), calcular baseado na frequência
-    const expiresAt = new Date()
-    if (planType === 'monthly') {
-      expiresAt.setMonth(expiresAt.getMonth() + 1)
-    } else if (planType === 'annual') {
-      expiresAt.setMonth(expiresAt.getMonth() + 12) // 12 meses para plano anual
+    let expiresAt: Date
+    if (existingSubscription && existingSubscription.current_period_end) {
+      // 🚀 RENOVAÇÃO: Estender a partir da data atual de vencimento
+      expiresAt = new Date(existingSubscription.current_period_end)
+      console.log('🔄 Renovação detectada! Estendendo subscription existente:', {
+        subscriptionId: existingSubscription.id,
+        vencimentoAtual: existingSubscription.current_period_end,
+      })
+      
+      if (planType === 'monthly') {
+        expiresAt.setMonth(expiresAt.getMonth() + 1)
+      } else if (planType === 'annual') {
+        expiresAt.setMonth(expiresAt.getMonth() + 12)
+      } else {
+        expiresAt.setMonth(expiresAt.getMonth() + 1)
+      }
+      
+      console.log('✅ Nova data de vencimento após renovação:', expiresAt.toISOString())
     } else {
-      // Fallback (não deveria acontecer)
-      expiresAt.setMonth(expiresAt.getMonth() + 1)
+      // NOVA ASSINATURA: Calcular a partir de agora
+      expiresAt = new Date()
+      if (planType === 'monthly') {
+        expiresAt.setMonth(expiresAt.getMonth() + 1)
+      } else if (planType === 'annual') {
+        expiresAt.setMonth(expiresAt.getMonth() + 12)
+      } else {
+        expiresAt.setMonth(expiresAt.getMonth() + 1)
+      }
+      console.log('🆕 Nova assinatura! Data de vencimento:', expiresAt.toISOString())
     }
 
     // Verificar se é PIX ou Boleto (para assinaturas mensais manuais, marcar reminder_sent como false)
-    // PIX: account_money, pix
-    // Boleto: ticket, boleto
     const isManualPayment = 
       paymentMethod === 'account_money' || 
       paymentMethod === 'pix' || 
       paymentMethod === 'ticket' || 
       paymentMethod === 'boleto'
-    const reminderSent = planType === 'monthly' && isManualPayment ? false : null // PIX/Boleto mensal precisa de aviso
+    const reminderSent = planType === 'monthly' && isManualPayment ? false : null
 
-    // Criar ou atualizar assinatura no banco
-    // Usar stripe_subscription_id temporariamente até atualizar o schema
-    const subscriptionId = `mp_${paymentId}`
+    let subscription: any
     
-    const { data: subscription, error: subError } = await supabaseAdmin
-      .from('subscriptions')
-      .upsert({
-        user_id: userId,
-        area: area,
-        plan_type: planType,
-        stripe_account: null, // Mercado Pago não usa stripe_account
-        stripe_subscription_id: subscriptionId, // Usar como ID único temporariamente
-        stripe_customer_id: fullData.payer?.id?.toString() || 'mp_customer',
-        stripe_price_id: 'mp_price', // Placeholder
-        amount: Math.round(amount * 100), // Converter para centavos
-        currency: currency.toLowerCase(),
-        status: 'active',
-        current_period_start: new Date().toISOString(),
-        current_period_end: expiresAt.toISOString(),
-        cancel_at_period_end: false,
-        reminder_sent: reminderSent, // false para PIX mensal (precisa aviso), null para outros
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'stripe_subscription_id',
+    if (existingSubscription) {
+      // 🚀 ATUALIZAR subscription existente (renovação)
+      const subscriptionId = `mp_${paymentId}` // ID único para este pagamento
+      
+      const { data: updatedSubscription, error: updateError } = await supabaseAdmin
+        .from('subscriptions')
+        .update({
+          current_period_start: new Date().toISOString(), // Novo período começa agora
+          current_period_end: expiresAt.toISOString(), // Estender vencimento
+          amount: Math.round(amount * 100),
+          currency: currency.toLowerCase(),
+          status: 'active',
+          cancel_at_period_end: false,
+          reminder_sent: reminderSent,
+          updated_at: new Date().toISOString(),
+          // Manter welcome_email_sent se já foi enviado (não reenviar em renovação)
+          welcome_email_sent: existingSubscription.welcome_email_sent || false,
+        })
+        .eq('id', existingSubscription.id)
+        .select()
+        .single()
+      
+      if (updateError) {
+        console.error('❌ Erro ao atualizar subscription:', updateError)
+        throw updateError
+      }
+      
+      subscription = updatedSubscription
+      console.log('✅ Subscription renovada com sucesso!', {
+        subscriptionId: subscription.id,
+        novoVencimento: subscription.current_period_end,
       })
-      .select()
-      .single()
-
-    if (subError) {
-      console.error('❌ Erro ao salvar subscription:', subError)
-      throw subError
+    } else {
+      // 🆕 CRIAR nova subscription (primeiro pagamento)
+      const subscriptionId = `mp_${paymentId}`
+      
+      const { data: newSubscription, error: subError } = await supabaseAdmin
+        .from('subscriptions')
+        .insert({
+          user_id: userId,
+          area: area,
+          plan_type: planType,
+          stripe_account: null,
+          stripe_subscription_id: subscriptionId,
+          stripe_customer_id: fullData.payer?.id?.toString() || 'mp_customer',
+          stripe_price_id: 'mp_price',
+          amount: Math.round(amount * 100),
+          currency: currency.toLowerCase(),
+          status: 'active',
+          current_period_start: new Date().toISOString(),
+          current_period_end: expiresAt.toISOString(),
+          cancel_at_period_end: false,
+          reminder_sent: reminderSent,
+          welcome_email_sent: false, // Nova assinatura precisa de email
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single()
+      
+      if (subError) {
+        console.error('❌ Erro ao criar subscription:', subError)
+        throw subError
+      }
+      
+      subscription = newSubscription
+      console.log('✅ Nova subscription criada!', {
+        subscriptionId: subscription.id,
+        vencimento: subscription.current_period_end,
+      })
     }
 
     // Criar registro de pagamento
@@ -466,6 +535,12 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       .single()
     
     const alreadySent = currentSubscription?.welcome_email_sent === true
+    const isNewSubscription = !existingSubscription // Se não tinha subscription antes, é nova
+    
+    // 🚀 CORREÇÃO: Enviar email apenas se:
+    // 1. É nova subscription (não renovação) OU
+    // 2. É renovação mas ainda não foi enviado email de boas-vindas
+    const shouldSendEmail = (isNewSubscription || !alreadySent) && payerEmail
     
     // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado)
     console.log('📧 ========================================')
@@ -474,9 +549,11 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     console.log('📧 Condições para enviar e-mail:', {
       hasSubscription: !!subscription,
       subscriptionId: subscription?.id,
+      isNewSubscription,
       welcomeEmailSent: currentSubscription?.welcome_email_sent,
       welcomeEmailSentAt: currentSubscription?.welcome_email_sent_at,
       alreadySent: alreadySent,
+      shouldSendEmail,
       hasPayerEmail: !!payerEmail,
       payerEmail: payerEmail,
       userId,
@@ -485,7 +562,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     })
     console.log('📧 ========================================')
 
-    if (subscription && !alreadySent && payerEmail) {
+    if (subscription && shouldSendEmail) {
       try {
         console.log('📧 ✅ TODAS AS CONDIÇÕES ATENDIDAS - INICIANDO ENVIO')
         console.log('📧 Iniciando envio de e-mail de boas-vindas...')
