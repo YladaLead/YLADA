@@ -102,8 +102,10 @@ export default function HomePage() {
                 Quem somos
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                O Ylada nasceu da ideia de que cada profissional pode ter seu próprio sistema inteligente de relacionamento.
-                Reunimos ferramentas e automações para que nutricionistas, coaches, consultores e distribuidores possam se conectar com clientes e equipes de forma simples, rápida e personalizada.
+                O YLADA nasceu da ideia de que cada profissional pode ter seu próprio sistema inteligente de relacionamento.
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed mt-4">
+                Criamos ferramentas, automações e inteligência orientada por dados para que nutricionistas, coaches, consultores e distribuidores se conectem com clientes e equipes de forma simples, humana e personalizada.
               </p>
             </div>
           </div>
