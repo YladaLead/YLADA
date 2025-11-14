@@ -28,9 +28,10 @@ export async function GET(request: NextRequest) {
     if (toolId) {
       // Buscar ferramenta específica (só se pertencer ao usuário ou for admin)
       // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
+      // CORRIGIDO: Incluir todos os campos usados no frontend (emoji, custom_colors, cta_type, etc)
       const { data: toolData, error } = await supabaseAdmin
         .from('user_templates')
-        .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description')
+        .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message')
         .eq('id', toolId)
         .eq('profession', profession)
         .eq('user_id', authenticatedUserId) // 🔒 Garantir que pertence ao usuário
@@ -70,9 +71,10 @@ export async function GET(request: NextRequest) {
 
     // Listar ferramentas do usuário autenticado
     // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
+    // CORRIGIDO: Incluir todos os campos usados no frontend (emoji, custom_colors, cta_type, etc)
     const { data: toolsData, error } = await supabaseAdmin
       .from('user_templates')
-      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, short_code, description')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message')
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
       .eq('profession', profession)
       .order('created_at', { ascending: false })
@@ -81,9 +83,10 @@ export async function GET(request: NextRequest) {
 
     // Buscar quizzes personalizados do usuário
     // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
+    // CORRIGIDO: Incluir todos os campos usados no código (titulo, descricao, emoji, views, leads_count, cores)
     const { data: quizzesData, error: quizzesError } = await supabaseAdmin
       .from('quizzes')
-      .select('id, title, slug, status, created_at, updated_at, user_id, description')
+      .select('id, titulo, descricao, emoji, slug, status, views, leads_count, cores, created_at, updated_at, user_id')
       .eq('user_id', authenticatedUserId)
       .eq('status', 'active') // Apenas quizzes ativos
       .order('created_at', { ascending: false })
@@ -359,10 +362,11 @@ export async function POST(request: NextRequest) {
     })
     
     // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
+    // CORRIGIDO: Incluir todos os campos usados no frontend
     const { data: insertedTool, error: insertError } = await supabaseAdmin
       .from('user_templates')
       .insert(insertData)
-      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message')
       .single()
 
     if (insertError) {
@@ -594,7 +598,7 @@ export async function PUT(request: NextRequest) {
       .update(updateData)
       .eq('id', id)
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
-      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message')
       .single()
 
     if (error) throw error
