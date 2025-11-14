@@ -3,6 +3,25 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { translateError } from '@/lib/error-messages'
 
+// 🚀 OTIMIZAÇÃO: Cache em memória para dados do dashboard (5 minutos de TTL)
+interface CacheEntry {
+  data: any
+  timestamp: number
+}
+
+const dashboardCache = new Map<string, CacheEntry>()
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
+
+// Função para limpar cache expirado
+function cleanExpiredCache() {
+  const now = Date.now()
+  for (const [key, entry] of dashboardCache.entries()) {
+    if (now - entry.timestamp > CACHE_TTL) {
+      dashboardCache.delete(key)
+    }
+  }
+}
+
 // GET - Buscar dados do dashboard (perfil + ferramentas + estatísticas)
 // Otimizado para reduzir chamadas de API e melhorar performance
 export async function GET(request: NextRequest) {
@@ -15,6 +34,17 @@ export async function GET(request: NextRequest) {
 
     const authenticatedUserId = user.id
     const startTime = Date.now()
+
+    // 🚀 OTIMIZAÇÃO: Verificar cache antes de fazer queries
+    cleanExpiredCache()
+    const cacheKey = `dashboard_${authenticatedUserId}`
+    const cached = dashboardCache.get(cacheKey)
+    
+    if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+      const age = Math.round((Date.now() - cached.timestamp) / 1000)
+      console.log(`⚡ Dashboard API: ${Date.now() - startTime}ms (cache, idade: ${age}s)`)
+      return NextResponse.json(cached.data)
+    }
 
     // Buscar perfil e ferramentas em paralelo (otimização)
     const [profileResult, toolsResult] = await Promise.all([
@@ -106,6 +136,12 @@ export async function GET(request: NextRequest) {
 
     const duration = Date.now() - startTime
     console.log(`⚡ Dashboard API: ${duration}ms`)
+
+    // 🚀 OTIMIZAÇÃO: Salvar no cache
+    dashboardCache.set(cacheKey, {
+      data: response,
+      timestamp: Date.now()
+    })
 
     return NextResponse.json(response)
   } catch (error: any) {

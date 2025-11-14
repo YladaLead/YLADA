@@ -27,9 +27,10 @@ export async function GET(request: NextRequest) {
 
     if (toolId) {
       // Buscar ferramenta específica (só se pertencer ao usuário ou for admin)
+      // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
       const { data: toolData, error } = await supabaseAdmin
         .from('user_templates')
-        .select('*')
+        .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description')
         .eq('id', toolId)
         .eq('profession', profession)
         .eq('user_id', authenticatedUserId) // 🔒 Garantir que pertence ao usuário
@@ -68,9 +69,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Listar ferramentas do usuário autenticado
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
     const { data: toolsData, error } = await supabaseAdmin
       .from('user_templates')
-      .select('*')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, short_code, description')
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
       .eq('profession', profession)
       .order('created_at', { ascending: false })
@@ -78,9 +80,10 @@ export async function GET(request: NextRequest) {
     if (error) throw error
 
     // Buscar quizzes personalizados do usuário
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
     const { data: quizzesData, error: quizzesError } = await supabaseAdmin
       .from('quizzes')
-      .select('*')
+      .select('id, title, slug, status, created_at, updated_at, user_id, description')
       .eq('user_id', authenticatedUserId)
       .eq('status', 'active') // Apenas quizzes ativos
       .order('created_at', { ascending: false })
@@ -355,10 +358,11 @@ export async function POST(request: NextRequest) {
       has_short_code: !!shortCode
     })
     
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
     const { data: insertedTool, error: insertError } = await supabaseAdmin
       .from('user_templates')
       .insert(insertData)
-      .select('*')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description')
       .single()
 
     if (insertError) {
@@ -590,7 +594,7 @@ export async function PUT(request: NextRequest) {
       .update(updateData)
       .eq('id', id)
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
-      .select('*')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description')
       .single()
 
     if (error) throw error

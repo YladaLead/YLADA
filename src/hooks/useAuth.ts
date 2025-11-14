@@ -24,13 +24,38 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string, useCache = true) => {
     try {
+      // 🚀 OTIMIZAÇÃO: Verificar cache em sessionStorage primeiro (2 minutos de TTL)
+      if (useCache && typeof window !== 'undefined') {
+        const cacheKey = `user_profile_${userId}`
+        const cached = sessionStorage.getItem(cacheKey)
+        
+        if (cached) {
+          try {
+            const { data, timestamp } = JSON.parse(cached)
+            const age = Date.now() - timestamp
+            const TTL = 2 * 60 * 1000 // 2 minutos
+            
+            if (age < TTL) {
+              console.log('✅ useAuth: Perfil encontrado no cache (idade:', Math.round(age / 1000), 's)')
+              return data as UserProfile
+            } else {
+              // Cache expirado, remover
+              sessionStorage.removeItem(cacheKey)
+            }
+          } catch (e) {
+            // Cache inválido, continuar normalmente
+            sessionStorage.removeItem(cacheKey)
+          }
+        }
+      }
+      
       console.log('🔍 Buscando perfil para user_id:', userId)
       
-      // Tentar buscar com retry (até 3 tentativas)
+      // 🚀 OTIMIZAÇÃO: Reduzir de 3 para 2 tentativas (suficiente para erros de rede temporários)
       let lastError = null
-      for (let attempt = 1; attempt <= 3; attempt++) {
+      for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           const { data, error } = await supabase
             .from('user_profiles')
@@ -39,35 +64,34 @@ export function useAuth() {
             .maybeSingle()
 
           if (error) {
-            console.error(`❌ Erro ao buscar perfil (tentativa ${attempt}/3):`, {
+            console.error(`❌ Erro ao buscar perfil (tentativa ${attempt}/2):`, {
               code: error.code,
-              message: error.message,
-              details: error.details,
-              hint: error.hint
+              message: error.message
             })
             
-            // Se for erro de RLS ou permissão, logar especificamente
+            // Se for erro de RLS ou permissão, não tentar novamente
             if (error.code === 'PGRST301' || error.message?.includes('permission') || error.message?.includes('policy')) {
-              console.error('🚫 Erro de permissão RLS ao buscar perfil. Verifique as políticas RLS.')
+              console.error('🚫 Erro de permissão RLS ao buscar perfil.')
+              break
             }
             
             lastError = error
             // Se não for erro de rede, não tentar novamente
-            if (error.code !== 'PGRST301' && !error.message?.includes('network')) {
+            if (!error.message?.includes('network')) {
               break
             }
             
-            // Aguardar antes de tentar novamente
-            if (attempt < 3) {
-              await new Promise(resolve => setTimeout(resolve, 500))
+            // Aguardar antes de tentar novamente (apenas se for última tentativa)
+            if (attempt < 2) {
+              await new Promise(resolve => setTimeout(resolve, 300)) // Reduzido de 500ms para 300ms
             }
             continue
           }
 
           if (!data) {
-            console.log(`⚠️ Perfil não encontrado para user_id: ${userId} (tentativa ${attempt}/3)`)
-            if (attempt < 3) {
-              await new Promise(resolve => setTimeout(resolve, 500))
+            console.log(`⚠️ Perfil não encontrado para user_id: ${userId} (tentativa ${attempt}/2)`)
+            if (attempt < 2) {
+              await new Promise(resolve => setTimeout(resolve, 300))
               continue
             }
             return null
@@ -77,17 +101,24 @@ export function useAuth() {
             id: data.id,
             perfil: data.perfil,
             is_admin: data.is_admin,
-            is_support: data.is_support,
-            email: data.email,
-            nome_completo: data.nome_completo
+            is_support: data.is_support
           })
+
+          // 🚀 OTIMIZAÇÃO: Salvar no cache
+          if (useCache && typeof window !== 'undefined') {
+            const cacheKey = `user_profile_${userId}`
+            sessionStorage.setItem(cacheKey, JSON.stringify({
+              data,
+              timestamp: Date.now()
+            }))
+          }
 
           return data as UserProfile
         } catch (err: any) {
-          console.error(`❌ Erro na tentativa ${attempt}/3:`, err)
+          console.error(`❌ Erro na tentativa ${attempt}/2:`, err)
           lastError = err
-          if (attempt < 3) {
-            await new Promise(resolve => setTimeout(resolve, 500))
+          if (attempt < 2) {
+            await new Promise(resolve => setTimeout(resolve, 300))
           }
         }
       }
@@ -98,8 +129,7 @@ export function useAuth() {
     } catch (error: any) {
       console.error('❌ Erro geral ao buscar perfil:', {
         error,
-        message: error?.message,
-        stack: error?.stack
+        message: error?.message
       })
       return null
     }
@@ -107,120 +137,65 @@ export function useAuth() {
 
   useEffect(() => {
     const loadAuthData = async () => {
-      console.log('🔄 useAuth: Iniciando carregamento...', {
-        isBrowser: typeof window !== 'undefined',
-        hasCookies: typeof document !== 'undefined' && document.cookie.length > 0
-      })
+      console.log('🔄 useAuth: Iniciando carregamento...')
       
-      // Aguardar um pouco para garantir que a página carregou completamente
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // 🚀 OTIMIZAÇÃO: Reduzir delay inicial de 200ms para 100ms (suficiente para página carregar)
+      await new Promise(resolve => setTimeout(resolve, 100))
       
-      // Tentar obter sessão - com múltiplas tentativas para produção
+      // 🚀 OTIMIZAÇÃO: Apenas 1 tentativa de getSession (o listener onAuthStateChange cobre mudanças)
+      // Isso reduz latência de 1.2s para ~100ms na maioria dos casos
       let session = null
       let sessionError = null
       
-      // Tentativa 1: Buscar sessão imediatamente
       try {
-        const { data: { session: currentSession }, error: error1 } = await supabase.auth.getSession()
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession()
         session = currentSession
-        sessionError = error1
+        sessionError = error
         
         if (session) {
-          console.log('✅ useAuth: Sessão encontrada na primeira tentativa')
-        } else if (error1) {
-          console.warn('⚠️ useAuth: Erro na primeira tentativa:', error1.message)
+          console.log('✅ useAuth: Sessão encontrada')
+        } else if (error) {
+          console.warn('⚠️ useAuth: Erro ao buscar sessão:', error.message)
         }
       } catch (err: any) {
-        console.error('❌ useAuth: Exceção na primeira tentativa:', err)
+        console.error('❌ useAuth: Exceção ao buscar sessão:', err)
         sessionError = err
       }
       
-      // Tentativa 2: Se não encontrou, tentar novamente após mais tempo (pode estar sincronizando)
-      if (!session) {
-        await new Promise(resolve => setTimeout(resolve, 500))
-        try {
-          const { data: { session: retrySession }, error: error2 } = await supabase.auth.getSession()
-          if (retrySession) {
-            console.log('✅ useAuth: Sessão encontrada após retry')
-            session = retrySession
-            sessionError = null
-          } else if (error2) {
-            console.warn('⚠️ useAuth: Erro na segunda tentativa:', error2.message)
-            sessionError = error2
-          }
-        } catch (err: any) {
-          console.error('❌ useAuth: Exceção na segunda tentativa:', err)
-        }
-      }
-      
-      // Tentativa 3: Última tentativa (especialmente importante em produção)
-      if (!session) {
-        await new Promise(resolve => setTimeout(resolve, 500))
-        try {
-          const { data: { session: finalSession }, error: error3 } = await supabase.auth.getSession()
-          if (finalSession) {
-            console.log('✅ useAuth: Sessão encontrada na terceira tentativa')
-            session = finalSession
-            sessionError = null
-          } else if (error3) {
-            console.warn('⚠️ useAuth: Erro na terceira tentativa:', error3.message)
-            sessionError = error3
-          }
-        } catch (err: any) {
-          console.error('❌ useAuth: Exceção na terceira tentativa:', err)
-        }
-      }
-      
-      console.log('📋 useAuth: Sessão final:', {
+      console.log('📋 useAuth: Sessão inicial:', {
         hasSession: !!session,
         hasUser: !!session?.user,
-        userId: session?.user?.id,
-        email: session?.user?.email,
-        error: sessionError?.message || null,
-        cookieCount: typeof document !== 'undefined' ? document.cookie.split(';').length : 0
+        userId: session?.user?.id
       })
       
       setSession(session)
       setUser(session?.user ?? null)
 
-      // IMPORTANTE: Só marcar como não loading DEPOIS de tentar todas as tentativas
-      // Isso evita que ProtectedRoute/RequireSubscription bloqueiem antes de detectar a sessão
+      // 🚀 OTIMIZAÇÃO: Marcar loading como false imediatamente após primeira tentativa
+      // O listener onAuthStateChange vai atualizar se a sessão mudar
       setLoading(false)
       console.log('✅ useAuth: Loading marcado como false')
 
       // Buscar perfil em background (não bloqueia)
       if (session?.user) {
         console.log('🔍 useAuth: Buscando perfil em background para user_id:', session.user.id)
-        // Não esperar - buscar em background
-        fetchUserProfile(session.user.id)
+        // Não esperar - buscar em background (com cache)
+        fetchUserProfile(session.user.id, true)
           .then(profile => {
             if (profile) {
-              console.log('✅ useAuth: Perfil carregado com sucesso:', {
-                id: profile.id,
-                perfil: profile.perfil,
-                is_admin: profile.is_admin,
-                is_support: profile.is_support,
-                nome_completo: profile.nome_completo
-              })
+              console.log('✅ useAuth: Perfil carregado com sucesso')
             } else {
-              console.warn('⚠️ useAuth: Perfil não encontrado (retornou null)')
+              console.warn('⚠️ useAuth: Perfil não encontrado')
             }
             setUserProfile(profile)
           })
           .catch(err => {
-            console.error('❌ useAuth: Erro ao buscar perfil em background:', {
-              error: err,
-              message: err?.message,
-              stack: err?.stack
-            })
+            console.error('❌ useAuth: Erro ao buscar perfil em background:', err?.message)
             // Mesmo com erro, não bloquear - permitir acesso sem perfil
             setUserProfile(null)
           })
       } else {
-        console.log('⚠️ useAuth: Nenhuma sessão encontrada após todas as tentativas', {
-          error: sessionError?.message || 'Sem erro específico',
-          hasCookies: typeof document !== 'undefined' && document.cookie.length > 0
-        })
+        console.log('⚠️ useAuth: Nenhuma sessão encontrada')
         // Se não há sessão, garantir que userProfile também seja null
         setUserProfile(null)
       }
@@ -245,29 +220,30 @@ export function useAuth() {
       if (session?.user) {
         console.log('🔍 useAuth: Buscando perfil após auth change para user_id:', session.user.id)
         try {
-          const profile = await fetchUserProfile(session.user.id)
+          // 🚀 OTIMIZAÇÃO: Usar cache também após auth change (mas invalidar se necessário)
+          const profile = await fetchUserProfile(session.user.id, true)
           if (profile) {
-            console.log('✅ useAuth: Perfil carregado após auth change:', {
-              id: profile.id,
-              perfil: profile.perfil,
-              is_admin: profile.is_admin,
-              is_support: profile.is_support
-            })
+            console.log('✅ useAuth: Perfil carregado após auth change')
           } else {
-            console.warn('⚠️ useAuth: Perfil não encontrado após auth change (retornou null)')
+            console.warn('⚠️ useAuth: Perfil não encontrado após auth change')
           }
           setUserProfile(profile)
         } catch (err: any) {
-          console.error('❌ useAuth: Erro ao buscar perfil após auth change:', {
-            error: err,
-            message: err?.message,
-            stack: err?.stack
-          })
+          console.error('❌ useAuth: Erro ao buscar perfil após auth change:', err?.message)
           // Mesmo com erro, não bloquear - permitir acesso sem perfil
           setUserProfile(null)
         }
       } else {
         console.log('⚠️ useAuth: Sessão removida')
+        // 🚀 OTIMIZAÇÃO: Limpar cache quando sessão é removida
+        if (typeof window !== 'undefined') {
+          const keys = Object.keys(sessionStorage)
+          keys.forEach(key => {
+            if (key.startsWith('user_profile_')) {
+              sessionStorage.removeItem(key)
+            }
+          })
+        }
         setUserProfile(null)
       }
 
@@ -279,6 +255,16 @@ export function useAuth() {
   }, [])
 
   const signOut = async () => {
+    // 🚀 OTIMIZAÇÃO: Limpar cache ao fazer sign out
+    if (typeof window !== 'undefined') {
+      const keys = Object.keys(sessionStorage)
+      keys.forEach(key => {
+        if (key.startsWith('user_profile_')) {
+          sessionStorage.removeItem(key)
+        }
+      })
+    }
+    
     await supabase.auth.signOut()
     setUser(null)
     setSession(null)
