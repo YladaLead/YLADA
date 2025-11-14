@@ -59,12 +59,13 @@ export async function GET(request: NextRequest) {
 
     const available = !data
 
+    // 🚀 MELHORIA: Mensagem mais clara explicando que a URL final inclui o user_slug
     return NextResponse.json({
       slug,
       available,
       message: available 
-        ? 'URL disponível!' 
-        : 'Esta URL já está em uso por você. Escolha outra.'
+        ? 'Nome disponível! A URL final será única com seu nome de usuário.' 
+        : 'Este nome já está em uso por você. Escolha outro. (Outras pessoas podem usar o mesmo nome porque a URL final inclui o nome único de cada usuário)'
     })
   } catch (error: any) {
     console.error('Erro ao verificar slug:', error)

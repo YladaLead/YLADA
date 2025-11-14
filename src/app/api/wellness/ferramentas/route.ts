@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Este nome de URL já está em uso por você. Escolha outro.' },
+        { error: 'Este nome já está em uso por você. Escolha outro. (Outras pessoas podem usar o mesmo nome porque a URL final inclui o nome único de cada usuário na composição)' },
         { status: 409 }
       )
     }

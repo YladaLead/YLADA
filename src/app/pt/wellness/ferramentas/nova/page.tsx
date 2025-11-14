@@ -854,14 +854,32 @@ function NovaFerramentaWellnessContent() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           />
                           <p className="text-xs text-gray-500 mt-2">
-                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos". O sistema ajusta automaticamente enquanto você digita.
+                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos", "agua". O sistema ajusta automaticamente enquanto você digita.
                           </p>
+                          
+                          {/* 🚀 MELHORIA: Mostrar composição completa da URL com user_slug */}
                           {configuracao.urlCompleta && (
-                            <div className={`mt-2 px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                              <p className="text-sm font-medium">
-                                {urlDisponivel ? '✓ Disponível' : '✗ Já em uso'} 
-                                <span className="ml-2 text-xs font-mono">{configuracao.urlCompleta}</span>
+                            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                              <p className="text-sm font-semibold text-blue-900 mb-2">
+                                🔗 Sua URL completa será:
                               </p>
+                              <div className={`px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                                <p className="text-sm font-medium mb-1">
+                                  {urlDisponivel ? '✓ Disponível' : '✗ Já em uso por você'} 
+                                </p>
+                                <p className="text-xs font-mono break-all text-gray-800">
+                                  {configuracao.urlCompleta}
+                                </p>
+                              </div>
+                              <div className="mt-3 p-3 bg-blue-100 rounded-lg">
+                                <p className="text-xs text-blue-800">
+                                  <strong>📋 Composição da URL:</strong><br/>
+                                  • <strong className="text-blue-900">{userSlug || '[seu-nome-url]'}</strong> = Seu nome único na URL (configurado no perfil)<br/>
+                                  • <strong className="text-blue-900">{configuracao.urlPersonalizada || '[nome-projeto]'}</strong> = Nome do projeto que você escolher<br/>
+                                  <br/>
+                                  <strong>💡 Importante:</strong> Diferentes pessoas podem usar o mesmo nome de projeto (ex: "água") porque a URL final será diferente com o seu nome único!
+                                </p>
+                              </div>
                             </div>
                           )}
                           <div className="mt-4 flex items-start space-x-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
