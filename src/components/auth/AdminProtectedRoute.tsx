@@ -21,6 +21,22 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
       try {
         console.log('🔐 AdminProtectedRoute: INICIANDO verificação...')
         
+        // 🚀 OTIMIZAÇÃO: Verificar cache PRIMEIRO (antes de qualquer chamada)
+        const cachedAdmin = getCachedAdminCheck()
+        if (cachedAdmin === true) {
+          console.log('✅ AdminProtectedRoute: Usando cache (instantâneo!)')
+          // Verificar sessão rapidamente para confirmar que ainda está autenticado
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.access_token) {
+            setIsAdmin(true)
+            setLoading(false)
+            return
+          } else {
+            // Sessão expirada, limpar cache
+            clearCachedAdminCheck()
+          }
+        }
+        
         // ✅ CORRIGIDO: Usar getUser() em vez de getSession() (mais seguro, valida com servidor)
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         
@@ -34,19 +50,9 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
           return
         }
 
-        // ✅ NOVO: Verificar cache APÓS confirmar que tem usuário (mais seguro)
-        const cachedAdmin = getCachedAdminCheck()
-        if (cachedAdmin === true) {
-          console.log('✅ AdminProtectedRoute: Usando cache (muito mais rápido!)')
-          setIsAdmin(true)
-          setLoading(false)
-          return
-        }
-        // Se cache é false, continuar para verificar novamente (pode ter mudado)
-
         console.log('✅ AdminProtectedRoute: Usuário autenticado! User:', user.email)
         
-        // Obter access_token da sessão para usar na API
+        // 🚀 OTIMIZAÇÃO: Obter sessão em paralelo (já temos user, só precisamos do token)
         const { data: { session } } = await supabase.auth.getSession()
         if (!session?.access_token) {
           console.error('❌ AdminProtectedRoute: Sem access_token')
@@ -58,8 +64,8 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
         // Verificar se é admin usando API route (evita problemas de RLS em produção)
         let isAdmin = false
         
-        // Criar promise com timeout de 5 segundos
-        const fetchWithTimeout = (url: string, options: RequestInit, timeout = 5000) => {
+        // 🚀 OTIMIZAÇÃO: Reduzir timeout de 5s para 2s (mais rápido)
+        const fetchWithTimeout = (url: string, options: RequestInit, timeout = 2000) => {
           return Promise.race([
             fetch(url, options),
             new Promise<Response>((_, reject) =>
@@ -78,7 +84,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
               'Authorization': `Bearer ${session.access_token}`,
               'Content-Type': 'application/json'
             }
-          }, 5000) // 5 segundos de timeout
+          }, 2000) // 🚀 Reduzido de 5s para 2s
 
           const apiDuration = Date.now() - apiStartTime
           console.log(`⏱️ AdminProtectedRoute: API respondeu em ${apiDuration}ms`)

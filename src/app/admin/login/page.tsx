@@ -24,33 +24,8 @@ function AdminLoginPage() {
     }
   }, [searchParams])
 
-  // Limpar cache ao carregar a página
-  useEffect(() => {
-    // Limpar cache do Service Worker se existir
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((registration) => {
-          registration.unregister()
-        })
-      })
-    }
-
-    // Limpar cache do navegador
-    if ('caches' in window) {
-      caches.keys().then((names) => {
-        names.forEach((name) => {
-          caches.delete(name)
-        })
-      })
-    }
-
-    // Forçar reload sem cache se detectar versão antiga
-    const lastReload = sessionStorage.getItem('lastReload')
-    const now = Date.now()
-    if (!lastReload || now - parseInt(lastReload) > 5000) {
-      sessionStorage.setItem('lastReload', now.toString())
-    }
-  }, [])
+  // 🚀 OTIMIZAÇÃO: Remover limpeza de cache desnecessária (causava lentidão)
+  // O cache é gerenciado automaticamente pelo AdminProtectedRoute
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
