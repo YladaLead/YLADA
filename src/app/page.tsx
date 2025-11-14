@@ -223,11 +223,13 @@ export default function HomePage() {
                 Filosofia Ylada
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed mb-4">
-                YLADA significa <span className="font-semibold text-gray-900">Your Leading Advanced Data Assistant</span> — o seu assistente avançado para gerar conexões significativas.
+                YLADA significa <span className="font-semibold text-gray-900">Your Leading Advanced Data Assistant</span> — a filosofia que une inteligência, experiência humana e propósito.
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed mb-4">
+                Acreditamos que tecnologia só faz sentido quando aproxima pessoas.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Nossa missão é aproximar tecnologia e propósito humano.
-                Cada ferramenta do Ylada é desenhada para apoiar o profissional que acredita no poder do bem-estar compartilhado.
+                Por isso, criamos ferramentas que transformam atendimento em relacionamento, dados em clareza e conexões em resultados reais.
               </p>
             </div>
           </div>

@@ -185,11 +185,13 @@ export default function HomePage() {
               </h2>
               <div className="space-y-6 lg:space-y-7">
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed">
-                  YLADA significa <span className="font-semibold text-gray-900 whitespace-nowrap">Your Leading Advanced Data Assistant</span> — o seu assistente avançado para <span className="whitespace-nowrap">gerar conexões significativas.</span>
+                  YLADA significa <span className="font-semibold text-gray-900 whitespace-nowrap">Your Leading Advanced Data Assistant</span> — a filosofia que une inteligência, experiência humana e propósito.
                 </p>
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed max-w-3xl mx-auto">
-                  Nossa missão é aproximar tecnologia e propósito humano.
-                  Cada ferramenta do Ylada é desenhada para apoiar o profissional que acredita no poder do <span className="whitespace-nowrap">bem-estar compartilhado.</span>
+                  Acreditamos que tecnologia só faz sentido quando aproxima pessoas.
+                </p>
+                <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed max-w-3xl mx-auto">
+                  Por isso, criamos ferramentas que transformam atendimento em relacionamento, dados em clareza e conexões em resultados reais.
                 </p>
               </div>
             </div>
