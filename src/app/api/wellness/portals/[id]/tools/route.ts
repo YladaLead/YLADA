@@ -87,7 +87,8 @@ export async function GET(
   }
 }
 
-// POST - Adicionar ferramenta ao portal
+// POST - Adicionar ferramenta(s) ao portal ou substituir todas
+// Aceita tanto uma ferramenta única quanto um array de ferramentas
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -102,6 +103,14 @@ export async function POST(
 
     const portalId = params.id
     const body = await request.json()
+    
+    // 🚀 CORREÇÃO: Verificar se é array de ferramentas (atualização em lote)
+    if (body.tools && Array.isArray(body.tools)) {
+      // Modo: substituir todas as ferramentas do portal
+      return await replaceAllPortalTools(portalId, body.tools, user, profile)
+    }
+    
+    // Modo antigo: adicionar uma ferramenta única
     const {
       tool_id,
       position,
@@ -298,6 +307,149 @@ export async function DELETE(
     console.error('Erro ao remover ferramenta do portal:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * Substitui todas as ferramentas do portal por um novo conjunto
+ */
+async function replaceAllPortalTools(
+  portalId: string,
+  tools: Array<{ tool_id: string; position: number; is_required?: boolean }>,
+  user: any,
+  profile: any
+) {
+  // Verificar se supabaseAdmin está configurado
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      { error: 'Configuração do servidor incompleta. Contate o suporte.' },
+      { status: 500 }
+    )
+  }
+
+  // Verificar se portal pertence ao usuário
+  const { data: portal, error: portalError } = await supabaseAdmin
+    .from('wellness_portals')
+    .select('id, user_id')
+    .eq('id', portalId)
+    .single()
+
+  if (portalError || !portal) {
+    return NextResponse.json(
+      { error: 'Portal não encontrado' },
+      { status: 404 }
+    )
+  }
+
+  // 🔒 Verificar permissão
+  if (portal.user_id !== user.id && !profile?.is_admin) {
+    return NextResponse.json(
+      { error: 'Você não tem permissão para modificar este portal' },
+      { status: 403 }
+    )
+  }
+
+  // Validar todas as ferramentas antes de fazer qualquer alteração
+  const toolIds = tools.map(t => t.tool_id)
+  const { data: existingTools, error: toolsError } = await supabaseAdmin
+    .from('user_templates')
+    .select('id, user_id, status')
+    .in('id', toolIds)
+
+  if (toolsError) {
+    console.error('Erro ao validar ferramentas:', toolsError)
+    return NextResponse.json(
+      { error: 'Erro ao validar ferramentas' },
+      { status: 500 }
+    )
+  }
+
+  // Verificar se todas as ferramentas existem e pertencem ao usuário
+  const existingToolIds = new Set(existingTools?.map((t: any) => t.id) || [])
+  const missingTools = toolIds.filter(id => !existingToolIds.has(id))
+  
+  if (missingTools.length > 0) {
+    console.error('Ferramentas não encontradas:', missingTools)
+    return NextResponse.json(
+      { error: `Ferramentas não encontradas: ${missingTools.join(', ')}` },
+      { status: 404 }
+    )
+  }
+
+  // Verificar se todas pertencem ao mesmo usuário
+  const invalidTools = existingTools?.filter((t: any) => t.user_id !== portal.user_id) || []
+  if (invalidTools.length > 0) {
+    return NextResponse.json(
+      { error: 'Algumas ferramentas não pertencem ao mesmo usuário do portal' },
+      { status: 403 }
+    )
+  }
+
+  // 🚀 Substituir todas as ferramentas: deletar antigas e inserir novas
+  // Usar transação para garantir consistência
+  try {
+    // 1. Deletar todas as ferramentas antigas do portal
+    const { error: deleteError } = await supabaseAdmin
+      .from('portal_tools')
+      .delete()
+      .eq('portal_id', portalId)
+
+    if (deleteError) {
+      console.error('Erro ao remover ferramentas antigas:', deleteError)
+      return NextResponse.json(
+        { error: 'Erro ao remover ferramentas antigas' },
+        { status: 500 }
+      )
+    }
+
+    // 2. Inserir novas ferramentas
+    if (tools.length > 0) {
+      const toolsToInsert = tools.map(t => ({
+        portal_id: portalId,
+        tool_id: t.tool_id,
+        position: t.position,
+        is_required: t.is_required || false
+      }))
+
+      const { data: insertedTools, error: insertError } = await supabaseAdmin
+        .from('portal_tools')
+        .insert(toolsToInsert)
+        .select()
+
+      if (insertError) {
+        console.error('Erro ao inserir novas ferramentas:', insertError)
+        return NextResponse.json(
+          { error: 'Erro ao inserir novas ferramentas', details: insertError.message },
+          { status: 500 }
+        )
+      }
+
+      console.log(`✅ Portal ${portalId}: ${insertedTools?.length || 0} ferramentas substituídas com sucesso`)
+      
+      return NextResponse.json({
+        success: true,
+        data: { 
+          portalTools: insertedTools,
+          replaced: insertedTools?.length || 0
+        }
+      })
+    } else {
+      // Se array vazio, apenas removeu todas (portal sem ferramentas)
+      return NextResponse.json({
+        success: true,
+        data: { 
+          portalTools: [],
+          replaced: 0,
+          message: 'Todas as ferramentas foram removidas do portal'
+        }
+      })
+    }
+  } catch (error: any) {
+    console.error('Erro ao substituir ferramentas do portal:', error)
+    return NextResponse.json(
+      { error: 'Erro ao substituir ferramentas do portal', details: error.message },
       { status: 500 }
     )
   }

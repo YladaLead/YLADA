@@ -52,11 +52,41 @@ export async function GET(
     const toolsWithDetails = await Promise.all(
       (portalTools || []).map(async (pt: any) => {
         // Buscar template da ferramenta
-        const { data: tool } = await supabaseAdmin
+        const { data: tool, error: toolError } = await supabaseAdmin
           .from('user_templates')
-          .select('id, title, slug, description, emoji, template_slug, custom_colors, user_id')
+          .select('id, title, slug, description, emoji, template_slug, custom_colors, user_id, status')
           .eq('id', pt.tool_id)
           .maybeSingle()
+
+        // 🚀 CORREÇÃO: Log quando ferramenta não é encontrada
+        if (toolError || !tool) {
+          console.warn(`⚠️ Ferramenta não encontrada no portal:`, {
+            portal_id: portal.id,
+            portal_slug: portal.slug,
+            tool_id: pt.tool_id,
+            portal_tool_id: pt.id,
+            error: toolError?.message
+          })
+          return {
+            ...pt,
+            user_templates: null
+          }
+        }
+
+        // 🚀 CORREÇÃO: Verificar se ferramenta está ativa (não mostrar inativas)
+        if (tool.status && tool.status !== 'active' && tool.status !== 'published') {
+          console.warn(`⚠️ Ferramenta inativa no portal:`, {
+            portal_id: portal.id,
+            tool_id: pt.tool_id,
+            tool_title: tool.title,
+            tool_status: tool.status
+          })
+          // Retornar null para que seja filtrada depois
+          return {
+            ...pt,
+            user_templates: null
+          }
+        }
 
         // Buscar perfil do usuário para obter user_slug
         let userSlug = null
