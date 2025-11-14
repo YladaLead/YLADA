@@ -285,12 +285,14 @@ export async function PUT(request: NextRequest) {
     }
 
     // Se slug mudou, verificar disponibilidade PARA ESTE USUÁRIO
+    // 🚀 CORREÇÃO: Excluir o próprio portal da verificação (para permitir editar sem mudar slug)
     if (updates.slug && updates.slug !== existing.slug) {
       const { data: slugExists } = await supabaseAdmin
         .from('wellness_portals')
         .select('id')
         .eq('slug', updates.slug)
         .eq('user_id', user.id) // ✅ Verificar apenas para o usuário atual
+        .neq('id', id) // 🚀 CORREÇÃO: Excluir o próprio portal da verificação
         .maybeSingle()
 
       if (slugExists) {
