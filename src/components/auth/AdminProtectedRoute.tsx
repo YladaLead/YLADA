@@ -37,29 +37,32 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
           }
         }
         
-        // ✅ CORRIGIDO: Usar getUser() em vez de getSession() (mais seguro, valida com servidor)
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        // 🚀 OTIMIZAÇÃO: Paralelizar getUser() e getSession() (mais rápido)
+        const [userResult, sessionResult] = await Promise.all([
+          supabase.auth.getUser(),
+          supabase.auth.getSession()
+        ])
+        
+        const { data: { user }, error: userError } = userResult
+        const { data: { session } } = sessionResult
         
         if (!mounted) return
 
         if (!user || userError) {
           console.log('❌ AdminProtectedRoute: Sem usuário autenticado:', userError?.message)
-          // Limpar cache se não tem usuário
           clearCachedAdminCheck()
           window.location.href = '/admin/login'
           return
         }
 
-        console.log('✅ AdminProtectedRoute: Usuário autenticado! User:', user.email)
-        
-        // 🚀 OTIMIZAÇÃO: Obter sessão em paralelo (já temos user, só precisamos do token)
-        const { data: { session } } = await supabase.auth.getSession()
         if (!session?.access_token) {
           console.error('❌ AdminProtectedRoute: Sem access_token')
           clearCachedAdminCheck()
           window.location.href = '/admin/login'
           return
         }
+
+        console.log('✅ AdminProtectedRoute: Usuário autenticado! User:', user.email)
 
         // Verificar se é admin usando API route (evita problemas de RLS em produção)
         let isAdmin = false
