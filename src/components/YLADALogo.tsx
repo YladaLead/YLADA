@@ -71,7 +71,7 @@ export default function YLADALogo({
     <div className="inline-block bg-transparent">
       <Image
         src={logoPaths[variant]}
-        alt="YLADA - Your Lead Advanced Data Assistant"
+        alt="YLADA - Your Leading Advanced Data Assistant"
         width={width}
         height={height}
         className={`${responsive ? 'h-10 sm:h-14 lg:h-20 w-auto' : ''} ${className} object-contain`}

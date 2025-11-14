@@ -476,7 +476,7 @@ export default function NutraLandingPage() {
               />
             </div>
             <p className="text-gray-600 text-sm mb-2 text-center">
-              YLADA Nutra — Your Lead Advanced Data Assistant
+              YLADA Nutra — Your Leading Advanced Data Assistant
             </p>
             <p className="text-gray-500 text-xs text-center mb-2">
               © {new Date().getFullYear()} YLADA. Todos os direitos reservados.

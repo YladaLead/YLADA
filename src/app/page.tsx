@@ -221,7 +221,7 @@ export default function HomePage() {
                 Filosofia Ylada
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed mb-4">
-                YLADA significa <span className="font-semibold text-gray-900">Your Lead Advanced Data Assistant</span> — o seu assistente avançado para gerar conexões significativas.
+                YLADA significa <span className="font-semibold text-gray-900">Your Leading Advanced Data Assistant</span> — o seu assistente avançado para gerar conexões significativas.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
                 Nossa missão é aproximar tecnologia e propósito humano.
@@ -322,7 +322,7 @@ export default function HomePage() {
               <YLADALogo size="md" className="bg-transparent" />
             </div>
             <p className="text-gray-600 text-sm mb-4 text-center">
-              YLADA — Your Lead Advanced Data Assistant
+              YLADA — Your Leading Advanced Data Assistant
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-4 text-sm text-gray-500">
               <Link href="#" className="hover:text-gray-700">Sobre</Link>

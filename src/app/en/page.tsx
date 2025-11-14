@@ -183,7 +183,7 @@ export default function HomePage() {
               </h2>
               <div className="space-y-6 lg:space-y-7">
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed">
-                  YLADA stands for <span className="font-semibold text-gray-900 whitespace-nowrap">Your Lead Advanced Data Assistant</span> — your advanced assistant to <span className="whitespace-nowrap">generate meaningful connections.</span>
+                  YLADA stands for <span className="font-semibold text-gray-900 whitespace-nowrap">Your Leading Advanced Data Assistant</span> — your advanced assistant to <span className="whitespace-nowrap">generate meaningful connections.</span>
                 </p>
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed max-w-3xl mx-auto">
                   Our mission is to bring together technology and human purpose.
@@ -285,7 +285,7 @@ export default function HomePage() {
               <YLADALogo size="md" className="bg-transparent" />
             </div>
             <p className="text-gray-600 text-sm mb-4 text-center">
-              YLADA — Your Lead Advanced Data Assistant
+              YLADA — Your Leading Advanced Data Assistant
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-4 text-sm text-gray-500">
               <Link href="#" className="hover:text-gray-700">About</Link>

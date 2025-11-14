@@ -482,7 +482,7 @@ export default function CoachLandingPage() {
               <YLADALogo size="md" className="bg-transparent" />
             </div>
             <p className="text-gray-600 text-sm mb-2 text-center">
-              YLADA Coach — Your Lead Advanced Data Assistant
+              YLADA Coach — Your Leading Advanced Data Assistant
             </p>
             <p className="text-gray-500 text-xs text-center mb-2">
               © {new Date().getFullYear()} YLADA. Todos os direitos reservados.
