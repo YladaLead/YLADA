@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 import { createClient } from '@/lib/supabase-client'
@@ -472,11 +473,15 @@ export default function WellnessModuloPlayerPage() {
                       {/* Verificar se é imagem ou PDF */}
                       {materialAtual.arquivo_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                         // É uma imagem
+                        // 🚀 OTIMIZAÇÃO: Usar Image do Next.js para otimização automática
                         <div className="flex flex-col items-center">
-                          <img
+                          <Image
                             src={urlMaterialAtual}
                             alt={materialAtual.titulo}
-                            className="max-w-full max-h-[calc(100vh-200px)] sm:max-h-[calc(100vh-300px)] rounded-lg shadow-md"
+                            width={1200}
+                            height={800}
+                            className="max-w-full max-h-[calc(100vh-200px)] sm:max-h-[calc(100vh-300px)] rounded-lg shadow-md object-contain"
+                            unoptimized={urlMaterialAtual.startsWith('http')} // URLs externas não podem ser otimizadas
                             onError={(e) => {
                               console.error('Erro ao carregar imagem:', e)
                               setError('Erro ao carregar imagem. Verifique se o arquivo existe.')

@@ -25,50 +25,50 @@ export default function ProtectedRoute({
   const [authCheckTimeout, setAuthCheckTimeout] = useState(false)
   const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
 
-  // Timeout de loading - após 2 segundos, continuar mesmo assim
+  // 🚀 OTIMIZAÇÃO: Timeout unificado e simplificado (reduzido de 2s/3s para 1.5s)
+  // Isso reduz latência percebida sem comprometer funcionalidade
   useEffect(() => {
+    let loadingTimer: NodeJS.Timeout | null = null
+    let authTimer: NodeJS.Timeout | null = null
+    let profileTimer: NodeJS.Timeout | null = null
+    
     if (loading) {
-      const timer = setTimeout(() => {
+      loadingTimer = setTimeout(() => {
         setLoadingTimeout(true)
-      }, 2000)
-      return () => clearTimeout(timer)
+      }, 1500) // Reduzido de 2s para 1.5s
     } else {
       setLoadingTimeout(false)
     }
-  }, [loading])
-
-  // Timeout para verificação de autenticação - aguardar 3 segundos antes de redirecionar
-  useEffect(() => {
+    
     if (!isAuthenticated || !user) {
-      if (loading) {
-        return // Aguardar enquanto carrega
+      if (!loading) {
+        authTimer = setTimeout(() => {
+          if (!isAuthenticated || !user) {
+            setAuthCheckTimeout(true)
+          }
+        }, 2000) // Reduzido de 3s para 2s
       }
-      
-      const timer = setTimeout(() => {
-        if (!isAuthenticated || !user) {
-          setAuthCheckTimeout(true)
-        }
-      }, 3000)
-      return () => clearTimeout(timer)
     } else {
       setAuthCheckTimeout(false)
     }
-  }, [isAuthenticated, user, loading])
-
-  // Timeout para verificação de perfil - após 3 segundos, permitir acesso mesmo sem perfil
-  useEffect(() => {
+    
     if (user && !userProfile && !loading) {
-      const timer = setTimeout(() => {
+      profileTimer = setTimeout(() => {
         if (user && !userProfile) {
-          console.warn('⚠️ ProtectedRoute: Perfil não carregou após 3s, permitindo acesso temporário')
+          console.warn('⚠️ ProtectedRoute: Perfil não carregou após 2s, permitindo acesso temporário')
           setProfileCheckTimeout(true)
         }
-      }, 3000) // Reduzido de 5s para 3s
-      return () => clearTimeout(timer)
+      }, 2000) // Reduzido de 3s para 2s
     } else {
       setProfileCheckTimeout(false)
     }
-  }, [user, userProfile, loading])
+    
+    return () => {
+      if (loadingTimer) clearTimeout(loadingTimer)
+      if (authTimer) clearTimeout(authTimer)
+      if (profileTimer) clearTimeout(profileTimer)
+    }
+  }, [loading, isAuthenticated, user, userProfile])
 
   useEffect(() => {
     // Se ainda está carregando, aguardar

@@ -35,18 +35,18 @@ export default function RequireSubscription({
   
   // IMPORTANTE: TODOS os Hooks devem estar sempre no topo, antes de qualquer retorno condicional
   // Hook 1: Timeout do perfil
+  // 🚀 OTIMIZAÇÃO: Reduzido de 1s para 0.8s (com cache do useAuth, perfil carrega mais rápido)
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
     
     if (!userProfile && user) {
       timer = setTimeout(() => {
         setProfileCheckTimeout(true)
-      }, 1000)
+      }, 800) // Reduzido de 1s para 0.8s
     } else {
       setProfileCheckTimeout(false)
     }
     
-    // Sempre retornar função de cleanup (mesma estrutura em todos os casos)
     return () => {
       if (timer) {
         clearTimeout(timer)
@@ -200,25 +200,21 @@ export default function RequireSubscription({
   }, [user, userProfile, authLoading, area, profileCheckTimeout])
 
   // Hook 3: Timeout para verificação de assinatura
-  // IMPORTANTE: Sempre executar, mesmo que checkingSubscription seja false
+  // 🚀 OTIMIZAÇÃO: Reduzido de 3s para 2s (suficiente com as otimizações do useAuth)
   useEffect(() => {
-    // Declarar timer no topo para garantir ordem consistente
     let timer: NodeJS.Timeout | null = null
     
-    // Sempre executar lógica, mesmo que seja apenas para resetar estado
     if (checkingSubscription) {
       timer = setTimeout(() => {
-        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 3s, permitindo acesso temporário')
+        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 2s, permitindo acesso temporário')
         setShowLoading(false)
         setCheckingSubscription(false)
         setHasSubscription(true)
-      }, 3000)
+      }, 2000) // Reduzido de 3s para 2s
     } else {
-      // Sempre atualizar estado, mesmo quando não há timer
       setShowLoading(false)
     }
     
-    // SEMPRE retornar função de cleanup com a mesma estrutura
     return () => {
       if (timer !== null) {
         clearTimeout(timer)

@@ -3,16 +3,22 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
 import { useAuth } from '@/contexts/AuthContext'
 import dynamic from 'next/dynamic'
 
-// Lazy load ChatIA para melhorar performance inicial
+// 🚀 OTIMIZAÇÃO: Lazy load de componentes pesados para melhorar performance inicial
 const ChatIA = dynamic(() => import('@/components/ChatIA'), {
   ssr: false,
   loading: () => null
+})
+
+const WellnessNavBar = dynamic(() => import('@/components/wellness/WellnessNavBar'), {
+  ssr: true, // NavBar pode ser SSR pois é importante para SEO
+  loading: () => (
+    <div className="h-16 bg-white border-b border-gray-200 animate-pulse" />
+  )
 })
 
 export default function WellnessDashboard() {

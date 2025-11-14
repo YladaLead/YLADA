@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { Calculator, Target, Heart, Droplets, Activity, Sparkles, FileText, Brain, DollarSign, TrendingUp, Star, Zap, UtensilsCrossed, Search } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { 
   calculadoraAguaDiagnosticos, 
   calculadoraImcDiagnosticos, 
@@ -21,30 +21,38 @@ import {
   desafio7DiasDiagnosticos,
   desafio21DiasDiagnosticos
 } from '@/lib/diagnostics'
-import QuizPerfilNutricionalPreview from '@/components/wellness-previews/quizzes/QuizPerfilNutricionalPreview'
-import QuizDetoxPreview from '@/components/wellness-previews/quizzes/QuizDetoxPreview'
-import QuizEnergeticoPreview from '@/components/wellness-previews/quizzes/QuizEnergeticoPreview'
-import QuizEmocionalPreview from '@/components/wellness-previews/quizzes/QuizEmocionalPreview'
-import QuizIntoleranciaPreview from '@/components/wellness-previews/quizzes/QuizIntoleranciaPreview'
-import QuizPerfilMetabolicoPreview from '@/components/wellness-previews/quizzes/QuizPerfilMetabolicoPreview'
-import QuizAvaliacaoInicialPreview from '@/components/wellness-previews/quizzes/QuizAvaliacaoInicialPreview'
-import QuizEletrolitosPreview from '@/components/wellness-previews/quizzes/QuizEletrolitosPreview'
-import QuizSintomasIntestinaisPreview from '@/components/wellness-previews/quizzes/QuizSintomasIntestinaisPreview'
-import QuizProntoEmagrecerPreview from '@/components/wellness-previews/quizzes/QuizProntoEmagrecerPreview'
-import QuizTipoFomePreview from '@/components/wellness-previews/quizzes/QuizTipoFomePreview'
-import QuizAlimentacaoSaudavelPreview from '@/components/wellness-previews/quizzes/QuizAlimentacaoSaudavelPreview'
-import QuizSindromeMetabolicaPreview from '@/components/wellness-previews/quizzes/QuizSindromeMetabolicaPreview'
-import QuizRetencaoLiquidosPreview from '@/components/wellness-previews/quizzes/QuizRetencaoLiquidosPreview'
-import QuizConheceSeuCorpoPreview from '@/components/wellness-previews/quizzes/QuizConheceSeuCorpoPreview'
-import QuizNutridoVsAlimentadoPreview from '@/components/wellness-previews/quizzes/QuizNutridoVsAlimentadoPreview'
-import QuizAlimentacaoRotinaPreview from '@/components/wellness-previews/quizzes/QuizAlimentacaoRotinaPreview'
-import QuizGanhosProsperidadePreview from '@/components/wellness-previews/quizzes/QuizGanhosProsperidadePreview'
-import QuizPotencialCrescimentoPreview from '@/components/wellness-previews/quizzes/QuizPotencialCrescimentoPreview'
-import QuizPropositoEquilibrioPreview from '@/components/wellness-previews/quizzes/QuizPropositoEquilibrioPreview'
-import ChecklistAlimentarPreview from '@/components/wellness-previews/checklists/ChecklistAlimentarPreview'
-import ChecklistDetoxPreview from '@/components/wellness-previews/checklists/ChecklistDetoxPreview'
-import GuiaHidratacaoPreview from '@/components/wellness-previews/guias/GuiaHidratacaoPreview'
-import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
+
+// 🚀 OTIMIZAÇÃO: Lazy load de componentes pesados (carregar apenas quando preview for aberto)
+const WellnessNavBar = dynamic(() => import('@/components/wellness/WellnessNavBar'), {
+  ssr: true,
+  loading: () => <div className="h-16 bg-white border-b border-gray-200 animate-pulse" />
+})
+
+// Lazy load dos previews - carregar apenas quando necessário
+const QuizPerfilNutricionalPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizPerfilNutricionalPreview'), { ssr: false })
+const QuizDetoxPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizDetoxPreview'), { ssr: false })
+const QuizEnergeticoPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizEnergeticoPreview'), { ssr: false })
+const QuizEmocionalPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizEmocionalPreview'), { ssr: false })
+const QuizIntoleranciaPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizIntoleranciaPreview'), { ssr: false })
+const QuizPerfilMetabolicoPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizPerfilMetabolicoPreview'), { ssr: false })
+const QuizAvaliacaoInicialPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizAvaliacaoInicialPreview'), { ssr: false })
+const QuizEletrolitosPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizEletrolitosPreview'), { ssr: false })
+const QuizSintomasIntestinaisPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizSintomasIntestinaisPreview'), { ssr: false })
+const QuizProntoEmagrecerPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizProntoEmagrecerPreview'), { ssr: false })
+const QuizTipoFomePreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizTipoFomePreview'), { ssr: false })
+const QuizAlimentacaoSaudavelPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizAlimentacaoSaudavelPreview'), { ssr: false })
+const QuizSindromeMetabolicaPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizSindromeMetabolicaPreview'), { ssr: false })
+const QuizRetencaoLiquidosPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizRetencaoLiquidosPreview'), { ssr: false })
+const QuizConheceSeuCorpoPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizConheceSeuCorpoPreview'), { ssr: false })
+const QuizNutridoVsAlimentadoPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizNutridoVsAlimentadoPreview'), { ssr: false })
+const QuizAlimentacaoRotinaPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizAlimentacaoRotinaPreview'), { ssr: false })
+const QuizGanhosProsperidadePreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizGanhosProsperidadePreview'), { ssr: false })
+const QuizPotencialCrescimentoPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizPotencialCrescimentoPreview'), { ssr: false })
+const QuizPropositoEquilibrioPreview = dynamic(() => import('@/components/wellness-previews/quizzes/QuizPropositoEquilibrioPreview'), { ssr: false })
+const ChecklistAlimentarPreview = dynamic(() => import('@/components/wellness-previews/checklists/ChecklistAlimentarPreview'), { ssr: false })
+const ChecklistDetoxPreview = dynamic(() => import('@/components/wellness-previews/checklists/ChecklistDetoxPreview'), { ssr: false })
+const GuiaHidratacaoPreview = dynamic(() => import('@/components/wellness-previews/guias/GuiaHidratacaoPreview'), { ssr: false })
+const DynamicTemplatePreview = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { ssr: false })
 
 interface Template {
   id: string
