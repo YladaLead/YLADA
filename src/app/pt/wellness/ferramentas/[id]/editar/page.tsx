@@ -633,31 +633,33 @@ export default function EditarFerramentaWellness() {
                           </p>
                         </div>
                       )}
-                      <div className="mt-2 text-xs text-gray-500">
-                        {/* 🚀 MELHORIA: Mostrar composição completa da URL com user_slug */}
-                        {configuracao.urlCompleta ? (
-                          <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <p className="text-xs font-semibold text-blue-900 mb-1">
-                              🔗 Sua URL completa será:
+                      
+                      {/* 🚀 MELHORIA: Mostrar composição completa da URL com user_slug */}
+                      {configuracao.urlCompleta && (
+                        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <p className="text-sm font-semibold text-blue-900 mb-2">
+                            🔗 Sua URL completa será:
+                          </p>
+                          <div className={`px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                            <p className="text-sm font-medium mb-1">
+                              {urlDisponivel ? '✓ Disponível' : '✗ Já em uso por você'} 
                             </p>
-                            <div className={`px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                              <p className="text-xs font-medium mb-1">
-                                {urlDisponivel ? '✓ Disponível' : '✗ Já em uso por você'} 
-                              </p>
-                              <p className="text-xs font-mono break-all text-gray-800">
-                                {configuracao.urlCompleta}
-                              </p>
-                            </div>
-                            <div className="mt-2 p-2 bg-blue-100 rounded">
-                              <p className="text-xs text-blue-800">
-                                <strong>📋 Composição:</strong> <strong className="text-blue-900">{userSlug || '[seu-nome-url]'}</strong> + <strong className="text-blue-900">{configuracao.urlPersonalizada || '[nome-projeto]'}</strong><br/>
-                                <strong>💡</strong> Outras pessoas podem usar o mesmo nome porque a URL final inclui seu nome único!
-                              </p>
-                            </div>
+                            <p className="text-xs font-mono break-all text-gray-800">
+                              {configuracao.urlCompleta}
+                            </p>
                           </div>
-                        ) : (
-                          <div className="text-xs text-gray-500">URL será: {configuracao.urlCompleta || '...'}</div>
-                        )}
+                          <div className="mt-3 p-3 bg-blue-100 rounded-lg">
+                            <p className="text-xs text-blue-800">
+                              <strong>📋 Composição da URL:</strong><br/>
+                              • <strong className="text-blue-900">{userSlug || '[seu-nome-url]'}</strong> = Seu nome único na URL (configurado no perfil)<br/>
+                              • <strong className="text-blue-900">{configuracao.urlPersonalizada || '[nome-projeto]'}</strong> = Nome do projeto que você escolher<br/>
+                              <br/>
+                              <strong>💡 Importante:</strong> Diferentes pessoas podem usar o mesmo nome de projeto (ex: "água") porque a URL final será diferente com o seu nome único!
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      
                       {!userSlug && (
                         <div className="mt-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
                           <p className="text-xs text-yellow-800">
