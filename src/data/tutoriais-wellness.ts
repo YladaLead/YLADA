@@ -16,7 +16,7 @@ export const tutoriaisData: Tutorial[] = [
   },
   {
     id: "2",
-    titulo: "Navegação no Dashboard",
+    titulo: "Navegação na Home",
     categoria: "primeiros-passos",
     tags: ["home", "navegação", "estatísticas", "menu"],
     conteudo: "### O que é a Home?\nA Home é o painel principal do YLADA Wellness. Mostra estatísticas, acesso rápido às ferramentas e visão geral da sua conta.\n\n### Elementos da Home:\n\n**1. Estatísticas gerais:**\n- Total de visualizações: quantas vezes suas ferramentas foram acessadas\n- Leads gerados: quantos contatos você recebeu\n- Taxa de conversão: porcentagem de visitantes que viraram leads\n- Ferramentas ativas: quantas ferramentas você tem publicadas\n\n**2. Menu de navegação:**\n- Home: volta para esta página\n- Ferramentas: lista todas as suas ferramentas\n- Templates: modelos prontos para criar ferramentas\n- Portais: seus portais de bem-estar\n- Módulos: materiais e cursos disponíveis\n- Configurações: ajustes do perfil\n\n**3. Ferramentas recentes:**\n- Lista das últimas ferramentas criadas ou editadas\n- Acesso rápido para editar ou visualizar\n\n**4. Chat IA:**\n- Assistente virtual para dúvidas\n- Ajuda com criação de conteúdo\n- Sugestões de melhorias\n\n**Como usar:**\n- Acompanhe suas estatísticas regularmente\n- Use o menu para navegar entre as seções\n- Clique em uma ferramenta para ver detalhes ou editar\n\n**Dicas:**\n- Verifique as estatísticas semanalmente\n- Use o Chat IA quando tiver dúvidas\n- Organize suas ferramentas pelo nome para facilitar a busca"
