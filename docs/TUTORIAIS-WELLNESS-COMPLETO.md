@@ -7,7 +7,7 @@ Este documento contém todos os textos de tutoriais para a área Wellness, pront
 ## 📋 ÍNDICE
 
 1. [Como Criar Sua Conta e Configurar Seu Perfil](#1-como-criar-sua-conta-e-configurar-seu-perfil)
-2. [Navegação no Dashboard](#2-navegação-no-dashboard)
+2. [Navegação na Home](#2-navegação-na-home)
 3. [Como Criar Sua Primeira Ferramenta](#3-como-criar-sua-primeira-ferramenta)
 4. [Templates Disponíveis e Quando Usar Cada Um](#4-templates-disponíveis-e-quando-usar-cada-um)
 5. [Personalização de Ferramentas](#5-personalização-de-ferramentas)
