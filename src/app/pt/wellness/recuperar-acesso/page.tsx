@@ -76,7 +76,7 @@ function RecuperarAcessoContent() {
             Recuperar Acesso
           </h1>
           <p className="text-gray-600 mb-8 text-center">
-            Digite seu e-mail para receber um link de acesso ao seu dashboard
+            Digite seu e-mail para receber um link de acesso à sua Home
           </p>
 
           {/* Mensagem de Sucesso */}

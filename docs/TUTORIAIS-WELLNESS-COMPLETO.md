@@ -67,12 +67,12 @@ Para usar o YLADA Wellness, você precisa criar uma conta e configurar seu perfi
 
 ---
 
-## 2. NAVEGAÇÃO NO DASHBOARD
+## 2. NAVEGAÇÃO NA HOME
 
-### O que é o Dashboard?
-O Dashboard é o painel principal do YLADA Wellness. Mostra estatísticas, acesso rápido às ferramentas e visão geral da sua conta.
+### O que é a Home?
+A Home é o painel principal do YLADA Wellness. Mostra estatísticas, acesso rápido às ferramentas e visão geral da sua conta.
 
-### Elementos do Dashboard:
+### Elementos da Home:
 
 **1. Estatísticas gerais:**
 - Total de visualizações: quantas vezes suas ferramentas foram acessadas
@@ -81,7 +81,7 @@ O Dashboard é o painel principal do YLADA Wellness. Mostra estatísticas, acess
 - Ferramentas ativas: quantas ferramentas você tem publicadas
 
 **2. Menu de navegação:**
-- Dashboard: volta para esta página
+- Home: volta para esta página
 - Ferramentas: lista todas as suas ferramentas
 - Templates: modelos prontos para criar ferramentas
 - Portais: seus portais de bem-estar
@@ -117,7 +117,7 @@ Uma ferramenta é um recurso criado por você para seus clientes. Pode ser uma c
 ### Passo a passo completo:
 
 **1. Acessar criação:**
-- No Dashboard, clique em "Ferramentas"
+- Na Home, clique em "Ferramentas"
 - Clique em "Nova Ferramenta" ou "+"
 
 **2. Escolher template:**
@@ -614,12 +614,12 @@ Acompanhar resultados ajuda a entender o que está funcionando, onde melhorar e 
 
 **1. Visualizações:**
 - O que é: quantas vezes sua ferramenta foi acessada
-- Onde ver: Dashboard e página da ferramenta
+- Onde ver: Home e página da ferramenta
 - Como usar: identifique ferramentas mais populares
 
 **2. Leads gerados:**
 - O que é: quantos contatos você recebeu através das ferramentas
-- Onde ver: Dashboard e página da ferramenta
+- Onde ver: Home e página da ferramenta
 - Como usar: veja quais ferramentas geram mais leads
 
 **3. Taxa de conversão:**
@@ -629,12 +629,12 @@ Acompanhar resultados ajuda a entender o que está funcionando, onde melhorar e 
 
 **4. Ferramentas ativas:**
 - O que é: quantas ferramentas você tem publicadas
-- Onde ver: Dashboard
+- Onde ver: Home
 - Como usar: acompanhe seu portfólio
 
 ### Como acompanhar:
 
-**1. Dashboard:**
+**1. Home:**
 - Veja estatísticas gerais
 - Compare diferentes períodos
 - Identifique tendências
@@ -688,7 +688,7 @@ O Chat IA é um assistente virtual integrado ao YLADA Wellness que ajuda você a
 ### Como usar:
 
 **1. Acessar:**
-- O Chat IA está disponível no Dashboard
+- O Chat IA está disponível na Home
 - Clique no ícone do chat
 - Uma janela abrirá
 

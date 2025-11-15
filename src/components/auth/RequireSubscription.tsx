@@ -464,7 +464,7 @@ function UpgradeRequiredPage({ area }: { area: string }) {
 
           {/* Mensagem */}
           <p className="text-lg text-gray-600 mb-8">
-            Para acessar o dashboard da área {areaLabel}, você precisa de uma assinatura ativa.
+            Para acessar a Home da área {areaLabel}, você precisa de uma assinatura ativa.
           </p>
 
           {/* Benefícios */}

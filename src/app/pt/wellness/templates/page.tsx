@@ -597,7 +597,7 @@ export default function WellnessTemplatesPage() {
                 <li>• <strong>Ver Demo:</strong> Veja como a ferramenta funciona antes de criar</li>
                 <li>• <strong>Criar Link:</strong> Crie seu link personalizado e comece a usar</li>
                 <li>• <strong>Compartilhar:</strong> Envie para seus clientes via WhatsApp, email ou redes sociais</li>
-                <li>• <strong>Coletar Leads:</strong> Receba os resultados diretamente no seu dashboard</li>
+                <li>• <strong>Coletar Leads:</strong> Receba os resultados diretamente na sua Home</li>
               </ul>
             </div>
           </div>

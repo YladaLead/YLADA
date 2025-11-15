@@ -233,7 +233,7 @@ function BemVindoContent() {
         
         // Aguardar 3 segundos para garantir que a mensagem seja vista antes de redirecionar
         setTimeout(() => {
-          console.log('🔄 Redirecionando para dashboard...')
+          console.log('🔄 Redirecionando para Home...')
           router.push('/pt/wellness/dashboard')
         }, 3000)
       } else {
@@ -328,7 +328,7 @@ function BemVindoContent() {
               {/* Contador de redirecionamento */}
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6 max-w-md mx-auto">
                 <p className="text-blue-800 font-medium mb-2">
-                  🚀 Redirecionando para o Dashboard...
+                  🚀 Redirecionando para a Home...
                 </p>
                 <div className="flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>

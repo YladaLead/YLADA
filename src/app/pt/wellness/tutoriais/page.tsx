@@ -246,7 +246,7 @@ function TutoriaisWellnessContent() {
               Tire dúvidas em tempo real com nosso assistente virtual
             </p>
             <p className="text-xs text-gray-500">
-              Disponível no Dashboard
+              Disponível na Home
             </p>
           </div>
         </div>
