@@ -465,6 +465,17 @@ function WellnessDashboardContent() {
               <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Quiz</h3>
               <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Personalizado</p>
             </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4">
+            <Link
+              href="/pt/wellness/tutoriais"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <span className="text-3xl sm:text-4xl mb-2">📚</span>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Tutoriais</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Ajuda e Recursos</p>
+            </Link>
             
             <Link 
               href="/pt/wellness/portals"
