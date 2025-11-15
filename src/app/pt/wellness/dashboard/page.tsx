@@ -468,15 +468,6 @@ function WellnessDashboardContent() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4">
-            <Link
-              href="/pt/wellness/tutoriais"
-              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">📚</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Tutoriais</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Ajuda e Recursos</p>
-            </Link>
-            
             <Link 
               href="/pt/wellness/portals"
               className="flex flex-col items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg hover:from-emerald-100 hover:to-green-100 transition-colors border border-emerald-200"
@@ -494,7 +485,7 @@ function WellnessDashboardContent() {
             <span>🎨</span>
             <span>Recursos e Materiais</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Link 
               href="/pt/wellness/templates"
               className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
@@ -508,9 +499,18 @@ function WellnessDashboardContent() {
               href="/pt/wellness/cursos"
               className="flex flex-col items-center justify-center p-4 sm:p-5 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
             >
-              <span className="text-3xl sm:text-4xl mb-2">📚</span>
+              <span className="text-3xl sm:text-4xl mb-2">📖</span>
               <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Cursos</h3>
               <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Educação</p>
+            </Link>
+
+            <Link
+              href="/pt/wellness/tutoriais"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+            >
+              <span className="text-3xl sm:text-4xl mb-2">📚</span>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Tutoriais</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Ajuda e Recursos</p>
             </Link>
           </div>
         </div>
