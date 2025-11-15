@@ -17,13 +17,11 @@ Este documento contém todos os textos de tutoriais para a área Wellness, pront
 9. [URLs Personalizadas e Códigos Curtos](#9-urls-personalizadas-e-códigos-curtos)
 10. [Navegação Sequencial em Portais](#10-navegação-sequencial-em-portais)
 11. [Acompanhamento de Resultados](#11-acompanhamento-de-resultados)
-12. [Chat IA Integrado](#12-chat-ia-integrado)
-13. [Como Aumentar Conversões](#13-como-aumentar-conversões)
-14. [Organização de Múltiplas Ferramentas](#14-organização-de-múltiplas-ferramentas)
-15. [Editar e Atualizar Ferramentas](#15-editar-e-atualizar-ferramentas)
-16. [Módulos e Materiais de Curso](#16-módulos-e-materiais-de-curso)
-17. [Configurações Avançadas](#17-configurações-avançadas)
-18. [Solução de Problemas Comuns](#18-solução-de-problemas-comuns)
+12. [Como Aumentar Conversões](#12-como-aumentar-conversões)
+13. [Organização de Múltiplas Ferramentas](#13-organização-de-múltiplas-ferramentas)
+14. [Editar e Atualizar Ferramentas](#14-editar-e-atualizar-ferramentas)
+15. [Configurações de Perfil](#15-configurações-de-perfil)
+16. [Solução de Problemas Comuns](#16-solução-de-problemas-comuns)
 
 ---
 
@@ -85,17 +83,11 @@ A Home é o painel principal do YLADA Wellness. Mostra estatísticas, acesso rá
 - Ferramentas: lista todas as suas ferramentas
 - Templates: modelos prontos para criar ferramentas
 - Portais: seus portais de bem-estar
-- Módulos: materiais e cursos disponíveis
 - Configurações: ajustes do perfil
 
 **3. Ferramentas recentes:**
 - Lista das últimas ferramentas criadas ou editadas
 - Acesso rápido para editar ou visualizar
-
-**4. Chat IA:**
-- Assistente virtual para dúvidas
-- Ajuda com criação de conteúdo
-- Sugestões de melhorias
 
 **Como usar:**
 - Acompanhe suas estatísticas regularmente
@@ -104,7 +96,6 @@ A Home é o painel principal do YLADA Wellness. Mostra estatísticas, acesso rá
 
 **Dicas:**
 - Verifique as estatísticas semanalmente
-- Use o Chat IA quando tiver dúvidas
 - Organize suas ferramentas pelo nome para facilitar a busca
 
 ---
@@ -636,18 +627,11 @@ Acompanhar resultados ajuda a entender o que está funcionando, onde melhorar e 
 
 **1. Home:**
 - Veja estatísticas gerais
-- Compare diferentes períodos
-- Identifique tendências
+- Acompanhe performance geral
 
 **2. Página da ferramenta:**
 - Veja estatísticas específicas
 - Acompanhe performance individual
-- Compare com outras ferramentas
-
-**3. Relatórios:**
-- Exporte dados (quando disponível)
-- Analise em planilhas
-- Crie gráficos
 
 ### Como interpretar os dados:
 
@@ -675,80 +659,12 @@ Acompanhar resultados ajuda a entender o que está funcionando, onde melhorar e 
 
 **Problemas comuns:**
 - "Estatísticas não aparecem": aguarde algumas horas após publicação
-- "Números parecem errados": verifique o período de análise
+- "Números parecem errados": verifique se há tráfego recente
 - "Como aumentar visualizações": divulgue mais, melhore SEO
 
 ---
 
-## 12. CHAT IA INTEGRADO
-
-### O que é o Chat IA?
-O Chat IA é um assistente virtual integrado ao YLADA Wellness que ajuda você a criar conteúdo, tirar dúvidas e otimizar suas ferramentas.
-
-### Como usar:
-
-**1. Acessar:**
-- O Chat IA está disponível na Home
-- Clique no ícone do chat
-- Uma janela abrirá
-
-**2. Fazer perguntas:**
-- Digite sua pergunta ou solicitação
-- Seja específico
-- Exemplos:
-  - "Como criar um quiz sobre nutrição?"
-  - "Me ajude a escrever uma descrição para calculadora de IMC"
-  - "Quais cores combinam para uma ferramenta de bem-estar?"
-
-**3. Receber respostas:**
-- O Chat IA responderá em segundos
-- Use as sugestões fornecidas
-- Faça perguntas de follow-up se necessário
-
-### Funcionalidades:
-
-**1. Criação de conteúdo:**
-- Gere descrições para ferramentas
-- Crie textos para CTAs
-- Escreva perguntas para quizzes
-- Sugira títulos
-
-**2. Ajuda com dúvidas:**
-- Tire dúvidas sobre funcionalidades
-- Entenda como usar recursos
-- Resolva problemas
-
-**3. Sugestões de melhorias:**
-- Receba dicas para otimizar ferramentas
-- Sugestões de conteúdo
-- Ideias de personalização
-
-**4. Análise:**
-- Analise performance (quando disponível)
-- Receba recomendações
-- Identifique oportunidades
-
-### Dicas para usar melhor:
-- Seja específico nas perguntas
-- Use o chat como brainstorming
-- Revise as sugestões antes de usar
-- Combine sugestões com seu conhecimento
-
-**Exemplos de uso:**
-- "Crie uma descrição para uma calculadora de calorias"
-- "Me dê 5 perguntas para um quiz sobre hidratação"
-- "Quais cores usar para uma ferramenta de nutrição?"
-- "Como aumentar conversões nas minhas ferramentas?"
-
-**Limitações:**
-- O Chat IA é uma ferramenta de apoio
-- Sempre revise e personalize as sugestões
-- Use seu conhecimento profissional
-- Não substitui sua expertise
-
----
-
-## 13. COMO AUMENTAR CONVERSÕES
+## 12. COMO AUMENTAR CONVERSÕES
 
 ### O que são conversões?
 Conversões são quando um visitante da sua ferramenta vira um lead (entra em contato, clica no CTA, etc.).
@@ -936,7 +852,6 @@ Ferramentas precisam ser atualizadas para manter informações corretas, melhora
 **4. Configurações:**
 - CTA
 - Status (ativo/inativo)
-- Configurações avançadas
 
 ### Quando editar:
 
@@ -973,104 +888,50 @@ Ferramentas precisam ser atualizadas para manter informações corretas, melhora
 
 ---
 
-## 16. MÓDULOS E MATERIAIS DE CURSO
+## 15. CONFIGURAÇÕES DE PERFIL
 
-### O que são módulos?
-Módulos são materiais educacionais disponíveis no YLADA Wellness, como cursos, guias e recursos de aprendizado.
+### O que são configurações?
+Configurações são opções para personalizar seu perfil e ajustar informações básicas da sua conta.
 
-### Como acessar:
+### Onde encontrar:
+- No menu, clique em "Configurações" ou "Perfil"
 
-**1. Menu:**
-- Clique em "Módulos" ou "Cursos"
-- Veja lista de módulos disponíveis
-- Escolha o que deseja acessar
+### Opções disponíveis:
 
-**2. Conteúdo:**
-- Cada módulo tem materiais específicos
-- Pode incluir: vídeos, PDFs, textos, exercícios
-- Navegue pelo conteúdo
-- Baixe materiais quando disponível
-
-### Como usar em atendimentos:
-
-**1. Compartilhar materiais:**
-- Envie materiais relevantes para clientes
-- Use como complemento ao atendimento
-- Ofereça como recurso adicional
-
-**2. Educar clientes:**
-- Use módulos para educar
-- Complemente consultas
-- Ofereça conhecimento adicional
-
-**3. Criar conteúdo próprio:**
-- Use módulos como inspiração
-- Adapte para suas necessidades
-- Crie suas próprias ferramentas baseadas no aprendizado
-
-### Dicas de uso:
-- Explore todos os módulos
-- Baixe materiais importantes
-- Use regularmente
-- Compartilhe com clientes quando relevante
-
-**Problemas comuns:**
-- "Módulo não carrega": verifique conexão
-- "Material não baixa": verifique permissões
-- "Conteúdo não aparece": atualize a página
-
----
-
-## 17. CONFIGURAÇÕES AVANÇADAS
-
-### O que são configurações avançadas?
-Configurações avançadas são ajustes mais específicos do seu perfil e conta.
-
-### Configurações disponíveis:
-
-**1. Perfil:**
-- Dados pessoais
-- Foto de perfil
-- Informações profissionais
-- User slug (nome na URL)
-
-**2. Preferências:**
-- Idioma (quando disponível)
-- Notificações
-- Tema (quando disponível)
-- Outras preferências
-
-**3. Privacidade:**
-- Visibilidade de perfil
-- Compartilhamento de dados
-- Configurações de privacidade
-
-**4. Conta:**
+**1. Informações do perfil:**
+- Nome completo
 - Email
-- Senha
-- Dados de pagamento (quando aplicável)
-- Assinatura
+- Telefone
+- WhatsApp
+- Bio (descrição pessoal)
+- Nome na URL (user_slug)
 
-### Como acessar:
-1. Clique em "Configurações" no menu
-2. Navegue pelas abas
-3. Faça as alterações desejadas
-4. Salve
+**2. Alterar senha:**
+- Senha atual
+- Nova senha
+- Confirmar nova senha
 
-### Dicas importantes:
-- Revise configurações regularmente
-- Mantenha informações atualizadas
-- Proteja sua conta
-- Use senhas seguras
+### Como editar:
+1. Acesse "Configurações" no menu
+2. Modifique os campos desejados
+3. Clique em "Salvar"
+4. As alterações são aplicadas imediatamente
+
+### Dicas:
+- Mantenha suas informações atualizadas
+- Use um nome na URL (user_slug) profissional
+- Escolha uma senha segura
+- Revise suas informações regularmente
 
 **Problemas comuns:**
-- "Não consigo alterar user_slug": não pode ser alterado após criação
-- "Senha não muda": verifique requisitos
-- "Configurações não salvam": verifique conexão
+- "Nome na URL já está em uso": escolha outro nome
+- "Senha não confere": verifique se as senhas digitadas são iguais
+- "Configuração não salva": recarregue a página e tente novamente
+- "Preciso de ajuda": consulte a documentação ou suporte
 
 ---
 
-## 18. SOLUÇÃO DE PROBLEMAS COMUNS
+## 16. SOLUÇÃO DE PROBLEMAS COMUNS
 
 ### Problemas e soluções:
 
@@ -1149,8 +1010,7 @@ Este documento contém todos os tutoriais em texto para a área Wellness. Os tex
 1. Criar seção "Ajuda" ou "Tutoriais" no sistema
 2. Adicionar busca por tópicos
 3. Criar links contextuais (ex: "Precisa de ajuda? Clique aqui")
-4. Integrar com Chat IA para respostas automáticas
-5. Criar versão resumida para quick start
+4. Criar versão resumida para quick start
 
 ---
 

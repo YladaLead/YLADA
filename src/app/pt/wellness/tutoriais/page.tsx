@@ -341,41 +341,6 @@ function TutoriaisWellnessContent() {
           )}
         </div>
 
-        {/* Seção de Recursos Adicionais */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            href="/pt/wellness/modulos"
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:scale-105"
-          >
-            <div className="text-4xl mb-4">📖</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Módulos e Cursos</h3>
-            <p className="text-gray-600 text-sm">
-              Acesse materiais educacionais e cursos completos
-            </p>
-          </Link>
-
-          <Link
-            href="/pt/wellness/suporte"
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:scale-105"
-          >
-            <div className="text-4xl mb-4">💬</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Suporte</h3>
-            <p className="text-gray-600 text-sm">
-              Entre em contato com nossa equipe de suporte
-            </p>
-          </Link>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="text-4xl mb-4">🤖</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Chat IA</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Tire dúvidas em tempo real com nosso assistente virtual
-            </p>
-            <p className="text-xs text-gray-500">
-              Disponível na Home
-            </p>
-          </div>
-        </div>
       </div>
 
       <style jsx>{`

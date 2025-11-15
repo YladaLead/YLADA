@@ -312,11 +312,41 @@ export async function POST(request: NextRequest) {
     // Gerar código curto se solicitado
     let shortCode = null
     if (generate_short_url) {
-      const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
-      if (!codeError && codeData) {
-        shortCode = codeData
+      // Se foi fornecido código personalizado, usar ele (após validação)
+      if (body.custom_short_code) {
+        const customCode = body.custom_short_code.toLowerCase().trim()
+        
+        // Validar formato
+        if (!/^[a-z0-9-]{3,10}$/.test(customCode)) {
+          return NextResponse.json(
+            { error: 'Código personalizado inválido. Deve ter entre 3 e 10 caracteres e conter apenas letras, números e hífens.' },
+            { status: 400 }
+          )
+        }
+
+        // Verificar disponibilidade
+        const { data: existingCode } = await supabaseAdmin
+          .from('user_templates')
+          .select('id')
+          .eq('short_code', customCode)
+          .limit(1)
+
+        if (existingCode && existingCode.length > 0) {
+          return NextResponse.json(
+            { error: 'Este código personalizado já está em uso' },
+            { status: 409 }
+          )
+        }
+
+        shortCode = customCode
       } else {
-        console.error('Erro ao gerar código curto:', codeError)
+        // Gerar código aleatório
+        const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+        if (!codeError && codeData) {
+          shortCode = codeData
+        } else {
+          console.error('Erro ao gerar código curto:', codeError)
+        }
       }
     }
 
@@ -574,6 +604,11 @@ export async function PUT(request: NextRequest) {
     if (custom_whatsapp_message !== undefined) updateData.custom_whatsapp_message = custom_whatsapp_message
     if (status !== undefined) updateData.status = status
 
+    // Remover código curto se solicitado
+    if (body.remove_short_code === true) {
+      updateData.short_code = null
+    }
+
     // Gerar código curto se solicitado e ainda não existir
     if (generate_short_url) {
       const { data: existingTool } = await supabaseAdmin
@@ -583,11 +618,42 @@ export async function PUT(request: NextRequest) {
         .single()
 
       if (!existingTool?.short_code) {
-        const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
-        if (!codeError && codeData) {
-          updateData.short_code = codeData
+        // Se foi fornecido código personalizado, usar ele (após validação)
+        if (body.custom_short_code) {
+          const customCode = body.custom_short_code.toLowerCase().trim()
+          
+          // Validar formato
+          if (!/^[a-z0-9-]{3,10}$/.test(customCode)) {
+            return NextResponse.json(
+              { error: 'Código personalizado inválido. Deve ter entre 3 e 10 caracteres e conter apenas letras, números e hífens.' },
+              { status: 400 }
+            )
+          }
+
+          // Verificar disponibilidade
+          const { data: existingCode } = await supabaseAdmin
+            .from('user_templates')
+            .select('id')
+            .eq('short_code', customCode)
+            .neq('id', id)
+            .limit(1)
+
+          if (existingCode && existingCode.length > 0) {
+            return NextResponse.json(
+              { error: 'Este código personalizado já está em uso' },
+              { status: 409 }
+            )
+          }
+
+          updateData.short_code = customCode
         } else {
-          console.error('Erro ao gerar código curto:', codeError)
+          // Gerar código aleatório
+          const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+          if (!codeError && codeData) {
+            updateData.short_code = codeData
+          } else {
+            console.error('Erro ao gerar código curto:', codeError)
+          }
         }
       }
     }

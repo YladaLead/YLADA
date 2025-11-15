@@ -8,12 +8,6 @@ import RequireSubscription from '@/components/auth/RequireSubscription'
 import { useAuth } from '@/contexts/AuthContext'
 import dynamic from 'next/dynamic'
 
-// 🚀 OTIMIZAÇÃO: Lazy load de componentes pesados para melhorar performance inicial
-const ChatIA = dynamic(() => import('@/components/ChatIA'), {
-  ssr: false,
-  loading: () => null
-})
-
 const WellnessNavBar = dynamic(() => import('@/components/wellness/WellnessNavBar'), {
   ssr: true, // NavBar pode ser SSR pois é importante para SEO
   loading: () => (
@@ -65,7 +59,6 @@ function WellnessDashboardContent() {
     conversoes: 0,
     clientesAtivos: 0
   })
-  const [chatAberto, setChatAberto] = useState(false)
   const [ferramentasAtivas, setFerramentasAtivas] = useState<Array<{
     id: string
     nome: string
@@ -458,12 +451,12 @@ function WellnessDashboardContent() {
             </Link>
 
             <Link 
-              href="/pt/wellness/quiz-personalizado"
+              href="/pt/wellness/quizzes"
               className="flex flex-col items-center justify-center p-4 sm:p-5 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
             >
               <span className="text-3xl sm:text-4xl mb-2">🎯</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Quiz</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Personalizado</p>
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Quizzes</h3>
+              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Gerenciar</p>
             </Link>
 
             <Link 
@@ -624,9 +617,6 @@ function WellnessDashboardContent() {
         </div>
 
       </div>
-
-      {/* Chat IA - só renderizar quando aberto */}
-      {chatAberto && <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />}
     </div>
   )
 }

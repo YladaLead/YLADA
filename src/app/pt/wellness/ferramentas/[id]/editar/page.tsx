@@ -70,6 +70,12 @@ export default function EditarFerramentaWellness() {
   const [userSlug, setUserSlug] = useState<string>('')
   const [slugNormalizado, setSlugNormalizado] = useState(false)
   const [generateShortUrl, setGenerateShortUrl] = useState(false)
+  const [shortCodeExistente, setShortCodeExistente] = useState<string | null>(null)
+  const [removendoShortCode, setRemovendoShortCode] = useState(false)
+  const [customShortCode, setCustomShortCode] = useState('')
+  const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
+  const [verificandoShortCode, setVerificandoShortCode] = useState(false)
+  const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
   const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null)
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
   const [erroUrlWhatsapp, setErroUrlWhatsapp] = useState(false) // Flag para erro de URL do WhatsApp
@@ -207,6 +213,14 @@ export default function EditarFerramentaWellness() {
 
       setSlugOriginal(tool.slug)
       setDescricao(tool.description || '')
+      
+      // Verificar se já tem código curto
+      if (tool.short_code) {
+        setShortCodeExistente(tool.short_code)
+        setGenerateShortUrl(false) // Não mostrar checkbox se já tem
+      } else {
+        setShortCodeExistente(null)
+      }
       
       // Calcular URL completa baseada no slug e userSlug atual
       const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
@@ -368,7 +382,8 @@ export default function EditarFerramentaWellness() {
         external_url: configuracao.tipoCta === 'url' ? configuracao.urlExterna : null,
         cta_button_text: configuracao.textoBotao,
         custom_whatsapp_message: configuracao.mensagemWhatsapp,
-        generate_short_url: generateShortUrl
+        generate_short_url: generateShortUrl,
+        custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
       }
 
       const response = await fetch('/api/wellness/ferramentas', {
@@ -667,23 +682,173 @@ export default function EditarFerramentaWellness() {
                           </p>
                         </div>
                       )}
-                      <div className="mt-4 flex items-start space-x-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                        <input
-                          type="checkbox"
-                          id="generateShortUrl"
-                          checked={generateShortUrl}
-                          onChange={(e) => setGenerateShortUrl(e.target.checked)}
-                          className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer">
-                          <span className="text-sm font-medium text-gray-900 block">
-                            🔗 Gerar URL Encurtada
-                          </span>
-                          <span className="text-xs text-gray-600 mt-1 block">
-                            Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{getAppUrl().replace(/^https?:\/\//, '')}/p/abc123</code> para facilitar compartilhamento.
-                          </span>
-                        </label>
-                      </div>
+                      
+                      {/* Código Curto Existente */}
+                      {shortCodeExistente && (
+                        <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <span className="text-sm font-medium text-gray-900 block">
+                                ✅ URL Encurtada Ativa
+                              </span>
+                              <span className="text-xs text-gray-600 mt-1 block">
+                                <code className="bg-white px-1 py-0.5 rounded font-mono">{getAppUrl()}/p/{shortCodeExistente}</code>
+                              </span>
+                            </div>
+                            <button
+                              onClick={async () => {
+                                if (confirm('Tem certeza que deseja remover o código curto? Esta ação não pode ser desfeita.')) {
+                                  try {
+                                    setRemovendoShortCode(true)
+                                    const response = await fetch('/api/wellness/ferramentas', {
+                                      method: 'PUT',
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                      },
+                                      credentials: 'include',
+                                      body: JSON.stringify({
+                                        id: toolId,
+                                        remove_short_code: true
+                                      }),
+                                    })
+
+                                    if (!response.ok) {
+                                      throw new Error('Erro ao remover código curto')
+                                    }
+
+                                    setShortCodeExistente(null)
+                                    setMensagemSucesso('Código curto removido com sucesso!')
+                                    setTimeout(() => setMensagemSucesso(null), 3000)
+                                  } catch (error: any) {
+                                    console.error('Erro ao remover código curto:', error)
+                                    setMensagemErro(error.message || 'Erro ao remover código curto')
+                                    setTimeout(() => setMensagemErro(null), 5000)
+                                  } finally {
+                                    setRemovendoShortCode(false)
+                                  }
+                                }
+                              }}
+                              disabled={removendoShortCode}
+                              className="text-xs text-red-600 hover:text-red-700 underline disabled:opacity-50"
+                            >
+                              {removendoShortCode ? 'Removendo...' : 'Remover'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Gerar Novo Código Curto */}
+                      {!shortCodeExistente && (
+                        <div className="mt-4 space-y-3">
+                          <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                            <div className="flex items-start space-x-3">
+                              <input
+                                type="checkbox"
+                                id="generateShortUrl"
+                                checked={generateShortUrl}
+                                onChange={(e) => {
+                                  setGenerateShortUrl(e.target.checked)
+                                  if (!e.target.checked) {
+                                    setUsarCodigoPersonalizado(false)
+                                    setCustomShortCode('')
+                                    setShortCodeDisponivel(null)
+                                  }
+                                }}
+                                className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                              />
+                              <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer">
+                                <span className="text-sm font-medium text-gray-900 block">
+                                  🔗 Gerar URL Encurtada
+                                </span>
+                                <span className="text-xs text-gray-600 mt-1 block">
+                                  Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{getAppUrl().replace(/^https?:\/\//, '')}/p/abc123</code> para facilitar compartilhamento.
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Opção de Código Personalizado */}
+                          {generateShortUrl && (
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                              <div className="flex items-start space-x-3 mb-3">
+                                <input
+                                  type="checkbox"
+                                  id="usarCodigoPersonalizado"
+                                  checked={usarCodigoPersonalizado}
+                                  onChange={(e) => {
+                                    setUsarCodigoPersonalizado(e.target.checked)
+                                    if (!e.target.checked) {
+                                      setCustomShortCode('')
+                                      setShortCodeDisponivel(null)
+                                    }
+                                  }}
+                                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor="usarCodigoPersonalizado" className="flex-1 cursor-pointer">
+                                  <span className="text-sm font-medium text-gray-900 block">
+                                    ✏️ Personalizar Código
+                                  </span>
+                                  <span className="text-xs text-gray-600 mt-1 block">
+                                    Escolha seu próprio código (3-10 caracteres, letras, números e hífens)
+                                  </span>
+                                </label>
+                              </div>
+
+                              {usarCodigoPersonalizado && (
+                                <div className="mt-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm text-gray-600 font-mono">{getAppUrl()}/p/</span>
+                                        <input
+                                          type="text"
+                                          value={customShortCode}
+                                          onChange={async (e) => {
+                                            const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 10)
+                                            setCustomShortCode(value)
+                                            
+                                            if (value.length >= 3) {
+                                              setVerificandoShortCode(true)
+                                              try {
+                                                const response = await fetch(
+                                                  `/api/wellness/ferramentas/check-short-code?code=${encodeURIComponent(value)}&excludeId=${toolId}`
+                                                )
+                                                const data = await response.json()
+                                                setShortCodeDisponivel(data.available)
+                                              } catch (error) {
+                                                console.error('Erro ao verificar código:', error)
+                                                setShortCodeDisponivel(false)
+                                              } finally {
+                                                setVerificandoShortCode(false)
+                                              }
+                                            } else {
+                                              setShortCodeDisponivel(null)
+                                            }
+                                          }}
+                                          placeholder="meu-codigo"
+                                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                        />
+                                      </div>
+                                      {verificandoShortCode && (
+                                        <p className="text-xs text-gray-500 mt-1">Verificando...</p>
+                                      )}
+                                      {!verificandoShortCode && shortCodeDisponivel === true && customShortCode.length >= 3 && (
+                                        <p className="text-xs text-green-600 mt-1">✅ Código disponível!</p>
+                                      )}
+                                      {!verificandoShortCode && shortCodeDisponivel === false && customShortCode.length >= 3 && (
+                                        <p className="text-xs text-red-600 mt-1">❌ Este código já está em uso</p>
+                                      )}
+                                      {customShortCode.length > 0 && customShortCode.length < 3 && (
+                                        <p className="text-xs text-yellow-600 mt-1">⚠️ Mínimo de 3 caracteres</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">

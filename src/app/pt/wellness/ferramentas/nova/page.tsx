@@ -59,6 +59,10 @@ function NovaFerramentaWellnessContent() {
   const [descricao, setDescricao] = useState('') // Descrição opcional embaixo do título
   const [slugNormalizado, setSlugNormalizado] = useState(false) // Flag para mostrar aviso de normalização
   const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
+  const [customShortCode, setCustomShortCode] = useState('')
+  const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
+  const [verificandoShortCode, setVerificandoShortCode] = useState(false)
+  const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
   const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null) // WhatsApp do perfil
   const [perfilCountryCode, setPerfilCountryCode] = useState<string>('BR') // Código do país do perfil
   const [userSlug, setUserSlug] = useState<string | null>(null) // user_slug do perfil
@@ -458,7 +462,8 @@ function NovaFerramentaWellnessContent() {
         cta_button_text: configuracao.textoBotao,
         custom_whatsapp_message: configuracao.mensagemWhatsapp,
         profession: 'wellness',
-        generate_short_url: generateShortUrl
+        generate_short_url: generateShortUrl,
+        custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
       }
 
       const response = await fetch('/api/wellness/ferramentas', {
@@ -882,22 +887,114 @@ function NovaFerramentaWellnessContent() {
                               </div>
                             </div>
                           )}
-                          <div className="mt-4 flex items-start space-x-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                            <input
-                              type="checkbox"
-                              id="generateShortUrl"
-                              checked={generateShortUrl}
-                              onChange={(e) => setGenerateShortUrl(e.target.checked)}
-                              className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                            />
-                            <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer">
-                              <span className="text-sm font-medium text-gray-900 block">
-                                🔗 Gerar URL Encurtada
-                              </span>
-                              <span className="text-xs text-gray-600 mt-1 block">
-                                Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{getAppUrl().replace(/^https?:\/\//, '')}/p/abc123</code> para facilitar compartilhamento via WhatsApp, SMS ou impresso.
-                              </span>
-                            </label>
+                          <div className="mt-4 space-y-3">
+                            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                              <div className="flex items-start space-x-3">
+                                <input
+                                  type="checkbox"
+                                  id="generateShortUrl"
+                                  checked={generateShortUrl}
+                                  onChange={(e) => {
+                                    setGenerateShortUrl(e.target.checked)
+                                    if (!e.target.checked) {
+                                      setUsarCodigoPersonalizado(false)
+                                      setCustomShortCode('')
+                                      setShortCodeDisponivel(null)
+                                    }
+                                  }}
+                                  className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer">
+                                  <span className="text-sm font-medium text-gray-900 block">
+                                    🔗 Gerar URL Encurtada
+                                  </span>
+                                  <span className="text-xs text-gray-600 mt-1 block">
+                                    Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{getAppUrl().replace(/^https?:\/\//, '')}/p/abc123</code> para facilitar compartilhamento via WhatsApp, SMS ou impresso.
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Opção de Código Personalizado */}
+                            {generateShortUrl && (
+                              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="flex items-start space-x-3 mb-3">
+                                  <input
+                                    type="checkbox"
+                                    id="usarCodigoPersonalizado"
+                                    checked={usarCodigoPersonalizado}
+                                    onChange={(e) => {
+                                      setUsarCodigoPersonalizado(e.target.checked)
+                                      if (!e.target.checked) {
+                                        setCustomShortCode('')
+                                        setShortCodeDisponivel(null)
+                                      }
+                                    }}
+                                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                  />
+                                  <label htmlFor="usarCodigoPersonalizado" className="flex-1 cursor-pointer">
+                                    <span className="text-sm font-medium text-gray-900 block">
+                                      ✏️ Personalizar Código
+                                    </span>
+                                    <span className="text-xs text-gray-600 mt-1 block">
+                                      Escolha seu próprio código (3-10 caracteres, letras, números e hífens)
+                                    </span>
+                                  </label>
+                                </div>
+
+                                {usarCodigoPersonalizado && (
+                                  <div className="mt-3">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-sm text-gray-600 font-mono">{getAppUrl()}/p/</span>
+                                          <input
+                                            type="text"
+                                            value={customShortCode}
+                                            onChange={async (e) => {
+                                              const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 10)
+                                              setCustomShortCode(value)
+                                              
+                                              if (value.length >= 3) {
+                                                setVerificandoShortCode(true)
+                                                try {
+                                                  const response = await fetch(
+                                                    `/api/wellness/ferramentas/check-short-code?code=${encodeURIComponent(value)}`
+                                                  )
+                                                  const data = await response.json()
+                                                  setShortCodeDisponivel(data.available)
+                                                } catch (error) {
+                                                  console.error('Erro ao verificar código:', error)
+                                                  setShortCodeDisponivel(false)
+                                                } finally {
+                                                  setVerificandoShortCode(false)
+                                                }
+                                              } else {
+                                                setShortCodeDisponivel(null)
+                                              }
+                                            }}
+                                            placeholder="meu-codigo"
+                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                          />
+                                        </div>
+                                        {verificandoShortCode && (
+                                          <p className="text-xs text-gray-500 mt-1">Verificando...</p>
+                                        )}
+                                        {!verificandoShortCode && shortCodeDisponivel === true && customShortCode.length >= 3 && (
+                                          <p className="text-xs text-green-600 mt-1">✅ Código disponível!</p>
+                                        )}
+                                        {!verificandoShortCode && shortCodeDisponivel === false && customShortCode.length >= 3 && (
+                                          <p className="text-xs text-red-600 mt-1">❌ Este código já está em uso</p>
+                                        )}
+                                        {customShortCode.length > 0 && customShortCode.length < 3 && (
+                                          <p className="text-xs text-yellow-600 mt-1">⚠️ Mínimo de 3 caracteres</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

@@ -327,18 +327,25 @@ export default function FerramentasWellness() {
                       </div>
                       {/* URL Encurtada */}
                       {ferramenta.shortUrl && (
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xs text-gray-500">URL Curta:</span>
-                          <span className="text-xs text-purple-700 font-mono font-semibold">{ferramenta.shortUrl}</span>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(ferramenta.shortUrl!)
-                              alert('URL encurtada copiada!')
-                            }}
-                            className="text-xs text-purple-600 hover:text-purple-700 underline"
-                          >
-                            Copiar
-                          </button>
+                        <div className="mb-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <span className="text-xs text-gray-500 block mb-1">URL Encurtada:</span>
+                              <span className="text-sm text-purple-700 font-mono font-semibold">{ferramenta.shortUrl}</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(ferramenta.shortUrl!)
+                                alert('URL encurtada copiada!')
+                              }}
+                              className="text-xs text-purple-600 hover:text-purple-700 underline px-2 py-1 bg-white rounded border border-purple-200"
+                            >
+                              Copiar
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Código: <code className="bg-white px-1 py-0.5 rounded">{ferramenta.shortCode}</code>
+                          </p>
                         </div>
                       )}
                       {/* QR Code */}
