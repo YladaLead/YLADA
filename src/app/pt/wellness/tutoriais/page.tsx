@@ -228,6 +228,7 @@ function TutoriaisWellnessContent() {
               return (
                 <div
                   key={tutorial.id}
+                  id={`tutorial-${tutorial.id}`}
                   className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200"
                 >
                   <button
@@ -316,11 +317,16 @@ function TutoriaisWellnessContent() {
                                   key={related.id}
                                   onClick={() => {
                                     setExpandedTutorial(related.id)
-                                    document.getElementById(`tutorial-${related.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                    setTimeout(() => {
+                                      const element = document.getElementById(`tutorial-${related.id}`)
+                                      if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                      }
+                                    }, 100)
                                   }}
-                                  className="text-green-600 hover:text-green-700 hover:underline"
+                                  className="text-green-600 hover:text-green-700 hover:underline text-xs"
                                 >
-                                  {related.titulo.substring(0, 30)}...
+                                  {related.titulo.length > 30 ? related.titulo.substring(0, 30) + '...' : related.titulo}
                                 </button>
                               ))}
                             </div>
