@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
   if (
     pathname === '/' || // Página raiz - não redirecionar
     pathname === '/migrado' || // Página de acesso migrado - não redirecionar
+    pathname.startsWith('/p/') || // IMPORTANTE: Links curtos (/p/code) - não redirecionar
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||
     pathname.startsWith('/calculadora-imc') ||
