@@ -433,20 +433,26 @@ function QuizzesWellnessContent() {
                           </button>
                         </div>
                       </div>
-                      <div className="flex flex-col space-y-2 ml-4">
+                      <div className="flex flex-col space-y-2 ml-4 text-right sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:text-left">
                         <Link
                           href={quiz.url}
                           target="_blank"
-                          className="text-sm text-purple-600 hover:text-purple-800 font-medium text-right"
+                          className="text-sm text-purple-600 hover:text-purple-800 font-medium"
                         >
                           Ver Quiz →
+                        </Link>
+                        <Link
+                          href={`/pt/wellness/quiz-personalizado?quizId=${quiz.id}`}
+                          className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                        >
+                          Editar
                         </Link>
                         <button
                           onClick={(e) => {
                             e.preventDefault()
                             setMostrarConfirmacaoExclusao(quiz.id)
                           }}
-                          className="text-sm text-red-600 hover:text-red-800 font-medium text-right"
+                          className="text-sm text-red-600 hover:text-red-800 font-medium"
                         >
                           Excluir
                         </button>

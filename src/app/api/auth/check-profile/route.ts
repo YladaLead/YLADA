@@ -1,6 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
+type CheckProfileResponse = {
+  exists: boolean
+  hasProfile: boolean
+  canCreate: boolean
+  perfil?: string | null
+  is_admin?: boolean
+  is_support?: boolean
+}
+
+const CACHE_TTL_MS = 1000 * 60 * 5 // 5 minutos
+const profileCache = new Map<string, { expiresAt: number; payload: CheckProfileResponse }>()
+
+function getCachedProfile(email: string) {
+  const cached = profileCache.get(email)
+  if (!cached) return null
+  if (cached.expiresAt > Date.now()) {
+    return cached.payload
+  }
+  profileCache.delete(email)
+  return null
+}
+
+function setCachedProfile(email: string, payload: CheckProfileResponse) {
+  profileCache.set(email, {
+    expiresAt: Date.now() + CACHE_TTL_MS,
+    payload,
+  })
+}
+
 /**
  * Verificar perfil por email antes do login/cadastro
  * Retorna o perfil atual do email (se existir)
@@ -16,55 +45,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar usuário diretamente pelo email (mais eficiente que listUsers)
-    // Usar getUserByEmail se disponível, senão tentar listUsers com limite
-    let authUser = null
-    
-    try {
-      // Tentar buscar usuário diretamente (método mais eficiente)
-      // Nota: Supabase Admin API não tem getUserByEmail, então vamos usar listUsers com filtro
-      const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers({
-        page: 1,
-        perPage: 1000 // Limitar para melhor performance
-      })
-      
-      if (authError) {
-        console.error('Erro ao buscar usuários:', authError)
-        // Se falhar, retornar como se não existisse (não bloquear login)
-        return NextResponse.json({
-          exists: false,
-          hasProfile: false,
-          canCreate: true
-        })
-      }
+    const normalizedEmail = email.trim().toLowerCase()
 
-      // Encontrar usuário pelo email (case-insensitive)
-      authUser = authUsers.users.find(u => 
-        u.email?.toLowerCase() === email.toLowerCase()
-      )
-    } catch (error: any) {
-      console.error('Erro ao verificar email:', error)
-      // Se der erro, retornar como se não existisse (não bloquear login)
-      return NextResponse.json({
-        exists: false,
-        hasProfile: false,
-        canCreate: true
-      })
+    const cached = getCachedProfile(normalizedEmail)
+    if (cached) {
+      return NextResponse.json({ ...cached, cache: 'hit' })
     }
 
-    if (!authUser) {
-      // Email não existe - pode criar conta
-      return NextResponse.json({
-        exists: false,
-        canCreate: true
-      })
-    }
-
-    // Buscar perfil do usuário
+    // Buscar diretamente na tabela user_profiles (indexada e bem mais rápida)
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .select('perfil, email, is_admin, is_support')
-      .eq('user_id', authUser.id)
+      .ilike('email', normalizedEmail)
       .maybeSingle()
 
     if (profileError && profileError.code !== 'PGRST116') {
@@ -75,25 +67,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!profile) {
-      // Usuário existe mas não tem perfil - pode criar perfil na área atual
-      return NextResponse.json({
+    if (profile) {
+      const response: CheckProfileResponse = {
         exists: true,
-        hasProfile: false,
-        canCreate: true
-      })
+        hasProfile: true,
+        canCreate: false,
+        perfil: profile.perfil,
+        is_admin: profile.is_admin || false,
+        is_support: profile.is_support || false,
+      }
+      setCachedProfile(normalizedEmail, response)
+      return NextResponse.json(response)
     }
 
-    // Usuário existe e tem perfil
-    return NextResponse.json({
-      exists: true,
-      hasProfile: true,
-      perfil: profile.perfil,
-      is_admin: profile.is_admin || false,
-      is_support: profile.is_support || false,
-      canCreate: false
-    })
-
+    // Caso não exista em user_profiles, considerar como novo email.
+    // O Supabase bloqueará cadastro duplicado se já houver usuário com este email.
+    const defaultResponse: CheckProfileResponse = {
+      exists: false,
+      hasProfile: false,
+      canCreate: true,
+    }
+    setCachedProfile(normalizedEmail, defaultResponse)
+    return NextResponse.json(defaultResponse)
   } catch (error: any) {
     console.error('Erro ao verificar perfil:', error)
     return NextResponse.json(

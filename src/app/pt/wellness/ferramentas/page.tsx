@@ -31,6 +31,7 @@ export default function FerramentasWellness() {
   const [ferramentas, setFerramentas] = useState<Ferramenta[]>([])
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'ativa' | 'inativa'>('todas')
   const [loading, setLoading] = useState(true)
+  const [ferramentaExcluindoId, setFerramentaExcluindoId] = useState<string | null>(null)
 
   // Carregar ferramentas do banco de dados
   useEffect(() => {
@@ -108,6 +109,33 @@ export default function FerramentasWellness() {
       setFerramentas([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const excluirFerramenta = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este link?')) {
+      return
+    }
+
+    try {
+      setFerramentaExcluindoId(id)
+      const response = await fetch(`/api/wellness/ferramentas?id=${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Erro ao excluir link')
+      }
+
+      setFerramentas(prev => prev.filter(f => f.id !== id))
+      alert('Link excluído com sucesso!')
+    } catch (error: any) {
+      console.error('Erro ao excluir link:', error)
+      alert(error.message || 'Erro ao excluir link. Tente novamente.')
+    } finally {
+      setFerramentaExcluindoId(null)
     }
   }
 
@@ -356,20 +384,27 @@ export default function FerramentasWellness() {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col space-y-2 ml-4">
+                    <div className="flex flex-col space-y-2 ml-4 text-right sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:text-left">
                       <Link
                         href={ferramenta.url}
                         target="_blank"
-                        className="text-sm text-purple-600 hover:text-purple-800 font-medium text-right"
+                        className="text-sm text-purple-600 hover:text-purple-800 font-medium"
                       >
                         Ver Link →
                       </Link>
                       <Link
                         href={`/pt/wellness/ferramentas/${ferramenta.id}/editar`}
-                        className="text-sm text-gray-600 hover:text-gray-800 font-medium text-right"
+                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
                       >
                         Editar
                       </Link>
+                      <button
+                        onClick={() => excluirFerramenta(ferramenta.id)}
+                        className="text-sm text-red-600 hover:text-red-800 font-medium"
+                        disabled={ferramentaExcluindoId === ferramenta.id}
+                      >
+                        {ferramentaExcluindoId === ferramenta.id ? 'Excluindo...' : 'Excluir'}
+                      </button>
                     </div>
                   </div>
                 </div>

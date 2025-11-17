@@ -193,101 +193,76 @@ export default function LoginForm({
           return
         }
 
-        if (data.session) {
-          console.log('✅ Login bem-sucedido!')
-          
-          // Verificar se a senha é provisória e se ainda está válida
-          try {
-            const { data: profileData, error: profileError } = await supabase
-              .from('user_profiles')
-              .select('temporary_password_expires_at')
-              .eq('user_id', data.session.user.id)
-              .maybeSingle()
-            
-            if (!profileError && profileData?.temporary_password_expires_at) {
-              const expiresAt = new Date(profileData.temporary_password_expires_at)
-              const now = new Date()
-              
-              if (now > expiresAt) {
-                // Senha provisória expirada
-                await supabase.auth.signOut()
-                setError('Sua senha provisória expirou. Entre em contato com o suporte para gerar uma nova.')
-                setLoading(false)
-                return
-              } else {
-                // Senha provisória ainda válida - mostrar aviso
-                const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-                console.log(`⚠️ Senha provisória válida por mais ${daysLeft} dia(s)`)
-              }
-            }
-          } catch (checkError) {
-            console.warn('⚠️ Não foi possível verificar expiração da senha provisória:', checkError)
-            // Continuar com o login mesmo se não conseguir verificar
-          }
-          
-          // Aguardar um pouco para garantir que a sessão foi salva
-          await new Promise(resolve => setTimeout(resolve, 500))
-          
-          // Verificar se a sessão foi salva
-          const { data: { session: verifySession } } = await supabase.auth.getSession()
-          
-          if (verifySession) {
-            // Sempre redirecionar para o dashboard ou configuracao
-            // O admin já preencheu todos os dados, usuário só precisa trocar senha se necessário
-            console.log('✅ Sessão confirmada, redirecionando para:', redirectPath)
-            router.push(redirectPath)
-            // Forçar reload se router.push não funcionar após 1 segundo
-            setTimeout(() => {
-              if (window.location.pathname !== redirectPath) {
-                console.log('⚠️ Router.push não funcionou, usando window.location.href')
-                window.location.href = redirectPath
-              }
-            }, 1000)
-          } else {
-            // Se não salvou, tentar novamente após mais tempo
-            console.log('⚠️ Sessão não confirmada, aguardando mais tempo...')
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const { data: { session: retrySession } } = await supabase.auth.getSession()
-            if (retrySession) {
-              // Verificar perfil também na segunda tentativa
-              try {
-                const profileResponse = await fetch('/api/wellness/profile', {
-                  credentials: 'include'
-                })
-                
-                if (profileResponse.ok) {
-                  const profileData = await profileResponse.json()
-                  const profile = profileData.profile
-                  
-                  if (!profile?.nome || !profile?.whatsapp) {
-                    console.log('ℹ️ Perfil incompleto, redirecionando para completar cadastro')
-                    router.push('/pt/wellness/bem-vindo?migrado=true')
-                    return
-                  }
-                }
-              } catch (profileError) {
-                console.warn('⚠️ Erro ao verificar perfil:', profileError)
-              }
-              
-              console.log('✅ Sessão confirmada na segunda tentativa, redirecionando...')
-              router.push(redirectPath)
-              setTimeout(() => {
-                if (window.location.pathname !== redirectPath) {
-                  window.location.href = redirectPath
-                }
-              }, 1000)
-            } else {
-              // Mesmo sem sessão confirmada, tentar redirecionar (pode ser problema de timing)
-              console.log('⚠️ Sessão não confirmada, mas redirecionando mesmo assim...')
-              router.push(redirectPath)
-            }
-          }
-          // Não setar loading como false aqui - o redirecionamento vai acontecer
-          return
-        } else {
+        const session = data.session
+        if (!session) {
           setError('Erro ao criar sessão. Tente novamente.')
           setLoading(false)
+          return
         }
+
+        console.log('✅ Login bem-sucedido!')
+
+        // Verificar se a senha é provisória e se ainda está válida
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('temporary_password_expires_at')
+            .eq('user_id', session.user.id)
+            .maybeSingle()
+          
+          if (!profileError && profileData?.temporary_password_expires_at) {
+            const expiresAt = new Date(profileData.temporary_password_expires_at)
+            const now = new Date()
+            
+            if (now > expiresAt) {
+              await supabase.auth.signOut()
+              setError('Sua senha provisória expirou. Entre em contato com o suporte para gerar uma nova.')
+              setLoading(false)
+              return
+            } else {
+              const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+              console.log(`⚠️ Senha provisória válida por mais ${daysLeft} dia(s)`)
+            }
+          }
+        } catch (checkError) {
+          console.warn('⚠️ Não foi possível verificar expiração da senha provisória:', checkError)
+        }
+
+        // Redirecionar imediatamente para melhorar percepção de velocidade
+        router.replace(redirectPath)
+
+        // Se o router.replace não ocorrer (navegadores antigos), forçar via window.location
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && window.location.pathname !== redirectPath) {
+            console.log('⚠️ router.replace não executou, forçando navegação manual.')
+            window.location.href = redirectPath
+          }
+        }, 1200)
+
+        // Após redirecionar, verificar em segundo plano se o perfil está completo.
+        void (async () => {
+          try {
+            // Pequeno atraso para garantir que os cookies/sessão foram persistidos
+            await new Promise(resolve => setTimeout(resolve, 200))
+            const profileResponse = await fetch('/api/wellness/profile', {
+              credentials: 'include'
+            })
+            
+            if (profileResponse.ok) {
+              const profileData = await profileResponse.json()
+              const profile = profileData.profile
+              
+              if (!profile?.nome || !profile?.whatsapp) {
+                console.log('ℹ️ Perfil incompleto detectado após login, redirecionando para onboarding.')
+                router.replace('/pt/wellness/bem-vindo?migrado=true')
+              }
+            }
+          } catch (profileError) {
+            console.warn('⚠️ Erro ao verificar perfil pós-login:', profileError)
+          }
+        })()
+
+        return
       }
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.')
