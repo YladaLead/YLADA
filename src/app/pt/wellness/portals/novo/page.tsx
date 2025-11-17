@@ -43,6 +43,11 @@ function NovoPortalWellnessContent() {
   })
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [checkingSlug, setCheckingSlug] = useState(false)
+  const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
+  const [customShortCode, setCustomShortCode] = useState('')
+  const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
+  const [verificandoShortCode, setVerificandoShortCode] = useState(false)
+  const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
 
   useEffect(() => {
     carregarFerramentas()
@@ -159,7 +164,9 @@ function NovoPortalWellnessContent() {
           navigation_type: formData.navigation_type,
           header_text: formData.header_text,
           footer_text: formData.footer_text,
-          tools_order: selectedTools
+          tools_order: selectedTools,
+          generate_short_url: generateShortUrl,
+          custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null,
         })
       })
 
@@ -499,6 +506,119 @@ function NovoPortalWellnessContent() {
                     </div>
                   </label>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Seção de URL Encurtada */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-3">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">URL Encurtada</h2>
+            
+            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="generateShortUrlPortal"
+                  checked={generateShortUrl}
+                  onChange={(e) => {
+                    setGenerateShortUrl(e.target.checked)
+                    if (!e.target.checked) {
+                      setUsarCodigoPersonalizado(false)
+                      setCustomShortCode('')
+                      setShortCodeDisponivel(null)
+                    }
+                  }}
+                  className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                />
+                <label htmlFor="generateShortUrlPortal" className="flex-1 cursor-pointer">
+                  <span className="text-sm font-medium text-gray-900 block">
+                    🔗 Gerar URL Encurtada
+                  </span>
+                  <span className="text-xs text-gray-600 mt-1 block">
+                    Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{typeof window !== 'undefined' ? window.location.hostname : 'ylada.app'}/p/abc123</code> para facilitar compartilhamento via WhatsApp, SMS ou impresso.
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Opção de Código Personalizado */}
+            {generateShortUrl && (
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-start space-x-3 mb-3">
+                  <input
+                    type="checkbox"
+                    id="usarCodigoPersonalizadoPortal"
+                    checked={usarCodigoPersonalizado}
+                    onChange={(e) => {
+                      setUsarCodigoPersonalizado(e.target.checked)
+                      if (!e.target.checked) {
+                        setCustomShortCode('')
+                        setShortCodeDisponivel(null)
+                      }
+                    }}
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="usarCodigoPersonalizadoPortal" className="flex-1 cursor-pointer">
+                    <span className="text-sm font-medium text-gray-900 block">
+                      ✏️ Personalizar Código
+                    </span>
+                    <span className="text-xs text-gray-600 mt-1 block">
+                      Escolha seu próprio código (3-10 caracteres, letras, números e hífens)
+                    </span>
+                  </label>
+                </div>
+
+                {usarCodigoPersonalizado && (
+                  <div className="mt-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-600 font-mono">{typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/</span>
+                          <input
+                            type="text"
+                            value={customShortCode}
+                            onChange={async (e) => {
+                              const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 10)
+                              setCustomShortCode(value)
+                              
+                              if (value.length >= 3) {
+                                setVerificandoShortCode(true)
+                                try {
+                                  const response = await fetch(
+                                    `/api/wellness/check-short-code?code=${encodeURIComponent(value)}&type=portal`
+                                  )
+                                  const data = await response.json()
+                                  setShortCodeDisponivel(data.available)
+                                } catch (error) {
+                                  console.error('Erro ao verificar código:', error)
+                                  setShortCodeDisponivel(false)
+                                } finally {
+                                  setVerificandoShortCode(false)
+                                }
+                              } else {
+                                setShortCodeDisponivel(null)
+                              }
+                            }}
+                            placeholder="meu-codigo"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                          />
+                        </div>
+                        {verificandoShortCode && (
+                          <p className="text-xs text-gray-500 mt-1">Verificando...</p>
+                        )}
+                        {!verificandoShortCode && shortCodeDisponivel === true && customShortCode.length >= 3 && (
+                          <p className="text-xs text-green-600 mt-1">✅ Código disponível!</p>
+                        )}
+                        {!verificandoShortCode && shortCodeDisponivel === false && customShortCode.length >= 3 && (
+                          <p className="text-xs text-red-600 mt-1">❌ Este código já está em uso</p>
+                        )}
+                        {customShortCode.length > 0 && customShortCode.length < 3 && (
+                          <p className="text-xs text-yellow-600 mt-1">⚠️ Mínimo de 3 caracteres</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

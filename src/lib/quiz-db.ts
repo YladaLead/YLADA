@@ -93,20 +93,62 @@ export const quizDB = {
         }
       }
 
-      // 2. Inserir quiz
+      // 2. Processar short_code se fornecido
+      let shortCode = null
+      if (quizData.generate_short_url) {
+        if (quizData.custom_short_code) {
+          const customCode = quizData.custom_short_code.toLowerCase().trim()
+          
+          // Validar formato
+          if (!/^[a-z0-9-]{3,10}$/.test(customCode)) {
+            throw new Error('Código personalizado inválido. Deve ter entre 3 e 10 caracteres e conter apenas letras, números e hífens.')
+          }
+
+          // Verificar disponibilidade (em todas as tabelas que usam short_code)
+          const [existingInQuizzes, existingInPortals, existingInTemplates] = await Promise.all([
+            supabaseAdmin.from('quizzes').select('id').eq('short_code', customCode).limit(1),
+            supabaseAdmin.from('wellness_portals').select('id').eq('short_code', customCode).limit(1),
+            supabaseAdmin.from('user_templates').select('id').eq('short_code', customCode).limit(1),
+          ])
+
+          if ((existingInQuizzes.data && existingInQuizzes.data.length > 0) ||
+              (existingInPortals.data && existingInPortals.data.length > 0) ||
+              (existingInTemplates.data && existingInTemplates.data.length > 0)) {
+            throw new Error('Este código personalizado já está em uso')
+          }
+
+          shortCode = customCode
+        } else {
+          // Gerar código aleatório
+          const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+          if (!codeError && codeData) {
+            shortCode = codeData
+          } else {
+            console.error('Erro ao gerar código curto:', codeError)
+          }
+        }
+      }
+
+      // 3. Inserir quiz
+      const insertData: any = {
+        user_id: quizData.user_id,
+        titulo: quizData.titulo,
+        descricao: quizData.descricao,
+        emoji: quizData.emoji,
+        cores: quizData.cores,
+        configuracoes: quizData.configuracoes,
+        entrega: quizData.entrega,
+        slug: quizData.slug,
+        status: 'draft', // Começar como rascunho
+      }
+
+      if (shortCode) {
+        insertData.short_code = shortCode
+      }
+
       const { data: quiz, error: quizError } = await supabaseAdmin
         .from('quizzes')
-        .insert({
-          user_id: quizData.user_id,
-          titulo: quizData.titulo,
-          descricao: quizData.descricao,
-          emoji: quizData.emoji,
-          cores: quizData.cores,
-          configuracoes: quizData.configuracoes,
-          entrega: quizData.entrega,
-          slug: quizData.slug,
-          status: 'draft', // Começar como rascunho
-        })
+        .insert(insertData)
         .select()
         .single()
 

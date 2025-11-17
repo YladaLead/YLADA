@@ -28,61 +28,104 @@ export async function GET(
     const normalizedCode = code.toLowerCase().trim()
     console.log('🔍 Buscando código curto:', normalizedCode)
 
-    // Buscar ferramenta pelo código curto (case-insensitive)
-    // Primeiro buscar sem join para verificar se existe
-    const { data: tool, error } = await supabaseAdmin
-      .from('user_templates')
-      .select(`
-        id,
-        slug,
-        status,
-        user_id,
-        profession
-      `)
-      .ilike('short_code', normalizedCode)
-      .eq('status', 'active')
-      .single()
+    // Buscar em todas as tabelas: user_templates, quizzes, wellness_portals
+    const [toolResult, quizResult, portalResult] = await Promise.all([
+      supabaseAdmin
+        .from('user_templates')
+        .select('id, slug, status, user_id, profession')
+        .ilike('short_code', normalizedCode)
+        .eq('status', 'active')
+        .maybeSingle(),
+      supabaseAdmin
+        .from('quizzes')
+        .select('id, slug, status, user_id')
+        .ilike('short_code', normalizedCode)
+        .eq('status', 'active')
+        .maybeSingle(),
+      supabaseAdmin
+        .from('wellness_portals')
+        .select('id, slug, status, user_id')
+        .ilike('short_code', normalizedCode)
+        .eq('status', 'active')
+        .maybeSingle(),
+    ])
 
-    if (error) {
-      console.error('❌ Erro ao buscar código curto:', error)
-      console.error('Código buscado:', normalizedCode)
-      return NextResponse.json(
-        { error: 'Link não encontrado ou inativo' },
-        { status: 404 }
-      )
-    }
-
-    if (!tool) {
-      console.error('❌ Ferramenta não encontrada para código:', normalizedCode)
-      return NextResponse.json(
-        { error: 'Link não encontrado ou inativo' },
-        { status: 404 }
-      )
-    }
-
-    console.log('✅ Ferramenta encontrada:', { id: tool.id, slug: tool.slug, profession: tool.profession })
-
-    // Buscar user_slug separadamente
-    let userSlug = null
-    if (tool.user_id) {
-      const { data: profile } = await supabaseAdmin
-        .from('user_profiles')
-        .select('user_slug')
-        .eq('user_id', tool.user_id)
-        .maybeSingle()
-      
-      userSlug = profile?.user_slug || null
-      console.log('👤 User slug encontrado:', userSlug)
-    }
-
-    // Construir URL completa baseada na profissão
     let redirectUrl = ''
-    
-    if (tool.profession === 'wellness' && userSlug) {
-      redirectUrl = `/pt/wellness/${userSlug}/${tool.slug}`
+    let userSlug = null
+
+    // Verificar qual tipo foi encontrado
+    if (toolResult.data) {
+      const tool = toolResult.data
+      console.log('✅ Ferramenta encontrada:', { id: tool.id, slug: tool.slug, profession: tool.profession })
+
+      // Buscar user_slug
+      if (tool.user_id) {
+        const { data: profile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('user_slug')
+          .eq('user_id', tool.user_id)
+          .maybeSingle()
+        
+        userSlug = profile?.user_slug || null
+        console.log('👤 User slug encontrado:', userSlug)
+      }
+
+      // Construir URL completa baseada na profissão
+      if (tool.profession === 'wellness' && userSlug) {
+        redirectUrl = `/pt/wellness/${userSlug}/${tool.slug}`
+      } else {
+        redirectUrl = `/pt/wellness/ferramenta/${tool.id}`
+      }
+    } else if (quizResult.data) {
+      const quiz = quizResult.data
+      console.log('✅ Quiz encontrado:', { id: quiz.id, slug: quiz.slug })
+
+      // Buscar user_slug
+      if (quiz.user_id) {
+        const { data: profile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('user_slug')
+          .eq('user_id', quiz.user_id)
+          .maybeSingle()
+        
+        userSlug = profile?.user_slug || null
+        console.log('👤 User slug encontrado:', userSlug)
+      }
+
+      // Construir URL do quiz
+      if (userSlug) {
+        redirectUrl = `/pt/wellness/${userSlug}/quiz/${quiz.slug}`
+      } else {
+        redirectUrl = `/pt/wellness/quiz/${quiz.slug}`
+      }
+    } else if (portalResult.data) {
+      const portal = portalResult.data
+      console.log('✅ Portal encontrado:', { id: portal.id, slug: portal.slug })
+
+      // Buscar user_slug
+      if (portal.user_id) {
+        const { data: profile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('user_slug')
+          .eq('user_id', portal.user_id)
+          .maybeSingle()
+        
+        userSlug = profile?.user_slug || null
+        console.log('👤 User slug encontrado:', userSlug)
+      }
+
+      // Construir URL do portal
+      if (userSlug) {
+        redirectUrl = `/pt/wellness/${userSlug}/portal/${portal.slug}`
+      } else {
+        redirectUrl = `/pt/wellness/portal/${portal.slug}`
+      }
     } else {
-      // Fallback para URL genérica se não tiver user_slug
-      redirectUrl = `/pt/wellness/ferramenta/${tool.id}`
+      console.error('❌ Nenhum item encontrado para código:', normalizedCode)
+      return NextResponse.json(
+        { error: 'Link não encontrado ou inativo' },
+        { status: 404 }
+      )
     }
 
     console.log('🔄 Redirecionando para:', redirectUrl)

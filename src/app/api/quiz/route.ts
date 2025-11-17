@@ -95,6 +95,8 @@ export async function POST(request: NextRequest) {
         ...body.quizData,
         user_id: user.id,
         cores: coresNormalizadas,
+        generate_short_url: body.generate_short_url || false,
+        custom_short_code: body.custom_short_code || null,
       }
 
       // Salvar quiz
@@ -188,12 +190,68 @@ export async function PUT(request: NextRequest) {
         )
       }
 
+      // Processar short_code se fornecido
+      const updateData: any = {
+        ...body.quizData,
+        updated_at: new Date().toISOString(),
+      }
+
+      // Remover short_code se solicitado
+      if (body.remove_short_code === true) {
+        updateData.short_code = null
+      } else if (body.generate_short_url || body.custom_short_code) {
+        // Buscar quiz atual para verificar se já tem short_code
+        const { data: existingQuiz } = await supabaseAdmin
+          .from('quizzes')
+          .select('short_code')
+          .eq('id', body.quizId)
+          .single()
+
+        if (!existingQuiz?.short_code) {
+          // Só gerar se não tiver
+          if (body.custom_short_code) {
+            const customCode = body.custom_short_code.toLowerCase().trim()
+            
+            // Validar formato
+            if (!/^[a-z0-9-]{3,10}$/.test(customCode)) {
+              return NextResponse.json(
+                { error: 'Código personalizado inválido. Deve ter entre 3 e 10 caracteres e conter apenas letras, números e hífens.' },
+                { status: 400 }
+              )
+            }
+
+            // Verificar disponibilidade (em todas as tabelas)
+            const [existingInQuizzes, existingInPortals, existingInTemplates] = await Promise.all([
+              supabaseAdmin.from('quizzes').select('id').eq('short_code', customCode).neq('id', body.quizId).limit(1),
+              supabaseAdmin.from('wellness_portals').select('id').eq('short_code', customCode).limit(1),
+              supabaseAdmin.from('user_templates').select('id').eq('short_code', customCode).limit(1),
+            ])
+
+            if ((existingInQuizzes.data && existingInQuizzes.data.length > 0) ||
+                (existingInPortals.data && existingInPortals.data.length > 0) ||
+                (existingInTemplates.data && existingInTemplates.data.length > 0)) {
+              return NextResponse.json(
+                { error: 'Este código personalizado já está em uso' },
+                { status: 409 }
+              )
+            }
+
+            updateData.short_code = customCode
+          } else if (body.generate_short_url) {
+            // Gerar código aleatório
+            const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+            if (!codeError && codeData) {
+              updateData.short_code = codeData
+            } else {
+              console.error('Erro ao gerar código curto:', codeError)
+            }
+          }
+        }
+      }
+
       const { data, error } = await supabaseAdmin
         .from('quizzes')
-        .update({
-          ...body.quizData,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', body.quizId)
         .select()
         .single()

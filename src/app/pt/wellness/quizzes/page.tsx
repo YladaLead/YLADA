@@ -32,6 +32,7 @@ interface Quiz {
   url: string
   totalRespostas: number
   taxaConversao: string
+  short_code?: string | null
 }
 
 export default function QuizzesWellnessPage() {
@@ -432,6 +433,33 @@ function QuizzesWellnessContent() {
                             Copiar
                           </button>
                         </div>
+                        {quiz.short_code && (
+                          <>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs text-gray-500">URL Encurtada:</span>
+                              <span className="text-xs text-purple-600 font-mono break-all">
+                                {typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/{quiz.short_code}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  const shortUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/${quiz.short_code}`
+                                  navigator.clipboard.writeText(shortUrl)
+                                  alert('URL encurtada copiada!')
+                                }}
+                                className="text-xs text-blue-600 hover:text-blue-700 underline"
+                              >
+                                Copiar
+                              </button>
+                            </div>
+                            <div className="mt-2">
+                              <p className="text-xs text-gray-500 mb-1">QR Code:</p>
+                              <QRCode 
+                                url={`${typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/${quiz.short_code}`}
+                                size={120}
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
                       <div className="flex flex-col space-y-2 ml-4 text-right sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:text-left">
                         <Link

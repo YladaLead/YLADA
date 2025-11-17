@@ -194,21 +194,86 @@ export async function POST(request: NextRequest) {
     // 🔒 Usar user_id do token (seguro)
     const authenticatedUserId = user.id
 
+    // Processar short_code se fornecido
+    let shortCode = null
+    if (body.generate_short_url) {
+      if (body.custom_short_code) {
+        const customCode = body.custom_short_code.toLowerCase().trim()
+        
+        // Validar formato
+        if (!/^[a-z0-9-]{3,10}$/.test(customCode)) {
+          return NextResponse.json(
+            { error: 'Código personalizado inválido. Deve ter entre 3 e 10 caracteres e conter apenas letras, números e hífens.' },
+            { status: 400 }
+          )
+        }
+
+        // Verificar disponibilidade (em todas as tabelas que usam short_code)
+        const [existingInPortals, existingInQuizzes, existingInTemplates] = await Promise.all([
+          supabaseAdmin.from('wellness_portals').select('id').eq('short_code', customCode).limit(1),
+          supabaseAdmin.from('quizzes').select('id').eq('short_code', customCode).limit(1),
+          supabaseAdmin.from('user_templates').select('id').eq('short_code', customCode).limit(1),
+        ])
+
+        if ((existingInPortals.data && existingInPortals.data.length > 0) ||
+            (existingInQuizzes.data && existingInQuizzes.data.length > 0) ||
+            (existingInTemplates.data && existingInTemplates.data.length > 0)) {
+          return NextResponse.json(
+            { error: 'Este código personalizado já está em uso' },
+            { status: 409 }
+          )
+        }
+
+        shortCode = customCode
+      } else {
+        // Gerar código aleatório (verificando em todas as tabelas)
+        let codeData = null
+        let attempts = 0
+        while (!codeData && attempts < 10) {
+          const { data: generatedCode, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+          if (!codeError && generatedCode) {
+            // Verificar se não existe em nenhuma tabela
+            const [checkPortals, checkQuizzes, checkTemplates] = await Promise.all([
+              supabaseAdmin.from('wellness_portals').select('id').eq('short_code', generatedCode).limit(1),
+              supabaseAdmin.from('quizzes').select('id').eq('short_code', generatedCode).limit(1),
+              supabaseAdmin.from('user_templates').select('id').eq('short_code', generatedCode).limit(1),
+            ])
+            
+            if (!checkPortals.data?.length && !checkQuizzes.data?.length && !checkTemplates.data?.length) {
+              codeData = generatedCode
+            }
+          }
+          attempts++
+        }
+        if (codeData) {
+          shortCode = codeData
+        } else {
+          console.error('Erro ao gerar código curto único após 10 tentativas')
+        }
+      }
+    }
+
     // Inserir novo portal
+    const insertData: any = {
+      user_id: authenticatedUserId,
+      name,
+      slug,
+      description,
+      navigation_type,
+      custom_colors: custom_colors || { primary: '#10B981', secondary: '#059669' },
+      header_text,
+      footer_text,
+      tools_order,
+      status: 'active'
+    }
+
+    if (shortCode) {
+      insertData.short_code = shortCode
+    }
+
     const { data, error } = await supabaseAdmin
       .from('wellness_portals')
-      .insert({
-        user_id: authenticatedUserId,
-        name,
-        slug,
-        description,
-        navigation_type,
-        custom_colors: custom_colors || { primary: '#10B981', secondary: '#059669' },
-        header_text,
-        footer_text,
-        tools_order,
-        status: 'active'
-      })
+      .insert(insertData)
       .select()
       .single()
 
@@ -303,10 +368,83 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // Processar short_code se fornecido
+    const updateData: any = { ...updates }
+
+    // Remover short_code se solicitado
+    if (body.remove_short_code === true) {
+      updateData.short_code = null
+    } else if (body.generate_short_url || body.custom_short_code) {
+      // Buscar portal atual para verificar se já tem short_code
+      const { data: existingPortal } = await supabaseAdmin
+        .from('wellness_portals')
+        .select('short_code')
+        .eq('id', id)
+        .single()
+
+      if (!existingPortal?.short_code) {
+        // Só gerar se não tiver
+        if (body.custom_short_code) {
+          const customCode = body.custom_short_code.toLowerCase().trim()
+          
+          // Validar formato
+          if (!/^[a-z0-9-]{3,10}$/.test(customCode)) {
+            return NextResponse.json(
+              { error: 'Código personalizado inválido. Deve ter entre 3 e 10 caracteres e conter apenas letras, números e hífens.' },
+              { status: 400 }
+            )
+          }
+
+          // Verificar disponibilidade (em todas as tabelas)
+          const [existingInPortals, existingInQuizzes, existingInTemplates] = await Promise.all([
+            supabaseAdmin.from('wellness_portals').select('id').eq('short_code', customCode).neq('id', id).limit(1),
+            supabaseAdmin.from('quizzes').select('id').eq('short_code', customCode).limit(1),
+            supabaseAdmin.from('user_templates').select('id').eq('short_code', customCode).limit(1),
+          ])
+
+          if ((existingInPortals.data && existingInPortals.data.length > 0) ||
+              (existingInQuizzes.data && existingInQuizzes.data.length > 0) ||
+              (existingInTemplates.data && existingInTemplates.data.length > 0)) {
+            return NextResponse.json(
+              { error: 'Este código personalizado já está em uso' },
+              { status: 409 }
+            )
+          }
+
+          updateData.short_code = customCode
+        } else if (body.generate_short_url) {
+          // Gerar código aleatório (verificando em todas as tabelas)
+          let codeData = null
+          let attempts = 0
+          while (!codeData && attempts < 10) {
+            const { data: generatedCode, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+            if (!codeError && generatedCode) {
+              // Verificar se não existe em nenhuma tabela
+              const [checkPortals, checkQuizzes, checkTemplates] = await Promise.all([
+                supabaseAdmin.from('wellness_portals').select('id').eq('short_code', generatedCode).limit(1),
+                supabaseAdmin.from('quizzes').select('id').eq('short_code', generatedCode).limit(1),
+                supabaseAdmin.from('user_templates').select('id').eq('short_code', generatedCode).limit(1),
+              ])
+              
+              if (!checkPortals.data?.length && !checkQuizzes.data?.length && !checkTemplates.data?.length) {
+                codeData = generatedCode
+              }
+            }
+            attempts++
+          }
+          if (codeData) {
+            updateData.short_code = codeData
+          } else {
+            console.error('Erro ao gerar código curto único após 10 tentativas')
+          }
+        }
+      }
+    }
+
     // Atualizar portal
     const { data, error } = await supabaseAdmin
       .from('wellness_portals')
-      .update(updates)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single()

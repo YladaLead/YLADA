@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
+import QRCode from '@/components/QRCode'
 
 interface Portal {
   id: string
@@ -15,6 +16,7 @@ interface Portal {
   navigation_type: 'sequential' | 'menu'
   created_at: string
   tools_count: number
+  short_code?: string | null
 }
 
 export default function PortalsWellness() {
@@ -312,6 +314,33 @@ function PortalsWellnessContent() {
                         Configurar
                       </Link>
                     </div>
+                  )}
+                  {portal.short_code && (
+                    <>
+                      <div className="flex items-center gap-1 flex-wrap mt-2">
+                        <span className="text-xs text-gray-500">URL Encurtada:</span>
+                        <span className="text-xs text-purple-600 font-mono break-all">
+                          {typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/{portal.short_code}
+                        </span>
+                        <button
+                          onClick={() => {
+                            const shortUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/${portal.short_code}`
+                            navigator.clipboard.writeText(shortUrl)
+                            alert('URL encurtada copiada!')
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-700 underline"
+                        >
+                          Copiar
+                        </button>
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-500 mb-1">QR Code:</p>
+                        <QRCode 
+                          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/${portal.short_code}`}
+                          size={120}
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
 
