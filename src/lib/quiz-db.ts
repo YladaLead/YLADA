@@ -139,6 +139,7 @@ export const quizDB = {
         configuracoes: quizData.configuracoes,
         entrega: quizData.entrega,
         slug: quizData.slug,
+        profession: quizData.profession || 'wellness', // Área do quiz
         status: 'draft', // Começar como rascunho
       }
 

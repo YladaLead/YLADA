@@ -90,10 +90,11 @@ export async function POST(request: NextRequest) {
       // Validar com Zod
       const validated = CreateQuizSchema.parse(dadosParaValidar)
 
-      // Adicionar user_id ao quizData
+      // Adicionar user_id e profession ao quizData
       const quizDataComUserId = {
         ...body.quizData,
         user_id: user.id,
+        profession: 'wellness', // Área do quiz (buscado da autenticação)
         cores: coresNormalizadas,
         generate_short_url: body.generate_short_url || false,
         custom_short_code: body.custom_short_code || null,

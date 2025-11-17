@@ -264,6 +264,7 @@ export async function POST(request: NextRequest) {
       header_text,
       footer_text,
       tools_order,
+      profession: 'wellness', // Área do portal
       status: 'active'
     }
 
@@ -330,7 +331,7 @@ export async function PUT(request: NextRequest) {
     // Verificar se o portal pertence ao usuário
     const { data: existing, error: checkError } = await supabaseAdmin
       .from('wellness_portals')
-      .select('id, user_id')
+      .select('id, user_id, slug')
       .eq('id', id)
       .single()
 

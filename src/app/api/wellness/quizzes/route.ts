@@ -13,8 +13,10 @@ export async function GET(request: NextRequest) {
     }
     const { user } = authResult
 
-    // Buscar quizzes do usuário
-    const quizzes = await quizDB.getUserQuizzes(user.id)
+    // Buscar quizzes do usuário (apenas wellness)
+    const allQuizzes = await quizDB.getUserQuizzes(user.id)
+    // Filtrar apenas quizzes da área wellness
+    const quizzes = allQuizzes.filter((q: any) => !q.profession || q.profession === 'wellness')
 
     // Buscar user_slug para construir URLs
     const { data: userProfile } = await supabaseAdmin
