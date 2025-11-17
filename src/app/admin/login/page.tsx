@@ -16,6 +16,24 @@ function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordResetSuccess, setShowPasswordResetSuccess] = useState(false)
 
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 AdminLogin: auth state', event, {
+        hasSession: !!session,
+        userId: session?.user?.id,
+      })
+
+      if (event === 'SIGNED_IN' && session?.access_token) {
+        console.log('✅ AdminLogin: sessão confirmada via listener, redirecionando...')
+        window.location.href = '/admin'
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
   // Verificar searchParams no cliente (após hidratação)
   useEffect(() => {
     // Verificar password_reset apenas no cliente

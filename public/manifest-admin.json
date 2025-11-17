@@ -1,0 +1,22 @@
+{
+  "name": "YLADA Admin",
+  "short_name": "YLADA Admin",
+  "description": "Acesso administrativo do YLADA",
+  "start_url": "/admin",
+  "display": "standalone",
+  "background_color": "#EFF6FF",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

@@ -1,0 +1,22 @@
+{
+  "name": "YLADA Nutra",
+  "short_name": "Nutra",
+  "description": "Painel YLADA para consultores Nutra",
+  "start_url": "/pt/nutra/dashboard",
+  "display": "standalone",
+  "background_color": "#FFF7ED",
+  "theme_color": "#F97316",
+  "icons": [
+    {
+      "src": "/images/logo/ylada/quadrado/laranja/ylada-quadrado-laranja-13.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo/ylada/quadrado/laranja/ylada-quadrado-laranja-13.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
