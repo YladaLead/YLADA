@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { supabase } from '@/lib/supabase'
+import QRCode from '@/components/QRCode'
+import NutriNavBar from '@/components/nutri/NutriNavBar'
+import { buildNutriToolUrl, buildNutriToolUrlFallback, buildShortUrl } from '@/lib/url-utils'
 
 interface Ferramenta {
   id: string
@@ -11,6 +13,8 @@ interface Ferramenta {
   categoria: string
   objetivo: string
   url: string
+  shortUrl?: string
+  shortCode?: string
   status: 'ativa' | 'inativa'
   leads: number
   visualizacoes: number
@@ -24,195 +28,134 @@ interface Ferramenta {
 }
 
 export default function FerramentasNutri() {
-  // Dados simulados - depois virão do banco de dados
-  const [ferramentas, setFerramentas] = useState<Ferramenta[]>([
-    {
-      id: 'quiz-interativo-001',
-      nome: 'Quiz Interativo',
-      categoria: 'Atrair Leads',
-      objetivo: 'Atrair leads frios',
-      url: 'https://ylada.app/pt/nutri/quiz-interativo-001',
-      status: 'ativa',
-      leads: 15,
-      visualizacoes: 120,
-      conversao: 12.5,
-      ultimaAtividade: '2024-01-15',
-      cores: { primaria: '#3B82F6', secundaria: '#1E40AF' },
-      criadaEm: '2024-01-10'
-    },
-    {
-      id: 'calculadora-imc-002',
-      nome: 'Calculadora de IMC',
-      categoria: 'Avaliação',
-      objetivo: 'Avaliação corporal',
-      url: 'https://ylada.app/pt/nutri/calculadora-imc-002',
-      status: 'ativa',
-      leads: 8,
-      visualizacoes: 85,
-      conversao: 9.4,
-      ultimaAtividade: '2024-01-14',
-      cores: { primaria: '#10B981', secundaria: '#059669' },
-      criadaEm: '2024-01-08'
-    },
-    {
-      id: 'checklist-detox-003',
-      nome: 'Checklist Detox',
-      categoria: 'Educação',
-      objetivo: 'Educação rápida',
-      url: 'https://ylada.app/pt/nutri/checklist-detox-003',
-      status: 'inativa',
-      leads: 3,
-      visualizacoes: 45,
-      conversao: 6.7,
-      ultimaAtividade: '2024-01-12',
-      cores: { primaria: '#8B5CF6', secundaria: '#7C3AED' },
-      criadaEm: '2024-01-05'
-    }
-  ])
-
+  const [ferramentas, setFerramentas] = useState<Ferramenta[]>([])
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'ativa' | 'inativa'>('todas')
-  const [filtroCategoria, setFiltroCategoria] = useState<string>('todas')
+  const [loading, setLoading] = useState(true)
+  const [ferramentaExcluindoId, setFerramentaExcluindoId] = useState<string | null>(null)
 
-  const [stats, setStats] = useState({
-    totalFerramentas: 0,
-    ferramentasAtivas: 0,
-    totalLeads: 0,
-    taxaConversaoMedia: 0
-  })
-
-  // Carregar ferramentas reais do Supabase (fallback para mock acima)
+  // Carregar ferramentas do banco de dados
   useEffect(() => {
-    const carregarFerramentas = async () => {
-      try {
-        // Verificar se Supabase está configurado
-        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-          console.warn('Supabase não configurado, usando dados mockados')
-          setLoading(false)
-          return
-        }
-
-        // Verificar se o cliente Supabase foi inicializado corretamente
-        if (!supabase) {
-          console.warn('Supabase cliente não inicializado, usando dados mockados')
-          setLoading(false)
-          return
-        }
-
-        // TODO: substituir pelo ID do usuário autenticado
-        const userId = '550e8400-e29b-41d4-a716-446655440000'
-
-        // Buscar ferramentas do usuário a partir de user_templates
-        const { data, error } = await supabase
-          .from('user_templates')
-          .select('id, slug, title, description, views, leads_count, status, created_at, content')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-
-        if (error) {
-          console.warn('Supabase indisponível em ferramentas:', error.message)
-          setLoading(false)
-          return
-        }
-
-        if (!data || data.length === 0) {
-          return
-        }
-
-        const mapeadas: Ferramenta[] = data.map((t) => ({
-          id: t.id,
-          nome: t.title,
-          categoria: 'Personalizada',
-          objetivo: t.description || 'Ferramenta personalizada',
-          url: `/link/${t.slug}`,
-          status: (t.status as 'ativa' | 'inativa') || 'ativa',
-          leads: t.leads_count ?? 0,
-          visualizacoes: t.views ?? 0,
-          conversao: t.views ? Number(((t.leads_count || 0) / t.views) * 100) : 0,
-          ultimaAtividade: new Date(t.created_at).toISOString().slice(0, 10),
-          cores: { primaria: '#3B82F6', secundaria: '#1E40AF' },
-          criadaEm: new Date(t.created_at).toISOString().slice(0, 10),
-        }))
-
-        setFerramentas(mapeadas)
-      } catch (e) {
-        console.warn('Falha ao carregar ferramentas do Supabase, usando mock.', e)
-      }
-    }
-
     carregarFerramentas()
   }, [])
 
-  const categorias = [...new Set(ferramentas.map(f => f.categoria))]
+  const carregarFerramentas = async () => {
+    try {
+      setLoading(true)
+
+      const response = await fetch(
+        `/api/nutri/ferramentas?profession=nutri`,
+        {
+          credentials: 'include'
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar ferramentas')
+      }
+
+      const data = await response.json()
+      
+      // Transformar dados da API para o formato da interface
+      const ferramentasFormatadas: Ferramenta[] = (data.tools || []).map((tool: any) => {
+        // Determinar categoria
+        let categoria = 'Planilha'
+        if (tool.is_quiz || tool.template_slug === 'quiz-personalizado') {
+          categoria = 'Quiz Personalizado'
+        } else if (tool.template_slug?.startsWith('calc-')) {
+          categoria = 'Calculadora'
+        } else if (tool.template_slug?.startsWith('quiz-')) {
+          categoria = 'Quiz'
+        }
+
+        // Construir URL - quizzes personalizados usam rota diferente
+        let url = ''
+        if (tool.is_quiz || tool.template_slug === 'quiz-personalizado') {
+          // URL para quiz personalizado: /pt/nutri/{user-slug}/quiz/{slug}
+          if (tool.user_profiles?.user_slug) {
+            const baseUrl = typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.host : 'https://ylada.app'
+            url = `${baseUrl}/pt/nutri/${tool.user_profiles.user_slug}/quiz/${tool.slug}`
+          } else {
+            url = buildNutriToolUrlFallback(tool.id)
+          }
+        } else {
+          // URL padrão para outras ferramentas
+          url = tool.user_profiles?.user_slug 
+            ? buildNutriToolUrl(tool.user_profiles.user_slug, tool.slug)
+            : buildNutriToolUrlFallback(tool.id)
+        }
+
+        return {
+          id: tool.id,
+          nome: tool.title,
+          categoria: categoria,
+          objetivo: tool.description || '',
+          url: url,
+          shortUrl: tool.short_code ? buildShortUrl(tool.short_code) : undefined,
+          shortCode: tool.short_code,
+          status: tool.status === 'active' ? 'ativa' : 'inativa',
+          leads: tool.leads_count || 0,
+          visualizacoes: tool.views || 0,
+          conversao: tool.views > 0 ? (tool.leads_count || 0) / tool.views * 100 : 0,
+          ultimaAtividade: new Date(tool.updated_at).toLocaleDateString('pt-BR'),
+          cores: tool.custom_colors || { primaria: '#3B82F6', secundaria: '#2563EB' },
+          criadaEm: new Date(tool.created_at).toLocaleDateString('pt-BR')
+        }
+      })
+
+      setFerramentas(ferramentasFormatadas)
+    } catch (error) {
+      console.error('Erro ao carregar ferramentas:', error)
+      // Em caso de erro, manter array vazio
+      setFerramentas([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const excluirFerramenta = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este link?')) {
+      return
+    }
+
+    try {
+      setFerramentaExcluindoId(id)
+      const response = await fetch(`/api/nutri/ferramentas?id=${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Erro ao excluir link')
+      }
+
+      setFerramentas(prev => prev.filter(f => f.id !== id))
+      alert('Link excluído com sucesso!')
+    } catch (error: any) {
+      console.error('Erro ao excluir link:', error)
+      alert(error.message || 'Erro ao excluir link. Tente novamente.')
+    } finally {
+      setFerramentaExcluindoId(null)
+    }
+  }
+
+  const stats = {
+    totalFerramentas: ferramentas.length,
+    ferramentasAtivas: ferramentas.filter(f => f.status === 'ativa').length,
+    totalLeads: ferramentas.reduce((sum, f) => sum + f.leads, 0),
+    taxaConversaoMedia: ferramentas.length > 0 
+      ? ferramentas.reduce((sum, f) => sum + f.conversao, 0) / ferramentas.length 
+      : 0
+  }
 
   const ferramentasFiltradas = ferramentas.filter(ferramenta => {
     const statusMatch = filtroStatus === 'todas' || ferramenta.status === filtroStatus
-    const categoriaMatch = filtroCategoria === 'todas' || ferramenta.categoria === filtroCategoria
-    return statusMatch && categoriaMatch
+    return statusMatch
   })
-
-  useEffect(() => {
-    setStats({
-      totalFerramentas: ferramentas.length,
-      ferramentasAtivas: ferramentas.filter(f => f.status === 'ativa').length,
-      totalLeads: ferramentas.reduce((acc, f) => acc + f.leads, 0),
-      taxaConversaoMedia: ferramentas.reduce((acc, f) => acc + f.conversao, 0) / ferramentas.length
-    })
-  }, [ferramentas])
-
-  const copiarLink = (url: string) => {
-    navigator.clipboard.writeText(url)
-    // Aqui você pode adicionar uma notificação de sucesso
-  }
-
-  const toggleStatus = (id: string) => {
-    setFerramentas(prev => prev.map(f => 
-      f.id === id 
-        ? { ...f, status: f.status === 'ativa' ? 'inativa' : 'ativa' as 'ativa' | 'inativa' }
-        : f
-    ))
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-6">
-              <Link href="/pt/nutri/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
-                  alt="YLADA"
-                  width={180}
-                  height={60}
-                  className="h-12 w-auto"
-                />
-              </Link>
-              <div className="h-12 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Meus Links
-                </h1>
-                <p className="text-sm text-gray-600">Gerencie os links que você criou para captação de leads</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/pt/nutri/dashboard"
-                className="text-gray-600 hover:text-gray-900 text-sm"
-              >
-                Voltar ao Dashboard
-              </Link>
-              <Link 
-                href="/pt/nutri/ferramentas/nova"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Criar Link
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <NutriNavBar showTitle={true} title="Meus Links" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
@@ -267,152 +210,186 @@ export default function FerramentasNutri() {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
-          <div className="flex flex-wrap items-center gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status:</label>
-              <select
-                value={filtroStatus}
-                onChange={(e) => setFiltroStatus(e.target.value as 'todas' | 'ativa' | 'inativa')}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="todas">Todas</option>
-                <option value="ativa">Ativas</option>
-                <option value="inativa">Inativas</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Categoria:</label>
-              <select
-                value={filtroCategoria}
-                onChange={(e) => setFiltroCategoria(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="todas">Todas</option>
-                {categorias.map(categoria => (
-                  <option key={categoria} value={categoria}>{categoria}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="ml-auto">
-              <p className="text-sm text-gray-600">
-                Mostrando {ferramentasFiltradas.length} de {ferramentas.length} links
-              </p>
-            </div>
-          </div>
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            onClick={() => setFiltroStatus('todas')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filtroStatus === 'todas'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+            }`}
+          >
+            Todas
+          </button>
+          <button
+            onClick={() => setFiltroStatus('ativa')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filtroStatus === 'ativa'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+            }`}
+          >
+            Ativas
+          </button>
+          <button
+            onClick={() => setFiltroStatus('inativa')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filtroStatus === 'inativa'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+            }`}
+          >
+            Inativas
+          </button>
         </div>
 
         {/* Lista de Ferramentas */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Links</h2>
+        {loading ? (
+          <div className="bg-white rounded-lg p-12 border border-gray-200 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Carregando links...</p>
           </div>
-          
-          <div className="divide-y divide-gray-200">
+        ) : ferramentasFiltradas.length === 0 ? (
+          <div className="bg-white rounded-lg p-12 border border-gray-200 text-center">
+            <span className="text-6xl mb-4 block">🛠️</span>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Nenhum link encontrado
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {ferramentas.length === 0 
+                ? 'Crie seu primeiro link para começar a capturar leads'
+                : 'Tente ajustar os filtros para ver mais links'}
+            </p>
+            <Link
+              href="/pt/nutri/ferramentas/nova"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Criar Novo Link
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
             {ferramentasFiltradas.map((ferramenta) => (
-              <div key={ferramenta.id} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div 
-                      className="p-3 rounded-lg"
-                      style={{ backgroundColor: ferramenta.cores.primaria + '20' }}
-                    >
-                      <span className="text-xl">🎯</span>
+              <div
+                key={ferramenta.id}
+                className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                        style={{ backgroundColor: ferramenta.cores.primaria || '#3B82F6' }}
+                      >
+                        🎯
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">{ferramenta.nome}</h3>
+                        <p className="text-sm text-gray-600">{ferramenta.categoria} • {ferramenta.objetivo}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{ferramenta.nome}</h3>
-                      <p className="text-sm text-gray-600">{ferramenta.categoria} • {ferramenta.objetivo}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Criada em: {ferramenta.criadaEm} • Última atividade: {ferramenta.ultimaAtividade}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-6">
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-gray-900">{ferramenta.leads}</p>
-                      <p className="text-xs text-gray-500">Leads</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-gray-900">{ferramenta.visualizacoes}</p>
-                      <p className="text-xs text-gray-500">Visualizações</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-gray-900">{ferramenta.conversao}%</p>
-                      <p className="text-xs text-gray-500">Conversão</p>
-                    </div>
-                    
                     <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => toggleStatus(ferramenta.id)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                          ferramenta.status === 'ativa' 
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                            : 'bg-red-100 text-red-800 hover:bg-red-200'
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          ferramenta.status === 'ativa'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
                         }`}
                       >
                         {ferramenta.status === 'ativa' ? 'Ativa' : 'Inativa'}
-                      </button>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        onClick={() => copiarLink(ferramenta.url)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        Copiar Link
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
-                        Editar
-                      </button>
-                      <button className="text-red-600 hover:text-red-800 text-sm font-medium">
-                        Excluir
-                      </button>
+                      </span>
                     </div>
                   </div>
-                </div>
-                
-                {/* URL da Ferramenta */}
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-medium text-gray-500">URL:</span>
-                    <code className="text-xs text-gray-700 bg-white px-2 py-1 rounded border">
-                      {ferramenta.url}
-                    </code>
-                    <button 
-                      onClick={() => copiarLink(ferramenta.url)}
-                      className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                    >
-                      Copiar
-                    </button>
+
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Visualizações</p>
+                      <p className="text-xl font-bold text-gray-900">{ferramenta.visualizacoes}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Leads</p>
+                      <p className="text-xl font-bold text-blue-600">{ferramenta.leads}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Taxa de Conversão</p>
+                      <p className="text-xl font-bold text-purple-600">{ferramenta.conversao.toFixed(1)}%</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Criado em: {ferramenta.criadaEm}
+                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-gray-500">URL:</span>
+                        <span className="text-xs text-gray-700 font-mono break-all">{ferramenta.url}</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(ferramenta.url)
+                            alert('URL copiada!')
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-700 underline"
+                        >
+                          Copiar
+                        </button>
+                      </div>
+                      {ferramenta.shortCode && (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-gray-500">URL Encurtada:</span>
+                            <span className="text-xs text-purple-600 font-mono break-all">
+                              {ferramenta.shortUrl}
+                            </span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(ferramenta.shortUrl || '')
+                                alert('URL encurtada copiada!')
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-700 underline"
+                            >
+                              Copiar
+                            </button>
+                          </div>
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-500 mb-1">QR Code:</p>
+                            <QRCode 
+                              url={ferramenta.shortUrl || ''}
+                              size={120}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex flex-col space-y-2 ml-4 text-right sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:text-left">
+                      <Link
+                        href={ferramenta.url}
+                        target="_blank"
+                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Ver Link →
+                      </Link>
+                      <Link
+                        href={`/pt/nutri/ferramentas/${ferramenta.id}/editar`}
+                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                      >
+                        Editar
+                      </Link>
+                      <button
+                        onClick={() => excluirFerramenta(ferramenta.id)}
+                        disabled={ferramentaExcluindoId === ferramenta.id}
+                        className="text-sm text-red-600 hover:text-red-800 font-medium disabled:opacity-50"
+                      >
+                        {ferramentaExcluindoId === ferramenta.id ? 'Excluindo...' : 'Excluir'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Empty State */}
-        {ferramentasFiltradas.length === 0 && (
-          <div className="text-center py-12">
-            <span className="text-6xl mb-4 block">🛠️</span>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum link encontrado</h3>
-            <p className="text-gray-600 mb-6">
-              {ferramentas.length === 0 
-                ? 'Crie seu primeiro link para começar a capturar leads'
-                : 'Tente ajustar os filtros para ver mais links'
-              }
-            </p>
-            <Link 
-              href="/pt/nutri/ferramentas/nova"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Criar Novo Link
-            </Link>
-          </div>
         )}
+
       </div>
     </div>
   )

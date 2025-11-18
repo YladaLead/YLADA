@@ -53,12 +53,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return withRateLimit(request, 'quiz-post', async () => {
     try {
-      // 🔒 Verificar autenticação
-      const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+      // 🔒 Verificar autenticação - aceitar todos os perfis
+      const authResult = await requireApiAuth(request, ['wellness', 'nutri', 'coach', 'nutra', 'admin'])
       if (authResult instanceof NextResponse) {
         return authResult
       }
-      const { user } = authResult
+      const { user, profile } = authResult
 
       const body = await request.json()
 
@@ -91,10 +91,13 @@ export async function POST(request: NextRequest) {
       const validated = CreateQuizSchema.parse(dadosParaValidar)
 
       // Adicionar user_id e profession ao quizData
+      // Usar profession do body se fornecido, senão usar o perfil do usuário autenticado
+      const profession = body.profession || profile?.perfil || 'wellness'
+      
       const quizDataComUserId = {
         ...body.quizData,
         user_id: user.id,
-        profession: 'wellness', // Área do quiz (buscado da autenticação)
+        profession: profession, // Área do quiz (do body ou do perfil do usuário)
         cores: coresNormalizadas,
         generate_short_url: body.generate_short_url || false,
         custom_short_code: body.custom_short_code || null,

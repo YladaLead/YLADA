@@ -244,19 +244,26 @@ export default function LoginForm({
           try {
             // Pequeno atraso para garantir que os cookies/sessão foram persistidos
             await new Promise(resolve => setTimeout(resolve, 200))
-            const profileResponse = await fetch('/api/wellness/profile', {
-              credentials: 'include'
-            })
             
-            if (profileResponse.ok) {
-              const profileData = await profileResponse.json()
-              const profile = profileData.profile
+            // Usar API dinâmica baseada no perfil (bem-vindo só existe em wellness por enquanto)
+            // Para outras áreas, verificar perfil via API genérica se necessário
+            if (perfil === 'wellness') {
+              const profileResponse = await fetch('/api/wellness/profile', {
+                credentials: 'include'
+              })
               
-              if (!profile?.nome || !profile?.whatsapp) {
-                console.log('ℹ️ Perfil incompleto detectado após login, redirecionando para onboarding.')
-                router.replace('/pt/wellness/bem-vindo?migrado=true')
+              if (profileResponse.ok) {
+                const profileData = await profileResponse.json()
+                const profile = profileData.profile
+                
+                if (!profile?.nome || !profile?.whatsapp) {
+                  console.log('ℹ️ Perfil incompleto detectado após login, redirecionando para onboarding.')
+                  router.replace('/pt/wellness/bem-vindo?migrado=true')
+                }
               }
             }
+            // Para outras áreas (nutri, coach, nutra), não redirecionar para onboarding por enquanto
+            // O perfil será verificado pelo ProtectedRoute
           } catch (profileError) {
             console.warn('⚠️ Erro ao verificar perfil pós-login:', profileError)
           }
@@ -275,7 +282,7 @@ export default function LoginForm({
     ? '/images/logo/wellness/Logo_Wellness_horizontal.png'
     : perfil === 'nutra' || logoColor === 'laranja'
     ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
-    : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png')
+    : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png')
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center px-4 py-8 sm:py-12">

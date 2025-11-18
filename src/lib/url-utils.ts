@@ -40,6 +40,22 @@ export function buildWellnessToolUrlFallback(toolId: string): string {
 }
 
 /**
+ * Constrói URL completa para uma ferramenta nutri
+ */
+export function buildNutriToolUrl(userSlug: string, toolSlug: string): string {
+  const baseUrl = getAppUrl()
+  return `${baseUrl}/pt/nutri/${userSlug}/${toolSlug}`
+}
+
+/**
+ * Constrói URL completa para uma ferramenta nutri alternativa (sem user_slug)
+ */
+export function buildNutriToolUrlFallback(toolId: string): string {
+  const baseUrl = getAppUrl()
+  return `${baseUrl}/pt/nutri/ferramenta/${toolId}`
+}
+
+/**
  * Constrói URL curta (encurtada)
  */
 export function buildShortUrl(shortCode: string): string {

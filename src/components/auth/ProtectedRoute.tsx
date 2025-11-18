@@ -24,6 +24,12 @@ export default function ProtectedRoute({
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   const [authCheckTimeout, setAuthCheckTimeout] = useState(false)
   const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
+  const adminOverrideReady =
+    allowAdmin &&
+    (userProfile?.is_admin || (!userProfile && loadingTimeout) || (!userProfile && profileCheckTimeout))
+  const supportOverrideReady =
+    allowSupport &&
+    (userProfile?.is_support || (!userProfile && loadingTimeout) || (!userProfile && profileCheckTimeout))
 
   // 🚀 OTIMIZAÇÃO: Timeout unificado e simplificado (reduzido de 2s/3s para 1.5s)
   // Isso reduz latência percebida sem comprometer funcionalidade
@@ -117,26 +123,13 @@ export default function ProtectedRoute({
       return
     }
 
-    // IMPORTANTE: Se allowAdmin está ativo, verificar se é admin ANTES de verificar perfil
-    // Isso permite que admin acesse outras áreas mesmo quando o perfil ainda está carregando
-    if (allowAdmin) {
-      // Se o perfil já foi carregado e é admin, permitir acesso imediatamente
-      if (userProfile?.is_admin) {
-        console.log('✅ Admin detectado, permitindo acesso à área:', perfil)
-        return
-      }
-      
-      // Se o perfil ainda não carregou mas já passou o timeout de loading (2s), permitir acesso
-      // Isso evita bloqueios desnecessários quando o perfil demora para carregar
-      if (!userProfile && loadingTimeout) {
-        console.log('⚠️ Perfil não carregou ainda, mas allowAdmin=true e loadingTimeout passou, permitindo acesso temporário')
-        return
-      }
+    if (adminOverrideReady) {
+      console.log('✅ Admin detectado (override ativo), permitindo acesso à área:', perfil)
+      return
     }
 
-    // Verificar se é suporte e se suporte tem permissão para acessar outras áreas
-    if (allowSupport && userProfile?.is_support) {
-      console.log('✅ Suporte detectado, permitindo acesso à área:', perfil)
+    if (supportOverrideReady) {
+      console.log('✅ Suporte detectado (override ativo), permitindo acesso à área:', perfil)
       return
     }
 
@@ -149,16 +142,27 @@ export default function ProtectedRoute({
 
     // Verificar se o perfil do usuário corresponde ao perfil requerido
     if (userProfile?.perfil !== perfil) {
-      // Se allowAdmin está ativo e ainda não temos certeza se é admin, não redirecionar ainda
-      if (allowAdmin && !userProfile) {
-        console.log('⏳ Aguardando confirmação de admin antes de redirecionar...')
+      if (adminOverrideReady || supportOverrideReady) {
+        console.log('✅ Override ativo mesmo com perfil diferente, permanecendo na área:', perfil)
         return
       }
       
-      // Redirecionar para o dashboard do perfil correto
+      // IMPORTANTE: Se o usuário está tentando acessar uma área diferente da dele,
+      // redirecionar para a área correta, MAS apenas se não for admin/suporte
+      // e se o perfil estiver claramente definido
       if (userProfile?.perfil) {
-        console.log('❌ Perfil não corresponde, redirecionando para:', `/pt/${userProfile.perfil}/dashboard`)
-        router.push(`/pt/${userProfile.perfil}/dashboard`)
+        // Verificar se a URL atual já está na área correta (evitar loop)
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+        const correctAreaPath = `/pt/${userProfile.perfil}/dashboard`
+        
+        // Se já está na área correta, não redirecionar novamente
+        if (currentPath.startsWith(`/pt/${userProfile.perfil}/`)) {
+          console.log('✅ Já está na área correta, permitindo acesso')
+          return
+        }
+        
+        console.log('❌ Perfil não corresponde, redirecionando para:', correctAreaPath)
+        router.push(correctAreaPath)
       } else {
         console.log('❌ Perfil não encontrado, redirecionando para login:', `/pt/${perfil}/login`)
         router.push(`/pt/${perfil}/login`)
@@ -244,31 +248,13 @@ export default function ProtectedRoute({
       return <>{children}</>
     }
 
-    // IMPORTANTE: Admin pode acessar outras áreas se allowAdmin = true
-    // Verificar mesmo quando o perfil ainda está carregando (após timeout)
-    if (allowAdmin) {
-      if (userProfile?.is_admin) {
-        console.log('✅ Render: Admin confirmado, permitindo acesso')
-        return <>{children}</>
-      }
-      
-      // Se passou timeout do perfil e allowAdmin está ativo, permitir acesso
-      if (!userProfile && profileCheckTimeout) {
-        console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true, permitindo acesso temporário')
-        return <>{children}</>
-      }
-      
-      // Se allowAdmin está ativo e já passou o timeout de loading (2s), permitir acesso imediatamente
-      // Não precisa esperar o profileCheckTimeout (3s)
-      if (!userProfile && loadingTimeout) {
-        console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true e loadingTimeout passou, permitindo acesso')
-        return <>{children}</>
-      }
+    if (adminOverrideReady) {
+      console.log('✅ Render: Admin override ativo, permitindo acesso')
+      return <>{children}</>
     }
 
-    // Suporte pode acessar outras áreas se allowSupport = true
-    if (allowSupport && userProfile?.is_support) {
-      console.log('✅ Render: Suporte confirmado, permitindo acesso')
+    if (supportOverrideReady) {
+      console.log('✅ Render: Suporte override ativo, permitindo acesso')
       return <>{children}</>
     }
 
@@ -286,20 +272,9 @@ export default function ProtectedRoute({
 
     // Verificar se perfil corresponde
     if (userProfile?.perfil !== perfil) {
-      // Se allowAdmin está ativo e ainda não temos certeza, aguardar ou permitir após timeout
-      if (allowAdmin) {
-        // Se já passou o timeout de loading (2s), permitir acesso mesmo sem perfil
-        if (!userProfile && loadingTimeout) {
-          console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true e loadingTimeout passou, permitindo acesso')
-          return <>{children}</>
-        }
-        if (!userProfile && profileCheckTimeout) {
-          console.warn('⚠️ Render: Perfil não carregou, mas allowAdmin=true, permitindo acesso')
-          return <>{children}</>
-        }
-        if (!userProfile) {
-          return null
-        }
+      if (adminOverrideReady || supportOverrideReady) {
+        console.log('✅ Render: Override ativo, permitindo acesso mesmo com perfil diferente')
+        return <>{children}</>
       }
       return null
     }
