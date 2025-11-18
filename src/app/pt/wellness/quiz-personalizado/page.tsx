@@ -318,6 +318,17 @@ export default function QuizPersonalizadoPage() {
     }
   ]
 
+  const atualizarOrdemPerguntas = (perguntas: Pergunta[]) =>
+    perguntas.map((pergunta, index) => ({
+      ...pergunta,
+      ordem: index + 1
+    }))
+
+  const fecharModalPergunta = () => {
+    setEditandoPergunta(false)
+    setPerguntaAtual(null)
+  }
+
   const adicionarPergunta = (tipo: string) => {
     const novaPergunta: Pergunta = {
       id: `pergunta_${Date.now()}`,
@@ -328,22 +339,63 @@ export default function QuizPersonalizadoPage() {
       ordem: quiz.perguntas.length + 1
     }
     
-    setPerguntaAtual(novaPergunta)
+    setPerguntaAtual({ ...novaPergunta })
     setEditandoPergunta(true)
   }
 
   const salvarPergunta = () => {
     if (!perguntaAtual) return
     
-    const perguntasAtualizadas = [...quiz.perguntas, perguntaAtual]
-    setQuiz({ ...quiz, perguntas: perguntasAtualizadas })
-    setEditandoPergunta(false)
-    setPerguntaAtual(null)
+    setQuiz((prev) => {
+      const perguntaJaExiste = prev.perguntas.some((p) => p.id === perguntaAtual.id)
+
+      const perguntasAtualizadas = perguntaJaExiste
+        ? prev.perguntas.map((pergunta) =>
+            pergunta.id === perguntaAtual.id ? { ...perguntaAtual } : pergunta
+          )
+        : [...prev.perguntas, { ...perguntaAtual, ordem: prev.perguntas.length + 1 }]
+
+      return {
+        ...prev,
+        perguntas: atualizarOrdemPerguntas(perguntasAtualizadas)
+      }
+    })
+
+    fecharModalPergunta()
   }
 
   const removerPergunta = (id: string) => {
     const perguntasAtualizadas = quiz.perguntas.filter(p => p.id !== id)
-    setQuiz({ ...quiz, perguntas: perguntasAtualizadas })
+    setQuiz({ ...quiz, perguntas: atualizarOrdemPerguntas(perguntasAtualizadas) })
+  }
+
+  const iniciarEdicaoPergunta = (id: string) => {
+    const perguntaSelecionada = quiz.perguntas.find((pergunta) => pergunta.id === id)
+    if (!perguntaSelecionada) return
+
+    setPerguntaAtual({
+      ...perguntaSelecionada,
+      opcoes: perguntaSelecionada.opcoes ? [...perguntaSelecionada.opcoes] : undefined
+    })
+    setEditandoPergunta(true)
+  }
+
+  const moverPergunta = (index: number, direcao: -1 | 1) => {
+    setQuiz((prev) => {
+      const novoIndice = index + direcao
+      if (novoIndice < 0 || novoIndice >= prev.perguntas.length) {
+        return prev
+      }
+
+      const perguntasReordenadas = [...prev.perguntas]
+      const [perguntaMovida] = perguntasReordenadas.splice(index, 1)
+      perguntasReordenadas.splice(novoIndice, 0, perguntaMovida)
+
+      return {
+        ...prev,
+        perguntas: atualizarOrdemPerguntas(perguntasReordenadas)
+      }
+    })
   }
 
   // Função para salvar quiz no banco de dados
@@ -668,13 +720,38 @@ export default function QuizPersonalizadoPage() {
                                 </div>
                               )}
                             </div>
-                            <button
-                              onClick={() => removerPergunta(pergunta.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                              title="Remover pergunta"
-                            >
-                              🗑️
-                            </button>
+                            <div className="flex items-center space-x-1">
+                              <button
+                                onClick={() => moverPergunta(index, -1)}
+                                disabled={index === 0}
+                                className="text-gray-500 hover:text-gray-800 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed p-2 rounded-lg transition-colors"
+                                title="Mover para cima"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                onClick={() => moverPergunta(index, 1)}
+                                disabled={index === quiz.perguntas.length - 1}
+                                className="text-gray-500 hover:text-gray-800 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed p-2 rounded-lg transition-colors"
+                                title="Mover para baixo"
+                              >
+                                ↓
+                              </button>
+                              <button
+                                onClick={() => iniciarEdicaoPergunta(pergunta.id)}
+                                className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                title="Editar pergunta"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => removerPergunta(pergunta.id)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                title="Remover pergunta"
+                              >
+                                🗑️
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -689,7 +766,10 @@ export default function QuizPersonalizadoPage() {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Criar Pergunta - {tiposPergunta.find(t => t.tipo === perguntaAtual.tipo)?.nome}
+                    {quiz.perguntas.some((pergunta) => pergunta.id === perguntaAtual.id)
+                      ? 'Editar Pergunta'
+                      : 'Criar Pergunta'}{' '}
+                    - {tiposPergunta.find(t => t.tipo === perguntaAtual.tipo)?.nome}
                   </h3>
                   
                   <div className="space-y-4">
@@ -770,10 +850,7 @@ export default function QuizPersonalizadoPage() {
 
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
-                      onClick={() => {
-                        setEditandoPergunta(false)
-                        setPerguntaAtual(null)
-                      }}
+                      onClick={fecharModalPergunta}
                       className="px-4 py-2 text-gray-600 hover:text-gray-800"
                     >
                       Cancelar
@@ -783,7 +860,9 @@ export default function QuizPersonalizadoPage() {
                       disabled={!perguntaAtual.titulo.trim()}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
-                      Salvar Pergunta
+                      {quiz.perguntas.some((pergunta) => pergunta.id === perguntaAtual.id)
+                        ? 'Atualizar Pergunta'
+                        : 'Salvar Pergunta'}
                     </button>
                   </div>
                 </div>

@@ -6,7 +6,7 @@ import Image from 'next/image'
 
 interface Pergunta {
   id: string
-  tipo: 'multipla' | 'dissertativa' | 'escala' | 'simnao'
+  tipo: 'multipla' | 'dissertativa'
   titulo: string
   opcoes?: string[]
   obrigatoria: boolean
@@ -56,6 +56,7 @@ interface QuizPersonalizado {
       tamanho: 'pequeno' | 'medio' | 'grande'
     }>
     acaoAposCaptura: 'redirecionar' | 'manter_pagina' | 'ambos'
+    mensagemWhatsapp?: string
   }
 }
 
@@ -65,6 +66,35 @@ export default function QuizPersonalizadoPage() {
   const [paginaPreviewAtual, setPaginaPreviewAtual] = useState(0)
   const [salvando, setSalvando] = useState(false)
   const [slugQuiz, setSlugQuiz] = useState<string>('')
+  const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null)
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
+  const [mensagemWhatsapp, setMensagemWhatsapp] = useState('')
+  const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
+  const [customShortCode, setCustomShortCode] = useState('')
+  const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
+  const [verificandoShortCode, setVerificandoShortCode] = useState(false)
+  const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
+
+  useEffect(() => {
+    const carregarPerfil = async () => {
+      try {
+        setCarregandoPerfil(true)
+        const response = await fetch('/api/nutri/profile')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile?.whatsapp) {
+            setPerfilWhatsapp(data.profile.whatsapp)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+      } finally {
+        setCarregandoPerfil(false)
+      }
+    }
+
+    carregarPerfil()
+  }, [])
   // Função para calcular total de páginas do preview
   const calcularTotalPaginas = () => {
     let total = 1 // Página inicial
@@ -252,7 +282,7 @@ export default function QuizPersonalizadoPage() {
       permitirVoltar: true
     },
     entrega: {
-      tipoEntrega: 'pagina',
+      tipoEntrega: 'whatsapp',
       ctaPersonalizado: 'Receber Meu Resultado',
       urlRedirecionamento: '',
       coletarDados: true,
@@ -290,7 +320,8 @@ export default function QuizPersonalizadoPage() {
           tamanho: 'medio'
         }
       ],
-      acaoAposCaptura: 'ambos'
+      acaoAposCaptura: 'ambos',
+      mensagemWhatsapp: ''
     }
   })
 
@@ -311,22 +342,19 @@ export default function QuizPersonalizadoPage() {
       descricao: 'Resposta livre em texto',
       icon: '✍️',
       dica: 'Perfeita para coletar informações detalhadas'
-    },
-    {
-      tipo: 'escala',
-      nome: 'Escala',
-      descricao: 'Avaliação em escala numérica',
-      icon: '📊',
-      dica: 'Ótima para medir intensidade ou frequência'
-    },
-    {
-      tipo: 'simnao',
-      nome: 'Sim/Não',
-      descricao: 'Resposta binária simples',
-      icon: '✅',
-      dica: 'Ideal para perguntas diretas e rápidas'
     }
   ]
+
+  const atualizarOrdemPerguntas = (perguntas: Pergunta[]) =>
+    perguntas.map((pergunta, index) => ({
+      ...pergunta,
+      ordem: index + 1
+    }))
+
+  const fecharModalPergunta = () => {
+    setEditandoPergunta(false)
+    setPerguntaAtual(null)
+  }
 
   const adicionarPergunta = (tipo: string) => {
     const novaPergunta: Pergunta = {
@@ -345,15 +373,62 @@ export default function QuizPersonalizadoPage() {
   const salvarPergunta = () => {
     if (!perguntaAtual) return
     
-    const perguntasAtualizadas = [...quiz.perguntas, perguntaAtual]
-    setQuiz({ ...quiz, perguntas: perguntasAtualizadas })
-    setEditandoPergunta(false)
-    setPerguntaAtual(null)
+    setQuiz((prev) => {
+      const perguntaJaExiste = prev.perguntas.some((pergunta) => pergunta.id === perguntaAtual.id)
+
+      const perguntasAtualizadas = perguntaJaExiste
+        ? prev.perguntas.map((pergunta) =>
+            pergunta.id === perguntaAtual.id ? { ...perguntaAtual } : pergunta
+          )
+        : [
+            ...prev.perguntas,
+            {
+              ...perguntaAtual,
+              ordem: prev.perguntas.length + 1
+            }
+          ]
+
+      return {
+        ...prev,
+        perguntas: atualizarOrdemPerguntas(perguntasAtualizadas)
+      }
+    })
+
+    fecharModalPergunta()
   }
 
   const removerPergunta = (id: string) => {
     const perguntasAtualizadas = quiz.perguntas.filter(p => p.id !== id)
-    setQuiz({ ...quiz, perguntas: perguntasAtualizadas })
+    setQuiz({ ...quiz, perguntas: atualizarOrdemPerguntas(perguntasAtualizadas) })
+  }
+
+  const iniciarEdicaoPergunta = (id: string) => {
+    const perguntaSelecionada = quiz.perguntas.find((pergunta) => pergunta.id === id)
+    if (!perguntaSelecionada) return
+
+    setPerguntaAtual({
+      ...perguntaSelecionada,
+      opcoes: perguntaSelecionada.opcoes ? [...perguntaSelecionada.opcoes] : undefined
+    })
+    setEditandoPergunta(true)
+  }
+
+  const moverPergunta = (index: number, direcao: -1 | 1) => {
+    setQuiz((prev) => {
+      const novoIndice = index + direcao
+      if (novoIndice < 0 || novoIndice >= prev.perguntas.length) {
+        return prev
+      }
+
+      const perguntasReordenadas = [...prev.perguntas]
+      const [perguntaMovida] = perguntasReordenadas.splice(index, 1)
+      perguntasReordenadas.splice(novoIndice, 0, perguntaMovida)
+
+      return {
+        ...prev,
+        perguntas: atualizarOrdemPerguntas(perguntasReordenadas)
+      }
+    })
   }
 
   // Função para salvar quiz no banco de dados
@@ -371,6 +446,12 @@ export default function QuizPersonalizadoPage() {
       
       const slug = `quiz-${slugBase}-${Date.now()}`
       
+      let urlRedirecionamento = quiz.entrega.urlRedirecionamento
+      if (quiz.entrega.tipoEntrega === 'whatsapp' && perfilWhatsapp) {
+        const numeroLimpo = perfilWhatsapp.replace(/\D/g, '')
+        urlRedirecionamento = numeroLimpo ? `https://wa.me/${numeroLimpo}` : urlRedirecionamento
+      }
+
       // Preparar dados para salvar
       const quizData = {
         user_id: 'user-temp-001', // TODO: Pegar do contexto de autenticação
@@ -379,7 +460,11 @@ export default function QuizPersonalizadoPage() {
         emoji: quiz.emoji,
         cores: quiz.cores,
         configuracoes: quiz.configuracao,
-        entrega: quiz.entrega,
+        entrega: {
+          ...quiz.entrega,
+          urlRedirecionamento,
+          mensagemWhatsapp: quiz.entrega.tipoEntrega === 'whatsapp' ? mensagemWhatsapp : ''
+        },
         slug: slug,
       }
 
@@ -397,6 +482,9 @@ export default function QuizPersonalizadoPage() {
             opcoes: p.opcoes || [],
             obrigatoria: p.obrigatoria,
           })),
+          profession: 'nutri', // Área Nutri
+          generate_short_url: generateShortUrl,
+          custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null,
         }),
       })
 
@@ -439,7 +527,7 @@ export default function QuizPersonalizadoPage() {
             <div className="flex items-center space-x-6">
               <Link href="/pt/nutri/dashboard">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
                   alt="YLADA"
                   width={150}
                   height={50}
@@ -654,13 +742,38 @@ export default function QuizPersonalizadoPage() {
                                 </div>
                               )}
                             </div>
-                            <button
-                              onClick={() => removerPergunta(pergunta.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                              title="Remover pergunta"
-                            >
-                              🗑️
-                            </button>
+                            <div className="flex items-center space-x-1">
+                              <button
+                                onClick={() => moverPergunta(index, -1)}
+                                disabled={index === 0}
+                                className="text-gray-500 hover:text-gray-800 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed p-2 rounded-lg transition-colors"
+                                title="Mover para cima"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                onClick={() => moverPergunta(index, 1)}
+                                disabled={index === quiz.perguntas.length - 1}
+                                className="text-gray-500 hover:text-gray-800 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed p-2 rounded-lg transition-colors"
+                                title="Mover para baixo"
+                              >
+                                ↓
+                              </button>
+                              <button
+                                onClick={() => iniciarEdicaoPergunta(pergunta.id)}
+                                className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                title="Editar pergunta"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => removerPergunta(pergunta.id)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                title="Remover pergunta"
+                              >
+                                🗑️
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -675,7 +788,10 @@ export default function QuizPersonalizadoPage() {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Criar Pergunta - {tiposPergunta.find(t => t.tipo === perguntaAtual.tipo)?.nome}
+                    {quiz.perguntas.some((pergunta) => pergunta.id === perguntaAtual.id)
+                      ? 'Editar Pergunta'
+                      : 'Criar Pergunta'}{' '}
+                    - {tiposPergunta.find(t => t.tipo === perguntaAtual.tipo)?.nome}
                   </h3>
                   
                   <div className="space-y-4">
@@ -756,10 +872,7 @@ export default function QuizPersonalizadoPage() {
 
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
-                      onClick={() => {
-                        setEditandoPergunta(false)
-                        setPerguntaAtual(null)
-                      }}
+                      onClick={fecharModalPergunta}
                       className="px-4 py-2 text-gray-600 hover:text-gray-800"
                     >
                       Cancelar
@@ -769,7 +882,9 @@ export default function QuizPersonalizadoPage() {
                       disabled={!perguntaAtual.titulo.trim()}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
-                      Salvar Pergunta
+                      {quiz.perguntas.some((pergunta) => pergunta.id === perguntaAtual.id)
+                        ? 'Atualizar Pergunta'
+                        : 'Salvar Pergunta'}
                     </button>
                   </div>
                 </div>
@@ -1065,13 +1180,27 @@ export default function QuizPersonalizadoPage() {
                    <div className="space-y-4">
                      {/* Coletar Dados */}
                      <div>
-                       <label className="flex items-center space-x-2">
-                         <input
-                           type="checkbox"
-                           checked={quiz.entrega.coletarDados}
-                           onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, coletarDados: e.target.checked } })}
-                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                         />
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={quiz.entrega.coletarDados}
+                          onChange={(e) => {
+                            const coletarDados = e.target.checked
+                            setQuiz({
+                              ...quiz,
+                              entrega: {
+                                ...quiz.entrega,
+                                coletarDados,
+                                acaoAposCaptura: coletarDados
+                                  ? 'ambos'
+                                  : quiz.entrega.tipoEntrega === 'whatsapp' || quiz.entrega.tipoEntrega === 'url'
+                                    ? 'redirecionar'
+                                    : 'manter_pagina'
+                              }
+                            })
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
                          <span className="text-sm text-blue-800">Coletar dados do cliente na página de resultado</span>
                        </label>
                        
@@ -1111,41 +1240,130 @@ export default function QuizPersonalizadoPage() {
                        )}
                      </div>
 
-                     {/* Redirecionamento */}
-                     <div>
-                       <label className="flex items-center space-x-2">
-                         <input
-                           type="checkbox"
-                           checked={quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos'}
-                           onChange={(e) => {
-                             const novoValor = e.target.checked ? 
-                               (quiz.entrega.coletarDados ? 'ambos' : 'redirecionar') : 
-                               (quiz.entrega.coletarDados ? 'manter_pagina' : 'manter_pagina')
-                             setQuiz({ ...quiz, entrega: { ...quiz.entrega, acaoAposCaptura: novoValor as any } })
-                           }}
-                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                         />
-                         <span className="text-sm text-blue-800">Redirecionar para WhatsApp ou URL</span>
-                       </label>
-                       
-                       {(quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos') && (
-                         <div className="ml-6 mt-3">
-                           <input
-                             type="url"
-                             placeholder="https://wa.me/5511999999999 ou https://seusite.com/contato"
-                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                             value={quiz.entrega.urlRedirecionamento}
-                             onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, urlRedirecionamento: e.target.value } })}
-                           />
-                         </div>
-                       )}
-                       
-                       <p className="text-xs text-blue-600 mt-2 ml-6">
-                         💡 Dica: Se ativado junto com "Coletar dados", captura os dados e depois redireciona
-                       </p>
-                     </div>
                    </div>
                  </div>
+
+                {/* Configurações de Redirecionamento */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-blue-900 mb-3">🔗 Configurações de Redirecionamento</h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Depois do resultado, o cliente vai para:
+                      </label>
+                      <select
+                        value={quiz.entrega.tipoEntrega}
+                        onChange={(e) => {
+                          const novoTipo = e.target.value as 'whatsapp' | 'url'
+                          const novaAcao = quiz.entrega.coletarDados ? 'ambos' : 'redirecionar'
+                          setQuiz({
+                            ...quiz,
+                            entrega: {
+                              ...quiz.entrega,
+                              tipoEntrega: novoTipo,
+                              acaoAposCaptura: novaAcao,
+                              urlRedirecionamento: novoTipo === 'url' ? quiz.entrega.urlRedirecionamento : ''
+                            }
+                          })
+                        }}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="whatsapp">WhatsApp (recomendado)</option>
+                        <option value="url">URL Externa</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        💡 Escolha o destino após o cliente ver o resultado. No WhatsApp usamos o número do seu perfil.
+                      </p>
+                    </div>
+
+                    {quiz.entrega.tipoEntrega === 'whatsapp' && (
+                      <>
+                        {carregandoPerfil ? (
+                          <div className="animate-pulse bg-gray-100 h-20 rounded-lg"></div>
+                        ) : perfilWhatsapp ? (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div className="flex items-start space-x-3">
+                              <span className="text-2xl">✅</span>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900 mb-1">
+                                  WhatsApp do Perfil
+                                </p>
+                                <p className="text-sm text-gray-700 font-mono mb-2">
+                                  {perfilWhatsapp}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  Este número será usado automaticamente. Para alterar, vá em{' '}
+                                  <Link href="/pt/nutri/configuracao" className="text-green-600 underline font-semibold">
+                                    Configurações → Perfil
+                                  </Link>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div className="flex items-start space-x-3">
+                              <span className="text-2xl">⚠️</span>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-yellow-900 mb-2">
+                                  WhatsApp não configurado
+                                </p>
+                                <p className="text-xs text-yellow-800 mb-3">
+                                  Configure seu WhatsApp no perfil para usar esta opção.
+                                </p>
+                                <Link
+                                  href="/pt/nutri/configuracao"
+                                  className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
+                                >
+                                  Ir para Configurações
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Mensagem pré-formatada <span className="text-red-500">*</span>
+                          </label>
+                          <textarea
+                            value={mensagemWhatsapp}
+                            onChange={(e) => setMensagemWhatsapp(e.target.value)}
+                            placeholder="Olá! Completei o quiz e gostaria de saber mais sobre os próximos passos. Pode me ajudar?"
+                            rows={4}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={!perfilWhatsapp}
+                          />
+                          <div className="mt-2 bg-blue-50 rounded-lg p-3">
+                            <p className="text-xs text-blue-700 font-medium mb-1">💡 Como funciona:</p>
+                            <p className="text-xs text-blue-600">
+                              Quando o cliente clicar no botão, abriremos o WhatsApp com esta mensagem já preenchida usando o número do seu perfil.
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {quiz.entrega.tipoEntrega === 'url' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          URL de Redirecionamento <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="url"
+                          value={quiz.entrega.urlRedirecionamento}
+                          onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, urlRedirecionamento: e.target.value } })}
+                          placeholder="https://seusite.com/contato"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          💡 Use a página de agendamento, checkout ou outra etapa do seu funil.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                     {/* Texto do Botão */}
                     <div>
@@ -1154,9 +1372,15 @@ export default function QuizPersonalizadoPage() {
                       </label>
                       <input
                         type="text"
-                        placeholder={quiz.entrega.coletarDados ? 'Ex: Enviar Dados' : 
-                                     quiz.entrega.acaoAposCaptura === 'redirecionar' ? 'Ex: Continuar' :
-                                     quiz.entrega.acaoAposCaptura === 'ambos' ? 'Ex: Ver Resultado' : 'Ex: OK'}
+                    placeholder={
+                      quiz.entrega.tipoEntrega === 'whatsapp'
+                        ? 'Ex: Receber meu resultado no WhatsApp'
+                        : quiz.entrega.tipoEntrega === 'url'
+                          ? 'Ex: Continuar'
+                          : quiz.entrega.coletarDados
+                            ? 'Ex: Enviar Dados'
+                            : 'Ex: Ver Resultado'
+                    }
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         value={quiz.entrega.ctaPersonalizado}
                         onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, ctaPersonalizado: e.target.value } })}
@@ -1166,21 +1390,6 @@ export default function QuizPersonalizadoPage() {
                       </p>
                     </div>
 
-                    {/* URL de Redirecionamento */}
-                    {(quiz.entrega.acaoAposCaptura === 'redirecionar' || quiz.entrega.acaoAposCaptura === 'ambos') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          URL de Redirecionamento
-                        </label>
-                        <input
-                          type="url"
-                          placeholder="https://wa.me/5511999999999 ou https://seusite.com/contato"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={quiz.entrega.urlRedirecionamento}
-                          onChange={(e) => setQuiz({ ...quiz, entrega: { ...quiz.entrega, urlRedirecionamento: e.target.value } })}
-                        />
-                      </div>
-                    )}
                   </div>
 
                   <div className="mt-8 flex justify-between">
@@ -1190,6 +1399,117 @@ export default function QuizPersonalizadoPage() {
                     >
                       ← Voltar
                     </button>
+                 {/* Seção de URL Encurtada */}
+                 <div className="mb-6 space-y-3">
+                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                     <div className="flex items-start space-x-3">
+                       <input
+                         type="checkbox"
+                         id="generateShortUrlQuiz"
+                         checked={generateShortUrl}
+                         onChange={(e) => {
+                           setGenerateShortUrl(e.target.checked)
+                           if (!e.target.checked) {
+                             setUsarCodigoPersonalizado(false)
+                             setCustomShortCode('')
+                             setShortCodeDisponivel(null)
+                           }
+                         }}
+                         className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                       />
+                       <label htmlFor="generateShortUrlQuiz" className="flex-1 cursor-pointer">
+                         <span className="text-sm font-medium text-gray-900 block">
+                           🔗 Gerar URL Encurtada
+                         </span>
+                         <span className="text-xs text-gray-600 mt-1 block">
+                           Crie um link curto como <code className="bg-white px-1 py-0.5 rounded">{typeof window !== 'undefined' ? window.location.hostname : 'ylada.app'}/p/abc123</code> para facilitar compartilhamento via WhatsApp, SMS ou impresso.
+                         </span>
+                       </label>
+                     </div>
+                   </div>
+
+                   {/* Opção de Código Personalizado */}
+                   {generateShortUrl && (
+                     <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                       <div className="flex items-start space-x-3 mb-3">
+                         <input
+                           type="checkbox"
+                           id="usarCodigoPersonalizadoQuiz"
+                           checked={usarCodigoPersonalizado}
+                           onChange={(e) => {
+                             setUsarCodigoPersonalizado(e.target.checked)
+                             if (!e.target.checked) {
+                               setCustomShortCode('')
+                               setShortCodeDisponivel(null)
+                             }
+                           }}
+                           className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                         />
+                         <label htmlFor="usarCodigoPersonalizadoQuiz" className="flex-1 cursor-pointer">
+                           <span className="text-sm font-medium text-gray-900 block">
+                             ✏️ Personalizar Código
+                           </span>
+                           <span className="text-xs text-gray-600 mt-1 block">
+                             Escolha seu próprio código (3-10 caracteres, letras, números e hífens)
+                           </span>
+                         </label>
+                       </div>
+
+                       {usarCodigoPersonalizado && (
+                         <div className="mt-3">
+                           <div className="flex items-center gap-2">
+                             <div className="flex-1">
+                               <div className="flex items-center gap-2">
+                                 <span className="text-sm text-gray-600 font-mono">{typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/p/</span>
+                                 <input
+                                   type="text"
+                                   value={customShortCode}
+                                   onChange={async (e) => {
+                                     const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 10)
+                                     setCustomShortCode(value)
+                                     
+                                     if (value.length >= 3) {
+                                       setVerificandoShortCode(true)
+                                       try {
+                                         const response = await fetch(
+                                           `/api/nutri/check-short-code?code=${encodeURIComponent(value)}&type=quiz`
+                                         )
+                                         const data = await response.json()
+                                         setShortCodeDisponivel(data.available)
+                                       } catch (error) {
+                                         console.error('Erro ao verificar código:', error)
+                                         setShortCodeDisponivel(false)
+                                       } finally {
+                                         setVerificandoShortCode(false)
+                                       }
+                                     } else {
+                                       setShortCodeDisponivel(null)
+                                     }
+                                   }}
+                                   placeholder="meu-codigo"
+                                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                 />
+                               </div>
+                               {verificandoShortCode && (
+                                 <p className="text-xs text-gray-500 mt-1">Verificando...</p>
+                               )}
+                               {!verificandoShortCode && shortCodeDisponivel === true && customShortCode.length >= 3 && (
+                                 <p className="text-xs text-blue-600 mt-1">✅ Código disponível!</p>
+                               )}
+                               {!verificandoShortCode && shortCodeDisponivel === false && customShortCode.length >= 3 && (
+                                 <p className="text-xs text-red-600 mt-1">❌ Este código já está em uso</p>
+                               )}
+                               {customShortCode.length > 0 && customShortCode.length < 3 && (
+                                 <p className="text-xs text-yellow-600 mt-1">⚠️ Mínimo de 3 caracteres</p>
+                               )}
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   )}
+                 </div>
+
                  <button
                    onClick={() => setEtapaAtual(5)}
                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

@@ -1,7 +1,48 @@
 'use client'
 
 import { useState } from 'react'
-import { quizInterativoDiagnosticos, quizBemEstarDiagnosticos, guiaHidratacaoDiagnosticos } from '@/lib/diagnostics'
+import {
+  alimentacaoRotinaDiagnosticos as alimentacaoRotinaDiagnosticosWellness,
+  alimentacaoSaudavelDiagnosticos as alimentacaoSaudavelDiagnosticosWellness,
+  avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness,
+  avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness,
+  calculadoraAguaDiagnosticos as calculadoraAguaDiagnosticosWellness,
+  calculadoraCaloriasDiagnosticos as calculadoraCaloriasDiagnosticosWellness,
+  calculadoraImcDiagnosticos as calculadoraImcDiagnosticosWellness,
+  calculadoraProteinaDiagnosticos as calculadoraProteinaDiagnosticosWellness,
+  checklistAlimentarDiagnosticos as checklistAlimentarDiagnosticosWellness,
+  checklistDetoxDiagnosticos as checklistDetoxDiagnosticosWellness,
+  conheceSeuCorpoDiagnosticos as conheceSeuCorpoDiagnosticosWellness,
+  desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness,
+  desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness,
+  eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness,
+  ganhosProsperidadeDiagnosticos as ganhosProsperidadeDiagnosticosWellness,
+  guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness,
+  guiaNutraceuticoDiagnosticos as guiaNutraceuticoDiagnosticosWellness,
+  guiaProteicoDiagnosticos as guiaProteicoDiagnosticosWellness,
+  intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness,
+  miniEbookDiagnosticos as miniEbookDiagnosticosWellness,
+  nutridoVsAlimentadoDiagnosticos as nutridoVsAlimentadoDiagnosticosWellness,
+  perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness,
+  potencialCrescimentoDiagnosticos as potencialCrescimentoDiagnosticosWellness,
+  prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness,
+  propositoEquilibrioDiagnosticos as propositoEquilibrioDiagnosticosWellness,
+  quizBemEstarDiagnosticos as quizBemEstarDiagnosticosWellness,
+  quizDetoxDiagnosticos as quizDetoxDiagnosticosWellness,
+  quizEnergeticoDiagnosticos as quizEnergeticoDiagnosticosWellness,
+  quizInterativoDiagnosticos as quizInterativoDiagnosticosWellness,
+  quizPerfilNutricionalDiagnosticos as quizPerfilNutricionalDiagnosticosWellness,
+  retencaoLiquidosDiagnosticos as retencaoLiquidosDiagnosticosWellness,
+  sindromeMetabolicaDiagnosticos as sindromeMetabolicaDiagnosticosWellness,
+  sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness,
+  tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness
+} from '@/lib/diagnostics'
+import {
+  diagnosticosNutri,
+  getDiagnostico,
+  type DiagnosticoCompleto,
+  type DiagnosticosPorFerramenta
+} from '@/lib/diagnosticos-nutri'
 
 interface Template {
   id: string
@@ -18,6 +59,178 @@ interface DynamicTemplatePreviewProps {
   onClose?: () => void
 }
 
+interface DiagnosticEntry {
+  resultadoId: string
+  diagnostico: DiagnosticoCompleto
+}
+
+const normalizeSlug = (value: string | undefined | null): string => {
+  if (!value) return ''
+  return value
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+const buildSlugCandidates = (template: Template): string[] => {
+  const rawValues = [
+    template.slug,
+    template.id,
+    template.nome,
+    template.name
+  ]
+
+  const candidates = new Set<string>()
+  rawValues.forEach((value) => {
+    const normalized = normalizeSlug(value)
+    if (!normalized) return
+    candidates.add(normalized)
+    if (normalized.startsWith('template-')) {
+      candidates.add(normalized.replace(/^template-/, ''))
+    }
+    candidates.add(normalized.replace(/-de-/g, '-'))
+    candidates.add(normalized.replace(/-da-/g, '-'))
+  })
+
+  return Array.from(candidates).filter(Boolean)
+}
+
+const slugMatches = (candidate: string, key: string) =>
+  candidate === key || candidate.includes(key) || key.includes(candidate)
+
+const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
+  'quiz-interativo': quizInterativoDiagnosticosWellness,
+  'quiz-bem-estar': quizBemEstarDiagnosticosWellness,
+  'quiz-perfil-nutricional': quizPerfilNutricionalDiagnosticosWellness,
+  'quiz-detox': quizDetoxDiagnosticosWellness,
+  'quiz-energetico': quizEnergeticoDiagnosticosWellness,
+  'avaliacao-emocional': avaliacaoEmocionalDiagnosticosWellness,
+  'avaliacao-intolerancia': intoleranciaDiagnosticosWellness,
+  'intolerancia': intoleranciaDiagnosticosWellness,
+  'perfil-metabolico': perfilMetabolicoDiagnosticosWellness,
+  'avaliacao-inicial': avaliacaoInicialDiagnosticosWellness,
+  'diagnostico-eletrolitos': eletrolitosDiagnosticosWellness,
+  'diagnostico-sintomas-intestinais': sintomasIntestinaisDiagnosticosWellness,
+  'pronto-emagrecer': prontoEmagrecerDiagnosticosWellness,
+  'tipo-fome': tipoFomeDiagnosticosWellness,
+  'alimentacao-saudavel': alimentacaoSaudavelDiagnosticosWellness,
+  'sindrome-metabolica': sindromeMetabolicaDiagnosticosWellness,
+  'retencao-liquidos': retencaoLiquidosDiagnosticosWellness,
+  'conhece-seu-corpo': conheceSeuCorpoDiagnosticosWellness,
+  'nutrido-vs-alimentado': nutridoVsAlimentadoDiagnosticosWellness,
+  'alimentacao-rotina': alimentacaoRotinaDiagnosticosWellness,
+  'ganhos-prosperidade': ganhosProsperidadeDiagnosticosWellness,
+  'potencial-crescimento': potencialCrescimentoDiagnosticosWellness,
+  'proposito-equilibrio': propositoEquilibrioDiagnosticosWellness,
+  'calculadora-imc': calculadoraImcDiagnosticosWellness,
+  'calculadora-proteina': calculadoraProteinaDiagnosticosWellness,
+  'calculadora-agua': calculadoraAguaDiagnosticosWellness,
+  'calculadora-calorias': calculadoraCaloriasDiagnosticosWellness,
+  'checklist-alimentar': checklistAlimentarDiagnosticosWellness,
+  'checklist-detox': checklistDetoxDiagnosticosWellness,
+  'mini-ebook': miniEbookDiagnosticosWellness,
+  'guia-nutraceutico': guiaNutraceuticoDiagnosticosWellness,
+  'guia-proteico': guiaProteicoDiagnosticosWellness,
+  'guia-hidratacao': guiaHidratacaoDiagnosticosWellness,
+  'desafio-7-dias': desafio7DiasDiagnosticosWellness,
+  'desafio-21-dias': desafio21DiasDiagnosticosWellness
+}
+
+const diagnosticsMapsByProfession: Record<'nutri' | 'wellness', Record<string, DiagnosticosPorFerramenta>> = {
+  nutri: diagnosticosNutri,
+  wellness: wellnessDiagnosticsMap
+}
+
+const resultColorPalette = [
+  { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-600', text: 'text-blue-900' },
+  { bg: 'bg-green-50', border: 'border-green-200', badge: 'bg-green-600', text: 'text-green-900' },
+  { bg: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-600', text: 'text-yellow-900' },
+  { bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-600', text: 'text-purple-900' },
+  { bg: 'bg-rose-50', border: 'border-rose-200', badge: 'bg-rose-600', text: 'text-rose-900' }
+]
+
+const formatResultadoLabel = (resultadoId: string) => {
+  return resultadoId
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (match) => match.toUpperCase())
+}
+
+const findDiagnosticsSource = (
+  candidates: string[],
+  profession: 'nutri' | 'wellness'
+): { slug: string; map: Record<string, DiagnosticosPorFerramenta> } | null => {
+  const primaryMap = diagnosticsMapsByProfession[profession]
+  const fallbackMap = profession === 'nutri' ? diagnosticsMapsByProfession.wellness : undefined
+  const mapsToCheck = [primaryMap, fallbackMap].filter(Boolean) as Array<Record<string, DiagnosticosPorFerramenta>>
+
+  for (const candidate of candidates) {
+    for (const map of mapsToCheck) {
+      if (candidate && map[candidate]) {
+        return { slug: candidate, map }
+      }
+    }
+  }
+
+  for (const candidate of candidates) {
+    for (const map of mapsToCheck) {
+      const matchKey = Object.keys(map).find((key) => slugMatches(candidate, key))
+      if (matchKey) {
+        return { slug: matchKey, map }
+      }
+    }
+  }
+
+  return null
+}
+
+const buildEntriesFromMap = (
+  slug: string,
+  map: Record<string, DiagnosticosPorFerramenta>,
+  profession: 'nutri' | 'wellness'
+): DiagnosticEntry[] => {
+  const entry = map[slug]
+  if (!entry) return []
+  const availableResults =
+    entry[profession] || entry.nutri || entry.wellness
+
+  if (!availableResults) return []
+
+  return Object.keys(availableResults)
+    .map((resultadoId) => {
+      const diagnostico = getDiagnostico(slug, profession, resultadoId)
+      if (!diagnostico) return null
+      return { resultadoId, diagnostico }
+    })
+    .filter(Boolean) as DiagnosticEntry[]
+}
+
+const getDiagnosticsInfoForTemplate = (
+  template: Template,
+  profession: 'nutri' | 'wellness'
+) => {
+  const candidates = buildSlugCandidates(template)
+  const source = findDiagnosticsSource(candidates, profession)
+
+  if (!source) {
+    return {
+      slug: candidates[0] || null,
+      entries: [] as DiagnosticEntry[]
+    }
+  }
+
+  return {
+    slug: source.slug,
+    entries: buildEntriesFromMap(source.slug, source.map, profession)
+  }
+}
+
 export default function DynamicTemplatePreview({ 
   template, 
   profession,
@@ -32,6 +245,59 @@ export default function DynamicTemplatePreview({
   const templateType = content.template_type || template.type || 'quiz'
   const nome = template.nome || template.name || 'Template'
   const descricao = (template as any).description || (template as any).descricao || ''
+  const diagnosticsInfo = getDiagnosticsInfoForTemplate(template, profession)
+  const fallbackDiagnosticsSlug =
+    diagnosticsInfo.slug ||
+    normalizeSlug(template.slug || template.id || template.nome || template.name || '')
+
+  const renderDiagnosticsCards = () => {
+    if (!diagnosticsInfo.entries.length) {
+      return (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800 font-semibold">
+            ⚠️ Diagnósticos não encontrados para este template ainda.
+          </p>
+          {fallbackDiagnosticsSlug && (
+            <p className="text-sm text-yellow-700 mt-2">
+              Slug analisado: <strong>{fallbackDiagnosticsSlug}</strong>
+            </p>
+          )}
+        </div>
+      )
+    }
+
+    return diagnosticsInfo.entries.map((entry, index) => {
+      const colors = resultColorPalette[index % resultColorPalette.length]
+      return (
+        <div
+          key={`${fallbackDiagnosticsSlug || entry.resultadoId}-${entry.resultadoId}`}
+          className={`rounded-lg p-6 border-2 ${colors.border} ${colors.bg}`}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h5 className={`text-lg font-bold ${colors.text}`}>
+              {formatResultadoLabel(entry.resultadoId)}
+            </h5>
+            <span className={`${colors.badge} text-white px-3 py-1 rounded-full text-sm font-semibold`}>
+              Resultado #{index + 1}
+            </span>
+          </div>
+          <div className="bg-white rounded-lg p-4 space-y-2">
+            <p className="font-semibold text-gray-900">{entry.diagnostico.diagnostico}</p>
+            <p className="text-gray-700">{entry.diagnostico.causaRaiz}</p>
+            <p className="text-gray-700">{entry.diagnostico.acaoImediata}</p>
+            <p className="text-gray-700">{entry.diagnostico.plano7Dias}</p>
+            <p className="text-gray-700">{entry.diagnostico.suplementacao}</p>
+            <p className="text-gray-700">{entry.diagnostico.alimentacao}</p>
+            {entry.diagnostico.proximoPasso && (
+              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">
+                {entry.diagnostico.proximoPasso}
+              </p>
+            )}
+          </div>
+        </div>
+      )
+    })
+  }
   
   // Debug: Log do content para verificar estrutura
   console.log('[DynamicPreview] Template:', {
@@ -768,128 +1034,12 @@ export default function DynamicTemplatePreview({
           })()}
 
           {/* Tela de Resultados - Etapa N+1 */}
-          {etapaAtual > totalPerguntas && (() => {
-            // Buscar diagnósticos do TypeScript baseado no slug
-            const slug = (template.slug || template.id || '').toLowerCase()
-            let diagnosticoLento: any = null
-            let diagnosticoEquilibrado: any = null
-            let diagnosticoAcelerado: any = null
-            
-            // Para Quiz Interativo, usar diagnósticos específicos
-            if (slug.includes('quiz-interativo') || slug.includes('interativo')) {
-              if (profession === 'wellness' && quizInterativoDiagnosticos.wellness) {
-                diagnosticoLento = quizInterativoDiagnosticos.wellness.metabolismoLento
-                diagnosticoEquilibrado = quizInterativoDiagnosticos.wellness.metabolismoEquilibrado
-                diagnosticoAcelerado = quizInterativoDiagnosticos.wellness.metabolismoAcelerado
-              } else if (profession === 'nutri' && quizInterativoDiagnosticos.nutri) {
-                diagnosticoLento = quizInterativoDiagnosticos.nutri.metabolismoLento
-                diagnosticoEquilibrado = quizInterativoDiagnosticos.nutri.metabolismoEquilibrado
-                diagnosticoAcelerado = quizInterativoDiagnosticos.nutri.metabolismoAcelerado
-              }
-            }
-            
-            // Para Quiz Bem-Estar, usar diagnósticos específicos
-            if (slug.includes('quiz-bem-estar') || slug.includes('bem-estar') || slug.includes('bem estar')) {
-              if (profession === 'wellness' && quizBemEstarDiagnosticos.wellness) {
-                diagnosticoLento = quizBemEstarDiagnosticos.wellness.bemEstarBaixo
-                diagnosticoEquilibrado = quizBemEstarDiagnosticos.wellness.bemEstarModerado
-                diagnosticoAcelerado = quizBemEstarDiagnosticos.wellness.bemEstarAlto
-              }
-            }
-            
-            return (
-              <div className="space-y-6">
-                <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Quiz</h4>
-                
-                {/* Metabolismo Lento / Bem-Estar Baixo */}
-                {diagnosticoLento && (
-                  <div className={`rounded-lg p-6 border-2 ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
-                    <div className="flex items-center justify-between mb-4">
-                      <h5 className={`text-lg font-bold ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'text-red-900' : 'text-blue-900'}`}>
-                        {slug.includes('bem-estar') || slug.includes('bem estar') ? '📉 Bem-Estar Baixo' : '🐌 Metabolismo Lento'}
-                      </h5>
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold text-white ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'bg-red-600' : 'bg-blue-600'}`}>
-                        {slug.includes('bem-estar') || slug.includes('bem estar') ? '10-20 pontos' : '6-9 pontos'}
-                      </span>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 space-y-2">
-                      <p className="font-semibold text-gray-900">{diagnosticoLento.diagnostico}</p>
-                      <p className="text-gray-700">{diagnosticoLento.causaRaiz}</p>
-                      <p className="text-gray-700">{diagnosticoLento.acaoImediata}</p>
-                      <p className="text-gray-700">{diagnosticoLento.plano7Dias}</p>
-                      <p className="text-gray-700">{diagnosticoLento.suplementacao}</p>
-                      <p className="text-gray-700">{diagnosticoLento.alimentacao}</p>
-                      {diagnosticoLento.proximoPasso && (
-                        <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{diagnosticoLento.proximoPasso}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Metabolismo Equilibrado / Bem-Estar Moderado */}
-                {diagnosticoEquilibrado && (
-                  <div className={`rounded-lg p-6 border-2 ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`}>
-                    <div className="flex items-center justify-between mb-4">
-                      <h5 className={`text-lg font-bold ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'text-yellow-900' : 'text-green-900'}`}>
-                        {slug.includes('bem-estar') || slug.includes('bem estar') ? '⚖️ Bem-Estar Moderado' : '⚖️ Metabolismo Equilibrado'}
-                      </h5>
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold text-white ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'bg-yellow-600' : 'bg-green-600'}`}>
-                        {slug.includes('bem-estar') || slug.includes('bem estar') ? '21-30 pontos' : '10-13 pontos'}
-                      </span>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 space-y-2">
-                      <p className="font-semibold text-gray-900">{diagnosticoEquilibrado.diagnostico}</p>
-                      <p className="text-gray-700">{diagnosticoEquilibrado.causaRaiz}</p>
-                      <p className="text-gray-700">{diagnosticoEquilibrado.acaoImediata}</p>
-                      <p className="text-gray-700">{diagnosticoEquilibrado.plano7Dias}</p>
-                      <p className="text-gray-700">{diagnosticoEquilibrado.suplementacao}</p>
-                      <p className="text-gray-700">{diagnosticoEquilibrado.alimentacao}</p>
-                      {diagnosticoEquilibrado.proximoPasso && (
-                        <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{diagnosticoEquilibrado.proximoPasso}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Metabolismo Acelerado / Bem-Estar Alto */}
-                {diagnosticoAcelerado && (
-                  <div className={`rounded-lg p-6 border-2 ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
-                    <div className="flex items-center justify-between mb-4">
-                      <h5 className={`text-lg font-bold ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'text-green-900' : 'text-yellow-900'}`}>
-                        {slug.includes('bem-estar') || slug.includes('bem estar') ? '📊 Bem-Estar Alto' : '🚀 Metabolismo Acelerado'}
-                      </h5>
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold text-white ${slug.includes('bem-estar') || slug.includes('bem estar') ? 'bg-green-600' : 'bg-yellow-600'}`}>
-                        {slug.includes('bem-estar') || slug.includes('bem estar') ? '31-40 pontos' : '14-18 pontos'}
-                      </span>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 space-y-2">
-                      <p className="font-semibold text-gray-900">{diagnosticoAcelerado.diagnostico}</p>
-                      <p className="text-gray-700">{diagnosticoAcelerado.causaRaiz}</p>
-                      <p className="text-gray-700">{diagnosticoAcelerado.acaoImediata}</p>
-                      <p className="text-gray-700">{diagnosticoAcelerado.plano7Dias}</p>
-                      <p className="text-gray-700">{diagnosticoAcelerado.suplementacao}</p>
-                      <p className="text-gray-700">{diagnosticoAcelerado.alimentacao}</p>
-                      {diagnosticoAcelerado.proximoPasso && (
-                        <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">{diagnosticoAcelerado.proximoPasso}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Fallback se não encontrar diagnósticos */}
-                {!diagnosticoLento && !diagnosticoEquilibrado && !diagnosticoAcelerado && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p className="text-yellow-800">
-                      ⚠️ Diagnósticos não encontrados para este template.
-                    </p>
-                    <p className="text-sm text-yellow-700 mt-2">
-                      Slug: <strong>{slug}</strong> | Profissão: <strong>{profession}</strong>
-                    </p>
-                  </div>
-                )}
-              </div>
-            )
-          })()}
+          {etapaAtual > totalPerguntas && (
+            <div className="space-y-6">
+              <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Quiz</h4>
+              {renderDiagnosticsCards()}
+            </div>
+          )}
 
           {/* Navegação com Setinhas e Botões Numerados (igual Quiz Bem-Estar) */}
           <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
@@ -1745,84 +1895,10 @@ export default function DynamicTemplatePreview({
     
     // Resultados (após formulário ou seções)
     if (etapaAtual > totalSecoes + (temFormulario ? 1 : 0)) {
-      // Buscar diagnósticos do TypeScript baseado no slug
-      const slug = (template.slug || template.id || '').toLowerCase()
-      let diagnosticos: any = null
-      
-      if (slug.includes('guia-hidratacao') || slug.includes('guia hidratacao') || (slug.includes('guia') && slug.includes('hidratacao'))) {
-        if (profession === 'wellness' && guiaHidratacaoDiagnosticos?.wellness) {
-          diagnosticos = guiaHidratacaoDiagnosticos.wellness
-        }
-      }
-      
       return (
         <div className="space-y-6">
           <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Diagnósticos Possíveis</h4>
-          
-          {diagnosticos && (
-            <>
-              {diagnosticos.baixaHidratacao && (
-                <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h5 className="text-lg font-bold text-red-900">💧 Baixa Hidratação</h5>
-                    <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">&lt; 1.5L/dia</span>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 space-y-2">
-                    <p className="font-semibold text-gray-900">{diagnosticos.baixaHidratacao.diagnostico}</p>
-                    <p className="text-gray-700">{diagnosticos.baixaHidratacao.causaRaiz}</p>
-                    <p className="text-gray-700">{diagnosticos.baixaHidratacao.acaoImediata}</p>
-                    <p className="text-gray-700">{diagnosticos.baixaHidratacao.plano7Dias}</p>
-                    <p className="text-gray-700">{diagnosticos.baixaHidratacao.suplementacao}</p>
-                    <p className="text-gray-700">{diagnosticos.baixaHidratacao.alimentacao}</p>
-                    {diagnosticos.baixaHidratacao.proximoPasso && (
-                      <p className="text-gray-700 font-semibold bg-blue-50 p-3 rounded-lg mt-2">{diagnosticos.baixaHidratacao.proximoPasso}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              {diagnosticos.hidratacaoModerada && (
-                <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h5 className="text-lg font-bold text-yellow-900">💧 Hidratação Moderada</h5>
-                    <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">1.5-2.5L/dia</span>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 space-y-2">
-                    <p className="font-semibold text-gray-900">{diagnosticos.hidratacaoModerada.diagnostico}</p>
-                    <p className="text-gray-700">{diagnosticos.hidratacaoModerada.causaRaiz}</p>
-                    <p className="text-gray-700">{diagnosticos.hidratacaoModerada.acaoImediata}</p>
-                    <p className="text-gray-700">{diagnosticos.hidratacaoModerada.plano7Dias}</p>
-                    <p className="text-gray-700">{diagnosticos.hidratacaoModerada.suplementacao}</p>
-                    <p className="text-gray-700">{diagnosticos.hidratacaoModerada.alimentacao}</p>
-                    {diagnosticos.hidratacaoModerada.proximoPasso && (
-                      <p className="text-gray-700 font-semibold bg-blue-50 p-3 rounded-lg mt-2">{diagnosticos.hidratacaoModerada.proximoPasso}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              {diagnosticos.altaHidratacao && (
-                <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h5 className="text-lg font-bold text-green-900">💧 Alta Hidratação</h5>
-                    <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">&gt; 2.5L/dia</span>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 space-y-2">
-                    <p className="font-semibold text-gray-900">{diagnosticos.altaHidratacao.diagnostico}</p>
-                    <p className="text-gray-700">{diagnosticos.altaHidratacao.causaRaiz}</p>
-                    <p className="text-gray-700">{diagnosticos.altaHidratacao.acaoImediata}</p>
-                    <p className="text-gray-700">{diagnosticos.altaHidratacao.plano7Dias}</p>
-                    <p className="text-gray-700">{diagnosticos.altaHidratacao.suplementacao}</p>
-                    <p className="text-gray-700">{diagnosticos.altaHidratacao.alimentacao}</p>
-                    {diagnosticos.altaHidratacao.proximoPasso && (
-                      <p className="text-gray-700 font-semibold bg-blue-50 p-3 rounded-lg mt-2">{diagnosticos.altaHidratacao.proximoPasso}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          
+          {renderDiagnosticsCards()}
           <div className="flex justify-between mt-6">
             <button
               onClick={() => setEtapaAtual(etapaAtual - 1)}
