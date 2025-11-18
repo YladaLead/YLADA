@@ -1,42 +1,41 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  alimentacaoRotinaDiagnosticos as alimentacaoRotinaDiagnosticosWellness,
-  alimentacaoSaudavelDiagnosticos as alimentacaoSaudavelDiagnosticosWellness,
-  avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness,
-  avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness,
-  calculadoraAguaDiagnosticos as calculadoraAguaDiagnosticosWellness,
-  calculadoraCaloriasDiagnosticos as calculadoraCaloriasDiagnosticosWellness,
-  calculadoraImcDiagnosticos as calculadoraImcDiagnosticosWellness,
-  calculadoraProteinaDiagnosticos as calculadoraProteinaDiagnosticosWellness,
-  checklistAlimentarDiagnosticos as checklistAlimentarDiagnosticosWellness,
-  checklistDetoxDiagnosticos as checklistDetoxDiagnosticosWellness,
-  conheceSeuCorpoDiagnosticos as conheceSeuCorpoDiagnosticosWellness,
-  desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness,
-  desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness,
-  eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness,
-  ganhosProsperidadeDiagnosticos as ganhosProsperidadeDiagnosticosWellness,
-  guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness,
-  guiaNutraceuticoDiagnosticos as guiaNutraceuticoDiagnosticosWellness,
-  guiaProteicoDiagnosticos as guiaProteicoDiagnosticosWellness,
-  intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness,
-  miniEbookDiagnosticos as miniEbookDiagnosticosWellness,
-  nutridoVsAlimentadoDiagnosticos as nutridoVsAlimentadoDiagnosticosWellness,
-  perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness,
-  potencialCrescimentoDiagnosticos as potencialCrescimentoDiagnosticosWellness,
-  prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness,
-  propositoEquilibrioDiagnosticos as propositoEquilibrioDiagnosticosWellness,
-  quizBemEstarDiagnosticos as quizBemEstarDiagnosticosWellness,
-  quizDetoxDiagnosticos as quizDetoxDiagnosticosWellness,
-  quizEnergeticoDiagnosticos as quizEnergeticoDiagnosticosWellness,
-  quizInterativoDiagnosticos as quizInterativoDiagnosticosWellness,
-  quizPerfilNutricionalDiagnosticos as quizPerfilNutricionalDiagnosticosWellness,
-  retencaoLiquidosDiagnosticos as retencaoLiquidosDiagnosticosWellness,
-  sindromeMetabolicaDiagnosticos as sindromeMetabolicaDiagnosticosWellness,
-  sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness,
-  tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness
-} from '@/lib/diagnostics'
+// Importar diagnósticos Wellness diretamente dos arquivos
+import { alimentacaoRotinaDiagnosticos as alimentacaoRotinaDiagnosticosWellness } from '@/lib/diagnostics/wellness/alimentacao-rotina'
+import { alimentacaoSaudavelDiagnosticos as alimentacaoSaudavelDiagnosticosWellness } from '@/lib/diagnostics/wellness/alimentacao-saudavel'
+import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from '@/lib/diagnostics/wellness/avaliacao-emocional'
+import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from '@/lib/diagnostics/wellness/avaliacao-inicial'
+import { calculadoraAguaDiagnosticos as calculadoraAguaDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-agua'
+import { calculadoraCaloriasDiagnosticos as calculadoraCaloriasDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-calorias'
+import { calculadoraImcDiagnosticos as calculadoraImcDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-imc'
+import { calculadoraProteinaDiagnosticos as calculadoraProteinaDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-proteina'
+import { checklistAlimentarDiagnosticos as checklistAlimentarDiagnosticosWellness } from '@/lib/diagnostics/wellness/checklist-alimentar'
+import { checklistDetoxDiagnosticos as checklistDetoxDiagnosticosWellness } from '@/lib/diagnostics/wellness/checklist-detox'
+import { conheceSeuCorpoDiagnosticos as conheceSeuCorpoDiagnosticosWellness } from '@/lib/diagnostics/wellness/conhece-seu-corpo'
+import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from '@/lib/diagnostics/wellness/desafio-21-dias'
+import { desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness } from '@/lib/diagnostics/wellness/desafio-7-dias'
+import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from '@/lib/diagnostics/wellness/eletrolitos'
+import { ganhosProsperidadeDiagnosticos as ganhosProsperidadeDiagnosticosWellness } from '@/lib/diagnostics/wellness/ganhos-prosperidade'
+import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from '@/lib/diagnostics/wellness/guia-hidratacao'
+import { guiaNutraceuticoDiagnosticos as guiaNutraceuticoDiagnosticosWellness } from '@/lib/diagnostics/wellness/guia-nutraceutico'
+import { guiaProteicoDiagnosticos as guiaProteicoDiagnosticosWellness } from '@/lib/diagnostics/wellness/guia-proteico'
+import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from '@/lib/diagnostics/wellness/intolerancia'
+import { miniEbookDiagnosticos as miniEbookDiagnosticosWellness } from '@/lib/diagnostics/wellness/mini-ebook'
+import { nutridoVsAlimentadoDiagnosticos as nutridoVsAlimentadoDiagnosticosWellness } from '@/lib/diagnostics/wellness/nutrido-vs-alimentado'
+import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } from '@/lib/diagnostics/wellness/perfil-metabolico'
+import { potencialCrescimentoDiagnosticos as potencialCrescimentoDiagnosticosWellness } from '@/lib/diagnostics/wellness/potencial-crescimento'
+import { prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness } from '@/lib/diagnostics/wellness/pronto-emagrecer'
+import { propositoEquilibrioDiagnosticos as propositoEquilibrioDiagnosticosWellness } from '@/lib/diagnostics/wellness/proposito-equilibrio'
+import { quizBemEstarDiagnosticos as quizBemEstarDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-bem-estar'
+import { quizDetoxDiagnosticos as quizDetoxDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-detox'
+import { quizEnergeticoDiagnosticos as quizEnergeticoDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-energetico'
+import { quizInterativoDiagnosticos as quizInterativoDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-interativo'
+import { quizPerfilNutricionalDiagnosticos as quizPerfilNutricionalDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-perfil-nutricional'
+import { retencaoLiquidosDiagnosticos as retencaoLiquidosDiagnosticosWellness } from '@/lib/diagnostics/wellness/retencao-liquidos'
+import { sindromeMetabolicaDiagnosticos as sindromeMetabolicaDiagnosticosWellness } from '@/lib/diagnostics/wellness/sindrome-metabolica'
+import { sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness } from '@/lib/diagnostics/wellness/sintomas-intestinais'
+import { tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness } from '@/lib/diagnostics/wellness/tipo-fome'
 import {
   diagnosticosNutri,
   getDiagnostico,

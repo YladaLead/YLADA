@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ChatIA from '../../../../components/ChatIA'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
-import NutriNavBar from '../../../../components/nutri/NutriNavBar'
+import NutriSidebar from '../../../../components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function NutriDashboard() {
@@ -47,6 +47,7 @@ function NutriDashboardContent() {
   const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState<string | null>(null)
   const [alterandoStatusId, setAlterandoStatusId] = useState<string | null>(null)
   const [chatAberto, setChatAberto] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Carregar perfil do usuário - otimizado com timeout menor e fallback rápido
   useEffect(() => {
@@ -325,8 +326,27 @@ function NutriDashboardContent() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <NutriNavBar />
+    <div className="min-h-screen bg-gray-50 flex">
+      <NutriSidebar 
+        isMobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+      />
+      
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
+          <div className="w-10"></div>
+        </div>
       
       {/* Mensagens de Sucesso/Erro */}
       {mensagemSucesso && (
@@ -404,358 +424,281 @@ function NutriDashboardContent() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Seção: Ferramentas do seu negócio */}
-        <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
-            <span>🔧</span>
-            <span>Ferramentas do seu negócio</span>
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <Link 
-              href="/pt/nutri/ferramentas"
-              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">🔗</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Meus Links</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Links criados</p>
-            </Link>
-
-            <Link 
-              href="/pt/nutri/quizzes"
-              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">🎯</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Quizzes</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Gerenciar</p>
-            </Link>
-
-            <Link 
-              href="/pt/nutri/portals"
-              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-colors border border-blue-200"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">🌿</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Portal do Bem-Estar</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Criar portal</p>
-            </Link>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Hero Section - Boas-vindas */}
+        <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 sm:p-8 text-white shadow-lg">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+            Olá, {perfil.nome || 'Nutricionista'}! 👋
+          </h1>
+          <p className="text-blue-100 text-sm sm:text-base">
+            Visão geral do seu negócio. Acompanhe suas métricas e acesse rapidamente todas as áreas.
+          </p>
         </div>
 
-        {/* Seção: Recursos e Materiais */}
-        <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
-            <span>🎨</span>
-            <span>Recursos e Materiais</span>
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <Link 
-              href="/pt/nutri/ferramentas/templates"
-              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">🎨</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Ver Templates</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Explorar modelos</p>
-            </Link>
-            
-            <Link 
-              href="/pt/nutri/cursos"
-              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">📖</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Cursos</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Educação</p>
-            </Link>
-
-            <Link
-              href="/pt/nutri/tutoriais"
-              className="flex flex-col items-center justify-center p-4 sm:p-5 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
-            >
-              <span className="text-3xl sm:text-4xl mb-2">📚</span>
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Tutoriais</h3>
-              <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Ajuda e Recursos</p>
-            </Link>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Links Ativos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.ferramentasAtivas}</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🔗</span>
-              </div>
+        {/* Stats Cards - Visão Geral */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-gray-600">Leads Hoje</p>
+              <span className="text-lg">📈</span>
             </div>
-            <div className="mt-4">
-              <span className="text-sm text-blue-600 font-medium">{stats.ferramentasAtivas > 0 ? 'Ativo' : 'Nenhuma ferramenta'}</span>
-            </div>
+            <p className="text-2xl font-bold text-gray-900">{stats.leadsGerados}</p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Leads Gerados</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.leadsGerados}</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">📈</span>
-              </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-gray-600">Clientes Ativos</p>
+              <span className="text-lg">👥</span>
             </div>
-            <div className="mt-4">
-              <span className="text-sm text-blue-600 font-medium">{stats.leadsGerados > 0 ? `${stats.leadsGerados} total` : 'Nenhum lead ainda'}</span>
-            </div>
+            <p className="text-2xl font-bold text-gray-900">{stats.clientesAtivos}</p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Conversões</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.conversoes}</p>
-              </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🎯</span>
-              </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-gray-600">Links Ativos</p>
+              <span className="text-lg">🔗</span>
             </div>
-            <div className="mt-4">
-              <span className="text-sm text-blue-600 font-medium">
-                {stats.leadsGerados > 0 
-                  ? `${Math.round((stats.conversoes / stats.leadsGerados) * 100)}% taxa de conversão`
-                  : 'Nenhuma conversão ainda'}
-              </span>
-            </div>
+            <p className="text-2xl font-bold text-gray-900">{stats.ferramentasAtivas}</p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Clientes Ativos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.clientesAtivos}</p>
-              </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">👥</span>
-              </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-gray-600">Taxa Conversão</p>
+              <span className="text-lg">🎯</span>
             </div>
-            <div className="mt-4">
-              <span className="text-sm text-blue-600 font-medium">{stats.clientesAtivos > 0 ? `${stats.clientesAtivos} clientes` : 'Nenhum cliente ainda'}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Links Ativos */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Links Ativos</h2>
-              <Link 
-                href="/pt/nutri/ferramentas" 
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Ver todos
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {carregandoDados ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600 text-sm">Carregando ferramentas...</p>
-                </div>
-              ) : ferramentasAtivas.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-600 text-sm mb-4">Você ainda não criou nenhuma ferramenta</p>
-                  <Link 
-                    href="/pt/nutri/ferramentas/nova"
-                    className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                  >
-                    Criar Primeira Ferramenta
-                  </Link>
-                </div>
-              ) : (
-                ferramentasAtivas.map((ferramenta) => {
-                  const isActive = ferramenta.status === 'active' || ferramenta.status === 'ativa' || ferramenta.status === 'ativo'
-                  const isAlterandoStatus = alterandoStatusId === ferramenta.id
-                  const isExcluindo = excluindoId === ferramenta.id
-                  
-                  return (
-                    <div 
-                      key={ferramenta.id} 
-                      className="group relative flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-transparent hover:border-blue-200"
-                    >
-                      {/* Card clicável para editar */}
-                      <Link 
-                        href={`/pt/nutri/ferramentas/${ferramenta.id}/editar`}
-                        className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer"
-                      >
-                        <span className="text-xl sm:text-2xl flex-shrink-0">{ferramenta.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{ferramenta.nome}</h3>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                              isActive 
-                                ? 'bg-blue-100 text-blue-800' 
-                                : 'bg-gray-200 text-gray-600'
-                            }`}>
-                              {isActive ? 'Ativo' : 'Inativo'}
-                            </span>
-                          </div>
-                          <p className="text-xs sm:text-sm text-gray-600 truncate">{ferramenta.categoria}</p>
-                        </div>
-                      </Link>
-                      
-                      {/* Estatísticas */}
-                      <div className="text-right flex-shrink-0 ml-3 mr-3">
-                        <p className="text-sm font-medium text-gray-900">{ferramenta.leads} leads</p>
-                        <p className="text-xs text-gray-600">{ferramenta.conversoes} conversões</p>
-                      </div>
-                      
-                      {/* Botões de Ação */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {/* Toggle Ativo/Inativo */}
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            alternarStatus(ferramenta.id, ferramenta.status)
-                          }}
-                          disabled={isAlterandoStatus || isExcluindo}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                            isActive ? 'bg-blue-600' : 'bg-gray-300'
-                          } ${isAlterandoStatus || isExcluindo ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          title={isActive ? 'Desativar ferramenta' : 'Ativar ferramenta'}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              isActive ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
-                        
-                        {/* Botão Excluir */}
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setMostrarConfirmacaoExclusao(ferramenta.id)
-                          }}
-                          disabled={isAlterandoStatus || isExcluindo}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Excluir ferramenta"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Portal do Bem-Estar */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Portal do Bem-Estar</h2>
-              <Link 
-                href="/pt/nutri/portals" 
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Ver todos
-              </Link>
-            </div>
-            <div className="text-center py-8">
-              <p className="text-gray-600 text-sm mb-4">Crie portais personalizados para seus clientes</p>
-              <Link 
-                href="/pt/nutri/portals/novo"
-                className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors text-sm font-medium"
-              >
-                Criar Portal
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Como os Leads são Gerados */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <span className="text-2xl mr-3">📈</span>
-            Como os Leads são Gerados e Medidos
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-medium text-gray-900 mb-3">🔄 Processo de Geração de Leads</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">1.</span>
-                  <p><strong>Cliente acessa seu link</strong> através do link personalizado</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">2.</span>
-                  <p><strong>Interage com o template</strong> (quiz, calculadora, conteúdo)</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">3.</span>
-                  <p><strong>Fornece dados de contato</strong> para receber o resultado</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-600 font-bold">4.</span>
-                  <p><strong>Lead é capturado automaticamente</strong> no seu dashboard</p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900 mb-3">📊 Métricas de Conversão</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <div className="flex justify-between">
-                  <span><strong>Taxa de Conversão:</strong></span>
-                  <span className="text-blue-600 font-bold">
-                    {stats.leadsGerados > 0 
-                      ? `${Math.round((stats.conversoes / stats.leadsGerados) * 100)}%`
-                      : '0%'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>Tempo Médio de Conversão:</strong></span>
-                  <span className="text-blue-600 font-bold">3-7 dias</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>Ticket Médio:</strong></span>
-                  <span className="text-purple-600 font-bold">R$ 180</span>
-                </div>
-                <div className="flex justify-between">
-                  <span><strong>ROI dos Links:</strong></span>
-                  <span className="text-orange-600 font-bold">400%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
-            <h4 className="font-medium text-gray-900 mb-2">💡 Dica Importante:</h4>
-            <p className="text-sm text-gray-700">
-              Cada link funciona 24/7 capturando leads qualificados. Quanto mais links você criar, 
-              mais leads receberá. O sistema mede automaticamente todas as interações e conversões.
+            <p className="text-2xl font-bold text-gray-900">
+              {stats.leadsGerados > 0 
+                ? `${Math.round((stats.conversoes / stats.leadsGerados) * 100)}%`
+                : '0%'}
             </p>
           </div>
         </div>
-      </div>
 
-      {/* Chat com IA */}
-      <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
-      
-      {/* Botão Flutuante do Chat */}
-      {!chatAberto && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            onClick={() => setChatAberto(true)}
-            className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-          >
-            <span className="text-2xl">💬</span>
-          </button>
+        {/* ============================================ */}
+        {/* ÁREA 1: 🎯 CAPTAÇÃO DE CLIENTES - RESUMO */}
+        {/* ============================================ */}
+        <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border-2 border-blue-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎯</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Captação de Clientes</h2>
+                <p className="text-sm text-gray-600">Resumo da sua captação</p>
+              </div>
+            </div>
+            <Link 
+              href="/pt/nutri/ferramentas"
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+            >
+              Ver tudo →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">🔗</span>
+                <span className="text-2xl font-bold text-blue-600">{stats.ferramentasAtivas}</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Links Ativos</h3>
+              <p className="text-xs text-gray-600">Ferramentas em funcionamento</p>
+            </div>
+
+            <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">📈</span>
+                <span className="text-2xl font-bold text-purple-600">{stats.leadsGerados}</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Leads Gerados</h3>
+              <p className="text-xs text-gray-600">Total de contatos capturados</p>
+            </div>
+
+            <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">🎯</span>
+                <span className="text-2xl font-bold text-indigo-600">{stats.conversoes}</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Conversões</h3>
+              <p className="text-xs text-gray-600">Leads que viraram clientes</p>
+            </div>
+          </div>
+
+          {/* Links Ativos - Preview (máximo 3) */}
+          {ferramentasAtivas.length > 0 && (
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-900 text-sm">Links Recentes</h3>
+                <Link 
+                  href="/pt/nutri/ferramentas" 
+                  className="text-blue-600 hover:text-blue-700 text-xs font-medium"
+                >
+                  Ver todos →
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {ferramentasAtivas.slice(0, 3).map((ferramenta) => {
+                  const isActive = ferramenta.status === 'active' || ferramenta.status === 'ativa' || ferramenta.status === 'ativo'
+                  return (
+                    <Link
+                      key={ferramenta.id}
+                      href={`/pt/nutri/ferramentas/${ferramenta.id}/editar`}
+                      className="flex items-center justify-between p-2 bg-white rounded-lg hover:bg-blue-50 transition-colors border border-gray-200"
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span className="text-lg">{ferramenta.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 text-xs truncate">{ferramenta.nome}</h4>
+                          <p className="text-xs text-gray-500">{ferramenta.leads} leads</p>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        isActive ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {isActive ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* ============================================ */}
+        {/* ÁREA 2: 👥 GESTÃO DE CLIENTES - RESUMO */}
+        {/* ============================================ */}
+        <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border-2 border-green-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">👥</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Gestão de Clientes</h2>
+                <p className="text-sm text-gray-600">Resumo da sua gestão</p>
+              </div>
+            </div>
+            <Link 
+              href="/pt/nutri/clientes"
+              className="text-green-600 hover:text-green-700 font-medium text-sm"
+            >
+              Ver tudo →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link 
+              href="/pt/nutri/clientes"
+              className="bg-green-50 rounded-lg p-4 border border-green-200 hover:bg-green-100 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">👤</span>
+                <span className="text-2xl font-bold text-green-600">{stats.clientesAtivos}</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Clientes Ativos</h3>
+              <p className="text-xs text-gray-600">Total de clientes</p>
+            </Link>
+
+            <Link 
+              href="/pt/nutri/agenda"
+              className="bg-teal-50 rounded-lg p-4 border border-teal-200 hover:bg-teal-100 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">📅</span>
+                <span className="text-2xl font-bold text-teal-600">-</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Agenda</h3>
+              <p className="text-xs text-gray-600">Consultas e agendamentos</p>
+            </Link>
+
+            <Link 
+              href="/pt/nutri/acompanhamento"
+              className="bg-emerald-50 rounded-lg p-4 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">📊</span>
+                <span className="text-2xl font-bold text-emerald-600">-</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Acompanhamento</h3>
+              <p className="text-xs text-gray-600">Evolução e progresso</p>
+            </Link>
+          </div>
+        </div>
+
+        {/* ============================================ */}
+        {/* ÁREA 3: 📚 FORMAÇÃO - RESUMO */}
+        {/* ============================================ */}
+        <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border-2 border-purple-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">📚</span>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Formação</h2>
+                <p className="text-sm text-gray-600">Resumo da sua formação</p>
+              </div>
+            </div>
+            <Link 
+              href="/pt/nutri/cursos"
+              className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+            >
+              Ver tudo →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link 
+              href="/pt/nutri/cursos"
+              className="bg-purple-50 rounded-lg p-4 border border-purple-200 hover:bg-purple-100 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">🎓</span>
+                <span className="text-2xl font-bold text-purple-600">-</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Cursos</h3>
+              <p className="text-xs text-gray-600">Aprenda e evolua</p>
+            </Link>
+
+            <Link 
+              href="/pt/nutri/meu-progresso"
+              className="bg-pink-50 rounded-lg p-4 border border-pink-200 hover:bg-pink-100 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">📈</span>
+                <span className="text-2xl font-bold text-pink-600">-</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Meu Progresso</h3>
+              <p className="text-xs text-gray-600">Acompanhe sua evolução</p>
+            </Link>
+
+            <Link 
+              href="/pt/nutri/certificados"
+              className="bg-amber-50 rounded-lg p-4 border border-amber-200 hover:bg-amber-100 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">🏆</span>
+                <span className="text-2xl font-bold text-amber-600">-</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Certificados</h3>
+              <p className="text-xs text-gray-600">Conquistas e certificações</p>
+            </Link>
+          </div>
+        </div>
+
+        </div>
+
+        {/* Chat com IA */}
+        <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
+        
+        {/* Botão Flutuante do Chat */}
+        {!chatAberto && (
+          <div className="fixed bottom-6 right-6 z-50">
+            <button
+              onClick={() => setChatAberto(true)}
+              className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+            >
+              <span className="text-2xl">💬</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

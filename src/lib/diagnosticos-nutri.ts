@@ -1,6 +1,10 @@
 import type { DiagnosticoCompleto, DiagnosticosPorFerramenta } from './diagnostics/types'
 
+import { alimentacaoRotinaDiagnosticos } from './diagnostics/nutri/alimentacao-rotina'
+import { alimentacaoSaudavelDiagnosticos } from './diagnostics/nutri/alimentacao-saudavel'
+import { avaliacaoEmocionalDiagnosticos } from './diagnostics/nutri/avaliacao-emocional'
 import { avaliacaoInicialDiagnosticos } from './diagnostics/nutri/avaliacao-inicial'
+import { avaliacaoIntoleranciaDiagnosticos } from './diagnostics/nutri/avaliacao-intolerancia'
 import { calculadoraAguaDiagnosticos } from './diagnostics/nutri/calculadora-agua'
 import { calculadoraCaloriasDiagnosticos } from './diagnostics/nutri/calculadora-calorias'
 import { calculadoraImcDiagnosticos } from './diagnostics/nutri/calculadora-imc'
@@ -8,17 +12,26 @@ import { calculadoraProteinaDiagnosticos } from './diagnostics/nutri/calculadora
 import { cardapioDetoxDiagnosticos } from './diagnostics/nutri/cardapio-detox'
 import { checklistAlimentarDiagnosticos } from './diagnostics/nutri/checklist-alimentar'
 import { checklistDetoxDiagnosticos } from './diagnostics/nutri/checklist-detox'
+import { conheceSeuCorpoDiagnosticos } from './diagnostics/nutri/conhece-seu-corpo'
 import { diarioAlimentarDiagnosticos } from './diagnostics/nutri/diario-alimentar'
 import { desafio21DiasDiagnosticos } from './diagnostics/nutri/desafio-21-dias'
 import { desafio7DiasDiagnosticos } from './diagnostics/nutri/desafio-7-dias'
+import { diagnosticoEletrolitosDiagnosticos } from './diagnostics/nutri/diagnostico-eletrolitos'
+import { diagnosticoSintomasIntestinaisDiagnosticos } from './diagnostics/nutri/diagnostico-sintomas-intestinais'
 import { formularioRecomendacaoDiagnosticos } from './diagnostics/nutri/formulario-recomendacao'
+import { ganhosProsperidadeDiagnosticos } from './diagnostics/nutri/ganhos-prosperidade'
 import { guiaHidratacaoDiagnosticos } from './diagnostics/nutri/guia-hidratacao'
 import { guiaNutraceuticoDiagnosticos } from './diagnostics/nutri/guia-nutraceutico'
 import { guiaProteicoDiagnosticos } from './diagnostics/nutri/guia-proteico'
 import { infograficoEducativoDiagnosticos } from './diagnostics/nutri/infografico-educativo'
 import { miniEbookDiagnosticos } from './diagnostics/nutri/mini-ebook'
+import { nutridoVsAlimentadoDiagnosticos } from './diagnostics/nutri/nutrido-vs-alimentado'
+import { perfilMetabolicoDiagnosticos } from './diagnostics/nutri/perfil-metabolico'
 import { plannerRefeicoesDiagnosticos } from './diagnostics/nutri/planner-refeicoes'
 import { planoAlimentarBaseDiagnosticos } from './diagnostics/nutri/plano-alimentar-base'
+import { potencialCrescimentoDiagnosticos } from './diagnostics/nutri/potencial-crescimento'
+import { propositoEquilibrioDiagnosticos } from './diagnostics/nutri/proposito-equilibrio'
+import { prontoEmagrecerDiagnosticos } from './diagnostics/nutri/pronto-emagrecer'
 import { quizBemEstarDiagnosticos } from './diagnostics/nutri/quiz-bem-estar'
 import { quizDetoxDiagnosticos } from './diagnostics/nutri/quiz-detox'
 import { quizEnergeticoDiagnosticos } from './diagnostics/nutri/quiz-energetico'
@@ -26,12 +39,15 @@ import { quizInterativoDiagnosticos } from './diagnostics/nutri/quiz-interativo'
 import { quizPerfilNutricionalDiagnosticos } from './diagnostics/nutri/quiz-perfil-nutricional'
 import { rastreadorAlimentarDiagnosticos } from './diagnostics/nutri/rastreador-alimentar'
 import { receitasDiagnosticos } from './diagnostics/nutri/receitas'
+import { retencaoLiquidosDiagnosticos } from './diagnostics/nutri/retencao-liquidos'
 import { simuladorResultadosDiagnosticos } from './diagnostics/nutri/simulador-resultados'
+import { sindromeMetabolicaDiagnosticos } from './diagnostics/nutri/sindrome-metabolica'
 import { storyInterativoDiagnosticos } from './diagnostics/nutri/story-interativo'
 import { tabelaComparativaDiagnosticos } from './diagnostics/nutri/tabela-comparativa'
 import { tabelaMetasSemanaisDiagnosticos } from './diagnostics/nutri/tabela-metas-semanais'
 import { tabelaSintomasDiagnosticos } from './diagnostics/nutri/tabela-sintomas'
 import { tabelaSubstituicoesDiagnosticos } from './diagnostics/nutri/tabela-substituicoes'
+import { tipoFomeDiagnosticos } from './diagnostics/nutri/tipo-fome'
 
 import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from './diagnostics/wellness/avaliacao-emocional'
 import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from './diagnostics/wellness/avaliacao-inicial'
@@ -57,7 +73,11 @@ import { tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness } from './diagnost
 export type { DiagnosticoCompleto, DiagnosticosPorFerramenta, ResultadoPossivel } from './diagnostics/types'
 
 export {
+  alimentacaoRotinaDiagnosticos,
+  alimentacaoSaudavelDiagnosticos,
+  avaliacaoEmocionalDiagnosticos,
   avaliacaoInicialDiagnosticos,
+  avaliacaoIntoleranciaDiagnosticos,
   calculadoraAguaDiagnosticos,
   calculadoraCaloriasDiagnosticos,
   calculadoraImcDiagnosticos,
@@ -65,17 +85,26 @@ export {
   cardapioDetoxDiagnosticos,
   checklistAlimentarDiagnosticos,
   checklistDetoxDiagnosticos,
+  conheceSeuCorpoDiagnosticos,
   diarioAlimentarDiagnosticos,
   desafio21DiasDiagnosticos,
   desafio7DiasDiagnosticos,
+  diagnosticoEletrolitosDiagnosticos,
+  diagnosticoSintomasIntestinaisDiagnosticos,
   formularioRecomendacaoDiagnosticos,
+  ganhosProsperidadeDiagnosticos,
   guiaHidratacaoDiagnosticos,
   guiaNutraceuticoDiagnosticos,
   guiaProteicoDiagnosticos,
   infograficoEducativoDiagnosticos,
   miniEbookDiagnosticos,
+  nutridoVsAlimentadoDiagnosticos,
+  perfilMetabolicoDiagnosticos,
   plannerRefeicoesDiagnosticos,
   planoAlimentarBaseDiagnosticos,
+  potencialCrescimentoDiagnosticos,
+  propositoEquilibrioDiagnosticos,
+  prontoEmagrecerDiagnosticos,
   quizBemEstarDiagnosticos,
   quizDetoxDiagnosticos,
   quizEnergeticoDiagnosticos,
@@ -83,12 +112,15 @@ export {
   quizPerfilNutricionalDiagnosticos,
   rastreadorAlimentarDiagnosticos,
   receitasDiagnosticos,
+  retencaoLiquidosDiagnosticos,
   simuladorResultadosDiagnosticos,
+  sindromeMetabolicaDiagnosticos,
   storyInterativoDiagnosticos,
   tabelaComparativaDiagnosticos,
   tabelaMetasSemanaisDiagnosticos,
   tabelaSintomasDiagnosticos,
-  tabelaSubstituicoesDiagnosticos
+  tabelaSubstituicoesDiagnosticos,
+  tipoFomeDiagnosticos
 }
 
 export function getDiagnostico(
@@ -116,18 +148,30 @@ export function getDiagnostico(
       break
     case 'avaliacao-emocional':
     case 'quiz-emocional':
-      diagnosticos = avaliacaoEmocionalDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = avaliacaoEmocionalDiagnosticosWellness
+      } else {
+        diagnosticos = avaliacaoEmocionalDiagnosticos
+      }
       break
     case 'avaliacao-intolerancia':
     case 'quiz-intolerancia':
     case 'intolerancia':
-      diagnosticos = intoleranciaDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = intoleranciaDiagnosticosWellness
+      } else {
+        diagnosticos = avaliacaoIntoleranciaDiagnosticos
+      }
       break
     case 'avaliacao-perfil-metabolico':
     case 'quiz-perfil-metabolico':
     case 'perfil-metabolico':
     case 'perfil-metabólico':
-      diagnosticos = perfilMetabolicoDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = perfilMetabolicoDiagnosticosWellness
+      } else {
+        diagnosticos = perfilMetabolicoDiagnosticos
+      }
       break
     case 'avaliacao-inicial':
     case 'quiz-avaliacao-inicial':
@@ -142,78 +186,130 @@ export function getDiagnostico(
     case 'quiz-eletrolitos':
     case 'eletrolitos':
     case 'eletrólitos':
-      diagnosticos = eletrolitosDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = eletrolitosDiagnosticosWellness
+      } else {
+        diagnosticos = diagnosticoEletrolitosDiagnosticos
+      }
       break
     case 'diagnostico-sintomas-intestinais':
     case 'quiz-sintomas-intestinais':
     case 'sintomas-intestinais':
     case 'sintomas intestinais':
-      diagnosticos = sintomasIntestinaisDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = sintomasIntestinaisDiagnosticosWellness
+      } else {
+        diagnosticos = diagnosticoSintomasIntestinaisDiagnosticos
+      }
       break
     case 'pronto-emagrecer':
     case 'quiz-pronto-emagrecer':
     case 'pronto para emagrecer':
-      diagnosticos = prontoEmagrecerDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = prontoEmagrecerDiagnosticosWellness
+      } else {
+        diagnosticos = prontoEmagrecerDiagnosticos
+      }
       break
     case 'tipo-fome':
     case 'quiz-tipo-fome':
     case 'qual-e-o-seu-tipo-de-fome':
     case 'tipo de fome':
-      diagnosticos = tipoFomeDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = tipoFomeDiagnosticosWellness
+      } else {
+        diagnosticos = tipoFomeDiagnosticos
+      }
       break
     case 'alimentacao-saudavel':
     case 'quiz-alimentacao-saudavel':
     case 'healthy-eating-quiz':
     case 'healthy-eating':
-      diagnosticos = alimentacaoSaudavelDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = alimentacaoSaudavelDiagnosticosWellness
+      } else {
+        diagnosticos = alimentacaoSaudavelDiagnosticos
+      }
       break
     case 'sindrome-metabolica':
     case 'risco-sindrome-metabolica':
     case 'metabolic-syndrome-risk':
     case 'metabolic-syndrome':
-      diagnosticos = sindromeMetabolicaDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = sindromeMetabolicaDiagnosticosWellness
+      } else {
+        diagnosticos = sindromeMetabolicaDiagnosticos
+      }
       break
     case 'retencao-liquidos':
     case 'teste-retencao-liquidos':
     case 'water-retention-test':
     case 'water-retention':
-      diagnosticos = retencaoLiquidosDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = retencaoLiquidosDiagnosticosWellness
+      } else {
+        diagnosticos = retencaoLiquidosDiagnosticos
+      }
       break
     case 'conhece-seu-corpo':
     case 'voce-conhece-seu-corpo':
     case 'body-awareness':
     case 'autoconhecimento-corporal':
-      diagnosticos = conheceSeuCorpoDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = conheceSeuCorpoDiagnosticosWellness
+      } else {
+        diagnosticos = conheceSeuCorpoDiagnosticos
+      }
       break
     case 'nutrido-vs-alimentado':
     case 'voce-nutrido-ou-apenas-alimentado':
     case 'nourished-vs-fed':
     case 'nutrido ou alimentado':
-      diagnosticos = nutridoVsAlimentadoDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = nutridoVsAlimentadoDiagnosticosWellness
+      } else {
+        diagnosticos = nutridoVsAlimentadoDiagnosticos
+      }
       break
     case 'alimentacao-rotina':
     case 'voce-alimentando-conforme-rotina':
     case 'eating-routine':
     case 'alimentação conforme rotina':
-      diagnosticos = alimentacaoRotinaDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = alimentacaoRotinaDiagnosticosWellness
+      } else {
+        diagnosticos = alimentacaoRotinaDiagnosticos
+      }
       break
     case 'ganhos-prosperidade':
     case 'quiz-ganhos-prosperidade':
     case 'gains-and-prosperity':
     case 'ganhos e prosperidade':
-      diagnosticos = ganhosProsperidadeDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = ganhosProsperidadeDiagnosticosWellness
+      } else {
+        diagnosticos = ganhosProsperidadeDiagnosticos
+      }
       break
     case 'potencial-crescimento':
     case 'quiz-potencial-crescimento':
     case 'potential-and-growth':
     case 'potencial e crescimento':
-      diagnosticos = potencialCrescimentoDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = potencialCrescimentoDiagnosticosWellness
+      } else {
+        diagnosticos = potencialCrescimentoDiagnosticos
+      }
       break
     case 'proposito-equilibrio':
     case 'quiz-proposito-equilibrio':
     case 'purpose-and-balance':
     case 'propósito e equilíbrio':
-      diagnosticos = propositoEquilibrioDiagnosticosWellness
+      if (profissao === 'wellness') {
+        diagnosticos = propositoEquilibrioDiagnosticosWellness
+      } else {
+        diagnosticos = propositoEquilibrioDiagnosticos
+      }
       break
     case 'calculadora-imc':
       diagnosticos = calculadoraImcDiagnosticos
@@ -319,8 +415,17 @@ export function getDiagnostico(
 }
 
 export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
+  'alimentacao-rotina': alimentacaoRotinaDiagnosticos,
+  'voce-alimentando-conforme-rotina': alimentacaoRotinaDiagnosticos,
+  'alimentacao-saudavel': alimentacaoSaudavelDiagnosticos,
+  'quiz-alimentacao-saudavel': alimentacaoSaudavelDiagnosticos,
+  'avaliacao-emocional': avaliacaoEmocionalDiagnosticos,
+  'quiz-emocional': avaliacaoEmocionalDiagnosticos,
   'avaliacao-inicial': avaliacaoInicialDiagnosticos,
   'template-avaliacao-inicial': avaliacaoInicialDiagnosticos,
+  'avaliacao-intolerancia': avaliacaoIntoleranciaDiagnosticos,
+  'quiz-intolerancia': avaliacaoIntoleranciaDiagnosticos,
+  'intolerancia': avaliacaoIntoleranciaDiagnosticos,
   'calculadora-agua': calculadoraAguaDiagnosticos,
   'calculadora-calorias': calculadoraCaloriasDiagnosticos,
   'calculadora-imc': calculadoraImcDiagnosticos,
@@ -328,19 +433,43 @@ export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'cardapio-detox': cardapioDetoxDiagnosticos,
   'checklist-alimentar': checklistAlimentarDiagnosticos,
   'checklist-detox': checklistDetoxDiagnosticos,
+  'conhece-seu-corpo': conheceSeuCorpoDiagnosticos,
+  'voce-conhece-seu-corpo': conheceSeuCorpoDiagnosticos,
+  'autoconhecimento-corporal': conheceSeuCorpoDiagnosticos,
   'diario-alimentar': diarioAlimentarDiagnosticos,
   'desafio-7-dias': desafio7DiasDiagnosticos,
   'template-desafio-7dias': desafio7DiasDiagnosticos,
   'desafio-21-dias': desafio21DiasDiagnosticos,
   'template-desafio-21dias': desafio21DiasDiagnosticos,
+  'diagnostico-eletrolitos': diagnosticoEletrolitosDiagnosticos,
+  'quiz-eletrolitos': diagnosticoEletrolitosDiagnosticos,
+  'eletrolitos': diagnosticoEletrolitosDiagnosticos,
+  'eletrólitos': diagnosticoEletrolitosDiagnosticos,
+  'diagnostico-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
+  'quiz-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
+  'sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
   'formulario-recomendacao': formularioRecomendacaoDiagnosticos,
   'guia-hidratacao': guiaHidratacaoDiagnosticos,
   'guia-nutraceutico': guiaNutraceuticoDiagnosticos,
   'guia-proteico': guiaProteicoDiagnosticos,
   'infografico-educativo': infograficoEducativoDiagnosticos,
   'mini-ebook': miniEbookDiagnosticos,
+  'nutrido-vs-alimentado': nutridoVsAlimentadoDiagnosticos,
+  'voce-nutrido-ou-apenas-alimentado': nutridoVsAlimentadoDiagnosticos,
+  'nutrido ou alimentado': nutridoVsAlimentadoDiagnosticos,
+  'perfil-metabolico': perfilMetabolicoDiagnosticos,
+  'avaliacao-perfil-metabolico': perfilMetabolicoDiagnosticos,
+  'quiz-perfil-metabolico': perfilMetabolicoDiagnosticos,
   'planner-refeicoes': plannerRefeicoesDiagnosticos,
   'plano-alimentar-base': planoAlimentarBaseDiagnosticos,
+  'potencial-crescimento': potencialCrescimentoDiagnosticos,
+  'quiz-potencial-crescimento': potencialCrescimentoDiagnosticos,
+  'proposito-equilibrio': propositoEquilibrioDiagnosticos,
+  'quiz-proposito-equilibrio': propositoEquilibrioDiagnosticos,
+  'pronto-emagrecer': prontoEmagrecerDiagnosticos,
+  'quiz-pronto-emagrecer': prontoEmagrecerDiagnosticos,
+  'ganhos-prosperidade': ganhosProsperidadeDiagnosticos,
+  'quiz-ganhos-prosperidade': ganhosProsperidadeDiagnosticos,
   'quiz-bem-estar': quizBemEstarDiagnosticos,
   'quiz-detox': quizDetoxDiagnosticos,
   'quiz-energetico': quizEnergeticoDiagnosticos,
@@ -349,11 +478,17 @@ export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'rastreador-alimentar': rastreadorAlimentarDiagnosticos,
   'receitas': receitasDiagnosticos,
   'template-receitas': receitasDiagnosticos,
+  'retencao-liquidos': retencaoLiquidosDiagnosticos,
+  'teste-retencao-liquidos': retencaoLiquidosDiagnosticos,
   'simulador-resultados': simuladorResultadosDiagnosticos,
+  'sindrome-metabolica': sindromeMetabolicaDiagnosticos,
+  'risco-sindrome-metabolica': sindromeMetabolicaDiagnosticos,
   'story-interativo': storyInterativoDiagnosticos,
   'template-story-interativo': storyInterativoDiagnosticos,
   'tabela-comparativa': tabelaComparativaDiagnosticos,
   'tabela-metas-semanais': tabelaMetasSemanaisDiagnosticos,
   'tabela-sintomas': tabelaSintomasDiagnosticos,
-  'tabela-substituicoes': tabelaSubstituicoesDiagnosticos
+  'tabela-substituicoes': tabelaSubstituicoesDiagnosticos,
+  'tipo-fome': tipoFomeDiagnosticos,
+  'quiz-tipo-fome': tipoFomeDiagnosticos
 }
