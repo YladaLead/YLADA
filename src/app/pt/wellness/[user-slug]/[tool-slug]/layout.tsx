@@ -11,46 +11,138 @@ interface Props {
   }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const resolvedParams = await params
-  const { 'user-slug': userSlug, 'tool-slug': toolSlug } = resolvedParams
+function resolveAppBaseUrl() {
+  const directUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+
+  if (directUrl) {
+    return directUrl
+  }
+
+  // Desenvolvimento local
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000'
+  }
+
+  return 'https://www.ylada.com'
+}
+
+async function fetchToolFromSupabase(userSlug: string, toolSlug: string) {
+  if (!supabaseAdmin) {
+    console.warn('[OG Metadata] Supabase admin client unavailable')
+    return null
+  }
 
   try {
-    // Buscar dados da ferramenta
-    const { data: tool, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('user_templates')
-      .select(`
+      .select(
+        `
         id,
         title,
         description,
         template_slug,
         user_profiles!inner(user_slug)
-      `)
+      `
+      )
       .eq('user_profiles.user_slug', userSlug)
       .eq('slug', toolSlug)
       .single()
 
-    if (error || !tool) {
-      // Debug: log do erro
-      console.error('[OG Metadata] ❌ Tool not found:', {
+    if (error) {
+      console.error('[OG Metadata] ❌ Supabase query failed:', {
         userSlug,
         toolSlug,
-        error: error?.message || 'Tool not found',
-        errorCode: error?.code,
-        errorDetails: error?.details,
-        errorHint: error?.hint
+        error: error.message,
+        code: error.code,
+        details: error.details
+      })
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.error('[OG Metadata] ❌ Unexpected Supabase error:', {
+      userSlug,
+      toolSlug,
+      error
+    })
+    return null
+  }
+}
+
+async function fetchToolFromApi(userSlug: string, toolSlug: string, baseUrl: string) {
+  const apiUrl = `${baseUrl.replace(/\/$/, '')}/api/wellness/ferramentas/by-url?user_slug=${encodeURIComponent(userSlug)}&tool_slug=${encodeURIComponent(toolSlug)}`
+
+  try {
+    const response = await fetch(apiUrl, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-metadata-fetch': 'true'
+      },
+      next: {
+        revalidate: 0
+      }
+    })
+
+    if (!response.ok) {
+      console.error('[OG Metadata] ❌ API fallback returned error:', {
+        userSlug,
+        toolSlug,
+        status: response.status,
+        statusText: response.statusText
+      })
+      return null
+    }
+
+    const data = await response.json()
+    return data.tool || null
+  } catch (error) {
+    console.error('[OG Metadata] ❌ API fallback failed:', {
+      userSlug,
+      toolSlug,
+      error
+    })
+    return null
+  }
+}
+
+async function resolveToolData(userSlug: string, toolSlug: string, baseUrl: string) {
+  const directData = await fetchToolFromSupabase(userSlug, toolSlug)
+  if (directData) {
+    return directData
+  }
+
+  return fetchToolFromApi(userSlug, toolSlug, baseUrl)
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = await params
+  const { 'user-slug': userSlug, 'tool-slug': toolSlug } = resolvedParams
+  const baseUrl = resolveAppBaseUrl()
+
+  try {
+    const tool = await resolveToolData(userSlug, toolSlug, baseUrl)
+
+    if (!tool) {
+      // Debug: log do erro
+      console.error('[OG Metadata] ❌ Tool not found after fallbacks:', {
+        userSlug,
+        toolSlug,
+        baseUrl
       })
       
       // Construir URL base para fallback
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
-      
       // Tentar inferir template_slug do tool-slug para usar imagem correta mesmo se ferramenta não for encontrada
       // Isso ajuda quando o Facebook faz cache antes da ferramenta ser criada
       const inferredSlug = normalizeTemplateSlug(toolSlug)
       const inferredImage = getFullOGImageUrl(inferredSlug, baseUrl)
       const inferredMessages = getOGMessages(inferredSlug)
       
-      console.log('[OG Metadata] 🔍 Using inferred metadata:', {
+      console.log('[OG Metadata] 🔍 Using inferred metadata (fallback):', {
         toolSlug,
         inferredSlug,
         inferredImage,
@@ -86,9 +178,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     }
 
-    // Construir URL base primeiro (usar www.ylada.com como padrão para produção)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
-    
     // Normalizar template_slug
     const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
     
@@ -171,10 +260,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch (error) {
     console.error('[OG Metadata] Error generating metadata:', error)
     // Construir URL base para fallback
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
-    
+    const fallbackBaseUrl = resolveAppBaseUrl()
+        
     // Fallback para metadata padrão
-    const pageUrl = `${baseUrl}/pt/wellness/${userSlug}/${toolSlug}`
+    const pageUrl = `${fallbackBaseUrl}/pt/wellness/${userSlug}/${toolSlug}`
     return {
       title: 'Ferramenta de Bem-Estar - WELLNESS',
       description: 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida',
@@ -186,7 +275,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'website',
         locale: 'pt_BR',
         images: [{
-          url: getFullOGImageUrl('default', baseUrl),
+          url: getFullOGImageUrl('default', fallbackBaseUrl),
           width: 1200,
           height: 630,
           type: 'image/jpeg',
