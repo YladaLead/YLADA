@@ -36,15 +36,14 @@ export default function WellnessConfiguracaoPage() {
   const [erroSenha, setErroSenha] = useState<string | null>(null)
   const [sucessoSenha, setSucessoSenha] = useState(false)
 
-  // Função para tratar slug (lowercase, sem espaços/acentos, hífens)
+  // Função para tratar slug (lowercase, sem espaços/acentos, SEM hífens - apenas um nome unificado)
   const tratarSlug = (texto: string): string => {
     return texto
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-      .replace(/[^a-z0-9]+/g, '-') // Substitui tudo que não é letra/número por hífen
-      .replace(/-+/g, '-') // Remove múltiplos hífens seguidos
-      .replace(/^-+|-+$/g, '') // Remove hífens do início e fim
+      .replace(/[^a-z0-9]/g, '') // Remove TUDO que não é letra/número (incluindo hífens e espaços)
+      .substring(0, 30) // Limitar a 30 caracteres
   }
 
   // Validar disponibilidade do slug
@@ -204,6 +203,13 @@ export default function WellnessConfiguracaoPage() {
       return
     }
 
+    // Validar que o slug não contém hífens (deve ser um nome unificado)
+    if (perfil.userSlug.includes('-')) {
+      setErro('O slug deve ser um nome único sem hífens. Use apenas letras e números.')
+      setTimeout(() => setErro(null), 5000)
+      return
+    }
+
     if (!slugDisponivel) {
       setErro('O slug escolhido não está disponível. Escolha outro.')
       setTimeout(() => setErro(null), 5000)
@@ -290,7 +296,7 @@ export default function WellnessConfiguracaoPage() {
                 type="text"
                 value={perfil.nome}
                 onChange={(e) => setPerfil({...perfil, nome: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400"
               />
             </div>
             <div>
@@ -299,7 +305,7 @@ export default function WellnessConfiguracaoPage() {
                 type="email"
                 value={perfil.email}
                 onChange={(e) => setPerfil({...perfil, email: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400"
               />
             </div>
             <div>
@@ -328,12 +334,12 @@ export default function WellnessConfiguracaoPage() {
                 value={perfil.bio}
                 onChange={(e) => setPerfil({...perfil, bio: e.target.value})}
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Seu Slug para URL (obrigatório)
+                Seu Slug para URL (obrigatório) <span className="text-red-500">*</span>
               </label>
               <div className="flex items-center space-x-2">
                 <input
@@ -351,12 +357,12 @@ export default function WellnessConfiguracaoPage() {
                     
                     setPerfil({...perfil, userSlug: slugTratado})
                   }}
-                  className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                  className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-gray-900 placeholder-gray-400 ${
                     slugDisponivel 
                       ? 'border-green-300 focus:ring-green-500' 
                       : 'border-red-300 focus:ring-red-500'
                   }`}
-                  placeholder="joao-silva"
+                  placeholder="joaosilva"
                 />
                 {slugValidando ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
@@ -374,11 +380,12 @@ export default function WellnessConfiguracaoPage() {
                 </div>
               )}
               <p className="text-xs text-gray-500 mt-1">
-                Este slug será usado nas suas URLs: ylada.app/wellness/<strong>{perfil.userSlug || 'seu-slug'}</strong>/[nome-ferramenta]
+                Este slug será usado nas suas URLs: ylada.app/wellness/<strong>{perfil.userSlug || 'seuslug'}</strong>/[nome-ferramenta]
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 • Será normalizado automaticamente enquanto você digita<br/>
-                • Apenas letras minúsculas, números e hífens<br/>
+                • <strong>Apenas um nome único</strong> - sem hífens, sem espaços<br/>
+                • Apenas letras minúsculas e números (ex: joaosilva, aracy, maria123)<br/>
                 • Será usado para criar seus links personalizados
               </p>
             </div>
