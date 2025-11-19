@@ -70,10 +70,6 @@ interface TemplateCard {
   descricao: string
   icon: string
   cor: string
-  perguntas: number
-  tempoEstimado: string
-  leadsMedio: string
-  conversao: string
   preview: string
   slug?: string
   content?: TemplateContent | null
@@ -128,35 +124,13 @@ export default function TemplatesNutri() {
                 const icon = t.icon || ICON_MAP[categoria] || '📋'
                 const cor = t.cor || COLOR_MAP[categoria] || 'blue'
                 
-                // Extrair número de perguntas do content se disponível
-                let perguntas = 0
-                if (t.content && typeof t.content === 'object') {
-                  if (t.content.questions && Array.isArray(t.content.questions)) {
-                    perguntas = t.content.questions.length
-                  } else if (t.content.items && Array.isArray(t.content.items)) {
-                    perguntas = t.content.items.length
-                  }
-                }
-                
-                // Estimar tempo baseado no tipo e número de perguntas
-                let tempoEstimado = '2 min'
-                if (t.type === 'calculadora') {
-                  tempoEstimado = '1-2 min'
-                } else if (perguntas > 0) {
-                  tempoEstimado = `${Math.ceil(perguntas * 0.3)} min`
-                }
-                
                 return {
                   id: normalizedId || t.slug || t.id,
-                  nome: t.nome,
+                  nome: t.nome || '',
                   categoria,
                   descricao: t.descricao || t.description || '',
                   icon,
                   cor,
-                  perguntas,
-                  tempoEstimado,
-                  leadsMedio: '40/mês', // Valor padrão
-                  conversao: '25%', // Valor padrão
                   preview: t.descricao || t.description || '',
                   slug: t.slug || normalizedId,
                   content: t.content, // Incluir content para preview dinâmico
@@ -325,28 +299,6 @@ export default function TemplatesNutri() {
                     <div className="bg-gray-50 rounded-xl p-3 mt-4">
                       <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Preview</p>
                       <p className="text-sm text-gray-700">{template.preview || template.descricao}</p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mt-4 text-center">
-                      <div className="bg-sky-50 rounded-xl p-3">
-                        <p className="text-xl font-bold text-sky-700">{template.perguntas}</p>
-                        <p className="text-xs text-sky-800">Perguntas</p>
-                      </div>
-                      <div className="bg-purple-50 rounded-xl p-3">
-                        <p className="text-xl font-bold text-purple-700">{template.tempoEstimado}</p>
-                        <p className="text-xs text-purple-800">Duração média</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mt-4 text-center">
-                      <div>
-                        <p className="text-sm font-semibold text-sky-600">{template.leadsMedio}</p>
-                        <p className="text-xs text-gray-500">Leads médios</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-sky-600">{template.conversao}</p>
-                        <p className="text-xs text-gray-500">Conversão</p>
-                      </div>
                     </div>
                   </div>
 
