@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
-import NutriSidebar from '../../../../components/nutri/NutriSidebar'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
 

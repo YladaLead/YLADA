@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import ProtectedRoute from '../../../../../components/auth/ProtectedRoute'
-import NutriSidebar from '../../../../../components/nutri/NutriSidebar'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
