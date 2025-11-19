@@ -1,41 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 // Importar diagnósticos Wellness diretamente dos arquivos
-import { alimentacaoRotinaDiagnosticos as alimentacaoRotinaDiagnosticosWellness } from '@/lib/diagnostics/wellness/alimentacao-rotina'
-import { alimentacaoSaudavelDiagnosticos as alimentacaoSaudavelDiagnosticosWellness } from '@/lib/diagnostics/wellness/alimentacao-saudavel'
-import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from '@/lib/diagnostics/wellness/avaliacao-emocional'
-import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from '@/lib/diagnostics/wellness/avaliacao-inicial'
-import { calculadoraAguaDiagnosticos as calculadoraAguaDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-agua'
-import { calculadoraCaloriasDiagnosticos as calculadoraCaloriasDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-calorias'
-import { calculadoraImcDiagnosticos as calculadoraImcDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-imc'
-import { calculadoraProteinaDiagnosticos as calculadoraProteinaDiagnosticosWellness } from '@/lib/diagnostics/wellness/calculadora-proteina'
-import { checklistAlimentarDiagnosticos as checklistAlimentarDiagnosticosWellness } from '@/lib/diagnostics/wellness/checklist-alimentar'
-import { checklistDetoxDiagnosticos as checklistDetoxDiagnosticosWellness } from '@/lib/diagnostics/wellness/checklist-detox'
-import { conheceSeuCorpoDiagnosticos as conheceSeuCorpoDiagnosticosWellness } from '@/lib/diagnostics/wellness/conhece-seu-corpo'
-import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from '@/lib/diagnostics/wellness/desafio-21-dias'
-import { desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness } from '@/lib/diagnostics/wellness/desafio-7-dias'
-import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from '@/lib/diagnostics/wellness/eletrolitos'
-import { ganhosProsperidadeDiagnosticos as ganhosProsperidadeDiagnosticosWellness } from '@/lib/diagnostics/wellness/ganhos-prosperidade'
-import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from '@/lib/diagnostics/wellness/guia-hidratacao'
-import { guiaNutraceuticoDiagnosticos as guiaNutraceuticoDiagnosticosWellness } from '@/lib/diagnostics/wellness/guia-nutraceutico'
-import { guiaProteicoDiagnosticos as guiaProteicoDiagnosticosWellness } from '@/lib/diagnostics/wellness/guia-proteico'
-import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from '@/lib/diagnostics/wellness/intolerancia'
-import { miniEbookDiagnosticos as miniEbookDiagnosticosWellness } from '@/lib/diagnostics/wellness/mini-ebook'
-import { nutridoVsAlimentadoDiagnosticos as nutridoVsAlimentadoDiagnosticosWellness } from '@/lib/diagnostics/wellness/nutrido-vs-alimentado'
-import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } from '@/lib/diagnostics/wellness/perfil-metabolico'
-import { potencialCrescimentoDiagnosticos as potencialCrescimentoDiagnosticosWellness } from '@/lib/diagnostics/wellness/potencial-crescimento'
-import { prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness } from '@/lib/diagnostics/wellness/pronto-emagrecer'
-import { propositoEquilibrioDiagnosticos as propositoEquilibrioDiagnosticosWellness } from '@/lib/diagnostics/wellness/proposito-equilibrio'
-import { quizBemEstarDiagnosticos as quizBemEstarDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-bem-estar'
-import { quizDetoxDiagnosticos as quizDetoxDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-detox'
-import { quizEnergeticoDiagnosticos as quizEnergeticoDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-energetico'
-import { quizInterativoDiagnosticos as quizInterativoDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-interativo'
-import { quizPerfilNutricionalDiagnosticos as quizPerfilNutricionalDiagnosticosWellness } from '@/lib/diagnostics/wellness/quiz-perfil-nutricional'
-import { retencaoLiquidosDiagnosticos as retencaoLiquidosDiagnosticosWellness } from '@/lib/diagnostics/wellness/retencao-liquidos'
-import { sindromeMetabolicaDiagnosticos as sindromeMetabolicaDiagnosticosWellness } from '@/lib/diagnostics/wellness/sindrome-metabolica'
-import { sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness } from '@/lib/diagnostics/wellness/sintomas-intestinais'
-import { tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness } from '@/lib/diagnostics/wellness/tipo-fome'
+import * as wellnessDiagnostics from '@/lib/diagnostics'
 import {
   diagnosticosNutri,
   getDiagnostico,
@@ -102,41 +69,41 @@ const slugMatches = (candidate: string, key: string) =>
   candidate === key || candidate.includes(key) || key.includes(candidate)
 
 const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
-  'quiz-interativo': quizInterativoDiagnosticosWellness,
-  'quiz-bem-estar': quizBemEstarDiagnosticosWellness,
-  'quiz-perfil-nutricional': quizPerfilNutricionalDiagnosticosWellness,
-  'quiz-detox': quizDetoxDiagnosticosWellness,
-  'quiz-energetico': quizEnergeticoDiagnosticosWellness,
-  'avaliacao-emocional': avaliacaoEmocionalDiagnosticosWellness,
-  'avaliacao-intolerancia': intoleranciaDiagnosticosWellness,
-  'intolerancia': intoleranciaDiagnosticosWellness,
-  'perfil-metabolico': perfilMetabolicoDiagnosticosWellness,
-  'avaliacao-inicial': avaliacaoInicialDiagnosticosWellness,
-  'diagnostico-eletrolitos': eletrolitosDiagnosticosWellness,
-  'diagnostico-sintomas-intestinais': sintomasIntestinaisDiagnosticosWellness,
-  'pronto-emagrecer': prontoEmagrecerDiagnosticosWellness,
-  'tipo-fome': tipoFomeDiagnosticosWellness,
-  'alimentacao-saudavel': alimentacaoSaudavelDiagnosticosWellness,
-  'sindrome-metabolica': sindromeMetabolicaDiagnosticosWellness,
-  'retencao-liquidos': retencaoLiquidosDiagnosticosWellness,
-  'conhece-seu-corpo': conheceSeuCorpoDiagnosticosWellness,
-  'nutrido-vs-alimentado': nutridoVsAlimentadoDiagnosticosWellness,
-  'alimentacao-rotina': alimentacaoRotinaDiagnosticosWellness,
-  'ganhos-prosperidade': ganhosProsperidadeDiagnosticosWellness,
-  'potencial-crescimento': potencialCrescimentoDiagnosticosWellness,
-  'proposito-equilibrio': propositoEquilibrioDiagnosticosWellness,
-  'calculadora-imc': calculadoraImcDiagnosticosWellness,
-  'calculadora-proteina': calculadoraProteinaDiagnosticosWellness,
-  'calculadora-agua': calculadoraAguaDiagnosticosWellness,
-  'calculadora-calorias': calculadoraCaloriasDiagnosticosWellness,
-  'checklist-alimentar': checklistAlimentarDiagnosticosWellness,
-  'checklist-detox': checklistDetoxDiagnosticosWellness,
-  'mini-ebook': miniEbookDiagnosticosWellness,
-  'guia-nutraceutico': guiaNutraceuticoDiagnosticosWellness,
-  'guia-proteico': guiaProteicoDiagnosticosWellness,
-  'guia-hidratacao': guiaHidratacaoDiagnosticosWellness,
-  'desafio-7-dias': desafio7DiasDiagnosticosWellness,
-  'desafio-21-dias': desafio21DiasDiagnosticosWellness
+  'quiz-interativo': wellnessDiagnostics.quizInterativoDiagnosticos,
+  'quiz-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
+  'quiz-perfil-nutricional': wellnessDiagnostics.quizPerfilNutricionalDiagnosticos,
+  'quiz-detox': wellnessDiagnostics.quizDetoxDiagnosticos,
+  'quiz-energetico': wellnessDiagnostics.quizEnergeticoDiagnosticos,
+  'avaliacao-emocional': wellnessDiagnostics.avaliacaoEmocionalDiagnosticos,
+  'avaliacao-intolerancia': wellnessDiagnostics.intoleranciaDiagnosticos,
+  'intolerancia': wellnessDiagnostics.intoleranciaDiagnosticos,
+  'perfil-metabolico': wellnessDiagnostics.perfilMetabolicoDiagnosticos,
+  'avaliacao-inicial': wellnessDiagnostics.avaliacaoInicialDiagnosticos,
+  'diagnostico-eletrolitos': wellnessDiagnostics.eletrolitosDiagnosticos,
+  'diagnostico-sintomas-intestinais': wellnessDiagnostics.sintomasIntestinaisDiagnosticos,
+  'pronto-emagrecer': wellnessDiagnostics.prontoEmagrecerDiagnosticos,
+  'tipo-fome': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'alimentacao-saudavel': wellnessDiagnostics.alimentacaoSaudavelDiagnosticos,
+  'sindrome-metabolica': wellnessDiagnostics.sindromeMetabolicaDiagnosticos,
+  'retencao-liquidos': wellnessDiagnostics.retencaoLiquidosDiagnosticos,
+  'conhece-seu-corpo': wellnessDiagnostics.conheceSeuCorpoDiagnosticos,
+  'nutrido-vs-alimentado': wellnessDiagnostics.nutridoVsAlimentadoDiagnosticos,
+  'alimentacao-rotina': wellnessDiagnostics.alimentacaoRotinaDiagnosticos,
+  'ganhos-prosperidade': wellnessDiagnostics.ganhosProsperidadeDiagnosticos,
+  'potencial-crescimento': wellnessDiagnostics.potencialCrescimentoDiagnosticos,
+  'proposito-equilibrio': wellnessDiagnostics.propositoEquilibrioDiagnosticos,
+  'calculadora-imc': wellnessDiagnostics.calculadoraImcDiagnosticos,
+  'calculadora-proteina': wellnessDiagnostics.calculadoraProteinaDiagnosticos,
+  'calculadora-agua': wellnessDiagnostics.calculadoraAguaDiagnosticos,
+  'calculadora-calorias': wellnessDiagnostics.calculadoraCaloriasDiagnosticos,
+  'checklist-alimentar': wellnessDiagnostics.checklistAlimentarDiagnosticos,
+  'checklist-detox': wellnessDiagnostics.checklistDetoxDiagnosticos,
+  'mini-ebook': wellnessDiagnostics.miniEbookDiagnosticos,
+  'guia-nutraceutico': wellnessDiagnostics.guiaNutraceuticoDiagnosticos,
+  'guia-proteico': wellnessDiagnostics.guiaProteicoDiagnosticos,
+  'guia-hidratacao': wellnessDiagnostics.guiaHidratacaoDiagnosticos,
+  'desafio-7-dias': wellnessDiagnostics.desafio7DiasDiagnosticos,
+  'desafio-21-dias': wellnessDiagnostics.desafio21DiasDiagnosticos
 }
 
 const diagnosticsMapsByProfession: Record<'nutri' | 'wellness', Record<string, DiagnosticosPorFerramenta>> = {
@@ -159,6 +126,190 @@ const formatResultadoLabel = (resultadoId: string) => {
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b\w/g, (match) => match.toUpperCase())
+}
+
+type CalculadoraMockRespostas = Record<string, string | number>
+
+const normalizeForMatch = (text: string) =>
+  (text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+const pickOptionValue = (option: any) => {
+  if (typeof option === 'object' && option !== null) {
+    return option.value ?? option.label ?? ''
+  }
+  return option
+}
+
+const friendlyLabelPresets: Array<{ keywords: string[]; labels: string[] }> = [
+  {
+    keywords: ['atividade', 'nivel'],
+    labels: ['Sedentário', 'Moderado', 'Intenso', 'Atleta']
+  },
+  {
+    keywords: ['clima', 'condicoes', 'condicao'],
+    labels: ['Clima ameno', 'Clima quente', 'Clima frio', 'Ambiente controlado']
+  },
+  {
+    keywords: ['objetivo'],
+    labels: ['Manter peso', 'Perder peso', 'Ganhar massa', 'Recomposição']
+  },
+  {
+    keywords: ['sexo', 'gênero'],
+    labels: ['Feminino', 'Masculino']
+  }
+]
+
+const hasFriendlyPreset = (field: any) => {
+  const labelLower = normalizeForMatch(field?.label || '')
+  return friendlyLabelPresets.find((preset) =>
+    preset.keywords.some((keyword) => labelLower.includes(keyword))
+  )
+}
+
+const getFriendlySelectFallback = (field: any, optionIndex: number): string | null => {
+  const preset = hasFriendlyPreset(field)
+  if (!preset) return null
+  const safeIndex = optionIndex >= 0 ? optionIndex : 0
+  return preset.labels[safeIndex] ?? preset.labels[0] ?? null
+}
+
+const pickOptionLabel = (field: any, value: any) => {
+  if (!field?.options) return value
+  const optionIndex = field.options.findIndex((opt: any) => pickOptionValue(opt) === value)
+  const match = field.options[optionIndex] ?? field.options.find((opt: any) => pickOptionValue(opt) === value)
+
+  const normalizeLabel = (raw: any) => {
+    if (!raw) return raw
+    if (typeof raw === 'string' && /exemplo/i.test(raw)) {
+      return getFriendlySelectFallback(field, optionIndex) || raw
+    }
+    if (typeof raw === 'string') return raw
+    if (raw?.label && /exemplo/i.test(raw.label)) {
+      return getFriendlySelectFallback(field, optionIndex) || raw.value || value
+    }
+    return raw?.label ?? raw?.value ?? value
+  }
+
+  if (!match) return value
+  if (typeof match === 'object' && match !== null) {
+    return normalizeLabel(match)
+  }
+  return normalizeLabel(match)
+}
+
+const inferNumeroExemplo = (field: any, slug: string) => {
+  const text = normalizeForMatch(`${field?.id || ''} ${field?.label || ''}`)
+  const unidade = normalizeForMatch(field?.unit || '')
+
+  if (text.includes('peso')) {
+    return 68
+  }
+  if (text.includes('altura') || text.includes('estatura')) {
+    if (unidade.includes('cm') || text.includes('cm')) return 168
+    return 1.68
+  }
+  if (text.includes('idade') || text.includes('anos')) {
+    return 32
+  }
+  if (text.includes('ingest') || text.includes('água') || text.includes('agua')) {
+    return 2300
+  }
+  if (text.includes('caloria') || text.includes('kcal')) {
+    return 2050
+  }
+  if (text.includes('protei') || slug.includes('proteina')) {
+    return 110
+  }
+
+  if (typeof field?.default_value === 'number') {
+    return field.default_value
+  }
+  if (typeof field?.min === 'number' && typeof field?.max === 'number') {
+    return Math.round((field.min + field.max) / 2)
+  }
+  if (typeof field?.min === 'number') {
+    return field.min
+  }
+
+  return 1
+}
+
+const buildCalculatorMockResponses = (slug: string, campos: any[] = []): CalculadoraMockRespostas => {
+  return (campos || []).reduce((acc, field, index) => {
+    const key = field?.id || field?.name || `field-${index}`
+
+    if (field?.type === 'select' && Array.isArray(field.options) && field.options.length > 0) {
+      const selecionada = pickOptionValue(field.options[1] ?? field.options[0])
+      acc[key] = selecionada || ''
+      return acc
+    }
+
+    if (field?.type === 'number') {
+      acc[key] = inferNumeroExemplo(field, slug)
+      return acc
+    }
+
+    acc[key] =
+      field?.example ||
+      field?.placeholder ||
+      (typeof field?.default_value !== 'undefined' ? field.default_value : `Exemplo ${index + 1}`)
+    return acc
+  }, {} as CalculadoraMockRespostas)
+}
+
+type CalculadoraResultadoSimulado = {
+  destaque: string
+  descricao: string
+  detalhe: string
+}
+
+const getSimulatedCalculatorResult = (
+  slug: string,
+  respostas: CalculadoraMockRespostas
+): CalculadoraResultadoSimulado => {
+  const normalized = slug.replace(/-nutri$/, '')
+  const peso = respostas?.peso ?? respostas?.weight ?? 68
+
+  if (normalized.includes('calculadora-agua') || normalized.includes('calculadora-hidratacao')) {
+    return {
+      destaque: '💧 Necessidade estimada: 2,3 L/dia',
+      descricao: `Considerando ${peso} kg, rotina ativa moderada e clima ameno, a hidratação ideal fica em torno de 2,3 litros por dia.`,
+      detalhe: 'O diagnóstico final orienta como distribuir a ingestão ao longo do dia e quais sinais acompanhar.'
+    }
+  }
+
+  if (normalized.includes('calculadora-caloria')) {
+    return {
+      destaque: '🔥 Meta calórica: 2.050 kcal/dia',
+      descricao: 'Simulação baseada em objetivo de recomposição corporal com treino 4x/semana.',
+      detalhe: 'O diagnóstico mostra macronutrientes sugeridos e próximos passos para acelerar os resultados.'
+    }
+  }
+
+  if (normalized.includes('calculadora-imc')) {
+    return {
+      destaque: '📊 IMC estimado: 24,1 (Faixa saudável)',
+      descricao: 'Peso adequado para o biotipo informado. O resultado explica a categoria e cuidados prioritários.',
+      detalhe: 'Os diagnósticos Nutri detalham como manter o peso ideal e ajustar hábitos caso o IMC mude.'
+    }
+  }
+
+  if (normalized.includes('calculadora-proteina')) {
+    return {
+      destaque: '🥩 Necessidade proteica: 110 g/dia',
+      descricao: 'Distribuição sugerida em 4 refeições principais para favorecer ganho de massa magra.',
+      detalhe: 'O diagnóstico orienta combinações de alimentos, horários ideais e suplementações indicadas.'
+    }
+  }
+
+  return {
+    destaque: 'Resultado simulado disponível',
+    descricao: 'Mostramos exatamente como o cliente verá o cálculo final e como conectamos com o diagnóstico.',
+    detalhe: 'Use este preview para demonstrar a experiência completa antes de criar o link definitivo.'
+  }
 }
 
 const findDiagnosticsSource = (
@@ -265,6 +416,21 @@ export default function DynamicTemplatePreview({
       )
     }
 
+    if (!diagnosticsInfo.entries.length) {
+      return (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800 font-semibold">
+            ⚠️ Diagnósticos não encontrados para este template ainda.
+          </p>
+          {fallbackDiagnosticsSlug && (
+            <p className="text-sm text-yellow-700 mt-2">
+              Slug analisado: <strong>{fallbackDiagnosticsSlug}</strong>
+            </p>
+          )}
+        </div>
+      )
+    }
+
     return diagnosticsInfo.entries.map((entry, index) => {
       const colors = resultColorPalette[index % resultColorPalette.length]
       return (
@@ -272,6 +438,9 @@ export default function DynamicTemplatePreview({
           key={`${fallbackDiagnosticsSlug || entry.resultadoId}-${entry.resultadoId}`}
           className={`rounded-lg p-6 border-2 ${colors.border} ${colors.bg}`}
         >
+          <p className="text-xs uppercase font-semibold text-gray-500 mb-2">
+            O que sua cliente verá no resultado real:
+          </p>
           <div className="flex items-center justify-between mb-4">
             <h5 className={`text-lg font-bold ${colors.text}`}>
               {formatResultadoLabel(entry.resultadoId)}
@@ -1035,7 +1204,15 @@ export default function DynamicTemplatePreview({
           {/* Tela de Resultados - Etapa N+1 */}
           {etapaAtual > totalPerguntas && (
             <div className="space-y-6">
-              <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Quiz</h4>
+              <div className="text-center space-y-1">
+                <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis do Quiz</h4>
+                <p className="text-sm text-gray-600">
+                  Esta prévia mostra exatamente o que sua cliente receberá como diagnóstico final, baseado nas respostas que ela informar no formulário original.
+                </p>
+                <p className="text-xs text-gray-500">
+                  Use este quadro como referência para orientar a conversa e preparar o plano de acompanhamento correspondente a cada resultado.
+                </p>
+              </div>
               {renderDiagnosticsCards()}
             </div>
           )}
@@ -1082,8 +1259,15 @@ export default function DynamicTemplatePreview({
 
   // Renderizar CALCULADORA
   if (templateType === 'calculator' && content.fields) {
-    const campos = content.fields
-    const todosPreenchidos = campos.every((field: any) => respostas[field.id])
+    const campos = content.fields || []
+    const slugCalculadora = (template.slug || template.id || '').toLowerCase()
+    const fieldKey = (field: any, index: number) => field?.id || field?.name || `field-${index}`
+    const mockRespostas = useMemo(
+      () => buildCalculatorMockResponses(slugCalculadora, campos),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [slugCalculadora, JSON.stringify(campos)]
+    )
+    const todosPreenchidos = campos.every((field: any, index: number) => respostas[fieldKey(field, index)])
     
     // Funções para título e introdução das calculadoras
     const getCalculadoraTitle = () => {
@@ -1246,93 +1430,148 @@ export default function DynamicTemplatePreview({
       )
     }
 
-    if (!todosPreenchidos) {
+    if (etapaAtual === 1 && !todosPreenchidos) {
       return (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             {getCalculadoraTitle()}
           </h3>
-          
+
+          <p className="text-gray-600 mb-6">
+            Veja todos os campos que o cliente preencherá. Mostramos o visual exato da calculadora, sem respostas predefinidas.
+          </p>
+
           <div className="space-y-4">
-            {campos.map((field: any) => (
-              <div key={field.id}>
+            {campos.map((field: any, index: number) => (
+              <div key={fieldKey(field, index)}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {field.label}
+                  {field.label || `Campo ${index + 1}`}
                   {field.required && <span className="text-red-500">*</span>}
                 </label>
-                {field.type === 'number' && (
+                {field.type === 'select' && field.options ? (
+                  <div className="border border-gray-300 rounded-lg bg-white">
+                    <div className="px-4 py-2 text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+                      Opções disponíveis
+                    </div>
+                    <div className="divide-y divide-gray-200">
+                      {field.options.map((opt: any, optIndex: number) => (
+                        <div
+                          key={`${fieldKey(field, index)}-opt-${optIndex}`}
+                          className="px-4 py-2 text-gray-700"
+                        >
+                          {pickOptionLabel(field, pickOptionValue(opt))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
                   <input
-                    type="number"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    placeholder={field.label}
+                    type={field.type === 'number' ? 'number' : 'text'}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-500"
+                    placeholder={
+                      field.placeholder ||
+                      (hasFriendlyPreset(field)
+                        ? hasFriendlyPreset(field)?.labels.join(' / ')
+                        : 'Campo disponível para o cliente')
+                    }
                     disabled
-                    min={field.min}
-                    max={field.max}
                   />
                 )}
-                {field.type === 'select' && field.options && (
-                  <select
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    disabled
-                  >
-                    <option>Selecione...</option>
-                    {field.options.map((opt: any) => (
-                      <option key={opt.value || opt} value={opt.value || opt}>
-                        {opt.label || opt}
-                      </option>
-                    ))}
-                  </select>
+                {field.unit && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Unidade: {field.unit}
+                  </p>
                 )}
               </div>
             ))}
           </div>
 
-          <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <p className="text-sm text-yellow-800">
-              ⚠️ Preview: Preencha os campos para ver o resultado
-            </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => setEtapaAtual(0)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              ← Voltar para apresentação
+            </button>
+            <button
+              onClick={() => {
+                setRespostas({ ...(mockRespostas as Record<string, any>) })
+                setEtapaAtual(2)
+              }}
+              className="flex-1 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+            >
+              Ver resultado simulado
+            </button>
           </div>
+
+          <p className="text-xs text-gray-500 mt-3">
+            *O cliente verá exatamente estes campos e escolherá as opções de acordo com a realidade dele.
+          </p>
         </div>
       )
     }
 
     // Resultado da calculadora
-    return (
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          {getCalculadoraTitle()}
-        </h3>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-gray-700">
-            <strong>{content.result_label || 'Resultado'}:</strong> [Cálculo baseado na fórmula]
-          </p>
-          {content.unit && (
-            <p className="text-sm text-gray-500 mt-2">
-              Unidade: {content.unit}
+    if (todosPreenchidos) {
+      const respostasVisiveis = Object.keys(respostas).length ? respostas : mockRespostas
+      const resultadoSimulado = getSimulatedCalculatorResult(slugCalculadora, respostasVisiveis)
+
+      return (
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            {getCalculadoraTitle()}
+          </h3>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-gray-900 font-semibold">
+              {resultadoSimulado.destaque}
             </p>
-          )}
-        </div>
-        <div className="flex gap-3 mt-4">
-          <button
-            onClick={() => {
-              setEtapaAtual(0)
-              setRespostas({})
-            }}
-            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-          >
-            Reiniciar Preview
-          </button>
-          {onClose && (
+            <p className="text-gray-700 mt-2">
+              {resultadoSimulado.descricao}
+            </p>
+            <p className="text-sm text-gray-600 mt-4">
+              {resultadoSimulado.detalhe}
+            </p>
+          </div>
+
+          <div className="mt-8 space-y-4">
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900">
+                Diagnósticos Nutri simulados
+              </h4>
+              <p className="text-sm text-gray-600">
+                Esta prévia mostra exatamente o que sua cliente verá como resultado final, conforme os dados que ela preencher.
+              </p>
+            </div>
+            <div className="space-y-4">
+              {renderDiagnosticsCards()}
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-8">
             <button
-              onClick={onClose}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              onClick={() => {
+                setEtapaAtual(1)
+                setRespostas({})
+              }}
+              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
             >
-              Fechar
+              ← Revisar campos
             </button>
-          )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
+              >
+                Fechar preview
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
+
+    // fallback
+    return null
   }
 
   // Renderizar PLANILHA/CHECKLIST

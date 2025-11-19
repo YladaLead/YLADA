@@ -103,6 +103,9 @@ export function normalizeTemplateSlug(slug: string | null | undefined): string {
     .replace(/\s+/g, '-') // Espaços para hífens
     .replace(/-+/g, '-') // Múltiplos hífens para um único
     .replace(/^-|-$/g, '') // Remover hífens no início/fim
+
+  // Se for um slug duplicado para Nutri (ex: calc-imc-nutri ou calc-imc-nutri-2), remover o sufixo
+  normalized = normalized.replace(/-nutri(?:-\d+)?$/, '')
   
   // Tentar encontrar no mapeamento
   if (TEMPLATE_SLUG_MAP[normalized]) {

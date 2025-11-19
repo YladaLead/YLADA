@@ -39,3 +39,6 @@ export const tipoFomeDiagnosticos: DiagnosticosPorFerramenta = {
   }
 }
 
+
+
+

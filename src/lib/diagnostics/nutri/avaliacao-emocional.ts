@@ -39,3 +39,6 @@ export const avaliacaoEmocionalDiagnosticos: DiagnosticosPorFerramenta = {
   }
 }
 
+
+
+

@@ -39,3 +39,6 @@ export const potencialCrescimentoDiagnosticos: DiagnosticosPorFerramenta = {
   }
 }
 
+
+
+

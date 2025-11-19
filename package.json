@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "create-stripe-products": "node scripts/create-stripe-products.js",
-    "preencher-migrados": "tsx scripts/preencher-dados-migrados.ts"
+    "preencher-migrados": "tsx scripts/preencher-dados-migrados.ts",
+    "duplicar-templates-nutri": "tsx scripts/duplicar-templates-wellness-para-nutri.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import Image from 'next/image'
+import YLADALogo from '@/components/YLADALogo'
 
 interface MenuItem {
   title: string
@@ -122,15 +122,8 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       } lg:translate-x-0 lg:static lg:z-40`}>
       {/* Logo */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <Link href="/pt/nutri/home" onClick={onMobileClose}>
-          <Image
-            src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
-            alt="YLADA Nutri"
-            width={180}
-            height={60}
-            className="h-8 w-auto"
-            style={{ backgroundColor: 'transparent' }}
-          />
+        <Link href="/pt/nutri/home" onClick={onMobileClose} className="flex items-center">
+          <YLADALogo size="md" responsive className="h-8 w-auto" />
         </Link>
         {/* Botão fechar mobile */}
         <button
