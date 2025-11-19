@@ -20,6 +20,7 @@ export default function PhoneInputWithCountry({
 }: PhoneInputWithCountryProps) {
   const [countryCode, setCountryCode] = useState(defaultCountryCode)
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [otherCountryCode, setOtherCountryCode] = useState('')
 
   useEffect(() => {
     // Try to infer country code from the value if it starts with a known country code
@@ -40,9 +41,10 @@ export default function PhoneInputWithCountry({
   const handleCountryChange = (newCountryCode: string) => {
     setCountryCode(newCountryCode)
     const selectedCountry = getCountryByCode(newCountryCode)
-    if (selectedCountry) {
+    if (selectedCountry && selectedCountry.phoneCode) {
       onChange(selectedCountry.phoneCode + phoneNumber, newCountryCode)
     } else {
+      // Para "OTHER", manter apenas o número
       onChange(phoneNumber, newCountryCode)
     }
   }
@@ -51,14 +53,22 @@ export default function PhoneInputWithCountry({
     const newNumber = e.target.value.replace(/[^0-9]/g, '') // Only numbers
     setPhoneNumber(newNumber)
     const selectedCountry = getCountryByCode(countryCode)
-    if (selectedCountry) {
+    if (selectedCountry && selectedCountry.phoneCode && countryCode !== 'OTHER') {
       onChange(selectedCountry.phoneCode + newNumber, countryCode)
     } else {
+      // Para "OTHER" ou sem código, apenas o número
       onChange(newNumber, countryCode)
     }
   }
 
+  const handleOtherCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newCode = e.target.value.replace(/[^0-9]/g, '')
+    setOtherCountryCode(newCode)
+    onChange(newCode + phoneNumber, countryCode)
+  }
+
   const selectedCountry = getCountryByCode(countryCode)
+  const isOtherCountry = countryCode === 'OTHER'
 
   return (
     <div className={`flex items-stretch border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent bg-white ${className}`}>
@@ -84,7 +94,21 @@ export default function PhoneInputWithCountry({
       </div>
       
       {/* Código do País */}
-      <span className="text-gray-600 px-2 border-r border-gray-300 text-sm font-medium min-w-[42px] text-center flex items-center">+{selectedCountry?.phoneCode || '--'}</span>
+      {!isOtherCountry ? (
+        <span className="text-gray-600 px-2 border-r border-gray-300 text-sm font-medium min-w-[42px] text-center flex items-center">+{selectedCountry?.phoneCode || '--'}</span>
+      ) : (
+        <div className="flex items-center border-r border-gray-300 px-2">
+          <span className="text-gray-400 text-sm">+</span>
+          <input
+            type="text"
+            placeholder="DDI"
+            value={otherCountryCode}
+            onChange={handleOtherCountryCodeChange}
+            className="text-gray-600 px-1 w-12 text-sm font-medium text-center outline-none bg-transparent border-none"
+            maxLength={4}
+          />
+        </div>
+      )}
       
       {/* Input do Telefone */}
       <input
@@ -92,7 +116,7 @@ export default function PhoneInputWithCountry({
         value={phoneNumber}
         onChange={handlePhoneNumberChange}
         className="flex-1 px-3 py-2 outline-none bg-transparent text-base min-h-[42px]"
-        placeholder="11 99999-9999"
+        placeholder={isOtherCountry ? "Número completo" : "11 99999-9999"}
       />
     </div>
   )

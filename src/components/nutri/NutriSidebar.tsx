@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import YLADALogo from '@/components/YLADALogo'
 
 interface MenuItem {
   title: string
@@ -15,8 +15,9 @@ interface MenuItem {
 interface MenuSection {
   title: string
   icon: string
+  href?: string
+  items?: MenuItem[]
   color: string
-  items: MenuItem[]
 }
 
 interface NutriSidebarProps {
@@ -26,7 +27,8 @@ interface NutriSidebarProps {
 
 export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: NutriSidebarProps) {
   const pathname = usePathname()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['captacao', 'gestao', 'formacao'])
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null)
+  const [expandedSections, setExpandedSections] = useState<string[]>([])
 
   const toggleSection = (section: string) => {
     const sectionId = section.toLowerCase().replace(/\s+/g, '-')
@@ -37,9 +39,15 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
     )
   }
 
-  const menuSections: MenuSection[] = [
+  const menuItems: MenuSection[] = [
     {
-      title: 'Captação de Clientes',
+      title: 'Home',
+      icon: '🏠',
+      href: '/pt/nutri/home',
+      color: 'gray'
+    },
+    {
+      title: 'Captação',
       icon: '🎯',
       color: 'blue',
       items: [
@@ -51,8 +59,8 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       ]
     },
     {
-      title: 'Gestão de Clientes',
-      icon: '👥',
+      title: 'Gestão',
+      icon: '📁',
       color: 'green',
       items: [
         { title: 'Meus Clientes', icon: '👤', href: '/pt/nutri/clientes' },
@@ -61,49 +69,76 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       ]
     },
     {
-      title: 'Formação',
-      icon: '📚',
-      color: 'purple',
-      items: [
-        { title: 'Cursos', icon: '🎓', href: '/pt/nutri/cursos' },
-        { title: 'Meu Progresso', icon: '📈', href: '/pt/nutri/meu-progresso' },
-        { title: 'Certificados', icon: '🏆', href: '/pt/nutri/certificados' },
-      ]
+      title: 'Formulários',
+      icon: '🧩',
+      href: '/pt/nutri/formularios',
+      color: 'purple'
+    },
+    {
+      title: 'Filosofia',
+      icon: '✨',
+      href: '/pt/nutri/cursos',
+      color: 'yellow'
+    },
+    {
+      title: 'Configurações',
+      icon: '⚙️',
+      href: '/pt/nutri/configuracao',
+      color: 'gray'
     }
   ]
 
   const isActive = (href: string) => {
-    if (href === '/pt/nutri/dashboard') {
-      return pathname === href
+    if (href === '/pt/nutri/home' || href === '/pt/nutri/dashboard') {
+      return pathname === href || pathname === '/pt/nutri/home' || pathname === '/pt/nutri/dashboard'
     }
     return pathname?.startsWith(href)
   }
 
-  const getColorClasses = (color: string) => {
+  const isSectionActive = (section: MenuSection) => {
+    if (section.href) {
+      return isActive(section.href)
+    }
+    if (section.items) {
+      return section.items.some(item => isActive(item.href))
+    }
+    return false
+  }
+
+  const getColorClasses = (color: string, isActive: boolean = false) => {
     const colors = {
       blue: {
-        bg: 'bg-blue-50',
+        bg: isActive ? 'bg-blue-50' : 'hover:bg-blue-50',
+        text: isActive ? 'text-blue-700' : 'text-gray-700',
         border: 'border-blue-200',
-        text: 'text-blue-700',
-        hover: 'hover:bg-blue-100',
-        active: 'bg-blue-100 text-blue-900 border-blue-300'
+        active: 'bg-blue-100 text-blue-900'
       },
       green: {
-        bg: 'bg-green-50',
+        bg: isActive ? 'bg-green-50' : 'hover:bg-green-50',
+        text: isActive ? 'text-green-700' : 'text-gray-700',
         border: 'border-green-200',
-        text: 'text-green-700',
-        hover: 'hover:bg-green-100',
-        active: 'bg-green-100 text-green-900 border-green-300'
+        active: 'bg-green-100 text-green-900'
       },
       purple: {
-        bg: 'bg-purple-50',
+        bg: isActive ? 'bg-purple-50' : 'hover:bg-purple-50',
+        text: isActive ? 'text-purple-700' : 'text-gray-700',
         border: 'border-purple-200',
-        text: 'text-purple-700',
-        hover: 'hover:bg-purple-100',
-        active: 'bg-purple-100 text-purple-900 border-purple-300'
+        active: 'bg-purple-100 text-purple-900'
+      },
+      yellow: {
+        bg: isActive ? 'bg-yellow-50' : 'hover:bg-yellow-50',
+        text: isActive ? 'text-yellow-700' : 'text-gray-700',
+        border: 'border-yellow-200',
+        active: 'bg-yellow-100 text-yellow-900'
+      },
+      gray: {
+        bg: isActive ? 'bg-gray-50' : 'hover:bg-gray-50',
+        text: isActive ? 'text-gray-900' : 'text-gray-700',
+        border: 'border-gray-200',
+        active: 'bg-gray-100 text-gray-900'
       }
     }
-    return colors[color as keyof typeof colors] || colors.blue
+    return colors[color as keyof typeof colors] || colors.gray
   }
 
   return (
@@ -117,104 +152,151 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 shadow-sm z-50 overflow-y-auto transform transition-transform duration-300 ${
+      <aside className={`fixed left-0 top-0 h-screen w-56 bg-white border-r border-gray-200 shadow-sm z-50 overflow-y-auto transform transition-transform duration-300 ${
         isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 lg:static lg:z-40`}>
-      {/* Logo */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <Link href="/pt/nutri/home" onClick={onMobileClose} className="flex items-center">
-          <YLADALogo size="md" responsive className="h-8 w-auto" />
-        </Link>
-        {/* Botão fechar mobile */}
-        <button
-          onClick={onMobileClose}
-          className="lg:hidden p-2 text-gray-500 hover:text-gray-700"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Menu Sections */}
-      <nav className="p-4 space-y-2">
-        {menuSections.map((section) => {
-          const colors = getColorClasses(section.color)
-          const isExpanded = expandedSections.includes(section.title.toLowerCase().replace(/\s+/g, '-'))
-
-          return (
-            <div key={section.title} className="mb-4">
-              {/* Section Header */}
-              <button
-                onClick={() => toggleSection(section.title)}
-                className={`w-full flex items-center justify-between p-3 rounded-lg ${colors.bg} ${colors.border} border transition-colors`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{section.icon}</span>
-                  <span className={`font-semibold ${colors.text} text-sm`}>
-                    {section.title}
-                  </span>
-                </div>
-                <svg
-                  className={`w-4 h-4 ${colors.text} transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Section Items */}
-              {isExpanded && (
-                <div className="mt-2 ml-4 space-y-1">
-                  {section.items.map((item) => {
-                    const itemIsActive = isActive(item.href)
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={onMobileClose}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                          itemIsActive
-                            ? `${colors.active} font-medium`
-                            : `text-gray-700 ${colors.hover}`
-                        }`}
-                      >
-                        <span className="text-lg">{item.icon}</span>
-                        <span className="flex-1">{item.title}</span>
-                        {item.badge && (
-                          <span className={`px-2 py-0.5 text-xs rounded-full ${colors.bg} ${colors.text}`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
-
-        {/* Configurações */}
-        <div className="mt-8 pt-4 border-t border-gray-200">
-          <Link
-            href="/pt/nutri/configuracao"
-            onClick={onMobileClose}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-              pathname === '/pt/nutri/configuracao'
-                ? 'bg-gray-100 text-gray-900 font-medium'
-                : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <span className="text-lg">⚙️</span>
-            <span>Configurações</span>
+      } lg:translate-x-0 lg:fixed lg:z-40`}>
+        {/* Logo */}
+        <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+          <Link href="/pt/nutri/home" onClick={onMobileClose} className="flex items-center w-full">
+            <Image
+              src="/images/logo/nutri/Logo_Nutri_horizontal.png"
+              alt="Nutri by YLADA"
+              width={180}
+              height={60}
+              className="h-7 w-auto max-w-full"
+              style={{ backgroundColor: 'transparent' }}
+              priority
+            />
           </Link>
+          {/* Botão fechar mobile */}
+          <button
+            onClick={onMobileClose}
+            className="lg:hidden p-2 text-gray-500 hover:text-gray-700"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      </nav>
-    </aside>
+
+        {/* Menu Principal */}
+        <nav className="p-3 space-y-1">
+          {menuItems.map((item) => {
+            const sectionId = item.title.toLowerCase().replace(/\s+/g, '-')
+            const isExpanded = expandedSections.includes(sectionId)
+            const isHovered = hoveredSection === sectionId
+            const sectionIsActive = isSectionActive(item)
+            const colors = getColorClasses(item.color, sectionIsActive)
+
+            // Se tem subitens, mostrar dropdown
+            if (item.items && item.items.length > 0) {
+              return (
+                <div 
+                  key={item.title}
+                  className="relative"
+                  onMouseEnter={() => setHoveredSection(sectionId)}
+                  onMouseLeave={() => setHoveredSection(null)}
+                >
+                  <button
+                    onClick={() => toggleSection(sectionId)}
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                      sectionIsActive || isHovered
+                        ? `${colors.bg} ${colors.text} font-medium`
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="text-lg flex-shrink-0">{item.icon}</span>
+                    <span className="flex-1 text-left truncate">{item.title}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Subitens - Desktop (hover) e Mobile (expandido) */}
+                  {(isHovered || isExpanded) && (
+                    <div className={`
+                      ${isExpanded ? 'block' : 'lg:block hidden'}
+                      mt-1 ml-2 pl-3 border-l-2 ${colors.border} space-y-0.5
+                    `}>
+                      {item.items.map((subItem) => {
+                        const subItemIsActive = isActive(subItem.href)
+                        return (
+                          <Link
+                            key={subItem.href}
+                            href={subItem.href}
+                            onClick={onMobileClose}
+                            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                              subItemIsActive
+                                ? `${colors.active} font-medium`
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                          >
+                            <span className="text-sm flex-shrink-0">{subItem.icon}</span>
+                            <span className="flex-1 truncate">{subItem.title}</span>
+                            {subItem.badge && (
+                              <span className={`px-1.5 py-0.5 text-xs rounded-full ${colors.bg} ${colors.text} flex-shrink-0`}>
+                                {subItem.badge}
+                              </span>
+                            )}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Tooltip lateral no desktop (hover) */}
+                  {isHovered && !isExpanded && (
+                    <div className="hidden lg:block absolute left-full top-0 ml-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 p-2 z-50">
+                      <div className="space-y-0.5">
+                        {item.items.map((subItem) => {
+                          const subItemIsActive = isActive(subItem.href)
+                          return (
+                            <Link
+                              key={subItem.href}
+                              href={subItem.href}
+                              onClick={onMobileClose}
+                              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                                subItemIsActive
+                                  ? `${colors.active} font-medium`
+                                  : 'text-gray-600 hover:bg-gray-50'
+                              }`}
+                            >
+                              <span className="text-sm">{subItem.icon}</span>
+                              <span>{subItem.title}</span>
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            // Item simples (sem subitens)
+            return (
+              <Link
+                key={item.title}
+                href={item.href || '#'}
+                onClick={onMobileClose}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                  sectionIsActive
+                    ? `${colors.bg} ${colors.text} font-medium`
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-lg flex-shrink-0">{item.icon}</span>
+                <span className="flex-1 truncate">{item.title}</span>
+              </Link>
+            )
+          })}
+        </nav>
+      </aside>
     </>
   )
 }
-

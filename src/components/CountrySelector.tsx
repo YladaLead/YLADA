@@ -38,6 +38,23 @@ export const COUNTRIES: Country[] = [
   // Europe
   { code: 'ES', name: 'Espanha', flag: '🇪🇸', phoneCode: '34', timezone: 'Europe/Madrid' },
   { code: 'PT', name: 'Portugal', flag: '🇵🇹', phoneCode: '351', timezone: 'Europe/Lisbon' },
+  { code: 'FR', name: 'França', flag: '🇫🇷', phoneCode: '33', timezone: 'Europe/Paris' },
+  { code: 'IT', name: 'Itália', flag: '🇮🇹', phoneCode: '39', timezone: 'Europe/Rome' },
+  { code: 'DE', name: 'Alemanha', flag: '🇩🇪', phoneCode: '49', timezone: 'Europe/Berlin' },
+  { code: 'GB', name: 'Reino Unido', flag: '🇬🇧', phoneCode: '44', timezone: 'Europe/London' },
+  { code: 'NL', name: 'Holanda', flag: '🇳🇱', phoneCode: '31', timezone: 'Europe/Amsterdam' },
+  { code: 'BE', name: 'Bélgica', flag: '🇧🇪', phoneCode: '32', timezone: 'Europe/Brussels' },
+  { code: 'CH', name: 'Suíça', flag: '🇨🇭', phoneCode: '41', timezone: 'Europe/Zurich' },
+  { code: 'AT', name: 'Áustria', flag: '🇦🇹', phoneCode: '43', timezone: 'Europe/Vienna' },
+  // Outros países importantes
+  { code: 'AU', name: 'Austrália', flag: '🇦🇺', phoneCode: '61', timezone: 'Australia/Sydney' },
+  { code: 'NZ', name: 'Nova Zelândia', flag: '🇳🇿', phoneCode: '64', timezone: 'Pacific/Auckland' },
+  { code: 'JP', name: 'Japão', flag: '🇯🇵', phoneCode: '81', timezone: 'Asia/Tokyo' },
+  { code: 'CN', name: 'China', flag: '🇨🇳', phoneCode: '86', timezone: 'Asia/Shanghai' },
+  { code: 'IN', name: 'Índia', flag: '🇮🇳', phoneCode: '91', timezone: 'Asia/Kolkata' },
+  { code: 'ZA', name: 'África do Sul', flag: '🇿🇦', phoneCode: '27', timezone: 'Africa/Johannesburg' },
+  // Opção genérica para outros países
+  { code: 'OTHER', name: 'Outro País', flag: '🌍', phoneCode: '', timezone: 'UTC' },
 ]
 
 export function getCountryByCode(code: string): Country | undefined {

@@ -4,8 +4,8 @@ import type { ReactNode } from 'react'
 export const metadata: Metadata = {
   manifest: '/manifest-nutri.json',
   icons: {
-    icon: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
-    apple: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
+    icon: '/images/logo/nutri/Logo_Nutri_quadrado.png',
+    apple: '/images/logo/nutri/Logo_Nutri_quadrado.png',
   },
 }
 

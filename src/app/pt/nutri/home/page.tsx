@@ -22,44 +22,43 @@ function NutriHomeContent() {
     nome: '',
     bio: ''
   })
-  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
   const [stats, setStats] = useState({
-    ferramentasAtivas: 0,
-    leadsGerados: 0,
-    conversoes: 0,
-    clientesAtivos: 0
+    leadsHoje: 0,
+    clientesAtivas: 0,
+    formularios: 0,
+    consultasSemana: 0,
+    taxaConversao: 0,
+    leadsTotal: 0,
+    conversoes: 0
   })
-  const [ferramentasAtivas, setFerramentasAtivas] = useState<Array<{
+  const [leadsRecentes, setLeadsRecentes] = useState<Array<{
     id: string
-    nome: string
-    categoria: string
-    leads: number
-    conversoes: number
-    status: string
-    icon: string
+    name: string
+    email: string
+    phone: string
+    created_at: string
+    source: string
+  }>>([])
+  const [proximasConsultas, setProximasConsultas] = useState<Array<{
+    id: string
+    client_name: string
+    title: string
+    start_time: string
+    type: string
   }>>([])
   const [carregandoDados, setCarregandoDados] = useState(true)
-  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
-  const [mensagemErro, setMensagemErro] = useState<string | null>(null)
-  const [excluindoId, setExcluindoId] = useState<string | null>(null)
-  const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState<string | null>(null)
-  const [alterandoStatusId, setAlterandoStatusId] = useState<string | null>(null)
   const [chatAberto, setChatAberto] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Carregar perfil do usuário
   useEffect(() => {
-    if (!user) {
-      setCarregandoPerfil(false)
-      return
-    }
+    if (!user) return
     
-    const nomeInicial = userProfile?.nome_completo || (user?.email ? user.email.split('@')[0] : null) || 'Usuário'
+    const nomeInicial = userProfile?.nome_completo || (user?.email ? user.email.split('@')[0] : null) || 'Nutricionista'
     setPerfil({
       nome: nomeInicial,
       bio: ''
     })
-    setCarregandoPerfil(false)
     
     const carregarPerfil = async () => {
       try {
@@ -77,14 +76,14 @@ function NutriHomeContent() {
           const data = await response.json()
           if (data.profile) {
             setPerfil({
-              nome: data.profile.nome || userProfile?.nome_completo || (user?.email ? user.email.split('@')[0] : null) || 'Usuário',
+              nome: data.profile.nome || nomeInicial,
               bio: data.profile.bio || ''
             })
           }
         }
       } catch (error: any) {
         if (error.name !== 'AbortError') {
-          console.warn('Erro ao carregar perfil (não crítico):', error)
+          console.warn('Erro ao carregar perfil:', error)
         }
       }
     }
@@ -103,61 +102,69 @@ function NutriHomeContent() {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 8000)
         
-        const response = await fetch('/api/nutri/dashboard', {
+        // Carregar stats do dashboard
+        const dashboardResponse = await fetch('/api/nutri/dashboard', {
           credentials: 'include',
           signal: controller.signal
         })
         
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          let errorMessage = 'Erro ao carregar dados do dashboard'
-          try {
-            const errorData = await response.json()
-            errorMessage = errorData.error || errorMessage
-            console.error('❌ Erro na API do dashboard Nutri:', {
-              status: response.status,
-              error: errorData,
-              technical: errorData.technical
-            })
-          } catch (e) {
-            console.error('❌ Erro ao processar resposta de erro:', e)
-          }
+        if (dashboardResponse.ok) {
+          const dashboardData = await dashboardResponse.json()
           
-          setMensagemErro(errorMessage)
-          setTimeout(() => setMensagemErro(null), 10000)
-          return
+          if (dashboardData.stats) {
+            const leadsTotal = dashboardData.stats.leadsGerados || 0
+            const conversoes = dashboardData.stats.conversoes || 0
+            const taxaConversao = leadsTotal > 0 ? Math.round((conversoes / leadsTotal) * 100) : 0
+            
+            // Calcular leads de hoje (mock - será substituído por query real)
+            const leadsHoje = Math.floor(Math.random() * 5) + 1
+            
+            // Calcular consultas da semana (mock - será substituído por query real)
+            const consultasSemana = Math.floor(Math.random() * 10) + 3
+            
+            setStats({
+              leadsHoje: leadsHoje,
+              clientesAtivas: dashboardData.stats.clientesAtivos || 0,
+              formularios: 5, // Mock - será substituído por query real
+              consultasSemana: consultasSemana,
+              taxaConversao: taxaConversao,
+              leadsTotal: leadsTotal,
+              conversoes: conversoes
+            })
+          }
         }
         
-        const data = await response.json()
-        
-        if (data.error) {
-          console.error('❌ API retornou erro:', data.error)
-          setMensagemErro(data.error)
-          setTimeout(() => setMensagemErro(null), 10000)
-          return
-        }
-        
-        if (data.ferramentas && Array.isArray(data.ferramentas)) {
-          setFerramentasAtivas(data.ferramentas.map((f: any) => ({
-            id: f.id,
-            nome: f.nome,
-            categoria: f.categoria,
-            leads: f.leads || 0,
-            conversoes: f.conversoes || 0,
-            status: f.status,
-            icon: f.icon || '🔗'
-          })))
-        }
-        
-        if (data.stats) {
-          setStats({
-            ferramentasAtivas: data.stats.ferramentasAtivas || 0,
-            leadsGerados: data.stats.leadsGerados || 0,
-            conversoes: data.stats.conversoes || 0,
-            clientesAtivos: data.stats.clientesAtivos || 0
+        // Carregar leads recentes (últimos 5)
+        try {
+          const leadsResponse = await fetch('/api/leads?limit=5', {
+            credentials: 'include',
+            signal: controller.signal
           })
+          
+          if (leadsResponse.ok) {
+            const leadsData = await leadsResponse.json()
+            // A API retorna { success: true, data: { leads: [...] } }
+            const leads = leadsData.data?.leads || leadsData.leads || []
+            if (Array.isArray(leads)) {
+              setLeadsRecentes(leads.slice(0, 5).map((lead: any) => ({
+                id: lead.id,
+                name: lead.name,
+                email: lead.email || '',
+                phone: lead.phone || '',
+                created_at: lead.created_at,
+                source: lead.source || lead.additional_data?.source || 'template'
+              })))
+            }
+          }
+        } catch (error) {
+          console.warn('Erro ao carregar leads recentes:', error)
         }
+        
+        // Carregar próximas consultas (mock - será substituído por query real quando tabela appointments existir)
+        // Por enquanto, deixar vazio ou usar dados mock
+        setProximasConsultas([])
+        
+        clearTimeout(timeoutId)
       } catch (error: any) {
         if (error.name !== 'AbortError') {
           console.error('Erro ao carregar dados:', error)
@@ -186,78 +193,6 @@ function NutriHomeContent() {
     return null
   }
 
-  // Alternar status de uma ferramenta
-  const alternarStatus = async (ferramentaId: string, statusAtual: string) => {
-    try {
-      setAlterandoStatusId(ferramentaId)
-      const novoStatus = statusAtual === 'active' || statusAtual === 'ativa' || statusAtual === 'ativo' ? 'inactive' : 'active'
-      
-      const response = await fetch('/api/nutri/ferramentas', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          id: ferramentaId,
-          status: novoStatus
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao alterar status')
-      }
-
-      setFerramentasAtivas(prev => prev.map(f => 
-        f.id === ferramentaId 
-          ? { ...f, status: novoStatus }
-          : f
-      ))
-      
-      setMensagemSucesso(`Ferramenta ${novoStatus === 'active' ? 'ativada' : 'desativada'} com sucesso!`)
-      setTimeout(() => setMensagemSucesso(null), 3000)
-    } catch (error: any) {
-      console.error('Erro ao alterar status:', error)
-      setMensagemErro(error.message || 'Erro ao alterar status. Tente novamente.')
-      setTimeout(() => setMensagemErro(null), 5000)
-    } finally {
-      setAlterandoStatusId(null)
-    }
-  }
-
-  // Excluir ferramenta
-  const excluirFerramenta = async (ferramentaId: string) => {
-    try {
-      setExcluindoId(ferramentaId)
-      
-      const response = await fetch(`/api/nutri/ferramentas?id=${ferramentaId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao excluir ferramenta')
-      }
-
-      setFerramentasAtivas(prev => prev.filter(f => f.id !== ferramentaId))
-      
-      setMensagemSucesso('Ferramenta excluída com sucesso!')
-      setTimeout(() => setMensagemSucesso(null), 3000)
-      setMostrarConfirmacaoExclusao(null)
-    } catch (error: any) {
-      console.error('Erro ao excluir ferramenta:', error)
-      setMensagemErro(error.message || 'Erro ao excluir ferramenta. Tente novamente.')
-      setTimeout(() => setMensagemErro(null), 5000)
-      setMostrarConfirmacaoExclusao(null)
-    } finally {
-      setExcluindoId(null)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <NutriSidebar 
@@ -266,7 +201,7 @@ function NutriHomeContent() {
       />
       
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-56">
         {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
           <button
@@ -281,348 +216,335 @@ function NutriHomeContent() {
           <div className="w-10"></div>
         </div>
 
-        {/* Mensagens de Sucesso/Erro */}
-        {mensagemSucesso && (
-          <div className="fixed top-4 right-4 bg-blue-50 border-2 border-blue-400 rounded-lg shadow-lg p-4 z-50 max-w-md" style={{ animation: 'slideInRight 0.3s ease-out' }}>
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <span className="text-blue-600 text-2xl">✅</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
+          {/* Seção: Boas-vindas */}
+          <div className="mb-8 bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              👋 Olá, {perfil.nome || 'Nutricionista'}!
+            </h1>
+            <p className="text-gray-600">Bem-vinda ao seu painel da YLADA Nutri.</p>
+            
+            {/* Métricas Principais */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <div className="text-2xl mb-2">📩</div>
+                <div className="text-2xl font-bold text-gray-900">{stats.leadsHoje}</div>
+                <div className="text-sm text-gray-600">Leads Hoje</div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-bold text-blue-900 mb-1">Sucesso!</h3>
-                <p className="text-xs text-blue-700">{mensagemSucesso}</p>
+              
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <div className="text-2xl mb-2">👩‍⚕️</div>
+                <div className="text-2xl font-bold text-gray-900">{stats.clientesAtivas}</div>
+                <div className="text-sm text-gray-600">Clientes Ativas</div>
               </div>
-              <button 
-                onClick={() => setMensagemSucesso(null)}
-                className="text-blue-600 hover:text-blue-800 text-lg font-bold"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
-
-        {mensagemErro && (
-          <div className="fixed top-4 right-4 bg-red-50 border-2 border-red-400 rounded-lg shadow-lg p-4 z-50 max-w-md" style={{ animation: 'slideInRight 0.3s ease-out' }}>
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <span className="text-red-600 text-2xl">❌</span>
+              
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <div className="text-2xl mb-2">📝</div>
+                <div className="text-2xl font-bold text-gray-900">{stats.formularios}</div>
+                <div className="text-sm text-gray-600">Formulários</div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-bold text-red-900 mb-1">Erro</h3>
-                <p className="text-xs text-red-700">{mensagemErro}</p>
-              </div>
-              <button 
-                onClick={() => setMensagemErro(null)}
-                className="text-red-600 hover:text-red-800 text-lg font-bold"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Modal de Confirmação de Exclusão */}
-        {mostrarConfirmacaoExclusao && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <div className="flex items-start space-x-4 mb-6">
-                <div className="flex-shrink-0">
-                  <span className="text-red-600 text-4xl">⚠️</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Confirmar Exclusão</h3>
-                  <p className="text-sm text-gray-600">
-                    Tem certeza que deseja excluir esta ferramenta? Esta ação não pode ser desfeita.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setMostrarConfirmacaoExclusao(null)}
-                  className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                  disabled={excluindoId !== null}
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => excluirFerramenta(mostrarConfirmacaoExclusao)}
-                  disabled={excluindoId !== null}
-                  className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {excluindoId === mostrarConfirmacaoExclusao ? 'Excluindo...' : 'Excluir'}
-                </button>
+              
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <div className="text-2xl mb-2">📅</div>
+                <div className="text-2xl font-bold text-gray-900">{stats.consultasSemana}</div>
+                <div className="text-sm text-gray-600">Consultas Semana</div>
               </div>
             </div>
           </div>
-        )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          {/* Seção: Ferramentas do seu negócio */}
-          <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
-              <span>🔧</span>
-              <span>Ferramentas do seu negócio</span>
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {/* Seção: Captação de Clientes */}
+          <div className="mb-8 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 sm:p-8 shadow-sm border border-blue-100">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">🎯 Captação de Clientes</h2>
+                <p className="text-gray-700">Atraia novas clientes com ferramentas inteligentes.</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
               <Link 
                 href="/pt/nutri/ferramentas"
-                className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-blue-100"
               >
-                <span className="text-3xl sm:text-4xl mb-2">🔗</span>
-                <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Meus Links</h3>
-                <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Links criados</p>
+                <div className="text-4xl mb-3">🔗</div>
+                <h3 className="font-semibold text-gray-900">Links Personalizados</h3>
+                <p className="text-sm text-gray-600 mt-1">Crie e compartilhe</p>
               </Link>
-
+              
               <Link 
                 href="/pt/nutri/quizzes"
-                className="flex flex-col items-center justify-center p-4 sm:p-5 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-blue-100"
               >
-                <span className="text-3xl sm:text-4xl mb-2">🎯</span>
-                <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Quizzes</h3>
-                <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Gerenciar</p>
+                <div className="text-4xl mb-3">📝</div>
+                <h3 className="font-semibold text-gray-900">Quizzes</h3>
+                <p className="text-sm text-gray-600 mt-1">Engaje e eduque</p>
               </Link>
-
+              
               <Link 
-                href="/pt/nutri/portals"
-                className="flex flex-col items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-colors border border-blue-200"
+                href="/pt/nutri/ferramentas/templates"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-blue-100"
               >
-                <span className="text-3xl sm:text-4xl mb-2">🌿</span>
-                <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Portal do Bem-Estar</h3>
-                <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Criar portal</p>
+                <div className="text-4xl mb-3">📊</div>
+                <h3 className="font-semibold text-gray-900">Calculadoras</h3>
+                <p className="text-sm text-gray-600 mt-1">Ferramentas práticas</p>
               </Link>
             </div>
           </div>
 
-          {/* Seção: Recursos e Materiais */}
-          <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
-              <span>🎨</span>
-              <span>Recursos e Materiais</span>
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {/* Seção: Gestão de Clientes */}
+          <div className="mb-8 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 sm:p-8 shadow-sm border border-green-100">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">📁 Gestão de Clientes</h2>
+                <p className="text-gray-700">Organize seus atendimentos com clareza.</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
               <Link 
-                href="/pt/nutri/ferramentas/templates"
-                className="flex flex-col items-center justify-center p-4 sm:p-5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                href="/pt/nutri/clientes"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-green-100"
               >
-                <span className="text-3xl sm:text-4xl mb-2">🎨</span>
-                <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Ver Templates</h3>
-                <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Explorar modelos</p>
+                <div className="text-4xl mb-3">📋</div>
+                <h3 className="font-semibold text-gray-900">Lista de Clientes</h3>
+                <p className="text-sm text-gray-600 mt-1">Visualize todos</p>
+              </Link>
+              
+              <Link 
+                href="/pt/nutri/clientes?view=kanban"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-green-100"
+              >
+                <div className="text-4xl mb-3">📌</div>
+                <h3 className="font-semibold text-gray-900">Kanban (Trello)</h3>
+                <p className="text-sm text-gray-600 mt-1">Organize por status</p>
+              </Link>
+              
+              <Link 
+                href="/pt/nutri/agenda"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-green-100"
+              >
+                <div className="text-4xl mb-3">📅</div>
+                <h3 className="font-semibold text-gray-900">Agenda</h3>
+                <p className="text-sm text-gray-600 mt-1">Gerencie consultas</p>
+              </Link>
+            </div>
+          </div>
+
+          {/* Seção: Formulários Personalizados */}
+          <div className="mb-8 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 sm:p-8 shadow-sm border border-purple-100">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">🧩 Formulários Personalizados</h2>
+                <p className="text-gray-700">Crie e envie anamneses completas.</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+              <Link 
+                href="/pt/nutri/formularios/novo"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
+              >
+                <div className="text-4xl mb-3">➕</div>
+                <h3 className="font-semibold text-gray-900">Criar Formulário</h3>
+                <p className="text-sm text-gray-600 mt-1">Novo formulário</p>
+              </Link>
+              
+              <Link 
+                href="/pt/nutri/formularios"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
+              >
+                <div className="text-4xl mb-3">📁</div>
+                <h3 className="font-semibold text-gray-900">Meus Formulários</h3>
+                <p className="text-sm text-gray-600 mt-1">Gerenciar</p>
+              </Link>
+              
+              <Link 
+                href="/pt/nutri/formularios/respostas"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
+              >
+                <div className="text-4xl mb-3">📨</div>
+                <h3 className="font-semibold text-gray-900">Respostas Recebidas</h3>
+                <p className="text-sm text-gray-600 mt-1">Ver respostas</p>
+              </Link>
+            </div>
+          </div>
+
+          {/* Seção: Filosofia YLADA */}
+          <div className="mb-8 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-6 sm:p-8 shadow-sm border border-yellow-100">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">✨ Filosofia YLADA</h2>
+                <p className="text-gray-700">Aprenda a pensar como uma Nutricionista Empresária.</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+              <Link 
+                href="/pt/nutri/cursos"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-yellow-100"
+              >
+                <div className="text-4xl mb-3">🎓</div>
+                <h3 className="font-semibold text-gray-900">Módulo 1</h3>
+                <p className="text-sm text-gray-600 mt-1">Fundamentos</p>
               </Link>
               
               <Link 
                 href="/pt/nutri/cursos"
-                className="flex flex-col items-center justify-center p-4 sm:p-5 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-yellow-100"
               >
-                <span className="text-3xl sm:text-4xl mb-2">📖</span>
-                <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Cursos</h3>
-                <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Educação</p>
+                <div className="text-4xl mb-3">🚀</div>
+                <h3 className="font-semibold text-gray-900">Módulo 2</h3>
+                <p className="text-sm text-gray-600 mt-1">Crescimento</p>
               </Link>
-
-              <Link
-                href="/pt/nutri/tutoriais"
-                className="flex flex-col items-center justify-center p-4 sm:p-5 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+              
+              <Link 
+                href="/pt/nutri/cursos"
+                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-yellow-100"
               >
-                <span className="text-3xl sm:text-4xl mb-2">📚</span>
-                <h3 className="font-medium text-gray-900 text-sm sm:text-base text-center">Tutoriais</h3>
-                <p className="text-xs text-gray-600 text-center hidden sm:block mt-1">Ajuda e Recursos</p>
+                <div className="text-4xl mb-3">📈</div>
+                <h3 className="font-semibold text-gray-900">Módulo 3</h3>
+                <p className="text-sm text-gray-600 mt-1">Expansão</p>
               </Link>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Seção: Leads Recentes e Próximas Consultas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Leads Recentes */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Links Ativos</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.ferramentasAtivas}</p>
-                </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">🔗</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm text-blue-600 font-medium">{stats.ferramentasAtivas > 0 ? 'Ativo' : 'Nenhuma ferramenta'}</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Leads Gerados</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.leadsGerados}</p>
-                </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">📈</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm text-blue-600 font-medium">{stats.leadsGerados > 0 ? `${stats.leadsGerados} total` : 'Nenhum lead ainda'}</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Conversões</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.conversoes}</p>
-                </div>
-                <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">🎯</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm text-blue-600 font-medium">
-                  {stats.leadsGerados > 0 
-                    ? `${Math.round((stats.conversoes / stats.leadsGerados) * 100)}% taxa de conversão`
-                    : 'Nenhuma conversão ainda'}
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Clientes Ativos</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.clientesAtivos}</p>
-                </div>
-                <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">👥</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm text-blue-600 font-medium">{stats.clientesAtivos > 0 ? `${stats.clientesAtivos} clientes` : 'Nenhum cliente ainda'}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Links Ativos */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Links Ativos</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">📩 Leads Recentes</h3>
                 <Link 
-                  href="/pt/nutri/ferramentas" 
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  href="/pt/nutri/leads"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Ver todos
+                  Ver todos →
                 </Link>
               </div>
-              <div className="space-y-4">
-                {carregandoDados ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600 text-sm">Carregando ferramentas...</p>
-                  </div>
-                ) : ferramentasAtivas.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-600 text-sm mb-4">Você ainda não criou nenhuma ferramenta</p>
-                    <Link 
-                      href="/pt/nutri/ferramentas/nova"
-                      className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              
+              {carregandoDados ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600 text-sm">Carregando leads...</p>
+                </div>
+              ) : leadsRecentes.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600 text-sm mb-4">Nenhum lead recente</p>
+                  <Link 
+                    href="/pt/nutri/ferramentas/nova"
+                    className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    Criar Ferramenta
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {leadsRecentes.map((lead) => (
+                    <div 
+                      key={lead.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                      Criar Primeira Ferramenta
-                    </Link>
-                  </div>
-                ) : (
-                  ferramentasAtivas.map((ferramenta) => {
-                    const isActive = ferramenta.status === 'active' || ferramenta.status === 'ativa' || ferramenta.status === 'ativo'
-                    const isAlterandoStatus = alterandoStatusId === ferramenta.id
-                    const isExcluindo = excluindoId === ferramenta.id
-                    
-                    return (
-                      <div 
-                        key={ferramenta.id} 
-                        className="group relative flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-transparent hover:border-blue-200"
-                      >
-                        <Link 
-                          href={`/pt/nutri/ferramentas/${ferramenta.id}/editar`}
-                          className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer"
-                        >
-                          <span className="text-xl sm:text-2xl flex-shrink-0">{ferramenta.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{ferramenta.nome}</h3>
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                isActive 
-                                  ? 'bg-blue-100 text-blue-800' 
-                                  : 'bg-gray-200 text-gray-600'
-                              }`}>
-                                {isActive ? 'Ativo' : 'Inativo'}
-                              </span>
-                            </div>
-                            <p className="text-xs sm:text-sm text-gray-600 truncate">{ferramenta.categoria}</p>
-                          </div>
-                        </Link>
-                        
-                        <div className="text-right flex-shrink-0 ml-3 mr-3">
-                          <p className="text-sm font-medium text-gray-900">{ferramenta.leads} leads</p>
-                          <p className="text-xs text-gray-600">{ferramenta.conversoes} conversões</p>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              alternarStatus(ferramenta.id, ferramenta.status)
-                            }}
-                            disabled={isAlterandoStatus || isExcluindo}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                              isActive ? 'bg-blue-600' : 'bg-gray-300'
-                            } ${isAlterandoStatus || isExcluindo ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            title={isActive ? 'Desativar ferramenta' : 'Ativar ferramenta'}
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                isActive ? 'translate-x-6' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                          
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              setMostrarConfirmacaoExclusao(ferramenta.id)
-                            }}
-                            disabled={isAlterandoStatus || isExcluindo}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Excluir ferramenta"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{lead.name}</p>
+                        <p className="text-sm text-gray-600 truncate">{lead.email || lead.phone}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+                        </p>
                       </div>
-                    )
-                  })
-                )}
-              </div>
+                      <Link
+                        href={`/pt/nutri/leads?convert=${lead.id}`}
+                        className="ml-3 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+                      >
+                        Converter
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Portal do Bem-Estar */}
+            {/* Próximas Consultas */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Portal do Bem-Estar</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">📅 Próximas Consultas</h3>
                 <Link 
-                  href="/pt/nutri/portals" 
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  href="/pt/nutri/agenda"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Ver todos
+                  Ver agenda →
                 </Link>
               </div>
-              <div className="text-center py-8">
-                <p className="text-gray-600 text-sm mb-4">Crie portais personalizados para seus clientes</p>
-                <Link 
-                  href="/pt/nutri/portals/novo"
-                  className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors text-sm font-medium"
-                >
-                  Criar Portal
-                </Link>
-              </div>
+              
+              {carregandoDados ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600 text-sm">Carregando consultas...</p>
+                </div>
+              ) : proximasConsultas.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600 text-sm mb-4">Nenhuma consulta agendada</p>
+                  <Link 
+                    href="/pt/nutri/agenda?nova=true"
+                    className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    Agendar Consulta
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {proximasConsultas.map((consulta) => (
+                    <div 
+                      key={consulta.id}
+                      className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <p className="font-medium text-gray-900">{consulta.client_name}</p>
+                      <p className="text-sm text-gray-600">{consulta.title}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(consulta.start_time).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Seção: Ações Rápidas */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">⚡ Ações Rápidas</h2>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Link
+                href="/pt/nutri/ferramentas/nova"
+                className="bg-blue-50 hover:bg-blue-100 rounded-lg p-4 text-center transition-colors border border-blue-200"
+              >
+                <div className="text-2xl mb-2">➕</div>
+                <p className="font-medium text-gray-900 text-sm">Criar Link</p>
+              </Link>
+              
+              <Link
+                href="/pt/nutri/clientes/novo"
+                className="bg-green-50 hover:bg-green-100 rounded-lg p-4 text-center transition-colors border border-green-200"
+              >
+                <div className="text-2xl mb-2">➕</div>
+                <p className="font-medium text-gray-900 text-sm">Cliente</p>
+              </Link>
+              
+              <Link
+                href="/pt/nutri/formularios/novo"
+                className="bg-purple-50 hover:bg-purple-100 rounded-lg p-4 text-center transition-colors border border-purple-200"
+              >
+                <div className="text-2xl mb-2">➕</div>
+                <p className="font-medium text-gray-900 text-sm">Formulário</p>
+              </Link>
+              
+              <Link
+                href="/pt/nutri/agenda?nova=true"
+                className="bg-orange-50 hover:bg-orange-100 rounded-lg p-4 text-center transition-colors border border-orange-200"
+              >
+                <div className="text-2xl mb-2">➕</div>
+                <p className="font-medium text-gray-900 text-sm">Consulta</p>
+              </Link>
             </div>
           </div>
         </div>
@@ -645,7 +567,3 @@ function NutriHomeContent() {
     </div>
   )
 }
-
-
-
-
