@@ -49,3 +49,4 @@ FROM user_profiles up
 LEFT JOIN users u ON up.user_id = u.id
 WHERE up.perfil = 'nutri';
 
+

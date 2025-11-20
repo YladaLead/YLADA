@@ -81,8 +81,8 @@ export default function NutriRelatorios() {
             <div className="flex items-center space-x-4">
               <Link href="/pt/nutri/dashboard">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
-                  alt="YLADA"
+                  src="/images/logo/nutri/Logo_Nutri_horizontal.png"
+                  alt="Nutri by YLADA"
                   width={120}
                   height={40}
                   className="h-8 w-auto"

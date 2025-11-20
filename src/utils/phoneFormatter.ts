@@ -47,3 +47,4 @@ export function displayPhoneWithFlag(phone: string | null): string {
   return `${formatted.flag} ${formatted.number}`
 }
 
+

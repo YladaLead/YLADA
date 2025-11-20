@@ -54,3 +54,4 @@ FROM user_profiles
 WHERE perfil = 'nutri'
 ORDER BY created_at;
 
+

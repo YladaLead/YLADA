@@ -158,3 +158,4 @@ SELECT 'Clientes criados:' as info, COUNT(*) as total
 FROM clients 
 WHERE name IN ('Maria Silva Santos', 'João Pedro Oliveira', 'Ana Carolina Costa', 'Carlos Eduardo Lima', 'Fernanda Alves', 'Roberto Santos');
 
+

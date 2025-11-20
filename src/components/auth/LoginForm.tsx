@@ -280,6 +280,8 @@ export default function LoginForm({
 
   const logoSrc = logoPath || (perfil === 'wellness' 
     ? '/images/logo/wellness/Logo_Wellness_horizontal.png'
+    : perfil === 'nutri'
+    ? '/images/logo/nutri/Logo_Nutri_horizontal.png'
     : perfil === 'nutra' || logoColor === 'laranja'
     ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
     : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png')
@@ -292,7 +294,7 @@ export default function LoginForm({
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
               src={logoSrc}
-              alt={perfil === 'wellness' ? 'WELLNESS - Your Leading Data System' : 'YLADA Logo'}
+              alt={perfil === 'wellness' ? 'WELLNESS - Your Leading Data System' : perfil === 'nutri' ? 'Nutri by YLADA' : 'YLADA Logo'}
               width={perfil === 'wellness' ? 572 : 280}
               height={perfil === 'wellness' ? 150 : 84}
               className="bg-transparent object-contain h-16 sm:h-20 w-auto"

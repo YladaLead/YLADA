@@ -135,16 +135,16 @@ export default function FerramentaPersonalizadaNutriPage() {
           </p>
           <div className="space-y-2">
             <button
-              onClick={() => router.push('/pt/nutri/ferramentas')}
+              onClick={() => router.push('/pt/nutri/home')}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Voltar para Meus Links
+              Voltar para Página Inicial
             </button>
             <button
-              onClick={() => router.push('/pt/nutri')}
+              onClick={() => router.push('/pt/nutri/ferramentas')}
               className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              Ir para Dashboard
+              Ver Meus Links
             </button>
           </div>
         </div>

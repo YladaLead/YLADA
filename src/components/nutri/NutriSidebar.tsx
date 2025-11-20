@@ -64,8 +64,10 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       color: 'green',
       items: [
         { title: 'Meus Clientes', icon: '👤', href: '/pt/nutri/clientes' },
+        { title: 'Kanban de Clientes', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
         { title: 'Agenda', icon: '📅', href: '/pt/nutri/agenda' },
         { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
+        { title: 'Relatórios de Gestão', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
       ]
     },
     {

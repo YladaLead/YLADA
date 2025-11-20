@@ -27,8 +27,8 @@ export default function NutriNavBar({ showTitle = false, title }: NutriNavBarPro
           <div className="flex items-center space-x-4">
             <Link href="/pt/nutri/dashboard">
               <Image
-                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
-                alt="YLADA Nutri"
+                src="/images/logo/nutri/Logo_Nutri_horizontal.png"
+                alt="Nutri by YLADA"
                 width={180}
                 height={60}
                 className="h-10 w-auto"

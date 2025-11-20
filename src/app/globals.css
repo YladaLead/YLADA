@@ -37,6 +37,13 @@ body {
   line-height: 1.5;
 }
 
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #374151;
+  opacity: 1;
+}
+
 @keyframes slideInRight {
   from {
     transform: translateX(100%);

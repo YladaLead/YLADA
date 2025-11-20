@@ -311,7 +311,7 @@ function NutriHomeContent() {
               </Link>
               
               <Link 
-                href="/pt/nutri/clientes?view=kanban"
+                href="/pt/nutri/clientes/kanban"
                 className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-green-100"
               >
                 <div className="text-4xl mb-3">📌</div>

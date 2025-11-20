@@ -57,3 +57,4 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
   AND tc.table_name = 'clients'
   AND kcu.column_name = 'user_id';
 
+

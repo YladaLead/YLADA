@@ -90,3 +90,4 @@ Quando terminar os testes:
 2. Verifique se está logado com o mesmo `user_id`
 3. Limpe o cache do navegador (Cmd+Shift+R)
 
+
