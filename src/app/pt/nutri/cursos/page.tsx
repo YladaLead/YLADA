@@ -2,245 +2,363 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import NutriSidebar from '@/components/nutri/NutriSidebar'
+import { useAuth } from '@/contexts/AuthContext'
+import type { Trilha, Microcurso, BibliotecaItem, Tutorial } from '@/types/cursos'
 
-interface Curso {
-  id: string
-  titulo: string
-  descricao: string
-  imagem?: string
-  nivel: 'iniciante' | 'intermediario' | 'avancado'
-  categoria: string
-  preco: number
-  preco_com_desconto?: number
-  duracao_horas: number
-  total_aulas: number
-  total_matriculados: number
-  avaliacao_media: number
-  status: 'draft' | 'published'
-  is_gratuito: boolean
-}
-
-export default function NutriCursosPage() {
-  const [cursos, setCursos] = useState<Curso[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filtro, setFiltro] = useState<'todos' | 'meus' | 'disponiveis'>('todos')
-
-  useEffect(() => {
-    // Simular carregamento de cursos
-    setLoading(false)
-    // TODO: Buscar cursos reais do Supabase
-    setCursos([
-      {
-        id: '1',
-        titulo: 'Nutrição Clínica Básica',
-        descricao: 'Fundamentos da nutrição clínica para iniciantes',
-        nivel: 'iniciante',
-        categoria: 'Nutrição',
-        preco: 299.90,
-        preco_com_desconto: 199.90,
-        duracao_horas: 40,
-        total_aulas: 25,
-        total_matriculados: 150,
-        avaliacao_media: 4.7,
-        status: 'published',
-        is_gratuito: false
-      },
-      {
-        id: '2',
-        titulo: 'Emagrecimento Saudável',
-        descricao: 'Estratégias práticas para emagrecimento sustentável',
-        nivel: 'intermediario',
-        categoria: 'Emagrecimento',
-        preco: 399.90,
-        duracao_horas: 60,
-        total_aulas: 35,
-        total_matriculados: 230,
-        avaliacao_media: 4.9,
-        status: 'published',
-        is_gratuito: false
-      },
-      {
-        id: '3',
-        titulo: 'Introdução à Nutrição Funcional',
-        descricao: 'Primeiros passos na nutrição funcional',
-        nivel: 'iniciante',
-        categoria: 'Nutrição Funcional',
-        preco: 0,
-        duracao_horas: 10,
-        total_aulas: 8,
-        total_matriculados: 500,
-        avaliacao_media: 4.5,
-        status: 'published',
-        is_gratuito: true
-      }
-    ])
-  }, [])
-
-  const cursosFiltrados = filtro === 'todos' 
-    ? cursos 
-    : filtro === 'meus' 
-    ? cursos.filter(c => c.total_matriculados > 0) // Simulação: verificar se está matriculado
-    : cursos.filter(c => c.status === 'published')
-
+export default function NutriCursos() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pt/nutri/dashboard">
-                <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
-                  alt="YLADA"
-                  width={180}
-                  height={60}
-                  className="h-12 w-auto"
-                />
-              </Link>
-              <div className="h-12 w-px bg-gray-300"></div>
-              <h1 className="text-xl font-bold text-gray-900">Cursos</h1>
-            </div>
-            <Link
-              href="/pt/nutri/dashboard"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              ← Voltar
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Intro */}
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            Meus Cursos
-          </h2>
-          <p className="text-gray-600">
-            Expandir conhecimento e oferecer educação contínua aos seus clientes
-          </p>
-        </div>
-
-        {/* Filtros */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <button
-            onClick={() => setFiltro('todos')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtro === 'todos'
-                ? 'bg-green-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-300 hover:border-green-300'
-            }`}
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => setFiltro('meus')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtro === 'meus'
-                ? 'bg-green-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-300 hover:border-green-300'
-            }`}
-          >
-            Minha Biblioteca
-          </button>
-          <button
-            onClick={() => setFiltro('disponiveis')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtro === 'disponiveis'
-                ? 'bg-green-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-300 hover:border-green-300'
-            }`}
-          >
-            Disponíveis
-          </button>
-        </div>
-
-        {/* Grid de Cursos */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            <div className="col-span-full text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-              <p className="mt-4 text-gray-600">Carregando cursos...</p>
-            </div>
-          ) : cursosFiltrados.length === 0 ? (
-            <div className="col-span-full bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
-              <div className="text-6xl mb-4">📚</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Nenhum curso encontrado
-              </h3>
-              <p className="text-gray-600">
-                Os cursos aparecerão aqui conforme forem adicionados pela administração
-              </p>
-            </div>
-          ) : (
-            cursosFiltrados.map((curso) => (
-              <div
-                key={curso.id}
-                className="bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all cursor-pointer group"
-              >
-                {/* Imagem do Curso */}
-                <div className="relative w-full h-48 bg-gradient-to-br from-green-400 to-green-600 rounded-t-xl overflow-hidden">
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                  <div className="absolute top-4 right-4">
-                    {curso.is_gratuito ? (
-                      <span className="bg-white text-green-600 px-3 py-1 rounded-full text-xs font-bold">
-                        GRÁTIS
-                      </span>
-                    ) : (
-                      <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        R$ {curso.preco_com_desconto || curso.preco}
-                      </span>
-                    )}
-                  </div>
-                  <div className="absolute bottom-4 left-4 flex items-center space-x-2 text-white">
-                    <span className="text-sm font-medium">{curso.total_aulas} aulas</span>
-                    <span className="text-lg">•</span>
-                    <span className="text-sm font-medium">{curso.duracao_horas}h</span>
-                  </div>
-                </div>
-
-                {/* Conteúdo */}
-                <div className="p-4 sm:p-6">
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">
-                      {curso.categoria}
-                    </span>
-                    <div className="flex items-center">
-                      <span className="text-yellow-400 text-sm">⭐</span>
-                      <span className="text-sm font-medium text-gray-700 ml-1">
-                        {curso.avaliacao_media}
-                      </span>
-                    </div>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                    {curso.titulo}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {curso.descricao}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">{curso.total_matriculados}</span> matriculados
-                    </div>
-                    <Link
-                      href={`/pt/nutri/cursos/${curso.id}`}
-                      className="text-green-600 hover:text-green-700 font-medium text-sm"
-                    >
-                      Ver detalhes →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </main>
-    </div>
+    <ProtectedRoute perfil="nutri" allowAdmin={true}>
+      <NutriCursosContent />
+    </ProtectedRoute>
   )
 }
 
+function NutriCursosContent() {
+  const { user, loading } = useAuth()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'trilhas' | 'microcursos' | 'biblioteca' | 'tutoriais'>('trilhas')
+  
+  const [trilhas, setTrilhas] = useState<Trilha[]>([])
+  const [microcursos, setMicrocursos] = useState<Microcurso[]>([])
+  const [biblioteca, setBiblioteca] = useState<BibliotecaItem[]>([])
+  const [tutoriais, setTutoriais] = useState<Tutorial[]>([])
+  
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+
+  // Carregar dados
+  useEffect(() => {
+    if (!user) return
+
+    const carregarDados = async () => {
+      try {
+        setCarregando(true)
+        setErro(null)
+
+        // Carregar trilhas
+        const trilhasRes = await fetch('/api/nutri/cursos?tipo=trilhas', {
+          credentials: 'include'
+        })
+        if (trilhasRes.ok) {
+          const trilhasData = await trilhasRes.json()
+          setTrilhas(trilhasData.data?.trilhas || [])
+        }
+
+        // Carregar microcursos
+        const microcursosRes = await fetch('/api/nutri/cursos?tipo=microcursos', {
+          credentials: 'include'
+        })
+        if (microcursosRes.ok) {
+          const microcursosData = await microcursosRes.json()
+          setMicrocursos(microcursosData.data?.microcursos || [])
+        }
+
+        // Carregar biblioteca
+        const bibliotecaRes = await fetch('/api/nutri/cursos?tipo=biblioteca', {
+          credentials: 'include'
+        })
+        if (bibliotecaRes.ok) {
+          const bibliotecaData = await bibliotecaRes.json()
+          setBiblioteca(bibliotecaData.data?.biblioteca || [])
+        }
+
+        // Carregar tutoriais
+        const tutoriaisRes = await fetch('/api/nutri/cursos?tipo=tutoriais', {
+          credentials: 'include'
+        })
+        if (tutoriaisRes.ok) {
+          const tutoriaisData = await tutoriaisRes.json()
+          setTutoriais(tutoriaisData.data?.tutoriais || [])
+        }
+
+      } catch (error: any) {
+        console.error('Erro ao carregar cursos:', error)
+        setErro('Erro ao carregar cursos')
+      } finally {
+        setCarregando(false)
+      }
+    }
+
+    carregarDados()
+  }, [user])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      <NutriSidebar 
+        isMobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+      />
+      
+      <div className="flex-1 lg:ml-56">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 className="text-lg font-semibold text-gray-900">Cursos</h1>
+          <div className="w-10"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Filosofia ILADA – Cursos e Trilhas</h1>
+            <p className="text-gray-600 mt-1">Seu crescimento acelerado como nutricionista empreendedora</p>
+          </div>
+
+          {erro && (
+            <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-lg p-4">
+              <p className="text-red-800">{erro}</p>
+            </div>
+          )}
+
+          {/* Tabs */}
+          <div className="mb-6 bg-white rounded-xl p-1 shadow-sm border border-gray-200 inline-flex">
+            <button
+              onClick={() => setActiveTab('trilhas')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'trilhas'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              📚 Trilhas
+            </button>
+            <button
+              onClick={() => setActiveTab('microcursos')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'microcursos'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              ⚡ Microcursos
+            </button>
+            <button
+              onClick={() => setActiveTab('biblioteca')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'biblioteca'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              📦 Biblioteca
+            </button>
+            <button
+              onClick={() => setActiveTab('tutoriais')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'tutoriais'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              🎓 Tutoriais
+            </button>
+          </div>
+
+          {/* Conteúdo */}
+          {carregando ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Carregando cursos...</p>
+            </div>
+          ) : (
+            <>
+              {/* Trilhas */}
+              {activeTab === 'trilhas' && (
+                <div className="space-y-6">
+                  {trilhas.length === 0 ? (
+                    <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
+                      <p className="text-gray-600">Nenhuma trilha disponível no momento.</p>
+                      <p className="text-sm text-gray-500 mt-2">Os cursos estarão disponíveis em breve!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {trilhas.map((trilha) => (
+                        <Link
+                          key={trilha.id}
+                          href={`/pt/nutri/cursos/${trilha.id}`}
+                          className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-gray-900 mb-2">{trilha.title}</h3>
+                              <p className="text-sm text-gray-600 line-clamp-2">{trilha.short_description || trilha.description}</p>
+                            </div>
+                            {trilha.thumbnail_url && (
+                              <img
+                                src={trilha.thumbnail_url}
+                                alt={trilha.title}
+                                className="w-20 h-20 object-cover rounded-lg ml-4"
+                              />
+                            )}
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm text-gray-600">
+                              <span>{trilha.estimated_hours}h • {trilha.level}</span>
+                              <span>{trilha.modulos_count || 0} módulos</span>
+                            </div>
+                            
+                            {trilha.progress_percentage > 0 && (
+                              <div>
+                                <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                  <span>Progresso</span>
+                                  <span>{Math.round(trilha.progress_percentage)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className="bg-blue-600 h-2 rounded-full transition-all"
+                                    style={{ width: `${trilha.progress_percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                              {trilha.progress_percentage > 0 ? 'Continuar' : 'Começar'}
+                            </button>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Microcursos */}
+              {activeTab === 'microcursos' && (
+                <div className="space-y-6">
+                  {microcursos.length === 0 ? (
+                    <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
+                      <p className="text-gray-600">Nenhum microcurso disponível no momento.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {microcursos.map((microcurso) => (
+                        <div
+                          key={microcurso.id}
+                          className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                        >
+                          {microcurso.thumbnail_url && (
+                            <img
+                              src={microcurso.thumbnail_url}
+                              alt={microcurso.title}
+                              className="w-full h-32 object-cover rounded-lg mb-3"
+                            />
+                          )}
+                          <h3 className="font-semibold text-gray-900 mb-1">{microcurso.title}</h3>
+                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{microcurso.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500">{microcurso.duration_minutes} min</span>
+                            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                              Assistir →
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Biblioteca */}
+              {activeTab === 'biblioteca' && (
+                <div className="space-y-6">
+                  {biblioteca.length === 0 ? (
+                    <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
+                      <p className="text-gray-600">Nenhum recurso disponível no momento.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {biblioteca.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="text-3xl">
+                              {item.file_type === 'pdf' && '📄'}
+                              {item.file_type === 'template' && '🎨'}
+                              {item.file_type === 'script' && '📝'}
+                              {item.file_type === 'planilha' && '📊'}
+                              {item.file_type === 'mensagem' && '💬'}
+                              {!['pdf', 'template', 'script', 'planilha', 'mensagem'].includes(item.file_type) && '📎'}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">{item.description}</p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-gray-500">{item.category}</span>
+                                <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                  Abrir →
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tutoriais */}
+              {activeTab === 'tutoriais' && (
+                <div className="space-y-6">
+                  {tutoriais.length === 0 ? (
+                    <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
+                      <p className="text-gray-600">Nenhum tutorial disponível no momento.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {tutoriais.map((tutorial) => (
+                        <div
+                          key={tutorial.id}
+                          className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="text-2xl">🎓</div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 mb-1">{tutorial.title}</h3>
+                              <p className="text-xs text-gray-600 mb-2">{tutorial.tool_name}</p>
+                              <p className="text-xs text-gray-500 mb-3 line-clamp-2">{tutorial.description}</p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-gray-500">{tutorial.duration_minutes} min • {tutorial.level}</span>
+                                <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                  Assistir →
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
