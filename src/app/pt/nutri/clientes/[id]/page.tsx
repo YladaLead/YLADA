@@ -1281,10 +1281,643 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
 }
 
 function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
+  const [assessments, setAssessments] = useState<any[]>([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+  const [mostrarForm, setMostrarForm] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null)
+
+  const initialFormState = () => ({
+    assessment_type: 'antropometrica',
+    assessment_name: '',
+    measurement_date: new Date().toISOString().split('T')[0],
+    status: 'completo',
+    is_reevaluation: false,
+    parent_assessment_id: '',
+    interpretation: '',
+    recommendations: '',
+    data: {
+      weight: '',
+      height: '',
+      bmi: '',
+      waist_circumference: '',
+      hip_circumference: '',
+      chest_circumference: '',
+      arm_circumference: '',
+      thigh_circumference: '',
+      body_fat_percentage: '',
+      muscle_mass: '',
+      water_percentage: '',
+      visceral_fat: '',
+      notes: ''
+    }
+  })
+
+  const [formData, setFormData] = useState(initialFormState)
+
+  const carregarAvaliacoes = async () => {
+    try {
+      setCarregando(true)
+      const params = new URLSearchParams()
+      params.append('order_by', 'created_at')
+      params.append('order', 'desc')
+      params.append('limit', '100')
+
+      const response = await fetch(`/api/nutri/clientes/${clientId}/avaliacoes?${params.toString()}`, {
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Erro ao carregar avaliações')
+      }
+
+      const data = await response.json()
+      const lista = data.data?.assessments || []
+      setAssessments(lista)
+      if (lista.length > 0) {
+        setSelectedAssessmentId((prev) => prev || lista[0].id)
+      } else {
+        setSelectedAssessmentId(null)
+      }
+    } catch (error: any) {
+      console.error('Erro ao carregar avaliações:', error)
+      setErro(error.message || 'Erro ao carregar avaliações')
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  useEffect(() => {
+    carregarAvaliacoes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId])
+
+  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type, checked } = e.target
+    if (name === 'is_reevaluation') {
+      setFormData(prev => ({
+        ...prev,
+        is_reevaluation: checked,
+        parent_assessment_id: checked ? prev.parent_assessment_id : ''
+      }))
+      return
+    }
+
+    if (name.startsWith('data.')) {
+      const field = name.replace('data.', '')
+      setFormData(prev => {
+        const updated = {
+          ...prev,
+          data: {
+            ...prev.data,
+            [field]: value
+          }
+        }
+
+        if (field === 'weight' || field === 'height') {
+          const peso = parseFloat((field === 'weight' ? value : updated.data.weight || '').replace(',', '.'))
+          const altura = parseFloat((field === 'height' ? value : updated.data.height || '').replace(',', '.'))
+          if (!isNaN(peso) && !isNaN(altura) && altura > 0) {
+            const bmi = (peso / (altura * altura)).toFixed(1)
+            updated.data.bmi = bmi
+          } else {
+            updated.data.bmi = ''
+          }
+        }
+
+        return updated
+      })
+      return
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+
+  const resetForm = () => {
+    setFormData(initialFormState())
+  }
+
+  const normalizeNumber = (value: string) => {
+    if (!value) return null
+    const parsed = parseFloat(value.replace(',', '.'))
+    return isNaN(parsed) ? null : parsed
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErro(null)
+    setSalvando(true)
+
+    try {
+      const payload = {
+        assessment_type: formData.assessment_type,
+        assessment_name: formData.assessment_name || null,
+        status: formData.status,
+        is_reevaluation: formData.is_reevaluation,
+        parent_assessment_id: formData.is_reevaluation && formData.parent_assessment_id ? formData.parent_assessment_id : null,
+        interpretation: formData.interpretation || null,
+        recommendations: formData.recommendations || null,
+        data: {
+          measurement_date: formData.measurement_date,
+          weight: normalizeNumber(formData.data.weight),
+          height: normalizeNumber(formData.data.height),
+          bmi: normalizeNumber(formData.data.bmi),
+          waist_circumference: normalizeNumber(formData.data.waist_circumference),
+          hip_circumference: normalizeNumber(formData.data.hip_circumference),
+          chest_circumference: normalizeNumber(formData.data.chest_circumference),
+          arm_circumference: normalizeNumber(formData.data.arm_circumference),
+          thigh_circumference: normalizeNumber(formData.data.thigh_circumference),
+          body_fat_percentage: normalizeNumber(formData.data.body_fat_percentage),
+          muscle_mass: normalizeNumber(formData.data.muscle_mass),
+          water_percentage: normalizeNumber(formData.data.water_percentage),
+          visceral_fat: normalizeNumber(formData.data.visceral_fat),
+          notes: formData.data.notes || null
+        }
+      }
+
+      const response = await fetch(`/api/nutri/clientes/${clientId}/avaliacoes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao salvar avaliação')
+      }
+
+      setMostrarForm(false)
+      resetForm()
+      await carregarAvaliacoes()
+    } catch (error: any) {
+      console.error('Erro ao salvar avaliação:', error)
+      setErro(error.message || 'Erro ao salvar avaliação. Tente novamente.')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  const selectedAssessment = assessments.find((assessment) => assessment.id === selectedAssessmentId)
+
+  if (carregando) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando avaliações...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Avaliação Física</h2>
-      <p className="text-gray-600">Aba de avaliação física será implementada em breve.</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Avaliação Física</h2>
+          <p className="text-sm text-gray-600">Registre medidas corporais, composição e notas rápidas.</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {assessments.length > 0 && (
+            <button
+              onClick={() => carregarAvaliacoes()}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+            >
+              Atualizar lista
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setMostrarForm(!mostrarForm)
+              if (!mostrarForm) {
+                resetForm()
+              }
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            {mostrarForm ? 'Cancelar' : '+ Nova Avaliação'}
+          </button>
+        </div>
+      </div>
+
+      {erro && (
+        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+          <p className="text-red-800 text-sm">{erro}</p>
+        </div>
+      )}
+
+      {mostrarForm && (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900">Registrar Avaliação</h3>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Avaliação *</label>
+                <select
+                  name="assessment_type"
+                  value={formData.assessment_type}
+                  onChange={handleFieldChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="antropometrica">Antropométrica</option>
+                  <option value="bioimpedancia">Bioimpedância</option>
+                  <option value="anamnese">Anamnese</option>
+                  <option value="questionario">Questionário</option>
+                  <option value="reavaliacao">Reavaliação</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nome / Identificação</label>
+                <input
+                  type="text"
+                  name="assessment_name"
+                  value={formData.assessment_name}
+                  onChange={handleFieldChange}
+                  placeholder="Ex: Avaliação inicial fevereiro"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Data da avaliação *</label>
+                <input
+                  type="date"
+                  name="measurement_date"
+                  value={formData.measurement_date}
+                  onChange={handleFieldChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleFieldChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="rascunho">Rascunho</option>
+                  <option value="completo">Completo</option>
+                </select>
+              </div>
+              <label className="flex items-center gap-3 text-sm font-medium text-gray-700 mt-6">
+                <input
+                  type="checkbox"
+                  name="is_reevaluation"
+                  checked={formData.is_reevaluation}
+                  onChange={handleFieldChange}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+                Essa avaliação é uma reavaliação
+              </label>
+            </div>
+
+            {formData.is_reevaluation && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Avaliação anterior</label>
+                <select
+                  name="parent_assessment_id"
+                  value={formData.parent_assessment_id}
+                  onChange={handleFieldChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">Selecione a avaliação base</option>
+                  {assessments
+                    .filter(a => !a.is_reevaluation)
+                    .map(a => (
+                      <option key={a.id} value={a.id}>
+                        #{a.assessment_number || 1} • {a.assessment_name || 'Avaliação'} ({new Date(a.created_at).toLocaleDateString('pt-BR')})
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h4 className="font-semibold text-gray-900 mb-4">Medidas corporais</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    name="data.weight"
+                    value={formData.data.weight}
+                    onChange={handleFieldChange}
+                    placeholder="Ex: 68.5"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Altura (m)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="data.height"
+                    value={formData.data.height}
+                    onChange={handleFieldChange}
+                    placeholder="Ex: 1.65"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">IMC</label>
+                  <input
+                    type="text"
+                    name="data.bmi"
+                    value={formData.data.bmi}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-200 bg-gray-100 rounded-lg text-gray-600"
+                    placeholder="Calculado automaticamente"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h4 className="font-semibold text-gray-900 mb-4">Circunferências (cm)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { label: 'Cintura', name: 'waist_circumference' },
+                  { label: 'Quadril', name: 'hip_circumference' },
+                  { label: 'Peitoral', name: 'chest_circumference' },
+                  { label: 'Braço', name: 'arm_circumference' },
+                  { label: 'Coxa', name: 'thigh_circumference' }
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      name={`data.${field.name}`}
+                      value={(formData.data as any)[field.name]}
+                      onChange={handleFieldChange}
+                      placeholder="Ex: 82"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h4 className="font-semibold text-gray-900 mb-4">Composição corporal</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { label: '% Gordura', name: 'body_fat_percentage', placeholder: 'Ex: 28.5' },
+                  { label: 'Massa Magra (kg)', name: 'muscle_mass', placeholder: 'Ex: 48' },
+                  { label: '% Água', name: 'water_percentage', placeholder: 'Ex: 52' },
+                  { label: 'Gordura visceral', name: 'visceral_fat', placeholder: 'Ex: 6' }
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      name={`data.${field.name}`}
+                      value={(formData.data as any)[field.name]}
+                      onChange={handleFieldChange}
+                      placeholder={field.placeholder}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Interpretação / Observações</label>
+                <textarea
+                  name="interpretation"
+                  value={formData.interpretation}
+                  onChange={handleFieldChange}
+                  rows={3}
+                  placeholder="Resumo rápido do que você percebeu nesta avaliação."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Recomendações / Plano</label>
+                <textarea
+                  name="recommendations"
+                  value={formData.recommendations}
+                  onChange={handleFieldChange}
+                  rows={3}
+                  placeholder="Ex: Ajustar ingestão de proteínas, revisar treino..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notas internas</label>
+                <textarea
+                  name="data.notes"
+                  value={formData.data.notes}
+                  onChange={handleFieldChange}
+                  rows={3}
+                  placeholder="Essas notas não são compartilhadas com a cliente."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  resetForm()
+                  setMostrarForm(false)
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
+                disabled={salvando}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={salvando}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
+              >
+                {salvando && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                Salvar avaliação
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {assessments.length === 0 && !mostrarForm ? (
+        <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+          <p className="text-gray-600 mb-4">Você ainda não registrou nenhuma avaliação física.</p>
+          <button
+            onClick={() => setMostrarForm(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            Registrar primeira avaliação
+          </button>
+        </div>
+      ) : null}
+
+      {assessments.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            {selectedAssessment ? (
+              <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                  <div>
+                    <p className="text-sm text-gray-500 uppercase tracking-wide">Avaliação selecionada</p>
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      {selectedAssessment.assessment_name || 'Avaliação'} #{selectedAssessment.assessment_number || 1}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {selectedAssessment.assessment_type === 'antropometrica' && 'Antropométrica'}
+                      {selectedAssessment.assessment_type === 'bioimpedancia' && 'Bioimpedância'}
+                      {selectedAssessment.assessment_type === 'anamnese' && 'Anamnese'}
+                      {['questionario', 'reavaliacao', 'outro'].includes(selectedAssessment.assessment_type) && selectedAssessment.assessment_type}
+                      {' • '}
+                      {selectedAssessment.data?.measurement_date
+                        ? new Date(selectedAssessment.data.measurement_date).toLocaleDateString('pt-BR')
+                        : new Date(selectedAssessment.created_at).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    selectedAssessment.status === 'completo'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {selectedAssessment.status === 'completo' ? 'Completo' : 'Rascunho'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { label: 'Peso', value: selectedAssessment.data?.weight ? `${selectedAssessment.data.weight} kg` : '-' },
+                    { label: 'Altura', value: selectedAssessment.data?.height ? `${selectedAssessment.data.height} m` : '-' },
+                    { label: 'IMC', value: selectedAssessment.data?.bmi ? selectedAssessment.data?.bmi : '-' },
+                    { label: 'Cintura', value: selectedAssessment.data?.waist_circumference ? `${selectedAssessment.data?.waist_circumference} cm` : '-' },
+                    { label: 'Quadril', value: selectedAssessment.data?.hip_circumference ? `${selectedAssessment.data?.hip_circumference} cm` : '-' },
+                    { label: 'Gordura corporal', value: selectedAssessment.data?.body_fat_percentage ? `${selectedAssessment.data?.body_fat_percentage}%` : '-' },
+                    { label: 'Massa magra', value: selectedAssessment.data?.muscle_mass ? `${selectedAssessment.data?.muscle_mass} kg` : '-' },
+                    { label: 'Água corporal', value: selectedAssessment.data?.water_percentage ? `${selectedAssessment.data?.water_percentage}%` : '-' }
+                  ].map(item => (
+                    <div key={item.label} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                      <p className="text-xs uppercase text-gray-500">{item.label}</p>
+                      <p className="text-lg font-semibold text-gray-900">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {selectedAssessment.interpretation && (
+                  <div className="mt-6">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-2">Interpretação</h4>
+                    <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{selectedAssessment.interpretation}</p>
+                  </div>
+                )}
+
+                {selectedAssessment.recommendations && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-2">Recomendações</h4>
+                    <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{selectedAssessment.recommendations}</p>
+                  </div>
+                )}
+
+                {selectedAssessment.data?.notes && (
+                  <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-blue-900 mb-1">Notas internas</p>
+                    <p className="text-sm text-blue-800 whitespace-pre-line">{selectedAssessment.data.notes}</p>
+                  </div>
+                )}
+
+                {selectedAssessment.is_reevaluation && selectedAssessment.comparison_data && (
+                  <div className="mt-6 border-t pt-4">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Comparação automática</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {['weight', 'bmi', 'body_fat_percentage', 'muscle_mass', 'waist_circumference', 'hip_circumference'].map((field) => {
+                        const comp = selectedAssessment.comparison_data[field]
+                        if (!comp || typeof comp !== 'object') return null
+                        const diff = parseFloat(comp.difference ?? 0)
+                        const signal = diff > 0 ? '+' : ''
+                        return (
+                          <div key={field} className="rounded-lg border border-gray-200 p-4">
+                            <p className="text-xs uppercase text-gray-500">{field.replace('_', ' ')}</p>
+                            <p className="text-lg font-semibold text-gray-900">{signal}{diff.toFixed(1)}</p>
+                            {comp.percent_change && (
+                              <p className="text-xs text-gray-500">{comp.percent_change}% desde a última avaliação</p>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="border border-dashed border-gray-300 rounded-xl p-6 text-center text-gray-500">
+                Selecione uma avaliação para visualizar os detalhes.
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-700">Histórico de avaliações</h3>
+            <div className="space-y-3">
+              {assessments.map((assessment) => {
+                const data = assessment.data || {}
+                const isSelected = assessment.id === selectedAssessmentId
+                return (
+                  <button
+                    key={assessment.id}
+                    onClick={() => setSelectedAssessmentId(assessment.id)}
+                    className={`w-full text-left border rounded-lg p-4 transition-all ${
+                      isSelected ? 'border-blue-400 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-blue-200 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {assessment.assessment_name || 'Avaliação'} #{assessment.assessment_number || 1}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {data.measurement_date
+                            ? new Date(data.measurement_date).toLocaleDateString('pt-BR')
+                            : new Date(assessment.created_at).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full ${
+                        assessment.is_reevaluation ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {assessment.is_reevaluation ? 'Reavaliação' : 'Inicial'}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-600">
+                      {data.weight && <span>⚖️ {data.weight} kg</span>}
+                      {data.body_fat_percentage && <span>💧 {data.body_fat_percentage}% gordura</span>}
+                      {data.waist_circumference && <span>📏 Cintura {data.waist_circumference} cm</span>}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -2810,19 +3443,1122 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
 }
 
 function TimelineTab({ cliente, clientId }: { cliente: any; clientId: string }) {
+  const [history, setHistory] = useState<any[]>([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+  const [activityFilter, setActivityFilter] = useState('todos')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [showNoteForm, setShowNoteForm] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+  const [noteForm, setNoteForm] = useState({
+    activity_type: 'nota_adicionada',
+    title: '',
+    description: ''
+  })
+
+  const activityOptions = [
+    { value: 'todos', label: 'Todos' },
+    { value: 'consulta', label: 'Consultas' },
+    { value: 'avaliacao', label: 'Avaliações' },
+    { value: 'reavaliacao', label: 'Reavaliações' },
+    { value: 'programa_criado', label: 'Programa criado' },
+    { value: 'programa_atualizado', label: 'Programa atualizado' },
+    { value: 'programa_concluido', label: 'Programa concluído' },
+    { value: 'nota_adicionada', label: 'Notas internas' },
+    { value: 'status_alterado', label: 'Mudanças de status' },
+    { value: 'evolucao_registrada', label: 'Registros físicos' },
+    { value: 'registro_emocional', label: 'Registros emocionais' },
+    { value: 'registro_comportamental', label: 'Registros comportamentais' },
+    { value: 'lead_convertido', label: 'Conversões' },
+    { value: 'outro', label: 'Outros' }
+  ]
+
+  const fetchHistory = async () => {
+    try {
+      setCarregando(true)
+      setErro(null)
+      const params = new URLSearchParams()
+      params.append('limit', '200')
+      params.append('order', 'desc')
+      if (activityFilter !== 'todos') {
+        params.append('activity_type', activityFilter)
+      }
+      if (searchTerm) {
+        params.append('search', searchTerm)
+      }
+      if (startDate) {
+        params.append('start_date', `${startDate}T00:00:00Z`)
+      }
+      if (endDate) {
+        params.append('end_date', `${endDate}T23:59:59Z`)
+      }
+
+      const response = await fetch(`/api/nutri/clientes/${clientId}/historico?${params.toString()}`, {
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Erro ao carregar histórico')
+      }
+
+      const data = await response.json()
+      setHistory(data.data?.history || [])
+    } catch (error: any) {
+      console.error('Erro ao carregar histórico:', error)
+      setErro(error.message || 'Erro ao carregar histórico')
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchHistory()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId, activityFilter, startDate, endDate])
+
+  const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      fetchHistory()
+    }
+  }
+
+  const statusLabels: Record<string, string> = {
+    lead: 'Contato',
+    pre_consulta: 'Pré-Consulta',
+    ativa: 'Ativa',
+    pausa: 'Pausa',
+    finalizada: 'Finalizada'
+  }
+
+  const groupedHistory = history.reduce((acc: Record<string, any[]>, item) => {
+    const date = new Date(item.created_at)
+    const label = date.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })
+    if (!acc[label]) acc[label] = []
+    acc[label].push(item)
+    return acc
+  }, {})
+
+  const getIconForType = (type: string) => {
+    const map: Record<string, string> = {
+      consulta: '📅',
+      avaliacao: '🏥',
+      reavaliacao: '🔄',
+      programa_criado: '📋',
+      programa_atualizado: '🛠️',
+      programa_concluido: '🏁',
+      nota_adicionada: '📝',
+      status_alterado: '⚙️',
+      evolucao_registrada: '📈',
+      registro_emocional: '💗',
+      registro_comportamental: '🧠',
+      cliente_criado: '✨',
+      cliente_deletado: '🗑️',
+      lead_convertido: '🎯',
+      outro: '🔔'
+    }
+    return map[type] || '🔔'
+  }
+
+  const getTypeLabel = (type: string) => {
+    const option = activityOptions.find(opt => opt.value === type)
+    return option ? option.label : type
+  }
+
+  const handleNoteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setNoteForm(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleCreateNote = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!noteForm.title.trim()) {
+      setErro('Descreva rapidamente o que aconteceu.')
+      return
+    }
+    setSalvando(true)
+    setErro(null)
+
+    try {
+      const response = await fetch(`/api/nutri/clientes/${clientId}/historico`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          activity_type: noteForm.activity_type,
+          title: noteForm.title.trim(),
+          description: noteForm.description?.trim() || null
+        })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao registrar evento')
+      }
+
+      setNoteForm({
+        activity_type: 'nota_adicionada',
+        title: '',
+        description: ''
+      })
+      setShowNoteForm(false)
+      await fetchHistory()
+    } catch (error: any) {
+      console.error('Erro ao criar evento no histórico:', error)
+      setErro(error.message || 'Erro ao criar evento. Tente novamente.')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  if (carregando) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando histórico...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Histórico Timeline</h2>
-      <p className="text-gray-600">Aba de histórico timeline será implementada em breve.</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Histórico completo</h2>
+          <p className="text-sm text-gray-600">Veja tudo que já aconteceu com {cliente.name}.</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => fetchHistory()}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+          >
+            Atualizar
+          </button>
+          <button
+            onClick={() => setShowNoteForm(!showNoteForm)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+          >
+            {showNoteForm ? 'Cancelar' : '+ Registrar evento rápido'}
+          </button>
+        </div>
+      </div>
+
+      {erro && (
+        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 text-sm text-red-800">
+          {erro}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="space-y-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Buscar</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearchKey}
+              placeholder="Ex: consulta, avaliação..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+            <p className="text-[11px] text-gray-500 mt-1">Pressione Enter para buscar</p>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Tipo de registro</label>
+            <select
+              value={activityFilter}
+              onChange={(e) => setActivityFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {activityOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">De</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Até</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          {showNoteForm && (
+            <div className="bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Registrar evento rápido</h3>
+              <form onSubmit={handleCreateNote} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Tipo</label>
+                  <select
+                    name="activity_type"
+                    value={noteForm.activity_type}
+                    onChange={handleNoteChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="nota_adicionada">Nota interna</option>
+                    <option value="programa_atualizado">Programa atualizado</option>
+                    <option value="programa_concluido">Programa concluído</option>
+                    <option value="status_alterado">Mudança de status</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Resumo rápido *</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={noteForm.title}
+                    onChange={handleNoteChange}
+                    placeholder="Ex: Cliente pediu pausa"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Detalhes (opcional)</label>
+                  <textarea
+                    name="description"
+                    value={noteForm.description}
+                    onChange={handleNoteChange}
+                    rows={3}
+                    placeholder="Anotações internas, combinado, próximos passos..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={salvando}
+                  className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center justify-center gap-2"
+                >
+                  {salvando && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
+                  Registrar evento
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+
+        <div className="lg:col-span-3">
+          {history.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+              <p className="text-gray-600 mb-4">Ainda não temos registros na timeline desta cliente.</p>
+              <button
+                onClick={() => setShowNoteForm(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+              >
+                Criar primeiro registro
+              </button>
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200 hidden sm:block"></div>
+              <div className="space-y-8">
+                {Object.entries(groupedHistory).map(([dateLabel, events]) => (
+                  <div key={dateLabel}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="hidden sm:block w-2 h-2 rounded-full bg-blue-500"></div>
+                      <p className="text-xs uppercase text-gray-500 font-semibold tracking-wide">{dateLabel}</p>
+                      <div className="flex-1 border-t border-dashed border-gray-300"></div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {events.map(event => (
+                        <div
+                          key={event.id}
+                          className="relative sm:pl-10"
+                        >
+                          <div className="hidden sm:flex absolute left-1 top-4 w-6 h-6 rounded-full border-2 border-white bg-blue-100 items-center justify-center text-sm">
+                            {getIconForType(event.activity_type)}
+                          </div>
+                          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">{event.title}</p>
+                                <p className="text-xs text-gray-500 flex items-center gap-2">
+                                  {getIconForType(event.activity_type)} {getTypeLabel(event.activity_type)}
+                                  <span>• {new Date(event.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                </p>
+                              </div>
+                              {event.metadata?.status_novo && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">
+                                  {event.metadata.status_anterior ? `${statusLabels[event.metadata.status_anterior] || event.metadata.status_anterior} → ` : ''}
+                                  {statusLabels[event.metadata.status_novo] || event.metadata.status_novo}
+                                </span>
+                              )}
+                            </div>
+                            {event.description && (
+                              <p className="mt-3 text-sm text-gray-700 whitespace-pre-line">{event.description}</p>
+                            )}
+
+                            {event.metadata?.patterns_identified && event.metadata.patterns_identified.length > 0 && (
+                              <div className="mt-3 text-xs text-gray-600">
+                                <p className="font-semibold mb-1">Padrões:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {event.metadata.patterns_identified.map((padrao: string) => (
+                                    <span key={padrao} className="px-2 py-0.5 bg-pink-50 text-pink-700 rounded-full">
+                                      {padrao}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {event.metadata?.triggers && event.metadata.triggers.length > 0 && (
+                              <div className="mt-3 text-xs text-gray-600">
+                                <p className="font-semibold mb-1">Gatilhos:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {event.metadata.triggers.map((gatilho: string) => (
+                                    <span key={gatilho} className="px-2 py-0.5 bg-orange-50 text-orange-700 rounded-full">
+                                      {gatilho}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
 function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
+  const [programas, setProgramas] = useState<any[]>([])
+  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+  const [mostrarForm, setMostrarForm] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+
+  const initialFormState = () => ({
+    name: '',
+    program_type: 'plano_alimentar',
+    description: '',
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: '',
+    status: 'ativo',
+    meals_plan: '',
+    protocol_notes: '',
+    checklist: [] as { id: string; label: string; done: boolean }[],
+    attachments: [] as { label: string; url: string }[]
+  })
+
+  const [formData, setFormData] = useState(initialFormState)
+  const [newChecklistLabel, setNewChecklistLabel] = useState('')
+  const [newAttachment, setNewAttachment] = useState({ label: '', url: '' })
+  const [attachmentSaving, setAttachmentSaving] = useState(false)
+  const [checklistSaving, setChecklistSaving] = useState(false)
+
+  const parseContent = (content: any) => {
+    if (!content) return {}
+    if (typeof content === 'string') {
+      try {
+        return JSON.parse(content)
+      } catch {
+        return {}
+      }
+    }
+    return content
+  }
+
+  const carregarProgramas = async () => {
+    try {
+      setCarregando(true)
+      setErro(null)
+      const response = await fetch(`/api/nutri/clientes/${clientId}/programas?order=desc&order_by=start_date`, {
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Erro ao carregar programas')
+      }
+
+      const data = await response.json()
+      const lista = data.data?.programs || []
+      setProgramas(lista)
+      if (lista.length > 0) {
+        const ativo = lista.find((programa: any) => programa.status === 'ativo')
+        setSelectedProgramId((prev) => prev || (ativo ? ativo.id : lista[0].id))
+      } else {
+        setSelectedProgramId(null)
+      }
+    } catch (error: any) {
+      console.error('Erro ao carregar programas:', error)
+      setErro(error.message || 'Erro ao carregar programas')
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  useEffect(() => {
+    carregarProgramas()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId])
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const addChecklistItemForm = () => {
+    if (!newChecklistLabel.trim()) return
+    setFormData(prev => ({
+      ...prev,
+      checklist: [
+        ...prev.checklist,
+        { id: `${Date.now()}`, label: newChecklistLabel.trim(), done: false }
+      ]
+    }))
+    setNewChecklistLabel('')
+  }
+
+  const removeChecklistItemForm = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      checklist: prev.checklist.filter(item => item.id !== id)
+    }))
+  }
+
+  const addAttachmentForm = () => {
+    if (!newAttachment.label.trim() || !newAttachment.url.trim()) return
+    setFormData(prev => ({
+      ...prev,
+      attachments: [
+        ...prev.attachments,
+        { label: newAttachment.label.trim(), url: newAttachment.url.trim() }
+      ]
+    }))
+    setNewAttachment({ label: '', url: '' })
+  }
+
+  const removeAttachmentForm = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSalvando(true)
+    setErro(null)
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        program_type: formData.program_type,
+        description: formData.description || null,
+        start_date: formData.start_date,
+        end_date: formData.end_date || null,
+        status: formData.status,
+        content: {
+          meals_plan: formData.meals_plan,
+          protocol_notes: formData.protocol_notes,
+          checklist: formData.checklist,
+          attachments: formData.attachments
+        }
+      }
+
+      const response = await fetch(`/api/nutri/clientes/${clientId}/programas`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao criar programa')
+      }
+
+      setMostrarForm(false)
+      setFormData(initialFormState())
+      await carregarProgramas()
+    } catch (error: any) {
+      console.error('Erro ao criar programa:', error)
+      setErro(error.message || 'Erro ao criar programa. Tente novamente.')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  const selectedProgram = programas.find(prog => prog.id === selectedProgramId)
+  const selectedContent = parseContent(selectedProgram?.content)
+  const checklist = selectedContent?.checklist || []
+  const attachments = selectedContent?.attachments || []
+
+  const updateProgramContent = async (programId: string, updatedContent: any) => {
+    try {
+      const response = await fetch(`/api/nutri/clientes/${clientId}/programas/${programId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ content: updatedContent })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao atualizar programa')
+      }
+      setProgramas(prev =>
+        prev.map(program => (program.id === programId ? data.data.program : program))
+      )
+    } catch (error: any) {
+      console.error('Erro ao atualizar conteúdo do programa:', error)
+      setErro(error.message || 'Erro ao atualizar programa.')
+    }
+  }
+
+  const toggleChecklistItem = async (itemId: string) => {
+    if (!selectedProgram) return
+    setChecklistSaving(true)
+    const currentContent = parseContent(selectedProgram.content)
+    const updatedChecklist = (currentContent.checklist || []).map((item: any) =>
+      item.id === itemId ? { ...item, done: !item.done } : item
+    )
+    const updatedContent = { ...currentContent, checklist: updatedChecklist }
+    await updateProgramContent(selectedProgram.id, updatedContent)
+    setChecklistSaving(false)
+  }
+
+  const addChecklistItemToProgram = async () => {
+    if (!selectedProgram || !newChecklistLabel.trim()) return
+    setChecklistSaving(true)
+    const currentContent = parseContent(selectedProgram.content)
+    const updatedChecklist = [
+      ...(currentContent.checklist || []),
+      { id: `${Date.now()}`, label: newChecklistLabel.trim(), done: false }
+    ]
+    const updatedContent = { ...currentContent, checklist: updatedChecklist }
+    await updateProgramContent(selectedProgram.id, updatedContent)
+    setNewChecklistLabel('')
+    setChecklistSaving(false)
+  }
+
+  const addAttachmentToProgram = async () => {
+    if (!selectedProgram || !newAttachment.label.trim() || !newAttachment.url.trim()) return
+    setAttachmentSaving(true)
+    const currentContent = parseContent(selectedProgram.content)
+    const updatedAttachments = [
+      ...(currentContent.attachments || []),
+      { label: newAttachment.label.trim(), url: newAttachment.url.trim() }
+    ]
+    const updatedContent = { ...currentContent, attachments: updatedAttachments }
+    await updateProgramContent(selectedProgram.id, updatedContent)
+    setNewAttachment({ label: '', url: '' })
+    setAttachmentSaving(false)
+  }
+
+  if (carregando) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando programas...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Programa Atual</h2>
-      <p className="text-gray-600">Aba de programa atual será implementada em breve.</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Programa Atual</h2>
+          <p className="text-sm text-gray-600">Organize planos alimentares, protocolos e anexos do jeito que você já faz.</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {programas.length > 0 && (
+            <select
+              value={selectedProgramId || ''}
+              onChange={(e) => setSelectedProgramId(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {programas.map(programa => (
+                <option key={programa.id} value={programa.id}>
+                  {programa.name} • {new Date(programa.start_date).toLocaleDateString('pt-BR')}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            onClick={() => {
+              setMostrarForm(!mostrarForm)
+              if (!mostrarForm) {
+                setFormData(initialFormState())
+              }
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          >
+            {mostrarForm ? 'Cancelar' : '+ Novo Programa'}
+          </button>
+        </div>
+      </div>
+
+      {erro && (
+        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 text-sm text-red-800">
+          {erro}
+        </div>
+      )}
+
+      {mostrarForm && (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900">Cadastrar novo programa</h3>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nome do programa *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ex: Programa Equilíbrio 8 semanas"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                <select
+                  name="program_type"
+                  value={formData.program_type}
+                  onChange={handleFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="plano_alimentar">Plano alimentar</option>
+                  <option value="protocolo">Protocolo</option>
+                  <option value="treinamento">Treinamento</option>
+                  <option value="desafio">Desafio</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Data início *</label>
+                <input
+                  type="date"
+                  name="start_date"
+                  value={formData.start_date}
+                  onChange={handleFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Data término</label>
+                <input
+                  type="date"
+                  name="end_date"
+                  value={formData.end_date}
+                  onChange={handleFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="rascunho">Rascunho</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="pausado">Pausado</option>
+                  <option value="concluido">Concluído</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Resumo do programa</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleFormChange}
+                rows={3}
+                placeholder="Ex: foco em inflamação, protocolo com anti-inflamatórios naturais..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Plano alimentar / refeições</label>
+                <textarea
+                  name="meals_plan"
+                  value={formData.meals_plan}
+                  onChange={handleFormChange}
+                  rows={4}
+                  placeholder="Ex: café da manhã, lanches, almoço..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Protocolos / observações</label>
+                <textarea
+                  name="protocol_notes"
+                  value={formData.protocol_notes}
+                  onChange={handleFormChange}
+                  rows={4}
+                  placeholder="Suplementação, treinos, materiais de apoio..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">Checklist do acompanhamento</h4>
+                  <button
+                    type="button"
+                    onClick={addChecklistItemForm}
+                    className="text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    + Adicionar
+                  </button>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    value={newChecklistLabel}
+                    onChange={(e) => setNewChecklistLabel(e.target.value)}
+                    placeholder="Ex: enviar cardápio PDF"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={addChecklistItemForm}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+                <ul className="space-y-2">
+                  {formData.checklist.length === 0 && (
+                    <li className="text-sm text-gray-500">Nada adicionado ainda.</li>
+                  )}
+                  {formData.checklist.map(item => (
+                    <li key={item.id} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg px-3 py-2">
+                      <span>{item.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeChecklistItemForm(item.id)}
+                        className="text-xs text-red-500 hover:text-red-600"
+                      >
+                        Remover
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">Materiais / links</h4>
+                  <button
+                    type="button"
+                    onClick={addAttachmentForm}
+                    className="text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    + Adicionar
+                  </button>
+                </div>
+                <div className="space-y-2 mb-3">
+                  <input
+                    type="text"
+                    placeholder="Nome do material"
+                    value={newAttachment.label}
+                    onChange={(e) => setNewAttachment(prev => ({ ...prev, label: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500"
+                  />
+                  <input
+                    type="url"
+                    placeholder="Link"
+                    value={newAttachment.url}
+                    onChange={(e) => setNewAttachment(prev => ({ ...prev, url: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <ul className="space-y-2">
+                  {formData.attachments.length === 0 && (
+                    <li className="text-sm text-gray-500">Nenhum anexo adicionado.</li>
+                  )}
+                  {formData.attachments.map((attachment, index) => (
+                    <li key={`${attachment.label}-${index}`} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg px-3 py-2">
+                      <span className="truncate mr-2">{attachment.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachmentForm(index)}
+                        className="text-xs text-red-500 hover:text-red-600"
+                      >
+                        Remover
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(initialFormState())
+                  setMostrarForm(false)
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
+                disabled={salvando}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={salvando}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center gap-2"
+              >
+                {salvando && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
+                Salvar programa
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {programas.length === 0 && !mostrarForm ? (
+        <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+          <p className="text-gray-600 mb-4">Você ainda não cadastrou nenhum programa para esta cliente.</p>
+          <button
+            onClick={() => setMostrarForm(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
+          >
+            Criar primeiro programa
+          </button>
+        </div>
+      ) : null}
+
+      {selectedProgram && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-2xl font-semibold text-gray-900">{selectedProgram.name}</h3>
+                  <p className="text-sm text-gray-500">
+                    {selectedProgram.program_type === 'plano_alimentar' && 'Plano alimentar'}
+                    {selectedProgram.program_type === 'protocolo' && 'Protocolo'}
+                    {selectedProgram.program_type === 'treinamento' && 'Treinamento'}
+                    {selectedProgram.program_type === 'desafio' && 'Desafio'}
+                    {selectedProgram.program_type === 'outro' && 'Programa personalizado'}
+                  </p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  selectedProgram.status === 'ativo' ? 'bg-green-100 text-green-700'
+                  : selectedProgram.status === 'rascunho' ? 'bg-yellow-100 text-yellow-700'
+                  : selectedProgram.status === 'concluido' ? 'bg-blue-100 text-blue-700'
+                  : 'bg-gray-100 text-gray-700'
+                }`}>
+                  {selectedProgram.status?.replace('_', ' ')}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                  <p className="text-xs uppercase text-gray-500">Início</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {new Date(selectedProgram.start_date).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                  <p className="text-xs uppercase text-gray-500">Término</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {selectedProgram.end_date ? new Date(selectedProgram.end_date).toLocaleDateString('pt-BR') : 'Sem data'}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                  <p className="text-xs uppercase text-gray-500">Adesão</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {selectedProgram.adherence_percentage ? `${selectedProgram.adherence_percentage}%` : '-'}
+                  </p>
+                </div>
+              </div>
+
+              {selectedProgram.description && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-2">Resumo do programa</h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-line">{selectedProgram.description}</p>
+                </div>
+              )}
+
+              {selectedContent?.meals_plan && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-2">Plano alimentar</h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-line">{selectedContent.meals_plan}</p>
+                </div>
+              )}
+
+              {selectedContent?.protocol_notes && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-2">Protocolos e observações</h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-line">{selectedContent.protocol_notes}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Checklist de entregas</h3>
+                {checklistSaving && (
+                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                    <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                    Salvando...
+                  </span>
+                )}
+              </div>
+              {checklist.length === 0 ? (
+                <p className="text-sm text-gray-500">Nenhum item no checklist ainda.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {checklist.map((item: any) => (
+                    <li key={item.id} className="flex items-center gap-3">
+                      <label className="inline-flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={!!item.done}
+                          onChange={() => toggleChecklistItem(item.id)}
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                        />
+                        <span className={`text-sm ${item.done ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                          {item.label}
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  value={newChecklistLabel}
+                  onChange={(e) => setNewChecklistLabel(e.target.value)}
+                  placeholder="Adicionar próxima entrega..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addChecklistItemToProgram}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm"
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Materiais e links</h3>
+              {attachments.length === 0 ? (
+                <p className="text-sm text-gray-500">Nenhum material adicionado ainda.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {attachments.map((attachment: any, index: number) => (
+                    <li key={`${attachment.url}-${index}`} className="text-sm flex items-center gap-2">
+                      <span>📎</span>
+                      <a
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 truncate"
+                      >
+                        {attachment.label || attachment.url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-4 space-y-2">
+                <input
+                  type="text"
+                  placeholder="Nome do material"
+                  value={newAttachment.label}
+                  onChange={(e) => setNewAttachment(prev => ({ ...prev, label: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500"
+                />
+                <input
+                  type="url"
+                  placeholder="https://"
+                  value={newAttachment.url}
+                  onChange={(e) => setNewAttachment(prev => ({ ...prev, url: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addAttachmentToProgram}
+                  disabled={attachmentSaving}
+                  className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-sm flex items-center justify-center gap-2"
+                >
+                  {attachmentSaving && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
+                  Adicionar material
+                </button>
+              </div>
+            </div>
+
+            {selectedProgram?.notes && (
+              <div className="border border-gray-200 rounded-xl p-6 bg-blue-50">
+                <h3 className="text-sm font-semibold text-blue-900 mb-2">Notas internas</h3>
+                <p className="text-sm text-blue-900 whitespace-pre-line">{selectedProgram.notes}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

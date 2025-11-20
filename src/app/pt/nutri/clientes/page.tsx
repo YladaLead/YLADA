@@ -154,13 +154,22 @@ function ClientesNutriContent() {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Clientes</h1>
               <p className="text-gray-600 mt-1">Gerencie seus clientes e acompanhe seus atendimentos</p>
             </div>
-            <Link
-              href="/pt/nutri/clientes/novo"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-            >
-              <span>➕</span>
-              Novo Cliente
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/pt/nutri/clientes/kanban"
+                className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                <span>🗂️</span>
+                Ver Kanban
+              </Link>
+              <Link
+                href="/pt/nutri/clientes/novo"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                <span>➕</span>
+                Novo Cliente
+              </Link>
+            </div>
           </div>
 
           {/* Filtros e Busca */}

@@ -269,3 +269,4 @@ function calculateDifference(oldValue: number | null | undefined, newValue: numb
   }
 }
 
+

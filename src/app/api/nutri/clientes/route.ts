@@ -176,8 +176,6 @@ export async function POST(request: NextRequest) {
       status = 'lead',
       goal,
       instagram,
-      origin,
-      origin_id,
       converted_from_lead = false,
       lead_source,
       lead_template_id,
@@ -216,8 +214,6 @@ export async function POST(request: NextRequest) {
       status: status,
       goal: goal || null,
       instagram: instagram?.trim() || null,
-      origin: origin || null,
-      origin_id: origin_id || null,
       converted_from_lead: converted_from_lead,
       lead_source: lead_source || null,
       lead_template_id: lead_template_id || null,
@@ -281,4 +277,5 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
 

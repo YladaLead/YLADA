@@ -11,7 +11,7 @@
 -- Tabela principal de clientes
 CREATE TABLE IF NOT EXISTS clients (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL, -- Nutricionista
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL, -- Nutricionista
   lead_id UUID REFERENCES leads(id) ON DELETE SET NULL, -- Lead original (se convertido)
   
   -- Dados básicos
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS clients (
   -- Metadados
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
+  created_by UUID REFERENCES auth.users(id)
 );
 
 -- =====================================================
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS clients (
 CREATE TABLE IF NOT EXISTS client_evolution (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   
   -- Data da medição
   measurement_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS client_evolution (
   photos_urls TEXT[], -- URLs de fotos de evolução (antes/depois)
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
+  created_by UUID REFERENCES auth.users(id)
 );
 
 -- =====================================================
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS client_evolution (
 CREATE TABLE IF NOT EXISTS appointments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   
   -- Dados do agendamento
   title VARCHAR(255) NOT NULL,
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS appointments (
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
+  created_by UUID REFERENCES auth.users(id)
 );
 
 -- =====================================================
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS appointments (
 CREATE TABLE IF NOT EXISTS assessments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   appointment_id UUID REFERENCES appointments(id) ON DELETE SET NULL, -- Se vinculado a uma consulta
   
   -- Tipo de avaliação
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS assessments (
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
+  created_by UUID REFERENCES auth.users(id)
 );
 
 -- =====================================================
@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS assessments (
 CREATE TABLE IF NOT EXISTS programs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   
   -- Dados do programa
   name VARCHAR(255) NOT NULL,
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS programs (
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
+  created_by UUID REFERENCES auth.users(id)
 );
 
 -- =====================================================
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS programs (
 -- Tabela de formulários personalizados (templates)
 CREATE TABLE IF NOT EXISTS custom_forms (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   
   -- Dados do formulário
   name VARCHAR(255) NOT NULL,
@@ -271,8 +271,8 @@ CREATE TABLE IF NOT EXISTS custom_forms (
 CREATE TABLE IF NOT EXISTS form_responses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   form_id UUID REFERENCES custom_forms(id) ON DELETE CASCADE NOT NULL,
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  client_id UUID REFERENCES clients(id) ON DELETE SET NULL, -- NULL se formulário preenchido antes de ser cliente
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL, -- user_id do criador do formulário
   
   -- Respostas (JSONB)
   responses JSONB NOT NULL, -- Respostas do cliente
@@ -293,7 +293,7 @@ CREATE TABLE IF NOT EXISTS form_responses (
 CREATE TABLE IF NOT EXISTS client_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   
   -- Tipo de atividade
   activity_type VARCHAR(100) NOT NULL, -- 'consulta', 'avaliacao', 'programa_criado', 'programa_atualizado', 'nota_adicionada', 'status_alterado', 'registro_emocional', 'registro_comportamental', 'outro'
@@ -304,7 +304,7 @@ CREATE TABLE IF NOT EXISTS client_history (
   metadata JSONB, -- Dados adicionais específicos do tipo de atividade
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
+  created_by UUID REFERENCES auth.users(id)
 );
 
 -- =====================================================
@@ -315,7 +315,7 @@ CREATE TABLE IF NOT EXISTS client_history (
 CREATE TABLE IF NOT EXISTS emotional_behavioral_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   appointment_id UUID REFERENCES appointments(id) ON DELETE SET NULL, -- Se vinculado a uma consulta
   
   -- Data do registro
@@ -349,7 +349,7 @@ CREATE TABLE IF NOT EXISTS emotional_behavioral_history (
   -- Metadados
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
+  created_by UUID REFERENCES auth.users(id)
 );
 
 -- =====================================================
@@ -422,50 +422,91 @@ ALTER TABLE emotional_behavioral_history ENABLE ROW LEVEL SECURITY;
 -- Políticas de segurança: usuários só veem/gerenciam seus próprios dados
 
 -- Clientes
+DROP POLICY IF EXISTS "Users can view own clients" ON clients;
+DROP POLICY IF EXISTS "Users can insert own clients" ON clients;
+DROP POLICY IF EXISTS "Users can update own clients" ON clients;
+DROP POLICY IF EXISTS "Users can delete own clients" ON clients;
+
 CREATE POLICY "Users can view own clients" ON clients FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own clients" ON clients FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own clients" ON clients FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own clients" ON clients FOR DELETE USING (auth.uid() = user_id);
 
 -- Evolução
+DROP POLICY IF EXISTS "Users can view own evolution" ON client_evolution;
+DROP POLICY IF EXISTS "Users can insert own evolution" ON client_evolution;
+DROP POLICY IF EXISTS "Users can update own evolution" ON client_evolution;
+DROP POLICY IF EXISTS "Users can delete own evolution" ON client_evolution;
+
 CREATE POLICY "Users can view own evolution" ON client_evolution FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own evolution" ON client_evolution FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own evolution" ON client_evolution FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own evolution" ON client_evolution FOR DELETE USING (auth.uid() = user_id);
 
 -- Agenda
+DROP POLICY IF EXISTS "Users can view own appointments" ON appointments;
+DROP POLICY IF EXISTS "Users can insert own appointments" ON appointments;
+DROP POLICY IF EXISTS "Users can update own appointments" ON appointments;
+DROP POLICY IF EXISTS "Users can delete own appointments" ON appointments;
+
 CREATE POLICY "Users can view own appointments" ON appointments FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own appointments" ON appointments FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own appointments" ON appointments FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own appointments" ON appointments FOR DELETE USING (auth.uid() = user_id);
 
 -- Avaliações
+DROP POLICY IF EXISTS "Users can view own assessments" ON assessments;
+DROP POLICY IF EXISTS "Users can insert own assessments" ON assessments;
+DROP POLICY IF EXISTS "Users can update own assessments" ON assessments;
+DROP POLICY IF EXISTS "Users can delete own assessments" ON assessments;
+
 CREATE POLICY "Users can view own assessments" ON assessments FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own assessments" ON assessments FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own assessments" ON assessments FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own assessments" ON assessments FOR DELETE USING (auth.uid() = user_id);
 
 -- Programas
+DROP POLICY IF EXISTS "Users can view own programs" ON programs;
+DROP POLICY IF EXISTS "Users can insert own programs" ON programs;
+DROP POLICY IF EXISTS "Users can update own programs" ON programs;
+DROP POLICY IF EXISTS "Users can delete own programs" ON programs;
+
 CREATE POLICY "Users can view own programs" ON programs FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own programs" ON programs FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own programs" ON programs FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own programs" ON programs FOR DELETE USING (auth.uid() = user_id);
 
 -- Formulários personalizados
+DROP POLICY IF EXISTS "Users can view own forms" ON custom_forms;
+DROP POLICY IF EXISTS "Users can insert own forms" ON custom_forms;
+DROP POLICY IF EXISTS "Users can update own forms" ON custom_forms;
+DROP POLICY IF EXISTS "Users can delete own forms" ON custom_forms;
+
 CREATE POLICY "Users can view own forms" ON custom_forms FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own forms" ON custom_forms FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own forms" ON custom_forms FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own forms" ON custom_forms FOR DELETE USING (auth.uid() = user_id);
 
 -- Respostas de formulários
+DROP POLICY IF EXISTS "Users can view own form responses" ON form_responses;
+DROP POLICY IF EXISTS "Users can insert form responses" ON form_responses;
+
 CREATE POLICY "Users can view own form responses" ON form_responses FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert form responses" ON form_responses FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Histórico
+DROP POLICY IF EXISTS "Users can view own history" ON client_history;
+DROP POLICY IF EXISTS "Users can insert own history" ON client_history;
+
 CREATE POLICY "Users can view own history" ON client_history FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own history" ON client_history FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Histórico Emocional e Comportamental
+DROP POLICY IF EXISTS "Users can view own emotional behavioral history" ON emotional_behavioral_history;
+DROP POLICY IF EXISTS "Users can insert own emotional behavioral history" ON emotional_behavioral_history;
+DROP POLICY IF EXISTS "Users can update own emotional behavioral history" ON emotional_behavioral_history;
+DROP POLICY IF EXISTS "Users can delete own emotional behavioral history" ON emotional_behavioral_history;
+
 CREATE POLICY "Users can view own emotional behavioral history" ON emotional_behavioral_history FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own emotional behavioral history" ON emotional_behavioral_history FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own emotional behavioral history" ON emotional_behavioral_history FOR UPDATE USING (auth.uid() = user_id);
