@@ -158,6 +158,17 @@ export default function LoginForm({
             setError('Verifique seu email para confirmar a conta antes de fazer login.')
             setIsSignUp(false)
           } else {
+            // Verificar e ativar autorizações pendentes para este email
+            try {
+              await fetch('/api/auth/activate-pending-authorization', {
+                method: 'POST',
+                credentials: 'include'
+              })
+              // Silencioso - não interrompe o fluxo se falhar
+            } catch (e) {
+              console.warn('Aviso: Não foi possível verificar autorizações pendentes:', e)
+            }
+            
             router.push(redirectPath)
           }
         }

@@ -12,9 +12,25 @@ export default function NutriLandingPage() {
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt">
-            <YLADALogo size="md" responsive={true} className="bg-transparent" />
+            <Image
+              src="/images/logo/coach-horizontal.png"
+              alt="Coach by YLADA"
+              width={180}
+              height={60}
+              className="h-10 sm:h-14 lg:h-16 w-auto object-contain bg-transparent"
+              style={{ backgroundColor: 'transparent' }}
+              priority
+            />
           </Link>
-          <LanguageSelector />
+          <div className="flex items-center gap-4">
+            <Link
+              href="/pt/coach/login"
+              className="px-4 py-2 text-purple-600 font-medium hover:text-purple-700 transition-colors"
+            >
+              Entrar
+            </Link>
+            <LanguageSelector />
+          </div>
         </div>
       </header>
 
@@ -482,7 +498,14 @@ export default function NutriLandingPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col items-center justify-center">
             <div className="mb-4">
-              <YLADALogo size="md" className="bg-transparent" />
+              <Image
+                src="/images/logo/coach-horizontal.png"
+                alt="Coach by YLADA"
+                width={180}
+                height={60}
+                className="h-10 w-auto object-contain bg-transparent"
+                style={{ backgroundColor: 'transparent' }}
+              />
             </div>
             <p className="text-gray-600 text-sm mb-2 text-center">
               YLADA Nutricionista — Your Leading Advanced Data Assistant

@@ -7,15 +7,15 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
-export default function FormulariosNutri() {
+export default function FormulariosCoach() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <FormulariosNutriContent />
+      <FormulariosCoachContent />
     </ProtectedRoute>
   )
 }
 
-function FormulariosNutriContent() {
+function FormulariosCoachContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

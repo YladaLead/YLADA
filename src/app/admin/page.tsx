@@ -122,6 +122,15 @@ function AdminDashboardContent() {
       color: 'bg-yellow-500'
     },
     {
+      id: 'email-authorizations',
+      title: 'Autorizações por Email',
+      description: 'Autorizar emails antes do cadastro',
+      icon: '📧',
+      link: '/admin/email-authorizations',
+      color: 'bg-indigo-500',
+      destaque: true
+    },
+    {
       id: 'templates',
       title: 'Templates',
       description: 'Gerenciar templates prontos',
