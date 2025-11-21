@@ -4,8 +4,8 @@ import type { ReactNode } from 'react'
 export const metadata: Metadata = {
   manifest: '/manifest-coach.json',
   icons: {
-    icon: '/images/logo/ylada/quadrado/roxo/ylada-quadrado-roxo-19.png',
-    apple: '/images/logo/ylada/quadrado/roxo/ylada-quadrado-roxo-19.png',
+    icon: '/images/logo/coach-quadrado.png',
+    apple: '/images/logo/coach-quadrado.png',
   },
 }
 

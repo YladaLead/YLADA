@@ -12,7 +12,7 @@ export default function WellnessPage() {
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="bg-transparent inline-block">
             <Image
-              src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+              src="/images/logo/wellness-horizontal.png"
               alt="WELLNESS - Your Leading Data System"
               width={572}
               height={150}
@@ -392,7 +392,7 @@ export default function WellnessPage() {
           <div className="flex flex-col items-center justify-center">
             <div className="mb-4 bg-transparent inline-block">
               <Image
-                src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+                src="/images/logo/wellness-horizontal.png"
                 alt="WELLNESS - Your Leading Data System"
                 width={572}
                 height={150}

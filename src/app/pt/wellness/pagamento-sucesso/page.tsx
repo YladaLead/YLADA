@@ -68,7 +68,7 @@ function WellnessPagamentoSucessoContent() {
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt/wellness">
             <Image
-              src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+              src="/images/logo/wellness-horizontal.png"
               alt="WELLNESS - Your Leading Data System"
               width={572}
               height={150}

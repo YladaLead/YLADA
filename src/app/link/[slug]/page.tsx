@@ -165,7 +165,7 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
           <div className="flex items-center">
             <Image
               src={area === 'wellness' 
-                ? '/images/logo/wellness/Logo_Wellness_horizontal.png'
+                ? '/images/logo/wellness-horizontal.png'
                 : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
               }
               alt={area === 'wellness' 

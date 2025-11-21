@@ -161,7 +161,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         <div className="p-3 border-b border-gray-200 flex items-center justify-between">
           <Link href="/pt/nutri/home" onClick={onMobileClose} className="flex items-center w-full">
             <Image
-              src="/images/logo/nutri/Logo_Nutri_horizontal.png"
+              src="/images/logo/nutri-horizontal.png"
               alt="Nutri by YLADA"
               width={180}
               height={60}

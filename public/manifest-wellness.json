@@ -8,12 +8,12 @@
   "theme_color": "#10B981",
   "icons": [
     {
-      "src": "/images/logo/wellness/Logo_Wellness_quadrado.png",
+      "src": "/images/logo/wellness-quadrado.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/images/logo/wellness/Logo_Wellness_quadrado.png",
+      "src": "/images/logo/wellness-quadrado.png",
       "sizes": "512x512",
       "type": "image/png"
     }

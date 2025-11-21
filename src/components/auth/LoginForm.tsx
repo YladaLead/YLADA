@@ -279,9 +279,11 @@ export default function LoginForm({
   }
 
   const logoSrc = logoPath || (perfil === 'wellness' 
-    ? '/images/logo/wellness/Logo_Wellness_horizontal.png'
+    ? '/images/logo/wellness-horizontal.png'
     : perfil === 'nutri'
-    ? '/images/logo/nutri/Logo_Nutri_horizontal.png'
+    ? '/images/logo/nutri-horizontal.png'
+    : perfil === 'coach'
+    ? '/images/logo/coach-horizontal.png'
     : perfil === 'nutra' || logoColor === 'laranja'
     ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
     : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png')
@@ -294,7 +296,7 @@ export default function LoginForm({
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
               src={logoSrc}
-              alt={perfil === 'wellness' ? 'WELLNESS - Your Leading Data System' : perfil === 'nutri' ? 'Nutri by YLADA' : 'YLADA Logo'}
+              alt={perfil === 'wellness' ? 'WELLNESS - Your Leading Data System' : perfil === 'nutri' ? 'Nutri by YLADA' : perfil === 'coach' ? 'Coach by YLADA' : 'YLADA Logo'}
               width={perfil === 'wellness' ? 572 : 280}
               height={perfil === 'wellness' ? 150 : 84}
               className="bg-transparent object-contain h-16 sm:h-20 w-auto"
@@ -397,6 +399,8 @@ export default function LoginForm({
             className={`w-full py-3.5 rounded-lg font-semibold text-white transition-all duration-200 ${
               perfil === 'wellness'
                 ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+                : perfil === 'coach'
+                ? 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
                 : perfil === 'nutra' || logoColor === 'laranja'
                 ? 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800'
                 : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'

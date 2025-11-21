@@ -5,10 +5,11 @@ import { useMemo, useState } from 'react'
 import * as wellnessDiagnostics from '@/lib/diagnostics'
 import {
   diagnosticosNutri,
-  getDiagnostico,
+  getDiagnostico as getDiagnosticoNutri,
   type DiagnosticoCompleto,
   type DiagnosticosPorFerramenta
 } from '@/lib/diagnosticos-nutri'
+import { diagnosticosCoach, getDiagnostico as getDiagnosticoCoach } from '@/lib/diagnosticos-coach'
 
 interface Template {
   id: string
@@ -21,7 +22,7 @@ interface Template {
 
 interface DynamicTemplatePreviewProps {
   template: Template
-  profession: 'wellness' | 'nutri'
+  profession: 'wellness' | 'nutri' | 'coach'
   onClose?: () => void
 }
 
@@ -106,9 +107,10 @@ const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
   'desafio-21-dias': wellnessDiagnostics.desafio21DiasDiagnosticos
 }
 
-const diagnosticsMapsByProfession: Record<'nutri' | 'wellness', Record<string, DiagnosticosPorFerramenta>> = {
+const diagnosticsMapsByProfession: Record<'nutri' | 'wellness' | 'coach', Record<string, DiagnosticosPorFerramenta>> = {
   nutri: diagnosticosNutri,
-  wellness: wellnessDiagnosticsMap
+  wellness: wellnessDiagnosticsMap,
+  coach: diagnosticosCoach
 }
 
 const resultColorPalette = [
@@ -268,10 +270,18 @@ type CalculadoraResultadoSimulado = {
 
 const getSimulatedCalculatorResult = (
   slug: string,
-  respostas: CalculadoraMockRespostas
+  respostas: CalculadoraMockRespostas,
+  profession: 'nutri' | 'wellness' | 'coach' = 'nutri'
 ): CalculadoraResultadoSimulado => {
   const normalized = slug.replace(/-nutri$/, '')
   const peso = respostas?.peso ?? respostas?.weight ?? 68
+
+  // Texto baseado na profissão
+  const textoDiagnostico = profession === 'coach' 
+    ? 'Os diagnósticos Coach detalham' 
+    : profession === 'wellness' 
+    ? 'Os diagnósticos Wellness detalham' 
+    : 'Os diagnósticos Nutri detalham'
 
   if (normalized.includes('calculadora-agua') || normalized.includes('calculadora-hidratacao')) {
     return {
@@ -293,7 +303,7 @@ const getSimulatedCalculatorResult = (
     return {
       destaque: '📊 IMC estimado: 24,1 (Faixa saudável)',
       descricao: 'Peso adequado para o biotipo informado. O resultado explica a categoria e cuidados prioritários.',
-      detalhe: 'Os diagnósticos Nutri detalham como manter o peso ideal e ajustar hábitos caso o IMC mude.'
+      detalhe: `${textoDiagnostico} como manter o peso ideal e ajustar hábitos caso o IMC mude.`
     }
   }
 
@@ -314,10 +324,10 @@ const getSimulatedCalculatorResult = (
 
 const findDiagnosticsSource = (
   candidates: string[],
-  profession: 'nutri' | 'wellness'
+  profession: 'nutri' | 'wellness' | 'coach'
 ): { slug: string; map: Record<string, DiagnosticosPorFerramenta> } | null => {
   const primaryMap = diagnosticsMapsByProfession[profession]
-  const fallbackMap = profession === 'nutri' ? diagnosticsMapsByProfession.wellness : undefined
+  const fallbackMap = (profession === 'nutri' || profession === 'coach') ? diagnosticsMapsByProfession.wellness : undefined
   const mapsToCheck = [primaryMap, fallbackMap].filter(Boolean) as Array<Record<string, DiagnosticosPorFerramenta>>
 
   for (const candidate of candidates) {
@@ -343,14 +353,17 @@ const findDiagnosticsSource = (
 const buildEntriesFromMap = (
   slug: string,
   map: Record<string, DiagnosticosPorFerramenta>,
-  profession: 'nutri' | 'wellness'
+  profession: 'nutri' | 'wellness' | 'coach'
 ): DiagnosticEntry[] => {
   const entry = map[slug]
   if (!entry) return []
   const availableResults =
-    entry[profession] || entry.nutri || entry.wellness
+    entry[profession] || entry.coach || entry.nutri || entry.wellness
 
   if (!availableResults) return []
+
+  // Usar a função getDiagnostico correta baseada na profissão
+  const getDiagnostico = profession === 'coach' ? getDiagnosticoCoach : getDiagnosticoNutri
 
   return Object.keys(availableResults)
     .map((resultadoId) => {
@@ -363,7 +376,7 @@ const buildEntriesFromMap = (
 
 const getDiagnosticsInfoForTemplate = (
   template: Template,
-  profession: 'nutri' | 'wellness'
+  profession: 'nutri' | 'wellness' | 'coach'
 ) => {
   const candidates = buildSlugCandidates(template)
   const source = findDiagnosticsSource(candidates, profession)
@@ -1514,7 +1527,7 @@ export default function DynamicTemplatePreview({
     // Resultado da calculadora
     if (todosPreenchidos) {
       const respostasVisiveis = Object.keys(respostas).length ? respostas : mockRespostas
-      const resultadoSimulado = getSimulatedCalculatorResult(slugCalculadora, respostasVisiveis)
+      const resultadoSimulado = getSimulatedCalculatorResult(slugCalculadora, respostasVisiveis, profession)
 
       return (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -1536,7 +1549,7 @@ export default function DynamicTemplatePreview({
           <div className="mt-8 space-y-4">
             <div>
               <h4 className="text-lg font-semibold text-gray-900">
-                Diagnósticos Nutri simulados
+                {profession === 'coach' ? 'Diagnósticos Coach simulados' : profession === 'wellness' ? 'Diagnósticos Wellness simulados' : 'Diagnósticos Nutri simulados'}
               </h4>
               <p className="text-sm text-gray-600">
                 Esta prévia mostra exatamente o que sua cliente verá como resultado final, conforme os dados que ela preencher.

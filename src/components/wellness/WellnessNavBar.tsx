@@ -29,7 +29,7 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
             <Link href="/pt/wellness/dashboard" className="flex-shrink-0">
               <Image
-                src="/images/logo/wellness/Logo_Wellness_horizontal.png"
+                src="/images/logo/wellness-horizontal.png"
                 alt="WELLNESS - Your Leading Data System"
                 width={572}
                 height={150}
