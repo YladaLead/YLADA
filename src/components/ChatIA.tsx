@@ -141,7 +141,7 @@ export default function ChatIA({ isOpen, onClose }: ChatIAProps) {
     }
 
     // Resposta padrão
-    return 'Olá! Posso te ajudar com dúvidas sobre:\n\n📋 **Gestão de Clientes** - Cadastro, Kanban, status\n📊 **Evolução Física** - Registro de medidas e gráficos\n📅 **Agenda** - Agendamento e visualizações\n🏥 **Avaliações** - Criação e reavaliações\n📝 **Formulários** - Criação, envio e respostas\n🔄 **Conversão de Leads** - Transformar leads em clientes\n📈 **Relatórios** - Análises e métricas\n\n**O que você gostaria de saber?** 😊'
+    return 'Olá! Posso te ajudar com dúvidas sobre:\n\n📋 **Gestão de Clientes** - Cadastro, Kanban, status\n📊 **Evolução Física** - Registro de medidas e gráficos\n📅 **Agenda** - Agendamento e visualizações\n🏥 **Avaliações** - Criação e reavaliações\n📝 **Formulários** - Criação, envio e respostas\n🔄 **Conversão de Leads** - Transformar leads em clientes\n📈 **Relatórios** - Análises e métricas\n📧 **Autorizações por Email** - Autorizar emails antes do cadastro\n\n**O que você gostaria de saber?** 😊'
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

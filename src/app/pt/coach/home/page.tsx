@@ -552,7 +552,7 @@ function NutriHomeContent() {
         </div>
 
         {/* Chat com IA */}
-        <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} />
+        <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} area="coach" />
         
         {/* Botão Flutuante do Chat */}
         {!chatAberto && (
