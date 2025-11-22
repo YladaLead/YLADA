@@ -30,10 +30,20 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
   }
 
   const calcularProteina = () => {
+    // 🚀 CORREÇÃO: Validar todos os campos obrigatórios antes de calcular
     const pesoNum = parseFloat(peso)
+    const alturaNum = parseFloat(altura)
+    const idadeNum = parseFloat(idade)
 
-    if (!pesoNum || pesoNum <= 0) {
-      alert('Por favor, preencha o peso com um valor válido.')
+    // Validar campos numéricos
+    if (!pesoNum || !alturaNum || !idadeNum || pesoNum <= 0 || alturaNum <= 0 || idadeNum <= 0) {
+      alert('Por favor, preencha todos os campos com valores válidos.')
+      return
+    }
+
+    // Validar campos de seleção
+    if (!genero || !atividade || !objetivo) {
+      alert('Por favor, selecione gênero, nível de atividade e objetivo.')
       return
     }
 

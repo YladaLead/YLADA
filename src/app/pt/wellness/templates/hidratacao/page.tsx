@@ -27,10 +27,18 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
   }
 
   const calcularHidratacao = () => {
+    // 🚀 CORREÇÃO: Validar todos os campos obrigatórios antes de calcular
     const pesoNum = parseFloat(peso)
 
+    // Validar campo numérico
     if (!pesoNum || pesoNum <= 0) {
       alert('Por favor, preencha o peso com um valor válido.')
+      return
+    }
+
+    // Validar campos de seleção
+    if (!atividade || !clima) {
+      alert('Por favor, selecione o nível de atividade física e o clima onde você vive.')
       return
     }
 

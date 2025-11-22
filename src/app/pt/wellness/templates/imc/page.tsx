@@ -28,11 +28,20 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
   }
 
   const calcularIMC = () => {
+    // 🚀 CORREÇÃO: Validar todos os campos obrigatórios antes de calcular
     const pesoNum = parseFloat(peso)
     const alturaNum = parseFloat(altura) / 100
+    const idadeNum = parseFloat(idade)
 
-    if (!pesoNum || !alturaNum || pesoNum <= 0 || alturaNum <= 0) {
+    // Validar campos numéricos
+    if (!pesoNum || !alturaNum || !idadeNum || pesoNum <= 0 || alturaNum <= 0 || idadeNum <= 0) {
       alert('Por favor, preencha todos os campos com valores válidos.')
+      return
+    }
+
+    // Validar campo de seleção
+    if (!genero) {
+      alert('Por favor, selecione o gênero.')
       return
     }
 
