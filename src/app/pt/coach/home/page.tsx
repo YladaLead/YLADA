@@ -7,15 +7,15 @@ import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
-export default function NutriHome() {
+export default function CoachHome() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <NutriHomeContent />
+      <CoachHomeContent />
     </ProtectedRoute>
   )
 }
 
-function NutriHomeContent() {
+function CoachHomeContent() {
   const { user, userProfile, loading } = useAuth()
   
   const [perfil, setPerfil] = useState({

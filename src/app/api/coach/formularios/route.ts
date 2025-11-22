@@ -32,9 +32,10 @@ export async function GET(request: NextRequest) {
       console.log('🔍 Formulários Coach API - User ID autenticado:', authenticatedUserId)
     }
 
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     let query = supabaseAdmin
       .from('custom_forms')
-      .select('*', { count: 'exact' })
+      .select('id, user_id, name, description, form_type, structure, is_active, is_template, created_at, updated_at', { count: 'exact' })
       .eq('user_id', authenticatedUserId)
       .order('created_at', { ascending: false })
 
@@ -158,10 +159,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir formulário
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     const { data: newForm, error } = await supabaseAdmin
       .from('custom_forms')
       .insert(formData)
-      .select()
+      .select('id, user_id, name, description, form_type, structure, is_active, is_template, created_at, updated_at')
       .single()
 
     if (error) {

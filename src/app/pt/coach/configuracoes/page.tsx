@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import CoachNavBar from "@/components/coach/CoachNavBar"
 
-export default function NutriConfiguracoes() {
+export default function CoachConfiguracoes() {
   const [usuario, setUsuario] = useState({
     nome: 'Dr. Ana Maria Silva',
     crn: 'CRN-3 12345',

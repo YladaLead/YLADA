@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export default function NutriRelatorios() {
+export default function CoachRelatorios() {
   const [periodo, setPeriodo] = useState('30dias')
   const [tipoRelatorio, setTipoRelatorio] = useState('geral')
 

@@ -7,15 +7,15 @@ import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import type { Trilha, Microcurso, BibliotecaItem, Tutorial } from '@/types/cursos'
 
-export default function NutriCursos() {
+export default function CoachCursos() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <NutriCursosContent />
+      <CoachCursosContent />
     </ProtectedRoute>
   )
 }
 
-function NutriCursosContent() {
+function CoachCursosContent() {
   const { user, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'trilhas' | 'microcursos' | 'biblioteca' | 'tutoriais'>('trilhas')

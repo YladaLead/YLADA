@@ -620,7 +620,7 @@ export default function QuizPersonalizadoPage() {
                       Descrição
                     </label>
                     <textarea
-                      placeholder="Ex: Descubra seu perfil nutricional e receba recomendações personalizadas para uma vida mais saudável."
+                      placeholder="Ex: Descubra seu perfil de bem-estar e receba recomendações personalizadas para uma vida mais saudável."
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 h-24"
                       value={quiz.descricao}
                       onChange={(e) => setQuiz({ ...quiz, descricao: e.target.value })}

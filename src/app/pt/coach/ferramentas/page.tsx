@@ -1,11 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import QRCode from '@/components/QRCode'
+import dynamic from 'next/dynamic'
 import CoachNavBar from '@/components/coach/CoachNavBar'
 import { buildCoachToolUrl, buildCoachToolUrlFallback, buildShortUrl } from '@/lib/url-utils'
+
+// 🚀 OTIMIZAÇÃO: Lazy load do QRCode (componente pesado, só usado quando necessário)
+const QRCode = dynamic(() => import('@/components/QRCode'), {
+  ssr: false,
+  loading: () => <div className="w-[200px] h-[200px] bg-gray-100 rounded-lg animate-pulse" />
+})
 
 interface Ferramenta {
   id: string
@@ -43,7 +49,7 @@ export default function FerramentasCoach() {
       setLoading(true)
 
       const response = await fetch(
-        `/api/coach/ferramentas?profession=nutri`,
+        `/api/coach/ferramentas?profession=coach`,
         {
           credentials: 'include'
         }
@@ -139,19 +145,23 @@ export default function FerramentasCoach() {
     }
   }
 
-  const stats = {
+  // 🚀 OTIMIZAÇÃO: useMemo para evitar recálculo desnecessário
+  const stats = useMemo(() => ({
     totalFerramentas: ferramentas.length,
     ferramentasAtivas: ferramentas.filter(f => f.status === 'ativa').length,
     totalLeads: ferramentas.reduce((sum, f) => sum + f.leads, 0),
     taxaConversaoMedia: ferramentas.length > 0 
       ? ferramentas.reduce((sum, f) => sum + f.conversao, 0) / ferramentas.length 
       : 0
-  }
+  }), [ferramentas])
 
-  const ferramentasFiltradas = ferramentas.filter(ferramenta => {
-    const statusMatch = filtroStatus === 'todas' || ferramenta.status === filtroStatus
-    return statusMatch
-  })
+  // 🚀 OTIMIZAÇÃO: useMemo para evitar refiltro desnecessário
+  const ferramentasFiltradas = useMemo(() => {
+    return ferramentas.filter(ferramenta => {
+      const statusMatch = filtroStatus === 'todas' || ferramenta.status === filtroStatus
+      return statusMatch
+    })
+  }, [ferramentas, filtroStatus])
 
   return (
     <div className="min-h-screen bg-gray-50">

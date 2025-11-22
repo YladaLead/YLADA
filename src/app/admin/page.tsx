@@ -131,6 +131,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'chat-qa',
+      title: 'ChatIA - Perguntas e Respostas',
+      description: 'Gerenciar respostas do assistente virtual',
+      icon: '🤖',
+      link: '/admin/chat-qa',
+      color: 'bg-cyan-500',
+      destaque: true
+    },
+    {
       id: 'templates',
       title: 'Templates',
       description: 'Gerenciar templates prontos',

@@ -6,15 +6,15 @@ import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
-export default function NutriAcompanhamento() {
+export default function CoachAcompanhamento() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <NutriAcompanhamentoContent />
+      <CoachAcompanhamentoContent />
     </ProtectedRoute>
   )
 }
 
-function NutriAcompanhamentoContent() {
+function CoachAcompanhamentoContent() {
   const { user, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [clientes, setClientes] = useState<any[]>([])

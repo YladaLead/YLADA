@@ -8,17 +8,17 @@ import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
 
-export default function ClienteDetalhesNutri() {
+export default function ClienteDetalhesCoach() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <ClienteDetalhesNutriContent />
+      <ClienteDetalhesCoachContent />
     </ProtectedRoute>
   )
 }
 
 type TabType = 'info' | 'evolucao' | 'avaliacao' | 'emocional' | 'reavaliacoes' | 'agenda' | 'timeline' | 'programa'
 
-function ClienteDetalhesNutriContent() {
+function ClienteDetalhesCoachContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const params = useParams()

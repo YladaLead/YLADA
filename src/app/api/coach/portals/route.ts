@@ -30,10 +30,11 @@ export async function GET(request: NextRequest) {
     const authenticatedUserId = user.id
 
     // Se ID foi fornecido, retornar portal específico
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     if (id) {
       const { data: portal, error } = await supabaseAdmin
         .from('coach_portals')
-        .select('*')
+        .select('id, user_id, name, slug, description, navigation_type, status, custom_colors, header_text, footer_text, tools_order, short_code, views, leads_count, profession, created_at, updated_at')
         .eq('id', id)
         .eq('user_id', authenticatedUserId)
         .eq('profession', 'coach') // Filtrar por profession
@@ -53,9 +54,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Primeiro buscar portais (filtrar por profession='coach')
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     let query = supabaseAdmin
       .from('coach_portals')
-      .select('*', { count: 'exact' })
+      .select('id, user_id, name, slug, description, navigation_type, status, custom_colors, header_text, footer_text, tools_order, short_code, views, leads_count, profession, created_at, updated_at', { count: 'exact' })
       .eq('user_id', authenticatedUserId)
       .eq('profession', 'coach') // Filtrar por profession
       .order('created_at', { ascending: false })
@@ -275,10 +277,11 @@ export async function POST(request: NextRequest) {
       insertData.short_code = shortCode
     }
 
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     const { data, error } = await supabaseAdmin
       .from('coach_portals')
       .insert(insertData)
-      .select()
+      .select('id, user_id, name, slug, description, navigation_type, status, custom_colors, header_text, footer_text, tools_order, short_code, views, leads_count, profession, created_at, updated_at')
       .single()
 
     if (error) {
@@ -452,7 +455,7 @@ export async function PUT(request: NextRequest) {
       .from('coach_portals')
       .update(updateData)
       .eq('id', id)
-      .select()
+      .select('id, user_id, name, slug, description, navigation_type, status, custom_colors, header_text, footer_text, tools_order, short_code, views, leads_count, profession, created_at, updated_at')
       .single()
 
     if (error) {

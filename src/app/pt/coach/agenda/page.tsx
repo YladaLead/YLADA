@@ -22,17 +22,17 @@ import {
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-export default function NutriAgenda() {
+export default function CoachAgenda() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <NutriAgendaContent />
+      <CoachAgendaContent />
     </ProtectedRoute>
   )
 }
 
 type ViewMode = 'semanal' | 'mensal' | 'lista'
 
-function NutriAgendaContent() {
+function CoachAgendaContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

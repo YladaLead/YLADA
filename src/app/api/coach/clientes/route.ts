@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (clientId) {
       const { data: client, error } = await supabaseAdmin
         .from('coach_clients')
-        .select('*')
+        .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, next_appointment, last_appointment, tags')
         .eq('id', clientId)
         .eq('user_id', authenticatedUserId)
         .single()
@@ -70,9 +70,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Construir query base
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     let query = supabaseAdmin
       .from('coach_clients')
-      .select('*', { count: 'exact' })
+      .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, next_appointment, last_appointment, tags', { count: 'exact' })
       .eq('user_id', authenticatedUserId)
       .order(orderBy, { ascending: order === 'asc' })
       .range(offset, offset + limit - 1)

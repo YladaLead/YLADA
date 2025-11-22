@@ -26,9 +26,10 @@ export async function GET(
     const { id } = await params
     const authenticatedUserId = user.id
 
+    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     const { data: client, error } = await supabaseAdmin
       .from('coach_clients')
-      .select('*')
+      .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, next_appointment, last_appointment, tags')
       .eq('id', id)
       .eq('user_id', authenticatedUserId)
       .single()

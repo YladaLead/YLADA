@@ -8,15 +8,15 @@ import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 
-export default function NutriLeads() {
+export default function CoachLeads() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <NutriLeadsContent />
+      <CoachLeadsContent />
     </ProtectedRoute>
   )
 }
 
-function NutriLeadsContent() {
+function CoachLeadsContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -200,16 +200,19 @@ function NutriLeadsContent() {
   const status = ['todos', 'novo', 'contatado', 'convertido', 'perdido']
   const ferramentas = ['todas', 'Quiz Interativo', 'Calculadora de IMC', 'Post de Curiosidades', 'Template Post Dica']
 
-  const leadsFiltrados = leads.filter(lead => {
-    const statusMatch = filtroStatus === 'todos' || lead.status === filtroStatus
-    const ferramentaMatch = filtroFerramenta === 'todas' || lead.ferramenta === filtroFerramenta
-    const buscaMatch = busca === '' || 
-      lead.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      lead.email.toLowerCase().includes(busca.toLowerCase()) ||
-      lead.cidade.toLowerCase().includes(busca.toLowerCase())
-    
-    return statusMatch && ferramentaMatch && buscaMatch
-  })
+  // 🚀 OTIMIZAÇÃO: useMemo para evitar refiltro desnecessário
+  const leadsFiltrados = useMemo(() => {
+    return leads.filter(lead => {
+      const statusMatch = filtroStatus === 'todos' || lead.status === filtroStatus
+      const ferramentaMatch = filtroFerramenta === 'todas' || lead.ferramenta === filtroFerramenta
+      const buscaMatch = busca === '' || 
+        lead.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        lead.email.toLowerCase().includes(busca.toLowerCase()) ||
+        lead.cidade.toLowerCase().includes(busca.toLowerCase())
+      
+      return statusMatch && ferramentaMatch && buscaMatch
+    })
+  }, [leads, filtroStatus, filtroFerramenta, busca])
 
   const getStatusClasses = (status: string) => {
     const statusClasses = {

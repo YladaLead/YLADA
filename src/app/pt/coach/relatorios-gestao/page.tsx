@@ -5,17 +5,17 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
-export default function RelatoriosGestaoNutri() {
+export default function RelatoriosGestaoCoach() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <RelatoriosGestaoNutriContent />
+      <RelatoriosGestaoCoachContent />
     </ProtectedRoute>
   )
 }
 
 type TipoRelatorio = 'evolucao' | 'adesao' | 'consultas' | 'avaliacoes'
 
-function RelatoriosGestaoNutriContent() {
+function RelatoriosGestaoCoachContent() {
   const { user, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [tipoRelatorio, setTipoRelatorio] = useState<TipoRelatorio>('evolucao')

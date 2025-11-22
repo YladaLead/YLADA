@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 
 interface QRCodeProps {
   url: string
@@ -8,7 +8,8 @@ interface QRCodeProps {
   className?: string
 }
 
-export default function QRCode({ url, size = 200, className = '' }: QRCodeProps) {
+// 🚀 OTIMIZAÇÃO: React.memo para evitar re-renders desnecessários
+function QRCode({ url, size = 200, className = '' }: QRCodeProps) {
   const [error, setError] = useState(false)
 
   // Usar API pública para gerar QR Code
@@ -37,4 +38,6 @@ export default function QRCode({ url, size = 200, className = '' }: QRCodeProps)
     </div>
   )
 }
+
+export default memo(QRCode)
 

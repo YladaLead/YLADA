@@ -56,6 +56,22 @@ export function buildNutriToolUrlFallback(toolId: string): string {
 }
 
 /**
+ * Constrói URL completa para uma ferramenta coach
+ */
+export function buildCoachToolUrl(userSlug: string, toolSlug: string): string {
+  const baseUrl = getAppUrl()
+  return `${baseUrl}/pt/coach/${userSlug}/${toolSlug}`
+}
+
+/**
+ * Constrói URL completa para uma ferramenta coach alternativa (sem user_slug)
+ */
+export function buildCoachToolUrlFallback(toolId: string): string {
+  const baseUrl = getAppUrl()
+  return `${baseUrl}/pt/coach/ferramenta/${toolId}`
+}
+
+/**
  * Constrói URL curta (encurtada)
  */
 export function buildShortUrl(shortCode: string): string {

@@ -5,7 +5,7 @@ import Image from 'next/image'
 import YLADALogo from '../../../components/YLADALogo'
 import LanguageSelector from '../../../components/LanguageSelector'
 
-export default function NutriLandingPage() {
+export default function CoachLandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

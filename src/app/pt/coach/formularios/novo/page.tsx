@@ -6,10 +6,10 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
-export default function NovoFormularioNutri() {
+export default function NovoFormularioCoach() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <NovoFormularioNutriContent />
+      <NovoFormularioCoachContent />
     </ProtectedRoute>
   )
 }
@@ -67,7 +67,7 @@ export function TooltipButton({
   )
 }
 
-function NovoFormularioNutriContent() {
+function NovoFormularioCoachContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

@@ -7,10 +7,10 @@ import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
 
-export default function ClientesNutri() {
+export default function ClientesCoach() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <ClientesNutriContent />
+      <ClientesCoachContent />
     </ProtectedRoute>
   )
 }
@@ -26,7 +26,7 @@ interface Cliente {
   lead_source: string | null
 }
 
-function ClientesNutriContent() {
+function ClientesCoachContent() {
   const { user, loading } = useAuth()
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [carregando, setCarregando] = useState(true)

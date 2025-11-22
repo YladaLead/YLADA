@@ -9,7 +9,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import { translateError } from '@/lib/error-messages'
 
-function NutriConfiguracaoContent() {
+function CoachConfiguracaoContent() {
   const { user, userProfile } = useAuth()
   const [perfil, setPerfil] = useState({
     nome: '',
@@ -108,12 +108,10 @@ function NutriConfiguracaoContent() {
   // Carregar perfil do usuário
   const carregarPerfil = async () => {
     if (!user) {
-      console.log('⚠️ carregarPerfil: Usuário não disponível')
       return
     }
     
     try {
-      console.log('🔄 carregarPerfil: Iniciando carregamento do perfil Nutri...')
       setCarregando(true)
       
       // Adicionar timestamp para evitar cache
@@ -122,14 +120,8 @@ function NutriConfiguracaoContent() {
         cache: 'no-store' // Forçar não usar cache
       })
       
-      console.log('📡 carregarPerfil: Resposta recebida:', {
-        ok: response.ok,
-        status: response.status
-      })
-      
       if (response.ok) {
         const data = await response.json()
-        console.log('📋 carregarPerfil: Dados recebidos:', data)
         
         if (data.profile) {
           const novoPerfil = {
@@ -142,10 +134,7 @@ function NutriConfiguracaoContent() {
             userSlug: data.profile.userSlug || data.profile.user_slug || ''
           }
           
-          console.log('✅ carregarPerfil: Definindo perfil:', novoPerfil)
           setPerfil(novoPerfil)
-        } else {
-          console.warn('⚠️ carregarPerfil: data.profile não existe')
         }
       } else {
         const errorData = await response.json().catch(() => ({}))
@@ -161,7 +150,7 @@ function NutriConfiguracaoContent() {
         }))
       }
     } catch (error) {
-      console.error('❌ carregarPerfil: Erro ao carregar perfil Nutri:', error)
+      console.error('❌ carregarPerfil: Erro ao carregar perfil Coach:', error)
       // Em caso de erro, usar dados do usuário logado
       setPerfil(prev => ({
         ...prev,
@@ -246,7 +235,7 @@ function NutriConfiguracaoContent() {
 
       if (!response.ok) {
         // Log detalhado do erro para debug
-        console.error('❌ Erro ao salvar perfil Nutri:', {
+        console.error('❌ Erro ao salvar perfil Coach:', {
           status: response.status,
           errorData: responseData,
           technical: responseData.technical
@@ -254,7 +243,7 @@ function NutriConfiguracaoContent() {
         throw new Error(responseData.error || 'Erro ao salvar')
       }
 
-      console.log('✅ Perfil Nutri salvo com sucesso:', responseData)
+      // Perfil salvo com sucesso
 
       // Salvar com sucesso!
       setSalvoComSucesso(true)
@@ -266,7 +255,7 @@ function NutriConfiguracaoContent() {
       // Mostrar mensagem de sucesso por mais tempo (8 segundos)
       setTimeout(() => setSalvoComSucesso(false), 8000)
     } catch (error: any) {
-      console.error('❌ Erro técnico ao salvar perfil Nutri:', {
+      console.error('❌ Erro técnico ao salvar perfil Coach:', {
         error,
         message: error?.message,
         stack: error?.stack
@@ -645,10 +634,10 @@ function NutriConfiguracaoContent() {
   )
 }
 
-export default function NutriConfiguracaoPage() {
+export default function CoachConfiguracaoPage() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <NutriConfiguracaoContent />
+      <CoachConfiguracaoContent />
     </ProtectedRoute>
   )
 }

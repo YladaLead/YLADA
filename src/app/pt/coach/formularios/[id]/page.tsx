@@ -20,15 +20,15 @@ import {
   ModalEditarCampo 
 } from '../novo/page'
 
-export default function EditarFormularioNutri() {
+export default function EditarFormularioCoach() {
   return (
     <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <EditarFormularioNutriContent />
+      <EditarFormularioCoachContent />
     </ProtectedRoute>
   )
 }
 
-function EditarFormularioNutriContent() {
+function EditarFormularioCoachContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const params = useParams()

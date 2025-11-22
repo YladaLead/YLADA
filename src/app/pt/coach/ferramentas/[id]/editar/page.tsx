@@ -197,7 +197,7 @@ export default function EditarFerramentaCoach() {
       setLoading(true)
 
       const response = await fetch(
-        `/api/coach/ferramentas?id=${toolId}&profession=nutri`,
+        `/api/coach/ferramentas?id=${toolId}&profession=coach`,
         {
           credentials: 'include'
         }
