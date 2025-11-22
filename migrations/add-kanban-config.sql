@@ -98,6 +98,35 @@ FROM clients
 WHERE user_id IS NOT NULL
 ON CONFLICT (user_id, area) DO NOTHING;
 
+-- Inserir configuração padrão para usuários Coach que já têm clientes
+INSERT INTO kanban_config (user_id, area, columns, card_fields, quick_actions)
+SELECT 
+  DISTINCT user_id,
+  'coach' as area,
+  '[
+    {"id": "lead", "value": "lead", "label": "Contato", "description": "Entrou agora, precisa de acolhimento", "color": "border-purple-200 bg-purple-50", "order": 1},
+    {"id": "pre_consulta", "value": "pre_consulta", "label": "Pré-Consulta", "description": "Já falou com você, falta agendar", "color": "border-yellow-200 bg-yellow-50", "order": 2},
+    {"id": "ativa", "value": "ativa", "label": "Ativa", "description": "Em atendimento e com plano ativo", "color": "border-green-200 bg-green-50", "order": 3},
+    {"id": "pausa", "value": "pausa", "label": "Pausa", "description": "Deu um tempo, precisa nutrir relação", "color": "border-orange-200 bg-orange-50", "order": 4},
+    {"id": "finalizada", "value": "finalizada", "label": "Finalizada", "description": "Concluiu o ciclo com você", "color": "border-gray-200 bg-gray-50", "order": 5}
+  ]'::jsonb as columns,
+  '[
+    {"field": "telefone", "visible": true},
+    {"field": "email", "visible": false},
+    {"field": "objetivo", "visible": true},
+    {"field": "proxima_consulta", "visible": true},
+    {"field": "ultima_consulta", "visible": true},
+    {"field": "tags", "visible": false},
+    {"field": "status_badge", "visible": true}
+  ]'::jsonb as card_fields,
+  '[
+    {"action": "whatsapp", "visible": true},
+    {"action": "ver_perfil", "visible": true}
+  ]'::jsonb as quick_actions
+FROM coach_clients
+WHERE user_id IS NOT NULL
+ON CONFLICT (user_id, area) DO NOTHING;
+
 -- =====================================================
 -- COMENTÁRIOS PARA DOCUMENTAÇÃO
 -- =====================================================

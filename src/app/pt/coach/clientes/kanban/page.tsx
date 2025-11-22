@@ -16,6 +16,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
+import KanbanConfigModal from '@/components/nutri/KanbanConfigModal'
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
 
@@ -29,14 +30,36 @@ interface Cliente {
   converted_from_lead: boolean
   lead_source: string | null
   created_at: string
+  next_appointment?: string | null
+  last_appointment?: string | null
+  tags?: string[] | null
 }
 
-const statusColumns = [
-  { value: 'lead', label: 'Contato', description: 'Entrou agora, precisa de acolhimento', color: 'border-purple-200 bg-purple-50' },
-  { value: 'pre_consulta', label: 'Pré-Consulta', description: 'Já falou com você, falta agendar', color: 'border-yellow-200 bg-yellow-50' },
-  { value: 'ativa', label: 'Ativa', description: 'Em atendimento e com plano ativo', color: 'border-green-200 bg-green-50' },
-  { value: 'pausa', label: 'Pausa', description: 'Deu um tempo, precisa nutrir relação', color: 'border-orange-200 bg-orange-50' },
-  { value: 'finalizada', label: 'Finalizada', description: 'Concluiu o ciclo com você', color: 'border-gray-200 bg-gray-50' }
+interface Column {
+  id: string
+  value: string
+  label: string
+  description: string
+  color: string
+  order: number
+}
+
+interface CardField {
+  field: string
+  visible: boolean
+}
+
+interface QuickAction {
+  action: string
+  visible: boolean
+}
+
+const defaultColumns: Column[] = [
+  { id: 'lead', value: 'lead', label: 'Contato', description: 'Entrou agora, precisa de acolhimento', color: 'border-purple-200 bg-purple-50', order: 1 },
+  { id: 'pre_consulta', value: 'pre_consulta', label: 'Pré-Consulta', description: 'Já falou com você, falta agendar', color: 'border-yellow-200 bg-yellow-50', order: 2 },
+  { id: 'ativa', value: 'ativa', label: 'Ativa', description: 'Em atendimento e com plano ativo', color: 'border-green-200 bg-green-50', order: 3 },
+  { id: 'pausa', value: 'pausa', label: 'Pausa', description: 'Deu um tempo, precisa nutrir relação', color: 'border-orange-200 bg-orange-50', order: 4 },
+  { id: 'finalizada', value: 'finalizada', label: 'Finalizada', description: 'Concluiu o ciclo com você', color: 'border-gray-200 bg-gray-50', order: 5 }
 ]
 
 function useStatusHelpers() {
@@ -52,7 +75,15 @@ function useStatusHelpers() {
   }
 }
 
-function ClienteCard({ cliente }: { cliente: Cliente }) {
+function ClienteCard({ 
+  cliente, 
+  cardFields, 
+  quickActions 
+}: { 
+  cliente: Cliente
+  cardFields: CardField[]
+  quickActions: QuickAction[]
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useDraggable({
     id: cliente.id,
     data: { status: cliente.status }
@@ -66,6 +97,27 @@ function ClienteCard({ cliente }: { cliente: Cliente }) {
 
   const { getStatusBadge } = useStatusHelpers()
 
+  const showField = (field: string) => {
+    const fieldConfig = cardFields.find(f => f.field === field)
+    return fieldConfig?.visible !== false
+  }
+
+  const showAction = (action: string) => {
+    const actionConfig = quickActions.find(a => a.action === action)
+    return actionConfig?.visible !== false
+  }
+
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      lead: 'Contato',
+      pre_consulta: 'Pré-Consulta',
+      ativa: 'Ativa',
+      pausa: 'Pausa',
+      finalizada: 'Finalizada'
+    }
+    return statusMap[status] || status
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -75,32 +127,58 @@ function ClienteCard({ cliente }: { cliente: Cliente }) {
       className={`bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing`}
     >
       <div className="flex items-start justify-between gap-2">
-        <div>
+        <div className="flex-1">
           <h3 className="text-sm font-semibold text-gray-900 leading-tight">{cliente.name}</h3>
-          {cliente.email && <p className="text-xs text-gray-500 mt-1">{cliente.email}</p>}
-          {cliente.phone && (
+          {showField('telefone') && cliente.phone && (
             <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
               {displayPhoneWithFlag(cliente.phone)}
             </p>
           )}
+          {showField('email') && cliente.email && (
+            <p className="text-xs text-gray-500 mt-1">{cliente.email}</p>
+          )}
         </div>
-        <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${getStatusBadge(cliente.status)}`}>
-          {cliente.status === 'lead'
-            ? 'Contato'
-            : cliente.status === 'pre_consulta'
-              ? 'Pré-Consulta'
-              : cliente.status === 'ativa'
-                ? 'Ativa'
-                : cliente.status === 'pausa'
-                  ? 'Pausa'
-                  : 'Finalizada'}
-        </span>
+        {showField('status_badge') && (
+          <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${getStatusBadge(cliente.status)}`}>
+            {getStatusLabel(cliente.status)}
+          </span>
+        )}
       </div>
 
-      {cliente.goal && (
+      {showField('objetivo') && cliente.goal && (
         <p className="text-xs text-gray-700 mt-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg p-2">
           🎯 {cliente.goal}
         </p>
+      )}
+
+      {showField('proxima_consulta') && cliente.next_appointment && (
+        <p className="text-xs text-gray-600 mt-2">
+          📅 Próxima: {new Date(cliente.next_appointment).toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </p>
+      )}
+
+      {showField('ultima_consulta') && cliente.last_appointment && (
+        <p className="text-xs text-gray-500 mt-1">
+          🕐 Última: {new Date(cliente.last_appointment).toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: 'short'
+          })}
+        </p>
+      )}
+
+      {showField('tags') && cliente.tags && cliente.tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {cliente.tags.map((tag, idx) => (
+            <span key={idx} className="text-[10px] px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
       )}
 
       <div className="mt-4 flex items-center justify-between text-[11px] text-gray-500">
@@ -110,13 +188,29 @@ function ClienteCard({ cliente }: { cliente: Cliente }) {
             month: 'short'
           })}
         </span>
-        <Link
-          href={`/pt/coach/clientes/${cliente.id}`}
-          className="text-purple-600 font-medium hover:underline"
-          onClick={(event) => event.stopPropagation()}
-        >
-          Ver perfil
-        </Link>
+        <div className="flex items-center gap-2">
+          {showAction('whatsapp') && cliente.phone && (
+            <a
+              href={`https://wa.me/${cliente.phone.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-600 hover:text-green-700"
+              onClick={(event) => event.stopPropagation()}
+              title="WhatsApp"
+            >
+              💬
+            </a>
+          )}
+          {showAction('ver_perfil') && (
+            <Link
+              href={`/pt/coach/clientes/${cliente.id}`}
+              className="text-purple-600 font-medium hover:underline"
+              onClick={(event) => event.stopPropagation()}
+            >
+              Ver perfil
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -127,13 +221,17 @@ function KanbanColumn({
   label,
   description,
   color,
-  clientes
+  clientes,
+  cardFields,
+  quickActions
 }: {
   status: string
   label: string
   description: string
   color: string
   clientes: Cliente[]
+  cardFields: CardField[]
+  quickActions: QuickAction[]
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `column-${status}`,
@@ -163,7 +261,14 @@ function KanbanColumn({
             Arraste alguém para cá
           </div>
         ) : (
-          clientes.map((cliente) => <ClienteCard key={cliente.id} cliente={cliente} />)
+          clientes.map((cliente) => (
+            <ClienteCard 
+              key={cliente.id} 
+              cliente={cliente}
+              cardFields={cardFields}
+              quickActions={quickActions}
+            />
+          ))
         )}
       </div>
     </div>
@@ -179,6 +284,11 @@ function KanbanContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeClient, setActiveClient] = useState<Cliente | null>(null)
   const [atualizacaoPendente, setAtualizacaoPendente] = useState<string | null>(null)
+  const [configModalOpen, setConfigModalOpen] = useState(false)
+  const [columns, setColumns] = useState<Column[]>(defaultColumns)
+  const [cardFields, setCardFields] = useState<CardField[]>([])
+  const [quickActions, setQuickActions] = useState<QuickAction[]>([])
+  const [carregandoConfig, setCarregandoConfig] = useState(true)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -186,6 +296,37 @@ function KanbanContent() {
     })
   )
 
+  // Carregar configuração do Kanban
+  useEffect(() => {
+    if (!user) return
+
+    const carregarConfig = async () => {
+      try {
+        setCarregandoConfig(true)
+        const response = await fetch('/api/coach/kanban/config', {
+          credentials: 'include'
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data?.config) {
+            const config = data.data.config
+            setColumns(config.columns || defaultColumns)
+            setCardFields(config.card_fields || [])
+            setQuickActions(config.quick_actions || [])
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar config do Kanban:', error)
+      } finally {
+        setCarregandoConfig(false)
+      }
+    }
+
+    carregarConfig()
+  }, [user])
+
+  // Carregar clientes
   useEffect(() => {
     if (!user) return
 
@@ -225,6 +366,29 @@ function KanbanContent() {
     carregarClientes()
   }, [user])
 
+  // Salvar configuração
+  const handleSaveConfig = async (config: { columns: Column[], card_fields: CardField[], quick_actions: QuickAction[] }) => {
+    try {
+      const response = await fetch('/api/coach/kanban/config', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(config),
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        setColumns(config.columns)
+        setCardFields(config.card_fields)
+        setQuickActions(config.quick_actions)
+      }
+    } catch (error) {
+      console.error('Erro ao salvar config do Kanban:', error)
+      alert('Erro ao salvar configuração. Tente novamente.')
+    }
+  }
+
   const clientesFiltrados = useMemo(() => {
     if (!busca) return clientes
     const termo = busca.toLowerCase().trim()
@@ -235,11 +399,13 @@ function KanbanContent() {
   }, [clientes, busca])
 
   const clientesPorStatus = useMemo(() => {
-    return statusColumns.map((coluna) => ({
+    // Ordenar colunas por order
+    const sortedColumns = [...columns].sort((a, b) => a.order - b.order)
+    return sortedColumns.map((coluna) => ({
       ...coluna,
       clientes: clientesFiltrados.filter((cliente) => cliente.status === coluna.value)
     }))
-  }, [clientesFiltrados])
+  }, [clientesFiltrados, columns])
 
   const handleDragStart = (event: DragStartEvent) => {
     const clientId = event.active.id as string
@@ -343,6 +509,12 @@ function KanbanContent() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setConfigModalOpen(true)}
+                className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                ⚙️ Customizar
+              </button>
               <Link
                 href="/pt/coach/clientes"
                 className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
@@ -418,6 +590,8 @@ function KanbanContent() {
                     description={coluna.description}
                     color={coluna.color}
                     clientes={coluna.clientes}
+                    cardFields={cardFields}
+                    quickActions={quickActions}
                   />
                 ))}
               </div>
@@ -442,6 +616,18 @@ function KanbanContent() {
           )}
         </div>
       </div>
+
+      {/* Modal de Configuração */}
+      <KanbanConfigModal
+        isOpen={configModalOpen}
+        onClose={() => setConfigModalOpen(false)}
+        onSave={handleSaveConfig}
+        initialConfig={{
+          columns,
+          card_fields: cardFields,
+          quick_actions: quickActions
+        }}
+      />
     </div>
   )
 }
