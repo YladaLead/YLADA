@@ -1,170 +1,173 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { supabaseAdmin } from '@/lib/supabase'
+import { calculateModuleProgress } from '@/lib/cursos-helpers'
 
+/**
+ * GET /api/nutri/cursos/progresso
+ * Busca progresso geral do usuário em todas as trilhas
+ */
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request)
-    if (!user) {
+    const user = await requireApiAuth(request, ['nutri', 'admin'])
+    if (!user || user instanceof NextResponse) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const supabase = supabaseAdmin
 
-    // Buscar progresso geral
-    const { data: progresso, error } = await supabase
-      .from('cursos_progresso')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false })
-
-    if (error) {
-      console.error('Erro ao buscar progresso:', error)
-      return NextResponse.json({ error: 'Erro ao buscar progresso' }, { status: 500 })
-    }
-
-    // Calcular estatísticas
-    const trilhasCompletas = progresso?.filter(p => 
-      p.item_type === 'trilha' && p.progress_percentage >= 100
-    ).length || 0
-
-    const trilhasEmAndamento = progresso?.filter(p => 
-      p.item_type === 'trilha' && p.progress_percentage > 0 && p.progress_percentage < 100
-    ).length || 0
-
-    const microcursosAssistidos = progresso?.filter(p => 
-      p.item_type === 'microcurso' && p.progress_percentage >= 100
-    ).length || 0
-
-    // Buscar certificados
-    const { data: certificados } = await supabase
-      .from('cursos_certificados')
-      .select('trilha_id')
-      .eq('user_id', user.id)
-
-    // Buscar trilhas com progresso
-    const trilhasProgresso = progresso?.filter(p => p.item_type === 'trilha') || []
-    const trilhaIds = trilhasProgresso.map(p => p.item_id)
-    
+    // Buscar todas as trilhas publicadas
     const { data: trilhas } = await supabase
       .from('cursos_trilhas')
       .select('id, title')
-      .in('id', trilhaIds)
+      .eq('status', 'published')
+      .order('ordem', { ascending: true })
 
-    const trilhasComProgresso = trilhas?.map(trilha => {
-      const prog = trilhasProgresso.find(p => p.item_id === trilha.id)
-      return {
-        trilha_id: trilha.id,
-        trilha_title: trilha.title,
-        progress_percentage: prog?.progress_percentage || 0
-      }
-    }) || []
+    if (!trilhas) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          trilhas: [],
+          progressoGeral: 0,
+          trilhasConcluidas: 0,
+          totalTrilhas: 0,
+        },
+      })
+    }
 
-    // Calcular horas estudadas (estimativa baseada em progresso)
-    // Isso seria mais preciso com dados reais de tempo assistido
-    const horasEstudadas = 0 // TODO: Calcular baseado em tempo real assistido
+    // Buscar progresso de cada trilha
+    const trilhaIds = trilhas.map(t => t.id)
+    const { data: progressoTrilhas } = await supabase
+      .from('cursos_progresso')
+      .select('item_id, progress_percentage')
+      .eq('user_id', user.id)
+      .eq('item_type', 'trilha')
+      .in('item_id', trilhaIds)
+
+    const progressoMap = new Map(
+      progressoTrilhas?.map(p => [p.item_id, p.progress_percentage]) || []
+    )
+
+    // Calcular estatísticas
+    const trilhasComProgresso = trilhas.map(trilha => ({
+      id: trilha.id,
+      title: trilha.title,
+      progress_percentage: progressoMap.get(trilha.id) || 0,
+    }))
+
+    const trilhasConcluidas = trilhasComProgresso.filter(
+      t => t.progress_percentage === 100
+    ).length
+
+    const progressoGeral =
+      trilhasComProgresso.length > 0
+        ? Math.round(
+            trilhasComProgresso.reduce(
+              (acc, t) => acc + t.progress_percentage,
+              0
+            ) / trilhasComProgresso.length
+          )
+        : 0
 
     return NextResponse.json({
       success: true,
       data: {
-        trilhas_completas: trilhasCompletas,
-        trilhas_em_andamento: trilhasEmAndamento,
-        microcursos_assistidos: microcursosAssistidos,
-        horas_estudadas: horasEstudadas,
-        certificados_obtidos: certificados?.length || 0,
-        trilhas_progresso: trilhasComProgresso
-      }
+        trilhas: trilhasComProgresso,
+        progressoGeral,
+        trilhasConcluidas,
+        totalTrilhas: trilhas.length,
+      },
     })
-
   } catch (error: any) {
-    console.error('Erro na API de progresso:', error)
+    console.error('❌ Erro ao buscar progresso:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro ao buscar progresso', details: error.message },
       { status: 500 }
     )
   }
 }
 
+/**
+ * POST /api/nutri/cursos/progresso
+ * Atualiza progresso (vídeo, checklist, tarefa)
+ */
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request)
-    if (!user) {
+    const user = await requireApiAuth(request, ['nutri', 'admin'])
+    if (!user || user instanceof NextResponse) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const body = await request.json()
-    const { item_type, item_id, progress_percentage, last_position } = body
+    const { tipo, item_id, item_type, progress_percentage, completed } = body
 
-    if (!item_type || !item_id || progress_percentage === undefined) {
+    if (!tipo || !item_id || !item_type) {
       return NextResponse.json(
-        { error: 'Campos obrigatórios: item_type, item_id, progress_percentage' },
+        { error: 'tipo, item_id e item_type são obrigatórios' },
         { status: 400 }
       )
     }
 
     const supabase = supabaseAdmin
 
-    // Verificar se já existe progresso
-    const { data: existing } = await supabase
-      .from('cursos_progresso')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('item_type', item_type)
-      .eq('item_id', item_id)
-      .single()
-
-    const progressoData: any = {
-      user_id: user.id,
-      item_type,
-      item_id,
-      progress_percentage: Math.min(100, Math.max(0, progress_percentage)),
-      updated_at: new Date().toISOString()
-    }
-
-    if (last_position !== undefined) {
-      progressoData.last_position = last_position
-    }
-
-    if (progress_percentage >= 100) {
-      progressoData.completed_at = new Date().toISOString()
-    }
-
-    let result
-    if (existing) {
-      // Atualizar
+    // Atualizar progresso na tabela cursos_progresso
+    if (tipo === 'video' || tipo === 'modulo') {
       const { data, error } = await supabase
         .from('cursos_progresso')
-        .update(progressoData)
-        .eq('id', existing.id)
+        .upsert(
+          {
+            user_id: user.id,
+            item_type: item_type, // 'modulo' ou 'trilha'
+            item_id: item_id,
+            progress_percentage: progress_percentage || (completed ? 100 : 0),
+            completed_at: completed ? new Date().toISOString() : null,
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: 'user_id,item_type,item_id',
+          }
+        )
         .select()
         .single()
 
-      if (error) throw error
-      result = data
-    } else {
-      // Criar novo
-      progressoData.started_at = new Date().toISOString()
-      const { data, error } = await supabase
-        .from('cursos_progresso')
-        .insert(progressoData)
-        .select()
-        .single()
+      if (error) {
+        console.error('❌ Erro ao atualizar progresso:', error)
+        return NextResponse.json(
+          { error: 'Erro ao atualizar progresso', details: error.message },
+          { status: 500 }
+        )
+      }
 
-      if (error) throw error
-      result = data
+      // Se módulo foi concluído, recalcular progresso da trilha
+      if (item_type === 'modulo' && completed) {
+        // Buscar trilha do módulo
+        const { data: modulo } = await supabase
+          .from('cursos_modulos')
+          .select('trilha_id')
+          .eq('id', item_id)
+          .single()
+
+        if (modulo) {
+          // Recalcular progresso da trilha
+          // (implementar lógica de cálculo)
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: { progresso: data },
+      })
     }
 
-    return NextResponse.json({
-      success: true,
-      data: result
-    })
-
-  } catch (error: any) {
-    console.error('Erro ao salvar progresso:', error)
     return NextResponse.json(
-      { error: 'Erro ao salvar progresso' },
+      { error: 'Tipo de progresso não suportado' },
+      { status: 400 }
+    )
+  } catch (error: any) {
+    console.error('❌ Erro ao atualizar progresso:', error)
+    return NextResponse.json(
+      { error: 'Erro ao atualizar progresso', details: error.message },
       { status: 500 }
     )
   }
 }
-

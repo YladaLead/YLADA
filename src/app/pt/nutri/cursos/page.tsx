@@ -3,14 +3,18 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import RequireFeature from '@/components/auth/RequireFeature'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
+import ProgressBar from '@/components/cursos/ProgressBar'
 import type { Trilha, Microcurso, BibliotecaItem, Tutorial } from '@/types/cursos'
 
 export default function NutriCursos() {
   return (
     <ProtectedRoute perfil="nutri" allowAdmin={true}>
-      <NutriCursosContent />
+      <RequireFeature area="nutri" feature={['cursos', 'completo']}>
+        <NutriCursosContent />
+      </RequireFeature>
     </ProtectedRoute>
   )
 }
