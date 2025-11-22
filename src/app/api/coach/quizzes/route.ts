@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
     }
     const { user } = authResult
 
-    // Buscar quizzes do usuário (apenas nutri)
+    // Buscar quizzes do usuário (apenas coach)
     const allQuizzes = await quizDB.getUserQuizzes(user.id)
-    // Filtrar apenas quizzes da área nutri
+    // Filtrar apenas quizzes da área coach
     const quizzes = allQuizzes.filter((q: any) => !q.profession || q.profession === 'coach')
 
     // Buscar user_slug para construir URLs
@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
         // Construir URL do quiz
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
         const url = userProfile?.user_slug
-          ? `${baseUrl}/pt/nutri/${userProfile.user_slug}/quiz/${quiz.slug}`
-          : `${baseUrl}/pt/nutri/quiz/${quiz.slug}`
+          ? `${baseUrl}/pt/coach/${userProfile.user_slug}/quiz/${quiz.slug}`
+          : `${baseUrl}/pt/coach/quiz/${quiz.slug}`
 
         return {
           ...quiz,

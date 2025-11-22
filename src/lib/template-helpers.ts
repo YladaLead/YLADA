@@ -25,7 +25,7 @@ export function generateSlugFromName(name: string): string {
  * PRIORIDADE: 1) slug do banco, 2) slug gerado do name
  * 
  * @param templateSlug - O slug do template
- * @param profession - A profissão/área do template (ex: 'wellness', 'nutri')
+ * @param profession - A profissão/área do template (ex: 'wellness', 'nutri', 'coach')
  * @param language - O idioma do template (ex: 'pt', 'en')
  * @returns O template encontrado ou null se não existir
  */
@@ -38,15 +38,19 @@ export async function findTemplateBySlug(
     throw new Error('Supabase admin não configurado')
   }
 
+  // Determinar a tabela correta baseado na profession
+  const tableName = profession === 'coach' ? 'coach_templates_nutrition' : 'templates_nutrition'
+
   try {
     // Tentar buscar com filtro de profession se fornecido
     let query = supabaseAdmin
-      .from('templates_nutrition')
+      .from(tableName)
       .select('id, name, slug, content, profession, language')
       .eq('is_active', true)
       .eq('language', language)
 
-    if (profession) {
+    if (profession && profession !== 'coach') {
+      // Para Coach, a tabela já filtra por profession='coach', então não precisa filtrar novamente
       query = query.eq('profession', profession)
     }
 
@@ -56,7 +60,7 @@ export async function findTemplateBySlug(
       // Se profession não existir, buscar sem filtro
       if (templatesError.message?.includes('profession') || templatesError.code === '42703') {
         const { data: allTemplates, error: allTemplatesError } = await supabaseAdmin
-          .from('templates_nutrition')
+          .from(tableName)
           .select('id, name, slug, content, profession, language')
           .eq('is_active', true)
           .eq('language', language)
@@ -181,11 +185,14 @@ export async function validateTemplateBeforeCreate(
   profession?: string,
   language: string = 'pt'
 ): Promise<{ templateId: string | null; templateSlug: string | null; error?: string }> {
+  // Determinar a tabela correta baseado na profession
+  const tableName = profession === 'coach' ? 'coach_templates_nutrition' : 'templates_nutrition'
+
   // Se tem template_id, buscar direto pelo ID e retornar o slug do banco
   if (templateId) {
     try {
       const { data: template } = await supabaseAdmin
-        .from('templates_nutrition')
+        .from(tableName)
         .select('id, slug, name')
         .eq('id', templateId)
         .maybeSingle()
