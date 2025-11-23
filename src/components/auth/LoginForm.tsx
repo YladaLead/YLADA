@@ -239,7 +239,35 @@ export default function LoginForm({
           console.warn('⚠️ Não foi possível verificar expiração da senha provisória:', checkError)
         }
 
-        // Redirecionar imediatamente para melhorar percepção de velocidade
+        // 🔧 CORREÇÃO: Aguardar um pouco para garantir que cookies/sessão foram persistidos
+        // Isso resolve o problema de sessão não ser detectada após login
+        console.log('⏳ Aguardando persistência da sessão...')
+        await new Promise(resolve => setTimeout(resolve, 300))
+        
+        // Verificar se a sessão foi realmente persistida
+        try {
+          const { data: { session: verifiedSession }, error: verifyError } = await supabase.auth.getSession()
+          if (verifyError || !verifiedSession || verifiedSession.user.id !== session.user.id) {
+            console.warn('⚠️ Sessão não foi persistida corretamente, tentando novamente...')
+            // Aguardar mais um pouco e tentar novamente
+            await new Promise(resolve => setTimeout(resolve, 300))
+            const { data: { session: retrySession } } = await supabase.auth.getSession()
+            if (!retrySession || retrySession.user.id !== session.user.id) {
+              console.error('❌ Sessão não persistida após múltiplas tentativas')
+              setError('Erro ao salvar sessão. Tente fazer login novamente.')
+              setLoading(false)
+              return
+            }
+          } else {
+            console.log('✅ Sessão verificada e persistida corretamente')
+          }
+        } catch (verifyErr) {
+          console.warn('⚠️ Erro ao verificar sessão persistida:', verifyErr)
+          // Continuar mesmo com erro, pois a sessão pode estar OK
+        }
+
+        // Redirecionar após garantir que sessão foi persistida
+        console.log('🔄 Redirecionando para:', redirectPath)
         router.replace(redirectPath)
 
         // Se o router.replace não ocorrer (navegadores antigos), forçar via window.location
@@ -248,7 +276,7 @@ export default function LoginForm({
             console.log('⚠️ router.replace não executou, forçando navegação manual.')
             window.location.href = redirectPath
           }
-        }, 1200)
+        }, 1000)
 
         // Após redirecionar, verificar em segundo plano se o perfil está completo.
         void (async () => {

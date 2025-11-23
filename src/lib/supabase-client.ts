@@ -45,27 +45,40 @@ export function createClient() {
             // Configurações padrão para produção
             const path = options?.path || '/'
             const maxAge = options?.maxAge || (60 * 60 * 24 * 7) // 7 dias padrão
-            const sameSite = options?.sameSite || (isProduction ? 'lax' : 'lax')
-            const secure = options?.secure !== undefined ? options.secure : (isSecure || isProduction)
+            // Usar 'lax' para melhor compatibilidade entre navegadores
+            const sameSite = options?.sameSite || 'lax'
+            // Secure apenas em HTTPS (não forçar em HTTP local)
+            const secure = options?.secure !== undefined ? options.secure : isSecure
             
             // Construir string do cookie
-            let cookieString = `${name}=${value}; path=${path}; max-age=${maxAge}; SameSite=${sameSite}`
+            let cookieString = `${name}=${encodeURIComponent(value)}; path=${path}; max-age=${maxAge}; SameSite=${sameSite}`
             
-            // Adicionar Secure apenas se necessário (HTTPS ou produção)
+            // Adicionar Secure apenas se necessário (HTTPS)
             if (secure) {
               cookieString += '; Secure'
             }
             
-            // Adicionar domain apenas se especificado
+            // Adicionar domain apenas se especificado (evitar problemas de subdomínio)
             if (options?.domain) {
               cookieString += `; domain=${options.domain}`
             }
             
-            document.cookie = cookieString
-            
-            // Log apenas em desenvolvimento para debug
-            if (!isProduction && name.startsWith('sb-')) {
-              console.log('🍪 Cookie setado:', { name, path, secure, sameSite })
+            // Tentar setar o cookie
+            try {
+              document.cookie = cookieString
+              
+              // Verificar se o cookie foi realmente setado (importante para debug)
+              const wasSet = document.cookie.includes(`${name}=`)
+              if (!wasSet && name.startsWith('sb-')) {
+                console.warn('⚠️ Cookie pode não ter sido setado:', name)
+              }
+              
+              // Log apenas em desenvolvimento para debug
+              if (!isProduction && name.startsWith('sb-')) {
+                console.log('🍪 Cookie setado:', { name, path, secure, sameSite, wasSet })
+              }
+            } catch (cookieErr) {
+              console.error('❌ Erro ao setar cookie individual:', name, cookieErr)
             }
           })
         } catch (err) {
