@@ -20,7 +20,7 @@ export const plannerRefeicoesDiagnosticos: DiagnosticosPorFerramenta = {
     },
     ganharMassa: {
       diagnostico: '📋 DIAGNÓSTICO: Seu plano alimentar está configurado para ganho de massa muscular através de superávit calórico controlado e alta proteína',
-      causaRaiz: '🔍 CAUSA RAIZ: O ganho de massa muscular requer superávit calórico adequado combinado com proteína suficiente para síntese proteica. Estudos mostram que ganhos de 0,25-0,5kg de massa muscular por mês são realistas quando há superávit de 300-500 kcal com 1,6-2,2g de proteína por kg. Uma avaliação de bem-estar identifica exatamente qual superávit e distribuição de macronutrientes são mais eficazes para você'
+      causaRaiz: '🔍 CAUSA RAIZ: O ganho de massa muscular requer superávit calórico adequado combinado com proteína suficiente para síntese proteica. Estudos mostram que ganhos de 0,25-0,5kg de massa muscular por mês são realistas quando há superávit de 300-500 kcal com 1,6-2,2g de proteína por kg. Uma avaliação de bem-estar identifica exatamente qual superávit e distribuição de macronutrientes são mais eficazes para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente o plano com superávit calórico e proteína elevada conforme sua rotina de treinos. Busque avaliação de bem-estar para receber ajustes personalizados que maximizam ganho de massa magra enquanto minimizam ganho de gordura',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo precisa de bem-estar adequada para resultados — descubra em minutos como otimizar seu ganho de massa muscular com um plano personalizado e estratégias direcionadas.'
     }
