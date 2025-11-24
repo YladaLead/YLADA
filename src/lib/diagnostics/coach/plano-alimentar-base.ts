@@ -8,7 +8,7 @@ export const planoAlimentarBaseDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     planoBasico: {
       diagnostico: '📅 DIAGNÓSTICO: Você precisa de um plano alimentar básico equilibrado para estabelecer uma base de bem-estar adequada',
-      causaRaiz: '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar básica e equilibrada para iniciar uma jornada de bem-estar adequada. Estudos mostram que planos alimentares equilibrados podem melhorar indicadores de saúde em até 45% quando seguidos consistentemente. Uma avaliação de bem-estar identifica exatamente quais são suas necessidades básicas e como estruturar seu plano alimentar adequadamente'
+      causaRaiz: '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar básica e equilibrada para iniciar uma jornada de bem-estar adequada. Estudos mostram que planos alimentares equilibrados podem melhorar indicadores de saúde em até 45% quando seguidos consistentemente. Uma avaliação de bem-estar identifica exatamente quais são suas necessidades básicas e como estruturar seu plano alimentar adequadamente',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente plano alimentar básico considerando sua rotina e preferências. Busque avaliação de bem-estar para receber um plano personalizado que atenda suas necessidades básicas com estrutura adequada',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu plano alimentar começa com uma base sólida — descubra em minutos como estrutura alimentar adequada pode melhorar sua saúde com orientações personalizadas.'
     }

@@ -11,7 +11,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     intestinoEquilibrado: {
       diagnostico:
-        '📋 DIAGNÓSTICO: Seu funcionamento intestinal está equilibrado, com boa digestão, evacuações regulares e ausência de sinais inflamatórios relevantes.'
+        '📋 DIAGNÓSTICO: Seu funcionamento intestinal está equilibrado, com boa digestão, evacuações regulares e ausência de sinais inflamatórios relevantes.',
       causaRaiz:
         '🔍 CAUSA RAIZ: Rotina alimentar organizada, ingestão adequada de fibras, hidratação consistente e microbiota estável sustentam esse cenário positivo.'
       acaoImediata:
