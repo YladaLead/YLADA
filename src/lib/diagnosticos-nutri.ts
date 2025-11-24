@@ -305,11 +305,12 @@ export function getDiagnostico(
       return null
   }
 
-  if (!diagnosticos[profissao] || !diagnosticos[profissao][resultadoId]) {
+  // Nutri agora usa apenas diagnósticos Nutri (independente)
+  if (!diagnosticos['nutri'] || !diagnosticos['nutri'][resultadoId]) {
     return null
   }
 
-  return diagnosticos[profissao][resultadoId]
+  return diagnosticos['nutri'][resultadoId]
 }
 
 export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
