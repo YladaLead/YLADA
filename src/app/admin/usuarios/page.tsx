@@ -20,6 +20,8 @@ interface Usuario {
   leadsGerados: number
   cursosCompletos: number
   isMigrado?: boolean
+  assinaturaSituacao: 'ativa' | 'vencida' | 'sem'
+  assinaturaDiasVencida: number | null
 }
 
 interface Stats {
@@ -385,6 +387,31 @@ export default function AdminUsuarios() {
     }
   }
 
+  const getAssinaturaStatusBadge = (situacao: Usuario['assinaturaSituacao']) => {
+    switch (situacao) {
+      case 'ativa':
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800">Ativa</span>
+      case 'vencida':
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-700">Vencida</span>
+      case 'sem':
+      default:
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600">Sem assinatura</span>
+    }
+  }
+
+  const getAssinaturaTipoLabel = (tipo: Usuario['assinatura']) => {
+    switch (tipo) {
+      case 'mensal':
+        return 'Mensal'
+      case 'anual':
+        return 'Anual'
+      case 'gratuita':
+        return 'Gratuita'
+      default:
+        return 'Sem assinatura'
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -553,14 +580,34 @@ export default function AdminUsuarios() {
                           {getStatusBadge(usuario.status)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 capitalize">
-                            {usuario.assinatura}
+                          <div className="flex items-center gap-2">
+                            {getAssinaturaStatusBadge(usuario.assinaturaSituacao)}
+                            <span className="text-sm text-gray-900">
+                              {getAssinaturaTipoLabel(usuario.assinatura)}
+                            </span>
                             {usuario.isMigrado && (
-                              <span className="ml-1 text-xs text-orange-600" title="Usuário migrado">🔄</span>
+                              <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>
                             )}
                           </div>
-                          {usuario.assinaturaVencimento && (
-                            <div className="text-xs text-gray-500">Vence: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}</div>
+                          {usuario.assinaturaVencimento ? (
+                            usuario.assinaturaSituacao === 'ativa' ? (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Vence: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-red-600 mt-1">
+                                Venceu: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
+                                {typeof usuario.assinaturaDiasVencida === 'number' && (
+                                  <span className="ml-1">
+                                    ({usuario.assinaturaDiasVencida === 0 ? 'hoje' : `há ${usuario.assinaturaDiasVencida} dia${usuario.assinaturaDiasVencida === 1 ? '' : 's'}`})
+                                  </span>
+                                )}
+                              </div>
+                            )
+                          ) : (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Nunca assinou
+                            </div>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

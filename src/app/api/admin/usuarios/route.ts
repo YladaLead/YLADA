@@ -62,14 +62,13 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Buscar assinaturas ativas para todos os usuários
+    // Buscar assinaturas (ativas e vencidas) para todos os usuários
     const userIds = profiles.map(p => p.user_id)
     const { data: subscriptions } = await supabaseAdmin
       .from('subscriptions')
       .select('id, user_id, area, plan_type, status, current_period_end, is_migrated')
       .in('user_id', userIds)
-      .eq('status', 'active')
-      .gt('current_period_end', new Date().toISOString())
+      .order('current_period_end', { ascending: false })
 
     // Buscar leads para todos os usuários
     const { data: leads } = await supabaseAdmin
@@ -99,11 +98,22 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    const now = new Date()
+
     // Montar lista de usuários com dados completos
     const usuarios = profiles.map(profile => {
-      // Buscar assinatura ativa para este usuário
-      const subscription = subscriptions?.find(s => s.user_id === profile.user_id)
-      const isAtivo = !!subscription
+      const userArea = profile.perfil || 'wellness'
+      const userSubscriptions = subscriptions?.filter(s => s.user_id === profile.user_id && s.area === userArea) || []
+      const activeSubscription = userSubscriptions.find(sub => {
+        if (!sub.current_period_end) return false
+        const expiresAt = new Date(sub.current_period_end)
+        return sub.status === 'active' && expiresAt.getTime() > now.getTime()
+      })
+      const latestSubscription = userSubscriptions[0]
+
+      const subscriptionToEdit = activeSubscription || latestSubscription || null
+      const subscriptionForStatus = activeSubscription || latestSubscription || null
+      const isAtivo = !!activeSubscription
       const status = isAtivo ? 'ativo' : 'inativo'
 
       // Aplicar filtro de status
@@ -113,17 +123,31 @@ export async function GET(request: NextRequest) {
 
       // Determinar tipo de assinatura
       let assinaturaTipo = 'sem assinatura'
-      let assinaturaVencimento = null
+      let assinaturaVencimento: string | null = null
+      let assinaturaSituacao: 'ativa' | 'vencida' | 'sem' = 'sem'
+      let assinaturaDiasVencida: number | null = null
       
-      if (subscription) {
-        if (subscription.plan_type === 'free') {
+      if (subscriptionForStatus) {
+        if (subscriptionForStatus.plan_type === 'free') {
           assinaturaTipo = 'gratuita'
-        } else if (subscription.plan_type === 'monthly') {
+        } else if (subscriptionForStatus.plan_type === 'monthly') {
           assinaturaTipo = 'mensal'
-        } else if (subscription.plan_type === 'annual') {
+        } else if (subscriptionForStatus.plan_type === 'annual') {
           assinaturaTipo = 'anual'
         }
-        assinaturaVencimento = subscription.current_period_end
+        assinaturaVencimento = subscriptionForStatus.current_period_end
+      }
+
+      if (activeSubscription) {
+        assinaturaSituacao = 'ativa'
+      } else if (latestSubscription && latestSubscription.current_period_end) {
+        assinaturaSituacao = 'vencida'
+        const vencimento = new Date(latestSubscription.current_period_end)
+        assinaturaVencimento = latestSubscription.current_period_end
+        const diffMs = now.getTime() - vencimento.getTime()
+        assinaturaDiasVencida = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0
+      } else {
+        assinaturaSituacao = 'sem'
       }
 
       return {
@@ -133,12 +157,14 @@ export async function GET(request: NextRequest) {
         area: profile.perfil || 'wellness',
         status,
         assinatura: assinaturaTipo,
-        assinaturaId: subscription?.id || null,
+        assinaturaId: subscriptionToEdit?.id || null,
         assinaturaVencimento: assinaturaVencimento ? new Date(assinaturaVencimento).toISOString().split('T')[0] : null,
         dataCadastro: profile.created_at ? new Date(profile.created_at).toISOString().split('T')[0] : null,
         leadsGerados: leadsPorUsuario[profile.user_id] || 0,
         cursosCompletos: templatesPorUsuario[profile.user_id] || 0,
-        isMigrado: subscription?.is_migrated || false
+        isMigrado: subscriptionForStatus?.is_migrated || false,
+        assinaturaSituacao,
+        assinaturaDiasVencida
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
 
