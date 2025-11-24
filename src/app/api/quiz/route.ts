@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { CreateQuizSchema, UpdateQuizSchema } from '@/lib/validation'
 import { withRateLimit } from '@/lib/rate-limit'
 import { requireApiAuth } from '@/lib/api-auth'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 // GET: Buscar quizzes (público para slugs, privado para userQuizzes)
 export async function GET(request: NextRequest) {
@@ -29,6 +30,16 @@ export async function GET(request: NextRequest) {
           return NextResponse.json(
             { error: 'Quiz não encontrado' },
             { status: 404 }
+          )
+        }
+
+        const quizArea = (quiz.profession as 'wellness' | 'nutri' | 'coach' | 'nutra' | null) || 'wellness'
+        const hasSubscription = await hasActiveSubscription(quiz.user_id, quizArea)
+
+        if (!hasSubscription) {
+          return NextResponse.json(
+            { error: 'link_indisponivel', message: 'Assinatura expirada' },
+            { status: 403 }
           )
         }
 

@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
+
+const redirectToLinkUnavailable = (request: NextRequest) => {
+  return NextResponse.redirect(new URL('/link-indisponivel', request.url), 307)
+}
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 // GET - Redirecionar código curto para URL completa
 export async function GET(
@@ -28,6 +34,11 @@ export async function GET(
     const normalizedCode = code.toLowerCase().trim()
     console.log('🔍 Buscando código curto:', normalizedCode)
 
+    const ensureSubscription = async (userId: string | null, area: 'wellness' | 'nutri' | 'coach' | 'nutra' | null) => {
+      if (!userId || !area) return true
+      return await hasActiveSubscription(userId, area)
+    }
+
     // Buscar em todas as tabelas: user_templates, quizzes, wellness_portals
     const [toolResult, quizResult, portalResult] = await Promise.all([
       supabaseAdmin
@@ -38,13 +49,13 @@ export async function GET(
         .maybeSingle(),
       supabaseAdmin
         .from('quizzes')
-        .select('id, slug, status, user_id')
+        .select('id, slug, status, user_id, profession')
         .ilike('short_code', normalizedCode)
         .eq('status', 'active')
         .maybeSingle(),
       supabaseAdmin
         .from('wellness_portals')
-        .select('id, slug, status, user_id')
+        .select('id, slug, status, user_id, area')
         .ilike('short_code', normalizedCode)
         .eq('status', 'active')
         .maybeSingle(),
@@ -57,6 +68,13 @@ export async function GET(
     if (toolResult.data) {
       const tool = toolResult.data
       console.log('✅ Ferramenta encontrada:', { id: tool.id, slug: tool.slug, profession: tool.profession })
+
+      const toolArea = (tool.profession as 'wellness' | 'nutri' | 'coach' | 'nutra' | null) || 'wellness'
+      const subscriptionOk = await ensureSubscription(tool.user_id, toolArea)
+      if (!subscriptionOk) {
+        console.warn('🚫 Assinatura inativa para ferramenta', { toolId: tool.id })
+        return redirectToLinkUnavailable(request)
+      }
 
       // Buscar user_slug
       if (tool.user_id) {
@@ -92,6 +110,13 @@ export async function GET(
         console.log('👤 User slug encontrado:', userSlug)
       }
 
+      const quizArea = (quiz.profession as 'wellness' | 'nutri' | 'coach' | 'nutra' | null) || 'wellness'
+      const subscriptionOk = await ensureSubscription(quiz.user_id, quizArea)
+      if (!subscriptionOk) {
+        console.warn('🚫 Assinatura inativa para quiz', { quizId: quiz.id })
+        return redirectToLinkUnavailable(request)
+      }
+
       // Construir URL do quiz
       if (userSlug) {
         redirectUrl = `/pt/wellness/${userSlug}/quiz/${quiz.slug}`
@@ -112,6 +137,13 @@ export async function GET(
         
         userSlug = profile?.user_slug || null
         console.log('👤 User slug encontrado:', userSlug)
+      }
+
+      const portalArea = (portal.area as 'wellness' | 'nutri' | 'coach' | 'nutra' | null) || 'wellness'
+      const subscriptionOk = await ensureSubscription(portal.user_id, portalArea)
+      if (!subscriptionOk) {
+        console.warn('🚫 Assinatura inativa para portal', { portalId: portal.id })
+        return redirectToLinkUnavailable(request)
       }
 
       // Construir URL do portal

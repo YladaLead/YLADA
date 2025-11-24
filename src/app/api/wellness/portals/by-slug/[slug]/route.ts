@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 // GET - Buscar portal público por slug (sem autenticação necessária)
 export async function GET(
@@ -29,6 +30,14 @@ export async function GET(
       return NextResponse.json(
         { error: 'Portal não encontrado ou inativo' },
         { status: 404 }
+      )
+    }
+
+    const subscriptionActive = await hasActiveSubscription(portal.user_id, 'wellness')
+    if (!subscriptionActive) {
+      return NextResponse.json(
+        { error: 'link_indisponivel', message: 'Assinatura expirada' },
+        { status: 403 }
       )
     }
 

@@ -167,6 +167,13 @@ export default function PortalPublicPageWithUserSlug() {
 
       const response = await fetch(`/api/wellness/portals/by-slug/${slug}`)
 
+      if (response.status === 403) {
+        setError('link_indisponivel')
+        setPortal(null)
+        setLoading(false)
+        return
+      }
+
       if (!response.ok) {
         if (response.status === 404) {
           setError('Portal não encontrado ou inativo')
@@ -206,12 +213,19 @@ export default function PortalPublicPageWithUserSlug() {
   }
 
   if (error || !portal) {
+    const isLinkUnavailable = error === 'link_indisponivel'
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
-          <div className="text-6xl mb-4">🔍</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Portal não encontrado</h1>
-          <p className="text-gray-600 mb-6">{error || 'O portal que você está procurando não existe ou foi removido.'}</p>
+          <div className="text-6xl mb-4">{isLinkUnavailable ? '⛔' : '🔍'}</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {isLinkUnavailable ? 'Link indisponível' : 'Portal não encontrado'}
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {isLinkUnavailable
+              ? 'Este link está indisponível no momento. Entre em contato com a pessoa que enviou para continuar.'
+              : error || 'O portal que você está procurando não existe ou foi removido.'}
+          </p>
           <Link
             href="/pt/wellness"
             className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"

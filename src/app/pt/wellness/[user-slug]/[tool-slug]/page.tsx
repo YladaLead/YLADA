@@ -81,6 +81,13 @@ export default function FerramentaPersonalizadaPage() {
         `/api/wellness/ferramentas/by-url?user_slug=${userSlug}&tool_slug=${toolSlug}`
       )
 
+      if (response.status === 403) {
+        setError('link_indisponivel')
+        setTool(null)
+        setLoading(false)
+        return
+      }
+
       if (!response.ok) {
         throw new Error('Ferramenta não encontrada')
       }
@@ -123,15 +130,20 @@ export default function FerramentaPersonalizadaPage() {
   }
 
   if (error || !tool) {
+    const isLinkUnavailable = error === 'link_indisponivel'
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 border-red-200">
           <div className="mb-4">
-            <span className="text-red-600 text-5xl">⚠️</span>
+            <span className="text-red-600 text-5xl">{isLinkUnavailable ? '⛔' : '⚠️'}</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Ferramenta não encontrada</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            {isLinkUnavailable ? 'Link indisponível' : 'Ferramenta não encontrada'}
+          </h2>
           <p className="text-gray-600 mb-6">
-            {error || 'A ferramenta que você está procurando não existe ou foi removida.'}
+            {isLinkUnavailable
+              ? 'Este link está indisponível no momento. Entre em contato com a pessoa que enviou para continuar.'
+              : error || 'A ferramenta que você está procurando não existe ou foi removida.'}
           </p>
           <div className="space-y-2">
             <button

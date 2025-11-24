@@ -463,8 +463,11 @@ function UpgradeRequiredPage({ area }: { area: string }) {
           </h1>
 
           {/* Mensagem */}
-          <p className="text-lg text-gray-600 mb-8">
-            Para acessar a Home da área {areaLabel}, você precisa de uma assinatura ativa.
+          <p className="text-lg text-gray-600 mb-4">
+            Sua assinatura da área {areaLabel} está inativa. Por segurança, todos os seus links públicos foram temporariamente desativados.
+          </p>
+          <p className="text-base text-gray-600 mb-8">
+            Regularize a assinatura para reativar imediatamente os links, dashboards e ferramentas do seu painel.
           </p>
 
           {/* Benefícios */}

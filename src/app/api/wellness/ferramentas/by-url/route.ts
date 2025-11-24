@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 // Buscar ferramenta por URL completa (user-slug/tool-slug)
 export async function GET(request: NextRequest) {
@@ -13,6 +14,11 @@ export async function GET(request: NextRequest) {
         { error: 'user_slug e tool_slug são obrigatórios' },
         { status: 400 }
       )
+    }
+
+    const ensureActiveSubscription = async (ownerId: string | null) => {
+      if (!ownerId) return true
+      return await hasActiveSubscription(ownerId, 'wellness')
     }
 
     // Buscar ferramenta pela combinação user_slug + tool_slug
@@ -84,6 +90,16 @@ export async function GET(request: NextRequest) {
           throw toolError
         }
         
+        // Bloquear se assinatura venceu
+        const ownerId = toolData?.user_id || profile.user_id
+        const subscriptionOk = await ensureActiveSubscription(ownerId)
+        if (!subscriptionOk) {
+          return NextResponse.json(
+            { error: 'link_indisponivel', message: 'Assinatura expirada' },
+            { status: 403 }
+          )
+        }
+
         // Buscar perfil separadamente e adicionar aos dados
         const { data: userProfile } = await supabaseAdmin
           .from('user_profiles')
@@ -100,6 +116,16 @@ export async function GET(request: NextRequest) {
       }
       
       throw error
+    }
+
+    const ownerId = data.user_profiles?.user_id || data.user_id
+    const subscriptionOk = await ensureActiveSubscription(ownerId)
+
+    if (!subscriptionOk) {
+      return NextResponse.json(
+        { error: 'link_indisponivel', message: 'Assinatura expirada' },
+        { status: 403 }
+      )
     }
 
     return NextResponse.json({ tool: data })
