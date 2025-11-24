@@ -51,23 +51,6 @@ import { tabelaSubstituicoesDiagnosticos } from './diagnostics/nutri/tabela-subs
 import { tipoFomeDiagnosticos } from './diagnostics/nutri/tipo-fome'
 import { disciplinadoEmocionalDiagnosticos } from './diagnostics/nutri/disciplinado-emocional'
 
-import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from './diagnostics/wellness/avaliacao-emocional'
-import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from './diagnostics/wellness/avaliacao-inicial'
-import { alimentacaoRotinaDiagnosticos as alimentacaoRotinaDiagnosticosWellness } from './diagnostics/wellness/alimentacao-rotina'
-import { alimentacaoSaudavelDiagnosticos as alimentacaoSaudavelDiagnosticosWellness } from './diagnostics/wellness/alimentacao-saudavel'
-import { conheceSeuCorpoDiagnosticos as conheceSeuCorpoDiagnosticosWellness } from './diagnostics/wellness/conhece-seu-corpo'
-import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-21-dias'
-import { desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-7-dias'
-import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from './diagnostics/wellness/eletrolitos'
-import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from './diagnostics/wellness/guia-hidratacao'
-import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from './diagnostics/wellness/intolerancia'
-import { nutridoVsAlimentadoDiagnosticos as nutridoVsAlimentadoDiagnosticosWellness } from './diagnostics/wellness/nutrido-vs-alimentado'
-import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } from './diagnostics/wellness/perfil-metabolico'
-import { prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness } from './diagnostics/wellness/pronto-emagrecer'
-import { retencaoLiquidosDiagnosticos as retencaoLiquidosDiagnosticosWellness } from './diagnostics/wellness/retencao-liquidos'
-import { sindromeMetabolicaDiagnosticos as sindromeMetabolicaDiagnosticosWellness } from './diagnostics/wellness/sindrome-metabolica'
-import { sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness } from './diagnostics/wellness/sintomas-intestinais'
-import { tipoFomeDiagnosticos as tipoFomeDiagnosticosWellness } from './diagnostics/wellness/tipo-fome'
 
 export type { DiagnosticoCompleto, DiagnosticosPorFerramenta, ResultadoPossivel } from './diagnostics/types'
 
@@ -155,59 +138,35 @@ export function getDiagnostico(
       break
     case 'avaliacao-emocional':
     case 'quiz-emocional':
-      if (profissao === 'wellness') {
-        diagnosticos = avaliacaoEmocionalDiagnosticosWellness
-      } else {
-        diagnosticos = avaliacaoEmocionalDiagnosticos
-      }
+      diagnosticos = avaliacaoEmocionalDiagnosticos
       break
     case 'avaliacao-intolerancia':
     case 'quiz-intolerancia':
     case 'intolerancia':
-      if (profissao === 'wellness') {
-        diagnosticos = intoleranciaDiagnosticosWellness
-      } else {
-        diagnosticos = avaliacaoIntoleranciaDiagnosticos
-      }
+      diagnosticos = avaliacaoIntoleranciaDiagnosticos
       break
     case 'avaliacao-perfil-metabolico':
     case 'quiz-perfil-metabolico':
     case 'perfil-metabolico':
     case 'perfil-metabólico':
-      if (profissao === 'wellness') {
-        diagnosticos = perfilMetabolicoDiagnosticosWellness
-      } else {
-        diagnosticos = perfilMetabolicoDiagnosticos
-      }
+      diagnosticos = perfilMetabolicoDiagnosticos
       break
     case 'avaliacao-inicial':
     case 'quiz-avaliacao-inicial':
     case 'template-avaliacao-inicial':
-      if (profissao === 'wellness') {
-        diagnosticos = avaliacaoInicialDiagnosticosWellness
-      } else {
-        diagnosticos = avaliacaoInicialDiagnosticos
-      }
+      diagnosticos = avaliacaoInicialDiagnosticos
       break
     case 'diagnostico-eletrolitos':
     case 'quiz-eletrolitos':
     case 'eletrolitos':
     case 'eletrólitos':
-      if (profissao === 'wellness') {
-        diagnosticos = eletrolitosDiagnosticosWellness
-      } else {
-        diagnosticos = diagnosticoEletrolitosDiagnosticos
-      }
+      diagnosticos = diagnosticoEletrolitosDiagnosticos
       break
     case 'diagnostico-sintomas-intestinais':
     case 'quiz-sintomas-intestinais':
     case 'sintomas-intestinais':
     case 'sintomas intestinais':
-      if (profissao === 'wellness') {
-        diagnosticos = sintomasIntestinaisDiagnosticosWellness
-      } else {
-        diagnosticos = diagnosticoSintomasIntestinaisDiagnosticos
-      }
+      diagnosticos = diagnosticoSintomasIntestinaisDiagnosticos
       break
     case 'perfil-intestino':
     case 'qual-e-seu-perfil-de-intestino':
@@ -216,71 +175,43 @@ export function getDiagnostico(
     case 'pronto-emagrecer':
     case 'quiz-pronto-emagrecer':
     case 'pronto para emagrecer':
-      if (profissao === 'wellness') {
-        diagnosticos = prontoEmagrecerDiagnosticosWellness
-      } else {
-        diagnosticos = prontoEmagrecerDiagnosticos
-      }
+      diagnosticos = prontoEmagrecerDiagnosticos
       break
     case 'tipo-fome':
     case 'quiz-tipo-fome':
     case 'qual-e-o-seu-tipo-de-fome':
     case 'tipo de fome':
-      if (profissao === 'wellness') {
-        diagnosticos = tipoFomeDiagnosticosWellness
-      } else {
-        diagnosticos = tipoFomeDiagnosticos
-      }
+      diagnosticos = tipoFomeDiagnosticos
       break
     case 'alimentacao-saudavel':
     case 'quiz-alimentacao-saudavel':
     case 'healthy-eating-quiz':
     case 'healthy-eating':
-      if (profissao === 'wellness') {
-        diagnosticos = alimentacaoSaudavelDiagnosticosWellness
-      } else {
-        diagnosticos = alimentacaoSaudavelDiagnosticos
-      }
+      diagnosticos = alimentacaoSaudavelDiagnosticos
       break
     case 'sindrome-metabolica':
     case 'risco-sindrome-metabolica':
     case 'metabolic-syndrome-risk':
     case 'metabolic-syndrome':
-      if (profissao === 'wellness') {
-        diagnosticos = sindromeMetabolicaDiagnosticosWellness
-      } else {
-        diagnosticos = sindromeMetabolicaDiagnosticos
-      }
+      diagnosticos = sindromeMetabolicaDiagnosticos
       break
     case 'retencao-liquidos':
     case 'teste-retencao-liquidos':
     case 'water-retention-test':
     case 'water-retention':
-      if (profissao === 'wellness') {
-        diagnosticos = retencaoLiquidosDiagnosticosWellness
-      } else {
-        diagnosticos = retencaoLiquidosDiagnosticos
-      }
+      diagnosticos = retencaoLiquidosDiagnosticos
       break
     case 'conhece-seu-corpo':
     case 'voce-conhece-seu-corpo':
     case 'body-awareness':
     case 'autoconhecimento-corporal':
-      if (profissao === 'wellness') {
-        diagnosticos = conheceSeuCorpoDiagnosticosWellness
-      } else {
-        diagnosticos = conheceSeuCorpoDiagnosticos
-      }
+      diagnosticos = conheceSeuCorpoDiagnosticos
       break
     case 'nutrido-vs-alimentado':
     case 'voce-nutrido-ou-apenas-alimentado':
     case 'nourished-vs-fed':
     case 'nutrido ou alimentado':
-      if (profissao === 'wellness') {
-        diagnosticos = nutridoVsAlimentadoDiagnosticosWellness
-      } else {
-        diagnosticos = nutridoVsAlimentadoDiagnosticos
-      }
+      diagnosticos = nutridoVsAlimentadoDiagnosticos
       break
     case 'alimentacao-rotina':
     case 'voce-alimentando-conforme-rotina':
@@ -288,11 +219,7 @@ export function getDiagnostico(
     case 'voce-esta-se-alimentando-conforme-sua-rotina':
     case 'eating-routine':
     case 'alimentação conforme rotina':
-      if (profissao === 'wellness') {
-        diagnosticos = alimentacaoRotinaDiagnosticosWellness
-      } else {
-        diagnosticos = alimentacaoRotinaDiagnosticos
-      }
+      diagnosticos = alimentacaoRotinaDiagnosticos
       break
     case 'calculadora-imc':
       diagnosticos = calculadoraImcDiagnosticos
@@ -347,26 +274,14 @@ export function getDiagnostico(
       break
     case 'template-desafio-7dias':
     case 'desafio-7-dias':
-      if (profissao === 'wellness') {
-        diagnosticos = desafio7DiasDiagnosticosWellness
-      } else {
-        diagnosticos = desafio7DiasDiagnosticos
-      }
+      diagnosticos = desafio7DiasDiagnosticos
       break
     case 'template-desafio-21dias':
     case 'desafio-21-dias':
-      if (profissao === 'wellness') {
-        diagnosticos = desafio21DiasDiagnosticosWellness
-      } else {
-        diagnosticos = desafio21DiasDiagnosticos
-      }
+      diagnosticos = desafio21DiasDiagnosticos
       break
     case 'guia-hidratacao':
-      if (profissao === 'wellness') {
-        diagnosticos = guiaHidratacaoDiagnosticosWellness
-      } else {
-        diagnosticos = guiaHidratacaoDiagnosticos
-      }
+      diagnosticos = guiaHidratacaoDiagnosticos
       break
     case 'infografico-educativo':
       diagnosticos = infograficoEducativoDiagnosticos
