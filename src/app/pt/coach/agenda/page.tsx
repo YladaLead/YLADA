@@ -115,7 +115,7 @@ function CoachAgendaContent() {
         params.append('limit', '200')
         params.append('order', 'asc')
 
-        const response = await fetch(`/api/c/appointments?${params.toString()}`, {
+        const response = await fetch(`/api/coach/appointments?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -250,7 +250,7 @@ function CoachAgendaContent() {
     novaDataFim.setMinutes(novaDataFim.getMinutes() + 60) // padrão 1 hora
 
     try {
-      const response = await fetch(`/api/c/appointments/${consultaId}`, {
+      const response = await fetch(`/api/coach/appointments/${consultaId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -991,7 +991,7 @@ function ModalNovaConsulta({
     setSalvando(true)
 
     try {
-      const response = await fetch('/api/c/appointments', {
+      const response = await fetch('/api/coach/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

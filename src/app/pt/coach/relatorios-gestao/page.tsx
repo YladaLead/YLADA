@@ -183,7 +183,7 @@ function RelatoriosGestaoCoachContent() {
 
   const carregarRelatorioConsultas = async (inicio: Date, fim: Date) => {
     const response = await fetch(
-      `/api/c/appointments?start_date=${inicio.toISOString()}&end_date=${fim.toISOString()}&limit=500`,
+      `/api/coach/appointments?start_date=${inicio.toISOString()}&end_date=${fim.toISOString()}&limit=500`,
       { credentials: 'include' }
     )
     const data = await response.json()

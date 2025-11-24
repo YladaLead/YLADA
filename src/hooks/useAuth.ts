@@ -161,6 +161,8 @@ export function useAuth() {
           
           setSession(currentSession)
           setUser(currentSession.user ?? null)
+          // Se temos sessão, marcar loading como false imediatamente (perfil pode carregar depois)
+          setLoading(false)
 
           // Buscar perfil em background (não bloqueia)
           fetchUserProfile(currentSession.user.id, true)
@@ -172,13 +174,11 @@ export function useAuth() {
                 console.warn('⚠️ useAuth: Perfil não encontrado')
               }
               setUserProfile(profile)
-              setLoading(false)
             })
             .catch(err => {
               if (!mounted) return
               console.error('❌ useAuth: Erro ao buscar perfil:', err?.message)
               setUserProfile(null)
-              setLoading(false)
             })
         } else {
           console.log('⚠️ useAuth: Nenhuma sessão encontrada')
@@ -197,13 +197,21 @@ export function useAuth() {
       }
     }
 
-    // Timeout de segurança: se não carregar em 5 segundos, marcar como não autenticado
+    // Timeout de segurança: apenas se não houver sessão após 3 segundos
+    // Não acionar se já temos uma sessão válida (mesmo que o perfil ainda esteja carregando)
     loadingTimeout = setTimeout(() => {
-      if (mounted && loading) {
-        console.warn('⚠️ useAuth: Timeout de carregamento, marcando como não autenticado')
-        setLoading(false)
-      }
-    }, 5000)
+      if (!mounted) return
+      // Verificar se ainda está em loading e não temos sessão
+      supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+        if (!mounted) return
+        // Se não temos sessão após timeout, marcar como não autenticado
+        if (!currentSession) {
+          console.warn('⚠️ useAuth: Timeout de carregamento sem sessão, marcando como não autenticado')
+          setLoading(false)
+        }
+        // Se temos sessão, não fazer nada (já foi marcado como false no loadAuthData)
+      })
+    }, 3000)
 
     loadAuthData()
 
@@ -295,7 +303,7 @@ export function useAuth() {
       }
       subscription.unsubscribe()
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const signOut = async () => {
     // 🚀 OTIMIZAÇÃO: Limpar cache ao fazer sign out

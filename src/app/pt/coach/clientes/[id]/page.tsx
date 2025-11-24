@@ -3003,7 +3003,7 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
           params.append('appointment_type', filtroTipo)
         }
 
-        const response = await fetch(`/api/c/appointments?${params.toString()}`, {
+        const response = await fetch(`/api/coach/appointments?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -3058,7 +3058,7 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
         status: 'agendado'
       }
 
-      const response = await fetch('/api/c/appointments', {
+      const response = await fetch('/api/coach/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
