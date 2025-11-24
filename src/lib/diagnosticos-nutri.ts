@@ -21,7 +21,6 @@ import { diagnosticoEletrolitosDiagnosticos } from './diagnostics/nutri/diagnost
 import { diagnosticoParasitoseDiagnosticos } from './diagnostics/nutri/diagnostico-parasitose'
 import { diagnosticoSintomasIntestinaisDiagnosticos } from './diagnostics/nutri/diagnostico-sintomas-intestinais'
 import { formularioRecomendacaoDiagnosticos } from './diagnostics/nutri/formulario-recomendacao'
-import { ganhosProsperidadeDiagnosticos } from './diagnostics/nutri/ganhos-prosperidade'
 import { guiaHidratacaoDiagnosticos } from './diagnostics/nutri/guia-hidratacao'
 import { guiaNutraceuticoDiagnosticos } from './diagnostics/nutri/guia-nutraceutico'
 import { guiaProteicoDiagnosticos } from './diagnostics/nutri/guia-proteico'
@@ -32,8 +31,6 @@ import { perfilIntestinoDiagnosticos } from './diagnostics/nutri/perfil-intestin
 import { perfilMetabolicoDiagnosticos } from './diagnostics/nutri/perfil-metabolico'
 import { plannerRefeicoesDiagnosticos } from './diagnostics/nutri/planner-refeicoes'
 import { planoAlimentarBaseDiagnosticos } from './diagnostics/nutri/plano-alimentar-base'
-import { potencialCrescimentoDiagnosticos } from './diagnostics/nutri/potencial-crescimento'
-import { propositoEquilibrioDiagnosticos } from './diagnostics/nutri/proposito-equilibrio'
 import { prontoEmagrecerDiagnosticos } from './diagnostics/nutri/pronto-emagrecer'
 import { quizPedindoDetoxDiagnosticos } from './diagnostics/nutri/quiz-pedindo-detox'
 import { quizBemEstarDiagnosticos } from './diagnostics/nutri/quiz-bem-estar'
@@ -62,14 +59,11 @@ import { conheceSeuCorpoDiagnosticos as conheceSeuCorpoDiagnosticosWellness } fr
 import { desafio21DiasDiagnosticos as desafio21DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-21-dias'
 import { desafio7DiasDiagnosticos as desafio7DiasDiagnosticosWellness } from './diagnostics/wellness/desafio-7-dias'
 import { eletrolitosDiagnosticos as eletrolitosDiagnosticosWellness } from './diagnostics/wellness/eletrolitos'
-import { ganhosProsperidadeDiagnosticos as ganhosProsperidadeDiagnosticosWellness } from './diagnostics/wellness/ganhos-prosperidade'
 import { guiaHidratacaoDiagnosticos as guiaHidratacaoDiagnosticosWellness } from './diagnostics/wellness/guia-hidratacao'
 import { intoleranciaDiagnosticos as intoleranciaDiagnosticosWellness } from './diagnostics/wellness/intolerancia'
 import { nutridoVsAlimentadoDiagnosticos as nutridoVsAlimentadoDiagnosticosWellness } from './diagnostics/wellness/nutrido-vs-alimentado'
 import { perfilMetabolicoDiagnosticos as perfilMetabolicoDiagnosticosWellness } from './diagnostics/wellness/perfil-metabolico'
-import { potencialCrescimentoDiagnosticos as potencialCrescimentoDiagnosticosWellness } from './diagnostics/wellness/potencial-crescimento'
 import { prontoEmagrecerDiagnosticos as prontoEmagrecerDiagnosticosWellness } from './diagnostics/wellness/pronto-emagrecer'
-import { propositoEquilibrioDiagnosticos as propositoEquilibrioDiagnosticosWellness } from './diagnostics/wellness/proposito-equilibrio'
 import { retencaoLiquidosDiagnosticos as retencaoLiquidosDiagnosticosWellness } from './diagnostics/wellness/retencao-liquidos'
 import { sindromeMetabolicaDiagnosticos as sindromeMetabolicaDiagnosticosWellness } from './diagnostics/wellness/sindrome-metabolica'
 import { sintomasIntestinaisDiagnosticos as sintomasIntestinaisDiagnosticosWellness } from './diagnostics/wellness/sintomas-intestinais'
@@ -97,7 +91,6 @@ export {
   diagnosticoEletrolitosDiagnosticos,
   diagnosticoSintomasIntestinaisDiagnosticos,
   formularioRecomendacaoDiagnosticos,
-  ganhosProsperidadeDiagnosticos,
   guiaHidratacaoDiagnosticos,
   guiaNutraceuticoDiagnosticos,
   guiaProteicoDiagnosticos,
@@ -107,8 +100,6 @@ export {
   perfilMetabolicoDiagnosticos,
   plannerRefeicoesDiagnosticos,
   planoAlimentarBaseDiagnosticos,
-  potencialCrescimentoDiagnosticos,
-  propositoEquilibrioDiagnosticos,
   prontoEmagrecerDiagnosticos,
   quizBemEstarDiagnosticos,
   quizDetoxDiagnosticos,
@@ -303,36 +294,6 @@ export function getDiagnostico(
         diagnosticos = alimentacaoRotinaDiagnosticos
       }
       break
-    case 'ganhos-prosperidade':
-    case 'quiz-ganhos-prosperidade':
-    case 'gains-and-prosperity':
-    case 'ganhos e prosperidade':
-      if (profissao === 'wellness') {
-        diagnosticos = ganhosProsperidadeDiagnosticosWellness
-      } else {
-        diagnosticos = ganhosProsperidadeDiagnosticos
-      }
-      break
-    case 'potencial-crescimento':
-    case 'quiz-potencial-crescimento':
-    case 'potential-and-growth':
-    case 'potencial e crescimento':
-      if (profissao === 'wellness') {
-        diagnosticos = potencialCrescimentoDiagnosticosWellness
-      } else {
-        diagnosticos = potencialCrescimentoDiagnosticos
-      }
-      break
-    case 'proposito-equilibrio':
-    case 'quiz-proposito-equilibrio':
-    case 'purpose-and-balance':
-    case 'propósito e equilíbrio':
-      if (profissao === 'wellness') {
-        diagnosticos = propositoEquilibrioDiagnosticosWellness
-      } else {
-        diagnosticos = propositoEquilibrioDiagnosticos
-      }
-      break
     case 'calculadora-imc':
       diagnosticos = calculadoraImcDiagnosticos
       break
@@ -490,14 +451,8 @@ export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'quiz-perfil-metabolico': perfilMetabolicoDiagnosticos,
   'planner-refeicoes': plannerRefeicoesDiagnosticos,
   'plano-alimentar-base': planoAlimentarBaseDiagnosticos,
-  'potencial-crescimento': potencialCrescimentoDiagnosticos,
-  'quiz-potencial-crescimento': potencialCrescimentoDiagnosticos,
-  'proposito-equilibrio': propositoEquilibrioDiagnosticos,
-  'quiz-proposito-equilibrio': propositoEquilibrioDiagnosticos,
   'pronto-emagrecer': prontoEmagrecerDiagnosticos,
   'quiz-pronto-emagrecer': prontoEmagrecerDiagnosticos,
-  'ganhos-prosperidade': ganhosProsperidadeDiagnosticos,
-  'quiz-ganhos-prosperidade': ganhosProsperidadeDiagnosticos,
   'quiz-bem-estar': quizBemEstarDiagnosticos,
   'descoberta-perfil-bem-estar': quizBemEstarDiagnosticos,
   'descubra-seu-perfil-de-bem-estar': quizBemEstarDiagnosticos,
