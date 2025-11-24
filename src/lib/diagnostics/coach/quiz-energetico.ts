@@ -11,7 +11,7 @@ export const quizEnergeticoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Deficiências nutricionais ou desequilíbrios metabólicos podem estar afetando sua produção energética. Pesquisas mostram que 68% das pessoas com baixa energia têm carências nutricionais não identificadas. Uma avaliação completa identifica exatamente o que está impactando sua vitalidade',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação de bem-estar para receber um protocolo energético seguro e adequado ao seu perfil. Evite auto-suplementação — carências específicas precisam ser identificadas primeiro',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu organismo já deu o primeiro sinal. Agora é hora de transformar esse diagnóstico em ação — descubra como seu corpo pode recuperar energia com apoio personalizado.'
-    }
+    },
     energiaModerada: {
       diagnostico: '📋 DIAGNÓSTICO: Energia moderada que pode ser otimizada com estratégias personalizadas',
       causaRaiz: '🔍 CAUSA RAIZ: Boa base energética estabelecida, mas ajustes nutricionais específicos podem elevar sua vitalidade significativamente. Estudos indicam que otimizações estratégicas podem aumentar energia em até 35%. Uma análise detalhada mostra exatamente onde ganhar performance'

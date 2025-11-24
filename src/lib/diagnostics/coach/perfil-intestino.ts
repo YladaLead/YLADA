@@ -25,7 +25,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Oscilações de fibras, baixa hidratação, rotina alimentar irregular e possíveis desequilíbrios leves da microbiota podem explicar os sintomas.',
       acaoImediata:
-        '⚡ AÇÃO IMEDIATA: Ajustar consumo de fibras solúveis, incluir alimentos prebióticos, fracionar melhor as refeições e aumentar hidratação ao longo do dia.'
+        '⚡ AÇÃO IMEDIATA: Ajustar consumo de fibras solúveis, incluir alimentos prebióticos, fracionar melhor as refeições e aumentar hidratação ao longo do dia.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Solicite uma análise de bem-estar completa para mapear intolerâncias, definir uso de probióticos específicos e alinhar um protocolo de restauração intestinal sob acompanhamento profissional.'
     }
