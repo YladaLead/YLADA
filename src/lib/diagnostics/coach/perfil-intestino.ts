@@ -15,7 +15,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Rotina alimentar organizada, ingestão adequada de fibras, hidratação consistente e microbiota estável sustentam esse cenário positivo.',
       acaoImediata:
-        '⚡ AÇÃO IMEDIATA: Manter hábitos atuais, reforçando alimentos in natura, fibras variadas e exposição matinal à luz natural para preservar a saúde intestinal.'
+        '⚡ AÇÃO IMEDIATA: Manter hábitos atuais, reforçando alimentos in natura, fibras variadas e exposição matinal à luz natural para preservar a saúde intestinal.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Agende uma avaliação digestiva preventiva para confirmar se todos os marcadores permanecem dentro do ideal e receber orientações personalizadas de manutenção.'
     }

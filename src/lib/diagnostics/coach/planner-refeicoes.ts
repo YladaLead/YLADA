@@ -14,7 +14,7 @@ export const plannerRefeicoesDiagnosticos: DiagnosticosPorFerramenta = {
     },
     manterPeso: {
       diagnostico: '📋 DIAGNÓSTICO: Seu plano alimentar está configurado para manutenção do peso com equilíbrio de bem-estar e suporte à saúde geral',
-      causaRaiz: '🔍 CAUSA RAIZ: A manutenção do peso requer equilíbrio preciso entre ingestão e gasto calórico, além de distribuição adequada de nutrientes. Pesquisas indicam que pessoas que mantêm peso estável com alimentação equilibrada têm 50% menos risco de desenvolver desequilíbrios metabólicos. Uma avaliação de bem-estar identifica exatamente quais são suas necessidades para manutenção ideal'
+      causaRaiz: '🔍 CAUSA RAIZ: A manutenção do peso requer equilíbrio preciso entre ingestão e gasto calórico, além de distribuição adequada de nutrientes. Pesquisas indicam que pessoas que mantêm peso estável com alimentação equilibrada têm 50% menos risco de desenvolver desequilíbrios metabólicos. Uma avaliação de bem-estar identifica exatamente quais são suas necessidades para manutenção ideal',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha o plano alimentar equilibrado e monitore peso semanalmente. Considere avaliação de bem-estar preventiva para identificar oportunidades de otimização que preservam esse equilíbrio e melhoram qualidade de bem-estar',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio atual é um ótimo ponto de partida. Descubra como estratégias preventivas podem potencializar ainda mais sua saúde e bem-estar com otimizações nutricionais.'
     }
