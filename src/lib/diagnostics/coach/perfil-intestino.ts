@@ -18,7 +18,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
         '⚡ AÇÃO IMEDIATA: Manter hábitos atuais, reforçando alimentos in natura, fibras variadas e exposição matinal à luz natural para preservar a saúde intestinal.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Agende uma avaliação digestiva preventiva para confirmar se todos os marcadores permanecem dentro do ideal e receber orientações personalizadas de manutenção.'
-    }
+    },
     intestinoSensivel: {
       diagnostico:
         '📋 DIAGNÓSTICO: Há sinais de intestino preso ou sensível, com pequenas alterações no ritmo e indícios de fermentação excessiva.'

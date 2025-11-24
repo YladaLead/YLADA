@@ -17,7 +17,7 @@ export const planoAlimentarBaseDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar especializada e avançada para resultados otimizados. Pesquisas indicam que planos alimentares especializados podem melhorar performance e resultados em até 60% quando adequadamente implementados. Uma avaliação de bem-estar identifica exatamente quais são suas necessidades específicas e como estruturar seu plano alimentar para máxima eficácia',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente plano alimentar avançado considerando seus objetivos e necessidades específicas. Busque avaliação de bem-estar para receber um plano personalizado que maximize seus resultados com estratégias direcionadas',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como um plano alimentar especializado pode potencializar ainda mais seus resultados com estratégias direcionadas.'
-    }
+    },
     planoPremium: {
       diagnostico: '📅 DIAGNÓSTICO: Você precisa de um plano alimentar premium de elite para máxima qualidade de bem-estar e resultados superiores',
       causaRaiz: '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar de elite e premium para máxima qualidade de bem-estar e resultados superiores. Estudos mostram que planos alimentares premium podem resultar em melhorias que potencializam resultados em até 70%. Uma avaliação de bem-estar avançada identifica oportunidades específicas de otimização para você'

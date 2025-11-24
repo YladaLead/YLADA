@@ -17,7 +17,7 @@ export const plannerRefeicoesDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: A manutenção do peso requer equilíbrio preciso entre ingestão e gasto calórico, além de distribuição adequada de nutrientes. Pesquisas indicam que pessoas que mantêm peso estável com alimentação equilibrada têm 50% menos risco de desenvolver desequilíbrios metabólicos. Uma avaliação de bem-estar identifica exatamente quais são suas necessidades para manutenção ideal',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha o plano alimentar equilibrado e monitore peso semanalmente. Considere avaliação de bem-estar preventiva para identificar oportunidades de otimização que preservam esse equilíbrio e melhoram qualidade de bem-estar',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio atual é um ótimo ponto de partida. Descubra como estratégias preventivas podem potencializar ainda mais sua saúde e bem-estar com otimizações nutricionais.'
-    }
+    },
     ganharMassa: {
       diagnostico: '📋 DIAGNÓSTICO: Seu plano alimentar está configurado para ganho de massa muscular através de superávit calórico controlado e alta proteína',
       causaRaiz: '🔍 CAUSA RAIZ: O ganho de massa muscular requer superávit calórico adequado combinado com proteína suficiente para síntese proteica. Estudos mostram que ganhos de 0,25-0,5kg de massa muscular por mês são realistas quando há superávit de 300-500 kcal com 1,6-2,2g de proteína por kg. Uma avaliação de bem-estar identifica exatamente qual superávit e distribuição de macronutrientes são mais eficazes para você'
