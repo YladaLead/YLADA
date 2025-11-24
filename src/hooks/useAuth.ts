@@ -244,26 +244,8 @@ export function useAuth() {
       setSession(session)
       setUser(session?.user ?? null)
 
-      // Para eventos de login/signin, verificar sessão novamente após um pequeno delay
-      // Isso garante que cookies foram persistidos
-      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
-        console.log('🔍 useAuth: Evento de login detectado, verificando sessão novamente...')
-        
-        // Aguardar um pouco para garantir que cookies foram persistidos
-        await new Promise(resolve => setTimeout(resolve, 200))
-        
-        // Verificar sessão novamente para garantir consistência
-        try {
-          const { data: { session: verifiedSession } } = await supabase.auth.getSession()
-          if (verifiedSession && verifiedSession.user.id === session.user.id) {
-            console.log('✅ useAuth: Sessão verificada e consistente')
-            setSession(verifiedSession)
-            setUser(verifiedSession.user)
-          }
-        } catch (verifyErr) {
-          console.warn('⚠️ useAuth: Erro ao verificar sessão após login:', verifyErr)
-        }
-      }
+      // 🚀 CORREÇÃO: Remover verificação duplicada de sessão que causava loop infinito
+      // A sessão já vem correta do onAuthStateChange, não precisa verificar novamente
 
       if (session?.user) {
         console.log('🔍 useAuth: Buscando perfil após auth change para user_id:', session.user.id)

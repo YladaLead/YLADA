@@ -30,40 +30,27 @@ export default function LoginForm({
   const [isSignUp, setIsSignUp] = useState(initialSignUpMode)
   const [name, setName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
-  const [lastInputTime, setLastInputTime] = useState(Date.now())
 
-  // Verificar se já está autenticado - mas NÃO redirecionar enquanto está digitando
+  // 🚀 CORREÇÃO: Verificar autenticação apenas UMA VEZ ao carregar (sem loop)
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Aguardar um pouco antes de verificar (evitar verificação imediata)
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
-          // Verificar se o usuário está digitando (última entrada foi há menos de 3 segundos)
-          const timeSinceLastInput = Date.now() - lastInputTime
-          if (timeSinceLastInput > 3000) {
-            // Só redirecionar se não está digitando há mais de 3 segundos
-            console.log('✅ Já autenticado, redirecionando para:', redirectPath)
-            window.location.href = redirectPath
-          }
+          console.log('✅ Já autenticado, redirecionando para:', redirectPath)
+          router.replace(redirectPath)
         }
       } catch (err) {
         console.error('Erro ao verificar autenticação:', err)
-      } finally {
-        setCheckingAuth(false)
       }
     }
 
     checkAuth()
-  }, [redirectPath, lastInputTime])
+  }, [redirectPath, router])
 
-  // Atualizar timestamp quando usuário digita
+  // Atualizar valor dos inputs
   const handleInputChange = (setter: (value: string) => void) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLastInputTime(Date.now())
       setter(e.target.value)
     }
   }
@@ -239,44 +226,10 @@ export default function LoginForm({
           console.warn('⚠️ Não foi possível verificar expiração da senha provisória:', checkError)
         }
 
-        // 🔧 CORREÇÃO: Aguardar um pouco para garantir que cookies/sessão foram persistidos
-        // Isso resolve o problema de sessão não ser detectada após login
-        console.log('⏳ Aguardando persistência da sessão...')
-        await new Promise(resolve => setTimeout(resolve, 300))
-        
-        // Verificar se a sessão foi realmente persistida
-        try {
-          const { data: { session: verifiedSession }, error: verifyError } = await supabase.auth.getSession()
-          if (verifyError || !verifiedSession || verifiedSession.user.id !== session.user.id) {
-            console.warn('⚠️ Sessão não foi persistida corretamente, tentando novamente...')
-            // Aguardar mais um pouco e tentar novamente
-            await new Promise(resolve => setTimeout(resolve, 300))
-            const { data: { session: retrySession } } = await supabase.auth.getSession()
-            if (!retrySession || retrySession.user.id !== session.user.id) {
-              console.error('❌ Sessão não persistida após múltiplas tentativas')
-              setError('Erro ao salvar sessão. Tente fazer login novamente.')
-              setLoading(false)
-              return
-            }
-          } else {
-            console.log('✅ Sessão verificada e persistida corretamente')
-          }
-        } catch (verifyErr) {
-          console.warn('⚠️ Erro ao verificar sessão persistida:', verifyErr)
-          // Continuar mesmo com erro, pois a sessão pode estar OK
-        }
-
-        // Redirecionar após garantir que sessão foi persistida
+        // 🚀 CORREÇÃO: Redirecionar imediatamente após login bem-sucedido
+        // Remover verificações múltiplas que causavam loop de verificação
         console.log('🔄 Redirecionando para:', redirectPath)
         router.replace(redirectPath)
-
-        // Se o router.replace não ocorrer (navegadores antigos), forçar via window.location
-        setTimeout(() => {
-          if (typeof window !== 'undefined' && window.location.pathname !== redirectPath) {
-            console.log('⚠️ router.replace não executou, forçando navegação manual.')
-            window.location.href = redirectPath
-          }
-        }, 1000)
 
         // Após redirecionar, verificar em segundo plano se o perfil está completo.
         void (async () => {
