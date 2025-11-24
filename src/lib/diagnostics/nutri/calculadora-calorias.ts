@@ -14,7 +14,7 @@ Busque avaliação profissional para ajustar calorias de forma segura e preserva
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pronto para mudança — descubra em minutos como criar um déficit calórico personalizado que preserva sua massa muscular e garante resultados sustentáveis.'
     },
     manutencaoCalorica: {
-      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão calórica está equilibrada, mantenha o padrão e considere otimizações na qualidade nutricional',
+      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão calórica está equilibrada, mantenha o padrão (mas pode melhorar) e considere otimizações na qualidade nutricional',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo calórico adequado para manutenção do peso atual estabelecido. Pesquisas mostram que otimizações na qualidade nutricional, mesmo mantendo calorias, podem melhorar composição corporal e saúde metabólica. Uma análise nutricional identifica oportunidades específicas para você',
       acaoImediata: 'Mantenha seus hábitos atuais e observe como o corpo responde.
 Pequenos ajustes com orientação podem otimizar a qualidade da dieta.',
@@ -22,7 +22,7 @@ Pequenos ajustes com orientação podem otimizar a qualidade da dieta.',
     },
     superavitCalorico: {
       diagnostico: '📋 DIAGNÓSTICO: Você precisa de superávit calórico para ganho de peso saudável e massa muscular',
-      causaRaiz: '🔍 CAUSA RAIZ: Consumo calórico abaixo do necessário para ganho de massa. Estudos indicam que superávit de 300-500 calorias por dia, combinado com treino adequado, pode resultar em ganho de 0.25-0.5kg de massa muscular por mês. Uma avaliação nutricional identifica exatamente qual é sua necessidade real e como alcançá-la',
+      causaRaiz: '🔍 CAUSA RAIZ: Consumo calórico abaixo do necessário para ganho de massa. Consumo calórico abaixo do necessário para ganho de massa, combinado com treino adequado, pode resultar em ganho de 0.25-0.5kg de massa muscular por mês. Uma avaliação nutricional identifica exatamente qual é sua necessidade real e como alcançá-la',
       acaoImediata: 'Acompanhe seu consumo de forma equilibrada e consistente.
 Avaliações periódicas ajudam a ganhar massa de forma saudável e segura.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pronto para crescer — descubra em minutos como criar um superávit calórico personalizado que maximiza ganho de massa muscular de forma saudável.'

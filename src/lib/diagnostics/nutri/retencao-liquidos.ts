@@ -2,7 +2,7 @@
  * DIAGNÓSTICOS: Teste de Retenção de Líquidos - ÁREA NUTRI
  * 
  * Diagnósticos focados em identificar retenção de líquidos
- * que estimulam contato com nutricionista profissional
+ * que estimulam contato com profissional de nutrição profissional
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -12,7 +12,7 @@ export const retencaoLiquidosDiagnosticos: DiagnosticosPorFerramenta = {
     retencaoAlta: {
       diagnostico: '📋 DIAGNÓSTICO: Seu perfil indica retenção alta de líquidos. Um acompanhamento nutricional especializado é essencial para identificar causas e criar estratégias personalizadas para reduzir o inchaço e melhorar significativamente seu bem-estar.',
       causaRaiz: '🔍 CAUSA RAIZ: Retenção de líquidos pode ser causada por desequilíbrios hormonais, excesso de sódio, falta de potássio, problemas circulatórios, sedentarismo ou condições médicas específicas. Estudos mostram que até 50% das mulheres podem apresentar retenção durante o ciclo menstrual. Quando não identificada e tratada adequadamente, a retenção pode piorar e afetar qualidade de vida. Uma avaliação nutricional completa identifica fatores causadores, cria um plano personalizado para reduzir retenção e fornece orientações para restaurar equilíbrio hidroeletrolítico.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional especializada para reduzir retenção de líquidos. Uma nutricionista pode criar um plano personalizado que inclui estratégias nutricionais otimizadas (redução de sódio, aumento de potássio), protocolos adequados e acompanhamento constante. Evite diuréticos sem orientação — isso pode causar desequilíbrios.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional especializada para reduzir retenção de líquidos. Uma profissional de nutrição pode criar um plano personalizado que inclui estratégias nutricionais otimizadas (redução de sódio, aumento de potássio), protocolos adequados e acompanhamento constante. Evite diuréticos sem orientação — isso pode causar desequilíbrios.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Sua qualidade de vida pode melhorar significativamente ao reduzir retenção de líquidos. Agende uma avaliação nutricional para receber um acompanhamento especializado com estratégias personalizadas. Descubra como um plano adequado pode restaurar seu equilíbrio e transformar seu bem-estar.'
     }
     retencaoModerada: {
@@ -25,7 +25,7 @@ Pequenos ajustes com orientação podem ajudar no equilíbrio hídrico.',
     retencaoBaixa: {
       diagnostico: '📋 DIAGNÓSTICO: Você tem baixa retenção! Mesmo assim, um acompanhamento nutricional preventivo pode ajudar a manter esse equilíbrio e otimizar ainda mais sua saúde hidroeletrolítica.',
       causaRaiz: '🔍 CAUSA RAIZ: Ter baixa retenção é um grande ativo, mas pode ser mantido e otimizado ainda mais com estratégias preventivas adequadas. Pesquisas mostram que hábitos inadequados ao longo do tempo podem aumentar retenção. Uma avaliação nutricional completa cria estratégias preventivas personalizadas e fornece orientações para manter seu bem-estar em longo prazo. A prevenção é sempre melhor que o tratamento.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma avaliação nutricional preventiva para manter sua baixa retenção. Uma nutricionista pode criar estratégias personalizadas, ajustar plano alimentar adequado e fornecer orientações para manter sua excelente condição ao longo do tempo. A prevenção garante qualidade de vida contínua.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma avaliação nutricional preventiva para manter sua baixa retenção. Uma profissional de nutrição pode criar estratégias personalizadas, ajustar plano alimentar adequado e fornecer orientações para manter sua excelente condição ao longo do tempo. A prevenção garante qualidade de vida contínua.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Mantenha sua baixa retenção com estratégias preventivas personalizadas. Agende uma avaliação nutricional para receber orientações adequadas ao seu perfil. A prevenção é o melhor investimento para sua saúde a longo prazo!'
     }
   }

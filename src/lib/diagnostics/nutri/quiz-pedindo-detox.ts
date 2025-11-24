@@ -1,8 +1,8 @@
 /**
  * DIAGNÓSTICOS: Seu corpo está pedindo Detox? - ÁREA NUTRI
  *
- * Diagnósticos criados para traduzir sinais de sobrecarga tóxica
- * em planos personalizados conduzidos por nutricionistas.
+ * Diagnósticos criados para traduzir sinais de sobrecarga de toxinas
+ * em planos personalizados conduzidos por profissional de nutriçãos.
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -33,7 +33,7 @@ Pequenos ajustes guiados por profissional podem apoiar detox de forma segura.'
     }
     corpoPedindoDetox: {
       diagnostico:
-        '📋 DIAGNÓSTICO: O organismo envia sinais claros de sobrecarga tóxica, exigindo intervenção personalizada e supervisão profissional.'
+        '📋 DIAGNÓSTICO: O organismo envia sinais claros de sobrecarga de toxinas, exigindo intervenção personalizada e supervisão profissional.'
       causaRaiz:
         '🔍 CAUSA RAIZ: Estresse crônico, sono inadequado, álcool frequente, medicamentos e inflamação intestinal dificultam a detoxificação endógena.'
       acaoImediata:

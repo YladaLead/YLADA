@@ -2,7 +2,7 @@
  * DIAGNÓSTICOS: Avaliação de Intolerância Alimentar - ÁREA NUTRI
  * 
  * Diagnósticos focados em identificar intolerâncias e sensibilidades alimentares
- * que estimulam contato com nutricionista profissional
+ * que estimulam contato com profissional de nutrição profissional
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -12,19 +12,19 @@ export const avaliacaoIntoleranciaDiagnosticos: DiagnosticosPorFerramenta = {
     altaSuspeitaIntolerancia: {
       diagnostico: '📋 DIAGNÓSTICO: Seus sintomas indicam alta suspeita de intolerâncias ou sensibilidades alimentares. Um acompanhamento nutricional especializado é essencial para identificar os alimentos problemáticos e criar um plano personalizado que melhore sua qualidade de vida.',
       causaRaiz: '🔍 CAUSA RAIZ: Intolerâncias alimentares podem causar sintomas digestivos, inchaço, gases, dores abdominais e até mesmo fadiga. Estudos mostram que até 20% da população pode ter alguma intolerância alimentar não diagnosticada. Quando não identificadas, essas sensibilidades podem impactar negativamente a qualidade de vida, energia e bem-estar geral. Uma avaliação nutricional completa identifica padrões alimentares problemáticos, cria um plano de eliminação controlado e garante nutrição adequada mesmo com restrições alimentares.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional especializada para identificar suas intolerâncias alimentares. Uma nutricionista pode criar um plano de eliminação controlado, identificar alimentos problemáticos e garantir nutrição adequada mesmo com restrições. Evite eliminar alimentos por conta própria — isso pode levar a deficiências nutricionais.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional especializada para identificar suas intolerâncias alimentares. Uma profissional de nutrição pode criar um plano de eliminação controlado, identificar alimentos problemáticos e garantir nutrição adequada mesmo com restrições. Evite eliminar alimentos por conta própria — isso pode levar a deficiências nutricionais.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Sua qualidade de vida pode melhorar significativamente ao identificar e tratar adequadamente suas intolerâncias alimentares. Agende uma avaliação nutricional para receber um acompanhamento especializado com estratégias personalizadas. Descubra como um plano adequado pode transformar seu bem-estar.'
     },
     intoleranciaModerada: {
       diagnostico: '📋 DIAGNÓSTICO: Você apresenta alguns sinais que podem indicar sensibilidade alimentar moderada. Um acompanhamento nutricional pode ajudar a identificar padrões e criar estratégias que otimizem seu bem-estar digestivo.',
       causaRaiz: '🔍 CAUSA RAIZ: Sensibilidades alimentares moderadas podem causar sintomas intermitentes que muitas vezes passam despercebidos ou são atribuídos a outras causas. Pesquisas indicam que muitas pessoas vivem com desconfortos leves a moderados sem saber que são causados por alimentos específicos. Uma avaliação nutricional completa identifica esses padrões sutis, cria um plano alimentar otimizado e fornece orientações para melhorar sua qualidade de vida e prevenir que sensibilidades se tornem mais severas.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para uma análise personalizada que identifica padrões alimentares que causam desconforto. Uma nutricionista pode criar estratégias práticas para otimizar sua alimentação, ajustar plano alimentar adequado e acompanhar sua evolução. Com pequenos ajustes personalizados, você pode melhorar significativamente seu bem-estar digestivo.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para uma análise personalizada que identifica padrões alimentares que causam desconforto. Uma profissional de nutrição pode criar estratégias práticas para otimizar sua alimentação, ajustar plano alimentar adequado e acompanhar sua evolução. Com pequenos ajustes personalizados, você pode melhorar significativamente seu bem-estar digestivo.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Com um acompanhamento nutricional personalizado, você pode otimizar sua alimentação e melhorar seu bem-estar digestivo. Agende uma avaliação nutricional para receber estratégias práticas adequadas ao seu perfil. Pequenos ajustes podem fazer grande diferença na sua qualidade de vida!'
     },
     baixaProbabilidadeIntolerancia: {
       diagnostico: '📋 DIAGNÓSTICO: Você parece ter boa tolerância alimentar. Mesmo assim, um acompanhamento nutricional preventivo pode ajudar a otimizar sua alimentação e prevenir futuras sensibilidades, mantendo seu bem-estar em alta.',
       causaRaiz: '🔍 CAUSA RAIZ: Ter boa tolerância alimentar é um grande ativo, mas mesmo pessoas com boa digestão podem se beneficiar de otimizações nutricionais preventivas. Pesquisas mostram que hábitos alimentares inadequados ao longo do tempo podem levar ao desenvolvimento de sensibilidades. Uma avaliação nutricional completa cria estratégias preventivas personalizadas e fornece orientações para manter seu bem-estar em longo prazo. A prevenção é sempre melhor que o tratamento.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma avaliação nutricional preventiva para otimizar sua alimentação e saúde digestiva. Uma nutricionista pode criar estratégias personalizadas, ajustar plano alimentar adequado e fornecer orientações para manter sua excelente tolerância alimentar ao longo do tempo. A prevenção garante qualidade de vida contínua.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma avaliação nutricional preventiva para otimizar sua alimentação e saúde digestiva. Uma profissional de nutrição pode criar estratégias personalizadas, ajustar plano alimentar adequado e fornecer orientações para manter sua excelente tolerância alimentar ao longo do tempo. A prevenção garante qualidade de vida contínua.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Mantenha sua excelente tolerância alimentar com estratégias preventivas personalizadas. Agende uma avaliação nutricional para receber orientações adequadas ao seu perfil. A prevenção é o melhor investimento para sua saúde a longo prazo!'
     }
   }

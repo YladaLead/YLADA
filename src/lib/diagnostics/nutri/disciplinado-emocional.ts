@@ -1,7 +1,7 @@
 /**
  * DIAGNÓSTICOS: Você é mais disciplinado ou emocional com a comida? - ÁREA NUTRI
  *
- * Categoriza o comportamento alimentar em quatro perfis para orientar a nutricionista.
+ * Categoriza o comportamento alimentar em quatro perfis para orientar a profissional de nutrição.
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -38,7 +38,7 @@ Evite rigidez excessiva para preservar bem-estar e prazer à mesa.',
         'Observe seus gatilhos emocionais ligados à comida.
 Apoio nutricional e emocional pode ajudar a restaurar o controle e a leveza.',
       proximoPasso:
-        '🎯 PRÓXIMO PASSO: Junto com a nutricionista, você constrói uma estratégia integrada (alimentação + emoções) para retomar o controle com acolhimento.'
+        '🎯 PRÓXIMO PASSO: Junto com a profissional de nutrição, você constrói uma estratégia integrada (alimentação + emoções) para retomar o controle com acolhimento.'
     },
     perfilImpulsivo: {
       diagnostico:

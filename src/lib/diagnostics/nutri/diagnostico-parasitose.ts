@@ -35,7 +35,7 @@ export const diagnosticoParasitoseDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Quadros complexos podem envolver múltiplos parasitas, inflamação intensa e comprometimento imunológico, exigindo protocolos avançados.',
       acaoImediata:
-        '⚡ AÇÃO IMEDIATA: Procure uma nutricionista funcional para coordenar exames completos, alinhar condutas com o médico e definir o plano de suporte nutricional e detox adequado.',
+        '⚡ AÇÃO IMEDIATA: Procure uma profissional de nutrição funcional para coordenar exames completos, alinhar condutas com o médico e definir o plano de suporte nutricional e detox adequado.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Mantenha acompanhamento contínuo. Relatórios nutricionais integrados ao tratamento médico aceleram resultados e protegem sua saúde intestinal.'
     }

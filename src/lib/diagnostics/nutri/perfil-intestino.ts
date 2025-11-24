@@ -1,7 +1,7 @@
 /**
  * DIAGNÓSTICOS: Qual é seu perfil de intestino? - ÁREA NUTRI
  *
- * Conteúdo 100% direcionado para nutricionistas que conduzem
+ * Conteúdo 100% direcionado para profissional de nutriçãos que conduzem
  * avaliações de funcionamento intestinal e microbiota.
  */
 

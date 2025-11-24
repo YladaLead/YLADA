@@ -2,7 +2,7 @@
  * DIAGNÓSTICOS: Avaliação do Perfil Metabólico - ÁREA NUTRI
  * 
  * Diagnósticos focados em identificar perfil metabólico e otimização
- * que estimulam contato com nutricionista profissional
+ * que estimulam contato com profissional de nutrição profissional
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -19,13 +19,13 @@ Busque avaliação profissional para identificar ajustes seguros e eficazes.',
     metabolismoModerado: {
       diagnostico: '📋 DIAGNÓSTICO: Seu metabolismo está moderado mas pode ser otimizado. Um plano nutricional personalizado pode acelerar seus resultados e melhorar significativamente sua eficiência metabólica.',
       causaRaiz: '🔍 CAUSA RAIZ: Metabolismo moderado indica boa base, mas há oportunidades de otimização. Pesquisas mostram que pessoas com metabolismo moderado, quando recebem estratégias nutricionais personalizadas, conseguem acelerar sua eficiência metabólica em até 25% e melhorar resultados de forma consistente. Uma avaliação nutricional completa identifica oportunidades específicas de otimização, cria estratégias personalizadas e fornece orientações para elevar seus resultados para o próximo nível.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para receber estratégias de otimização metabólica personalizadas. Uma nutricionista pode criar um plano que inclui estratégias nutricionais otimizadas, ajustes no estilo de vida e acompanhamento para garantir que você alcance máxima eficiência metabólica. Com pequenos ajustes personalizados, você pode acelerar significativamente seus resultados.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para receber estratégias de otimização metabólica personalizadas. Uma profissional de nutrição pode criar um plano que inclui estratégias nutricionais otimizadas, ajustes no estilo de vida e acompanhamento para garantir que você alcance máxima eficiência metabólica. Com pequenos ajustes personalizados, você pode acelerar significativamente seus resultados.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Com estratégias personalizadas, você pode otimizar seu metabolismo e acelerar seus resultados. Agende uma avaliação nutricional para receber um plano de otimização metabólica. Estratégias adequadas podem fazer toda diferença na sua eficiência metabólica!'
     }
     metabolismoRapido: {
       diagnostico: '📋 DIAGNÓSTICO: Excelente! Você tem um metabolismo rápido! Mesmo assim, um acompanhamento nutricional preventivo pode ajudar a manter sua eficiência metabólica e otimizar ainda mais seus resultados.',
       causaRaiz: '🔍 CAUSA RAIZ: Ter um metabolismo rápido é um grande ativo, mas pode ser otimizado ainda mais com estratégias preventivas adequadas. Pesquisas mostram que pessoas com metabolismo rápido, quando recebem estratégias nutricionais avançadas, conseguem manter e até superar sua eficiência metabólica, otimizando resultados a longo prazo. Uma avaliação nutricional completa cria estratégias preventivas personalizadas e fornece orientações para você continuar otimizando seus resultados.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma avaliação nutricional preventiva para manter e otimizar seu metabolismo rápido. Uma nutricionista pode criar estratégias avançadas, ajustar plano alimentar adequado e fornecer orientações para você continuar otimizando seus resultados. A prevenção garante que você mantenha sua excelente eficiência metabólica.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma avaliação nutricional preventiva para manter e otimizar seu metabolismo rápido. Uma profissional de nutrição pode criar estratégias avançadas, ajustar plano alimentar adequado e fornecer orientações para você continuar otimizando seus resultados. A prevenção garante que você mantenha sua excelente eficiência metabólica.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Mantenha seu metabolismo rápido otimizado com estratégias preventivas personalizadas. Agende uma avaliação nutricional para receber orientações adequadas ao seu perfil. A prevenção é o melhor investimento para sua saúde a longo prazo!'
     }
   }
