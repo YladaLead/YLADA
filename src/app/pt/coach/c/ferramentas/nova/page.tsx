@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import CoachNavBar from '@/components/c/CoachNavBar'
+import CoachNavBar from '@/components/coach/CoachNavBar'
 import { getAppUrl } from '@/lib/url-utils'
 import { normalizeTemplateSlug, CANONICAL_TEMPLATE_SLUGS } from '@/lib/template-slug-map'
 

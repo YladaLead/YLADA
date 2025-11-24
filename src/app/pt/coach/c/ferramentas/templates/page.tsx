@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Sparkles } from 'lucide-react'
-import CoachNavBar from '@/components/c/CoachNavBar'
+import CoachNavBar from '@/components/coach/CoachNavBar'
 
 type TemplateContent = {
   questions?: unknown[]

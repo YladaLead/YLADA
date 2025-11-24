@@ -31,6 +31,13 @@ interface Configuracao {
   mensagemWhatsapp: string
   urlExterna: string
   textoBotao: string
+  coletarDados: boolean
+  camposColeta: {
+    nome: boolean
+    email: boolean
+    telefone: boolean
+  }
+  mensagemPersonalizada: string
 }
 
 function NovaFerramentaNutriContent() {
@@ -49,7 +56,14 @@ function NovaFerramentaNutriContent() {
     tipoCta: 'whatsapp',
     mensagemWhatsapp: '',
     urlExterna: '',
-    textoBotao: 'Agendar Consulta'
+    textoBotao: 'Agendar Consulta',
+    coletarDados: true,
+    camposColeta: {
+      nome: true,
+      email: true,
+      telefone: false
+    },
+    mensagemPersonalizada: ''
   })
   const [urlDisponivel, setUrlDisponivel] = useState(true)
   const [emojiEditadoManual, setEmojiEditadoManual] = useState(false) // Flag para saber se usuário já editou
@@ -463,7 +477,12 @@ function NovaFerramentaNutriContent() {
         custom_whatsapp_message: configuracao.mensagemWhatsapp,
         profession: 'nutri',
         generate_short_url: generateShortUrl,
-        custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
+        custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null,
+        leader_data_collection: {
+          coletar_dados: configuracao.coletarDados,
+          campos_coleta: configuracao.camposColeta,
+          mensagem_personalizada: configuracao.mensagemPersonalizada
+        }
       }
 
       const response = await fetch('/api/nutri/ferramentas', {
@@ -1284,6 +1303,81 @@ function NovaFerramentaNutriContent() {
                             </p>
                   </div>
                         )}
+
+                        {/* Coletar Dados do Líder */}
+                        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <label className="flex items-center space-x-2 mb-3">
+                            <input
+                              type="checkbox"
+                              checked={configuracao.coletarDados}
+                              onChange={(e) => setConfiguracao({ ...configuracao, coletarDados: e.target.checked })}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="text-sm font-medium text-blue-900">Coletar dados do cliente antes do resultado</span>
+                          </label>
+                          
+                          {configuracao.coletarDados && (
+                            <div className="ml-6 mt-3 space-y-2">
+                              <h4 className="text-xs font-medium text-blue-700 mb-2">Campos para coletar:</h4>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={configuracao.camposColeta.nome}
+                                    onChange={(e) => setConfiguracao({ 
+                                      ...configuracao, 
+                                      camposColeta: { ...configuracao.camposColeta, nome: e.target.checked } 
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <span className="text-sm text-blue-700">Nome</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={configuracao.camposColeta.email}
+                                    onChange={(e) => setConfiguracao({ 
+                                      ...configuracao, 
+                                      camposColeta: { ...configuracao.camposColeta, email: e.target.checked } 
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <span className="text-sm text-blue-700">Email</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={configuracao.camposColeta.telefone}
+                                    onChange={(e) => setConfiguracao({ 
+                                      ...configuracao, 
+                                      camposColeta: { ...configuracao.camposColeta, telefone: e.target.checked } 
+                                    })}
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <span className="text-sm text-blue-700">Telefone</span>
+                                </div>
+                              </div>
+                              <div className="mt-3">
+                                <label className="block text-sm font-medium text-blue-700 mb-2">
+                                  Mensagem de agradecimento (opcional)
+                                </label>
+                                <textarea
+                                  value={configuracao.mensagemPersonalizada}
+                                  onChange={(e) => setConfiguracao({ ...configuracao, mensagemPersonalizada: e.target.value })}
+                                  placeholder="Obrigado por preencher! Seu resultado será enviado em breve."
+                                  rows={2}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <p className="text-xs text-blue-600 mt-1">
+                                  💡 Esta mensagem aparecerá após o cliente enviar os dados.
+                                </p>
+                              </div>
+                              <p className="text-xs text-blue-600 mt-2">
+                                💡 Os dados coletados serão salvos automaticamente como leads na sua área de gestão.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                         </div>
                       )}
                     </div>

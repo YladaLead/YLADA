@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/c/CoachSidebar"
+import CoachSidebar from "@/components/coach/CoachSidebar"
 
 export default function CoachLeads() {
   return (

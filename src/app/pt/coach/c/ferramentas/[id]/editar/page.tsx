@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import CoachNavBar from '@/components/c/CoachNavBar'
+import CoachNavBar from '@/components/coach/CoachNavBar'
 import { getAppUrl, buildCoachToolUrl } from '@/lib/url-utils'
 
 interface Configuracao {

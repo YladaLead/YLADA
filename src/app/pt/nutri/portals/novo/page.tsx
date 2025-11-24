@@ -48,6 +48,13 @@ function NovoPortalNutriContent() {
   const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
   const [verificandoShortCode, setVerificandoShortCode] = useState(false)
   const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
+  const [coletarDados, setColetarDados] = useState(true)
+  const [camposColeta, setCamposColeta] = useState({
+    nome: true,
+    email: true,
+    telefone: false
+  })
+  const [mensagemPersonalizada, setMensagemPersonalizada] = useState('')
 
   useEffect(() => {
     carregarFerramentas()
@@ -167,6 +174,11 @@ function NovoPortalNutriContent() {
           tools_order: selectedTools,
           generate_short_url: generateShortUrl,
           custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null,
+          leader_data_collection: {
+            coletar_dados: coletarDados,
+            campos_coleta: camposColeta,
+            mensagem_personalizada: mensagemPersonalizada
+          }
         })
       })
 
@@ -528,6 +540,76 @@ function NovoPortalNutriContent() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Coletar Dados do Cliente */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Coleta de Dados do Cliente</h2>
+            
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <label className="flex items-center space-x-2 mb-3">
+                <input
+                  type="checkbox"
+                  checked={coletarDados}
+                  onChange={(e) => setColetarDados(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-blue-900">Coletar dados do cliente ao acessar o portal</span>
+              </label>
+              
+              {coletarDados && (
+                <div className="ml-6 mt-3 space-y-2">
+                  <h4 className="text-xs font-medium text-blue-700 mb-2">Campos para coletar:</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={camposColeta.nome}
+                        onChange={(e) => setCamposColeta({ ...camposColeta, nome: e.target.checked })}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-blue-700">Nome</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={camposColeta.email}
+                        onChange={(e) => setCamposColeta({ ...camposColeta, email: e.target.checked })}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-blue-700">Email</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={camposColeta.telefone}
+                        onChange={(e) => setCamposColeta({ ...camposColeta, telefone: e.target.checked })}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-blue-700">Telefone</span>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-blue-700 mb-2">
+                      Mensagem de agradecimento (opcional)
+                    </label>
+                    <textarea
+                      value={mensagemPersonalizada}
+                      onChange={(e) => setMensagemPersonalizada(e.target.value)}
+                      placeholder="Obrigado por acessar! Seu acesso foi liberado."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <p className="text-xs text-blue-600 mt-1">
+                      💡 Esta mensagem aparecerá após o cliente enviar os dados.
+                    </p>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">
+                    💡 Os dados coletados serão salvos automaticamente como leads na sua área de gestão.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Seleção de Ferramentas */}

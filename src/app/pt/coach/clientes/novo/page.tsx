@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/c/CoachSidebar"
+import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 

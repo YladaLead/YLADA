@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachNavBar from '@/components/c/CoachNavBar'
+import CoachNavBar from '@/components/coach/CoachNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface Tool {
@@ -47,6 +47,7 @@ function NovoPortalCoachContent() {
     email: true,
     telefone: false
   })
+  const [mensagemPersonalizada, setMensagemPersonalizada] = useState('')
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [checkingSlug, setCheckingSlug] = useState(false)
   const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
@@ -173,12 +174,11 @@ function NovoPortalCoachContent() {
           tools_order: selectedTools,
           generate_short_url: generateShortUrl,
           custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null,
-          collect_leader_data: coletarDados,
-          leader_data_fields: coletarDados ? {
-            name: camposColeta.nome,
-            email: camposColeta.email,
-            phone: camposColeta.telefone
-          } : null,
+          leader_data_collection: {
+            coletar_dados: coletarDados,
+            campos_coleta: camposColeta,
+            mensagem_personalizada: mensagemPersonalizada
+          }
         })
       })
 
@@ -588,6 +588,21 @@ function NovoPortalCoachContent() {
                       />
                       <span className="text-sm text-purple-700">Telefone</span>
                     </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-purple-700 mb-2">
+                      Mensagem de agradecimento (opcional)
+                    </label>
+                    <textarea
+                      value={mensagemPersonalizada}
+                      onChange={(e) => setMensagemPersonalizada(e.target.value)}
+                      placeholder="Obrigado por acessar! Seu acesso foi liberado."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    />
+                    <p className="text-xs text-purple-600 mt-1">
+                      💡 Esta mensagem aparecerá após o cliente enviar os dados.
+                    </p>
                   </div>
                   <p className="text-xs text-purple-600 mt-2">
                     💡 Os dados coletados serão salvos automaticamente como leads na sua área de gestão.

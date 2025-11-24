@@ -15,7 +15,7 @@ import {
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/c/CoachSidebar"
+import CoachSidebar from "@/components/coach/CoachSidebar"
 import KanbanConfigModal from '@/components/nutri/KanbanConfigModal'
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'

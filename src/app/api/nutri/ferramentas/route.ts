@@ -188,7 +188,8 @@ export async function POST(request: NextRequest) {
       cta_button_text,
       custom_whatsapp_message,
       profession = 'nutri',
-      generate_short_url = false
+      generate_short_url = false,
+      leader_data_collection
     } = body
 
     // 🔒 Usar user_id do token (seguro), não do body
@@ -400,7 +401,8 @@ export async function POST(request: NextRequest) {
       profession: profession || 'nutri',
       status: 'active',
       views: 0,
-      leads_count: 0
+      leads_count: 0,
+      leader_data_collection: leader_data_collection || null
     }
     
     // Adicionar content sempre (objeto vazio se não tiver)

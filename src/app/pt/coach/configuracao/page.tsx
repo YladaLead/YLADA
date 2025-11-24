@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
-import CoachNavBar from "@/components/c/CoachNavBar"
+import CoachNavBar from "@/components/coach/CoachNavBar"
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import { translateError } from '@/lib/error-messages'

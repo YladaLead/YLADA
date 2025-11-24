@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachNavBar from '@/components/c/CoachNavBar'
+import CoachNavBar from '@/components/coach/CoachNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface Tool {

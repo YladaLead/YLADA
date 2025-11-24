@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import CoachNavBar from '@/components/c/CoachNavBar'
+import CoachNavBar from '@/components/coach/CoachNavBar'
 import { getAppUrl } from '@/lib/url-utils'
 import { normalizeTemplateSlug, CANONICAL_TEMPLATE_SLUGS } from '@/lib/template-slug-map'
 
@@ -37,6 +37,7 @@ interface Configuracao {
     email: boolean
     telefone: boolean
   }
+  mensagemPersonalizada: string
 }
 
 function NovaFerramentaCoachContent() {
@@ -61,7 +62,8 @@ function NovaFerramentaCoachContent() {
       nome: true,
       email: true,
       telefone: false
-    }
+    },
+    mensagemPersonalizada: ''
   })
   const [urlDisponivel, setUrlDisponivel] = useState(true)
   const [emojiEditadoManual, setEmojiEditadoManual] = useState(false) // Flag para saber se usuário já editou
@@ -476,12 +478,11 @@ function NovaFerramentaCoachContent() {
         profession: 'coach',
         generate_short_url: generateShortUrl,
         custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null,
-        collect_leader_data: configuracao.coletarDados,
-        leader_data_fields: configuracao.coletarDados ? {
-          name: configuracao.camposColeta.nome,
-          email: configuracao.camposColeta.email,
-          phone: configuracao.camposColeta.telefone
-        } : null
+        leader_data_collection: {
+          coletar_dados: configuracao.coletarDados,
+          campos_coleta: configuracao.camposColeta,
+          mensagem_personalizada: configuracao.mensagemPersonalizada || ''
+        }
       }
 
       const response = await fetch('/api/c/ferramentas', {
@@ -1355,6 +1356,21 @@ function NovaFerramentaCoachContent() {
                                   />
                                   <span className="text-sm text-purple-700">Telefone</span>
                                 </div>
+                              </div>
+                              <div className="mt-3">
+                                <label className="block text-sm font-medium text-purple-700 mb-2">
+                                  Mensagem de agradecimento (opcional)
+                                </label>
+                                <textarea
+                                  value={configuracao.mensagemPersonalizada}
+                                  onChange={(e) => setConfiguracao({ ...configuracao, mensagemPersonalizada: e.target.value })}
+                                  placeholder="Obrigado por preencher! Seu resultado será enviado em breve."
+                                  rows={2}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                />
+                                <p className="text-xs text-purple-600 mt-1">
+                                  💡 Esta mensagem aparecerá após o cliente enviar os dados.
+                                </p>
                               </div>
                               <p className="text-xs text-purple-600 mt-2">
                                 💡 Os dados coletados serão salvos automaticamente como leads na sua área de gestão.

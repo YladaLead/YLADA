@@ -167,7 +167,8 @@ export async function POST(request: NextRequest) {
       custom_colors,
       header_text,
       footer_text,
-      tools_order = []
+      tools_order = [],
+      leader_data_collection
     } = body
 
     // Validações
@@ -268,7 +269,8 @@ export async function POST(request: NextRequest) {
       footer_text,
       tools_order,
       profession: 'nutri', // Área do portal
-      status: 'active'
+      status: 'active',
+      leader_data_collection: leader_data_collection || null
     }
 
     if (shortCode) {

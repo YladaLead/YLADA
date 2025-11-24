@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import CoachNavBar from '@/components/c/CoachNavBar'
+import CoachNavBar from '@/components/coach/CoachNavBar'
 import { buildCoachToolUrl, buildCoachToolUrlFallback, buildShortUrl } from '@/lib/url-utils'
 
 // 🚀 OTIMIZAÇÃO: Lazy load do QRCode (componente pesado, só usado quando necessário)

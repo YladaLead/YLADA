@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/c/CoachSidebar"
+import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function RespostasFormulario() {

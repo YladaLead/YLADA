@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/c/CoachSidebar"
+import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 // Importar tipos e componentes da página de criação

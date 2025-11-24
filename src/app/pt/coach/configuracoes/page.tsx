@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import CoachNavBar from "@/components/c/CoachNavBar"
+import CoachNavBar from "@/components/coach/CoachNavBar"
 
 export default function CoachConfiguracoes() {
   const [usuario, setUsuario] = useState({

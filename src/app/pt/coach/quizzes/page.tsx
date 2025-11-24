@@ -7,7 +7,7 @@ import RequireSubscription from '@/components/auth/RequireSubscription'
 import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 
-const CoachNavBar = dynamic(() => import('@/components/c/CoachNavBar'), {
+const CoachNavBar = dynamic(() => import('@/components/coach/CoachNavBar'), {
   ssr: true,
   loading: () => <div className="h-16 bg-white border-b border-gray-200 animate-pulse" />
 })
