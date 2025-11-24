@@ -17,19 +17,73 @@ export async function GET(request: NextRequest) {
   const redirectTo = requestUrl.searchParams.get('redirect_to')
   const error = requestUrl.searchParams.get('error')
   
-  // Se for tipo 'recovery' (reset de senha), redirecionar para página de reset
+  // Se for tipo 'recovery' (reset de senha), determinar área do usuário e redirecionar
   if (type === 'recovery' && token) {
-    console.log('🔄 Link de recovery detectado, redirecionando para reset de senha')
-    const resetUrl = new URL('/admin/reset-password', requestUrl.origin)
-    resetUrl.searchParams.set('token', token)
-    resetUrl.searchParams.set('type', type)
-    return NextResponse.redirect(resetUrl)
+    console.log('🔄 Link de recovery detectado, determinando área do usuário...')
+    
+    try {
+      // Tentar verificar o token para obter o email do usuário
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      const cookieStore = await cookies()
+      
+      const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll() {},
+        },
+      })
+
+      const { data: verifyData } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'recovery',
+      })
+
+      let resetPath = '/pt/wellness/reset-password' // padrão
+
+      if (verifyData?.user?.email) {
+        // Buscar perfil do usuário para determinar a área
+        const { data: profile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('perfil')
+          .eq('email', verifyData.user.email)
+          .maybeSingle()
+
+        if (profile?.perfil) {
+          if (profile.perfil === 'nutri') {
+            resetPath = '/pt/nutri/reset-password'
+          } else if (profile.perfil === 'coach') {
+            resetPath = '/pt/coach/reset-password'
+          } else if (profile.perfil === 'admin') {
+            resetPath = '/admin/reset-password'
+          } else {
+            resetPath = '/pt/wellness/reset-password'
+          }
+        }
+      }
+
+      const resetUrl = new URL(resetPath, requestUrl.origin)
+      resetUrl.searchParams.set('token', token)
+      resetUrl.searchParams.set('type', type)
+      console.log('🔄 Redirecionando para:', resetPath)
+      return NextResponse.redirect(resetUrl)
+    } catch (err) {
+      console.error('❌ Erro ao determinar área, usando padrão:', err)
+      // Fallback: redirecionar para Wellness
+      const resetUrl = new URL('/pt/wellness/reset-password', requestUrl.origin)
+      resetUrl.searchParams.set('token', token)
+      resetUrl.searchParams.set('type', type)
+      return NextResponse.redirect(resetUrl)
+    }
   }
   
   // Se houver erro, verificar se é recovery e redirecionar para reset com erro
   if (error && type === 'recovery') {
     console.error('❌ Erro no verify (recovery):', error)
-    const resetUrl = new URL('/admin/reset-password', requestUrl.origin)
+    // Usar Wellness como padrão para erro
+    const resetUrl = new URL('/pt/wellness/reset-password', requestUrl.origin)
     resetUrl.searchParams.set('error', error)
     const errorDesc = requestUrl.searchParams.get('error_description')
     if (errorDesc) {
