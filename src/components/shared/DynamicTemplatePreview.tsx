@@ -466,9 +466,20 @@ export default function DynamicTemplatePreview({
             <p className="font-semibold text-gray-900">{entry.diagnostico.diagnostico}</p>
             <p className="text-gray-700">{entry.diagnostico.causaRaiz}</p>
             <p className="text-gray-700">{entry.diagnostico.acaoImediata}</p>
-            <p className="text-gray-700">{entry.diagnostico.plano7Dias}</p>
-            <p className="text-gray-700">{entry.diagnostico.suplementacao}</p>
-            <p className="text-gray-700">{entry.diagnostico.alimentacao}</p>
+            {/* Campos removidos para área Nutri: plano7Dias, suplementacao, alimentacao */}
+            {profession !== 'nutri' && (
+              <>
+                {entry.diagnostico.plano7Dias && (
+                  <p className="text-gray-700">{entry.diagnostico.plano7Dias}</p>
+                )}
+                {entry.diagnostico.suplementacao && (
+                  <p className="text-gray-700">{entry.diagnostico.suplementacao}</p>
+                )}
+                {entry.diagnostico.alimentacao && (
+                  <p className="text-gray-700">{entry.diagnostico.alimentacao}</p>
+                )}
+              </>
+            )}
             {entry.diagnostico.proximoPasso && (
               <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">
                 {entry.diagnostico.proximoPasso}
