@@ -250,19 +250,48 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar se o slug já existe PARA ESTE USUÁRIO (slugs podem ser repetidos entre usuários diferentes)
-    const { data: existing } = await supabaseAdmin
-      .from('user_templates')
-      .select('id')
-      .eq('slug', slug)
-      .eq('user_id', authenticatedUserId) // ✅ Verificar apenas para o usuário atual
-      .maybeSingle()
+    const normalizeSlug = (value: string) => {
+      return value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'link'
+    }
 
-    if (existing) {
-      return NextResponse.json(
-        { error: 'Este nome já está em uso por você. Escolha outro. (Outras pessoas podem usar o mesmo nome porque a URL final inclui o nome único de cada usuário na composição)' },
-        { status: 409 }
-      )
+    const baseSlug = normalizeSlug(slug)
+
+    const slugExists = async (candidate: string) => {
+      const { data } = await supabaseAdmin
+        .from('user_templates')
+        .select('id')
+        .eq('slug', candidate)
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+
+      return !!data
+    }
+
+    let finalSlug = baseSlug
+    let slugAdjusted = false
+
+    if (await slugExists(finalSlug)) {
+      for (let attempt = 2; attempt <= 50; attempt++) {
+        const candidate = `${baseSlug}-${attempt}`
+        if (!(await slugExists(candidate))) {
+          finalSlug = candidate
+          slugAdjusted = true
+          break
+        }
+      }
+
+      if (!slugAdjusted) {
+        return NextResponse.json(
+          { error: 'Não foi possível gerar um link único automaticamente. Escolha outro nome e tente novamente.' },
+          { status: 409 }
+        )
+      }
     }
 
     // ✅ Validar template antes de criar (usando helper reutilizável)
@@ -358,7 +387,7 @@ export async function POST(request: NextRequest) {
       user_id: authenticatedUserId, // 🔒 Sempre usar user_id do token
       template_id: templateIdToUse || null,
       template_slug: templateSlugCanonico, // ✅ Slug canônico do banco ou normalizado
-      slug,
+      slug: finalSlug,
       title,
       description: description || null,
       emoji: emoji || null,
@@ -445,7 +474,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         tool: data,
-        message: 'Ferramenta criada com sucesso!'
+        message: slugAdjusted
+          ? `Ferramenta criada com sucesso! Ajustamos o link para: ${finalSlug}`
+          : 'Ferramenta criada com sucesso!'
       },
       { status: 201 }
     )
