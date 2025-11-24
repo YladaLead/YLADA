@@ -392,6 +392,18 @@ export default function LoginForm({
           </button>
         </form>
 
+        {/* Link "Esqueci minha senha" - apenas no modo login */}
+        {!isSignUp && (
+          <div className="mt-4 text-center">
+            <a
+              href={`/pt/${perfil === 'wellness' ? 'wellness' : perfil === 'nutri' ? 'nutri' : perfil === 'coach' ? 'coach' : 'wellness'}/recuperar-senha`}
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium underline"
+            >
+              Esqueci minha senha
+            </a>
+          </div>
+        )}
+
         {/* Toggle entre Login e Sign Up */}
         <div className="mt-6 sm:mt-8 text-center">
           <button
