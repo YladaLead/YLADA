@@ -28,7 +28,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
         '⚡ AÇÃO IMEDIATA: Ajustar consumo de fibras solúveis, incluir alimentos prebióticos, fracionar melhor as refeições e aumentar hidratação ao longo do dia.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Solicite uma análise de bem-estar completa para mapear intolerâncias, definir uso de probióticos específicos e alinhar um protocolo de restauração intestinal sob acompanhamento profissional.'
-    }
+    },
     disbioseIntestinal: {
       diagnostico:
         '📋 DIAGNÓSTICO: Os sinais apontam para disbiose intestinal com provável inflamação, produção irregular de ácidos graxos e comprometimento da absorção de nutrientes.'

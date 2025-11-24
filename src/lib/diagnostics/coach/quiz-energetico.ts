@@ -14,7 +14,7 @@ export const quizEnergeticoDiagnosticos: DiagnosticosPorFerramenta = {
     },
     energiaModerada: {
       diagnostico: '📋 DIAGNÓSTICO: Energia moderada que pode ser otimizada com estratégias personalizadas',
-      causaRaiz: '🔍 CAUSA RAIZ: Boa base energética estabelecida, mas ajustes nutricionais específicos podem elevar sua vitalidade significativamente. Estudos indicam que otimizações estratégicas podem aumentar energia em até 35%. Uma análise detalhada mostra exatamente onde ganhar performance'
+      causaRaiz: '🔍 CAUSA RAIZ: Boa base energética estabelecida, mas ajustes nutricionais específicos podem elevar sua vitalidade significativamente. Estudos indicam que otimizações estratégicas podem aumentar energia em até 35%. Uma análise detalhada mostra exatamente onde ganhar performance',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e considere avaliação para identificar estratégias de timing de bem-estar que potencializam energia. Às vezes pequenos ajustes geram grandes melhorias',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como estratégias avançadas podem elevar ainda mais sua vitalidade.'
     }
