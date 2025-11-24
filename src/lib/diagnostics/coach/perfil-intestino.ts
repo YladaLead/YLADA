@@ -23,7 +23,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
       diagnostico:
         '📋 DIAGNÓSTICO: Há sinais de intestino preso ou sensível, com pequenas alterações no ritmo e indícios de fermentação excessiva.',
       causaRaiz:
-        '🔍 CAUSA RAIZ: Oscilações de fibras, baixa hidratação, rotina alimentar irregular e possíveis desequilíbrios leves da microbiota podem explicar os sintomas.'
+        '🔍 CAUSA RAIZ: Oscilações de fibras, baixa hidratação, rotina alimentar irregular e possíveis desequilíbrios leves da microbiota podem explicar os sintomas.',
       acaoImediata:
         '⚡ AÇÃO IMEDIATA: Ajustar consumo de fibras solúveis, incluir alimentos prebióticos, fracionar melhor as refeições e aumentar hidratação ao longo do dia.'
       proximoPasso:
