@@ -25,3 +25,4 @@ export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como otimizar sua nutrição de forma completa e equilibrada com apoio personalizado.'
     }
   }
+}
