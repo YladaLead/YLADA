@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
@@ -28,7 +28,7 @@ function CoachAcompanhamentoContent() {
     const carregarClientes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch('/api/coach/clientes?status=ativa&limit=50', {
+        const response = await fetch('/api/c/clientes?status=ativa&limit=50', {
           credentials: 'include'
         })
 

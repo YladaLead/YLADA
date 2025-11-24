@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
@@ -70,7 +70,7 @@ function NovoClienteNutriContent() {
     setSalvando(true)
 
     try {
-      const response = await fetch('/api/coach/clientes', {
+      const response = await fetch('/api/c/clientes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

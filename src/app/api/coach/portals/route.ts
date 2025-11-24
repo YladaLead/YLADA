@@ -169,7 +169,9 @@ export async function POST(request: NextRequest) {
       custom_colors,
       header_text,
       footer_text,
-      tools_order = []
+      tools_order = [],
+      collect_leader_data = false,
+      leader_data_fields = null
     } = body
 
     // Validações
@@ -271,6 +273,27 @@ export async function POST(request: NextRequest) {
       tools_order,
       profession: 'coach', // Área do portal
       status: 'active'
+    }
+    
+    // Adicionar configuração de coleta de dados do líder
+    if (collect_leader_data && leader_data_fields) {
+      insertData.leader_data_collection = {
+        enabled: true,
+        fields: {
+          name: leader_data_fields.name || false,
+          email: leader_data_fields.email || false,
+          phone: leader_data_fields.phone || false
+        }
+      }
+    } else {
+      insertData.leader_data_collection = {
+        enabled: false,
+        fields: {
+          name: false,
+          email: false,
+          phone: false
+        }
+      }
     }
 
     if (shortCode) {

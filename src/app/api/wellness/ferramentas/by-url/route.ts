@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
             { status: 403 }
           )
         }
-
+        
         // Buscar perfil separadamente e adicionar aos dados
         const { data: userProfile } = await supabaseAdmin
           .from('user_profiles')

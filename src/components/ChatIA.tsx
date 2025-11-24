@@ -236,7 +236,7 @@ export default function ChatIA({ isOpen, onClose, area = 'nutri' }: ChatIAProps)
       }
 
       if (perguntaLower.includes('link para cadastro') || perguntaLower.includes('acesso autorizado')) {
-        return 'O link para a pessoa autorizada se cadastrar é: `https://www.ylada.com/pt/coach/login`\n\nEla deve clicar em "Cadastrar", usar o email autorizado e escolher a própria senha. A assinatura será ativada automaticamente após a confirmação do email.'
+        return 'O link para a pessoa autorizada se cadastrar é: `https://www.ylada.com/pt/c/login`\n\nEla deve clicar em "Cadastrar", usar o email autorizado e escolher a própria senha. A assinatura será ativada automaticamente após a confirmação do email.'
       }
 
       if (perguntaLower.includes('ver autorizações') || perguntaLower.includes('lista autorizações')) {

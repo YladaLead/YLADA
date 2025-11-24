@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
 
@@ -51,7 +51,7 @@ function ClientesCoachContent() {
         params.append('order_by', 'created_at')
         params.append('order', 'desc')
 
-        const response = await fetch(`/api/coach/clientes?${params.toString()}`, {
+        const response = await fetch(`/api/c/clientes?${params.toString()}`, {
           credentials: 'include'
         })
 

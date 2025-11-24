@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import CoachNavBar from '@/components/coach/CoachNavBar'
+import CoachNavBar from '@/components/c/CoachNavBar'
 import { buildCoachToolUrl, buildCoachToolUrlFallback, buildShortUrl } from '@/lib/url-utils'
 
 // 🚀 OTIMIZAÇÃO: Lazy load do QRCode (componente pesado, só usado quando necessário)
@@ -49,7 +49,7 @@ export default function FerramentasCoach() {
       setLoading(true)
 
       const response = await fetch(
-        `/api/coach/ferramentas?profession=coach`,
+        `/api/c/ferramentas?profession=coach`,
         {
           credentials: 'include'
         }
@@ -76,10 +76,10 @@ export default function FerramentasCoach() {
         // Construir URL - quizzes personalizados usam rota diferente
         let url = ''
         if (tool.is_quiz || tool.template_slug === 'quiz-personalizado') {
-          // URL para quiz personalizado: /pt/coach/{user-slug}/quiz/{slug}
+          // URL para quiz personalizado: /pt/c/{user-slug}/quiz/{slug}
           if (tool.user_profiles?.user_slug) {
             const baseUrl = typeof window !== 'undefined' ? window.location.protocol + '//' + window.location.host : 'https://ylada.app'
-            url = `${baseUrl}/pt/coach/${tool.user_profiles.user_slug}/quiz/${tool.slug}`
+            url = `${baseUrl}/pt/c/${tool.user_profiles.user_slug}/quiz/${tool.slug}`
           } else {
             url = buildCoachToolUrlFallback(tool.id)
           }
@@ -125,7 +125,7 @@ export default function FerramentasCoach() {
 
     try {
       setFerramentaExcluindoId(id)
-      const response = await fetch(`/api/coach/ferramentas?id=${id}`, {
+      const response = await fetch(`/api/c/ferramentas?id=${id}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -168,6 +168,24 @@ export default function FerramentasCoach() {
       <CoachNavBar showTitle={true} title="Meus Links" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header com botão Criar Novo Link */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              🔗 Meus Links
+            </h1>
+            <p className="text-gray-600">
+              Gerencie todos os seus links personalizados
+            </p>
+          </div>
+          <Link
+            href="/pt/coach/ferramentas/nova"
+            className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105 shadow-lg font-medium"
+          >
+            + Criar Novo Link
+          </Link>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">

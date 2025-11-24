@@ -84,7 +84,7 @@ export default function EscolhaPerfilPage() {
 
             {/* Coach de Bem-estar */}
             <Link 
-              href="/pt/coach"
+              href="/pt/c"
               className="group bg-white border border-gray-200 rounded-2xl p-8 hover:border-purple-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="text-center">

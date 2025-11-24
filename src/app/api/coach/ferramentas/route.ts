@@ -188,7 +188,9 @@ export async function POST(request: NextRequest) {
       cta_button_text,
       custom_whatsapp_message,
       profession = 'coach',
-      generate_short_url = false
+      generate_short_url = false,
+      collect_leader_data = false,
+      leader_data_fields = null
     } = body
 
     // 🔒 Usar user_id do token (seguro), não do body
@@ -308,6 +310,27 @@ export async function POST(request: NextRequest) {
     // Garantir que content seja sempre um objeto válido
     if (typeof content !== 'object' || Array.isArray(content)) {
       content = {}
+    }
+    
+    // Adicionar configuração de coleta de dados do líder ao content
+    if (collect_leader_data && leader_data_fields) {
+      content.leader_data_collection = {
+        enabled: true,
+        fields: {
+          name: leader_data_fields.name || false,
+          email: leader_data_fields.email || false,
+          phone: leader_data_fields.phone || false
+        }
+      }
+    } else {
+      content.leader_data_collection = {
+        enabled: false,
+        fields: {
+          name: false,
+          email: false,
+          phone: false
+        }
+      }
     }
 
     // Gerar código curto se solicitado

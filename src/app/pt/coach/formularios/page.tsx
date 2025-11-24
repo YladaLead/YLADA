@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function FormulariosCoach() {
@@ -37,7 +37,7 @@ function FormulariosCoachContent() {
         // Removendo filtro de is_active temporariamente para ver todos os formulários
         // params.append('is_active', 'true')
 
-        const response = await fetch(`/api/coach/formularios?${params.toString()}`, {
+        const response = await fetch(`/api/c/formularios?${params.toString()}`, {
           credentials: 'include'
         })
 

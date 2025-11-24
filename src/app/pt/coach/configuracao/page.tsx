@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
-import CoachNavBar from "@/components/coach/CoachNavBar"
+import CoachNavBar from "@/components/c/CoachNavBar"
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import { translateError } from '@/lib/error-messages'
@@ -59,7 +59,7 @@ function CoachConfiguracaoContent() {
       const slugTratado = tratarSlug(slug)
       
       // Verificar se slug já existe para outro usuário
-      const response = await fetch(`/api/coach/profile?user_slug=${encodeURIComponent(slugTratado)}`, {
+      const response = await fetch(`/api/c/profile?user_slug=${encodeURIComponent(slugTratado)}`, {
         credentials: 'include'
       })
       
@@ -115,7 +115,7 @@ function CoachConfiguracaoContent() {
       setCarregando(true)
       
       // Adicionar timestamp para evitar cache
-      const response = await fetch(`/api/coach/profile?t=${Date.now()}`, {
+      const response = await fetch(`/api/c/profile?t=${Date.now()}`, {
         credentials: 'include',
         cache: 'no-store' // Forçar não usar cache
       })
@@ -216,7 +216,7 @@ function CoachConfiguracaoContent() {
       setSalvando(true)
       setSalvoComSucesso(false)
 
-      const response = await fetch('/api/coach/profile', {
+      const response = await fetch('/api/c/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -580,7 +580,7 @@ function CoachConfiguracaoContent() {
 
                 try {
                   setSalvandoSenha(true)
-                  const response = await fetch('/api/coach/change-password', {
+                  const response = await fetch('/api/c/change-password', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',

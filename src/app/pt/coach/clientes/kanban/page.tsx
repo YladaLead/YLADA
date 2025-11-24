@@ -15,7 +15,7 @@ import {
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import KanbanConfigModal from '@/components/nutri/KanbanConfigModal'
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
@@ -303,7 +303,7 @@ function KanbanContent() {
     const carregarConfig = async () => {
       try {
         setCarregandoConfig(true)
-        const response = await fetch('/api/coach/kanban/config', {
+        const response = await fetch('/api/c/kanban/config', {
           credentials: 'include'
         })
 
@@ -340,7 +340,7 @@ function KanbanContent() {
         params.append('order_by', 'created_at')
         params.append('order', 'asc')
 
-        const response = await fetch(`/api/coach/clientes?${params.toString()}`, {
+        const response = await fetch(`/api/c/clientes?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -369,7 +369,7 @@ function KanbanContent() {
   // Salvar configuração
   const handleSaveConfig = async (config: { columns: Column[], card_fields: CardField[], quick_actions: QuickAction[] }) => {
     try {
-      const response = await fetch('/api/coach/kanban/config', {
+      const response = await fetch('/api/c/kanban/config', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -437,7 +437,7 @@ function KanbanContent() {
     setAtualizacaoPendente(clientId)
 
     try {
-      const response = await fetch(`/api/coach/clientes/${clientId}`, {
+      const response = await fetch(`/api/c/clientes/${clientId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

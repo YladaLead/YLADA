@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import CoachNavBar from '@/components/coach/CoachNavBar'
+import CoachNavBar from '@/components/c/CoachNavBar'
 import { getAppUrl, buildCoachToolUrl } from '@/lib/url-utils'
 
 interface Configuracao {
@@ -166,7 +166,7 @@ export default function EditarFerramentaCoach() {
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
-        const response = await fetch('/api/wellness/profile') // TODO: Criar /api/coach/profile quando necessário
+        const response = await fetch('/api/wellness/profile') // TODO: Criar /api/c/profile quando necessário
         if (response.ok) {
           const data = await response.json()
           if (data.profile?.userSlug) {
@@ -197,7 +197,7 @@ export default function EditarFerramentaCoach() {
       setLoading(true)
 
       const response = await fetch(
-        `/api/coach/ferramentas?id=${toolId}&profession=coach`,
+        `/api/c/ferramentas?id=${toolId}&profession=coach`,
         {
           credentials: 'include'
         }
@@ -225,8 +225,8 @@ export default function EditarFerramentaCoach() {
       // Calcular URL completa baseada no slug e userSlug atual
       const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
       const urlCompletaCalculada = userSlug 
-        ? `${baseUrl}/pt/coach/${userSlug}/${tool.slug}`
-        : `${baseUrl}/pt/coach/[configure-seu-slug]/${tool.slug}`
+        ? `${baseUrl}/pt/c/${userSlug}/${tool.slug}`
+        : `${baseUrl}/pt/c/[configure-seu-slug]/${tool.slug}`
       
       setConfiguracao({
         urlPersonalizada: tool.slug,
@@ -242,7 +242,7 @@ export default function EditarFerramentaCoach() {
       // Atualizar URL completa se userSlug mudar depois
       if (userSlug) {
         const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
-        const novaUrl = `${baseUrl}/pt/coach/${userSlug}/${tool.slug}`
+        const novaUrl = `${baseUrl}/pt/c/${userSlug}/${tool.slug}`
         setConfiguracao(prev => ({ ...prev, urlCompleta: novaUrl }))
       }
       setUrlDisponivel(true)
@@ -271,7 +271,7 @@ export default function EditarFerramentaCoach() {
     }
 
     try {
-      const response = await fetch(`/api/coach/ferramentas/check-slug?slug=${encodeURIComponent(url)}`)
+      const response = await fetch(`/api/c/ferramentas/check-slug?slug=${encodeURIComponent(url)}`)
       const data = await response.json()
       
       setUrlDisponivel(data.available)
@@ -297,8 +297,8 @@ export default function EditarFerramentaCoach() {
       
       const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
       const url = userSlug 
-        ? `${baseUrl}/pt/coach/${userSlug}/${slugTratado}`
-        : `${baseUrl}/pt/coach/[configure-seu-slug]/${slugTratado}`
+        ? `${baseUrl}/pt/c/${userSlug}/${slugTratado}`
+        : `${baseUrl}/pt/c/[configure-seu-slug]/${slugTratado}`
       
       setConfiguracao(prev => ({ 
         ...prev, 

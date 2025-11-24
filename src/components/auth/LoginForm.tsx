@@ -37,7 +37,7 @@ export default function LoginForm({
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
-          console.log('✅ Já autenticado, redirecionando para:', redirectPath)
+            console.log('✅ Já autenticado, redirecionando para:', redirectPath)
           router.replace(redirectPath)
         }
       } catch (err) {

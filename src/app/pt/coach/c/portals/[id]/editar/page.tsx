@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachNavBar from '@/components/coach/CoachNavBar'
+import CoachNavBar from '@/components/c/CoachNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface Tool {
@@ -66,7 +66,7 @@ function EditarPortalCoachContent() {
   const carregarUserSlug = async () => {
     try {
       setCarregandoSlug(true)
-      const response = await fetch('/api/wellness/profile', { // TODO: Criar /api/coach/profile quando necessário
+      const response = await fetch('/api/wellness/profile', { // TODO: Criar /api/c/profile quando necessário
         credentials: 'include'
       })
       if (response.ok) {
@@ -84,7 +84,7 @@ function EditarPortalCoachContent() {
 
   const carregarFerramentas = async () => {
     try {
-      const response = await fetch('/api/coach/ferramentas', {
+      const response = await fetch('/api/c/ferramentas', {
         credentials: 'include'
       })
 
@@ -102,7 +102,7 @@ function EditarPortalCoachContent() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch(`/api/coach/portals?id=${portalId}`, {
+      const response = await fetch(`/api/c/portals?id=${portalId}`, {
         credentials: 'include'
       })
 
@@ -129,7 +129,7 @@ function EditarPortalCoachContent() {
         }
 
         // Carregar ferramentas do portal
-        const toolsResponse = await fetch(`/api/coach/portals/${portalId}/tools`, {
+        const toolsResponse = await fetch(`/api/c/portals/${portalId}/tools`, {
           credentials: 'include'
         })
         
@@ -165,7 +165,7 @@ function EditarPortalCoachContent() {
 
     setCheckingSlug(true)
     try {
-      const response = await fetch(`/api/coach/portals/check-slug?slug=${encodeURIComponent(slug)}&excludeId=${portalId}`, {
+      const response = await fetch(`/api/c/portals/check-slug?slug=${encodeURIComponent(slug)}&excludeId=${portalId}`, {
         credentials: 'include'
       })
 
@@ -236,7 +236,7 @@ function EditarPortalCoachContent() {
         }
       }
 
-      const portalResponse = await fetch('/api/coach/portals', {
+      const portalResponse = await fetch('/api/c/portals', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -249,7 +249,7 @@ function EditarPortalCoachContent() {
       }
 
       // Atualizar ferramentas do portal
-      await fetch(`/api/coach/portals/${portalId}/tools`, {
+      await fetch(`/api/c/portals/${portalId}/tools`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -319,7 +319,7 @@ function EditarPortalCoachContent() {
                 </label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500">
-                    {typeof window !== 'undefined' ? window.location.hostname : 'ylada.app'}/pt/coach/
+                    {typeof window !== 'undefined' ? window.location.hostname : 'ylada.app'}/pt/c/
                     {userSlug ? (
                       <span className="text-purple-600 font-semibold">{userSlug}</span>
                     ) : (
@@ -600,7 +600,7 @@ function EditarPortalCoachContent() {
                                     setVerificandoShortCode(true)
                                     try {
                                       const response = await fetch(
-                                        `/api/coach/check-short-code?code=${encodeURIComponent(value)}&type=portal&excludeId=${portalId}`
+                                        `/api/c/check-short-code?code=${encodeURIComponent(value)}&type=portal&excludeId=${portalId}`
                                       )
                                       const data = await response.json()
                                       setShortCodeDisponivel(data.available)

@@ -51,6 +51,9 @@ import { tabelaSintomasDiagnosticos } from './diagnostics/nutri/tabela-sintomas'
 import { tabelaSubstituicoesDiagnosticos } from './diagnostics/nutri/tabela-substituicoes'
 import { tipoFomeDiagnosticos } from './diagnostics/nutri/tipo-fome'
 import { disciplinadoEmocionalDiagnosticos } from './diagnostics/nutri/disciplinado-emocional'
+import { perfilIntestinoDiagnosticos } from './diagnostics/nutri/perfil-intestino'
+import { avaliacaoSonoEnergiaDiagnosticos } from './diagnostics/nutri/avaliacao-sono-energia'
+import { quizPedindoDetoxDiagnosticos } from './diagnostics/nutri/quiz-pedindo-detox'
 
 import { avaliacaoEmocionalDiagnosticos as avaliacaoEmocionalDiagnosticosWellness } from './diagnostics/wellness/avaliacao-emocional'
 import { avaliacaoInicialDiagnosticos as avaliacaoInicialDiagnosticosWellness } from './diagnostics/wellness/avaliacao-inicial'
@@ -123,7 +126,10 @@ export {
   tabelaMetasSemanaisDiagnosticos,
   tabelaSintomasDiagnosticos,
   tabelaSubstituicoesDiagnosticos,
-  tipoFomeDiagnosticos
+  tipoFomeDiagnosticos,
+  perfilIntestinoDiagnosticos,
+  avaliacaoSonoEnergiaDiagnosticos,
+  quizPedindoDetoxDiagnosticos
 }
 
 // Função para substituir "nutricionista" por "Coach de bem-estar" nos diagnósticos
@@ -133,9 +139,11 @@ function adaptarDiagnosticoParaCoach(diagnostico: DiagnosticoCompleto | null): D
   const substituirTexto = (texto: string): string => {
     if (!texto) return texto
     
-    // Substituições: nutricionista -> Coach de bem-estar (mantendo variações)
+    // Substituições: nutricionista/nutricional -> Coach de bem-estar/bem-estar
     // IMPORTANTE: Ordem importa! Substituir as mais específicas primeiro
-    return texto
+    
+    // 1. Substituir "nutricionista" (várias variações)
+    let resultado = texto
       // Substituições específicas primeiro (com contexto)
       .replace(/nutricionista profissional/gi, 'Coach de bem-estar profissional')
       .replace(/com uma nutricionista/gi, 'com um Coach de bem-estar')
@@ -144,19 +152,53 @@ function adaptarDiagnosticoParaCoach(diagnostico: DiagnosticoCompleto | null): D
       .replace(/a nutricionista/gi, 'o Coach de bem-estar')
       .replace(/sua nutricionista/gi, 'seu Coach de bem-estar')
       .replace(/uma nutricionista/gi, 'um Coach de bem-estar')
+      .replace(/guiado por nutricionista/gi, 'guiado por Coach de bem-estar')
       // Depois as genéricas (para pegar os casos restantes)
       .replace(/NUTRICIONISTA/gi, 'COACH DE BEM-ESTAR')
       .replace(/Nutricionista/gi, 'Coach de bem-estar')
       .replace(/nutricionista/gi, 'Coach de bem-estar')
+    
+    // 2. Substituir "nutricional" e variações
+    resultado = resultado
+      // Frases completas com "nutricional"
+      .replace(/avaliação nutricional especializada/gi, 'avaliação de bem-estar especializada')
+      .replace(/avaliação nutricional completa/gi, 'avaliação de bem-estar completa')
+      .replace(/avaliação nutricional preventiva/gi, 'avaliação de bem-estar preventiva')
+      .replace(/avaliação nutricional/gi, 'avaliação de bem-estar')
+      .replace(/consulta nutricional/gi, 'consulta de bem-estar')
+      .replace(/análise nutricional completa/gi, 'análise de bem-estar completa')
+      .replace(/análise nutricional/gi, 'análise de bem-estar')
+      .replace(/acompanhamento nutricional especializado/gi, 'acompanhamento de bem-estar especializado')
+      .replace(/acompanhamento nutricional e comportamental/gi, 'acompanhamento de bem-estar e comportamental')
+      .replace(/acompanhamento nutricional preventivo/gi, 'acompanhamento de bem-estar preventivo')
+      .replace(/acompanhamento nutricional/gi, 'acompanhamento de bem-estar')
+      .replace(/marcadores nutricionais/gi, 'marcadores de bem-estar')
+      .replace(/marcadores hormonais e nutricionais/gi, 'marcadores hormonais e de bem-estar')
+      .replace(/estratégias nutricionais otimizadas/gi, 'estratégias de bem-estar otimizadas')
+      .replace(/estratégias nutricionais/gi, 'estratégias de bem-estar')
+      .replace(/plano nutricional/gi, 'plano de bem-estar')
+      .replace(/protocolo nutricional/gi, 'protocolo de bem-estar')
+      // Palavras isoladas "nutricional"
+      .replace(/\bnutricional\b/gi, 'de bem-estar')
+    
+    // 3. Substituir "nutrição" (palavra isolada, não parte de outras palavras)
+    resultado = resultado
+      .replace(/\badequar nutrição\b/gi, 'adequar bem-estar')
+      .replace(/\badequar nutrição ao\b/gi, 'adequar bem-estar ao')
+      .replace(/\bnutrição ao estilo de vida\b/gi, 'bem-estar ao estilo de vida')
+      .replace(/\bà nutrição\b/gi, 'ao bem-estar')
+      .replace(/\bda nutrição\b/gi, 'do bem-estar')
+      .replace(/\bde nutrição\b/gi, 'de bem-estar')
+      .replace(/\bnutrição\b/gi, 'bem-estar')
+    
+    return resultado
   }
 
+  // Retornar apenas os campos necessários (removendo plano7Dias, suplementacao, alimentacao)
   return {
     diagnostico: substituirTexto(diagnostico.diagnostico),
     causaRaiz: substituirTexto(diagnostico.causaRaiz),
     acaoImediata: substituirTexto(diagnostico.acaoImediata),
-    plano7Dias: substituirTexto(diagnostico.plano7Dias),
-    suplementacao: substituirTexto(diagnostico.suplementacao),
-    alimentacao: substituirTexto(diagnostico.alimentacao),
     proximoPasso: diagnostico.proximoPasso ? substituirTexto(diagnostico.proximoPasso) : undefined
   }
 }
@@ -189,7 +231,15 @@ export function getDiagnostico(
       break
     case 'avaliacao-sono-energia':
     case 'quiz-sono-energia':
-      diagnosticos = quizEnergeticoDiagnosticos
+      diagnosticos = avaliacaoSonoEnergiaDiagnosticos
+      break
+    case 'quiz-pedindo-detox':
+    case 'seu-corpo-esta-pedindo-detox':
+      diagnosticos = quizPedindoDetoxDiagnosticos
+      break
+    case 'perfil-intestino':
+    case 'qual-e-seu-perfil-de-intestino':
+      diagnosticos = perfilIntestinoDiagnosticos
       break
     case 'avaliacao-emocional':
     case 'quiz-emocional':
@@ -509,8 +559,8 @@ export const diagnosticosCoach: Record<string, DiagnosticosPorFerramenta> = {
   'diagnostico-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
   'quiz-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
   'sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
-  'perfil-intestino': diagnosticoSintomasIntestinaisDiagnosticos,
-  'qual-e-seu-perfil-de-intestino': diagnosticoSintomasIntestinaisDiagnosticos,
+  'perfil-intestino': perfilIntestinoDiagnosticos,
+  'qual-e-seu-perfil-de-intestino': perfilIntestinoDiagnosticos,
   'formulario-recomendacao': formularioRecomendacaoDiagnosticos,
   'guia-hidratacao': guiaHidratacaoDiagnosticos,
   'guia-nutraceutico': guiaNutraceuticoDiagnosticos,
@@ -538,10 +588,11 @@ export const diagnosticosCoach: Record<string, DiagnosticosPorFerramenta> = {
   'descubra-seu-perfil-de-bem-estar': quizBemEstarDiagnosticos,
   'disciplinado-emocional': disciplinadoEmocionalDiagnosticos,
   'quiz-detox': quizDetoxDiagnosticos,
-  'quiz-pedindo-detox': quizDetoxDiagnosticos,
+  'quiz-pedindo-detox': quizPedindoDetoxDiagnosticos,
+  'seu-corpo-esta-pedindo-detox': quizPedindoDetoxDiagnosticos,
   'quiz-energetico': quizEnergeticoDiagnosticos,
-  'avaliacao-sono-energia': quizEnergeticoDiagnosticos,
-  'quiz-sono-energia': quizEnergeticoDiagnosticos,
+  'avaliacao-sono-energia': avaliacaoSonoEnergiaDiagnosticos,
+  'quiz-sono-energia': avaliacaoSonoEnergiaDiagnosticos,
   'quiz-interativo': quizInterativoDiagnosticos,
   'quiz-perfil-nutricional': quizPerfilNutricionalDiagnosticos,
   'rastreador-alimentar': rastreadorAlimentarDiagnosticos,

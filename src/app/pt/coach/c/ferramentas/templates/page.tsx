@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Sparkles } from 'lucide-react'
-import CoachNavBar from '@/components/coach/CoachNavBar'
+import CoachNavBar from '@/components/c/CoachNavBar'
 
 type TemplateContent = {
   questions?: unknown[]
@@ -89,7 +89,7 @@ export default function TemplatesCoach() {
     const carregarTemplates = async () => {
       try {
         setCarregandoTemplates(true)
-        const response = await fetch('/api/coach/templates', {
+        const response = await fetch('/api/c/templates', {
           cache: 'no-store',
           signal: AbortSignal.timeout(10000) // Timeout de 10 segundos
         })

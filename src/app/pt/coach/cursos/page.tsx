@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import type { Trilha, Microcurso, BibliotecaItem, Tutorial } from '@/types/cursos'
 
@@ -38,7 +38,7 @@ function CoachCursosContent() {
         setErro(null)
 
         // Carregar trilhas
-        const trilhasRes = await fetch('/api/coach/cursos?tipo=trilhas', {
+        const trilhasRes = await fetch('/api/c/cursos?tipo=trilhas', {
           credentials: 'include'
         })
         if (trilhasRes.ok) {
@@ -47,7 +47,7 @@ function CoachCursosContent() {
         }
 
         // Carregar microcursos
-        const microcursosRes = await fetch('/api/coach/cursos?tipo=microcursos', {
+        const microcursosRes = await fetch('/api/c/cursos?tipo=microcursos', {
           credentials: 'include'
         })
         if (microcursosRes.ok) {
@@ -56,7 +56,7 @@ function CoachCursosContent() {
         }
 
         // Carregar biblioteca
-        const bibliotecaRes = await fetch('/api/coach/cursos?tipo=biblioteca', {
+        const bibliotecaRes = await fetch('/api/c/cursos?tipo=biblioteca', {
           credentials: 'include'
         })
         if (bibliotecaRes.ok) {
@@ -65,7 +65,7 @@ function CoachCursosContent() {
         }
 
         // Carregar tutoriais
-        const tutoriaisRes = await fetch('/api/coach/cursos?tipo=tutoriais', {
+        const tutoriaisRes = await fetch('/api/c/cursos?tipo=tutoriais', {
           credentials: 'include'
         })
         if (tutoriaisRes.ok) {

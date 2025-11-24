@@ -270,7 +270,7 @@ export default function PostCuriosidades() {
       const urls = {
         nutri: '/pt/nutri',
         sales: '/pt/nutra', 
-        coach: '/pt/coach'
+        coach: '/pt/c'
       }
       window.location.href = urls[data.profissao]
     }

@@ -1,10 +1,18 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LanguageSelector from '../../../components/LanguageSelector'
 
 export default function WellnessPage() {
+  const [currentUrl, setCurrentUrl] = useState('https://ylada.app/pt/wellness')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href)
+    }
+  }, [])
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -45,12 +53,22 @@ export default function WellnessPage() {
                 O YLADA Wellness é o assistente digital que te ajuda a gerar novos contatos, despertar interesse em pessoas certas e fortalecer suas conexões — de forma leve, simples e inspiradora.
               </p>
               
-              <Link
-                href="/pt/wellness/checkout"
-                className="inline-flex items-center px-8 py-4 bg-green-600 text-white text-lg font-semibold rounded-xl hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-              >
-                ✨ Começar agora - Escolher plano
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link
+                  href="/pt/wellness/checkout"
+                  className="inline-flex items-center px-8 py-4 bg-green-600 text-white text-lg font-semibold rounded-xl hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  ✨ Começar agora - Escolher plano
+                </Link>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Conheça o YLADA Wellness - Transforme seu trabalho de bem-estar em uma ponte de conexões reais. ${currentUrl}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-6 py-4 bg-green-500 text-white text-lg font-semibold rounded-xl hover:bg-green-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  📱 Compartilhar por WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </section>
@@ -170,47 +188,6 @@ export default function WellnessPage() {
                     Use nas redes, status, grupos e eventos — e veja o interesse crescer.
                   </p>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 💬 5️⃣ SEÇÃO – DEPOIMENTOS */}
-        <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
-          <div className="container mx-auto px-6 lg:px-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
-              Histórias de quem já está usando o YLADA Wellness
-            </h2>
-            
-            <div className="max-w-4xl mx-auto grid sm:grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-                <div className="text-4xl mb-4">💬</div>
-                <p className="text-gray-700 mb-4 italic leading-relaxed">
-                  "Com meu link, consegui alcançar pessoas novas que nunca tinham ouvido falar do meu espaço. É simples e bonito."
-                </p>
-                <p className="text-sm font-semibold text-gray-900">
-                  — Cláudia R., Supervisora Wellness
-                </p>
-              </div>
-              
-              <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-                <div className="text-4xl mb-4">💬</div>
-                <p className="text-gray-700 mb-4 italic leading-relaxed">
-                  "Agora o meu time inteiro divulga de forma igual. Ficou padronizado e profissional."
-                </p>
-                <p className="text-sm font-semibold text-gray-900">
-                  — Carlos F., Líder de Equipe 7.5K
-                </p>
-              </div>
-              
-              <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-                <div className="text-4xl mb-4">💬</div>
-                <p className="text-gray-700 mb-4 italic leading-relaxed">
-                  "Adorei poder mostrar meu propósito de um jeito mais digital, sem precisar explicar tudo."
-                </p>
-                <p className="text-sm font-semibold text-gray-900">
-                  — Juliana M., Distribuidora Wellness
-                </p>
               </div>
             </div>
           </div>

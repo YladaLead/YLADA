@@ -5,6 +5,7 @@ import { alimentacaoSaudavelDiagnosticos } from './diagnostics/nutri/alimentacao
 import { avaliacaoEmocionalDiagnosticos } from './diagnostics/nutri/avaliacao-emocional'
 import { avaliacaoInicialDiagnosticos } from './diagnostics/nutri/avaliacao-inicial'
 import { avaliacaoIntoleranciaDiagnosticos } from './diagnostics/nutri/avaliacao-intolerancia'
+import { avaliacaoSonoEnergiaDiagnosticos } from './diagnostics/nutri/avaliacao-sono-energia'
 import { calculadoraAguaDiagnosticos } from './diagnostics/nutri/calculadora-agua'
 import { calculadoraCaloriasDiagnosticos } from './diagnostics/nutri/calculadora-calorias'
 import { calculadoraImcDiagnosticos } from './diagnostics/nutri/calculadora-imc'
@@ -27,12 +28,14 @@ import { guiaProteicoDiagnosticos } from './diagnostics/nutri/guia-proteico'
 import { infograficoEducativoDiagnosticos } from './diagnostics/nutri/infografico-educativo'
 import { miniEbookDiagnosticos } from './diagnostics/nutri/mini-ebook'
 import { nutridoVsAlimentadoDiagnosticos } from './diagnostics/nutri/nutrido-vs-alimentado'
+import { perfilIntestinoDiagnosticos } from './diagnostics/nutri/perfil-intestino'
 import { perfilMetabolicoDiagnosticos } from './diagnostics/nutri/perfil-metabolico'
 import { plannerRefeicoesDiagnosticos } from './diagnostics/nutri/planner-refeicoes'
 import { planoAlimentarBaseDiagnosticos } from './diagnostics/nutri/plano-alimentar-base'
 import { potencialCrescimentoDiagnosticos } from './diagnostics/nutri/potencial-crescimento'
 import { propositoEquilibrioDiagnosticos } from './diagnostics/nutri/proposito-equilibrio'
 import { prontoEmagrecerDiagnosticos } from './diagnostics/nutri/pronto-emagrecer'
+import { quizPedindoDetoxDiagnosticos } from './diagnostics/nutri/quiz-pedindo-detox'
 import { quizBemEstarDiagnosticos } from './diagnostics/nutri/quiz-bem-estar'
 import { quizDetoxDiagnosticos } from './diagnostics/nutri/quiz-detox'
 import { quizEnergeticoDiagnosticos } from './diagnostics/nutri/quiz-energetico'
@@ -145,6 +148,10 @@ export function getDiagnostico(
     case 'quiz-detox':
       diagnosticos = quizDetoxDiagnosticos
       break
+    case 'quiz-pedindo-detox':
+    case 'seu-corpo-esta-pedindo-detox':
+      diagnosticos = quizPedindoDetoxDiagnosticos
+      break
     case 'disciplinado-emocional':
       diagnosticos = disciplinadoEmocionalDiagnosticos
       break
@@ -153,7 +160,7 @@ export function getDiagnostico(
       break
     case 'avaliacao-sono-energia':
     case 'quiz-sono-energia':
-      diagnosticos = quizEnergeticoDiagnosticos
+      diagnosticos = avaliacaoSonoEnergiaDiagnosticos
       break
     case 'avaliacao-emocional':
     case 'quiz-emocional':
@@ -210,6 +217,10 @@ export function getDiagnostico(
       } else {
         diagnosticos = diagnosticoSintomasIntestinaisDiagnosticos
       }
+      break
+    case 'perfil-intestino':
+    case 'qual-e-seu-perfil-de-intestino':
+      diagnosticos = perfilIntestinoDiagnosticos
       break
     case 'pronto-emagrecer':
     case 'quiz-pronto-emagrecer':
@@ -463,8 +474,8 @@ export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'diagnostico-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
   'quiz-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
   'sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
-  'perfil-intestino': diagnosticoSintomasIntestinaisDiagnosticos,
-  'qual-e-seu-perfil-de-intestino': diagnosticoSintomasIntestinaisDiagnosticos,
+  'perfil-intestino': perfilIntestinoDiagnosticos,
+  'qual-e-seu-perfil-de-intestino': perfilIntestinoDiagnosticos,
   'formulario-recomendacao': formularioRecomendacaoDiagnosticos,
   'guia-hidratacao': guiaHidratacaoDiagnosticos,
   'guia-nutraceutico': guiaNutraceuticoDiagnosticos,
@@ -492,10 +503,11 @@ export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'descubra-seu-perfil-de-bem-estar': quizBemEstarDiagnosticos,
   'disciplinado-emocional': disciplinadoEmocionalDiagnosticos,
   'quiz-detox': quizDetoxDiagnosticos,
-  'quiz-pedindo-detox': quizDetoxDiagnosticos,
+  'quiz-pedindo-detox': quizPedindoDetoxDiagnosticos,
+  'seu-corpo-esta-pedindo-detox': quizPedindoDetoxDiagnosticos,
   'quiz-energetico': quizEnergeticoDiagnosticos,
-  'avaliacao-sono-energia': quizEnergeticoDiagnosticos,
-  'quiz-sono-energia': quizEnergeticoDiagnosticos,
+  'avaliacao-sono-energia': avaliacaoSonoEnergiaDiagnosticos,
+  'quiz-sono-energia': avaliacaoSonoEnergiaDiagnosticos,
   'quiz-interativo': quizInterativoDiagnosticos,
   'quiz-perfil-nutricional': quizPerfilNutricionalDiagnosticos,
   'rastreador-alimentar': rastreadorAlimentarDiagnosticos,

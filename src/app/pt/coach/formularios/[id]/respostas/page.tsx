@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function RespostasFormulario() {
@@ -40,7 +40,7 @@ function RespostasFormularioContent() {
         setErro(null)
 
         // Carregar formulário
-        const formResponse = await fetch(`/api/coach/formularios/${formId}`, {
+        const formResponse = await fetch(`/api/c/formularios/${formId}`, {
           credentials: 'include'
         })
 
@@ -79,7 +79,7 @@ function RespostasFormularioContent() {
         params.append('end_date', filtroDataFim)
       }
 
-      const response = await fetch(`/api/coach/formularios/${formId}/respostas?${params.toString()}`, {
+      const response = await fetch(`/api/c/formularios/${formId}/respostas?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -199,7 +199,7 @@ function RespostasFormularioContent() {
 
   const visualizarResposta = async (responseId: string) => {
     try {
-      const response = await fetch(`/api/coach/formularios/${formId}/respostas/${responseId}`, {
+      const response = await fetch(`/api/c/formularios/${formId}/respostas/${responseId}`, {
         credentials: 'include'
       })
 

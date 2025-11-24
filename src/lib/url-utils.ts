@@ -60,7 +60,7 @@ export function buildNutriToolUrlFallback(toolId: string): string {
  */
 export function buildCoachToolUrl(userSlug: string, toolSlug: string): string {
   const baseUrl = getAppUrl()
-  return `${baseUrl}/pt/coach/${userSlug}/${toolSlug}`
+  return `${baseUrl}/pt/c/${userSlug}/${toolSlug}`
 }
 
 /**
@@ -68,7 +68,7 @@ export function buildCoachToolUrl(userSlug: string, toolSlug: string): string {
  */
 export function buildCoachToolUrlFallback(toolId: string): string {
   const baseUrl = getAppUrl()
-  return `${baseUrl}/pt/coach/ferramenta/${toolId}`
+  return `${baseUrl}/pt/c/ferramenta/${toolId}`
 }
 
 /**

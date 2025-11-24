@@ -7,7 +7,7 @@ import RequireSubscription from '@/components/auth/RequireSubscription'
 import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 
-const CoachNavBar = dynamic(() => import('@/components/coach/CoachNavBar'), {
+const CoachNavBar = dynamic(() => import('@/components/c/CoachNavBar'), {
   ssr: true,
   loading: () => <div className="h-16 bg-white border-b border-gray-200 animate-pulse" />
 })
@@ -61,7 +61,7 @@ function QuizzesCoachContent() {
   const carregarQuizzes = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/coach/quizzes', {
+      const response = await fetch('/api/c/quizzes', {
         credentials: 'include'
       })
 
@@ -256,7 +256,7 @@ function QuizzesCoachContent() {
             href="/pt/coach/quiz-personalizado"
             className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105 shadow-lg font-medium"
           >
-            + Criar Quiz
+            + Criar Novo Link
           </Link>
         </div>
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function EnviarFormularioNutri() {
@@ -33,7 +33,7 @@ function EnviarFormularioNutriContent() {
     const carregarFormulario = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/coach/formularios/${formId}`, {
+        const response = await fetch(`/api/c/formularios/${formId}`, {
           credentials: 'include'
         })
 

@@ -164,7 +164,7 @@ export default function PortalPublicCoachPage() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`/api/coach/portals/by-slug/${slug}`)
+      const response = await fetch(`/api/c/portals/by-slug/${slug}`)
 
       if (response.status === 403) {
         setError('link_indisponivel')
@@ -195,9 +195,9 @@ export default function PortalPublicCoachPage() {
 
   const getToolUrl = (tool: PortalTool) => {
     if (tool.tool.user_profiles?.user_slug) {
-      return `/pt/coach/${tool.tool.user_profiles.user_slug}/${tool.tool.slug}`
+      return `/pt/c/${tool.tool.user_profiles.user_slug}/${tool.tool.slug}`
     }
-    return `/pt/coach/ferramenta/${tool.tool.id}`
+    return `/pt/c/ferramenta/${tool.tool.id}`
   }
 
   if (loading) {
@@ -226,7 +226,7 @@ export default function PortalPublicCoachPage() {
               : error || 'O portal que você está procurando não existe ou foi removido.'}
           </p>
           <Link
-            href="/pt/coach"
+            href="/pt/c"
             className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
           >
             Voltar ao início

@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
         // Construir URL do quiz
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
         const url = userProfile?.user_slug
-          ? `${baseUrl}/pt/coach/${userProfile.user_slug}/quiz/${quiz.slug}`
-          : `${baseUrl}/pt/coach/quiz/${quiz.slug}`
+          ? `${baseUrl}/pt/c/${userProfile.user_slug}/quiz/${quiz.slug}`
+          : `${baseUrl}/pt/c/quiz/${quiz.slug}`
 
         return {
           ...quiz,

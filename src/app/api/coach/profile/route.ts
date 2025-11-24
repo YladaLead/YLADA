@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     // Buscar perfil do usuário (tentar buscar campos que podem não existir)
     let profile: any = null
     try {
-      console.log('🔍 GET /api/coach/profile - Buscando perfil para user_id:', user.id)
+      console.log('🔍 GET /api/c/profile - Buscando perfil para user_id:', user.id)
       
       // Tentar buscar todos os campos primeiro
       const { data: profileData, error: profileError } = await supabaseAdmin

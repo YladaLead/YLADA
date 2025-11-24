@@ -232,7 +232,7 @@ export default function CalculadoraIMC() {
       const urls = {
         nutri: '/pt/nutri',
         sales: '/pt/nutra', 
-        coach: '/pt/coach'
+        coach: '/pt/c'
       }
       window.location.href = urls[profissao]
     }

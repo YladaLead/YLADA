@@ -161,7 +161,7 @@ export default function CoachSidebar({ isMobileOpen = false, onMobileClose }: Co
         <div className="p-3 border-b border-gray-200 flex items-center justify-between">
           <Link href="/pt/coach/home" onClick={onMobileClose} className="flex items-center w-full">
             <Image
-              src="/images/logo/coach/Logo_Coach_horizontal.png"
+              src="/images/logo/coach-horizontal.png"
               alt="Coach by YLADA"
               width={180}
               height={60}

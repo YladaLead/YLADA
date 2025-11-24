@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function NovoFormularioCoach() {
@@ -161,7 +161,7 @@ function NovoFormularioCoachContent() {
     setSalvando(true)
 
     try {
-      const response = await fetch('/api/coach/formularios', {
+      const response = await fetch('/api/c/formularios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

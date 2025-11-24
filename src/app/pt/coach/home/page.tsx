@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ChatIA from '../../../../components/ChatIA'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function CoachHome() {
@@ -65,7 +65,7 @@ function CoachHomeContent() {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 3000)
         
-        const response = await fetch('/api/coach/profile', {
+        const response = await fetch('/api/c/profile', {
           credentials: 'include',
           signal: controller.signal
         })
@@ -103,7 +103,7 @@ function CoachHomeContent() {
         const timeoutId = setTimeout(() => controller.abort(), 8000)
         
         // Carregar stats do dashboard
-        const dashboardResponse = await fetch('/api/coach/dashboard', {
+        const dashboardResponse = await fetch('/api/c/dashboard', {
           credentials: 'include',
           signal: controller.signal
         })

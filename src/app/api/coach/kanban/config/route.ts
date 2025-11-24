@@ -3,7 +3,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**
- * GET /api/coach/kanban/config
+ * GET /api/c/kanban/config
  * Busca configuração do Kanban do usuário
  */
 export async function GET(request: NextRequest) {
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * PUT /api/coach/kanban/config
+ * PUT /api/c/kanban/config
  * Salva configuração do Kanban do usuário
  */
 export async function PUT(request: NextRequest) {

@@ -180,7 +180,7 @@ export default function HomePage() {
                   Que buscam inspirar pessoas com ferramentas e desafios interativos.
                 </p>
                 <div className="mt-4 text-center">
-                  <Link href="/pt/coach" className="text-blue-600 text-sm font-medium hover:text-blue-700">
+                  <Link href="/pt/c" className="text-blue-600 text-sm font-medium hover:text-blue-700">
                     Explorar →
                   </Link>
                 </div>

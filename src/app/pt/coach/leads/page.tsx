@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 
 export default function CoachLeads() {
   return (
@@ -164,7 +164,7 @@ function CoachLeadsContent() {
     if (!user) return
 
     try {
-      const response = await fetch(`/api/coach/leads/alerts?days=${diasAlerta}`, {
+      const response = await fetch(`/api/c/leads/alerts?days=${diasAlerta}`, {
         credentials: 'include'
       })
 
@@ -247,7 +247,7 @@ function CoachLeadsContent() {
       setConvertendo(true)
       setErro(null)
 
-      const response = await fetch(`/api/coach/leads/${leadParaConverter.id}/convert-to-client`, {
+      const response = await fetch(`/api/c/leads/${leadParaConverter.id}/convert-to-client`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

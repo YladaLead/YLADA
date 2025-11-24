@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 
 // Importar tipos e componentes da página de criação
@@ -44,7 +44,7 @@ function EditarFormularioCoachContent() {
     const carregarFormulario = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/coach/formularios/${formId}`, {
+        const response = await fetch(`/api/c/formularios/${formId}`, {
           credentials: 'include'
         })
 
@@ -203,7 +203,7 @@ function EditarFormularioWrapper({
     setSalvando(true)
 
     try {
-      const response = await fetch(`/api/coach/formularios/${formId}`, {
+      const response = await fetch(`/api/c/formularios/${formId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ function EditarFormularioWrapper({
     setMensagemErro(null)
 
     try {
-      const response = await fetch(`/api/coach/formularios/${formId}`, {
+      const response = await fetch(`/api/c/formularios/${formId}`, {
         method: 'DELETE',
         credentials: 'include'
       })

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CoachSidebar from "@/components/coach/CoachSidebar"
+import CoachSidebar from "@/components/c/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
@@ -36,7 +36,7 @@ function ClienteDetalhesCoachContent() {
     const carregarCliente = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/coach/clientes?id=${clientId}`, {
+        const response = await fetch(`/api/c/clientes?id=${clientId}`, {
           credentials: 'include'
         })
 
@@ -321,7 +321,7 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
     setSalvando(true)
 
     try {
-      const response = await fetch(`/api/coach/clientes/${clientId}`, {
+      const response = await fetch(`/api/c/clientes/${clientId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -823,7 +823,7 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     const carregarEvolucoes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/coach/clientes/${clientId}/evolucao`, {
+        const response = await fetch(`/api/c/clientes/${clientId}/evolucao`, {
           credentials: 'include'
         })
 
@@ -877,7 +877,7 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         photos_urls: formData.photos_urls
       }
 
-      const response = await fetch(`/api/coach/clientes/${clientId}/evolucao`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/evolucao`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1324,7 +1324,7 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
       params.append('order', 'desc')
       params.append('limit', '100')
 
-      const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?${params.toString()}`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -1440,7 +1440,7 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
         }
       }
 
-      const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1961,7 +1961,7 @@ function EmocionalTab({ cliente, clientId }: { cliente: any; clientId: string })
           params.append('record_type', tipoFiltro)
         }
 
-        const response = await fetch(`/api/coach/clientes/${clientId}/emocional?${params.toString()}`, {
+        const response = await fetch(`/api/c/clientes/${clientId}/emocional?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -2051,7 +2051,7 @@ function EmocionalTab({ cliente, clientId }: { cliente: any; clientId: string })
         notes: formData.notes || null
       }
 
-      const response = await fetch(`/api/coach/clientes/${clientId}/emocional`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/emocional`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2706,7 +2706,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     const carregarAvaliacoes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
+        const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
           credentials: 'include'
         })
 
@@ -2739,7 +2739,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     const carregarComparacao = async () => {
       try {
         setCarregandoComparacao(true)
-        const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes/${avaliacaoSelecionada}/comparacao`, {
+        const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes/${avaliacaoSelecionada}/comparacao`, {
           credentials: 'include'
         })
 
@@ -3005,7 +3005,7 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
           params.append('appointment_type', filtroTipo)
         }
 
-        const response = await fetch(`/api/coach/appointments?${params.toString()}`, {
+        const response = await fetch(`/api/c/appointments?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -3060,7 +3060,7 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
         status: 'agendado'
       }
 
-      const response = await fetch('/api/coach/appointments', {
+      const response = await fetch('/api/c/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3495,7 +3495,7 @@ function TimelineTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         params.append('end_date', `${endDate}T23:59:59Z`)
       }
 
-      const response = await fetch(`/api/coach/clientes/${clientId}/historico?${params.toString()}`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/historico?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -3585,7 +3585,7 @@ function TimelineTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     setErro(null)
 
     try {
-      const response = await fetch(`/api/coach/clientes/${clientId}/historico`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/historico`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -3899,7 +3899,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     try {
       setCarregando(true)
       setErro(null)
-      const response = await fetch(`/api/coach/clientes/${clientId}/programas?order=desc&order_by=start_date`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/programas?order=desc&order_by=start_date`, {
         credentials: 'include'
       })
 
@@ -3996,7 +3996,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         }
       }
 
-      const response = await fetch(`/api/coach/clientes/${clientId}/programas`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/programas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -4028,7 +4028,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
 
   const updateProgramContent = async (programId: string, updatedContent: any) => {
     try {
-      const response = await fetch(`/api/coach/clientes/${clientId}/programas/${programId}`, {
+      const response = await fetch(`/api/c/clientes/${clientId}/programas/${programId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

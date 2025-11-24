@@ -206,3 +206,4 @@ Após executar todas as queries:
 
 
 
+

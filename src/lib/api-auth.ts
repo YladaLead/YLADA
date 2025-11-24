@@ -132,7 +132,7 @@ export async function requireApiAuth(
         const url = request.url.toLowerCase()
         if (url.includes('/wellness/')) inferredProfile = 'wellness'
         else if (url.includes('/nutri/')) inferredProfile = 'nutri'
-        else if (url.includes('/coach/')) inferredProfile = 'coach'
+        else if (url.includes('/c/')) inferredProfile = 'coach'
         else if (url.includes('/nutra/')) inferredProfile = 'nutra'
       }
 

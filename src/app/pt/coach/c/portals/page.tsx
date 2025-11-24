@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import CoachNavBar from '@/components/coach/CoachNavBar'
+import CoachNavBar from '@/components/c/CoachNavBar'
 import QRCode from '@/components/QRCode'
 
 interface Portal {
@@ -41,7 +41,7 @@ function PortalsCoachContent() {
   const carregarUserSlug = async () => {
     try {
       setCarregandoSlug(true)
-      // TODO: Criar API /api/coach/profile quando necessário
+      // TODO: Criar API /api/c/profile quando necessário
       // Por enquanto, usar wellness como fallback ou criar API genérica
       const response = await fetch('/api/wellness/profile', {
         credentials: 'include'
@@ -64,7 +64,7 @@ function PortalsCoachContent() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/api/coach/portals', {
+      const response = await fetch('/api/c/portals', {
         credentials: 'include',
         cache: 'no-store'
       })
@@ -137,7 +137,7 @@ function PortalsCoachContent() {
     }
 
     try {
-      const response = await fetch(`/api/coach/portals?id=${id}`, {
+      const response = await fetch(`/api/c/portals?id=${id}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -195,7 +195,7 @@ function PortalsCoachContent() {
                   ⚠️ <strong>Configure seu slug pessoal</strong> para personalizar as URLs dos seus portais
                 </p>
                 <p className="text-xs text-yellow-700 mb-3">
-                  Sem o slug configurado, suas URLs não serão personalizadas. Configure agora para ter URLs como: <span className="font-mono">ylada.app/pt/coach/[seu-slug]/portal/[nome-portal]</span>
+                  Sem o slug configurado, suas URLs não serão personalizadas. Configure agora para ter URLs como: <span className="font-mono">ylada.app/pt/c/[seu-slug]/portal/[nome-portal]</span>
                 </p>
                 <Link
                   href="/pt/coach/configuracoes"
@@ -210,12 +210,15 @@ function PortalsCoachContent() {
 
         {/* Actions */}
         <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">Meus Portais</h2>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Meus Portais</h2>
+            <p className="text-sm text-gray-600">Gerencie todos os seus portais do bem-estar</p>
+          </div>
           <Link
             href="/pt/coach/portals/novo"
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105 shadow-lg font-medium"
           >
-            + Novo Portal
+            + Criar Novo Link
           </Link>
         </div>
 
@@ -297,11 +300,11 @@ function PortalsCoachContent() {
                   ) : userSlug ? (
                     <div className="flex items-center gap-1 flex-wrap">
                       <span className="text-xs text-gray-600 font-mono break-all">
-                        {typeof window !== 'undefined' ? window.location.hostname : 'ylada.app'}/pt/coach/<span className="text-purple-600 font-semibold">{userSlug}</span>/portal/{portal.slug}
+                        {typeof window !== 'undefined' ? window.location.hostname : 'ylada.app'}/pt/c/<span className="text-purple-600 font-semibold">{userSlug}</span>/portal/{portal.slug}
                       </span>
                       <button
                         onClick={() => {
-                          const url = `${window.location.origin}/pt/coach/${userSlug}/portal/${portal.slug}`
+                          const url = `${window.location.origin}/pt/c/${userSlug}/portal/${portal.slug}`
                           navigator.clipboard.writeText(url)
                           alert('URL copiada!')
                         }}
@@ -312,7 +315,7 @@ function PortalsCoachContent() {
                     </div>
                   ) : (
                     <div className="text-xs text-gray-400">
-                      <span className="font-mono">ylada.app/pt/coach/[configure]/portal/{portal.slug}</span>
+                      <span className="font-mono">ylada.app/pt/c/[configure]/portal/{portal.slug}</span>
                       <Link href="/pt/coach/configuracoes" className="text-purple-600 hover:text-purple-700 underline ml-1">
                         Configurar
                       </Link>
@@ -353,7 +356,7 @@ function PortalsCoachContent() {
                   </div>
                   <div className="flex space-x-2">
                     <Link
-                      href={userSlug ? `/pt/coach/${userSlug}/portal/${portal.slug}` : `/pt/coach/portal/${portal.slug}`}
+                      href={userSlug ? `/pt/c/${userSlug}/portal/${portal.slug}` : `/pt/c/portal/${portal.slug}`}
                       target="_blank"
                       className="text-sm text-purple-600 hover:text-purple-700"
                     >
