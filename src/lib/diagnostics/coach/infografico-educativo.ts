@@ -17,7 +17,7 @@ export const infograficoEducativoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Conhecimento moderado estabelecido permite aprofundamento através de infográficos intermediários. Pesquisas indicam que infográficos moderados com estratégias práticas aumentam aplicação de conhecimento em até 50% quando comparados a educação básica. Uma análise de bem-estar identifica exatamente quais tópicos intermediários são mais eficazes para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Explore infográficos moderados sobre timing de bem-estar, alimentos funcionais e estratégias avançadas. Considere avaliação de bem-estar para receber infográficos educativos direcionados que potencializam seus resultados',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como infográficos moderados podem elevar ainda mais sua estratégia de bem-estar com educação visual direcionada.'
-    }
+    },
     conhecimentoAvancado: {
       diagnostico: '📊 DIAGNÓSTICO: Excelente conhecimento! Infográficos educativos avançados podem aprofundar ainda mais sua expertise e manter você atualizado com ciência de ponta',
       causaRaiz: '🔍 CAUSA RAIZ: Conhecimento avançado estabelecido permite foco em infográficos especializados e ciência atualizada. Estudos mostram que profissionais com alto conhecimento se beneficiam de infográficos avançados que consolidam expertise e apresentam pesquisas recentes. Uma avaliação de bem-estar identifica oportunidades específicas de especialização para você',

@@ -17,7 +17,7 @@ export const miniEbookDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Conhecimento básico presente, mas falta especialização em áreas específicas. Pesquisas indicam que aprofundamento estratégico pode melhorar aplicação prática em até 35%. Uma análise identifica oportunidades específicas para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Aprofunde conhecimentos específicos estrategicamente. Considere avaliação para identificar áreas onde o aprofundamento traz maior impacto',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como aprofundar seu conhecimento com estratégias especializadas que potencializam resultados práticos.'
-    }
+    },
     altoConhecimento: {
       diagnostico: '📚 DIAGNÓSTICO: Seu conhecimento de bem-estar está alto, mantenha o padrão e evolua para especialização',
       causaRaiz: '🔍 CAUSA RAIZ: Bom conhecimento de bem-estar estabelecido permite foco em evolução e especialização. Estratégias avançadas ajudam a preservar esse conhecimento e evoluir para níveis ainda melhores. Uma avaliação preventiva identifica oportunidades específicas de especialização',

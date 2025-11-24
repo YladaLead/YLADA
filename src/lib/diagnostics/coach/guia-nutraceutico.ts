@@ -17,7 +17,7 @@ export const guiaNutraceuticoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Interesse básico presente, mas falta conhecimento especializado sobre uso direcionado de nutracêuticos. Pesquisas indicam que aprofundamento estratégico pode aumentar eficácia preventiva em até 40%. Uma análise de bem-estar identifica exatamente quais nutracêuticos são mais eficazes para seu perfil específico',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Aprofunde uso de nutracêuticos específicos. Considere avaliação de bem-estar para identificar quais nutracêuticos direcionados podem potencializar seus resultados preventivos',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como nutracêuticos direcionados podem potencializar ainda mais sua saúde preventiva com estratégias personalizadas.'
-    }
+    },
     altoInteresse: {
       diagnostico: '💊 DIAGNÓSTICO: Excelente interesse em nutracêuticos! Mantenha padrão atual e evolua para estratégias de precisão',
       causaRaiz: '🔍 CAUSA RAIZ: Alto interesse em nutracêuticos e conhecimento básico estabelecido permite foco em estratégias avançadas de precisão. Pesquisas mostram que protocolos nutracêuticos personalizados podem potencializar resultados preventivos em até 50%. Uma avaliação de bem-estar identifica oportunidades específicas de otimização para você',

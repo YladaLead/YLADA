@@ -17,7 +17,7 @@ export const guiaProteicoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Boa distribuição proteica ao longo do dia estabelecida. Pesquisas mostram que otimizações de timing podem aumentar síntese proteica em até 25%. Uma análise de bem-estar identifica oportunidades específicas para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize timing das refeições proteicas. Considere avaliação para identificar oportunidades de melhoria na distribuição e qualidade',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu consumo proteico está adequado. Descubra como estratégias avançadas de timing podem potencializar ainda mais seus resultados.'
-    }
+    },
     altaProteina: {
       diagnostico: '🥩 DIAGNÓSTICO: Excelente consumo de proteína! Ideal para atletas e pessoas ativas. Mantenha padrão atual e otimize absorção',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo adequado para alta performance e recuperação. Para pessoas ativas, consumo acima de 1.2g/kg é adequado quando acompanhado de distribuição estratégica. Uma avaliação de bem-estar identifica se está dentro da faixa ideal e como otimizar timing',
