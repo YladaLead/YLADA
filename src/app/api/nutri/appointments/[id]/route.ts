@@ -31,7 +31,7 @@ export async function GET(
       .from('appointments')
       .select(`
         *,
-        clients:client_id (
+        clients:clients!client_id (
           id,
           name,
           email,
@@ -197,7 +197,7 @@ export async function PUT(
       .eq('user_id', authenticatedUserId)
       .select(`
         *,
-        clients:client_id (
+        clients:clients!client_id (
           id,
           name,
           email,

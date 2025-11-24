@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       .from('appointments')
       .select(`
         *,
-        clients:client_id (
+        clients:clients!client_id (
           id,
           name,
           email,
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
       .insert(appointmentData)
       .select(`
         *,
-        clients:client_id (
+        clients:clients!client_id (
           id,
           name,
           email,
