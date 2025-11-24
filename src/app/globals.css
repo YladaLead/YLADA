@@ -37,11 +37,39 @@ body {
   line-height: 1.5;
 }
 
+input,
+textarea,
+select {
+  color: #111827;
+  border-color: #9ca3af;
+  background-color: #ffffff;
+  caret-color: #0f172a;
+  font-weight: 500;
+}
+
 input::placeholder,
 textarea::placeholder,
 select::placeholder {
-  color: #374151;
+  color: #4b5563;
   opacity: 1;
+  font-weight: 400;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+  -webkit-text-fill-color: #111827;
+  caret-color: #0f172a;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #0ea5e9;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
 }
 
 @keyframes slideInRight {
