@@ -31,3 +31,4 @@ export const calculadoraImcDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu organismo precisa de cuidado agora — e é totalmente possível reverter com apoio profissional especializado e um plano estruturado.'
     }
   }
+}

@@ -25,3 +25,4 @@ export const calculadoraCaloriasDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pronto para crescer — descubra em minutos como criar um superávit calórico personalizado que maximiza ganho de massa muscular de forma saudável.'
     }
   }
+}

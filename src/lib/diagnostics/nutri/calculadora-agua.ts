@@ -25,3 +25,4 @@ export const calculadoraAguaDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Excelente! Sua hidratação está otimizada. Descubra como estratégias avançadas de reposição eletrolítica podem potencializar ainda mais sua performance.'
     }
   }
+}

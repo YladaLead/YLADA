@@ -25,3 +25,4 @@ export const avaliacaoInicialDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Avaliações avançadas revelam todo o potencial — descubra como análise profunda do seu perfil nutricional pode maximizar estratégias e transformar resultados com orientações especializadas.'
     }
   }
+}
