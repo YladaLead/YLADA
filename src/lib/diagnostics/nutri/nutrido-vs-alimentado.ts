@@ -24,7 +24,8 @@ export const nutridoVsAlimentadoDiagnosticos: DiagnosticosPorFerramenta = {
     bemNutrido: {
       diagnostico: '📋 DIAGNÓSTICO: Você já está bem nutrido! Mesmo assim, um acompanhamento nutricional preventivo pode ajudar a manter essa nutrição adequada e otimizar ainda mais sua saúde nutricional.',
       causaRaiz: '🔍 CAUSA RAIZ: Ter boa nutrição é um grande ativo, mas pode ser otimizado ainda mais com estratégias preventivas adequadas. Pesquisas mostram que nutrição pode ser mantida e otimizada continuamente. Uma avaliação nutricional completa cria estratégias preventivas personalizadas e fornece orientações para manter seu bem-estar em longo prazo. A prevenção é sempre melhor que o tratamento.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma avaliação nutricional preventiva para otimizar sua nutrição. Uma nutricionista pode criar estratégias personalizadas, ajustar plano alimentar adequado e fornecer orientações para manter sua excelente condição ao longo do tempo. A prevenção garante qualidade de vida contínua.',
+      acaoImediata: 'Mantenha variedade e equilíbrio nas escolhas alimentares.
+Continue observando sinais de energia e bem-estar.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Mantenha sua excelente nutrição com estratégias preventivas personalizadas. Agende uma avaliação nutricional para receber orientações adequadas ao seu perfil. A prevenção é o melhor investimento para sua saúde a longo prazo!'
     }
   }

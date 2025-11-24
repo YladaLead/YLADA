@@ -35,7 +35,8 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Desequilíbrio importante da microbiota, excesso de processados, estresse e possíveis deficiências de fibras e compostos bioativos sustentam o quadro.'
       acaoImediata:
-        '⚡ AÇÃO IMEDIATA: Suspender gatilhos inflamatórios (açúcar, ultraprocessados, álcool), priorizar alimentos calmantes para o intestino e iniciar protocolo de reparo guiado por nutricionista.'
+        'Busque avaliação profissional para identificar causas e restaurar o equilíbrio da microbiota.
+Evite protocolos ou suplementações sem acompanhamento.'
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Marque uma consulta nutricional para elaborar um plano de restauração intestinal, com testes específicos, ajustes graduais e acompanhamento próximo da resposta do organismo.'
     }

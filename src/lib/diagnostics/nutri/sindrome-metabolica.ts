@@ -18,7 +18,8 @@ export const sindromeMetabolicaDiagnosticos: DiagnosticosPorFerramenta = {
     riscoModerado: {
       diagnostico: '📋 DIAGNÓSTICO: Você apresenta risco moderado. Um acompanhamento nutricional preventivo pode ajudar a reduzir riscos e manter sua saúde metabólica em equilíbrio.',
       causaRaiz: '🔍 CAUSA RAIZ: Risco moderado indica que você tem alguns fatores de risco que podem ser reduzidos com estratégias preventivas adequadas. Pesquisas indicam que muitas pessoas têm riscos moderados não identificados que podem ser prevenidos. Uma avaliação nutricional completa identifica fatores de risco específicos, cria estratégias preventivas personalizadas e fornece orientações para melhorar sua saúde metabólica e prevenir complicações futuras.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para uma análise preventiva que identifica seus fatores de risco específicos. Uma nutricionista pode criar estratégias práticas para reduzir riscos, ajustar plano alimentar adequado e acompanhar sua evolução. Com pequenos ajustes personalizados, você pode melhorar significativamente sua saúde metabólica.',
+      acaoImediata: 'Reflita sobre alimentação e nível de atividade física.
+Ajustes guiados por um profissional podem evitar progressão do risco.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Com um acompanhamento nutricional personalizado, você pode reduzir seus riscos metabólicos e melhorar seu bem-estar. Agende uma avaliação nutricional para receber estratégias práticas adequadas ao seu perfil. Pequenos ajustes podem fazer grande diferença na sua qualidade de vida!'
     }
     riscoBaixo: {

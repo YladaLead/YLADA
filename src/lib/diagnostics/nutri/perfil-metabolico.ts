@@ -12,7 +12,8 @@ export const perfilMetabolicoDiagnosticos: DiagnosticosPorFerramenta = {
     metabolismoLento: {
       diagnostico: '📋 DIAGNÓSTICO: Seu perfil indica que seu metabolismo está lento e precisa de otimização urgente. Um acompanhamento nutricional especializado pode acelerar seu metabolismo e transformar seus resultados de forma significativa.',
       causaRaiz: '🔍 CAUSA RAIZ: Metabolismo lento pode ser causado por diversos fatores como desequilíbrios nutricionais, falta de atividade física, padrões alimentares inadequados e até mesmo genética. Estudos mostram que pessoas com metabolismo lento, quando recebem acompanhamento nutricional personalizado, conseguem acelerar seu metabolismo em até 40% em 30 dias. Uma avaliação nutricional completa identifica fatores específicos, cria um plano personalizado e fornece orientações para garantir resultados duradouros.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional especializada para acelerar seu metabolismo. Uma nutricionista pode criar um plano personalizado que inclui estratégias nutricionais otimizadas, protocolos adequados e acompanhamento constante. Evite abordagens genéricas — cada pessoa tem fatores metabólicos específicos.',
+      acaoImediata: 'Observe seu padrão alimentar e nível de atividade.
+Busque avaliação profissional para identificar ajustes seguros e eficazes.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu metabolismo pode ser acelerado com as estratégias certas! Agende uma avaliação nutricional para receber um acompanhamento especializado com estratégias personalizadas. Descubra como um plano adequado pode transformar seus resultados.'
     }
     metabolismoModerado: {

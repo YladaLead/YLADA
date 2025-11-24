@@ -15,7 +15,8 @@ export const quizPedindoDetoxDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Hidratação consistente, consumo baixo de ultraprocessados e rotina de sono organizada preservam os sistemas naturais de detox.'
       acaoImediata:
-        '⚡ AÇÃO IMEDIATA: Manter os hábitos atuais, reforçando vegetais verdes, ingestão fracionada de água e intervalos adequados entre refeições.'
+        'Mantenha sua rotina equilibrada e hábitos preventivos.
+Observe sinais do corpo e continue com constância.'
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Realize uma avaliação preventiva para confirmar marcadores hepáticos e intestinais e receber um plano de manutenção supervisionado.'
     }
@@ -25,7 +26,8 @@ export const quizPedindoDetoxDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Picos de açúcar, álcool, preparo improvisado das refeições e alto estresse podem desacelerar a eliminação natural de toxinas.'
       acaoImediata:
-        '⚡ AÇÃO IMEDIATA: Iniciar um protocolo leve com foco em água, fibras, vegetais crucíferos e redução de processados enquanto agenda acompanhamento profissional.'
+        'Observe sinais de retenção ou cansaço leve.
+Pequenos ajustes guiados por profissional podem apoiar detox de forma segura.'
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Agende uma mini avaliação detox para receber um plano personalizado com ajustes progressivos e monitoramento semanal.'
     }
@@ -35,7 +37,8 @@ export const quizPedindoDetoxDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Estresse crônico, sono inadequado, álcool frequente, medicamentos e inflamação intestinal dificultam a detoxificação endógena.'
       acaoImediata:
-        '⚡ AÇÃO IMEDIATA: Suspender gatilhos inflamatórios, priorizar alimentos simples, aumentar hidratação e procurar avaliação especializada antes de protocolos intensos.'
+        'Busque avaliação profissional antes de iniciar qualquer protocolo detox.
+Estratégias individualizadas garantem segurança e eficácia.'
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Marque uma consulta nutricional para construir um plano detox completo com fases de reparo intestinal, suporte hepático e acompanhamento contínuo.'
     }

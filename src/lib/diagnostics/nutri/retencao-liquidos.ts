@@ -18,7 +18,8 @@ export const retencaoLiquidosDiagnosticos: DiagnosticosPorFerramenta = {
     retencaoModerada: {
       diagnostico: '📋 DIAGNÓSTICO: Você apresenta retenção moderada. Um acompanhamento nutricional pode ajudar a reduzir a retenção e manter seu corpo em equilíbrio hidroeletrolítico.',
       causaRaiz: '🔍 CAUSA RAIZ: Retenção moderada indica que você tem alguns fatores que podem ser identificados e tratados com estratégias preventivas adequadas. Pesquisas indicam que muitas pessoas têm retenção moderada não identificada que pode ser prevenida. Uma avaliação nutricional completa identifica fatores específicos, cria estratégias preventivas personalizadas e fornece orientações para melhorar seu equilíbrio hidroeletrolítico e prevenir desconfortos futuros.'
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação nutricional para uma análise preventiva que identifica seus fatores de retenção específicos. Uma nutricionista pode criar estratégias práticas para reduzir retenção, ajustar plano alimentar adequado e acompanhar sua evolução. Com pequenos ajustes personalizados, você pode melhorar significativamente seu equilíbrio hidroeletrolítico.',
+      acaoImediata: 'Reflita sobre consumo de sal e alimentos industrializados.
+Pequenos ajustes com orientação podem ajudar no equilíbrio hídrico.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Com um acompanhamento nutricional personalizado, você pode reduzir sua retenção moderada e melhorar seu bem-estar. Agende uma avaliação nutricional para receber estratégias práticas adequadas ao seu perfil. Pequenos ajustes podem fazer grande diferença na sua qualidade de vida!'
     }
     retencaoBaixa: {
