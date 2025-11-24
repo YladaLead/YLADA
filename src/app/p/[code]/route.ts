@@ -5,7 +5,6 @@ import { hasActiveSubscription } from '@/lib/subscription-helpers'
 const redirectToLinkUnavailable = (request: NextRequest) => {
   return NextResponse.redirect(new URL('/link-indisponivel', request.url), 307)
 }
-import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 // GET - Redirecionar código curto para URL completa
 export async function GET(
