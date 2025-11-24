@@ -1,0 +1,66 @@
+🔧 LOGIN FICA CARREGANDO? Siga estes passos:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣ LIMPAR CACHE (Mais Importante!)
+   
+   Chrome/Edge:
+   • Pressione Ctrl+Shift+Delete (ou Cmd+Shift+Delete no Mac)
+   • Selecione "Última hora"
+   • Marque: Cookies + Cache
+   • Clique "Limpar dados"
+   • FECHE TODAS AS ABAS
+   • Abra nova aba e tente novamente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2️⃣ TESTAR EM ABA ANÔNIMA
+   
+   • Chrome: Ctrl+Shift+N
+   • Firefox: Ctrl+Shift+P
+   • Se funcionar = problema é cache
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3️⃣ VERIFICAR ÁREA CORRETA
+   
+   Cada área tem login diferente:
+   • Wellness: ylada.app/pt/wellness/login
+   • Nutri: ylada.app/pt/nutri/login
+   • Coach: ylada.app/pt/coach/login
+   
+   ⚠️ Se você tem conta em Wellness mas tenta entrar em Nutri, NÃO VAI FUNCIONAR!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4️⃣ AGUARDAR 10-15 SEGUNDOS
+   
+   • Não clique várias vezes no botão
+   • Deixe carregar completamente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5️⃣ TENTAR OUTRO NAVEGADOR
+   
+   Se não funcionar no Chrome, tente Firefox ou Edge
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CHECKLIST ANTES DE PEDIR AJUDA:
+   
+   [ ] Limpei cache e cookies
+   [ ] Testei em aba anônima
+   [ ] Estou na área correta
+   [ ] Aguardei 10-15 segundos
+   [ ] Tentei outro navegador
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚨 Se NADA funcionar, envie:
+   • Área (Wellness/Nutri/Coach)
+   • Email usado
+   • Navegador (Chrome/Firefox/etc)
+   • O que acontece exatamente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+

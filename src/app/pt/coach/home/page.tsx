@@ -264,32 +264,74 @@ function CoachHomeContent() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-              <Link 
-                href="/pt/coach/ferramentas"
-                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
-              >
-                <div className="text-4xl mb-3">🔗</div>
-                <h3 className="font-semibold text-gray-900">Links Personalizados</h3>
-                <p className="text-sm text-gray-600 mt-1">Crie e compartilhe</p>
-              </Link>
+              {/* Links Personalizados */}
+              <div className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100 flex flex-col justify-between">
+                <div>
+                  <div className="text-4xl mb-3">🔗</div>
+                  <h3 className="font-semibold text-gray-900">Links Personalizados</h3>
+                  <p className="text-sm text-gray-600 mt-1">Crie e compartilhe</p>
+                </div>
+                <div className="mt-4 flex flex-col gap-2">
+                  <Link
+                    href="/pt/coach/ferramentas"
+                    className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  >
+                    Ver Meus Links →
+                  </Link>
+                  <Link
+                    href="/pt/coach/ferramentas/nova"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  >
+                    + Criar Novo Link
+                  </Link>
+                </div>
+              </div>
               
-              <Link 
-                href="/pt/coach/quizzes"
-                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
-              >
-                <div className="text-4xl mb-3">📝</div>
-                <h3 className="font-semibold text-gray-900">Quizzes</h3>
-                <p className="text-sm text-gray-600 mt-1">Engaje e eduque</p>
-              </Link>
+              {/* Quizzes Personalizados */}
+              <div className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100 flex flex-col justify-between">
+                <div>
+                  <div className="text-4xl mb-3">📝</div>
+                  <h3 className="font-semibold text-gray-900">Quizzes Personalizados</h3>
+                  <p className="text-sm text-gray-600 mt-1">Engaje e eduque</p>
+                </div>
+                <div className="mt-4 flex flex-col gap-2">
+                  <Link
+                    href="/pt/coach/quizzes"
+                    className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  >
+                    Ver Meus Quizzes →
+                  </Link>
+                  <Link
+                    href="/pt/coach/quiz-personalizado"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  >
+                    + Criar Novo Quiz
+                  </Link>
+                </div>
+              </div>
               
-              <Link 
-                href="/pt/coach/ferramentas/templates"
-                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
-              >
-                <div className="text-4xl mb-3">📊</div>
-                <h3 className="font-semibold text-gray-900">Calculadoras</h3>
-                <p className="text-sm text-gray-600 mt-1">Ferramentas práticas</p>
-              </Link>
+              {/* Portal do Bem-Estar */}
+              <div className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100 flex flex-col justify-between">
+                <div>
+                  <div className="text-4xl mb-3">🌐</div>
+                  <h3 className="font-semibold text-gray-900">Portal do Bem-Estar</h3>
+                  <p className="text-sm text-gray-600 mt-1">Organize conteúdos</p>
+                </div>
+                <div className="mt-4 flex flex-col gap-2">
+                  <Link
+                    href="/pt/coach/portals"
+                    className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  >
+                    Ver Meus Portais →
+                  </Link>
+                  <Link
+                    href="/pt/coach/portals/novo"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  >
+                    + Criar Novo Portal
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 

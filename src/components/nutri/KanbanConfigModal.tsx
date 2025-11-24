@@ -48,6 +48,23 @@ interface KanbanConfigModalProps {
   }
 }
 
+// Campos padrão do card
+const defaultCardFields: CardField[] = [
+  { field: 'telefone', visible: true },
+  { field: 'email', visible: false },
+  { field: 'objetivo', visible: true },
+  { field: 'proxima_consulta', visible: true },
+  { field: 'ultima_consulta', visible: true },
+  { field: 'tags', visible: false },
+  { field: 'status_badge', visible: true }
+]
+
+// Ações rápidas padrão
+const defaultQuickActions: QuickAction[] = [
+  { action: 'whatsapp', visible: true },
+  { action: 'ver_perfil', visible: true }
+]
+
 export default function KanbanConfigModal({
   isOpen,
   onClose,
@@ -55,11 +72,19 @@ export default function KanbanConfigModal({
   initialConfig
 }: KanbanConfigModalProps) {
   const [columns, setColumns] = useState<Column[]>(initialConfig?.columns || [])
-  const [cardFields, setCardFields] = useState<CardField[]>(initialConfig?.card_fields || [])
-  const [quickActions, setQuickActions] = useState<QuickAction[]>(initialConfig?.quick_actions || [])
+  const [cardFields, setCardFields] = useState<CardField[]>(
+    initialConfig?.card_fields && initialConfig.card_fields.length > 0 
+      ? initialConfig.card_fields 
+      : defaultCardFields
+  )
+  const [quickActions, setQuickActions] = useState<QuickAction[]>(
+    initialConfig?.quick_actions && initialConfig.quick_actions.length > 0
+      ? initialConfig.quick_actions
+      : defaultQuickActions
+  )
   const [newColumnLabel, setNewColumnLabel] = useState('')
   const [newColumnDescription, setNewColumnDescription] = useState('')
-  const [newColumnColor, setNewColumnColor] = useState('border-blue-200 bg-blue-50')
+  const [newColumnColor, setNewColumnColor] = useState('border-blue-300 bg-blue-50')
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -69,10 +94,24 @@ export default function KanbanConfigModal({
   )
 
   useEffect(() => {
-    if (isOpen && initialConfig) {
-      setColumns(initialConfig.columns || [])
-      setCardFields(initialConfig.card_fields || [])
-      setQuickActions(initialConfig.quick_actions || [])
+    if (isOpen) {
+      if (initialConfig) {
+        setColumns(initialConfig.columns || [])
+        setCardFields(
+          initialConfig.card_fields && initialConfig.card_fields.length > 0
+            ? initialConfig.card_fields
+            : defaultCardFields
+        )
+        setQuickActions(
+          initialConfig.quick_actions && initialConfig.quick_actions.length > 0
+            ? initialConfig.quick_actions
+            : defaultQuickActions
+        )
+      } else {
+        // Se não houver initialConfig, usar padrões
+        setCardFields(defaultCardFields)
+        setQuickActions(defaultQuickActions)
+      }
     }
   }, [isOpen, initialConfig])
 
@@ -91,7 +130,7 @@ export default function KanbanConfigModal({
     setColumns([...columns, newColumn])
     setNewColumnLabel('')
     setNewColumnDescription('')
-    setNewColumnColor('border-blue-200 bg-blue-50')
+    setNewColumnColor('border-blue-300 bg-blue-50')
   }
 
   const handleRemoveColumn = (columnId: string) => {
@@ -198,13 +237,16 @@ export default function KanbanConfigModal({
                   onChange={(e) => setNewColumnColor(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
-                  <option value="border-blue-200 bg-blue-50">Azul</option>
-                  <option value="border-green-200 bg-green-50">Verde</option>
-                  <option value="border-yellow-200 bg-yellow-50">Amarelo</option>
-                  <option value="border-orange-200 bg-orange-50">Laranja</option>
-                  <option value="border-purple-200 bg-purple-50">Roxo</option>
-                  <option value="border-pink-200 bg-pink-50">Rosa</option>
-                  <option value="border-gray-200 bg-gray-50">Cinza</option>
+                  <option value="border-blue-300 bg-blue-50">Azul Suave</option>
+                  <option value="border-green-300 bg-green-50">Verde Suave</option>
+                  <option value="border-yellow-300 bg-yellow-50">Amarelo Suave</option>
+                  <option value="border-orange-300 bg-orange-50">Laranja Suave</option>
+                  <option value="border-purple-300 bg-purple-50">Roxo Suave</option>
+                  <option value="border-pink-300 bg-pink-50">Rosa Suave</option>
+                  <option value="border-cyan-300 bg-cyan-50">Ciano Suave</option>
+                  <option value="border-teal-300 bg-teal-50">Verde-Água Suave</option>
+                  <option value="border-indigo-300 bg-indigo-50">Índigo Suave</option>
+                  <option value="border-gray-300 bg-gray-50">Cinza Suave</option>
                 </select>
                 <button
                   onClick={handleAddColumn}
@@ -218,44 +260,82 @@ export default function KanbanConfigModal({
 
           {/* Seção: Campos do Card */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Campos do Card</h3>
-            <div className="space-y-2">
-              {cardFields.map((field) => (
-                <label key={field.field} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                  <span className="text-sm text-gray-700">
-                    {field.field === 'telefone' && '📞 Telefone'}
-                    {field.field === 'email' && '📧 Email'}
-                    {field.field === 'objetivo' && '🎯 Objetivo'}
-                    {field.field === 'proxima_consulta' && '📅 Próxima Consulta'}
-                    {field.field === 'ultima_consulta' && '🕐 Última Consulta'}
-                    {field.field === 'tags' && '🏷️ Tags'}
-                    {field.field === 'status_badge' && '🏷️ Badge de Status'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={field.visible}
-                    onChange={(e) => {
-                      setCardFields(cardFields.map(f => 
-                        f.field === field.field ? { ...f, visible: e.target.checked } : f
-                      ))
-                    }}
-                    className="w-5 h-5 text-blue-600"
-                  />
-                </label>
-              ))}
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold text-gray-900">Campos do Card</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Escolha quais informações aparecem nos cards dos clientes no Kanban. 
+                Desmarque os campos que você não precisa ver para deixar os cards mais limpos.
+              </p>
+            </div>
+            <div className="space-y-2 mt-4">
+              {cardFields.map((field) => {
+                const fieldLabels: Record<string, { icon: string; label: string; description: string }> = {
+                  telefone: { icon: '📞', label: 'Telefone', description: 'Número de telefone do cliente' },
+                  email: { icon: '📧', label: 'Email', description: 'Endereço de email do cliente' },
+                  objetivo: { icon: '🎯', label: 'Objetivo', description: 'Objetivo principal do cliente' },
+                  proxima_consulta: { icon: '📅', label: 'Próxima Consulta', description: 'Data e hora da próxima consulta agendada' },
+                  ultima_consulta: { icon: '🕐', label: 'Última Consulta', description: 'Data da última consulta realizada' },
+                  tags: { icon: '🏷️', label: 'Tags', description: 'Tags ou etiquetas associadas ao cliente' },
+                  status_badge: { icon: '🏷️', label: 'Badge de Status', description: 'Badge colorido mostrando o status atual' },
+                  data_cadastro: { icon: '📆', label: 'Data de Cadastro', description: 'Data em que o cliente foi cadastrado' }
+                }
+                
+                const fieldInfo = fieldLabels[field.field] || { icon: '📋', label: field.field, description: 'Campo personalizado' }
+                
+                return (
+                  <label key={field.field} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{fieldInfo.icon}</span>
+                        <span className="text-sm font-medium text-gray-900">{fieldInfo.label}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1 ml-7">{fieldInfo.description}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-400 hidden sm:inline">
+                        {field.visible ? 'Visível' : 'Oculto'}
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={field.visible}
+                        onChange={(e) => {
+                          setCardFields(cardFields.map(f => 
+                            f.field === field.field ? { ...f, visible: e.target.checked } : f
+                          ))
+                        }}
+                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </div>
+                  </label>
+                )
+              })}
             </div>
           </div>
 
           {/* Seção: Ações Rápidas */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
-            <div className="space-y-2">
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold text-gray-900">Ações Rápidas</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Controle quais botões de ação rápida aparecem nos cards dos clientes. 
+                Esses botões ficam na parte inferior de cada card para acesso rápido.
+              </p>
+            </div>
+            <div className="space-y-2 mt-4">
               {quickActions.map((action) => (
-                <label key={action.action} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                  <span className="text-sm text-gray-700">
-                    {action.action === 'whatsapp' && '💬 WhatsApp'}
-                    {action.action === 'ver_perfil' && '👁️ Ver Perfil'}
-                  </span>
+                <label key={action.action} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-900">
+                        {action.action === 'whatsapp' && '💬 WhatsApp'}
+                        {action.action === 'ver_perfil' && '👁️ Ver Perfil'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {action.action === 'whatsapp' && 'Botão para abrir conversa no WhatsApp diretamente do card'}
+                      {action.action === 'ver_perfil' && 'Link para visualizar o perfil completo do cliente'}
+                    </p>
+                  </div>
                   <input
                     type="checkbox"
                     checked={action.visible}
@@ -264,7 +344,7 @@ export default function KanbanConfigModal({
                         a.action === action.action ? { ...a, visible: e.target.checked } : a
                       ))
                     }}
-                    className="w-5 h-5 text-blue-600"
+                    className="w-5 h-5 text-blue-600 ml-4 flex-shrink-0"
                   />
                 </label>
               ))}
@@ -345,13 +425,16 @@ function SortableColumnItem({
         onChange={(e) => onUpdate(column.id, { color: e.target.value })}
         className="text-xs border border-gray-300 rounded px-2 py-1"
       >
-        <option value="border-blue-200 bg-blue-50">Azul</option>
-        <option value="border-green-200 bg-green-50">Verde</option>
-        <option value="border-yellow-200 bg-yellow-50">Amarelo</option>
-        <option value="border-orange-200 bg-orange-50">Laranja</option>
-        <option value="border-purple-200 bg-purple-50">Roxo</option>
-        <option value="border-pink-200 bg-pink-50">Rosa</option>
-        <option value="border-gray-200 bg-gray-50">Cinza</option>
+        <option value="border-blue-300 bg-blue-50">Azul Suave</option>
+        <option value="border-green-300 bg-green-50">Verde Suave</option>
+        <option value="border-yellow-300 bg-yellow-50">Amarelo Suave</option>
+        <option value="border-orange-300 bg-orange-50">Laranja Suave</option>
+        <option value="border-purple-300 bg-purple-50">Roxo Suave</option>
+        <option value="border-pink-300 bg-pink-50">Rosa Suave</option>
+        <option value="border-cyan-300 bg-cyan-50">Ciano Suave</option>
+        <option value="border-teal-300 bg-teal-50">Verde-Água Suave</option>
+        <option value="border-indigo-300 bg-indigo-50">Índigo Suave</option>
+        <option value="border-gray-300 bg-gray-50">Cinza Suave</option>
       </select>
       <button
         onClick={() => onRemove(column.id)}

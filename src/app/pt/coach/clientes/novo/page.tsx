@@ -215,8 +215,6 @@ function NovoClienteNutriContent() {
                     <option value="">Selecione</option>
                     <option value="feminino">Feminino</option>
                     <option value="masculino">Masculino</option>
-                    <option value="outro">Outro</option>
-                    <option value="prefiro_nao_informar">Prefiro não informar</option>
                   </select>
                 </div>
 

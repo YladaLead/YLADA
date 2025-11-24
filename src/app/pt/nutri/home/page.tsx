@@ -262,32 +262,74 @@ function NutriHomeContent() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-              <Link 
-                href="/pt/nutri/ferramentas"
-                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-blue-100"
-              >
-                <div className="text-4xl mb-3">🔗</div>
-                <h3 className="font-semibold text-gray-900">Links Personalizados</h3>
-                <p className="text-sm text-gray-600 mt-1">Crie e compartilhe</p>
-              </Link>
+              {/* Links Personalizados */}
+              <div className="bg-white rounded-lg p-6 border border-blue-100 hover:shadow-md transition-shadow">
+                <div className="text-center mb-4">
+                  <div className="text-4xl mb-3">🔗</div>
+                  <h3 className="font-semibold text-gray-900">Links Personalizados</h3>
+                  <p className="text-sm text-gray-600 mt-1">Crie e compartilhe</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Link 
+                    href="/pt/nutri/ferramentas"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium text-center py-2 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    Ver Meus Links →
+                  </Link>
+                  <Link 
+                    href="/pt/nutri/ferramentas/nova"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium text-center"
+                  >
+                    + Criar Novo Link
+                  </Link>
+                </div>
+              </div>
               
-              <Link 
-                href="/pt/nutri/quizzes"
-                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-blue-100"
-              >
-                <div className="text-4xl mb-3">📝</div>
-                <h3 className="font-semibold text-gray-900">Quizzes</h3>
-                <p className="text-sm text-gray-600 mt-1">Engaje e eduque</p>
-              </Link>
+              {/* Quizzes Personalizados */}
+              <div className="bg-white rounded-lg p-6 border border-blue-100 hover:shadow-md transition-shadow">
+                <div className="text-center mb-4">
+                  <div className="text-4xl mb-3">📝</div>
+                  <h3 className="font-semibold text-gray-900">Quizzes Personalizados</h3>
+                  <p className="text-sm text-gray-600 mt-1">Engaje e eduque</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Link 
+                    href="/pt/nutri/quizzes"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium text-center py-2 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    Ver Meus Quizzes →
+                  </Link>
+                  <Link 
+                    href="/pt/nutri/quiz-personalizado"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium text-center"
+                  >
+                    + Criar Novo Quiz
+                  </Link>
+                </div>
+              </div>
               
-              <Link 
-                href="/pt/nutri/ferramentas/templates"
-                className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-blue-100"
-              >
-                <div className="text-4xl mb-3">📊</div>
-                <h3 className="font-semibold text-gray-900">Calculadoras</h3>
-                <p className="text-sm text-gray-600 mt-1">Ferramentas práticas</p>
-              </Link>
+              {/* Portal do Bem-Estar */}
+              <div className="bg-white rounded-lg p-6 border border-blue-100 hover:shadow-md transition-shadow">
+                <div className="text-center mb-4">
+                  <div className="text-4xl mb-3">🌐</div>
+                  <h3 className="font-semibold text-gray-900">Portal do Bem-Estar</h3>
+                  <p className="text-sm text-gray-600 mt-1">Portal completo</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Link 
+                    href="/pt/nutri/portals"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium text-center py-2 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    Ver Meus Portais →
+                  </Link>
+                  <Link 
+                    href="/pt/nutri/portals/novo"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium text-center"
+                  >
+                    + Criar Novo Portal
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 

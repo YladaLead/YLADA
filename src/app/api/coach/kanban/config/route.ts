@@ -31,11 +31,11 @@ export async function GET(request: NextRequest) {
         data: {
           config: {
             columns: [
-              { id: 'lead', value: 'lead', label: 'Contato', description: 'Entrou agora, precisa de acolhimento', color: 'border-purple-200 bg-purple-50', order: 1 },
-              { id: 'pre_consulta', value: 'pre_consulta', label: 'Pré-Consulta', description: 'Já falou com você, falta agendar', color: 'border-yellow-200 bg-yellow-50', order: 2 },
-              { id: 'ativa', value: 'ativa', label: 'Ativa', description: 'Em atendimento e com plano ativo', color: 'border-green-200 bg-green-50', order: 3 },
-              { id: 'pausa', value: 'pausa', label: 'Pausa', description: 'Deu um tempo, precisa nutrir relação', color: 'border-orange-200 bg-orange-50', order: 4 },
-              { id: 'finalizada', value: 'finalizada', label: 'Finalizada', description: 'Concluiu o ciclo com você', color: 'border-gray-200 bg-gray-50', order: 5 }
+              { id: 'lead', value: 'lead', label: 'Contato', description: 'Entrou agora, precisa de acolhimento', color: 'border-purple-300 bg-purple-50', order: 1 },
+              { id: 'pre_consulta', value: 'pre_consulta', label: 'Pré-Consulta', description: 'Já falou com você, falta agendar', color: 'border-yellow-300 bg-yellow-50', order: 2 },
+              { id: 'ativa', value: 'ativa', label: 'Ativa', description: 'Em atendimento e com plano ativo', color: 'border-green-300 bg-green-50', order: 3 },
+              { id: 'pausa', value: 'pausa', label: 'Pausa', description: 'Deu um tempo, precisa nutrir relação', color: 'border-orange-300 bg-orange-50', order: 4 },
+              { id: 'finalizada', value: 'finalizada', label: 'Finalizada', description: 'Concluiu o ciclo com você', color: 'border-gray-300 bg-gray-50', order: 5 }
             ],
             card_fields: [
               { field: 'telefone', visible: true },
@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
               { field: 'proxima_consulta', visible: true },
               { field: 'ultima_consulta', visible: true },
               { field: 'tags', visible: false },
-              { field: 'status_badge', visible: true }
+              { field: 'status_badge', visible: true },
+              { field: 'data_cadastro', visible: false }
             ],
             quick_actions: [
               { action: 'whatsapp', visible: true },
