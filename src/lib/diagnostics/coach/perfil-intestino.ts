@@ -13,7 +13,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
       diagnostico:
         '📋 DIAGNÓSTICO: Seu funcionamento intestinal está equilibrado, com boa digestão, evacuações regulares e ausência de sinais inflamatórios relevantes.',
       causaRaiz:
-        '🔍 CAUSA RAIZ: Rotina alimentar organizada, ingestão adequada de fibras, hidratação consistente e microbiota estável sustentam esse cenário positivo.'
+        '🔍 CAUSA RAIZ: Rotina alimentar organizada, ingestão adequada de fibras, hidratação consistente e microbiota estável sustentam esse cenário positivo.',
       acaoImediata:
         '⚡ AÇÃO IMEDIATA: Manter hábitos atuais, reforçando alimentos in natura, fibras variadas e exposição matinal à luz natural para preservar a saúde intestinal.'
       proximoPasso:

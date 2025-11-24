@@ -11,7 +11,7 @@ export const plannerRefeicoesDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: O déficit calórico adequado promove redução de peso de forma saudável quando acompanhado de distribuição correta de macronutrientes. Estudos mostram que pequenas mudanças de 300-500 kcal por dia já podem resultar em perda de 0,5-1kg por semana quando mantidas consistentemente. Uma avaliação de bem-estar identifica exatamente qual déficit é mais adequado para seu metabolismo e estilo de vida',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente o plano com déficit calórico conforme sua rotina. Busque avaliação de bem-estar para receber ajustes personalizados e acompanhamento que garanta perda de peso saudável e sustentável. Evite restrições extremas — cada organismo responde diferente',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pedindo equilíbrio — e você já deu o primeiro passo. Descubra como reduzir peso de forma saudável e sustentável com um plano personalizado e acompanhamento adequado.'
-    }
+    },
     manterPeso: {
       diagnostico: '📋 DIAGNÓSTICO: Seu plano alimentar está configurado para manutenção do peso com equilíbrio de bem-estar e suporte à saúde geral',
       causaRaiz: '🔍 CAUSA RAIZ: A manutenção do peso requer equilíbrio preciso entre ingestão e gasto calórico, além de distribuição adequada de nutrientes. Pesquisas indicam que pessoas que mantêm peso estável com alimentação equilibrada têm 50% menos risco de desenvolver desequilíbrios metabólicos. Uma avaliação de bem-estar identifica exatamente quais são suas necessidades para manutenção ideal'
