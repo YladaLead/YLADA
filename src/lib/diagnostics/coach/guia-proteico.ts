@@ -11,7 +11,7 @@ export const guiaProteicoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Ingestão insuficiente de alimentos proteicos ou planejamento inadequado das refeições. Estudos indicam que consumo abaixo de 0.8g/kg pode comprometer síntese proteica e recuperação muscular. Uma avaliação de bem-estar identifica exatamente qual é sua necessidade real e como alcançá-la',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Aumente proteínas em todas as refeições principais. Busque avaliação de bem-estar para um plano personalizado que distribua proteína ao longo do dia de forma estratégica',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo precisa de proteína adequada para resultados — descubra em minutos como otimizar sua ingestão proteica com um plano personalizado.'
-    }
+    },
     proteinaModerada: {
       diagnostico: '🥩 DIAGNÓSTICO: Seu consumo de proteína está adequado, mantenha o padrão e considere otimizações estratégicas',
       causaRaiz: '🔍 CAUSA RAIZ: Boa distribuição proteica ao longo do dia estabelecida. Pesquisas mostram que otimizações de timing podem aumentar síntese proteica em até 25%. Uma análise de bem-estar identifica oportunidades específicas para você',

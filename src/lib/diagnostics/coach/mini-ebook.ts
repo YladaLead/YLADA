@@ -11,7 +11,7 @@ export const miniEbookDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Falta de conhecimento básico sobre bem-estar e alimentação. Estudos mostram que pessoas com maior conhecimento de bem-estar têm 40% mais probabilidade de adotar hábitos saudáveis. Uma avaliação de bem-estar identifica exatamente quais fundamentos você precisa dominar primeiro',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Comece estudando fundamentos nutricionais gradualmente. Busque avaliação de bem-estar para receber um plano educacional personalizado que priorize os conceitos mais importantes para você',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu conhecimento é o primeiro passo — descubra em minutos como construir uma base sólida em bem-estar com um plano educacional personalizado.'
-    }
+    },
     conhecimentoModerado: {
       diagnostico: '📚 DIAGNÓSTICO: Seu conhecimento de bem-estar está moderado, mas pode ser aprofundado para potencializar ainda mais resultados',
       causaRaiz: '🔍 CAUSA RAIZ: Conhecimento básico presente, mas falta especialização em áreas específicas. Pesquisas indicam que aprofundamento estratégico pode melhorar aplicação prática em até 35%. Uma análise identifica oportunidades específicas para você',

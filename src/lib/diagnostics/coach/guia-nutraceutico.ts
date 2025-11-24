@@ -11,7 +11,7 @@ export const guiaNutraceuticoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Falta de conhecimento sobre benefícios dos nutracêuticos e alimentos funcionais. Estudos mostram que 65% das pessoas com baixo interesse em nutracêuticos desconhecem como essas substâncias podem melhorar saúde preventiva. Uma avaliação de bem-estar identifica exatamente quais nutracêuticos são mais relevantes para seu perfil e como introduzi-los gradualmente',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Comece aprendendo sobre nutracêuticos básicos (multivitamínicos, ômega-3, probióticos). Busque avaliação de bem-estar para receber orientações personalizadas sobre quais são mais adequados para você',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu interesse em nutracêuticos está começando — descubra em minutos como eles podem transformar sua saúde preventiva com orientações personalizadas.'
-    }
+    },
     interesseModerado: {
       diagnostico: '💊 DIAGNÓSTICO: Seu interesse em nutracêuticos está moderado, precisa de aprofundamento estratégico',
       causaRaiz: '🔍 CAUSA RAIZ: Interesse básico presente, mas falta conhecimento especializado sobre uso direcionado de nutracêuticos. Pesquisas indicam que aprofundamento estratégico pode aumentar eficácia preventiva em até 40%. Uma análise de bem-estar identifica exatamente quais nutracêuticos são mais eficazes para seu perfil específico',

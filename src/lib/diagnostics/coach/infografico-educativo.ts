@@ -11,7 +11,7 @@ export const infograficoEducativoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Conhecimento básico em bem-estar requer educação visual estruturada. Estudos mostram que aprendizado através de infográficos aumenta retenção de informação em até 65% quando comparado a texto puro. Infográficos básicos com conceitos fundamentais criam base sólida que permite evolução gradual. Uma avaliação de bem-estar identifica exatamente quais tópicos básicos são mais relevantes para seu perfil e objetivos',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Comece com infográficos básicos sobre macronutrientes, hidratação e alimentação saudável. Considere avaliação de bem-estar para receber infográficos educativos personalizados que aceleram seu aprendizado',
       proximoPasso: '🎯 PRÓXIMO PASSO: Aprenda de forma visual e eficiente — descubra como infográficos básicos podem acelerar seu conhecimento de bem-estar com orientações personalizadas.'
-    }
+    },
     conhecimentoModerado: {
       diagnostico: '📊 DIAGNÓSTICO: Você precisa de infográficos educativos moderados sobre bem-estar para aprofundar conhecimento e otimizar estratégias de bem-estar',
       causaRaiz: '🔍 CAUSA RAIZ: Conhecimento moderado estabelecido permite aprofundamento através de infográficos intermediários. Pesquisas indicam que infográficos moderados com estratégias práticas aumentam aplicação de conhecimento em até 50% quando comparados a educação básica. Uma análise de bem-estar identifica exatamente quais tópicos intermediários são mais eficazes para você',
