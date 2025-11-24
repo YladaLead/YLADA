@@ -25,3 +25,4 @@ export const tabelaSintomasDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Seus sintomas precisam de cuidado profissional agora — e é totalmente possível melhorá-los com um protocolo nutricional estruturado e acompanhamento adequado.'
     }
   }
+}

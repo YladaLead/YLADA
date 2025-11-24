@@ -25,3 +25,4 @@ export const guiaProteicoDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Excelente! Seu consumo proteico está otimizado. Descubra como estratégias avançadas de timing e absorção podem potencializar ainda mais sua performance.'
     }
   }
+}

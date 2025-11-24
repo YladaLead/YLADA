@@ -25,3 +25,4 @@ export const formularioRecomendacaoDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Recomendações avançadas maximizam potencial — descubra como estratégias complexas e refinamentos especializados podem transformar seus resultados com orientações de elite.'
     }
   }
+}

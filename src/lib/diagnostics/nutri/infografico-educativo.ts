@@ -25,3 +25,4 @@ export const infograficoEducativoDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu conhecimento atual é um ótimo ponto de partida. Descubra como infográficos avançados podem consolidar e expandir ainda mais sua expertise nutricional.'
     }
   }
+}

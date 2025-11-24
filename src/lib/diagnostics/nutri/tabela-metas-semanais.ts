@@ -25,3 +25,4 @@ export const tabelaMetasSemanaisDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Você está em modo performance. Com ajustes finos personalizados, seus resultados podem avançar de forma consistente e sustentável.'
     }
   }
+}

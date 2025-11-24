@@ -25,3 +25,4 @@ export const planoAlimentarBaseDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua busca por qualidade premium é um ótimo ponto de partida. Descubra como um plano alimentar de elite pode potencializar ainda mais seus resultados com estratégias avançadas.'
     }
   }
+}

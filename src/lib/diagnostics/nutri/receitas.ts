@@ -25,3 +25,4 @@ export const receitasDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua experiência atual é um ótimo ponto de partida. Descubra como receitas avançadas podem potencializar ainda mais sua alimentação com preparações gourmet personalizadas.'
     }
   }
+}

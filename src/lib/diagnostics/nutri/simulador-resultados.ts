@@ -25,3 +25,4 @@ export const simuladorResultadosDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Estratégias avançadas maximizam resultados — descubra como simular seus resultados de elite e transformar ambição em conquista com orientações especializadas.'
     }
   }
+}

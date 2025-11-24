@@ -25,3 +25,4 @@ export const checklistAlimentarDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio alimentar é um ótimo ponto de partida. Descubra como estratégias avançadas podem potencializar ainda mais sua saúde e bem-estar.'
     }
   }
+}

@@ -25,3 +25,4 @@ export const miniEbookDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu conhecimento atual é um ótimo ponto de partida. Descubra como estratégias avançadas de especialização podem potencializar ainda mais sua expertise e resultados práticos.'
     }
   }
+}

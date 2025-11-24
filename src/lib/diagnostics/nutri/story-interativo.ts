@@ -25,3 +25,4 @@ export const storyInterativoDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Integre tracking de métricas (visualizações por tela e replies) e faça testes A/B de hooks e CTAs.'
     }
   }
+}

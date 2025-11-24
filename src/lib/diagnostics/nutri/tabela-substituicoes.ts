@@ -25,3 +25,4 @@ export const tabelaSubstituicoesDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua busca por qualidade premium é um ótimo ponto de partida. Descubra como substituições de elite podem potencializar ainda mais seus resultados com alternativas avançadas.'
     }
   }
+}

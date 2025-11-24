@@ -25,3 +25,4 @@ export const diarioAlimentarDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu comprometimento com diário avançado é um ótimo ponto de partida. Descubra como padrões emocionais complexos podem ser transformados com interpretação profissional e estratégias direcionadas de relação com a comida.'
     }
   }
+}

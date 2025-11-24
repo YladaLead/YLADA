@@ -25,3 +25,4 @@ export const plannerRefeicoesDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo precisa de nutrição adequada para resultados — descubra em minutos como otimizar seu ganho de massa muscular com um plano personalizado e estratégias direcionadas.'
     }
   }
+}

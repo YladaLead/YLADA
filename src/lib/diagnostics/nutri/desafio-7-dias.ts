@@ -25,3 +25,4 @@ export const desafio7DiasDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Você não precisa fazer isso sozinho. Clique aqui e inscreva-se no Desafio 7 Dias. Um profissional especializado vai entrar em contato para criar seu plano personalizado e te acompanhar em cada dia da sua transformação. Seus resultados começam agora!'
     }
   }
+}

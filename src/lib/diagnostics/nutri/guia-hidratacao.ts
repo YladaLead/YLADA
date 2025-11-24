@@ -25,3 +25,4 @@ export const guiaHidratacaoDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua hidratação atual é um ótimo ponto de partida. Descubra como refinamentos estratégicos podem potencializar ainda mais sua performance com hidratação de precisão.'
     }
   }
+}

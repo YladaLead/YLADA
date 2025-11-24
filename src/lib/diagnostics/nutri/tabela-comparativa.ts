@@ -25,3 +25,4 @@ export const tabelaComparativaDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua busca por qualidade premium é um ótimo ponto de partida. Descubra como produtos de elite podem potencializar ainda mais seus resultados com comparações avançadas.'
     }
   }
+}

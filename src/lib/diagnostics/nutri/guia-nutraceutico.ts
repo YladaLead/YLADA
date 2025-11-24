@@ -25,3 +25,4 @@ export const guiaNutraceuticoDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu interesse atual é um ótimo ponto de partida. Descubra como estratégias nutracêuticas de precisão podem potencializar ainda mais sua saúde preventiva.'
     }
   }
+}

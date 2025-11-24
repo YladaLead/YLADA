@@ -25,3 +25,4 @@ export const cardapioDetoxDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Você está pronto para detox profundo. Descubra como um cardápio detox avançado pode potencializar ainda mais sua limpeza e bem-estar com estratégias de elite.'
     }
   }
+}
