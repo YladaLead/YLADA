@@ -33,11 +33,15 @@ export default function LoginForm({
 
   // 🚀 CORREÇÃO: Verificar autenticação apenas UMA VEZ ao carregar (sem loop)
   useEffect(() => {
+    let mounted = true
+    let checkTimeout: NodeJS.Timeout | null = null
+
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-            console.log('✅ Já autenticado, redirecionando para:', redirectPath)
+        if (mounted && session?.user) {
+          console.log('✅ Já autenticado, redirecionando para:', redirectPath)
+          // Usar replace para evitar adicionar ao histórico
           router.replace(redirectPath)
         }
       } catch (err) {
@@ -45,7 +49,19 @@ export default function LoginForm({
       }
     }
 
-    checkAuth()
+    // Aguardar um pouco para garantir que cookies foram carregados
+    checkTimeout = setTimeout(() => {
+      if (mounted) {
+        checkAuth()
+      }
+    }, 100)
+
+    return () => {
+      mounted = false
+      if (checkTimeout) {
+        clearTimeout(checkTimeout)
+      }
+    }
   }, [redirectPath, router])
 
   // Atualizar valor dos inputs
@@ -227,39 +243,13 @@ export default function LoginForm({
         }
 
         // 🚀 CORREÇÃO: Redirecionar imediatamente após login bem-sucedido
-        // Remover verificações múltiplas que causavam loop de verificação
+        // Aguardar um pouco para garantir que a sessão foi persistida
         console.log('🔄 Redirecionando para:', redirectPath)
-        router.replace(redirectPath)
-
-        // Após redirecionar, verificar em segundo plano se o perfil está completo.
-        void (async () => {
-          try {
-            // Pequeno atraso para garantir que os cookies/sessão foram persistidos
-            await new Promise(resolve => setTimeout(resolve, 200))
-            
-            // Usar API dinâmica baseada no perfil (bem-vindo só existe em wellness por enquanto)
-            // Para outras áreas, verificar perfil via API genérica se necessário
-            if (perfil === 'wellness') {
-              const profileResponse = await fetch('/api/wellness/profile', {
-                credentials: 'include'
-              })
-              
-              if (profileResponse.ok) {
-                const profileData = await profileResponse.json()
-                const profile = profileData.profile
-                
-                if (!profile?.nome || !profile?.whatsapp) {
-                  console.log('ℹ️ Perfil incompleto detectado após login, redirecionando para onboarding.')
-                  router.replace('/pt/wellness/bem-vindo?migrado=true')
-                }
-              }
-            }
-            // Para outras áreas (nutri, coach, nutra), não redirecionar para onboarding por enquanto
-            // O perfil será verificado pelo ProtectedRoute
-          } catch (profileError) {
-            console.warn('⚠️ Erro ao verificar perfil pós-login:', profileError)
-          }
-        })()
+        
+        // Usar setTimeout para garantir que o estado foi atualizado
+        setTimeout(() => {
+          router.replace(redirectPath)
+        }, 100)
 
         return
       }
