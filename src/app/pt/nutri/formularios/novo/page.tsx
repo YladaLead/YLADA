@@ -16,6 +16,8 @@ import {
   DragStartEvent,
   DragOverlay,
   Active,
+  DragOverEvent,
+  useDroppable,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -47,7 +49,41 @@ export interface Field {
   options?: string[]
 }
 
-// Componente para item arrastável
+// Componente para item de componente arrastável
+function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label: string; icon: string; description: string; suggestion: string } }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `component-${fieldType.type}` })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`flex flex-col gap-1 p-4 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-blue-500' : ''}`}
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-xl">{fieldType.icon}</span>
+        <span className="text-sm font-medium">{fieldType.label}</span>
+      </div>
+      <p className="text-xs text-gray-600 ml-9">{fieldType.description}</p>
+    </div>
+  )
+}
+
+// Componente para item arrastável na lista
 function DraggableFieldItem({ field, onEdit, onRemove }: { 
   field: Field
   onEdit: (field: Field) => void
@@ -113,6 +149,24 @@ function DraggableFieldItem({ field, onEdit, onRemove }: {
   )
 }
 
+// Componente da área de drop
+function FormDropZone({ children }: { children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: 'form-drop-zone',
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-[400px] transition-colors ${
+        isOver ? 'bg-blue-50 border-blue-300' : 'bg-white'
+      } border-2 border-dashed border-gray-200 rounded-lg p-6`}
+    >
+      {children}
+    </div>
+  )
+}
+
 // Componente para preview do campo
 function FieldPreview({ field }: { field: Field }) {
   const renderField = () => {
@@ -124,7 +178,7 @@ function FieldPreview({ field }: { field: Field }) {
           <input
             type={field.type}
             placeholder={field.placeholder}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled
           />
         )
@@ -242,29 +296,87 @@ function NovoFormularioNutriContent() {
     })
   )
 
-  const fieldTypes: { type: FieldType; label: string; icon: string }[] = [
-    { type: 'text', label: 'Texto', icon: '📝' },
-    { type: 'email', label: 'E-mail', icon: '📧' },
-    { type: 'phone', label: 'Telefone', icon: '📱' },
-    { type: 'textarea', label: 'Área de texto', icon: '📄' },
-    { type: 'number', label: 'Número', icon: '🔢' },
-    { type: 'date', label: 'Data', icon: '📅' },
-    { type: 'select', label: 'Lista suspensa', icon: '📋' },
-    { type: 'radio', label: 'Múltipla escolha', icon: '🔘' },
-    { type: 'checkbox', label: 'Caixas de seleção', icon: '☑️' },
+  const fieldTypes: { type: FieldType; label: string; icon: string; description: string; suggestion: string }[] = [
+    { 
+      type: 'text', 
+      label: 'Texto', 
+      icon: '📝', 
+      description: 'Para nomes, profissão, medicamentos',
+      suggestion: 'Nome completo'
+    },
+    { 
+      type: 'email', 
+      label: 'E-mail', 
+      icon: '📧', 
+      description: 'Para contato e envio de materiais',
+      suggestion: 'E-mail para contato'
+    },
+    { 
+      type: 'phone', 
+      label: 'Telefone', 
+      icon: '📱', 
+      description: 'Para emergências e WhatsApp',
+      suggestion: 'Telefone/WhatsApp'
+    },
+    { 
+      type: 'textarea', 
+      label: 'Área de texto', 
+      icon: '📄', 
+      description: 'Para histórico médico, sintomas, objetivos',
+      suggestion: 'Descreva seu histórico alimentar'
+    },
+    { 
+      type: 'number', 
+      label: 'Número', 
+      icon: '🔢', 
+      description: 'Para peso, altura, idade, horas de sono',
+      suggestion: 'Peso atual (kg)'
+    },
+    { 
+      type: 'date', 
+      label: 'Data', 
+      icon: '📅', 
+      description: 'Para nascimento, início de sintomas',
+      suggestion: 'Data de nascimento'
+    },
+    { 
+      type: 'select', 
+      label: 'Lista suspensa', 
+      icon: '📋', 
+      description: 'Para opções únicas: sexo, estado civil, escolaridade',
+      suggestion: 'Sexo biológico'
+    },
+    { 
+      type: 'radio', 
+      label: 'Múltipla escolha', 
+      icon: '🔘', 
+      description: 'Para uma opção entre várias: nível de atividade',
+      suggestion: 'Nível de atividade física'
+    },
+    { 
+      type: 'checkbox', 
+      label: 'Caixas de seleção', 
+      icon: '☑️', 
+      description: 'Para múltiplas opções: sintomas, alergias',
+      suggestion: 'Sintomas que apresenta'
+    },
   ]
 
   const adicionarCampo = (tipo: FieldType) => {
+    const fieldType = fieldTypes.find(ft => ft.type === tipo)
     const novoCampo: Field = {
       id: `field_${Date.now()}`,
       type: tipo,
-      label: '',
+      label: fieldType?.suggestion || '',
       required: false,
       placeholder: tipo === 'text' ? 'Digite aqui...' : 
-                   tipo === 'textarea' ? 'Descreva aqui...' : 
-                   tipo === 'email' ? 'Digite seu e-mail...' :
-                   tipo === 'phone' ? 'Digite seu telefone...' : undefined,
-      options: tipo === 'select' || tipo === 'radio' || tipo === 'checkbox' ? ['Opção 1', 'Opção 2'] : undefined
+                   tipo === 'textarea' ? 'Descreva detalhadamente...' : 
+                   tipo === 'email' ? 'exemplo@email.com' :
+                   tipo === 'phone' ? '(11) 99999-9999' :
+                   tipo === 'number' ? 'Digite o valor' : undefined,
+      options: tipo === 'select' ? ['Feminino', 'Masculino'] :
+               tipo === 'radio' ? ['Sedentário', 'Leve', 'Moderado', 'Intenso'] :
+               tipo === 'checkbox' ? ['Dor de cabeça', 'Fadiga', 'Insônia', 'Ansiedade'] : undefined
     }
     setFieldEditando(novoCampo)
     setMostrarModalCampo(true)
@@ -312,7 +424,16 @@ function NovoFormularioNutriContent() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
 
-    if (active.id !== over?.id) {
+    // Se arrastou um componente para a área de drop
+    if (active.id.toString().startsWith('component-') && over?.id === 'form-drop-zone') {
+      const componentType = active.id.toString().replace('component-', '') as FieldType
+      adicionarCampo(componentType)
+      setActiveId(null)
+      return
+    }
+
+    // Se reordenou campos existentes
+    if (active.id !== over?.id && !active.id.toString().startsWith('component-')) {
       setFields((items) => {
         const oldIndex = items.findIndex(item => item.id === active.id)
         const newIndex = items.findIndex(item => item.id === over?.id)
@@ -384,8 +505,14 @@ function NovoFormularioNutriContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <NutriSidebar isMobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="min-h-screen bg-gray-50 flex">
+        <NutriSidebar isMobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
       
       <div className="flex-1 flex flex-col lg:ml-64">
         {/* Header */}
@@ -407,11 +534,16 @@ function NovoFormularioNutriContent() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex">
+        <div className="flex-1 flex flex-col xl:flex-row gap-4 p-4">
           {/* Left Panel - Components */}
-          <div className="w-80 bg-white border-r border-gray-200 p-4 overflow-y-auto">
+          <div className="w-full xl:w-80 bg-white border border-gray-200 rounded-lg p-4 overflow-y-auto max-h-96 xl:max-h-none">
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">📋 Informações Básicas</h2>
+              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">📋 Informações Básicas</h2>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-blue-800">
+                  💡 <strong>Dica:</strong> Defina um nome claro e uma descrição que explique o objetivo do formulário para seus pacientes.
+                </p>
+              </div>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -421,8 +553,8 @@ function NovoFormularioNutriContent() {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ex: Questionário de Avaliação"
+                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ex: Anamnese Nutricional Completa"
                   />
                 </div>
                 <div>
@@ -432,9 +564,9 @@ function NovoFormularioNutriContent() {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={2}
-                    placeholder="Descreva o objetivo do formulário"
+                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                    placeholder="Ex: Formulário para coletar informações sobre hábitos alimentares, histórico de saúde e objetivos nutricionais do paciente."
                   />
                 </div>
                 <div>
@@ -444,7 +576,7 @@ function NovoFormularioNutriContent() {
                   <select
                     value={formData.form_type}
                     onChange={(e) => setFormData({ ...formData, form_type: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="questionario">Questionário</option>
                     <option value="anamnese">Anamnese</option>
@@ -457,119 +589,108 @@ function NovoFormularioNutriContent() {
             </div>
 
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">🧩 Componentes</h2>
-              <div className="grid grid-cols-1 gap-2">
-                {fieldTypes.map((fieldType) => (
-                  <button
-                    key={fieldType.type}
-                    onClick={() => adicionarCampo(fieldType.type)}
-                    className="flex items-center gap-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                  >
-                    <span className="text-lg">{fieldType.icon}</span>
-                    <span className="text-sm font-medium">{fieldType.label}</span>
-                  </button>
-                ))}
+              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">🧩 Componentes</h2>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-green-800">
+                  💡 <strong>Como usar:</strong> Arraste os componentes abaixo para a área de preview à direita, ou clique duas vezes para adicionar rapidamente.
+                </p>
+              </div>
+              <SortableContext items={fieldTypes.map(ft => `component-${ft.type}`)} strategy={verticalListSortingStrategy}>
+                <div className="grid grid-cols-1 gap-3">
+                  {fieldTypes.map((fieldType) => (
+                    <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
+                      <DraggableComponent fieldType={fieldType} />
+                    </div>
+                  ))}
+                </div>
+              </SortableContext>
               </div>
             </div>
 
             {fields.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">📝 Campos Adicionados</h2>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-2">
-                      {fields.map((field) => (
-                        <DraggableFieldItem
-                          key={field.id}
-                          field={field}
-                          onEdit={editarCampo}
-                          onRemove={removerCampo}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                  <DragOverlay>
-                    {activeId ? (
-                      <div className="bg-white border rounded-lg p-3 shadow-lg opacity-90">
-                        <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                          </svg>
-                          <div>
-                            <p className="font-medium text-sm">
-                              {fields.find(f => f.id === activeId.id)?.label || 'Campo sem título'}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {getFieldTypeLabel(fields.find(f => f.id === activeId.id)?.type || 'text')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-                  </DragOverlay>
-                </DndContext>
+                <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">📝 Campos Adicionados</h2>
+                <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2">
+                    {fields.map((field) => (
+                      <DraggableFieldItem
+                        key={field.id}
+                        field={field}
+                        onEdit={editarCampo}
+                        onRemove={removerCampo}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
               </div>
             )}
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <div className="max-w-2xl mx-auto">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-4xl mx-auto">
+              <FormDropZone>
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
                     {formData.name || 'Visualização do Formulário'}
                   </h2>
                   {formData.description && (
-                    <p className="text-gray-600">{formData.description}</p>
+                    <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
                   )}
                 </div>
 
                 {fields.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 mb-4">
-                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="text-center py-16">
+                    <div className="text-gray-400 mb-6">
+                      <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Formulário vazio</h3>
-                    <p className="text-gray-500">Adicione componentes do painel à esquerda para ver o preview</p>
+                    <h3 className="text-xl font-medium text-gray-900 mb-3">Arraste componentes aqui</h3>
+                    <p className="text-gray-500 mb-4">Arraste os componentes do painel à esquerda para esta área</p>
+                    <p className="text-sm text-gray-400">Ou clique duas vezes em um componente para adicionar rapidamente</p>
                   </div>
                 ) : (
-                  <form className="space-y-6">
-                    {fields.map((field) => (
-                      <FieldPreview key={field.id} field={field} />
-                    ))}
-                    <div className="pt-4 border-t border-gray-200">
-                      <button
-                        type="button"
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors"
-                        disabled
-                      >
-                        Enviar Formulário
-                      </button>
+                  <div className="bg-white rounded-lg p-6">
+                    <div className="mb-6">
+                      <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+                        {formData.name || 'Visualização do Formulário'}
+                      </h2>
+                      {formData.description && (
+                        <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
+                      )}
                     </div>
-                  </form>
+                    
+                    <form className="space-y-6">
+                      {fields.map((field) => (
+                        <FieldPreview key={field.id} field={field} />
+                      ))}
+                      <div className="pt-4 border-t border-gray-200">
+                        <button
+                          type="button"
+                          className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                          disabled
+                        >
+                          Enviar Formulário
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 )}
-              </div>
+              </FormDropZone>
 
               {/* Action Buttons */}
-              <div className="mt-6 flex gap-4">
+              <div className="mt-6 flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => router.push('/pt/nutri/formularios')}
-                  className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-md font-medium hover:bg-gray-200 transition-colors"
+                  className="flex-1 bg-gray-100 text-gray-700 py-4 px-4 text-base rounded-md font-medium hover:bg-gray-200 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={salvando || fields.length === 0 || !formData.name.trim()}
-                  className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 bg-blue-600 text-white py-4 px-4 text-base rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {salvando ? 'Salvando...' : 'Criar Formulário'}
                 </button>
@@ -605,13 +726,47 @@ function NovoFormularioNutriContent() {
         </div>
       </div>
 
+      {/* Drag Overlay */}
+      <DragOverlay>
+        {activeId ? (
+          activeId.toString().startsWith('component-') ? (
+            <div className="bg-white border-2 border-blue-500 rounded-lg p-4 shadow-lg opacity-90">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">
+                  {fieldTypes.find(ft => `component-${ft.type}` === activeId.toString())?.icon}
+                </span>
+                <span className="text-sm font-medium">
+                  {fieldTypes.find(ft => `component-${ft.type}` === activeId.toString())?.label}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white border rounded-lg p-3 shadow-lg opacity-90">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                </svg>
+                <div>
+                  <p className="font-medium text-sm">
+                    {fields.find(f => f.id === activeId.toString())?.label || 'Campo sem título'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {getFieldTypeLabel(fields.find(f => f.id === activeId.toString())?.type || 'text')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
+        ) : null}
+      </DragOverlay>
+
       {/* Modal de Edição de Campo */}
       {mostrarModalCampo && fieldEditando && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+            <div className="p-4 lg:p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">
+                <h3 className="text-base lg:text-lg font-semibold">
                   Configurar Campo - {getFieldTypeLabel(fieldEditando.type)}
                 </h3>
                 <button
@@ -624,6 +779,15 @@ function NovoFormularioNutriContent() {
                 </button>
               </div>
 
+              {/* Orientação específica para o tipo de campo */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-yellow-800">
+                  💡 <strong>Dica para {getFieldTypeLabel(fieldEditando.type)}:</strong> {
+                    fieldTypes.find(ft => ft.type === fieldEditando.type)?.description || 'Configure este campo conforme sua necessidade.'
+                  }
+                </p>
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -633,8 +797,8 @@ function NovoFormularioNutriContent() {
                     type="text"
                     value={fieldEditando.label}
                     onChange={(e) => setFieldEditando({ ...fieldEditando, label: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ex: Nome completo"
+                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={fieldTypes.find(ft => ft.type === fieldEditando.type)?.suggestion || "Ex: Nome completo"}
                   />
                 </div>
 
@@ -647,8 +811,8 @@ function NovoFormularioNutriContent() {
                       type="text"
                       value={fieldEditando.placeholder || ''}
                       onChange={(e) => setFieldEditando({ ...fieldEditando, placeholder: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Texto de exemplo"
+                      className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ex: Digite seu nome completo"
                     />
                   </div>
                 )}
@@ -669,7 +833,7 @@ function NovoFormularioNutriContent() {
                               newOptions[index] = e.target.value
                               setFieldEditando({ ...fieldEditando, options: newOptions })
                             }}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder={`Opção ${index + 1}`}
                           />
                           <button
@@ -690,7 +854,7 @@ function NovoFormularioNutriContent() {
                           const newOptions = [...(fieldEditando.options || []), '']
                           setFieldEditando({ ...fieldEditando, options: newOptions })
                         }}
-                        className="w-full px-3 py-2 border border-dashed border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
+                        className="w-full px-3 py-3 text-base border border-dashed border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
                       >
                         + Adicionar opção
                       </button>
@@ -715,13 +879,13 @@ function NovoFormularioNutriContent() {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setMostrarModalCampo(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="flex-1 px-4 py-3 text-base border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={salvarCampo}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="flex-1 px-4 py-3 text-base bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Salvar Campo
                 </button>
@@ -730,6 +894,6 @@ function NovoFormularioNutriContent() {
           </div>
         </div>
       )}
-    </div>
+    </DndContext>
   )
 }
