@@ -89,7 +89,7 @@ export default function TemplatesCoach() {
     const carregarTemplates = async () => {
       try {
         setCarregandoTemplates(true)
-        const response = await fetch('/api/c/templates', {
+        const response = await fetch('/api/coach/templates', {
           cache: 'no-store',
           signal: AbortSignal.timeout(10000) // Timeout de 10 segundos
         })

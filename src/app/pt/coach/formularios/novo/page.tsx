@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
+import dynamic from 'next/dynamic'
+
+// Lazy load do QRCode
+const QRCode = dynamic(() => import('@/components/QRCode'), { ssr: false })
 import {
   DndContext,
   closestCenter,
@@ -110,14 +114,18 @@ function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={`flex items-center gap-2 p-2 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-purple-500' : ''}`}
+      className={`flex items-center gap-2 p-2.5 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-purple-500 opacity-50' : ''}`}
     >
-      <span className="text-lg">{fieldType.icon}</span>
-      <div className="flex-1 min-w-0">
-        <span className="text-xs font-medium block">{fieldType.label}</span>
-        <p className="text-xs text-gray-500 truncate">{fieldType.description}</p>
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex items-center gap-2 flex-1 min-w-0 w-full"
+      >
+        <span className="text-lg flex-shrink-0">{fieldType.icon}</span>
+        <div className="flex-1 min-w-0">
+          <span className="text-xs font-medium block">{fieldType.label}</span>
+          <p className="text-xs text-gray-500 truncate">{fieldType.description}</p>
+        </div>
       </div>
     </div>
   )
@@ -225,14 +233,20 @@ function NovoFormularioCoachContent() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    form_type: 'questionario' as 'questionario' | 'anamnese' | 'avaliacao' | 'consentimento' | 'outro'
+    form_type: 'questionario' as 'questionario' | 'anamnese' | 'avaliacao' | 'consentimento' | 'outro',
+    nameAlign: 'left' as 'left' | 'center' | 'right',
+    descriptionAlign: 'left' as 'left' | 'center' | 'right'
   })
   
   const [fields, setFields] = useState<Field[]>([])
   const [fieldEditando, setFieldEditando] = useState<Field | null>(null)
   const [mostrarModalCampo, setMostrarModalCampo] = useState(false)
-  const [infoCollapsed, setInfoCollapsed] = useState(false) // Começar aberto para facilitar preenchimento
   const [activeId, setActiveId] = useState<Active | null>(null)
+  const [generateShortUrl, setGenerateShortUrl] = useState(false)
+  const [customShortCode, setCustomShortCode] = useState('')
+  const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
+  const [verificandoShortCode, setVerificandoShortCode] = useState(false)
+  const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -325,6 +339,13 @@ function NovoFormularioCoachContent() {
       icon: '📊', 
       description: 'Escala deslizante para notas de 1-10, níveis de energia',
       suggestion: 'Nível de energia (1-10)'
+    },
+    { 
+      type: 'file' as FieldType, 
+      label: 'Upload de Arquivo', 
+      icon: '📎', 
+      description: 'Permite upload de arquivos, fotos, documentos',
+      suggestion: 'Anexar arquivo'
     },
   ]
 
@@ -428,15 +449,23 @@ function NovoFormularioCoachContent() {
     setErro(null)
 
     try {
-      const response = await fetch('/api/formularios', {
+      const response = await fetch('/api/coach/formularios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          ...formData,
-          fields,
-          created_by: user?.id
+          name: formData.name,
+          description: formData.description,
+          form_type: 'questionario', // Tipo padrão, não precisa ser editável
+          structure: {
+            fields: fields,
+            nameAlign: formData.nameAlign,
+            descriptionAlign: formData.descriptionAlign
+          },
+          generate_short_url: generateShortUrl,
+          custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
         }),
       })
 
@@ -509,13 +538,108 @@ function NovoFormularioCoachContent() {
                   </div>
                   
                   <FormDropZone>
-                    <div className="mb-6">
-                      <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                        {formData.name || 'Visualização do Formulário'}
-                      </h2>
-                      {formData.description && (
-                        <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
-                      )}
+                    <div className="mb-6 space-y-3">
+                      {/* Edição inline do nome */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="Nome do Formulário *"
+                            className={`flex-1 text-xl lg:text-2xl font-bold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-purple-500 rounded px-2 py-1 -ml-2 hover:bg-purple-50 transition-colors ${
+                              formData.nameAlign === 'center' ? 'text-center' :
+                              formData.nameAlign === 'right' ? 'text-right' :
+                              'text-left'
+                            }`}
+                            style={{ minHeight: '2rem' }}
+                          />
+                          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, nameAlign: 'left' })}
+                              className={`p-1.5 rounded transition-colors ${
+                                formData.nameAlign === 'left' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                              }`}
+                              title="Alinhar à esquerda"
+                            >
+                              ⬅️
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, nameAlign: 'center' })}
+                              className={`p-1.5 rounded transition-colors ${
+                                formData.nameAlign === 'center' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                              }`}
+                              title="Centralizar"
+                            >
+                              ⬌
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, nameAlign: 'right' })}
+                              className={`p-1.5 rounded transition-colors ${
+                                formData.nameAlign === 'right' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                              }`}
+                              title="Alinhar à direita"
+                            >
+                              ➡️
+                            </button>
+                          </div>
+                        </div>
+                        {!formData.name && (
+                          <p className="text-xs text-gray-400 italic">Digite o nome do formulário</p>
+                        )}
+                      </div>
+                      {/* Edição inline da descrição */}
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2">
+                          <textarea
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Descrição do formulário (opcional)"
+                            className={`flex-1 text-sm lg:text-base text-gray-600 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-purple-500 rounded px-2 py-1 -ml-2 hover:bg-purple-50 transition-colors resize-none ${
+                              formData.descriptionAlign === 'center' ? 'text-center' :
+                              formData.descriptionAlign === 'right' ? 'text-right' :
+                              'text-left'
+                            }`}
+                            rows={2}
+                            style={{ minHeight: '3rem' }}
+                          />
+                          <div className="flex flex-col gap-1 bg-gray-100 rounded-lg p-1">
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, descriptionAlign: 'left' })}
+                              className={`p-1.5 rounded transition-colors ${
+                                formData.descriptionAlign === 'left' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                              }`}
+                              title="Alinhar à esquerda"
+                            >
+                              ⬅️
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, descriptionAlign: 'center' })}
+                              className={`p-1.5 rounded transition-colors ${
+                                formData.descriptionAlign === 'center' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                              }`}
+                              title="Centralizar"
+                            >
+                              ⬌
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setFormData({ ...formData, descriptionAlign: 'right' })}
+                              className={`p-1.5 rounded transition-colors ${
+                                formData.descriptionAlign === 'right' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                              }`}
+                              title="Alinhar à direita"
+                            >
+                              ➡️
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {fields.length === 0 ? (
@@ -537,15 +661,6 @@ function NovoFormularioCoachContent() {
                       </div>
                     ) : (
                       <div className="bg-white rounded-lg p-6">
-                        <div className="mb-6">
-                          <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                            {formData.name || 'Visualização do Formulário'}
-                          </h2>
-                          {formData.description && (
-                            <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
-                          )}
-                        </div>
-                        
                         <form className="space-y-6">
                           <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
                             {fields.map((field) => (
@@ -618,103 +733,142 @@ function NovoFormularioCoachContent() {
                 </div>
               </div>
 
-              {/* Right Sidebar */}
-              <div className="w-80 bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <form onSubmit={handleSubmit}>
-                  {/* Informações Iniciais - Collapsible */}
-                  <div className="border-b border-gray-200">
-                    <button
-                      type="button"
-                      onClick={() => setInfoCollapsed(!infoCollapsed)}
-                      className="w-full px-4 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-                    >
-                      <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                        📋 Informações Iniciais
-                      </h2>
-                      <svg
-                        className={`w-5 h-5 text-gray-500 transition-transform ${
-                          infoCollapsed ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    
-                    {!infoCollapsed && (
-                      <div className="px-4 pb-4">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                          <p className="text-xs text-blue-800">
-                            💡 <strong>Dica:</strong> Defina um nome claro e uma descrição que explique o objetivo do formulário.
+              {/* Right Sidebar - URL Curta e Componentes */}
+              <div className="w-80 bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+                <form onSubmit={handleSubmit} className="flex flex-col h-full">
+                  {/* URL Curta */}
+                  <div className="border-b border-gray-200 px-4 py-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <input
+                        type="checkbox"
+                        id="generateShortUrl"
+                        checked={generateShortUrl}
+                        onChange={(e) => {
+                          setGenerateShortUrl(e.target.checked)
+                          if (!e.target.checked) {
+                            setCustomShortCode('')
+                            setUsarCodigoPersonalizado(false)
+                            setShortCodeDisponivel(null)
+                          }
+                        }}
+                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                      />
+                      <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
+                        Gerar URL Curta
+                      </label>
+                    </div>
+                    {generateShortUrl && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="usarCodigoPersonalizado"
+                            checked={usarCodigoPersonalizado}
+                            onChange={(e) => {
+                              setUsarCodigoPersonalizado(e.target.checked)
+                              if (!e.target.checked) {
+                                setCustomShortCode('')
+                                setShortCodeDisponivel(null)
+                              }
+                            }}
+                            className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                          />
+                          <label htmlFor="usarCodigoPersonalizado" className="text-xs text-gray-600 cursor-pointer">
+                            Usar código personalizado
+                          </label>
+                        </div>
+                        {usarCodigoPersonalizado && (
+                          <div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={customShortCode}
+                                onChange={async (e) => {
+                                  const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 10)
+                                  setCustomShortCode(value)
+                                  
+                                  if (value.length >= 3) {
+                                    setVerificandoShortCode(true)
+                                    try {
+                                      const response = await fetch(
+                                        `/api/coach/check-short-code?code=${encodeURIComponent(value)}&type=form`
+                                      )
+                                      const data = await response.json()
+                                      setShortCodeDisponivel(data.available)
+                                    } catch (error) {
+                                      console.error('Erro ao verificar código:', error)
+                                      setShortCodeDisponivel(false)
+                                    } finally {
+                                      setVerificandoShortCode(false)
+                                    }
+                                  } else {
+                                    setShortCodeDisponivel(null)
+                                  }
+                                }}
+                                placeholder="meu-codigo"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                              />
+                            </div>
+                            {verificandoShortCode && (
+                              <p className="text-xs text-gray-500 mt-1">Verificando...</p>
+                            )}
+                            {!verificandoShortCode && shortCodeDisponivel === true && customShortCode.length >= 3 && (
+                              <p className="text-xs text-purple-600 mt-1">✅ Código disponível!</p>
+                            )}
+                            {!verificandoShortCode && shortCodeDisponivel === false && customShortCode.length >= 3 && (
+                              <p className="text-xs text-red-600 mt-1">❌ Este código já está em uso</p>
+                            )}
+                            {customShortCode.length > 0 && customShortCode.length < 3 && (
+                              <p className="text-xs text-yellow-600 mt-1">⚠️ Mínimo de 3 caracteres</p>
+                            )}
+                          </div>
+                        )}
+                        {usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? (
+                          <>
+                            <p className="text-xs text-gray-500 mb-3">
+                              URL: <span className="font-mono font-semibold text-purple-700">{typeof window !== 'undefined' ? window.location.origin : ''}/p/{customShortCode}</span>
+                            </p>
+                            {/* QR Code Preview */}
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <p className="text-xs text-gray-500 mb-2 text-center font-medium">QR Code:</p>
+                              <div className="flex justify-center">
+                                <QRCode 
+                                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}/p/${customShortCode}`} 
+                                  size={120} 
+                                />
+                              </div>
+                              <p className="text-xs text-gray-400 text-center mt-2">
+                                Escaneie para acessar o formulário
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <p className="text-xs text-gray-500">
+                            Uma URL curta será gerada automaticamente após salvar. O QR code estará disponível na página de envio do formulário.
                           </p>
-                        </div>
-                        <div className="space-y-4">
-                          <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                              Nome do Formulário *
-                            </label>
-                            <input
-                              type="text"
-                              id="name"
-                              value={formData.name}
-                              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                              required
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              placeholder="Ex: Anamnese Inicial"
-                            />
-                          </div>
-                          <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                              Descrição
-                            </label>
-                            <textarea
-                              id="description"
-                              value={formData.description}
-                              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              rows={2}
-                              placeholder="Ex: Coleta informações sobre hábitos..."
-                            />
-                          </div>
-                          <div>
-                            <label htmlFor="form_type" className="block text-sm font-medium text-gray-700 mb-1">
-                              Tipo
-                            </label>
-                            <select
-                              id="form_type"
-                              value={formData.form_type}
-                              onChange={(e) => setFormData({ ...formData, form_type: e.target.value as any })}
-                              required
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            >
-                              <option value="questionario">Questionário</option>
-                              <option value="anamnese">Anamnese</option>
-                              <option value="avaliacao">Avaliação</option>
-                              <option value="consentimento">Consentimento</option>
-                              <option value="outro">Outro</option>
-                            </select>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
-
+                  
                   {/* Componentes */}
                   <div className="flex-1 overflow-y-auto">
                     <div className="px-4 py-4">
-                      <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
                         🧩 Componentes
                       </h2>
-                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-2 mb-3">
                         <p className="text-xs text-purple-800">
-                          💡 <strong>Como usar:</strong> Arraste para o preview à esquerda ou clique duas vezes.
+                          💡 Arraste para o preview ou clique duas vezes
                         </p>
                       </div>
-                      <div className="grid grid-cols-1 gap-2">
+                      <div className="space-y-2">
                         {fieldTypes.map((fieldType) => (
-                          <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
+                          <div 
+                            key={fieldType.type} 
+                            onDoubleClick={() => adicionarCampo(fieldType.type)}
+                            className="w-full"
+                          >
                             <DraggableComponent fieldType={fieldType} />
                           </div>
                         ))}
@@ -875,7 +1029,7 @@ export function getHelpTextExample(type: FieldType): string {
 
 export function renderFieldPreview(field: Field) {
   switch (field.type) {
-    case 'text':
+      case 'text':
     case 'email':
     case 'tel':
       return (
@@ -1129,6 +1283,7 @@ export function ModalEditarCampo({
               />
             </div>
           )}
+
 
           <div className="flex items-center gap-2">
             <input

@@ -75,6 +75,19 @@ export async function GET(request: NextRequest) {
       checks.push(query)
     }
 
+    if (!type || type === 'form') {
+      let query = supabaseAdmin
+        .from('custom_forms')
+        .select('id')
+        .ilike('short_code', normalizedCode)
+        .limit(1)
+      
+      if (excludeId && type === 'form') {
+        query = query.neq('id', excludeId)
+      }
+      checks.push(query)
+    }
+
     const results = await Promise.all(checks)
 
     // Verificar se algum resultado encontrou o código

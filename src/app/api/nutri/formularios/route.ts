@@ -119,7 +119,9 @@ export async function POST(request: NextRequest) {
       form_type = 'questionario',
       structure,
       is_active = true,
-      is_template = false
+      is_template = false,
+      generate_short_url = false,
+      custom_short_code = null
     } = body
 
     // Validações
@@ -146,6 +148,50 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Gerar código curto se solicitado
+    let shortCode = null
+    if (generate_short_url) {
+      if (custom_short_code) {
+        const customCode = custom_short_code.toLowerCase().trim()
+        
+        // Validar formato
+        if (!/^[a-z0-9-]{3,10}$/.test(customCode)) {
+          return NextResponse.json(
+            { error: 'Código personalizado inválido. Deve ter entre 3 e 10 caracteres e conter apenas letras, números e hífens.' },
+            { status: 400 }
+          )
+        }
+
+        // Verificar disponibilidade (em todas as tabelas que usam short_code)
+        const [toolCheck, quizCheck, portalCheck, formCheck] = await Promise.all([
+          supabaseAdmin.from('user_templates').select('id').eq('short_code', customCode).limit(1),
+          supabaseAdmin.from('quizzes').select('id').eq('short_code', customCode).limit(1),
+          supabaseAdmin.from('wellness_portals').select('id').eq('short_code', customCode).limit(1),
+          supabaseAdmin.from('custom_forms').select('id').eq('short_code', customCode).limit(1)
+        ])
+
+        if ((toolCheck.data && toolCheck.data.length > 0) ||
+            (quizCheck.data && quizCheck.data.length > 0) ||
+            (portalCheck.data && portalCheck.data.length > 0) ||
+            (formCheck.data && formCheck.data.length > 0)) {
+          return NextResponse.json(
+            { error: 'Este código personalizado já está em uso' },
+            { status: 409 }
+          )
+        }
+
+        shortCode = customCode
+      } else {
+        // Gerar código aleatório
+        const { data: codeData, error: codeError } = await supabaseAdmin.rpc('generate_unique_short_code')
+        if (!codeError && codeData) {
+          shortCode = codeData
+        } else {
+          console.error('Erro ao gerar código curto:', codeError)
+        }
+      }
+    }
+
     // Preparar dados
     const formData: any = {
       user_id: authenticatedUserId,
@@ -155,6 +201,11 @@ export async function POST(request: NextRequest) {
       structure: structure,
       is_active: is_active,
       is_template: is_template
+    }
+
+    // Adicionar short_code se foi gerado
+    if (shortCode) {
+      formData.short_code = shortCode
     }
 
     // Inserir formulário

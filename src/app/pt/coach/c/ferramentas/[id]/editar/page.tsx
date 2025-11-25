@@ -197,7 +197,7 @@ export default function EditarFerramentaCoach() {
       setLoading(true)
 
       const response = await fetch(
-        `/api/c/ferramentas?id=${toolId}&profession=coach`,
+        `/api/coach/ferramentas?id=${toolId}&profession=coach`,
         {
           credentials: 'include'
         }
@@ -271,7 +271,7 @@ export default function EditarFerramentaCoach() {
     }
 
     try {
-      const response = await fetch(`/api/c/ferramentas/check-slug?slug=${encodeURIComponent(url)}`)
+      const response = await fetch(`/api/coach/ferramentas/check-slug?slug=${encodeURIComponent(url)}`)
       const data = await response.json()
       
       setUrlDisponivel(data.available)

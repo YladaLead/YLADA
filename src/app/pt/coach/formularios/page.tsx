@@ -37,7 +37,7 @@ function FormulariosCoachContent() {
         // Removendo filtro de is_active temporariamente para ver todos os formulários
         // params.append('is_active', 'true')
 
-        const response = await fetch(`/api/c/formularios?${params.toString()}`, {
+        const response = await fetch(`/api/coach/formularios?${params.toString()}`, {
           credentials: 'include'
         })
 
