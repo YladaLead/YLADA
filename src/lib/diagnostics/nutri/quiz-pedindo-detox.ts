@@ -21,7 +21,7 @@ export const quizPedindoDetoxDiagnosticos: DiagnosticosPorFerramenta = {
     },
     sinaisLevesToxinas: {
       diagnostico:
-        '📋 DIAGNÓSTICO: Existem sinais leves de sobrecarga, como cansaço, inchaço e digestão lenta, indicando necessidade de um detox guiado.'
+        '📋 DIAGNÓSTICO: Existem sinais leves de sobrecarga, como cansaço, inchaço e digestão lenta, indicando necessidade de um detox guiado.',
       causaRaiz:
         '🔍 CAUSA RAIZ: Picos de açúcar, álcool, preparo improvisado das refeições e alto estresse podem desacelerar a eliminação natural de toxinas.'
       acaoImediata:

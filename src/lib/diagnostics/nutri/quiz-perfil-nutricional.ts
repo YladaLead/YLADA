@@ -20,9 +20,8 @@ export const quizPerfilNutricionalDiagnosticos: DiagnosticosPorFerramenta = {
     },
     absorcaoOtimizada: {
       diagnostico: '📋 DIAGNÓSTICO: Sistema digestivo funcionando bem; estratégias avançadas podem potencializar ainda mais',
-      causaRaiz: '🔍 CAUSA RAIZ: Sistema digestivo saudável e eficiente. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para níveis superiores. Uma avaliação preventiva identifica oportunidades específicas'
-      acaoImediata: 'Mantenha seus hábitos e atenção ao corpo.
-Avaliações regulares ajudam a preservar o bom desempenho nutricional.',
+      causaRaiz: '🔍 CAUSA RAIZ: Sistema digestivo saudável e eficiente. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para níveis superiores. Uma avaliação preventiva identifica oportunidades específicas',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha seus hábitos e atenção ao corpo. Avaliações regulares ajudam a preservar o bom desempenho nutricional.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio digestivo é um ótimo ponto de partida. Descubra como estratégias avançadas podem potencializar ainda mais seus resultados.'
     }
   }
