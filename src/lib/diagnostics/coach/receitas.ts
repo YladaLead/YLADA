@@ -11,7 +11,7 @@ export const receitasDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Iniciantes na cozinha ou pessoas com pouco tempo se beneficiam de receitas simples com poucos ingredientes. Estudos mostram que receitas básicas aumentam aderência a hábitos saudáveis em até 60% quando comparadas a receitas complexas para iniciantes. Receitas básicas criam base sólida de preparo de alimentos nutritivos e desenvolvem confiança na cozinha gradualmente',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Comece com receitas básicas de 3-5 ingredientes, preparo rápido (até 30min) e técnicas simples. Busque avaliação de bem-estar para receber receitas personalizadas que se adaptam ao seu nível e objetivos',
       proximoPasso: '🎯 PRÓXIMO PASSO: Receitas básicas podem transformar sua relação com a comida — descubra como preparar refeições nutritivas de forma simples com receitas personalizadas para você.'
-    }
+    },
     receitasModeradas: {
       diagnostico: '👨‍🍳 DIAGNÓSTICO: Você precisa de receitas moderadas e específicas para elevar qualidade de bem-estar e diversificar preparações',
       causaRaiz: '🔍 CAUSA RAIZ: Com base culinária estabelecida, receitas moderadas com ingredientes específicos e técnicas intermediárias elevam qualidade de bem-estar. Pesquisas indicam que receitas moderadas aumentam satisfação e resultados em até 45% quando comparadas a receitas básicas para pessoas com experiência. Uma análise de bem-estar identifica quais receitas moderadas são mais estratégicas para você'
