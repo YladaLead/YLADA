@@ -8,7 +8,7 @@ export const quizPerfilNutricionalDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     absorcaoBaixa: {
       diagnostico: '📋 DIAGNÓSTICO: Dificuldades de absorção que precisam de intervenção personalizada',
-      causaRaiz: '🔍 CAUSA RAIZ: Problemas digestivos ou inflamação podem estar reduzindo a absorção de nutrientes. Estudos indicam que 60% das pessoas com absorção baixa têm condições digestivas não identificadas. Uma avaliação completa identifica exatamente a origem e como reverter'
+      causaRaiz: '🔍 CAUSA RAIZ: Problemas digestivos ou inflamação podem estar reduzindo a absorção de nutrientes. Estudos indicam que 60% das pessoas com absorção baixa têm condições digestivas não identificadas. Uma avaliação completa identifica exatamente a origem e como reverter',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação de bem-estar para receber um protocolo seguro e adequado ao seu perfil. Evite auto-suplementação — cada caso tem necessidades específicas',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu organismo precisa de cuidado agora — e é totalmente possível reverter com apoio profissional especializado.'
     }

@@ -11,7 +11,7 @@ export const quizPedindoDetoxDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     corpoEquilibrado: {
       diagnostico:
-        '📋 DIAGNÓSTICO: Seu corpo mostra equilíbrio metabólico e não apresenta sinais relevantes de acúmulo de toxinas.'
+        '📋 DIAGNÓSTICO: Seu corpo mostra equilíbrio metabólico e não apresenta sinais relevantes de acúmulo de toxinas.',
       causaRaiz:
         '🔍 CAUSA RAIZ: Hidratação consistente, consumo baixo de ultraprocessados e rotina de sono organizada preservam os sistemas naturais de detox.'
       acaoImediata:

@@ -8,7 +8,7 @@ export const rastreadorAlimentarDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     rastreamentoBasico: {
       diagnostico: '📈 DIAGNÓSTICO: Você precisa de rastreamento básico para identificar padrões alimentares e estabelecer consciência de bem-estar',
-      causaRaiz: '🔍 CAUSA RAIZ: Falta de consciência sobre consumo alimentar diário pode estar afetando seus resultados nutricionais. Estudos mostram que pessoas que rastreiam alimentação têm 30% mais sucesso em alcançar objetivos nutricionais quando comparadas àquelas que não fazem acompanhamento. Uma avaliação de bem-estar identifica exatamente quais padrões alimentares precisam ser identificados e como otimizá-los'
+      causaRaiz: '🔍 CAUSA RAIZ: Falta de consciência sobre consumo alimentar diário pode estar afetando seus resultados nutricionais. Estudos mostram que pessoas que rastreiam alimentação têm 30% mais sucesso em alcançar objetivos nutricionais quando comparadas àquelas que não fazem acompanhamento. Uma avaliação de bem-estar identifica exatamente quais padrões alimentares precisam ser identificados e como otimizá-los',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Comece a rastrear sua alimentação diariamente por pelo menos 30 dias. Busque avaliação de bem-estar para receber orientações sobre o que observar e como interpretar os padrões identificados durante o rastreamento',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu rastreamento começa com consciência — descubra em minutos como identificar padrões alimentares pode transformar sua relação com a bem-estar com orientações personalizadas.'
     }
