@@ -15,8 +15,7 @@ export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
     proteinaNormal: {
       diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está adequada, mantenha o padrão e considere otimizações estratégicas',
       causaRaiz: '🔍 CAUSA RAIZ: Boa distribuição proteica ao longo do dia estabelecida. Pesquisas mostram que otimizações de timing podem aumentar síntese proteica em até 25%. Uma análise nutricional identifica oportunidades específicas para você',
-      acaoImediata: 'Mantenha seus hábitos atuais e observe como seu corpo responde.
-Pequenos ajustes com orientação profissional podem melhorar a distribuição de proteína.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha seus hábitos atuais e observe como seu corpo responde. Pequenos ajustes com orientação profissional podem melhorar a distribuição de proteína.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu consumo proteico está adequado. Descubra como estratégias avançadas de timing podem potencializar ainda mais seus resultados.'
     },
     altaProteina: {

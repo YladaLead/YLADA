@@ -15,8 +15,7 @@ export const calculadoraCaloriasDiagnosticos: DiagnosticosPorFerramenta = {
     manutencaoCalorica: {
       diagnostico: '📋 DIAGNÓSTICO: Sua ingestão calórica está equilibrada, mantenha o padrão (mas pode melhorar) e considere otimizações na qualidade nutricional',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo calórico adequado para manutenção do peso atual estabelecido. Pesquisas mostram que otimizações na qualidade nutricional, mesmo mantendo calorias, podem melhorar composição corporal e saúde metabólica. Uma análise nutricional identifica oportunidades específicas para você',
-      acaoImediata: 'Mantenha seus hábitos atuais e observe como o corpo responde.
-Pequenos ajustes com orientação podem otimizar a qualidade da dieta.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha seus hábitos atuais e observe como o corpo responde. Pequenos ajustes com orientação podem otimizar a qualidade da dieta.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio calórico está adequado. Descubra como otimizações na qualidade nutricional podem potencializar ainda mais sua saúde e composição corporal.'
     },
     superavitCalorico: {

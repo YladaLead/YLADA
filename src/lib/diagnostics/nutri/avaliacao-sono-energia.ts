@@ -25,8 +25,7 @@ export const avaliacaoSonoEnergiaDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Cafeína tarde da noite, telas antes de dormir, horários irregulares e alto nível de estresse podem estar fragmentando o sono.',
       acaoImediata:
-        'Reduza estímulos noturnos, como cafeína e telas.
-Pequenos ajustes de rotina podem melhorar qualidade do sono.',
+        '⚡ AÇÃO IMEDIATA: Reduza estímulos noturnos, como cafeína e telas. Pequenos ajustes de rotina podem melhorar qualidade do sono.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Agende uma consulta para receber protocolos personalizados (luz, alimentação, micronutrientes) e reavaliar energia após 7–14 dias de ajustes.'
     },

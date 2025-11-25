@@ -15,8 +15,7 @@ export const calculadoraAguaDiagnosticos: DiagnosticosPorFerramenta = {
     hidratacaoModerada: {
       diagnostico: '📋 DIAGNÓSTICO: Sua hidratação está adequada, mantenha o padrão e considere otimizações estratégicas para máximo desempenho',
       causaRaiz: '🔍 CAUSA RAIZ: Boa ingestão hídrica e equilíbrio eletrolítico estabelecidos. Pesquisas mostram que otimizações de timing e qualidade dos líquidos podem melhorar recuperação em até 15%. Uma análise nutricional identifica oportunidades específicas para você',
-      acaoImediata: 'Mantenha seu consumo atual e observe como o corpo reage.
-Pequenos ajustes com orientação profissional podem otimizar sua hidratação.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha seu consumo atual e observe como o corpo reage. Pequenos ajustes com orientação profissional podem otimizar sua hidratação.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua hidratação está adequada. Descubra como estratégias avançadas de timing podem potencializar ainda mais sua performance e bem-estar.'
     },
     altaHidratacao: {

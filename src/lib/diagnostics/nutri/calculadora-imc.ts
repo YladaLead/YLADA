@@ -15,8 +15,7 @@ export const calculadoraImcDiagnosticos: DiagnosticosPorFerramenta = {
     pesoNormal: {
       diagnostico: '📋 DIAGNÓSTICO: Seu IMC está normal, o que indica boa relação peso/altura. Manter hábitos saudáveis e considerar estratégias preventivas',
       causaRaiz: '🔍 CAUSA RAIZ: Boa relação peso/altura estabelecida. Pesquisas mostram que pessoas com IMC normal que adotam estratégias nutricionais preventivas têm 60% menos risco de desenvolver desequilíbrios futuros. Continue cuidando da saúde com foco em qualidade nutricional',
-      acaoImediata: 'Mantenha seus hábitos equilibrados e ativos.
-Avaliações periódicas ajudam a preservar esse resultado.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha seus hábitos equilibrados e ativos. Avaliações periódicas ajudam a preservar esse resultado.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio atual é um ótimo ponto de partida. Descubra como estratégias preventivas podem potencializar ainda mais sua saúde e bem-estar.'
     },
     sobrepeso: {
