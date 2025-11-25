@@ -53,7 +53,7 @@ function ClientesCoachContent() {
         params.append('order_by', 'created_at')
         params.append('order', 'desc')
 
-        const response = await fetch(`/api/c/clientes?${params.toString()}`, {
+        const response = await fetch(`/api/coach/clientes?${params.toString()}`, {
           credentials: 'include'
         })
 
