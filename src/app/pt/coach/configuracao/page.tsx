@@ -18,6 +18,8 @@ function CoachConfiguracaoContent() {
     whatsapp: '',
     countryCode: 'BR',
     bio: '',
+    filosofia: '',
+    formacao_empresarial: '',
     userSlug: ''
   })
   const [slugDisponivel, setSlugDisponivel] = useState(true)
@@ -131,6 +133,8 @@ function CoachConfiguracaoContent() {
             whatsapp: data.profile.whatsapp || data.profile.telefone || '',
             countryCode: data.profile.countryCode || 'BR',
             bio: data.profile.bio || '',
+            filosofia: data.profile.filosofia || '',
+            formacao_empresarial: data.profile.formacao_empresarial || '',
             userSlug: data.profile.userSlug || data.profile.user_slug || ''
           }
           
@@ -227,6 +231,8 @@ function CoachConfiguracaoContent() {
           whatsapp: perfil.whatsapp,
           countryCode: perfil.countryCode,
           bio: perfil.bio,
+          filosofia: perfil.filosofia,
+          formacao_empresarial: perfil.formacao_empresarial,
           userSlug: perfil.userSlug
         })
       })
@@ -319,13 +325,40 @@ function CoachConfiguracaoContent() {
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bio/Bio</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bio Profissional</label>
               <textarea
                 value={perfil.bio}
                 onChange={(e) => setPerfil({...perfil, bio: e.target.value})}
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                placeholder="Descreva sua experiência profissional e especialidades..."
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filosofia de Coaching</label>
+              <textarea
+                value={perfil.filosofia}
+                onChange={(e) => setPerfil({...perfil, filosofia: e.target.value})}
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                placeholder="Compartilhe sua filosofia de trabalho, abordagem e valores como coach..."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                💡 Explique sua metodologia, valores e como você trabalha com seus clientes
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Formação Empresarial</label>
+              <textarea
+                value={perfil.formacao_empresarial}
+                onChange={(e) => setPerfil({...perfil, formacao_empresarial: e.target.value})}
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                placeholder="Liste suas certificações, formações, cursos e especializações em coaching empresarial..."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                💡 Inclua certificações ICF, formações acadêmicas, cursos especializados e experiência empresarial
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

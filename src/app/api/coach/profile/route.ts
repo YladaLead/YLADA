@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       // Tentar buscar todos os campos primeiro
       const { data: profileData, error: profileError } = await supabaseAdmin
         .from('user_profiles')
-        .select('nome_completo, email, whatsapp, bio, user_slug, country_code')
+        .select('nome_completo, email, whatsapp, bio, filosofia, formacao_empresarial, user_slug, country_code')
         .eq('user_id', user.id)
         .single()
 
@@ -119,6 +119,8 @@ export async function GET(request: NextRequest) {
         whatsapp: profile?.whatsapp || '',
         countryCode: profile?.country_code || 'BR',
         bio: profile?.bio || '',
+        filosofia: profile?.filosofia || '',
+        formacao_empresarial: profile?.formacao_empresarial || '',
         userSlug: profile?.user_slug || ''
       }
     }
@@ -167,6 +169,8 @@ export async function PUT(request: NextRequest) {
       whatsapp,
       countryCode,
       bio,
+      filosofia,
+      formacao_empresarial,
       userSlug
     } = body
 
@@ -243,6 +247,14 @@ export async function PUT(request: NextRequest) {
     // Adicionar campos que podem não existir ainda (o Supabase vai ignorar se não existirem)
     if (bio !== undefined) {
       profileData.bio = bio || null
+    }
+    
+    if (filosofia !== undefined) {
+      profileData.filosofia = filosofia || null
+    }
+    
+    if (formacao_empresarial !== undefined) {
+      profileData.formacao_empresarial = formacao_empresarial || null
     }
     
     if (userSlug !== undefined) {
