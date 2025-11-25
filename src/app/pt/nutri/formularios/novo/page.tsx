@@ -288,6 +288,7 @@ function NovoFormularioNutriContent() {
   const [fieldEditando, setFieldEditando] = useState<Field | null>(null)
   const [mostrarModalCampo, setMostrarModalCampo] = useState(false)
   const [activeId, setActiveId] = useState<Active | null>(null)
+  const [activeTab, setActiveTab] = useState<'info' | 'preview'>('info')
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -534,11 +535,40 @@ function NovoFormularioNutriContent() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4">
+        <div className="flex-1 flex flex-col gap-4 p-4">
+          {/* Tabs - Mobile/Tablet */}
+          <div className="lg:hidden bg-white border border-gray-200 rounded-lg">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab('info')}
+                className={`flex-1 px-4 py-3 text-sm font-medium rounded-l-lg transition-colors ${
+                  activeTab === 'info'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                📋 Informações Iniciais
+              </button>
+              <button
+                onClick={() => setActiveTab('preview')}
+                className={`flex-1 px-4 py-3 text-sm font-medium rounded-r-lg transition-colors ${
+                  activeTab === 'preview'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                👁️ Preview
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col lg:flex-row gap-4">
           {/* Left Panel - Components */}
-          <div className="w-full lg:w-96 bg-white border border-gray-200 rounded-lg p-4 overflow-y-auto max-h-[calc(100vh-200px)]">
+          <div className={`w-full lg:w-96 bg-white border border-gray-200 rounded-lg p-4 overflow-y-auto max-h-[calc(100vh-200px)] ${
+            activeTab === 'info' ? 'block' : 'hidden lg:block'
+          }`}>
             <div className="mb-6">
-              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">📋 Informações Básicas</h2>
+              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">📋 Informações Iniciais</h2>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                 <p className="text-xs text-blue-800">
                   💡 <strong>Dica:</strong> Defina um nome claro e uma descrição que explique o objetivo do formulário para seus pacientes.
@@ -592,7 +622,7 @@ function NovoFormularioNutriContent() {
               <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">🧩 Componentes</h2>
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
                 <p className="text-xs text-green-800">
-                  💡 <strong>Como usar:</strong> Arraste os componentes abaixo para a área de preview à direita, ou clique duas vezes para adicionar rapidamente.
+                  💡 <strong>Como usar:</strong> Arraste os componentes para a área de preview <span className="lg:inline hidden">à direita</span><span className="lg:hidden inline">(aba Preview)</span>, ou clique duas vezes para adicionar rapidamente.
                 </p>
               </div>
               <SortableContext items={fieldTypes.map(ft => `component-${ft.type}`)} strategy={verticalListSortingStrategy}>
@@ -627,7 +657,9 @@ function NovoFormularioNutriContent() {
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="flex-1 overflow-y-auto">
+          <div className={`flex-1 overflow-y-auto ${
+            activeTab === 'preview' ? 'block' : 'hidden lg:block'
+          }`}>
             <div className="bg-white border border-gray-200 rounded-lg p-6 h-full">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -648,19 +680,19 @@ function NovoFormularioNutriContent() {
                 </div>
 
                 {fields.length === 0 ? (
-                  <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                    <div className="text-gray-400 mb-4">
+                  <div className="text-center py-12 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                    <div className="text-blue-400 mb-4">
                       <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Arraste componentes aqui</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Solte os componentes aqui</h3>
                     <p className="text-gray-600 mb-4 text-sm">
-                      Ou clique duas vezes em um componente à esquerda
+                      Arraste da <span className="lg:inline hidden">esquerda</span><span className="lg:hidden inline">aba "Informações Iniciais"</span> ou clique duas vezes
                     </p>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-sm mx-auto">
+                    <div className="bg-white border border-blue-200 rounded-lg p-4 max-w-sm mx-auto shadow-sm">
                       <p className="text-xs text-blue-800">
-                        💡 <strong>Dica:</strong> Comece com campos básicos como nome e email
+                        💡 <strong>Sugestão:</strong> Comece com "Nome" e "Email" para identificar o paciente
                       </p>
                     </div>
                   </div>
@@ -908,6 +940,7 @@ function NovoFormularioNutriContent() {
           </div>
         </div>
       )}
+      </div>
     </DndContext>
   )
 }

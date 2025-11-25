@@ -84,6 +84,7 @@ function NovoFormularioCoachContent() {
   const [fields, setFields] = useState<Field[]>([])
   const [fieldEditando, setFieldEditando] = useState<Field | null>(null)
   const [mostrarModalCampo, setMostrarModalCampo] = useState(false)
+  const [activeTab, setActiveTab] = useState<'info' | 'preview'>('info')
 
   const adicionarCampo = (tipo: FieldType) => {
     const novoCampo: Field = {
@@ -247,7 +248,7 @@ function NovoFormularioCoachContent() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Informações Básicas */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Informações Básicas</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">📋 Informações Iniciais</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -390,9 +391,19 @@ function NovoFormularioCoachContent() {
               </div>
 
               {fields.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-600 mb-4">Nenhum campo adicionado ainda</p>
-                  <p className="text-sm text-gray-500">Clique nos botões acima para adicionar campos</p>
+                <div className="text-center py-12 bg-blue-50/30 rounded-lg border-2 border-dashed border-blue-300">
+                  <div className="text-blue-400 mb-4">
+                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Adicione seus primeiros campos</h3>
+                  <p className="text-gray-600 mb-4">Clique nos botões coloridos acima para criar campos</p>
+                  <div className="bg-white border border-blue-200 rounded-lg p-4 max-w-sm mx-auto shadow-sm">
+                    <p className="text-xs text-blue-800">
+                      💡 <strong>Sugestão:</strong> Comece com "Nome" e "Email" para identificar o cliente
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
