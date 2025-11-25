@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Configurações para Tesseract.js no servidor
+      config.externals = [...(config.externals || []), 'canvas', 'jsdom']
+    }
+    return config
+  },
   async headers() {
     return [
       {

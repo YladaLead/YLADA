@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireApiAuth } from '@/lib/auth'
+import { requireApiAuth } from '@/lib/api-auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -22,13 +22,11 @@ interface MappedField {
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação
-    const authResult = await requireApiAuth(request)
-    if (!authResult.success) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      )
+    const authResult = await requireApiAuth(request, ['coach', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     const { data, mappings }: { data: ParsedData[], mappings: MappedField[] } = await request.json()
 
@@ -42,7 +40,25 @@ export async function POST(request: NextRequest) {
     const missingRequired = requiredMappings.filter(m => !m.sourceColumn)
     
     if (missingRequired.length > 0) {
-      errors.push(`Campos obrigatórios não mapeados: ${missingRequired.map(m => m.targetField).join(', ')}`)
+      // Mapear targetField para labels legíveis
+      const fieldLabels: { [key: string]: string } = {
+        'name': 'Nome Completo',
+        'email': 'Email',
+        'phone': 'Telefone',
+        'birth_date': 'Data de Nascimento',
+        'gender': 'Gênero',
+        'cpf': 'CPF'
+      }
+      
+      const missingLabels = missingRequired.map(m => {
+        return fieldLabels[m.targetField] || m.targetField
+      })
+      
+      if (missingLabels.length === 1) {
+        errors.push(`Campo obrigatório "${missingLabels[0]}" não foi mapeado`)
+      } else {
+        errors.push(`Campos obrigatórios não mapeados: ${missingLabels.map(l => `"${l}"`).join(', ')}`)
+      }
     }
 
     // Consolidar dados de todos os arquivos
@@ -109,7 +125,7 @@ export async function POST(request: NextRequest) {
       const { data: existingClients } = await supabaseAdmin
         .from('clients')
         .select('email')
-        .eq('user_id', authResult.userId)
+        .eq('user_id', user.id)
         .in('email', Array.from(processedEmails))
 
       if (existingClients && existingClients.length > 0) {
