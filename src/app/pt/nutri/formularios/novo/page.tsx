@@ -534,9 +534,9 @@ function NovoFormularioNutriContent() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col xl:flex-row gap-4 p-4">
+        <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4">
           {/* Left Panel - Components */}
-          <div className="w-full xl:w-80 bg-white border border-gray-200 rounded-lg p-4 overflow-y-auto max-h-96 xl:max-h-none">
+          <div className="w-full lg:w-96 bg-white border border-gray-200 rounded-lg p-4 overflow-y-auto max-h-[calc(100vh-200px)]">
             <div className="mb-6">
               <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">📋 Informações Básicas</h2>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
@@ -628,7 +628,15 @@ function NovoFormularioNutriContent() {
 
           {/* Right Panel - Preview */}
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 h-full">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  👁️ Preview do Formulário
+                </h2>
+                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  Atualização em tempo real
+                </div>
+              </div>
               <FormDropZone>
                 <div className="mb-6">
                   <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
@@ -640,15 +648,21 @@ function NovoFormularioNutriContent() {
                 </div>
 
                 {fields.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="text-gray-400 mb-6">
-                      <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-medium text-gray-900 mb-3">Arraste componentes aqui</h3>
-                    <p className="text-gray-500 mb-4">Arraste os componentes do painel à esquerda para esta área</p>
-                    <p className="text-sm text-gray-400">Ou clique duas vezes em um componente para adicionar rapidamente</p>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Arraste componentes aqui</h3>
+                    <p className="text-gray-600 mb-4 text-sm">
+                      Ou clique duas vezes em um componente à esquerda
+                    </p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-sm mx-auto">
+                      <p className="text-xs text-blue-800">
+                        💡 <strong>Dica:</strong> Comece com campos básicos como nome e email
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="bg-white rounded-lg p-6">
@@ -678,9 +692,14 @@ function NovoFormularioNutriContent() {
                   </div>
                 )}
               </FormDropZone>
+            </div>
+          </div>
+        </div>
 
-              {/* Action Buttons */}
-              <div className="mt-6 flex flex-col sm:flex-row gap-4">
+        {/* Action Buttons - Fixed at bottom */}
+        <div className="bg-white border-t border-gray-200 px-4 py-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row gap-4 justify-end">
                 <button
                   onClick={() => router.push('/pt/nutri/formularios')}
                   className="flex-1 bg-gray-100 text-gray-700 py-4 px-4 text-base rounded-md font-medium hover:bg-gray-200 transition-colors"
@@ -892,7 +911,6 @@ function NovoFormularioNutriContent() {
               </div>
             </div>
           </div>
-        </div>
       )}
     </DndContext>
   )
