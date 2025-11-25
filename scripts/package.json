@@ -1,0 +1,12 @@
+{
+  "name": "ylada-demo-scripts",
+  "version": "1.0.0",
+  "description": "Scripts para criar dados de demonstração do YLADA",
+  "main": "create-demo-accounts.js",
+  "scripts": {
+    "create-demo": "node create-demo-accounts.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}

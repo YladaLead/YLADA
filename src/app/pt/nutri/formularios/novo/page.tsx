@@ -168,7 +168,21 @@ function FormDropZone({ children }: { children: React.ReactNode }) {
 }
 
 // Componente para preview do campo
-function FieldPreview({ field }: { field: Field }) {
+function FieldPreview({ field, onEdit, onRemove }: { field: Field, onEdit?: (field: Field) => void, onRemove?: (fieldId: string) => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
   const renderField = () => {
     switch (field.type) {
       case 'text':
@@ -245,12 +259,58 @@ function FieldPreview({ field }: { field: Field }) {
   }
 
   return (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {field.label || 'Campo sem título'}
-        {field.required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      {renderField()}
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={`mb-4 p-3 border border-gray-200 rounded-lg bg-white ${isDragging ? 'shadow-lg border-blue-500' : 'hover:border-gray-300'}`}
+    >
+      <div className="flex items-start gap-2">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded mt-1 flex-shrink-0"
+          title="Arrastar para reordenar"
+        >
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label || 'Campo sem título'}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <div className="flex items-center gap-1">
+              {onEdit && (
+                <button
+                  type="button"
+                  onClick={() => onEdit(field)}
+                  className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  title="Editar campo"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              )}
+              {onRemove && (
+                <button
+                  type="button"
+                  onClick={() => onRemove(field.id)}
+                  className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                  title="Remover campo"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+          {renderField()}
+        </div>
+      </div>
     </div>
   )
 }
@@ -288,7 +348,7 @@ function NovoFormularioNutriContent() {
   const [fieldEditando, setFieldEditando] = useState<Field | null>(null)
   const [mostrarModalCampo, setMostrarModalCampo] = useState(false)
   const [activeId, setActiveId] = useState<Active | null>(null)
-  const [infoCollapsed, setInfoCollapsed] = useState(false)
+  const [infoCollapsed, setInfoCollapsed] = useState(false) // Começar aberto para facilitar preenchimento
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -586,9 +646,16 @@ function NovoFormularioNutriContent() {
                     </div>
                     
                     <form className="space-y-6">
-                      {fields.map((field) => (
-                        <FieldPreview key={field.id} field={field} />
-                      ))}
+                      <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                        {fields.map((field) => (
+                          <FieldPreview 
+                            key={field.id} 
+                            field={field} 
+                            onEdit={editarCampo}
+                            onRemove={removerCampo}
+                          />
+                        ))}
+                      </SortableContext>
                       <div className="pt-4 border-t border-gray-200">
                         <button
                           type="button"
@@ -603,22 +670,26 @@ function NovoFormularioNutriContent() {
                 )}
               </FormDropZone>
 
+
               {/* Action Buttons */}
-              <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => router.push('/pt/nutri/formularios')}
-                  className="flex-1 bg-gray-100 text-gray-700 py-4 px-4 text-base rounded-md font-medium hover:bg-gray-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={salvando || fields.length === 0 || !formData.name.trim()}
-                  className="flex-1 bg-blue-600 text-white py-4 px-4 text-base rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {salvando ? 'Salvando...' : 'Criar Formulário'}
-                </button>
-              </div>
+              <form onSubmit={handleSubmit} className="mt-6">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    type="button"
+                    onClick={() => router.push('/pt/nutri/formularios')}
+                    className="flex-1 bg-gray-100 text-gray-700 py-4 px-4 text-base rounded-md font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={salvando || fields.length === 0 || !formData.name.trim()}
+                    className="flex-1 bg-blue-600 text-white py-4 px-4 text-base rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {salvando ? 'Salvando...' : 'Criar Formulário'}
+                  </button>
+                </div>
+              </form>
 
               {erro && (
                 <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
@@ -746,23 +817,6 @@ function NovoFormularioNutriContent() {
                 </SortableContext>
               </div>
 
-              {fields.length > 0 && (
-                <div className="px-4 pb-4 border-t border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3 mt-4">📝 Campos Adicionados</h3>
-                  <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-2">
-                      {fields.map((field) => (
-                        <DraggableFieldItem
-                          key={field.id}
-                          field={field}
-                          onEdit={editarCampo}
-                          onRemove={removerCampo}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </div>
-              )}
             </div>
 
           </div>
