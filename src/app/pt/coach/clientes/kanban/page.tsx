@@ -679,7 +679,7 @@ function KanbanContent() {
         params.append('order_by', 'created_at')
         params.append('order', 'asc')
 
-        const response = await fetch(`/api/c/clientes?${params.toString()}`, {
+        const response = await fetch(`/api/coach/clientes?${params.toString()}`, {
           credentials: 'include'
         })
 
