@@ -17,7 +17,7 @@ export const quizBemEstarDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Boa base de bem-estar estabelecida, porém pode faltar micronutrientes específicos para elevar seu bem-estar. Pesquisas mostram que otimizações nutricionais podem aumentar vitalidade em até 40%. Uma análise detalhada identifica exatamente o que pode fazer a diferença',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e considere uma consulta para identificar oportunidades de otimização. Às vezes pequenos ajustes feitos de forma personalizada geram grandes melhorias',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pedindo equilíbrio — e você já deu o primeiro passo. O próximo é descobrir o que ele realmente precisa para evoluir.'
-    }
+    },
     bemEstarAlto: {
       diagnostico: '📋 DIAGNÓSTICO: Excelente bem-estar! Mantenha com bem-estar preventiva e estratégias avançadas de performance',
       causaRaiz: '🔍 CAUSA RAIZ: Ótima base de bem-estar e hábitos saudáveis estabelecidos. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para níveis ainda superiores. Uma avaliação preventiva identifica oportunidades específicas para você'

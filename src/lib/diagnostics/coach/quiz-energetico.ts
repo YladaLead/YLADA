@@ -17,7 +17,7 @@ export const quizEnergeticoDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Boa base energética estabelecida, mas ajustes nutricionais específicos podem elevar sua vitalidade significativamente. Estudos indicam que otimizações estratégicas podem aumentar energia em até 35%. Uma análise detalhada mostra exatamente onde ganhar performance',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha hábitos atuais e considere avaliação para identificar estratégias de timing de bem-estar que potencializam energia. Às vezes pequenos ajustes geram grandes melhorias',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como estratégias avançadas podem elevar ainda mais sua vitalidade.'
-    }
+    },
     energiaAlta: {
       diagnostico: '📋 DIAGNÓSTICO: Excelente energia natural; estratégias avançadas podem potencializar ainda mais',
       causaRaiz: '🔍 CAUSA RAIZ: Sistema energético eficiente e bem-estar adequada. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para performance superior. Uma avaliação preventiva identifica oportunidades específicas para você'

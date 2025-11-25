@@ -31,7 +31,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
     },
     disbioseIntestinal: {
       diagnostico:
-        '📋 DIAGNÓSTICO: Os sinais apontam para disbiose intestinal com provável inflamação, produção irregular de ácidos graxos e comprometimento da absorção de nutrientes.'
+        '📋 DIAGNÓSTICO: Os sinais apontam para disbiose intestinal com provável inflamação, produção irregular de ácidos graxos e comprometimento da absorção de nutrientes.',
       causaRaiz:
         '🔍 CAUSA RAIZ: Desequilíbrio importante da microbiota, excesso de processados, estresse e possíveis deficiências de fibras e compostos bioativos sustentam o quadro.'
       acaoImediata:

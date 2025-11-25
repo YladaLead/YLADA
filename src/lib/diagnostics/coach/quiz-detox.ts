@@ -17,7 +17,7 @@ export const quizDetoxDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz: '🔍 CAUSA RAIZ: Exposição ambiental e alimentação podem estar aumentando toxinas no organismo. Estudos indicam que protocolos detox personalizados podem reduzir carga tóxica em até 45% em poucos meses. Uma avaliação completa identifica exatamente a origem e estratégias para reduzir',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação de bem-estar para receber um protocolo detox adequado ao seu perfil. Evite protocolos genéricos — cada organismo responde diferente',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pedindo equilíbrio — e você já deu o primeiro passo. O próximo é descobrir como reduzir toxinas com um plano personalizado.'
-    }
+    },
     altaToxicidade: {
       diagnostico: '📋 DIAGNÓSTICO: Alta carga tóxica que precisa de intervenção personalizada e urgente',
       causaRaiz: '🔍 CAUSA RAIZ: Exposição excessiva a toxinas e sistema de eliminação comprometido podem estar afetando sua saúde significativamente. Uma avaliação completa identifica exatamente a origem e estratégias para reverter com segurança'
