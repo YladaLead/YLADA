@@ -692,14 +692,9 @@ function NovoFormularioNutriContent() {
                   </div>
                 )}
               </FormDropZone>
-            </div>
-          </div>
-        </div>
 
-        {/* Action Buttons - Fixed at bottom */}
-        <div className="bg-white border-t border-gray-200 px-4 py-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row gap-4 justify-end">
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => router.push('/pt/nutri/formularios')}
                   className="flex-1 bg-gray-100 text-gray-700 py-4 px-4 text-base rounded-md font-medium hover:bg-gray-200 transition-colors"
@@ -911,6 +906,7 @@ function NovoFormularioNutriContent() {
               </div>
             </div>
           </div>
+        </div>
       )}
     </DndContext>
   )
