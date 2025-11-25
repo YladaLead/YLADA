@@ -14,6 +14,10 @@ import {
   useSensors,
   DragEndEvent,
   DragStartEvent,
+  DragOverlay,
+  Active,
+  useDroppable,
+  useDraggable,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -83,6 +87,56 @@ export function TooltipButton({
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// Componente para item de componente arrastável
+function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label: string; icon: string; description: string; suggestion: string } }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggable({ id: `component-${fieldType.type}` })
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`flex items-center gap-2 p-2 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-purple-500' : ''}`}
+    >
+      <span className="text-lg">{fieldType.icon}</span>
+      <div className="flex-1 min-w-0">
+        <span className="text-xs font-medium block">{fieldType.label}</span>
+        <p className="text-xs text-gray-500 truncate">{fieldType.description}</p>
+      </div>
+    </div>
+  )
+}
+
+// Componente da área de drop
+function FormDropZone({ children }: { children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: 'form-drop-zone',
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-[400px] transition-colors ${
+        isOver ? 'bg-purple-50 border-purple-300' : 'bg-white'
+      } border-2 border-dashed border-gray-200 rounded-lg p-6`}
+    >
+      {children}
     </div>
   )
 }
@@ -178,6 +232,7 @@ function NovoFormularioCoachContent() {
   const [fieldEditando, setFieldEditando] = useState<Field | null>(null)
   const [mostrarModalCampo, setMostrarModalCampo] = useState(false)
   const [infoCollapsed, setInfoCollapsed] = useState(false) // Começar aberto para facilitar preenchimento
+  const [activeId, setActiveId] = useState<Active | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -186,10 +241,110 @@ function NovoFormularioCoachContent() {
     })
   )
 
+  const fieldTypes = [
+    { 
+      type: 'text' as FieldType, 
+      label: 'Texto', 
+      icon: '📝', 
+      description: 'Para nomes, objetivos, respostas breves',
+      suggestion: 'Nome completo'
+    },
+    { 
+      type: 'textarea' as FieldType, 
+      label: 'Texto Longo', 
+      icon: '📄', 
+      description: 'Para observações, históricos, descrições detalhadas',
+      suggestion: 'Observações'
+    },
+    { 
+      type: 'email' as FieldType, 
+      label: 'E-mail', 
+      icon: '✉️', 
+      description: 'Campo de e-mail com validação automática',
+      suggestion: 'E-mail'
+    },
+    { 
+      type: 'tel' as FieldType, 
+      label: 'Telefone', 
+      icon: '📞', 
+      description: 'Campo de telefone com formatação automática',
+      suggestion: 'Telefone'
+    },
+    { 
+      type: 'number' as FieldType, 
+      label: 'Número', 
+      icon: '🔢', 
+      description: 'Para peso, altura, medidas, quantidades',
+      suggestion: 'Peso (kg)'
+    },
+    { 
+      type: 'date' as FieldType, 
+      label: 'Data', 
+      icon: '📅', 
+      description: 'Seletor de data com calendário visual',
+      suggestion: 'Data de nascimento'
+    },
+    { 
+      type: 'time' as FieldType, 
+      label: 'Hora', 
+      icon: '🕐', 
+      description: 'Seletor de hora com relógio visual',
+      suggestion: 'Horário preferido'
+    },
+    { 
+      type: 'select' as FieldType, 
+      label: 'Lista suspensa', 
+      icon: '📋', 
+      description: 'Para opções únicas: sexo, estado civil, escolaridade',
+      suggestion: 'Gênero'
+    },
+    { 
+      type: 'radio' as FieldType, 
+      label: 'Múltipla escolha', 
+      icon: '⚪', 
+      description: 'Para uma opção entre várias: nível de atividade',
+      suggestion: 'Nível de atividade física'
+    },
+    { 
+      type: 'checkbox' as FieldType, 
+      label: 'Caixas de seleção', 
+      icon: '☑️', 
+      description: 'Para múltiplas opções: sintomas, alergias',
+      suggestion: 'Objetivos'
+    },
+    { 
+      type: 'yesno' as FieldType, 
+      label: 'Sim/Não', 
+      icon: '✅', 
+      description: 'Pergunta simples Sim/Não',
+      suggestion: 'Pratica exercícios regularmente?'
+    },
+    { 
+      type: 'range' as FieldType, 
+      label: 'Escala', 
+      icon: '📊', 
+      description: 'Escala deslizante para notas de 1-10, níveis de energia',
+      suggestion: 'Nível de energia (1-10)'
+    },
+  ]
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active)
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
 
-    if (active.id !== over?.id) {
+    // Se arrastou um componente para a área de drop
+    if (active.id.toString().startsWith('component-') && over?.id === 'form-drop-zone') {
+      const componentType = active.id.toString().replace('component-', '') as FieldType
+      adicionarCampo(componentType)
+      setActiveId(null)
+      return
+    }
+
+    // Se reordenou campos existentes
+    if (active.id !== over?.id && !active.id.toString().startsWith('component-')) {
       setFields((items) => {
         const oldIndex = items.findIndex(item => item.id === active.id)
         const newIndex = items.findIndex(item => item.id === over?.id)
@@ -197,36 +352,54 @@ function NovoFormularioCoachContent() {
         return arrayMove(items, oldIndex, newIndex)
       })
     }
+
+    setActiveId(null)
   }
 
   const adicionarCampo = (tipo: FieldType) => {
+    const fieldType = fieldTypes.find(ft => ft.type === tipo)
     const novoCampo: Field = {
       id: `field_${Date.now()}`,
       type: tipo,
-      label: '',
+      label: fieldType?.suggestion || '',
       required: false,
-      placeholder: tipo === 'text' ? 'Digite aqui...' : tipo === 'textarea' ? 'Descreva aqui...' : undefined,
-      options: tipo === 'select' || tipo === 'radio' ? ['Opção 1', 'Opção 2'] : undefined
+      placeholder: tipo === 'text' ? 'Digite aqui...' : 
+                   tipo === 'textarea' ? 'Descreva detalhadamente...' : 
+                   tipo === 'email' ? 'exemplo@email.com' :
+                   tipo === 'tel' ? '(11) 99999-9999' :
+                   tipo === 'number' ? 'Digite o valor' : undefined,
+      options: tipo === 'select' ? ['Feminino', 'Masculino'] :
+               tipo === 'radio' ? ['Sedentário', 'Leve', 'Moderado', 'Intenso'] :
+               tipo === 'checkbox' ? ['Ganhar massa', 'Perder peso', 'Melhorar condicionamento'] : undefined
     }
     setFieldEditando(novoCampo)
     setMostrarModalCampo(true)
   }
 
   const salvarCampo = () => {
-    if (fieldEditando && fieldEditando.label.trim()) {
-      const campoExistente = fields.find(f => f.id === fieldEditando.id)
-      
-      if (campoExistente) {
-        // Editando campo existente
-        setFields(fields.map(f => f.id === fieldEditando.id ? fieldEditando : f))
-      } else {
-        // Novo campo
-        setFields([...fields, fieldEditando])
-      }
-      
-      setFieldEditando(null)
-      setMostrarModalCampo(false)
+    if (!fieldEditando || !fieldEditando.label.trim()) {
+      alert('Preencha o rótulo do campo')
+      return
     }
+
+    if (fieldEditando.type === 'select' || fieldEditando.type === 'radio' || fieldEditando.type === 'checkbox') {
+      if (!fieldEditando.options || fieldEditando.options.length < 1) {
+        alert('Adicione pelo menos 1 opção')
+        return
+      }
+    }
+
+    const campoExistente = fields.findIndex(f => f.id === fieldEditando.id)
+    if (campoExistente >= 0) {
+      const novosFields = [...fields]
+      novosFields[campoExistente] = fieldEditando
+      setFields(novosFields)
+    } else {
+      setFields([...fields, fieldEditando])
+    }
+
+    setFieldEditando(null)
+    setMostrarModalCampo(false)
   }
 
   const editarCampo = (campo: Field) => {
@@ -319,6 +492,7 @@ function NovoFormularioCoachContent() {
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
             <div className="flex gap-4">
@@ -334,66 +508,68 @@ function NovoFormularioCoachContent() {
                     </div>
                   </div>
                   
-                  <div className="mb-6">
-                    <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                      {formData.name || 'Visualização do Formulário'}
-                    </h2>
-                    {formData.description && (
-                      <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
-                    )}
-                  </div>
+                  <FormDropZone>
+                    <div className="mb-6">
+                      <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+                        {formData.name || 'Visualização do Formulário'}
+                      </h2>
+                      {formData.description && (
+                        <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
+                      )}
+                    </div>
 
-                  {fields.length === 0 ? (
-                    <div className="text-center py-12 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
-                      <div className="text-blue-400 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                        </svg>
-                      </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Adicione seus primeiros campos</h3>
-                      <p className="text-gray-600 mb-4 text-sm">
-                        Clique nos botões coloridos da sidebar direita
-                      </p>
-                      <div className="bg-white border border-blue-200 rounded-lg p-4 max-w-sm mx-auto shadow-sm">
-                        <p className="text-xs text-blue-800">
-                          💡 <strong>Sugestão:</strong> Comece com "Nome" e "Email" para identificar o cliente
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-white rounded-lg p-6">
-                      <div className="mb-6">
-                        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                          {formData.name || 'Visualização do Formulário'}
-                        </h2>
-                        {formData.description && (
-                          <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
-                        )}
-                      </div>
-                      
-                      <form className="space-y-6">
-                        <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                          {fields.map((field) => (
-                            <DraggableFieldPreview 
-                              key={field.id} 
-                              field={field} 
-                              onEdit={editarCampo}
-                              onRemove={removerCampo}
-                            />
-                          ))}
-                        </SortableContext>
-                        <div className="pt-4 border-t border-gray-200">
-                          <button
-                            type="button"
-                            className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-medium hover:bg-purple-700 transition-colors"
-                            disabled
-                          >
-                            Enviar Formulário
-                          </button>
+                    {fields.length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="text-purple-400 mb-4">
+                          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                          </svg>
                         </div>
-                      </form>
-                    </div>
-                  )}
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Solte os componentes aqui</h3>
+                        <p className="text-gray-600 mb-4 text-sm">
+                          Arraste da sidebar direita ou clique duas vezes
+                        </p>
+                        <div className="bg-white border border-purple-200 rounded-lg p-4 max-w-sm mx-auto shadow-sm">
+                          <p className="text-xs text-purple-800">
+                            💡 <strong>Sugestão:</strong> Comece com "Nome" e "Email" para identificar o cliente
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-lg p-6">
+                        <div className="mb-6">
+                          <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+                            {formData.name || 'Visualização do Formulário'}
+                          </h2>
+                          {formData.description && (
+                            <p className="text-sm lg:text-base text-gray-600">{formData.description}</p>
+                          )}
+                        </div>
+                        
+                        <form className="space-y-6">
+                          <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                            {fields.map((field) => (
+                              <DraggableFieldPreview 
+                                key={field.id} 
+                                field={field} 
+                                onEdit={editarCampo}
+                                onRemove={removerCampo}
+                              />
+                            ))}
+                          </SortableContext>
+                          <div className="pt-4 border-t border-gray-200">
+                            <button
+                              type="button"
+                              className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-medium hover:bg-purple-700 transition-colors"
+                              disabled
+                            >
+                              Enviar Formulário
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
+                  </FormDropZone>
 
                   {/* Action Buttons */}
                   <div className="mt-6 flex flex-col sm:flex-row gap-4">
@@ -531,103 +707,57 @@ function NovoFormularioCoachContent() {
                       <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         🧩 Componentes
                       </h2>
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                        <p className="text-xs text-green-800">
-                          💡 <strong>Como usar:</strong> Clique nos botões para adicionar campos ao preview.
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                        <p className="text-xs text-purple-800">
+                          💡 <strong>Como usar:</strong> Arraste para o preview à esquerda ou clique duas vezes.
                         </p>
                       </div>
                       <div className="grid grid-cols-1 gap-2">
-                        <TooltipButton
-                          onClick={() => adicionarCampo('text')}
-                          className="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium border border-blue-200 text-left"
-                          tooltip="Campo de texto curto para nomes, objetivos, respostas breves"
-                        >
-                          📝 Texto
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('textarea')}
-                          className="w-full px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-xs font-medium border border-green-200 text-left"
-                          tooltip="Campo de texto longo para observações, históricos, descrições detalhadas"
-                        >
-                          📄 Texto Longo
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('select')}
-                          className="w-full px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-xs font-medium border border-purple-200 text-left"
-                          tooltip="Lista suspensa - cliente escolhe uma opção de uma lista"
-                        >
-                          📋 Seleção
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('radio')}
-                          className="w-full px-3 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-xs font-medium border border-indigo-200 text-left"
-                          tooltip="Múltipla escolha - cliente escolhe apenas UMA opção entre várias"
-                        >
-                          ⚪ Múltipla Escolha
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('checkbox')}
-                          className="w-full px-3 py-2 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors text-xs font-medium border border-pink-200 text-left"
-                          tooltip="Caixas de seleção - cliente pode marcar VÁRIAS opções"
-                        >
-                          ☑️ Caixas de Seleção
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('number')}
-                          className="w-full px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-xs font-medium border border-orange-200 text-left"
-                          tooltip="Campo numérico para peso, altura, medidas, quantidades (pode ter unidade como kg, cm)"
-                        >
-                          🔢 Número
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('date')}
-                          className="w-full px-3 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors text-xs font-medium border border-teal-200 text-left"
-                          tooltip="Seletor de data com calendário visual - ao clicar, abre um calendário para escolher a data. Ideal para data de nascimento, início de programa, consultas, prazos"
-                        >
-                          📅 Data
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('time')}
-                          className="w-full px-3 py-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors text-xs font-medium border border-cyan-200 text-left"
-                          tooltip="Seletor de hora com relógio visual - ao clicar, abre um seletor de hora. Ideal para horários de refeições, treinos, medicações, lembretes"
-                        >
-                          🕐 Hora
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('email')}
-                          className="w-full px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors text-xs font-medium border border-yellow-200 text-left"
-                          tooltip="Campo de e-mail com validação automática"
-                        >
-                          ✉️ E-mail
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('tel')}
-                          className="w-full px-3 py-2 bg-lime-100 text-lime-700 rounded-lg hover:bg-lime-200 transition-colors text-xs font-medium border border-lime-200 text-left"
-                          tooltip="Campo de telefone com formatação automática"
-                        >
-                          📞 Telefone
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('yesno')}
-                          className="w-full px-3 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors text-xs font-medium border border-emerald-200 text-left"
-                          tooltip="Pergunta simples Sim/Não - ideal para questões diretas como 'Pratica exercícios regularmente?'"
-                        >
-                          ✅ Sim/Não
-                        </TooltipButton>
-                        <TooltipButton
-                          onClick={() => adicionarCampo('range')}
-                          className="w-full px-3 py-2 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors text-xs font-medium border border-rose-200 text-left"
-                          tooltip="Escala deslizante (slider) para notas de 1-10, níveis de energia, dor, satisfação, etc"
-                        >
-                          📊 Escala
-                        </TooltipButton>
+                        {fieldTypes.map((fieldType) => (
+                          <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
+                            <DraggableComponent fieldType={fieldType} />
+                          </div>
+                        ))}
                       </div>
-
                     </div>
                   </div>
                 </form>
               </div>
             </div>
+
+            {/* Drag Overlay */}
+            <DragOverlay>
+              {activeId ? (
+                activeId.toString().startsWith('component-') ? (
+                  <div className="bg-white border-2 border-purple-500 rounded-lg p-4 shadow-lg opacity-90">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">
+                        {fieldTypes.find(ft => `component-${ft.type}` === activeId.toString())?.icon}
+                      </span>
+                      <span className="text-sm font-medium">
+                        {fieldTypes.find(ft => `component-${ft.type}` === activeId.toString())?.label}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white border rounded-lg p-3 shadow-lg opacity-90">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                      </svg>
+                      <div>
+                        <p className="font-medium text-sm">
+                          {fields.find(f => f.id === activeId.toString())?.label || 'Campo sem título'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {getFieldTypeLabel(fields.find(f => f.id === activeId.toString())?.type || 'text')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              ) : null}
+            </DragOverlay>
           </DndContext>
         </div>
       </div>
@@ -984,7 +1114,7 @@ export function ModalEditarCampo({
             </div>
           )}
 
-          {campo.type !== 'date' && campo.type !== 'time' && (
+          {(campo.type === 'text' || campo.type === 'textarea' || campo.type === 'email' || campo.type === 'tel' || campo.type === 'number') && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Texto de Ajuda (Placeholder)

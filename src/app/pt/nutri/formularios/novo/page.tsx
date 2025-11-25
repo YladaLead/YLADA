@@ -18,6 +18,7 @@ import {
   Active,
   DragOverEvent,
   useDroppable,
+  useDraggable,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -56,13 +57,11 @@ function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label
     listeners,
     setNodeRef,
     transform,
-    transition,
     isDragging,
-  } = useSortable({ id: `component-${fieldType.type}` })
+  } = useDraggable({ id: `component-${fieldType.type}` })
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
   }
 
@@ -806,15 +805,13 @@ function NovoFormularioNutriContent() {
                     💡 <strong>Como usar:</strong> Arraste para o preview à esquerda ou clique duas vezes.
                   </p>
                 </div>
-                <SortableContext items={fieldTypes.map(ft => `component-${ft.type}`)} strategy={verticalListSortingStrategy}>
-                  <div className="grid grid-cols-1 gap-2">
-                    {fieldTypes.map((fieldType) => (
-                      <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
-                        <DraggableComponent fieldType={fieldType} />
-                      </div>
-                    ))}
-                  </div>
-                </SortableContext>
+                <div className="grid grid-cols-1 gap-2">
+                  {fieldTypes.map((fieldType) => (
+                    <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
+                      <DraggableComponent fieldType={fieldType} />
+                    </div>
+                  ))}
+                </div>
               </div>
 
             </div>

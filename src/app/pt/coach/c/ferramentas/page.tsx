@@ -49,7 +49,7 @@ export default function FerramentasCoach() {
       setLoading(true)
 
       const response = await fetch(
-        `/api/c/ferramentas?profession=coach`,
+        `/api/coach/ferramentas?profession=coach`,
         {
           credentials: 'include'
         }
@@ -125,7 +125,7 @@ export default function FerramentasCoach() {
 
     try {
       setFerramentaExcluindoId(id)
-      const response = await fetch(`/api/c/ferramentas?id=${id}`, {
+      const response = await fetch(`/api/coach/ferramentas?id=${id}`, {
         method: 'DELETE',
         credentials: 'include'
       })

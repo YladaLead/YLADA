@@ -94,7 +94,7 @@ function NovaFerramentaCoachContent() {
     const carregarTemplates = async () => {
       try {
         setCarregandoTemplates(true)
-        const response = await fetch('/api/c/templates', {
+        const response = await fetch('/api/coach/templates', {
           credentials: 'include'
         })
         
@@ -223,7 +223,7 @@ function NovaFerramentaCoachContent() {
     const carregarTemplates = async () => {
       try {
         setCarregandoTemplates(true)
-        const response = await fetch('/api/c/templates', {
+        const response = await fetch('/api/coach/templates', {
           credentials: 'include'
         })
         
@@ -369,7 +369,7 @@ function NovaFerramentaCoachContent() {
     }
 
     try {
-      const response = await fetch(`/api/c/ferramentas/check-slug?slug=${encodeURIComponent(url)}`)
+      const response = await fetch(`/api/coach/ferramentas/check-slug?slug=${encodeURIComponent(url)}`)
       const data = await response.json()
       
       setUrlDisponivel(data.available)
@@ -485,7 +485,7 @@ function NovaFerramentaCoachContent() {
         }
       }
 
-      const response = await fetch('/api/c/ferramentas', {
+      const response = await fetch('/api/coach/ferramentas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
