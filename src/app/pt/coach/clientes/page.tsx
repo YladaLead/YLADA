@@ -6,6 +6,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
+import ImportClientsModal from '@/components/coach/ImportClientsModal'
 
 export default function ClientesCoach() {
   return (
@@ -34,6 +35,7 @@ function ClientesCoachContent() {
   const [busca, setBusca] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('todos')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   // Carregar clientes
   useEffect(() => {
@@ -162,6 +164,14 @@ function ClientesCoachContent() {
                 <span>🗂️</span>
                 Ver Kanban
               </Link>
+              <button
+                onClick={() => setImportModalOpen(true)}
+                className="inline-flex items-center gap-2 border border-green-500 text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors text-sm font-medium"
+                title="Importe todos os seus clientes de planilhas Excel, CSV ou Google Sheets em poucos cliques!"
+              >
+                <span>📥</span>
+                Importar Clientes
+              </button>
               <Link
                 href="/pt/coach/clientes/novo"
                 className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
@@ -233,13 +243,25 @@ function ClientesCoachContent() {
                   ? 'Tente ajustar os filtros de busca'
                   : 'Comece adicionando seu primeiro cliente'}
               </p>
-              <Link
-                href="/pt/coach/clientes/novo"
-                className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
-              >
-                <span>➕</span>
-                Criar Primeiro Cliente
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => setImportModalOpen(true)}
+                  className="inline-flex items-center gap-2 border border-green-500 text-green-600 px-6 py-3 rounded-lg hover:bg-green-50 transition-colors font-medium"
+                >
+                  <span>📥</span>
+                  Importar Clientes
+                </button>
+                <Link
+                  href="/pt/coach/clientes/novo"
+                  className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                >
+                  <span>➕</span>
+                  Criar Primeiro Cliente
+                </Link>
+              </div>
+              <p className="text-sm text-gray-500 mt-4 text-center">
+                💡 Já tem clientes em planilhas? Importe todos de uma vez!
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -282,6 +304,17 @@ function ClientesCoachContent() {
           )}
         </div>
       </div>
+
+      {/* Modal de Importação */}
+      <ImportClientsModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImportSuccess={() => {
+          setImportModalOpen(false)
+          // Recarregar clientes após importação
+          window.location.reload()
+        }}
+      />
     </div>
   )
 }
