@@ -14,13 +14,13 @@ export const receitasDiagnosticos: DiagnosticosPorFerramenta = {
     },
     receitasModeradas: {
       diagnostico: '👨‍🍳 DIAGNÓSTICO: Você precisa de receitas moderadas e específicas para elevar qualidade de bem-estar e diversificar preparações',
-      causaRaiz: '🔍 CAUSA RAIZ: Com base culinária estabelecida, receitas moderadas com ingredientes específicos e técnicas intermediárias elevam qualidade de bem-estar. Pesquisas indicam que receitas moderadas aumentam satisfação e resultados em até 45% quando comparadas a receitas básicas para pessoas com experiência. Uma análise de bem-estar identifica quais receitas moderadas são mais estratégicas para você'
+      causaRaiz: '🔍 CAUSA RAIZ: Com base culinária estabelecida, receitas moderadas com ingredientes específicos e técnicas intermediárias elevam qualidade de bem-estar. Pesquisas indicam que receitas moderadas aumentam satisfação e resultados em até 45% quando comparadas a receitas básicas para pessoas com experiência. Uma análise de bem-estar identifica quais receitas moderadas são mais estratégicas para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Explore receitas moderadas com 5-7 ingredientes, técnicas intermediárias e ingredientes funcionais. Considere avaliação de bem-estar para receber receitas direcionadas que potencializam seus objetivos',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como receitas moderadas podem elevar ainda mais sua qualidade de bem-estar com preparações direcionadas.'
-    }
+    },
     receitasAvancadas: {
       diagnostico: '👨‍🍳 DIAGNÓSTICO: Excelente! Receitas avançadas e gourmet podem maximizar qualidade de bem-estar e satisfação com preparações sofisticadas',
-      causaRaiz: '🔍 CAUSA RAIZ: Experiência culinária estabelecida permite receitas avançadas com técnicas refinadas e ingredientes premium. Estudos mostram que receitas avançadas com foco em densidade de bem-estar podem potencializar resultados em até 50% quando comparadas a receitas básicas para pessoas experientes. Uma avaliação de bem-estar identifica receitas avançadas que maximizam benefícios para você'
+      causaRaiz: '🔍 CAUSA RAIZ: Experiência culinária estabelecida permite receitas avançadas com técnicas refinadas e ingredientes premium. Estudos mostram que receitas avançadas com foco em densidade de bem-estar podem potencializar resultados em até 50% quando comparadas a receitas básicas para pessoas experientes. Uma avaliação de bem-estar identifica receitas avançadas que maximizam benefícios para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Explore receitas avançadas com técnicas refinadas, ingredientes premium e combinações estratégicas. Considere avaliação de bem-estar avançada para receber receitas gourmet personalizadas que maximizam resultados',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua experiência atual é um ótimo ponto de partida. Descubra como receitas avançadas podem potencializar ainda mais sua alimentação com preparações gourmet personalizadas.'
     }
