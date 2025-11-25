@@ -8,10 +8,10 @@ export const rastreadorAlimentarDiagnosticos: DiagnosticosPorFerramenta = {
   nutri: {
     rastreamentoBasico: {
       diagnostico: '📈 DIAGNÓSTICO: Você precisa de rastreamento básico para identificar padrões alimentares e estabelecer consciência nutricional',
-      causaRaiz: '🔍 CAUSA RAIZ: Falta de consciência sobre consumo alimentar diário pode estar afetando seus resultados nutricionais. Estudos mostram que pessoas que rastreiam alimentação têm 30% mais sucesso em alcançar objetivos nutricionais quando comparadas àquelas que não fazem acompanhamento. Uma avaliação nutricional identifica exatamente quais padrões alimentares precisam ser identificados e como otimizá-los'
+      causaRaiz: '🔍 CAUSA RAIZ: Falta de consciência sobre consumo alimentar diário pode estar afetando seus resultados nutricionais. Estudos mostram que pessoas que rastreiam alimentação têm 30% mais sucesso em alcançar objetivos nutricionais quando comparadas àquelas que não fazem acompanhamento. Uma avaliação nutricional identifica exatamente quais padrões alimentares precisam ser identificados e como otimizá-los',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Comece a rastrear sua alimentação diariamente por pelo menos 30 dias. Busque avaliação nutricional para receber orientações sobre o que observar e como interpretar os padrões identificados durante o rastreamento',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu rastreamento começa com consciência — descubra em minutos como identificar padrões alimentares pode transformar sua relação com a nutrição com orientações personalizadas.'
-    }
+    },
     rastreamentoModerado: {
       diagnostico: '📈 DIAGNÓSTICO: Você precisa de rastreamento moderado para identificar padrões alimentares intermediários e otimizar seus resultados nutricionais',
       causaRaiz: '🔍 CAUSA RAIZ: Padrões alimentares intermediários podem estar impactando seus resultados nutricionais sem você perceber. Pesquisas indicam que rastreamento detalhado de macronutrientes e horários pode melhorar resultados nutricionais em até 40% quando adequadamente implementado. Uma análise nutricional identifica exatamente quais padrões específicos são mais relevantes para você'

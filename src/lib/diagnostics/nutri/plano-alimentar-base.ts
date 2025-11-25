@@ -20,7 +20,7 @@ export const planoAlimentarBaseDiagnosticos: DiagnosticosPorFerramenta = {
     },
     planoPremium: {
       diagnostico: '📅 DIAGNÓSTICO: Você precisa de um plano alimentar premium de elite para máxima qualidade nutricional e resultados superiores',
-      causaRaiz: '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar de elite e premium para máxima qualidade nutricional e resultados superiores. Estudos mostram que planos alimentares premium podem resultar em melhorias que potencializam resultados em até 70%. Uma avaliação nutricional avançada identifica oportunidades específicas de otimização para você'
+      causaRaiz: '🔍 CAUSA RAIZ: Necessidade de estrutura alimentar de elite e premium para máxima qualidade nutricional e resultados superiores. Estudos mostram que planos alimentares premium podem resultar em melhorias que potencializam resultados em até 70%. Uma avaliação nutricional avançada identifica oportunidades específicas de otimização para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Implemente plano alimentar premium considerando qualidade superior e densidade nutricional. Considere avaliação nutricional avançada para protocolo personalizado que maximiza resultados com estratégias de elite',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua busca por qualidade premium é um ótimo ponto de partida. Descubra como um plano alimentar de elite pode potencializar ainda mais seus resultados com estratégias avançadas.'
     }
