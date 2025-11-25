@@ -101,3 +101,43 @@ export async function requireAdmin() {
   return profile
 }
 
+// API Authentication helper
+export async function requireApiAuth(request: any) {
+  try {
+    // Extrair token do cookie ou header
+    const cookies = request.headers.get('cookie') || ''
+    const authCookie = cookies.split(';').find((c: string) => c.trim().startsWith('sb-'))
+    
+    if (!authCookie) {
+      return {
+        success: false,
+        error: 'Token de autenticação não encontrado',
+        status: 401
+      }
+    }
+
+    // Verificar se há um usuário autenticado
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error || !user) {
+      return {
+        success: false,
+        error: 'Usuário não autenticado',
+        status: 401
+      }
+    }
+
+    return {
+      success: true,
+      userId: user.id,
+      user: user
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Erro na verificação de autenticação',
+      status: 500
+    }
+  }
+}
+

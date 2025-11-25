@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { requireApiAuth } from '@/lib/auth'
+import { requireApiAuth } from '@/lib/api-auth'
 
 /**
  * GET - Listar clientes do usuário autenticado
@@ -19,13 +19,11 @@ import { requireApiAuth } from '@/lib/auth'
 export async function GET(request: NextRequest) {
   try {
     // 🔒 Verificar autenticação
-    const authResult = await requireApiAuth(request)
-    if (!authResult.success) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      )
+    const authResult = await requireApiAuth(request, ['coach', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     // Verificar se supabaseAdmin está configurado
     if (!supabaseAdmin) {
@@ -47,7 +45,7 @@ export async function GET(request: NextRequest) {
     const order = searchParams.get('order') || 'desc'
 
     // 🔒 Sempre usar user_id do token (seguro)
-    const authenticatedUserId = authResult.userId
+    const authenticatedUserId = user.id
 
     // Se ID foi fornecido, retornar cliente específico
     if (clientId) {
