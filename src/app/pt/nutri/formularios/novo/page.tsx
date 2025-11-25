@@ -5,6 +5,28 @@ import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  Active,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 export default function NovoFormularioNutri() {
   return (
@@ -14,57 +36,184 @@ export default function NovoFormularioNutri() {
   )
 }
 
-export type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'number' | 'date' | 'time' | 'email' | 'tel' | 'yesno' | 'range' | 'file'
+export type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'number' | 'date' | 'email' | 'phone'
 
 export interface Field {
   id: string
   type: FieldType
   label: string
-  placeholder?: string
   required: boolean
+  placeholder?: string
   options?: string[]
-  min?: number
-  max?: number
-  step?: number // Para range e number
-  unit?: string // Para number (ex: "kg", "cm")
-  helpText?: string // Texto de ajuda abaixo do campo
 }
 
-// Componente TooltipButton
-export function TooltipButton({ 
-  children, 
-  onClick, 
-  className, 
-  tooltip 
-}: { 
-  children: React.ReactNode
-  onClick: () => void
-  className: string
-  tooltip: string
+// Componente para item arrastável
+function DraggableFieldItem({ field, onEdit, onRemove }: { 
+  field: Field
+  onEdit: (field: Field) => void
+  onRemove: (id: string) => void
 }) {
-  const [showTooltip, setShowTooltip] = useState(false)
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
 
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={onClick}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        className={className}
-      >
-        {children}
-      </button>
-      {showTooltip && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 max-w-xs whitespace-normal">
-          {tooltip}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-            <div className="border-4 border-transparent border-t-gray-900"></div>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white border rounded-lg p-3 shadow-sm ${isDragging ? 'shadow-lg' : ''}`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+          >
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium text-sm">{field.label || 'Campo sem título'}</p>
+            <p className="text-xs text-gray-500">{getFieldTypeLabel(field.type)}</p>
           </div>
         </div>
-      )}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onEdit(field)}
+            className="p-1 hover:bg-gray-100 rounded text-blue-600"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => onRemove(field.id)}
+            className="p-1 hover:bg-gray-100 rounded text-red-600"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   )
+}
+
+// Componente para preview do campo
+function FieldPreview({ field }: { field: Field }) {
+  const renderField = () => {
+    switch (field.type) {
+      case 'text':
+      case 'email':
+      case 'number':
+        return (
+          <input
+            type={field.type}
+            placeholder={field.placeholder}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled
+          />
+        )
+      case 'phone':
+        return (
+          <input
+            type="tel"
+            placeholder={field.placeholder || "Digite seu telefone"}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled
+          />
+        )
+      case 'textarea':
+        return (
+          <textarea
+            placeholder={field.placeholder}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            disabled
+          />
+        )
+      case 'select':
+        return (
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+            <option>Selecione uma opção</option>
+            {field.options?.map((option, index) => (
+              <option key={index} value={option}>{option}</option>
+            ))}
+          </select>
+        )
+      case 'radio':
+        return (
+          <div className="space-y-2">
+            {field.options?.map((option, index) => (
+              <label key={index} className="flex items-center">
+                <input type="radio" name={field.id} className="mr-2" disabled />
+                <span>{option}</span>
+              </label>
+            ))}
+          </div>
+        )
+      case 'checkbox':
+        return (
+          <div className="space-y-2">
+            {field.options?.map((option, index) => (
+              <label key={index} className="flex items-center">
+                <input type="checkbox" className="mr-2" disabled />
+                <span>{option}</span>
+              </label>
+            ))}
+          </div>
+        )
+      case 'date':
+        return (
+          <input
+            type="date"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled
+          />
+        )
+      default:
+        return <div className="text-gray-400">Campo não suportado</div>
+    }
+  }
+
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {field.label || 'Campo sem título'}
+        {field.required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      {renderField()}
+    </div>
+  )
+}
+
+function getFieldTypeLabel(type: FieldType): string {
+  const labels = {
+    text: 'Texto',
+    textarea: 'Área de texto',
+    select: 'Lista suspensa',
+    radio: 'Múltipla escolha',
+    checkbox: 'Caixas de seleção',
+    number: 'Número',
+    date: 'Data',
+    email: 'E-mail',
+    phone: 'Telefone'
+  }
+  return labels[type] || type
 }
 
 function NovoFormularioNutriContent() {
@@ -84,6 +233,26 @@ function NovoFormularioNutriContent() {
   const [fields, setFields] = useState<Field[]>([])
   const [fieldEditando, setFieldEditando] = useState<Field | null>(null)
   const [mostrarModalCampo, setMostrarModalCampo] = useState(false)
+  const [activeId, setActiveId] = useState<Active | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const fieldTypes: { type: FieldType; label: string; icon: string }[] = [
+    { type: 'text', label: 'Texto', icon: '📝' },
+    { type: 'email', label: 'E-mail', icon: '📧' },
+    { type: 'phone', label: 'Telefone', icon: '📱' },
+    { type: 'textarea', label: 'Área de texto', icon: '📄' },
+    { type: 'number', label: 'Número', icon: '🔢' },
+    { type: 'date', label: 'Data', icon: '📅' },
+    { type: 'select', label: 'Lista suspensa', icon: '📋' },
+    { type: 'radio', label: 'Múltipla escolha', icon: '🔘' },
+    { type: 'checkbox', label: 'Caixas de seleção', icon: '☑️' },
+  ]
 
   const adicionarCampo = (tipo: FieldType) => {
     const novoCampo: Field = {
@@ -91,8 +260,11 @@ function NovoFormularioNutriContent() {
       type: tipo,
       label: '',
       required: false,
-      placeholder: tipo === 'text' ? 'Digite aqui...' : tipo === 'textarea' ? 'Descreva aqui...' : undefined,
-      options: tipo === 'select' || tipo === 'radio' ? ['Opção 1', 'Opção 2'] : undefined
+      placeholder: tipo === 'text' ? 'Digite aqui...' : 
+                   tipo === 'textarea' ? 'Descreva aqui...' : 
+                   tipo === 'email' ? 'Digite seu e-mail...' :
+                   tipo === 'phone' ? 'Digite seu telefone...' : undefined,
+      options: tipo === 'select' || tipo === 'radio' || tipo === 'checkbox' ? ['Opção 1', 'Opção 2'] : undefined
     }
     setFieldEditando(novoCampo)
     setMostrarModalCampo(true)
@@ -104,9 +276,9 @@ function NovoFormularioNutriContent() {
       return
     }
 
-    if (fieldEditando.type === 'select' || fieldEditando.type === 'radio') {
-      if (!fieldEditando.options || fieldEditando.options.length < 2) {
-        alert('Adicione pelo menos 2 opções')
+    if (fieldEditando.type === 'select' || fieldEditando.type === 'radio' || fieldEditando.type === 'checkbox') {
+      if (!fieldEditando.options || fieldEditando.options.length < 1) {
+        alert('Adicione pelo menos 1 opção')
         return
       }
     }
@@ -133,15 +305,23 @@ function NovoFormularioNutriContent() {
     setFields(fields.filter(f => f.id !== id))
   }
 
-  const moverCampo = (index: number, direcao: 'up' | 'down') => {
-    if (direcao === 'up' && index === 0) return
-    if (direcao === 'down' && index === fields.length - 1) return
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active)
+  }
 
-    const novosFields = [...fields]
-    const temp = novosFields[index]
-    novosFields[index] = novosFields[direcao === 'up' ? index - 1 : index + 1]
-    novosFields[direcao === 'up' ? index - 1 : index + 1] = temp
-    setFields(novosFields)
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+
+    if (active.id !== over?.id) {
+      setFields((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id)
+        const newIndex = items.findIndex(item => item.id === over?.id)
+
+        return arrayMove(items, oldIndex, newIndex)
+      })
+    }
+
+    setActiveId(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -197,82 +377,74 @@ function NovoFormularioNutriContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <NutriSidebar 
-        isMobileOpen={mobileMenuOpen}
-        onMobileClose={() => setMobileMenuOpen(false)}
-      />
+      <NutriSidebar isMobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
       
-      <div className="flex-1 lg:ml-56">
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-2 text-gray-600 hover:text-gray-900"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <h1 className="text-lg font-semibold text-gray-900">Novo Formulário</h1>
-          <div className="w-10"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
-          {/* Header */}
-          <div className="mb-6">
+      <div className="flex-1 flex flex-col lg:ml-64">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/pt/nutri/formularios')}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-              Voltar
             </button>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Criar Formulário Personalizado</h1>
-            <p className="text-gray-600 mt-1">Construa seu formulário de anamnese ou avaliação</p>
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">Novo Formulário</h1>
+              <p className="text-sm text-gray-600">Arraste os componentes e veja o preview em tempo real</p>
+            </div>
           </div>
+        </header>
 
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Informações Básicas */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Informações Básicas</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+        {/* Main Content */}
+        <div className="flex-1 flex">
+          {/* Left Panel - Components */}
+          <div className="w-80 bg-white border-r border-gray-200 p-4 overflow-y-auto">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">📋 Informações Básicas</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nome do Formulário *
                   </label>
                   <input
                     type="text"
-                    id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ex: Anamnese Inicial"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ex: Questionário de Avaliação"
                   />
                 </div>
                 <div>
-                  <label htmlFor="form_type" className="block text-sm font-medium text-gray-700 mb-2">
-                    Tipo *
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descrição
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={2}
+                    placeholder="Descreva o objetivo do formulário"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo
                   </label>
                   <select
-                    id="form_type"
                     value={formData.form_type}
                     onChange={(e) => setFormData({ ...formData, form_type: e.target.value as any })}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="questionario">Questionário</option>
                     <option value="anamnese">Anamnese</option>
@@ -281,801 +453,283 @@ function NovoFormularioNutriContent() {
                     <option value="outro">Outro</option>
                   </select>
                 </div>
-                <div className="md:col-span-2">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Descrição
-                  </label>
-                  <textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Descreva o objetivo deste formulário..."
-                  />
-                </div>
               </div>
             </div>
 
-            {/* Builder de Campos */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Campos do Formulário</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                  <TooltipButton
-                    onClick={() => adicionarCampo('text')}
-                    className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium border border-blue-200"
-                    tooltip="Campo de texto curto para nomes, objetivos, respostas breves"
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">🧩 Componentes</h2>
+              <div className="grid grid-cols-1 gap-2">
+                {fieldTypes.map((fieldType) => (
+                  <button
+                    key={fieldType.type}
+                    onClick={() => adicionarCampo(fieldType.type)}
+                    className="flex items-center gap-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors"
                   >
-                    📝 Texto
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('textarea')}
-                    className="px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium border border-green-200"
-                    tooltip="Campo de texto longo para observações, históricos, descrições detalhadas"
-                  >
-                    📄 Texto Longo
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('select')}
-                    className="px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium border border-purple-200"
-                    tooltip="Lista suspensa - cliente escolhe uma opção de uma lista"
-                  >
-                    📋 Seleção
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('radio')}
-                    className="px-3 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium border border-indigo-200"
-                    tooltip="Múltipla escolha - cliente escolhe apenas UMA opção entre várias"
-                  >
-                    ⚪ Múltipla Escolha
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('checkbox')}
-                    className="px-3 py-2 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors text-sm font-medium border border-pink-200"
-                    tooltip="Caixas de seleção - cliente pode marcar VÁRIAS opções"
-                  >
-                    ☑️ Caixas
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('number')}
-                    className="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium border border-orange-200"
-                    tooltip="Campo numérico para peso, altura, medidas, quantidades (pode ter unidade como kg, cm)"
-                  >
-                    🔢 Número
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('date')}
-                    className="px-3 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors text-sm font-medium border border-teal-200"
-                    tooltip="Seletor de data com calendário - ao clicar, abre um calendário visual. Ideal para data de nascimento, início de programa, consultas"
-                  >
-                    📅 Data
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('time')}
-                    className="px-3 py-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors text-sm font-medium border border-cyan-200"
-                    tooltip="Seletor de hora - ao clicar, abre um seletor de hora visual. Ideal para horários de refeições, treinos, medicações"
-                  >
-                    🕐 Hora
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('email')}
-                    className="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors text-sm font-medium border border-yellow-200"
-                    tooltip="Campo de e-mail com validação automática"
-                  >
-                    ✉️ E-mail
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('tel')}
-                    className="px-3 py-2 bg-lime-100 text-lime-700 rounded-lg hover:bg-lime-200 transition-colors text-sm font-medium border border-lime-200"
-                    tooltip="Campo de telefone com formatação automática"
-                  >
-                    📞 Telefone
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('yesno')}
-                    className="px-3 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors text-sm font-medium border border-emerald-200"
-                    tooltip="Pergunta simples Sim/Não - ideal para questões diretas como 'Pratica exercícios?'"
-                  >
-                    ✅ Sim/Não
-                  </TooltipButton>
-                  <TooltipButton
-                    onClick={() => adicionarCampo('range')}
-                    className="px-3 py-2 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors text-sm font-medium border border-rose-200"
-                    tooltip="Escala deslizante (slider) para notas de 1-10, níveis de energia, dor, etc"
-                  >
-                    📊 Escala
-                  </TooltipButton>
+                    <span className="text-lg">{fieldType.icon}</span>
+                    <span className="text-sm font-medium">{fieldType.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {fields.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">📝 Campos Adicionados</h2>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-2">
+                      {fields.map((field) => (
+                        <DraggableFieldItem
+                          key={field.id}
+                          field={field}
+                          onEdit={editarCampo}
+                          onRemove={removerCampo}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                  <DragOverlay>
+                    {activeId ? (
+                      <div className="bg-white border rounded-lg p-3 shadow-lg opacity-90">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                          </svg>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {fields.find(f => f.id === activeId.id)?.label || 'Campo sem título'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {getFieldTypeLabel(fields.find(f => f.id === activeId.id)?.type || 'text')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel - Preview */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {formData.name || 'Visualização do Formulário'}
+                  </h2>
+                  {formData.description && (
+                    <p className="text-gray-600">{formData.description}</p>
+                  )}
                 </div>
+
+                {fields.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Formulário vazio</h3>
+                    <p className="text-gray-500">Adicione componentes do painel à esquerda para ver o preview</p>
+                  </div>
+                ) : (
+                  <form className="space-y-6">
+                    {fields.map((field) => (
+                      <FieldPreview key={field.id} field={field} />
+                    ))}
+                    <div className="pt-4 border-t border-gray-200">
+                      <button
+                        type="button"
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                        disabled
+                      >
+                        Enviar Formulário
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
 
-              {fields.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-600 mb-4">Nenhum campo adicionado ainda</p>
-                  <p className="text-sm text-gray-500">Clique nos botões acima para adicionar campos</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {fields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-gray-900">{field.label}</span>
-                          {field.required && (
-                            <span className="text-xs text-red-600">*</span>
-                          )}
-                          <span className="text-xs text-gray-500">({getFieldTypeLabel(field.type)})</span>
-                        </div>
-                        {field.placeholder && (
-                          <p className="text-xs text-gray-500">{field.placeholder}</p>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => moverCampo(index, 'up')}
-                          disabled={index === 0}
-                          className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50"
-                        >
-                          ↑
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moverCampo(index, 'down')}
-                          disabled={index === fields.length - 1}
-                          className="p-2 text-gray-600 hover:text-gray-900 disabled:opacity-50"
-                        >
-                          ↓
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => editarCampo(field)}
-                          className="p-2 text-blue-600 hover:text-blue-700"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removerCampo(field.id)}
-                          className="p-2 text-red-600 hover:text-red-700"
-                        >
-                          🗑️
-                        </button>
-                      </div>
+              {/* Action Buttons */}
+              <div className="mt-6 flex gap-4">
+                <button
+                  onClick={() => router.push('/pt/nutri/formularios')}
+                  className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-md font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={salvando || fields.length === 0 || !formData.name.trim()}
+                  className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {salvando ? 'Salvando...' : 'Criar Formulário'}
+                </button>
+              </div>
+
+              {erro && (
+                <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+                  <div className="flex">
+                    <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{erro}</p>
                     </div>
-                  ))}
+                  </div>
+                </div>
+              )}
+
+              {mensagemSucesso && (
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
+                  <div className="flex">
+                    <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <div className="ml-3">
+                      <p className="text-sm text-green-800">{mensagemSucesso}</p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
-
-            {/* Preview */}
-            {fields.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Preview</h2>
-                <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{formData.name || 'Formulário'}</h3>
-                  {formData.description && (
-                    <p className="text-gray-600 mb-6">{formData.description}</p>
-                  )}
-                  {(fields.some(f => f.type === 'date' || f.type === 'time') && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-xs text-blue-800">
-                        <strong>💡 Dica:</strong> Os campos de Data e Hora abrem calendários/seletores visuais quando o cliente clicar neles.
-                      </p>
-                    </div>
-                  ))}
-                  <div className="space-y-4">
-                    {fields.map((field) => (
-                      <div key={field.id}>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {field.label}
-                          {field.required && <span className="text-red-600 ml-1">*</span>}
-                        </label>
-                        <div className="relative">
-                          {renderFieldPreview(field)}
-                          {field.unit && field.type === 'number' && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-                              {field.unit}
-                            </span>
-                          )}
-                        </div>
-                        {field.helpText && (
-                          <p className="mt-1 text-xs text-gray-500">{field.helpText}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Botões de Ação */}
-            <div className="flex justify-end gap-4">
-              <button
-                type="button"
-                onClick={() => router.push('/pt/nutri/formularios')}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={salvando}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
-              >
-                {salvando ? 'Salvando...' : 'Salvar Formulário'}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
 
       {/* Modal de Edição de Campo */}
       {mostrarModalCampo && fieldEditando && (
-        <ModalEditarCampo
-          campo={fieldEditando}
-          onChange={setFieldEditando}
-          onSalvar={salvarCampo}
-          onCancelar={() => {
-            setFieldEditando(null)
-            setMostrarModalCampo(false)
-          }}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">
+                  Configurar Campo - {getFieldTypeLabel(fieldEditando.type)}
+                </h3>
+                <button
+                  onClick={() => setMostrarModalCampo(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Rótulo do Campo *
+                  </label>
+                  <input
+                    type="text"
+                    value={fieldEditando.label}
+                    onChange={(e) => setFieldEditando({ ...fieldEditando, label: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ex: Nome completo"
+                  />
+                </div>
+
+                {(fieldEditando.type === 'text' || fieldEditando.type === 'textarea' || fieldEditando.type === 'email' || fieldEditando.type === 'phone' || fieldEditando.type === 'number') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Placeholder
+                    </label>
+                    <input
+                      type="text"
+                      value={fieldEditando.placeholder || ''}
+                      onChange={(e) => setFieldEditando({ ...fieldEditando, placeholder: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Texto de exemplo"
+                    />
+                  </div>
+                )}
+
+                {(fieldEditando.type === 'select' || fieldEditando.type === 'radio' || fieldEditando.type === 'checkbox') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Opções
+                    </label>
+                    <div className="space-y-2">
+                      {fieldEditando.options?.map((option, index) => (
+                        <div key={index} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={option}
+                            onChange={(e) => {
+                              const newOptions = [...(fieldEditando.options || [])]
+                              newOptions[index] = e.target.value
+                              setFieldEditando({ ...fieldEditando, options: newOptions })
+                            }}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder={`Opção ${index + 1}`}
+                          />
+                          <button
+                            onClick={() => {
+                              const newOptions = fieldEditando.options?.filter((_, i) => i !== index)
+                              setFieldEditando({ ...fieldEditando, options: newOptions })
+                            }}
+                            className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-md"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => {
+                          const newOptions = [...(fieldEditando.options || []), '']
+                          setFieldEditando({ ...fieldEditando, options: newOptions })
+                        }}
+                        className="w-full px-3 py-2 border border-dashed border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
+                      >
+                        + Adicionar opção
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="required"
+                    checked={fieldEditando.required}
+                    onChange={(e) => setFieldEditando({ ...fieldEditando, required: e.target.checked })}
+                    className="mr-2"
+                  />
+                  <label htmlFor="required" className="text-sm text-gray-700">
+                    Campo obrigatório
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setMostrarModalCampo(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={salvarCampo}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Salvar Campo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
 }
-
-export function getFieldTypeLabel(type: FieldType): string {
-  const labels: Record<FieldType, string> = {
-    text: 'Texto',
-    textarea: 'Texto Longo',
-    select: 'Seleção',
-    radio: 'Múltipla Escolha',
-    checkbox: 'Caixa de Seleção',
-    number: 'Número',
-    date: 'Data',
-    time: 'Hora',
-    email: 'E-mail',
-    tel: 'Telefone',
-    yesno: 'Sim/Não',
-    range: 'Escala',
-    file: 'Upload de Arquivo'
-  }
-  return labels[type] || type
-}
-
-export function getFieldDescription(type: FieldType): string {
-  const descriptions: Record<FieldType, string> = {
-    text: 'Campo de texto curto para nomes, objetivos, respostas breves',
-    textarea: 'Campo de texto longo para observações, históricos, descrições detalhadas',
-    select: 'Lista suspensa - cliente escolhe uma opção de uma lista',
-    radio: 'Múltipla escolha - cliente escolhe apenas UMA opção entre várias',
-    checkbox: 'Caixas de seleção - cliente pode marcar VÁRIAS opções',
-    number: 'Campo numérico para peso, altura, medidas, quantidades (pode ter unidade como kg, cm)',
-    date: 'Seletor de data com calendário visual - ao clicar, abre um calendário para escolher a data. Ideal para data de nascimento, início de programa, consultas, prazos',
-    time: 'Seletor de hora com relógio visual - ao clicar, abre um seletor de hora. Ideal para horários de refeições, treinos, medicações, lembretes',
-    email: 'Campo de e-mail com validação automática',
-    tel: 'Campo de telefone com formatação automática',
-    yesno: 'Pergunta simples Sim/Não - ideal para questões diretas como "Pratica exercícios regularmente?"',
-    range: 'Escala deslizante (slider) para notas de 1-10, níveis de energia, dor, satisfação, etc',
-    file: 'Upload de arquivo para fotos, documentos, exames médicos'
-  }
-  return descriptions[type] || ''
-}
-
-export function getFieldPlaceholderExample(type: FieldType): string {
-  const examples: Record<FieldType, string> = {
-    text: 'Ex: Nome completo',
-    textarea: 'Ex: Descreva seu objetivo principal',
-    select: 'Ex: Objetivo principal',
-    radio: 'Ex: Tipo de atividade física',
-    checkbox: 'Ex: Sintomas apresentados',
-    number: 'Ex: Peso atual',
-    date: 'Ex: Data de nascimento',
-    time: 'Ex: Horário do café da manhã',
-    email: 'Ex: Seu melhor e-mail',
-    tel: 'Ex: Telefone para contato',
-    yesno: 'Ex: Pratica exercícios regularmente?',
-    range: 'Ex: Nível de energia (1-10)',
-    file: 'Ex: Foto de perfil'
-  }
-  return examples[type] || 'Ex: Nome do campo'
-}
-
-export function getPlaceholderExample(type: FieldType): string {
-  const examples: Record<FieldType, string> = {
-    text: 'Ex: Digite seu nome completo',
-    textarea: 'Ex: Descreva em detalhes...',
-    select: 'Ex: Selecione uma opção',
-    radio: '',
-    checkbox: '',
-    number: 'Ex: 70',
-    date: 'Clique para abrir o calendário',
-    time: 'Clique para abrir o seletor de hora',
-    email: 'Ex: seu@email.com',
-    tel: 'Ex: (11) 99999-9999',
-    yesno: '',
-    range: '',
-    file: ''
-  }
-  return examples[type] || 'Texto que aparece dentro do campo'
-}
-
-export function getHelpTextExample(type: FieldType): string {
-  const examples: Record<FieldType, string> = {
-    text: 'Ex: Digite seu nome completo como aparece no documento',
-    textarea: 'Ex: Seja o mais detalhado possível',
-    select: 'Ex: Escolha a opção que melhor descreve sua situação',
-    radio: 'Ex: Selecione apenas uma opção',
-    checkbox: 'Ex: Marque todas as opções que se aplicam',
-    number: 'Ex: Digite seu peso atual em quilogramas',
-    date: 'Ex: Clique no calendário para escolher a data (ex: data de nascimento, início do programa)',
-    time: 'Ex: Clique no relógio para escolher o horário (ex: horário das refeições, treinos)',
-    email: 'Ex: Usaremos este e-mail para enviar informações importantes',
-    tel: 'Ex: Inclua o DDD',
-    yesno: 'Ex: Responda Sim ou Não',
-    range: 'Ex: Arraste o indicador para escolher seu nível',
-    file: 'Ex: Formatos aceitos: JPG, PNG, PDF (máx. 5MB)'
-  }
-  return examples[type] || 'Ex: Texto de ajuda para o cliente'
-}
-
-export function renderFieldPreview(field: Field) {
-  switch (field.type) {
-    case 'text':
-    case 'email':
-    case 'tel':
-      return (
-        <input
-          type={field.type}
-          placeholder={field.placeholder}
-          disabled
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
-        />
-      )
-    case 'textarea':
-      return (
-        <textarea
-          placeholder={field.placeholder}
-          rows={4}
-          disabled
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white resize-none"
-        />
-      )
-    case 'select':
-      return (
-        <select
-          disabled
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
-        >
-          <option>Selecione uma opção</option>
-          {field.options?.map((opt, idx) => (
-            <option key={idx}>{opt}</option>
-          ))}
-        </select>
-      )
-    case 'radio':
-      return (
-        <div className="space-y-2">
-          {field.options?.map((opt, idx) => (
-            <label key={idx} className="flex items-center gap-2">
-              <input type="radio" disabled className="text-blue-600" />
-              <span className="text-sm text-gray-700">{opt}</span>
-            </label>
-          ))}
-        </div>
-      )
-    case 'checkbox':
-      return (
-        <div className="space-y-2">
-          {field.options?.map((opt, idx) => (
-            <label key={idx} className="flex items-center gap-2">
-              <input type="checkbox" disabled className="text-blue-600" />
-              <span className="text-sm text-gray-700">{opt}</span>
-            </label>
-          ))}
-        </div>
-      )
-    case 'number':
-      return (
-        <div className="relative">
-          <input
-            type="number"
-            placeholder={field.placeholder}
-            min={field.min}
-            max={field.max}
-            disabled
-            className={`w-full px-4 py-2 border border-gray-300 rounded-lg bg-white ${field.unit ? 'pr-12' : ''}`}
-          />
-          {field.unit && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
-              {field.unit}
-            </span>
-          )}
-        </div>
-      )
-    case 'date':
-      return (
-        <div className="relative">
-          <input
-            type="date"
-            disabled
-            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg bg-white cursor-pointer"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        </div>
-      )
-    case 'time':
-      return (
-        <div className="relative">
-          <input
-            type="time"
-            disabled
-            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg bg-white cursor-pointer"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-      )
-    case 'yesno':
-      return (
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2">
-            <input type="radio" name={`yesno-${field.id}`} value="sim" disabled className="text-blue-600" />
-            <span className="text-sm text-gray-700">Sim</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="radio" name={`yesno-${field.id}`} value="nao" disabled className="text-blue-600" />
-            <span className="text-sm text-gray-700">Não</span>
-          </label>
-        </div>
-      )
-    case 'range':
-      return (
-        <div className="space-y-2">
-          <input
-            type="range"
-            min={field.min || 1}
-            max={field.max || 10}
-            step={field.step || 1}
-            disabled
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-gray-500">
-            <span>{field.min || 1}</span>
-            <span>{field.max || 10}</span>
-          </div>
-        </div>
-      )
-    case 'file':
-      return (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-          <p className="text-sm text-gray-600">Clique para fazer upload</p>
-          <input
-            type="file"
-            disabled
-            className="hidden"
-          />
-        </div>
-      )
-    default:
-      return null
-  }
-}
-
-export function ModalEditarCampo({
-  campo,
-  onChange,
-  onSalvar,
-  onCancelar
-}: {
-  campo: Field
-  onChange: (campo: Field) => void
-  onSalvar: () => void
-  onCancelar: () => void
-}) {
-  const [novaOpcao, setNovaOpcao] = useState('')
-
-  const adicionarOpcao = () => {
-    if (novaOpcao.trim() && (campo.type === 'select' || campo.type === 'radio' || campo.type === 'checkbox')) {
-      onChange({
-        ...campo,
-        options: [...(campo.options || []), novaOpcao.trim()]
-      })
-      setNovaOpcao('')
-    }
-  }
-
-  const removerOpcao = (index: number) => {
-    if (campo.options) {
-      onChange({
-        ...campo,
-        options: campo.options.filter((_, i) => i !== index)
-      })
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onCancelar}>
-      <div
-        className="bg-white rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-start gap-3">
-            <div className="text-3xl">
-              {campo.type === 'date' && '📅'}
-              {campo.type === 'time' && '🕐'}
-              {campo.type === 'text' && '📝'}
-              {campo.type === 'textarea' && '📄'}
-              {campo.type === 'select' && '📋'}
-              {campo.type === 'radio' && '⚪'}
-              {campo.type === 'checkbox' && '☑️'}
-              {campo.type === 'number' && '🔢'}
-              {campo.type === 'email' && '✉️'}
-              {campo.type === 'tel' && '📞'}
-              {campo.type === 'yesno' && '✅'}
-              {campo.type === 'range' && '📊'}
-              {campo.type === 'file' && '📎'}
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-900">Editar Campo: {getFieldTypeLabel(campo.type)}</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                {campo.type === 'date' && 'O cliente verá um campo de data. Ao clicar, abre um calendário para escolher a data.'}
-                {campo.type === 'time' && 'O cliente verá um campo de hora. Ao clicar, abre um seletor de hora.'}
-                {campo.type !== 'date' && campo.type !== 'time' && getFieldDescription(campo.type)}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rótulo do Campo *
-            </label>
-            <p className="text-xs text-gray-500 mb-2">O que aparece acima do campo (ex: "Data de nascimento")</p>
-            <input
-              type="text"
-              value={campo.label}
-              onChange={(e) => onChange({ ...campo, label: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder={getFieldPlaceholderExample(campo.type)}
-            />
-          </div>
-
-          {(campo.type === 'date' || campo.type === 'time') && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-blue-900 mb-2">💡 Como funciona:</p>
-              <p className="text-xs text-blue-800">
-                {campo.type === 'date' 
-                  ? 'O cliente verá um campo com ícone de calendário. Ao clicar, abre automaticamente um calendário visual para escolher a data. Não precisa configurar nada além do rótulo acima.'
-                  : 'O cliente verá um campo com ícone de relógio. Ao clicar, abre automaticamente um seletor de hora. Não precisa configurar nada além do rótulo acima.'}
-              </p>
-            </div>
-          )}
-
-          {campo.type !== 'date' && campo.type !== 'time' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Texto de Ajuda (Placeholder)
-              </label>
-              <p className="text-xs text-gray-500 mb-2">Texto que aparece dentro do campo antes do cliente digitar (opcional)</p>
-              <input
-                type="text"
-                value={campo.placeholder || ''}
-                onChange={(e) => onChange({ ...campo, placeholder: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder={getPlaceholderExample(campo.type)}
-              />
-            </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="required"
-              checked={campo.required}
-              onChange={(e) => onChange({ ...campo, required: e.target.checked })}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="required" className="text-sm font-medium text-gray-700">
-              Campo obrigatório
-            </label>
-          </div>
-
-          {(campo.type === 'select' || campo.type === 'radio' || campo.type === 'checkbox') && (
-            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Opções *
-              </label>
-              <p className="text-xs text-gray-600 mb-3">
-                {campo.type === 'select' 
-                  ? 'Lista de opções que aparecem no menu suspenso (adicione pelo menos 2)'
-                  : campo.type === 'radio'
-                  ? 'Opções de múltipla escolha - cliente escolhe apenas UMA opção'
-                  : 'Opções de caixas - cliente pode marcar VÁRIAS opções'}
-              </p>
-              <div className="space-y-2 mb-3">
-                {campo.options?.map((opt, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={opt}
-                      onChange={(e) => {
-                        const novasOpcoes = [...(campo.options || [])]
-                        novasOpcoes[idx] = e.target.value
-                        onChange({ ...campo, options: novasOpcoes })
-                      }}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removerOpcao(idx)}
-                      className="p-2 text-red-600 hover:text-red-700"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={novaOpcao}
-                  onChange={(e) => setNovaOpcao(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && adicionarOpcao()}
-                  placeholder="Nova opção"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <button
-                  type="button"
-                  onClick={adicionarOpcao}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Adicionar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {(campo.type === 'number' || campo.type === 'range') && (
-            <div className="space-y-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <p className="text-sm font-medium text-blue-900 mb-3">
-                {campo.type === 'number' 
-                  ? '📊 Configurações de Número'
-                  : '📊 Configurações de Escala'}
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Valor Mínimo
-                  </label>
-                  <p className="text-xs text-gray-500 mb-2">
-                    {campo.type === 'number' 
-                      ? 'Menor valor permitido (ex: 0 para peso)'
-                      : 'Menor valor da escala (ex: 1)'}
-                  </p>
-                  <input
-                    type="number"
-                    value={campo.min || ''}
-                    onChange={(e) => onChange({ ...campo, min: e.target.value ? parseInt(e.target.value) : undefined })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                    placeholder={campo.type === 'number' ? 'Ex: 0' : 'Ex: 1'}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Valor Máximo
-                  </label>
-                  <p className="text-xs text-gray-500 mb-2">
-                    {campo.type === 'number' 
-                      ? 'Maior valor permitido (ex: 200 para peso)'
-                      : 'Maior valor da escala (ex: 10)'}
-                  </p>
-                  <input
-                    type="number"
-                    value={campo.max || ''}
-                    onChange={(e) => onChange({ ...campo, max: e.target.value ? parseInt(e.target.value) : undefined })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                    placeholder={campo.type === 'number' ? 'Ex: 200' : 'Ex: 10'}
-                  />
-                </div>
-              </div>
-              {campo.type === 'range' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Incremento (Step)
-                  </label>
-                  <p className="text-xs text-gray-500 mb-2">De quanto em quanto o valor aumenta (ex: 1 para números inteiros, 0.5 para decimais)</p>
-                  <input
-                    type="number"
-                    value={campo.step || 1}
-                    onChange={(e) => onChange({ ...campo, step: e.target.value ? parseFloat(e.target.value) : 1 })}
-                    min="0.1"
-                    step="0.1"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                    placeholder="Ex: 1"
-                  />
-                </div>
-              )}
-              {campo.type === 'number' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Unidade (opcional)
-                  </label>
-                  <p className="text-xs text-gray-500 mb-2">Unidade de medida que aparece ao lado do número (ex: kg, cm, litros, copos)</p>
-                  <input
-                    type="text"
-                    value={campo.unit || ''}
-                    onChange={(e) => onChange({ ...campo, unit: e.target.value })}
-                    placeholder="Ex: kg, cm, litros"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {(campo.type === 'date' || campo.type === 'time') ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Texto de Ajuda (opcional)
-              </label>
-              <p className="text-xs text-gray-500 mb-2">Texto que aparece abaixo do campo para orientar o cliente</p>
-              <input
-                type="text"
-                value={campo.helpText || ''}
-                onChange={(e) => onChange({ ...campo, helpText: e.target.value })}
-                placeholder={campo.type === 'date' ? 'Ex: Selecione sua data de nascimento' : 'Ex: Selecione o horário da refeição'}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          ) : (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Texto de Ajuda (aparece abaixo do campo)
-              </label>
-              <p className="text-xs text-gray-500 mb-2">Texto explicativo que aparece abaixo do campo para orientar o cliente (opcional)</p>
-              <input
-                type="text"
-                value={campo.helpText || ''}
-                onChange={(e) => onChange({ ...campo, helpText: e.target.value })}
-                placeholder={getHelpTextExample(campo.type)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          )}
-
-          <div className="flex gap-2 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onCancelar}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={onSalvar}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              Salvar Campo
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
