@@ -72,13 +72,13 @@ function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label
       style={style}
       {...attributes}
       {...listeners}
-      className={`flex flex-col gap-1 p-4 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-blue-500' : ''}`}
+      className={`flex items-center gap-2 p-2 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-blue-500' : ''}`}
     >
-      <div className="flex items-center gap-3">
-        <span className="text-xl">{fieldType.icon}</span>
-        <span className="text-sm font-medium">{fieldType.label}</span>
+      <span className="text-lg">{fieldType.icon}</span>
+      <div className="flex-1 min-w-0">
+        <span className="text-xs font-medium block">{fieldType.label}</span>
+        <p className="text-xs text-gray-500 truncate">{fieldType.description}</p>
       </div>
-      <p className="text-xs text-gray-600 ml-9">{fieldType.description}</p>
     </div>
   )
 }
@@ -288,7 +288,7 @@ function NovoFormularioNutriContent() {
   const [fieldEditando, setFieldEditando] = useState<Field | null>(null)
   const [mostrarModalCampo, setMostrarModalCampo] = useState(false)
   const [activeId, setActiveId] = useState<Active | null>(null)
-  const [activeTab, setActiveTab] = useState<'info' | 'preview'>('info')
+  const [infoCollapsed, setInfoCollapsed] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -535,131 +535,9 @@ function NovoFormularioNutriContent() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col gap-4 p-4">
-          {/* Tabs - Mobile/Tablet */}
-          <div className="lg:hidden bg-white border border-gray-200 rounded-lg">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab('info')}
-                className={`flex-1 px-4 py-3 text-sm font-medium rounded-l-lg transition-colors ${
-                  activeTab === 'info'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                📋 Informações Iniciais
-              </button>
-              <button
-                onClick={() => setActiveTab('preview')}
-                className={`flex-1 px-4 py-3 text-sm font-medium rounded-r-lg transition-colors ${
-                  activeTab === 'preview'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                👁️ Preview
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 flex flex-col lg:flex-row gap-4">
-          {/* Left Panel - Components */}
-          <div className={`w-full lg:w-96 bg-white border border-gray-200 rounded-lg p-4 overflow-y-auto max-h-[calc(100vh-200px)] ${
-            activeTab === 'info' ? 'block' : 'hidden lg:block'
-          }`}>
-            <div className="mb-6">
-              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">📋 Informações Iniciais</h2>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                <p className="text-xs text-blue-800">
-                  💡 <strong>Dica:</strong> Defina um nome claro e uma descrição que explique o objetivo do formulário para seus pacientes.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nome do Formulário *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ex: Anamnese Nutricional Completa"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Descrição
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                    placeholder="Ex: Formulário para coletar informações sobre hábitos alimentares, histórico de saúde e objetivos nutricionais do paciente."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tipo
-                  </label>
-                  <select
-                    value={formData.form_type}
-                    onChange={(e) => setFormData({ ...formData, form_type: e.target.value as any })}
-                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="questionario">Questionário</option>
-                    <option value="anamnese">Anamnese</option>
-                    <option value="avaliacao">Avaliação</option>
-                    <option value="consentimento">Consentimento</option>
-                    <option value="outro">Outro</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">🧩 Componentes</h2>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                <p className="text-xs text-green-800">
-                  💡 <strong>Como usar:</strong> Arraste os componentes para a área de preview <span className="lg:inline hidden">à direita</span><span className="lg:hidden inline">(aba Preview)</span>, ou clique duas vezes para adicionar rapidamente.
-                </p>
-              </div>
-              <SortableContext items={fieldTypes.map(ft => `component-${ft.type}`)} strategy={verticalListSortingStrategy}>
-                <div className="grid grid-cols-1 gap-3">
-                  {fieldTypes.map((fieldType) => (
-                    <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
-                      <DraggableComponent fieldType={fieldType} />
-                    </div>
-                  ))}
-                </div>
-              </SortableContext>
-              </div>
-            </div>
-
-            {fields.length > 0 && (
-              <div>
-                <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">📝 Campos Adicionados</h2>
-                <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-2">
-                    {fields.map((field) => (
-                      <DraggableFieldItem
-                        key={field.id}
-                        field={field}
-                        onEdit={editarCampo}
-                        onRemove={removerCampo}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </div>
-            )}
-          </div>
-
-          {/* Right Panel - Preview */}
-          <div className={`flex-1 overflow-y-auto ${
-            activeTab === 'preview' ? 'block' : 'hidden lg:block'
-          }`}>
+        <div className="flex-1 flex gap-4 p-4">
+          {/* Left Panel - Preview */}
+          <div className="flex-1 overflow-y-auto">
             <div className="bg-white border border-gray-200 rounded-lg p-6 h-full">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -688,7 +566,7 @@ function NovoFormularioNutriContent() {
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Solte os componentes aqui</h3>
                     <p className="text-gray-600 mb-4 text-sm">
-                      Arraste da <span className="lg:inline hidden">esquerda</span><span className="lg:hidden inline">aba "Informações Iniciais"</span> ou clique duas vezes
+                      Arraste da sidebar direita ou clique duas vezes
                     </p>
                     <div className="bg-white border border-blue-200 rounded-lg p-4 max-w-sm mx-auto shadow-sm">
                       <p className="text-xs text-blue-800">
@@ -768,6 +646,125 @@ function NovoFormularioNutriContent() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="w-80 bg-white border border-gray-200 rounded-lg overflow-hidden">
+            {/* Informações Iniciais - Collapsible */}
+            <div className="border-b border-gray-200">
+              <button
+                onClick={() => setInfoCollapsed(!infoCollapsed)}
+                className="w-full px-4 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+              >
+                <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  📋 Informações Iniciais
+                </h2>
+                <svg
+                  className={`w-5 h-5 text-gray-500 transition-transform ${
+                    infoCollapsed ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {!infoCollapsed && (
+                <div className="px-4 pb-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <p className="text-xs text-blue-800">
+                      💡 <strong>Dica:</strong> Defina um nome claro e uma descrição que explique o objetivo do formulário.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nome do Formulário *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ex: Anamnese Nutricional"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Descrição
+                      </label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows={2}
+                        placeholder="Ex: Coleta informações sobre hábitos alimentares..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tipo
+                      </label>
+                      <select
+                        value={formData.form_type}
+                        onChange={(e) => setFormData({ ...formData, form_type: e.target.value as any })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="questionario">Questionário</option>
+                        <option value="anamnese">Anamnese</option>
+                        <option value="avaliacao">Avaliação</option>
+                        <option value="consentimento">Consentimento</option>
+                        <option value="outro">Outro</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Componentes */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-4 py-4">
+                <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  🧩 Componentes
+                </h2>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-green-800">
+                    💡 <strong>Como usar:</strong> Arraste para o preview à esquerda ou clique duas vezes.
+                  </p>
+                </div>
+                <SortableContext items={fieldTypes.map(ft => `component-${ft.type}`)} strategy={verticalListSortingStrategy}>
+                  <div className="grid grid-cols-1 gap-2">
+                    {fieldTypes.map((fieldType) => (
+                      <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
+                        <DraggableComponent fieldType={fieldType} />
+                      </div>
+                    ))}
+                  </div>
+                </SortableContext>
+              </div>
+
+              {fields.length > 0 && (
+                <div className="px-4 pb-4 border-t border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3 mt-4">📝 Campos Adicionados</h3>
+                  <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-2">
+                      {fields.map((field) => (
+                        <DraggableFieldItem
+                          key={field.id}
+                          field={field}
+                          onEdit={editarCampo}
+                          onRemove={removerCampo}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       </div>
