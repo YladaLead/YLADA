@@ -9,8 +9,7 @@ export const calculadoraImcDiagnosticos: DiagnosticosPorFerramenta = {
     baixoPeso: {
       diagnostico: '📋 DIAGNÓSTICO: Seu IMC indica baixo peso, o que pode sinalizar carência energética e nutricional. É importante restaurar o equilíbrio de forma segura e personalizada',
       causaRaiz: '🔍 CAUSA RAIZ: Pode estar relacionado a ingestão calórica insuficiente, metabolismo acelerado ou má absorção. Estudos indicam que 40% das pessoas com baixo peso têm causas nutricionais não identificadas. Uma avaliação nutricional identifica exatamente onde está o desequilíbrio',
-      acaoImediata: 'Evite aumento de calorias sem orientação.
-Busque equilíbrio entre alimentação e rotina para ganho saudável.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Evite aumento de calorias sem orientação. Busque equilíbrio entre alimentação e rotina para ganho saudável.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Descubra em minutos como seu corpo pode responder a um plano de ganho saudável — solicite sua análise personalizada agora.'
     },
     pesoNormal: {

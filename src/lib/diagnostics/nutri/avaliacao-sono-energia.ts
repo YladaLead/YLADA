@@ -15,8 +15,7 @@ export const avaliacaoSonoEnergiaDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Rotina regular, exposição à luz natural pela manhã, alimentação leve no período noturno e gestão do estresse ajudam a preservar esse padrão.',
       acaoImediata:
-        'Mantenha higiene do sono e horários consistentes.
-Observe como seu corpo responde ao descanso diário.',
+        '⚡ AÇÃO IMEDIATA: Mantenha higiene do sono e horários consistentes. Observe como seu corpo responde ao descanso diário.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Faça uma avaliação preventiva para confirmar se marcadores hormonais e nutricionais seguem alinhados e receba sugestões personalizadas para continuar evoluindo.'
     },

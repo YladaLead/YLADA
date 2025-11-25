@@ -77,8 +77,8 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       color: 'purple'
     },
     {
-      title: 'Filosofia',
-      icon: '✨',
+      title: 'Formação Empresarial',
+      icon: '🎓',
       href: '/pt/nutri/cursos',
       color: 'yellow'
     },

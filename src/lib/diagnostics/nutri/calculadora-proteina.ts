@@ -9,8 +9,7 @@ export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
     baixaProteina: {
       diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está abaixo do recomendado, o que pode afetar massa muscular, recuperação e saciedade',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo insuficiente de alimentos proteicos ou planejamento inadequado das refeições. Estudos indicam que 70% das pessoas que treinam consomem menos proteína do que precisam para otimizar resultados. Uma avaliação nutricional identifica exatamente qual é sua necessidade real e como alcançá-la',
-      acaoImediata: 'Observe seu consumo diário de proteínas.
-Busque avaliação profissional para distribuir proteína de forma segura ao longo do dia.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Observe seu consumo diário de proteínas. Busque avaliação profissional para distribuir proteína de forma segura ao longo do dia.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo precisa de proteína adequada para resultados — descubra em minutos como otimizar sua ingestão proteica com um plano personalizado.'
     },
     proteinaNormal: {

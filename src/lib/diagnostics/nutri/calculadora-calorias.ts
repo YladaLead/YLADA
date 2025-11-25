@@ -9,8 +9,7 @@ export const calculadoraCaloriasDiagnosticos: DiagnosticosPorFerramenta = {
     deficitCalorico: {
       diagnostico: '📋 DIAGNÓSTICO: Você precisa de déficit calórico para emagrecimento controlado e sustentável',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo calórico acima do gasto energético diário. Pesquisas mostram que pequenas reduções de 300-500 calorias por dia resultam em perda de 0.5-1kg por semana, de forma segura. Uma avaliação nutricional identifica exatamente onde ajustar calorias sem comprometer massa muscular e nutrição adequada',
-      acaoImediata: 'Observe seu consumo diário e evite mudanças bruscas.
-Busque avaliação profissional para ajustar calorias de forma segura e preservar massa muscular.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Observe seu consumo diário e evite mudanças bruscas. Busque avaliação profissional para ajustar calorias de forma segura e preservar massa muscular.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pronto para mudança — descubra em minutos como criar um déficit calórico personalizado que preserva sua massa muscular e garante resultados sustentáveis.'
     },
     manutencaoCalorica: {

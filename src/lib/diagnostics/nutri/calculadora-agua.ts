@@ -9,8 +9,7 @@ export const calculadoraAguaDiagnosticos: DiagnosticosPorFerramenta = {
     baixaHidratacao: {
       diagnostico: '📋 DIAGNÓSTICO: Sua hidratação está abaixo do recomendado, o que pode afetar funções essenciais do organismo e performance',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo insuficiente de líquidos ou perda excessiva. Estudos indicam que mesmo desidratação leve (1-2% do peso corporal) pode reduzir desempenho físico em até 10% e afetar funções cognitivas. Uma avaliação nutricional identifica exatamente qual é sua necessidade real considerando atividade física, clima e perfil individual',
-      acaoImediata: 'Observe seu padrão de hidratação ao longo do dia.
-Busque avaliação profissional para ajustar o consumo conforme suas necessidades.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Observe seu padrão de hidratação ao longo do dia. Busque avaliação profissional para ajustar o consumo conforme suas necessidades.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu organismo precisa de hidratação adequada — descubra em minutos como otimizar sua ingestão hídrica com um plano personalizado.'
     },
     hidratacaoModerada: {
