@@ -21,8 +21,7 @@ export const calculadoraAguaDiagnosticos: DiagnosticosPorFerramenta = {
     altaHidratacao: {
       diagnostico: '📋 DIAGNÓSTICO: Excelente hidratação! Ideal para atletas e pessoas ativas. Mantenha padrão atual e otimize reposição eletrolítica',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo adequado para alta performance e recuperação. Para pessoas ativas, hidratação acima de 3L/dia é adequada quando acompanhada de reposição eletrolítica. Uma avaliação nutricional identifica se está dentro da faixa ideal e como otimizar eletrólitos',
-      acaoImediata: 'Continue mantendo hábitos de hidratação consistentes.
-Avaliações periódicas ajudam a identificar necessidades específicas de reposição.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Continue mantendo hábitos de hidratação consistentes. Avaliações periódicas ajudam a identificar necessidades específicas de reposição.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Excelente! Sua hidratação está otimizada. Descubra como estratégias avançadas de reposição eletrolítica podem potencializar ainda mais sua performance.'
     }
   }

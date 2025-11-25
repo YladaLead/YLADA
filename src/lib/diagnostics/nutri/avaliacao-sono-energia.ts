@@ -35,8 +35,7 @@ export const avaliacaoSonoEnergiaDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Falta de horário fixo, trabalho noturno, estresse elevado e alimentação tardia mantêm o sistema nervoso em alerta e dificultam a entrada em sono profundo.',
       acaoImediata:
-        'Evite mudanças drásticas sozinho.
-Busque avaliação profissional para ajustar sono e rotina de forma segura.',
+        '⚡ AÇÃO IMEDIATA: Evite mudanças drásticas sozinho. Busque avaliação profissional para ajustar sono e rotina de forma segura.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Inicie acompanhamento nutricional e comportamental para restabelecer o sono, avaliar necessidade de exames e estruturar um plano completo de recuperação de energia.'
     }

@@ -8,9 +8,8 @@ export const quizDetoxDiagnosticos: DiagnosticosPorFerramenta = {
   nutri: {
     baixaToxicidade: {
       diagnostico: '📋 DIAGNÓSTICO: Baixa carga de toxinas mantendo boa saúde; estratégias preventivas podem preservar essa condição',
-      causaRaiz: '🔍 CAUSA RAIZ: Boa alimentação e estilo de vida saudável mantêm toxinas controladas. Estratégias preventivas ajudam a preservar essa condição ideal e evoluir para níveis ainda melhores. Uma avaliação preventiva identifica oportunidades específicas'
-      acaoImediata: 'Mantenha seus hábitos equilibrados e atenção ao corpo.
-Avaliações periódicas ajudam a sustentar bons resultados.',
+      causaRaiz: '🔍 CAUSA RAIZ: Boa alimentação e estilo de vida saudável mantêm toxinas controladas. Estratégias preventivas ajudam a preservar essa condição ideal e evoluir para níveis ainda melhores. Uma avaliação preventiva identifica oportunidades específicas',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha seus hábitos equilibrados e atenção ao corpo. Avaliações periódicas ajudam a sustentar bons resultados.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio atual é um ótimo ponto de partida. Descubra como estratégias preventivas avançadas podem preservar e potencializar ainda mais sua saúde.'
     }
     toxicidadeModerada: {

@@ -14,8 +14,7 @@ export const disciplinadoEmocionalDiagnosticos: DiagnosticosPorFerramenta = {
       causaRaiz:
         '🔍 CAUSA RAIZ: Pessoas disciplinadas costumam ter repertório de escolhas, rotina estruturada e compreensão dos sinais do corpo. Ainda assim, pequenas rigidez podem gerar gatilhos em eventos sociais ou viagens.',
       acaoImediata:
-        'Mantenha equilíbrio e flexibilidade nas escolhas alimentares.
-Evite rigidez excessiva para preservar bem-estar e prazer à mesa.',
+        '⚡ AÇÃO IMEDIATA: Mantenha equilíbrio e flexibilidade nas escolhas alimentares. Evite rigidez excessiva para preservar bem-estar e prazer à mesa.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Marque a consulta para transformar sua disciplina em resultados sustentáveis com flexibilidade planejada.'
     },
@@ -35,8 +34,7 @@ Evite rigidez excessiva para preservar bem-estar e prazer à mesa.',
       causaRaiz:
         '🔍 CAUSA RAIZ: Comer sem fome física, pular refeições e buscar conforto na comida indicam falta de estratégias emocionais paralelas ao plano nutricional.',
       acaoImediata:
-        'Observe seus gatilhos emocionais ligados à comida.
-Apoio nutricional e emocional pode ajudar a restaurar o controle e a leveza.',
+        '⚡ AÇÃO IMEDIATA: Observe seus gatilhos emocionais ligados à comida. Apoio nutricional e emocional pode ajudar a restaurar o controle e a leveza.',
       proximoPasso:
         '🎯 PRÓXIMO PASSO: Junto com a profissional de nutrição, você constrói uma estratégia integrada (alimentação + emoções) para retomar o controle com acolhimento.'
     },

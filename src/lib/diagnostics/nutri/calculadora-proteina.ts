@@ -21,8 +21,7 @@ export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
     altaProteina: {
       diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está elevada, o que pode ser otimizada para máximo benefício com menor sobrecarga',
       causaRaiz: '🔍 CAUSA RAIZ: Ingestão proteica acima do necessário pode não trazer benefícios adicionais. Estudos mostram que acima de 2.2g/kg há pouco ganho adicional. Uma avaliação nutricional identifica se está dentro da faixa ideal ou pode ser ajustada',
-      acaoImediata: 'Mantenha seu consumo equilibrado e atenção à variedade nutricional.
-Avaliações periódicas ajudam a otimizar a ingestão sem desequilíbrios.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha seu consumo equilibrado e atenção à variedade nutricional. Avaliações periódicas ajudam a otimizar a ingestão sem desequilíbrios.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como otimizar sua nutrição de forma completa e equilibrada com apoio personalizado.'
     }
   }

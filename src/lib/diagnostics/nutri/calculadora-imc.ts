@@ -21,15 +21,13 @@ export const calculadoraImcDiagnosticos: DiagnosticosPorFerramenta = {
     sobrepeso: {
       diagnostico: '📋 DIAGNÓSTICO: Seu IMC indica sobrepeso, o que sinaliza necessidade de reequilíbrio controlado e personalizado',
       causaRaiz: '🔍 CAUSA RAIZ: Desequilíbrio entre ingestão calórica e gasto energético. Estudos mostram que pequenas mudanças de 300 kcal por dia já podem influenciar a composição corporal ao longo do tempo. Uma avaliação completa identifica exatamente onde ajustar',
-      acaoImediata: 'Observe seus hábitos e ritmo de vida.
-Busque avaliação profissional para um ajuste gradual e seguro.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Observe seus hábitos e ritmo de vida. Busque avaliação profissional para um ajuste gradual e seguro.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pedindo equilíbrio — e você já deu o primeiro passo. O próximo é descobrir como reduzir peso de forma saudável e sustentável com apoio personalizado.'
     },
     obesidade: {
       diagnostico: '📋 DIAGNÓSTICO: Seu IMC indica obesidade, o que requer intervenção personalizada e estruturada com acompanhamento profissional',
       causaRaiz: '🔍 CAUSA RAIZ: Desequilíbrio metabólico significativo que pode afetar sua saúde. Pesquisas indicam que intervenções nutricionais personalizadas podem resultar em melhoria significativa. Uma avaliação completa identifica exatamente a origem e estratégias para reverter com segurança',
-      acaoImediata: 'Procure acompanhamento profissional para um plano personalizado.
-Evite dietas restritivas ou soluções rápidas — cada corpo tem seu ritmo.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Procure acompanhamento profissional para um plano personalizado. Evite dietas restritivas ou soluções rápidas — cada corpo tem seu ritmo.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu organismo precisa de cuidado agora — e é totalmente possível reverter com apoio profissional especializado e um plano estruturado.'
     }
   }

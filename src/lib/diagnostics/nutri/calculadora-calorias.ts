@@ -21,8 +21,7 @@ export const calculadoraCaloriasDiagnosticos: DiagnosticosPorFerramenta = {
     superavitCalorico: {
       diagnostico: '📋 DIAGNÓSTICO: Você precisa de superávit calórico para ganho de peso saudável e massa muscular',
       causaRaiz: '🔍 CAUSA RAIZ: Consumo calórico abaixo do necessário para ganho de massa. Consumo calórico abaixo do necessário para ganho de massa, combinado com treino adequado, pode resultar em ganho de 0.25-0.5kg de massa muscular por mês. Uma avaliação nutricional identifica exatamente qual é sua necessidade real e como alcançá-la',
-      acaoImediata: 'Acompanhe seu consumo de forma equilibrada e consistente.
-Avaliações periódicas ajudam a ganhar massa de forma saudável e segura.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Acompanhe seu consumo de forma equilibrada e consistente. Avaliações periódicas ajudam a ganhar massa de forma saudável e segura.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pronto para crescer — descubra em minutos como criar um superávit calórico personalizado que maximiza ganho de massa muscular de forma saudável.'
     }
   }
