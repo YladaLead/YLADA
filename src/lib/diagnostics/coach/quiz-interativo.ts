@@ -20,7 +20,7 @@ export const quizInterativoDiagnosticos: DiagnosticosPorFerramenta = {
     },
     metabolismoAcelerado: {
       diagnostico: '📋 DIAGNÓSTICO: Seu metabolismo rápido precisa de estabilização estratégica',
-      causaRaiz: '🔍 CAUSA RAIZ: Alta queima calórica pode causar desequilíbrios e fadiga quando não há reposição adequada. Uma avaliação completa identifica exatamente como sustentar energia sem oscilações'
+      causaRaiz: '🔍 CAUSA RAIZ: Alta queima calórica pode causar desequilíbrios e fadiga quando não há reposição adequada. Uma avaliação completa identifica exatamente como sustentar energia sem oscilações',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Aumente frequência de refeições (5-6x/dia) e busque avaliação para um plano que mantenha energia de forma consistente. Evite aumentar calorias de forma desordenada',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pedindo estabilização — e você já deu o primeiro passo. O próximo é descobrir como manter energia consistente com apoio personalizado.'
     }

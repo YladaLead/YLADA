@@ -20,7 +20,7 @@ export const quizEnergeticoDiagnosticos: DiagnosticosPorFerramenta = {
     },
     energiaAlta: {
       diagnostico: '📋 DIAGNÓSTICO: Excelente energia natural; estratégias avançadas podem potencializar ainda mais',
-      causaRaiz: '🔍 CAUSA RAIZ: Sistema energético eficiente e bem-estar adequada. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para performance superior. Uma avaliação preventiva identifica oportunidades específicas para você'
+      causaRaiz: '🔍 CAUSA RAIZ: Sistema energético eficiente e bem-estar adequada. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para performance superior. Uma avaliação preventiva identifica oportunidades específicas para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Continue a rotina atual e considere avaliação preventiva para introduzir estratégias de bem-estar avançadas que sustentam energia a longo prazo',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio energético é um ótimo ponto de partida. Descubra como estratégias avançadas podem potencializar ainda mais sua performance.'
     }

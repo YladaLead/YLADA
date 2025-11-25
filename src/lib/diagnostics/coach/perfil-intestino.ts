@@ -33,7 +33,7 @@ export const perfilIntestinoDiagnosticos: DiagnosticosPorFerramenta = {
       diagnostico:
         '📋 DIAGNÓSTICO: Os sinais apontam para disbiose intestinal com provável inflamação, produção irregular de ácidos graxos e comprometimento da absorção de nutrientes.',
       causaRaiz:
-        '🔍 CAUSA RAIZ: Desequilíbrio importante da microbiota, excesso de processados, estresse e possíveis deficiências de fibras e compostos bioativos sustentam o quadro.'
+        '🔍 CAUSA RAIZ: Desequilíbrio importante da microbiota, excesso de processados, estresse e possíveis deficiências de fibras e compostos bioativos sustentam o quadro.',
       acaoImediata:
         '⚡ AÇÃO IMEDIATA: Suspender gatilhos inflamatórios (açúcar, ultraprocessados, álcool), priorizar alimentos calmantes para o intestino e iniciar protocolo de reparo guiado por Coach de bem-estar.'
       proximoPasso:

@@ -20,7 +20,7 @@ export const quizDetoxDiagnosticos: DiagnosticosPorFerramenta = {
     },
     altaToxicidade: {
       diagnostico: '📋 DIAGNÓSTICO: Alta carga tóxica que precisa de intervenção personalizada e urgente',
-      causaRaiz: '🔍 CAUSA RAIZ: Exposição excessiva a toxinas e sistema de eliminação comprometido podem estar afetando sua saúde significativamente. Uma avaliação completa identifica exatamente a origem e estratégias para reverter com segurança'
+      causaRaiz: '🔍 CAUSA RAIZ: Exposição excessiva a toxinas e sistema de eliminação comprometido podem estar afetando sua saúde significativamente. Uma avaliação completa identifica exatamente a origem e estratégias para reverter com segurança',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Busque avaliação de bem-estar imediata para receber um protocolo detox seguro e adequado ao seu perfil. Evite protocolos intensivos sem acompanhamento — cada caso requer abordagem específica',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu organismo precisa de cuidado agora — e é totalmente possível reverter com apoio profissional especializado.'
     }

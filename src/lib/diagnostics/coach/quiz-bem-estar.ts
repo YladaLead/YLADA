@@ -20,7 +20,7 @@ export const quizBemEstarDiagnosticos: DiagnosticosPorFerramenta = {
     },
     bemEstarAlto: {
       diagnostico: '📋 DIAGNÓSTICO: Excelente bem-estar! Mantenha com bem-estar preventiva e estratégias avançadas de performance',
-      causaRaiz: '🔍 CAUSA RAIZ: Ótima base de bem-estar e hábitos saudáveis estabelecidos. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para níveis ainda superiores. Uma avaliação preventiva identifica oportunidades específicas para você'
+      causaRaiz: '🔍 CAUSA RAIZ: Ótima base de bem-estar e hábitos saudáveis estabelecidos. Estratégias preventivas avançadas ajudam a preservar essa condição ideal e evoluir para níveis ainda superiores. Uma avaliação preventiva identifica oportunidades específicas para você',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Continue a rotina atual e considere uma avaliação preventiva para introduzir estratégias de bem-estar avançadas que sustentam resultados a longo prazo',
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio atual é um ótimo ponto de partida. Descubra como estratégias avançadas podem potencializar ainda mais seus resultados.'
     }
