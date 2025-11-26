@@ -20,9 +20,12 @@ function FormulariosCoachContent() {
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [formularios, setFormularios] = useState<any[]>([])
+  const [templates, setTemplates] = useState<any[]>([])
   const [carregando, setCarregando] = useState(true)
+  const [carregandoTemplates, setCarregandoTemplates] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
+  const [mostrarTemplates, setMostrarTemplates] = useState(true)
 
   useEffect(() => {
     if (!user) return
@@ -34,8 +37,6 @@ function FormulariosCoachContent() {
         if (filtroTipo !== 'todos') {
           params.append('form_type', filtroTipo)
         }
-        // Removendo filtro de is_active temporariamente para ver todos os formulários
-        // params.append('is_active', 'true')
 
         const response = await fetch(`/api/coach/formularios?${params.toString()}`, {
           credentials: 'include'
@@ -46,24 +47,11 @@ function FormulariosCoachContent() {
         }
 
         const data = await response.json()
-        console.log('📦 Resposta completa da API:', data)
         
         if (data.success) {
           const formsArray = data.data?.forms || []
-          console.log('✅ Formulários carregados:', {
-            total: data.data?.total || 0,
-            formsCount: formsArray.length,
-            forms: formsArray,
-            debug: data.debug // Informações de debug se disponível
-          })
-          
-          if (formsArray.length === 0) {
-            console.warn('⚠️ Nenhum formulário encontrado. Verifique se o user_id corresponde.')
-          }
-          
           setFormularios(formsArray)
         } else {
-          console.error('❌ Erro na resposta:', data)
           setErro(data.error || 'Erro ao carregar formulários')
         }
       } catch (error: any) {
@@ -74,7 +62,28 @@ function FormulariosCoachContent() {
       }
     }
 
+    const carregarTemplates = async () => {
+      try {
+        setCarregandoTemplates(true)
+        const response = await fetch('/api/coach/formularios?is_template=true', {
+          credentials: 'include'
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            setTemplates(data.data?.forms || [])
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar templates:', error)
+      } finally {
+        setCarregandoTemplates(false)
+      }
+    }
+
     carregarFormularios()
+    carregarTemplates()
   }, [user, filtroTipo])
 
   const getTipoLabel = (tipo: string) => {
@@ -175,7 +184,78 @@ function FormulariosCoachContent() {
             </div>
           </div>
 
-          {/* Lista de Formulários */}
+          {/* Seção de Formulários Pré-montados */}
+          {mostrarTemplates && templates.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">📋 Formulários Pré-montados</h2>
+                  <p className="text-sm text-gray-600 mt-1">Formulários prontos para usar. Clique para editar e personalizar</p>
+                </div>
+                <button
+                  onClick={() => setMostrarTemplates(false)}
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Ocultar
+                </button>
+              </div>
+              
+              {carregandoTemplates ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {templates.map((template) => (
+                    <div
+                      key={template.id}
+                      className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border-2 border-purple-200 hover:border-purple-300 transition-all cursor-pointer"
+                      onClick={() => router.push(`/pt/coach/formularios/novo?template=${template.id}`)}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
+                        <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded">Pronto</span>
+                      </div>
+                      {template.description && (
+                        <p className="text-sm text-gray-700 mb-4 line-clamp-2">{template.description}</p>
+                      )}
+                      <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
+                        <span className="px-2 py-1 bg-white rounded">{getTipoLabel(template.form_type)}</span>
+                        <span>{template.structure?.fields?.length || 0} campos</span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/pt/coach/formularios/novo?template=${template.id}`)
+                        }}
+                        className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                      >
+                        Usar este formulário
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!mostrarTemplates && templates.length > 0 && (
+            <div className="mb-6">
+              <button
+                onClick={() => setMostrarTemplates(true)}
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              >
+                Mostrar formulários pré-montados ({templates.length})
+              </button>
+            </div>
+          )}
+
+          {/* Lista de Formulários do Usuário */}
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Meus Formulários</h2>
+            <p className="text-sm text-gray-600 mt-1">Formulários que você criou</p>
+          </div>
+
           {formularios.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {formularios.map((form) => (

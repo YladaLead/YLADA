@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
@@ -225,10 +225,16 @@ function DraggableFieldPreview({ field, onEdit, onRemove }: { field: Field, onEd
 function NovoFormularioCoachContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
+  
+  // Estados para templates
+  const [mostrarTemplates, setMostrarTemplates] = useState(true) // Mostrar templates por padrão
+  const [templates, setTemplates] = useState<any[]>([])
+  const [carregandoTemplates, setCarregandoTemplates] = useState(false)
   
   const [formData, setFormData] = useState({
     name: '',
@@ -254,6 +260,95 @@ function NovoFormularioCoachContent() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
+
+  // Carregar templates ao montar o componente
+  useEffect(() => {
+    carregarTemplates()
+    
+    // Verificar se há template na URL
+    const templateId = searchParams.get('template')
+    if (templateId) {
+      carregarTemplatePorId(templateId)
+    }
+  }, [searchParams])
+
+  const carregarTemplates = async () => {
+    setCarregandoTemplates(true)
+    try {
+      const response = await fetch('/api/coach/formularios?is_template=true', {
+        credentials: 'include'
+      })
+      const data = await response.json()
+      if (data.success && data.data.forms) {
+        setTemplates(data.data.forms)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar templates:', error)
+    } finally {
+      setCarregandoTemplates(false)
+    }
+  }
+
+  const carregarTemplatePorId = async (templateId: string) => {
+    try {
+      const response = await fetch(`/api/coach/formularios?is_template=true`, {
+        credentials: 'include'
+      })
+      const data = await response.json()
+      if (data.success && data.data.forms) {
+        const template = data.data.forms.find((t: any) => t.id === templateId)
+        if (template) {
+          usarTemplate(template)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar template:', error)
+    }
+  }
+
+  const usarTemplate = (template: any) => {
+    // Copiar dados do template - formulário vem pronto
+    setFormData({
+      name: template.name,
+      description: template.description || '',
+      form_type: template.form_type || 'questionario',
+      nameAlign: template.structure?.nameAlign || 'left',
+      descriptionAlign: template.structure?.descriptionAlign || 'left'
+    })
+    
+    // Copiar campos do template - garantir que todos os atributos sejam copiados
+    if (template.structure && template.structure.fields) {
+      const camposCopiados = template.structure.fields.map((f: any) => ({
+        id: f.id,
+        type: f.type,
+        label: f.label,
+        required: f.required !== undefined ? f.required : true,
+        placeholder: f.placeholder || undefined,
+        helpText: f.helpText || undefined,
+        options: f.options ? [...f.options] : undefined,
+        min: f.min,
+        max: f.max,
+        step: f.step,
+        unit: f.unit || undefined
+      }))
+      setFields(camposCopiados)
+    }
+    
+    // Esconder templates e mostrar editor
+    setMostrarTemplates(false)
+  }
+
+  const criarDoZero = () => {
+    setFormData({
+      name: '',
+      description: '',
+      form_type: 'questionario',
+      nameAlign: 'left',
+      descriptionAlign: 'left'
+    })
+    setFields([])
+    setMostrarTemplates(false)
+  }
 
   const fieldTypes = [
     { 
@@ -496,6 +591,92 @@ function NovoFormularioCoachContent() {
     )
   }
 
+  // Tela de seleção de templates
+  if (mostrarTemplates) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <CoachSidebar />
+
+        <div className="lg:pl-72">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
+            {/* Header */}
+            <div className="mb-6">
+              <button
+                onClick={() => router.push('/pt/coach/formularios')}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Voltar
+              </button>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Criar Novo Formulário</h1>
+              <p className="text-gray-600 mt-1">Escolha um template ou crie do zero</p>
+            </div>
+
+            {/* Formulários Pré-montados */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">📋 Formulários Pré-montados</h2>
+              <p className="text-gray-600 mb-6">Formulários prontos para usar. Escolha um e personalize conforme sua necessidade</p>
+              
+              {carregandoTemplates ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Carregando formulários...</p>
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                  <p className="text-gray-600">Nenhum formulário pré-montado disponível no momento</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {templates.map((template) => (
+                    <div
+                      key={template.id}
+                      className="bg-white rounded-lg border border-gray-200 p-6 hover:border-purple-400 hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => usarTemplate(template)}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Pronto</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{template.description || 'Sem descrição'}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{template.form_type || 'questionario'}</span>
+                        <span>{template.structure?.fields?.length || 0} campos</span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          usarTemplate(template)
+                        }}
+                        className="mt-4 w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                      >
+                        Usar este formulário
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Opção de criar do zero */}
+            <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Criar do Zero</h3>
+              <p className="text-gray-600 mb-4">Prefere criar seu próprio formulário personalizado?</p>
+              <button
+                onClick={criarDoZero}
+                className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+              >
+                Criar Formulário Personalizado
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <CoachSidebar />
@@ -513,8 +694,18 @@ function NovoFormularioCoachContent() {
               </svg>
               Voltar
             </button>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Criar Formulário Personalizado</h1>
-            <p className="text-gray-600 mt-1">Construa seu formulário de anamnese ou avaliação</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Criar Formulário Personalizado</h1>
+                <p className="text-gray-600 mt-1">Construa seu formulário de anamnese ou avaliação</p>
+              </div>
+              <button
+                onClick={() => setMostrarTemplates(true)}
+                className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+              >
+                Ver formulários pré-montados
+              </button>
+            </div>
           </div>
 
           {/* Main Content */}

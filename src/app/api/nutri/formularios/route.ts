@@ -35,8 +35,18 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('custom_forms')
       .select('*', { count: 'exact' })
-      .eq('user_id', authenticatedUserId)
-      .order('created_at', { ascending: false })
+
+    // Se is_template=true, buscar templates de todos os usuários
+    // Caso contrário, buscar apenas formulários do usuário autenticado
+    if (isTemplate === 'true') {
+      // Buscar apenas templates (is_template=true)
+      query = query.eq('is_template', true)
+    } else {
+      // Buscar apenas formulários do usuário autenticado
+      query = query.eq('user_id', authenticatedUserId)
+    }
+
+    query = query.order('created_at', { ascending: false })
 
     if (formType) {
       query = query.eq('form_type', formType)
@@ -44,10 +54,6 @@ export async function GET(request: NextRequest) {
 
     if (isActive !== null) {
       query = query.eq('is_active', isActive === 'true')
-    }
-
-    if (isTemplate !== null) {
-      query = query.eq('is_template', isTemplate === 'true')
     }
 
     const { data: forms, error, count } = await query
