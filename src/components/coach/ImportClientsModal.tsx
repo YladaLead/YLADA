@@ -962,216 +962,158 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
           {/* Upload Step */}
           {step === 'upload' && (
             <div className="space-y-6">
-              {/* Grid com todas as opções visíveis lado a lado */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Opção A: Template Padrão */}
-                <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">Template Padrão</h3>
-                  <p className="text-sm text-gray-600 mb-4 text-center">
-                    Baixe nosso template, preencha e importe (100% automático)
-                  </p>
-                  <button
-                    onClick={downloadTemplate}
-                    className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all shadow-md hover:shadow-lg"
-                  >
-                    📥 Baixar Template Excel
-                  </button>
-                </div>
+              {/* Template Padrão - Destaque Principal */}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-8 text-center">
+                <div className="text-5xl mb-4">📋</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Template Padrão</h3>
+                <p className="text-lg text-gray-700 mb-6 max-w-2xl mx-auto">
+                  Use nosso template padrão para garantir <strong>100% de precisão</strong> na importação. 
+                  Baixe, preencha e importe - tudo automático, sem erros!
+                </p>
+                <button
+                  onClick={downloadTemplate}
+                  className="px-8 py-4 bg-purple-600 text-white rounded-lg font-bold text-lg hover:bg-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  📥 Baixar Template Excel
+                </button>
+              </div>
 
-                {/* Opção B: Colar Dados ou Imagem */}
-                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">Colar Dados/Imagem</h3>
-                  <p className="text-sm text-gray-600 mb-4 text-center">
-                    Cole dados do Excel ou uma imagem de planilha
-                  </p>
-                  
-                  <div className="space-y-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-2">
-                      Cole aqui (Ctrl+V ou Cmd+V):
-                    </label>
-                    <textarea
-                      value={pastedText}
-                      onChange={(e) => setPastedText(e.target.value)}
-                      onPaste={async (e) => {
-                        // Verificar se é uma imagem colada
-                        const items = e.clipboardData?.items
-                        if (items) {
-                          for (let i = 0; i < items.length; i++) {
-                            const item = items[i]
-                            if (item.type.indexOf('image') !== -1) {
-                              e.preventDefault()
-                              const file = item.getAsFile()
-                              if (file) {
-                                setFiles([file])
-                                setError(null)
-                                setPastedText('')
-                                try {
-                                  const parsed = await parseFiles([file])
-                                  setParsedData(parsed)
-                                  const headers = parsed[0]?.headers || []
-                                  const allRows = parsed[0]?.rows || []
-                                  const sampleRows = allRows.slice(0, 10)
-                                  const detection = analyzeSpreadsheet(headers, sampleRows, FIELD_MAPPINGS)
-                                  setDetectionResult(detection)
-                                  const normalized = normalizeSpreadsheet(headers, allRows, FIELD_MAPPINGS)
-                                  setNormalizedData(normalized)
-                                  const autoMappings: MappedField[] = FIELD_MAPPINGS.map(field => {
-                                    const bestMatch = detection.mappings.find(m => m.targetField === field.key)
-                                    return {
-                                      sourceColumn: bestMatch?.sourceColumn || '',
-                                      targetField: field.key,
-                                      required: field.required
-                                    }
-                                  })
-                                  setFieldMappings(autoMappings)
-                                  setIsStandardTemplate(false)
-                                  setStep('preview')
-                                } catch (err: any) {
-                                  setError(err.message || 'Erro ao processar imagem')
-                                }
-                                return
-                              }
-                            }
-                          }
-                        }
-                        // Se não for imagem, permitir colar texto normalmente
-                        setTimeout(() => {
-                          const text = e.currentTarget.value
-                          setPastedText(text)
-                        }, 0)
-                      }}
-                      placeholder="Cole dados do Excel ou uma imagem..."
-                      className="w-full h-24 px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm font-mono resize-none"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handlePasteData}
-                        disabled={!pastedText || pastedText.trim().length === 0}
-                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
-                      >
-                        ✅ Processar
-                      </button>
-                      <button
-                        onClick={() => {
-                          const input = document.createElement('input')
-                          input.type = 'file'
-                          input.accept = 'image/png,image/jpeg,image/jpg,image/webp'
-                          input.onchange = async (e: any) => {
-                            const file = e.target.files?.[0]
-                            if (file) {
-                              setFiles([file])
-                              setError(null)
-                              try {
-                                const parsed = await parseFiles([file])
-                                setParsedData(parsed)
-                                const headers = parsed[0]?.headers || []
-                                const allRows = parsed[0]?.rows || []
-                                const sampleRows = allRows.slice(0, 10)
-                                const detection = analyzeSpreadsheet(headers, sampleRows, FIELD_MAPPINGS)
-                                setDetectionResult(detection)
-                                const normalized = normalizeSpreadsheet(headers, allRows, FIELD_MAPPINGS)
-                                setNormalizedData(normalized)
-                                const autoMappings: MappedField[] = FIELD_MAPPINGS.map(field => {
-                                  const bestMatch = detection.mappings.find(m => m.targetField === field.key)
-                                  return {
-                                    sourceColumn: bestMatch?.sourceColumn || '',
-                                    targetField: field.key,
-                                    required: field.required
-                                  }
-                                })
-                                setFieldMappings(autoMappings)
-                                setIsStandardTemplate(false)
-                                setStep('preview')
-                              } catch (err: any) {
-                                setError(err.message || 'Erro ao processar imagem')
-                              }
-                            }
-                          }
-                          input.click()
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-sm"
-                      >
-                        📸 Imagem
-                      </button>
+              {/* Seção: Seu modelo é diferente? */}
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="text-4xl">🤖</div>
+                  <div className="flex-1">
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Seu modelo é diferente? Use o ChatGPT!
+                    </h4>
+                    <p className="text-gray-700 mb-4">
+                      Se você já tem uma planilha com formato diferente, use o ChatGPT para converter automaticamente para nosso template padrão. É rápido e fácil!
+                    </p>
+                    
+                    {/* Prompt pronto para copiar */}
+                    <div className="bg-white rounded-lg border-2 border-blue-200 p-4 mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-semibold text-gray-700">
+                          📋 Prompt pronto para o ChatGPT:
+                        </label>
+                        <button
+                          onClick={() => {
+                            const prompt = `Preciso converter uma planilha de clientes para o formato padrão do sistema YLADA. 
+
+FORMATO DE ENTRADA: [Cole aqui os cabeçalhos da sua planilha atual]
+
+FORMATO DE SAÍDA (template padrão YLADA):
+Nome Completo | Data de Nascimento | Gênero | CPF | Email | Telefone | Instagram | Rua | Número | Complemento | Bairro | Cidade | Estado | CEP | Status | Objetivo da Cliente | Data da Primeira Avaliação | Peso (kg) | Altura (m) | IMC | Circunferência do Pescoço (cm) | Circunferência do Tórax (cm) | Circunferência da Cintura (cm) | Circunferência do Quadril (cm) | Circunferência do Braço (cm) | Circunferência da Coxa (cm) | Dobra Cutânea Tríceps (mm) | Dobra Cutânea Bíceps (mm) | Dobra Cutânea Subescapular (mm) | Dobra Cutânea Ilíaca (mm) | Dobra Cutânea Abdominal (mm) | Dobra Cutânea Coxa (mm) | Gordura Corporal (%) | Massa Muscular (kg) | Massa Óssea (kg) | Água Corporal (%) | Gordura Visceral | Observações da Avaliação
+
+INSTRUÇÕES:
+1. Analise os cabeçalhos da minha planilha e identifique correspondências com o template padrão
+2. Mapeie os campos equivalentes (ex: "Nome" → "Nome Completo", "Data Nasc" → "Data de Nascimento")
+3. Para campos que não existem na minha planilha, deixe vazio
+4. Mantenha a ordem exata das colunas do template padrão
+5. Retorne apenas os dados convertidos, sem explicações adicionais
+6. Use formato Excel/CSV (separado por tabulação ou vírgula)
+
+Por favor, converta os dados da minha planilha para este formato padrão.`
+                            navigator.clipboard.writeText(prompt)
+                            alert('Prompt copiado! Cole no ChatGPT e adicione seus dados.')
+                          }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                        >
+                          📋 Copiar Prompt
+                        </button>
+                      </div>
+                      <div className="bg-gray-50 rounded p-3 border border-gray-200">
+                        <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono overflow-x-auto">
+{`Preciso converter uma planilha de clientes para o formato padrão do sistema YLADA.
+
+FORMATO DE ENTRADA: [Cole aqui os cabeçalhos da sua planilha atual]
+
+FORMATO DE SAÍDA (template padrão YLADA):
+Nome Completo | Data de Nascimento | Gênero | CPF | Email | Telefone | Instagram | Rua | Número | Complemento | Bairro | Cidade | Estado | CEP | Status | Objetivo da Cliente | Data da Primeira Avaliação | Peso (kg) | Altura (m) | IMC | Circunferência do Pescoço (cm) | Circunferência do Tórax (cm) | Circunferência da Cintura (cm) | Circunferência do Quadril (cm) | Circunferência do Braço (cm) | Circunferência da Coxa (cm) | Dobra Cutânea Tríceps (mm) | Dobra Cutânea Bíceps (mm) | Dobra Cutânea Subescapular (mm) | Dobra Cutânea Ilíaca (mm) | Dobra Cutânea Abdominal (mm) | Dobra Cutânea Coxa (mm) | Gordura Corporal (%) | Massa Muscular (kg) | Massa Óssea (kg) | Água Corporal (%) | Gordura Visceral | Observações da Avaliação
+
+INSTRUÇÕES:
+1. Analise os cabeçalhos da minha planilha e identifique correspondências
+2. Mapeie os campos equivalentes (ex: "Nome" → "Nome Completo")
+3. Para campos inexistentes, deixe vazio
+4. Mantenha a ordem exata das colunas do template padrão
+5. Retorne apenas os dados convertidos em formato Excel/CSV`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                      <p className="text-sm text-gray-700">
+                        <strong>💡 Dica:</strong> Copie o prompt acima, cole no ChatGPT junto com os dados da sua planilha, e o ChatGPT fará a conversão automaticamente para o formato padrão!
+                      </p>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Opção C: Upload de Arquivo */}
-                <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">Upload Arquivo</h3>
-                  <p className="text-sm text-gray-600 mb-4 text-center">
-                    Arraste ou selecione arquivo Excel, CSV ou imagem
-                  </p>
+              {/* Opção de Upload (apenas para template padrão) */}
+              <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+                  📤 Importar Planilha no Template Padrão
+                </h4>
+                <p className="text-sm text-gray-600 mb-4 text-center">
+                  Após preencher o template padrão (ou converter com ChatGPT), faça o upload aqui:
+                </p>
               <div
                 {...getRootProps()}
-                    className={`border-2 border-dashed rounded-lg p-6 transition-colors cursor-pointer text-center ${
+                    className={`border-2 border-dashed rounded-lg p-8 transition-colors cursor-pointer text-center ${
                   isDragActive 
-                        ? 'border-blue-500 bg-blue-100' 
-                        : 'border-blue-300 hover:border-blue-400 bg-white'
+                        ? 'border-purple-500 bg-purple-100' 
+                        : 'border-purple-300 hover:border-purple-400 bg-gray-50'
                 }`}
               >
                 <input {...getInputProps()} />
-                    <div className="text-4xl mb-2">📁</div>
-                    <p className="text-sm font-semibold text-gray-700 mb-1">
-                      {isDragActive ? 'Solte aqui' : 'Arraste arquivo'}
+                    <div className="text-5xl mb-3">📁</div>
+                    <p className="text-lg font-semibold text-gray-700 mb-2">
+                      {isDragActive ? 'Solte o arquivo aqui' : 'Arraste sua planilha aqui'}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      ou clique para selecionar
+                    <p className="text-sm text-gray-500">
+                      ou clique para selecionar (Excel, CSV)
                 </p>
                   </div>
-                </div>
               </div>
               
-              {/* Informações Unificadas */}
-              <div className="bg-gradient-to-r from-purple-50 via-green-50 to-blue-50 border-2 border-gray-200 rounded-xl p-6 mt-6">
+              {/* Informações sobre o Template Padrão */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl p-6 mt-6">
                 <h4 className="font-bold text-gray-900 mb-4 text-center text-lg flex items-center justify-center gap-2">
-                  <span>💡</span>
-                  Como Funciona a Importação
+                  <span>✅</span>
+                  Por que usar o Template Padrão?
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                    <div className="text-3xl mb-2">⭐</div>
-                    <h5 className="font-semibold text-gray-900 mb-2">Opção A: Template Padrão</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">🎯</div>
+                    <h5 className="font-semibold text-gray-900 mb-2">100% Preciso</h5>
                     <p className="text-sm text-gray-700">
-                      <strong>100% automático</strong> - Baixe o template, preencha e importe. Sem mapeamento necessário, funciona sempre sem erros.
+                      O template padrão garante que todos os dados sejam importados corretamente, sem erros de mapeamento ou perda de informações.
                     </p>
-                </div>
+                  </div>
                   
-                <div className="text-center">
-                    <div className="text-3xl mb-2">📋</div>
-                    <h5 className="font-semibold text-gray-900 mb-2">Opção B: Colar Dados/Imagem</h5>
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">⚡</div>
+                    <h5 className="font-semibold text-gray-900 mb-2">Importação Automática</h5>
                     <p className="text-sm text-gray-700">
-                      <strong>Super rápido</strong> - Copie e cole dados do Excel ou cole uma imagem diretamente. OCR automático extrai dados de fotos/escaneamentos.
-                    </p>
-                </div>
-                  
-                <div className="text-center">
-                    <div className="text-3xl mb-2">📁</div>
-                    <h5 className="font-semibold text-gray-900 mb-2">Opção C: Upload Arquivo</h5>
-                    <p className="text-sm text-gray-700">
-                      <strong>Detecção automática</strong> - Arraste qualquer arquivo Excel, CSV ou imagem. O sistema detecta, normaliza e adapta automaticamente.
+                      Sem necessidade de mapear campos manualmente. Basta preencher o template e importar - tudo funciona automaticamente!
                     </p>
                   </div>
                 </div>
                 
-                <div className="mt-6 pt-6 border-t border-gray-300">
+                <div className="mt-6 pt-6 border-t border-purple-300">
                   <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-700">
                     <div className="flex items-center gap-2">
                       <span className="text-green-600">✓</span>
-                      <span><strong>Detecção automática</strong> de colunas</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Normalização inteligente</strong> de dados</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>OCR integrado</strong> para imagens</span>
+                      <span><strong>Sem mapeamento manual</strong> necessário</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-green-600">✓</span>
                       <span><strong>Validação automática</strong> antes da importação</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      <span><strong>Suporte completo</strong> a todos os campos</span>
                     </div>
                   </div>
                 </div>
