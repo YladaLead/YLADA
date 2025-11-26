@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
+import * as XLSX from 'xlsx'
 
 interface ImportPatientsModalProps {
   isOpen: boolean
@@ -51,6 +52,46 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
   const [importing, setImporting] = useState(false)
   const [importProgress, setImportProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [isStandardTemplate, setIsStandardTemplate] = useState(false)
+
+  const downloadTemplate = () => {
+    const headers = FIELD_MAPPINGS.map(field => field.label)
+    
+    const wb = XLSX.utils.book_new()
+    const wsData = [
+      headers,
+      [
+        'Maria Silva',
+        'maria@email.com',
+        '(11) 98765-4321',
+        '70',
+        '165',
+        'Emagrecimento saudável',
+        'Paciente com histórico de ansiedade',
+        '15/03/1990',
+        'Feminino'
+      ]
+    ]
+    
+    const ws = XLSX.utils.aoa_to_sheet(wsData)
+    ws['!cols'] = FIELD_MAPPINGS.map(() => ({ wch: 20 }))
+    
+    XLSX.utils.book_append_sheet(wb, ws, 'Pacientes')
+    XLSX.writeFile(wb, 'template-importacao-pacientes.xlsx')
+  }
+
+  const isStandardTemplateFormat = (headers: string[]): boolean => {
+    const standardHeaders = FIELD_MAPPINGS.map(field => field.label)
+    if (headers.length < standardHeaders.length) return false
+    
+    for (let i = 0; i < standardHeaders.length; i++) {
+      if (headers[i]?.trim() !== standardHeaders[i]) {
+        return false
+      }
+    }
+    
+    return true
+  }
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setFiles(acceptedFiles)
@@ -60,9 +101,23 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
       const parsed = await parseFiles(acceptedFiles)
       setParsedData(parsed)
       
-      // Auto-detectar mapeamentos
-      const autoMappings = autoDetectMappings(parsed[0]?.headers || [])
-      setFieldMappings(autoMappings)
+      // Verificar se é template padrão
+      const isStandard = parsed[0]?.headers ? isStandardTemplateFormat(parsed[0].headers) : false
+      setIsStandardTemplate(isStandard)
+      
+      if (isStandard) {
+        // Se for template padrão, criar mapeamento automático direto
+        const standardMappings: MappedField[] = FIELD_MAPPINGS.map((field, index) => ({
+          sourceColumn: parsed[0].headers[index] || '',
+          targetField: field.key,
+          required: field.required
+        }))
+        setFieldMappings(standardMappings)
+      } else {
+        // Auto-detectar mapeamentos
+        const autoMappings = autoDetectMappings(parsed[0]?.headers || [])
+        setFieldMappings(autoMappings)
+      }
       
       setStep('preview')
     } catch (err: any) {
@@ -310,45 +365,120 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
 
           {/* Upload Step */}
           {step === 'upload' && (
-            <div className="text-center">
+            <div className="space-y-6">
+              {/* Template Padrão - Destaque Principal */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-8 text-center">
+                <div className="text-5xl mb-4">📋</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Template Padrão</h3>
+                <p className="text-lg text-gray-700 mb-6 max-w-2xl mx-auto">
+                  Use nosso template padrão para garantir <strong>100% de precisão</strong> na importação. 
+                  Baixe, preencha e importe - tudo automático, sem erros!
+                </p>
+                <button
+                  onClick={downloadTemplate}
+                  className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  📥 Baixar Template Excel
+                </button>
+              </div>
+
+              {/* Seção: Seu modelo é diferente? */}
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="text-4xl">🤖</div>
+                  <div className="flex-1">
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Seu modelo é diferente? Use o ChatGPT!
+                    </h4>
+                    <p className="text-gray-700 mb-4">
+                      Se você já tem uma planilha com formato diferente, use o ChatGPT para converter automaticamente para nosso template padrão. É rápido e fácil!
+                    </p>
+                    
+                    {/* Prompt pronto para copiar */}
+                    <div className="bg-white rounded-lg border-2 border-purple-200 p-4 mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-semibold text-gray-700">
+                          📋 Prompt pronto para o ChatGPT:
+                        </label>
+                        <button
+                          onClick={() => {
+                            const prompt = `Preciso converter uma planilha de pacientes para o formato padrão do sistema YLADA Nutri. 
+
+FORMATO DE ENTRADA: [Cole aqui os cabeçalhos da sua planilha atual]
+
+FORMATO DE SAÍDA (template padrão YLADA Nutri):
+Nome | Email | Telefone | Peso Atual (kg) | Altura (cm) | Objetivo | Observações | Data de Nascimento | Gênero
+
+INSTRUÇÕES:
+1. Analise os cabeçalhos da minha planilha e identifique correspondências com o template padrão
+2. Mapeie os campos equivalentes (ex: "Nome Completo" → "Nome", "Peso" → "Peso Atual (kg)")
+3. Para campos que não existem na minha planilha, deixe vazio
+4. Mantenha a ordem exata das colunas do template padrão
+5. Retorne apenas os dados convertidos, sem explicações adicionais
+6. Use formato Excel/CSV (separado por tabulação ou vírgula)
+
+Por favor, converta os dados da minha planilha para este formato padrão.`
+                            navigator.clipboard.writeText(prompt)
+                            alert('Prompt copiado! Cole no ChatGPT e adicione seus dados.')
+                          }}
+                          className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 transition-colors"
+                        >
+                          📋 Copiar Prompt
+                        </button>
+                      </div>
+                      <div className="bg-gray-50 rounded p-3 border border-gray-200">
+                        <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono overflow-x-auto">
+{`Preciso converter uma planilha de pacientes para o formato padrão do sistema YLADA Nutri.
+
+FORMATO DE ENTRADA: [Cole aqui os cabeçalhos da sua planilha atual]
+
+FORMATO DE SAÍDA (template padrão YLADA Nutri):
+Nome | Email | Telefone | Peso Atual (kg) | Altura (cm) | Objetivo | Observações | Data de Nascimento | Gênero
+
+INSTRUÇÕES:
+1. Analise os cabeçalhos da minha planilha e identifique correspondências
+2. Mapeie os campos equivalentes (ex: "Nome Completo" → "Nome")
+3. Para campos inexistentes, deixe vazio
+4. Mantenha a ordem exata das colunas do template padrão
+5. Retorne apenas os dados convertidos em formato Excel/CSV`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                      <p className="text-sm text-gray-700">
+                        <strong>💡 Dica:</strong> Copie o prompt acima, cole no ChatGPT junto com os dados da sua planilha, e o ChatGPT fará a conversão automaticamente para o formato padrão!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Opção de Upload (apenas para template padrão) */}
+              <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+                  📤 Importar Planilha no Template Padrão
+                </h4>
+                <p className="text-sm text-gray-600 mb-4 text-center">
+                  Após preencher o template padrão (ou converter com ChatGPT), faça o upload aqui:
+                </p>
               <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-xl p-12 transition-colors cursor-pointer ${
+                    className={`border-2 border-dashed rounded-lg p-8 transition-colors cursor-pointer text-center ${
                   isDragActive 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-blue-500 bg-blue-100' 
+                        : 'border-blue-300 hover:border-blue-400 bg-gray-50'
                 }`}
               >
                 <input {...getInputProps()} />
-                <div className="text-6xl mb-4">📁</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {isDragActive ? 'Solte os arquivos aqui' : 'Arraste seus arquivos aqui'}
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  ou clique para selecionar arquivos
+                    <div className="text-5xl mb-3">📁</div>
+                    <p className="text-lg font-semibold text-gray-700 mb-2">
+                      {isDragActive ? 'Solte o arquivo aqui' : 'Arraste sua planilha aqui'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      ou clique para selecionar (Excel, CSV)
                 </p>
-                <div className="text-sm text-gray-500">
-                  <p>Formatos suportados: Excel (.xlsx, .xls), CSV (.csv)</p>
-                  <p>Múltiplos arquivos são aceitos</p>
-                </div>
-              </div>
-              
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl mb-2">📊</div>
-                  <h4 className="font-medium text-gray-900">Excel</h4>
-                  <p className="text-sm text-gray-600">Planilhas .xlsx e .xls</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl mb-2">📄</div>
-                  <h4 className="font-medium text-gray-900">CSV</h4>
-                  <p className="text-sm text-gray-600">Arquivos separados por vírgula</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl mb-2">🔄</div>
-                  <h4 className="font-medium text-gray-900">Múltiplos</h4>
-                  <p className="text-sm text-gray-600">Vários arquivos de uma vez</p>
-                </div>
+                  </div>
               </div>
             </div>
           )}
@@ -356,6 +486,24 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
           {/* Preview Step */}
           {step === 'preview' && parsedData.length > 0 && (
             <div>
+              {isStandardTemplate && (
+                <div className="text-center py-8">
+                  <div className="text-6xl mb-4">✅</div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Template Padrão Confirmado!</h3>
+                  <p className="text-lg text-gray-700 mb-6 max-w-2xl mx-auto">
+                    Seu arquivo está no formato padrão. {parsedData.reduce((sum, data) => sum + data.totalRows, 0)} paciente(s) será(ão) importado(s) automaticamente.
+                  </p>
+                  <button
+                    onClick={async () => await validateData()}
+                    className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    ✓ Confirmar e Importar
+                  </button>
+                </div>
+              )}
+              
+              {!isStandardTemplate && (
+                <>
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Dados Encontrados</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -412,6 +560,8 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
                   </div>
                 </div>
               ))}
+                </>
+              )}
             </div>
           )}
 
@@ -587,7 +737,7 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
           </button>
           
           <div className="flex gap-3">
-            {step === 'preview' && (
+            {step === 'preview' && !isStandardTemplate && (
               <button
                 onClick={() => setStep('mapping')}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

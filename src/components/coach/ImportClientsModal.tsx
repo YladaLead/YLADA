@@ -1076,48 +1076,6 @@ INSTRUÇÕES:
                 </p>
                   </div>
               </div>
-              
-              {/* Informações sobre o Template Padrão */}
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl p-6 mt-6">
-                <h4 className="font-bold text-gray-900 mb-4 text-center text-lg flex items-center justify-center gap-2">
-                  <span>✅</span>
-                  Por que usar o Template Padrão?
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="text-center">
-                    <div className="text-3xl mb-2">🎯</div>
-                    <h5 className="font-semibold text-gray-900 mb-2">100% Preciso</h5>
-                    <p className="text-sm text-gray-700">
-                      O template padrão garante que todos os dados sejam importados corretamente, sem erros de mapeamento ou perda de informações.
-                    </p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="text-3xl mb-2">⚡</div>
-                    <h5 className="font-semibold text-gray-900 mb-2">Importação Automática</h5>
-                    <p className="text-sm text-gray-700">
-                      Sem necessidade de mapear campos manualmente. Basta preencher o template e importar - tudo funciona automaticamente!
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="mt-6 pt-6 border-t border-purple-300">
-                  <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-700">
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Sem mapeamento manual</strong> necessário</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Validação automática</strong> antes da importação</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span><strong>Suporte completo</strong> a todos os campos</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
@@ -1125,21 +1083,23 @@ INSTRUÇÕES:
           {step === 'preview' && parsedData.length > 0 && (
             <div>
               {isStandardTemplate && (
-                <div className="mb-6 bg-green-50 border-2 border-green-300 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">✅</span>
-                    <h4 className="font-semibold text-green-900">
-                      {normalizedData ? 'Planilha Normalizada com Sucesso!' : 'Template Padrão Detectado!'}
-                    </h4>
-                  </div>
-                  <p className="text-sm text-green-800">
-                    {normalizedData 
-                      ? 'Sua planilha foi analisada e transformada automaticamente para o formato padrão. Os dados estão prontos para importação!'
-                      : 'Seu arquivo está no formato padrão. Os campos serão mapeados automaticamente e você pode pular a etapa de mapeamento.'}
+                <div className="text-center py-8">
+                  <div className="text-6xl mb-4">✅</div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Template Padrão Confirmado!</h3>
+                  <p className="text-lg text-gray-700 mb-6 max-w-2xl mx-auto">
+                    Seu arquivo está no formato padrão. {parsedData.reduce((sum, data) => sum + data.totalRows, 0)} cliente(s) será(ão) importado(s) automaticamente.
                   </p>
+                  <button
+                    onClick={async () => await validateData()}
+                    className="px-8 py-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    ✓ Confirmar e Importar
+                  </button>
                 </div>
               )}
               
+              {!isStandardTemplate && (
+                <>
               {/* Aviso se poucas colunas foram detectadas */}
               {parsedData[0]?.headers && parsedData[0].headers.length <= 2 && (
                 <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-4">
@@ -1255,6 +1215,7 @@ INSTRUÇÕES:
                   </div>
                 </div>
               )}
+              
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Dados Encontrados</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1311,6 +1272,8 @@ INSTRUÇÕES:
                   </div>
                 </div>
               ))}
+                </>
+              )}
             </div>
           )}
 
@@ -1693,11 +1656,11 @@ INSTRUÇÕES:
           </button>
           
           <div className="flex gap-3">
-            {step === 'preview' && (
+            {step === 'preview' && !isStandardTemplate && (
               <button
                 onClick={async () => {
-                  if (isStandardTemplate || (detectionResult && detectionResult.overallConfidence >= 80 && autoMappingEnabled)) {
-                    // Se for template padrão OU detecção com alta confiança, pular mapeamento
+                  if (detectionResult && detectionResult.overallConfidence >= 80 && autoMappingEnabled) {
+                    // Se detecção com alta confiança, pular mapeamento
                     await validateData()
                   } else {
                     setStep('mapping')
@@ -1705,7 +1668,7 @@ INSTRUÇÕES:
                 }}
                 className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
-                {isStandardTemplate || (detectionResult && detectionResult.overallConfidence >= 80 && autoMappingEnabled)
+                {detectionResult && detectionResult.overallConfidence >= 80 && autoMappingEnabled
                   ? 'Validar Dados' 
                   : 'Revisar Mapeamento'}
               </button>
