@@ -177,7 +177,9 @@ function NovaFerramentaCoachContent() {
     const carregarPerfil = async () => {
       try {
         setCarregandoPerfil(true)
-        const response = await fetch('/api/c/profile')
+        const response = await fetch('/api/coach/profile', {
+          credentials: 'include'
+        })
         if (response.ok) {
           const data = await response.json()
           if (data.profile?.whatsapp) {

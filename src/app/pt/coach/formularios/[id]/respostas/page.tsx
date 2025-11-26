@@ -40,7 +40,7 @@ function RespostasFormularioContent() {
         setErro(null)
 
         // Carregar formulário
-        const formResponse = await fetch(`/api/c/formularios/${formId}`, {
+        const formResponse = await fetch(`/api/coach/formularios/${formId}`, {
           credentials: 'include'
         })
 
@@ -79,7 +79,7 @@ function RespostasFormularioContent() {
         params.append('end_date', filtroDataFim)
       }
 
-      const response = await fetch(`/api/c/formularios/${formId}/respostas?${params.toString()}`, {
+      const response = await fetch(`/api/coach/formularios/${formId}/respostas?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -199,7 +199,7 @@ function RespostasFormularioContent() {
 
   const visualizarResposta = async (responseId: string) => {
     try {
-      const response = await fetch(`/api/c/formularios/${formId}/respostas/${responseId}`, {
+      const response = await fetch(`/api/coach/formularios/${formId}/respostas/${responseId}`, {
         credentials: 'include'
       })
 

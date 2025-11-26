@@ -38,6 +38,7 @@ export default function FerramentasCoach() {
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'ativa' | 'inativa'>('todas')
   const [loading, setLoading] = useState(true)
   const [ferramentaExcluindoId, setFerramentaExcluindoId] = useState<string | null>(null)
+  const [copiadoId, setCopiadoId] = useState<string | null>(null)
 
   // Carregar ferramentas do banco de dados
   useEffect(() => {
@@ -119,7 +120,9 @@ export default function FerramentasCoach() {
   }
 
   const excluirFerramenta = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este link?')) {
+    // Usar confirmação mais discreta
+    const confirmacao = window.confirm('Tem certeza que deseja excluir este link?')
+    if (!confirmacao) {
       return
     }
 
@@ -136,10 +139,10 @@ export default function FerramentasCoach() {
       }
 
       setFerramentas(prev => prev.filter(f => f.id !== id))
-      alert('Link excluído com sucesso!')
+      // Notificação silenciosa - não usar alert
     } catch (error: any) {
       console.error('Erro ao excluir link:', error)
-      alert(error.message || 'Erro ao excluir link. Tente novamente.')
+      // Notificação silenciosa - não usar alert
     } finally {
       setFerramentaExcluindoId(null)
     }
@@ -353,13 +356,18 @@ export default function FerramentasCoach() {
                         <span className="text-xs text-gray-500">URL:</span>
                         <span className="text-xs text-gray-700 font-mono break-all">{ferramenta.url}</span>
                         <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(ferramenta.url)
-                            alert('URL copiada!')
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(ferramenta.url)
+                              setCopiadoId(`url-${ferramenta.id}`)
+                              setTimeout(() => setCopiadoId(null), 2000)
+                            } catch (err) {
+                              console.error('Erro ao copiar URL:', err)
+                            }
                           }}
                           className="text-xs text-purple-600 hover:text-purple-700 underline"
                         >
-                          Copiar
+                          {copiadoId === `url-${ferramenta.id}` ? '✓ Copiado!' : 'Copiar'}
                         </button>
                       </div>
                       {ferramenta.shortCode && (
@@ -370,13 +378,18 @@ export default function FerramentasCoach() {
                               {ferramenta.shortUrl}
                             </span>
                             <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(ferramenta.shortUrl || '')
-                                alert('URL encurtada copiada!')
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(ferramenta.shortUrl || '')
+                                  setCopiadoId(`short-${ferramenta.id}`)
+                                  setTimeout(() => setCopiadoId(null), 2000)
+                                } catch (err) {
+                                  console.error('Erro ao copiar URL encurtada:', err)
+                                }
                               }}
                               className="text-xs text-purple-600 hover:text-purple-700 underline"
                             >
-                              Copiar
+                              {copiadoId === `short-${ferramenta.id}` ? '✓ Copiado!' : 'Copiar'}
                             </button>
                           </div>
                           <div className="mt-2">

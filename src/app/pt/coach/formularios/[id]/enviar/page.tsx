@@ -33,7 +33,7 @@ function EnviarFormularioNutriContent() {
     const carregarFormulario = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/c/formularios/${formId}`, {
+        const response = await fetch(`/api/coach/formularios/${formId}`, {
           credentials: 'include'
         })
 

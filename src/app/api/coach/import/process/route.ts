@@ -390,7 +390,7 @@ export async function POST(request: NextRequest) {
 
             // Inserir evolução
             const { error: evolutionError } = await supabaseAdmin
-              .from('coach_client_evolution')
+              .from('client_evolution')
               .insert(evolutionData)
 
             if (!evolutionError) {
