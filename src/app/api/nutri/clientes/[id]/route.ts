@@ -180,6 +180,8 @@ export async function PUT(
             client_id: id,
             user_id: authenticatedUserId,
             activity_type: 'status_alterado',
+            title: 'Status alterado',
+            description: `Status alterado de ${existingClient.status} para ${status}`,
             metadata: {
               status_anterior: existingClient.status,
               status_novo: status
@@ -270,6 +272,8 @@ export async function DELETE(
           client_id: id,
           user_id: authenticatedUserId,
           activity_type: 'cliente_deletado',
+          title: 'Cliente deletado',
+          description: `Cliente ${existingClient.name} foi deletado`,
           metadata: {
             name: existingClient.name
           }

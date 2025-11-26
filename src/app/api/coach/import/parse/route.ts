@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (isExcel) {
       // Processar arquivo Excel
       try {
-        const buffer = await file.arrayBuffer()
+      const buffer = await file.arrayBuffer()
         
         if (buffer.byteLength === 0) {
           return NextResponse.json(
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
           )
         }
         
-        const workbook = XLSX.read(buffer, { type: 'buffer' })
+      const workbook = XLSX.read(buffer, { type: 'buffer' })
         
         if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
           return NextResponse.json(
@@ -56,11 +56,11 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           )
         }
-        
-        // Usar a primeira planilha
-        const sheetName = workbook.SheetNames[0]
-        const worksheet = workbook.Sheets[sheetName]
-        
+      
+      // Usar a primeira planilha
+      const sheetName = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[sheetName]
+      
         if (!worksheet) {
           return NextResponse.json(
             { error: 'Não foi possível ler a planilha do arquivo Excel' },
@@ -187,8 +187,8 @@ export async function POST(request: NextRequest) {
             return normalizedRow
           })
           .filter(row => 
-            row.some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')
-          )
+          row.some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')
+        )
         
         // Remover colunas completamente vazias do final
         while (headers.length > 1) {

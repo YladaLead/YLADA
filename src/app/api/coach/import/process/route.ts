@@ -54,11 +54,11 @@ export async function POST(request: NextRequest) {
     const allRows: any[][] = []
     data.forEach(fileData => {
       if (fileData.rows && Array.isArray(fileData.rows)) {
-        fileData.rows.forEach(row => {
+      fileData.rows.forEach(row => {
           if (Array.isArray(row)) {
-            allRows.push(row)
+        allRows.push(row)
           }
-        })
+      })
       }
     })
 
@@ -342,7 +342,7 @@ export async function POST(request: NextRequest) {
         .from('clients')
         .insert(clientsBatch)
         .select('id, name')
-      
+
       if (error) {
         console.error('Erro ao inserir lote:', error)
         throw new Error(`Erro ao inserir clientes: ${error.message}`)

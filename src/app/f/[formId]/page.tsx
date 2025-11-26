@@ -12,6 +12,7 @@ export default function PreencherFormularioPage() {
   const [formulario, setFormulario] = useState<any>(null)
   const [respostas, setRespostas] = useState<Record<string, any>>({})
   const [mensagemSucesso, setMensagemSucesso] = useState(false)
+  const [responseId, setResponseId] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,6 +36,8 @@ export default function PreencherFormularioPage() {
           data.data.form.structure?.fields?.forEach((field: any) => {
             if (field.type === 'checkbox') {
               respostasIniciais[field.id] = []
+            } else if (field.type === 'file') {
+              respostasIniciais[field.id] = null
             } else {
               respostasIniciais[field.id] = ''
             }
@@ -94,6 +97,7 @@ export default function PreencherFormularioPage() {
 
       if (data.success) {
         setMensagemSucesso(true)
+        setResponseId(data.data.response.id)
       }
     } catch (error: any) {
       console.error('Erro ao enviar formulário:', error)
@@ -277,6 +281,94 @@ export default function PreencherFormularioPage() {
             </div>
           </div>
         )
+      case 'file':
+        return (
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.txt,.csv,.zip"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                
+                // Validar tamanho (máximo 10MB)
+                const maxSize = 10 * 1024 * 1024
+                if (file.size > maxSize) {
+                  setErro(`Arquivo muito grande. Tamanho máximo: 10MB`)
+                  return
+                }
+                
+                // Validar tipo de arquivo
+                const tiposPermitidos = [
+                  'application/pdf',
+                  'application/x-pdf',
+                  'application/msword',
+                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                  'application/vnd.ms-excel',
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                  'image/jpeg',
+                  'image/jpg',
+                  'image/png',
+                  'image/gif',
+                  'image/webp',
+                  'text/plain',
+                  'text/csv',
+                  'application/zip',
+                  'application/x-zip-compressed'
+                ]
+                
+                if (!tiposPermitidos.includes(file.type)) {
+                  setErro(`Tipo de arquivo não permitido. Tipos aceitos: PDF, Word, Excel, Imagens (JPG, PNG, GIF, WebP), Texto, CSV, ZIP`)
+                  e.target.value = '' // Limpar o input
+                  return
+                }
+                
+                try {
+                  // Upload do arquivo
+                  const formData = new FormData()
+                  formData.append('file', file)
+                  formData.append('formId', formId)
+                  formData.append('fieldId', field.id)
+                  
+                  const uploadResponse = await fetch(`/api/public/formularios/${formId}/upload`, {
+                    method: 'POST',
+                    body: formData
+                  })
+                  
+                  const uploadData = await uploadResponse.json()
+                  
+                  if (!uploadResponse.ok) {
+                    throw new Error(uploadData.error || 'Erro ao fazer upload')
+                  }
+                  
+                  handleChange(field.id, uploadData.data.url)
+                  setErro(null) // Limpar erros anteriores
+                } catch (error: any) {
+                  console.error('Erro ao fazer upload:', error)
+                  setErro(error.message || 'Erro ao fazer upload do arquivo')
+                }
+              }}
+              required={field.required}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            <p className="text-xs text-gray-500">
+              Tipos aceitos: PDF, Word (.doc, .docx), Excel (.xls, .xlsx), Imagens (JPG, PNG, GIF, WebP), Texto (.txt), CSV, ZIP. Tamanho máximo: 10MB
+            </p>
+            {value && (
+              <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                <span className="text-sm text-green-700">✓ Arquivo enviado</span>
+                <a 
+                  href={value} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline ml-auto"
+                >
+                  Ver arquivo
+                </a>
+              </div>
+            )}
+          </div>
+        )
       default:
         return null
     }
@@ -311,7 +403,15 @@ export default function PreencherFormularioPage() {
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">✅</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Formulário enviado!</h1>
-          <p className="text-gray-600">Obrigado por preencher o formulário. Suas respostas foram enviadas com sucesso.</p>
+          <p className="text-gray-600 mb-6">Obrigado por preencher o formulário. Suas respostas foram enviadas com sucesso.</p>
+          {responseId && (
+            <a
+              href={`/f/${formId}/resposta/${responseId}`}
+              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Ver minhas respostas
+            </a>
+          )}
         </div>
       </div>
     )

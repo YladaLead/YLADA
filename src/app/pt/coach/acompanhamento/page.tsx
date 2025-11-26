@@ -28,7 +28,7 @@ function CoachAcompanhamentoContent() {
     const carregarClientes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch('/api/c/clientes?status=ativa&limit=50', {
+        const response = await fetch('/api/coach/clientes?status=ativa&limit=50', {
           credentials: 'include'
         })
 

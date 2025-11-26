@@ -28,6 +28,8 @@ function ClienteDetalhesCoachContent() {
   const [erro, setErro] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<TabType>('info')
   const [cliente, setCliente] = useState<any>(null)
+  const [mostrarModalExclusao, setMostrarModalExclusao] = useState(false)
+  const [excluindo, setExcluindo] = useState(false)
 
   // Carregar cliente
   useEffect(() => {
@@ -36,7 +38,7 @@ function ClienteDetalhesCoachContent() {
     const carregarCliente = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/c/clientes?id=${clientId}`, {
+        const response = await fetch(`/api/coach/clientes?id=${clientId}`, {
           credentials: 'include'
         })
 
@@ -124,6 +126,33 @@ function ClienteDetalhesCoachContent() {
     return labels[status] || status
   }
 
+  const handleExcluirCliente = async () => {
+    try {
+      setExcluindo(true)
+      const response = await fetch(`/api/coach/clientes/${clientId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Erro ao excluir cliente')
+      }
+
+      // Redirecionar para a lista de clientes após exclusão
+      router.push('/pt/coach/clientes')
+    } catch (error: any) {
+      console.error('Erro ao excluir cliente:', error)
+      setErro(error.message || 'Erro ao excluir cliente')
+      setMostrarModalExclusao(false)
+    } finally {
+      setExcluindo(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <CoachSidebar 
@@ -172,12 +201,23 @@ function ClienteDetalhesCoachContent() {
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => setActiveTab('info')}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-              >
-                Editar
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab('info')}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => setMostrarModalExclusao(true)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Excluir
+                </button>
+              </div>
             </div>
           </div>
 
@@ -237,6 +277,54 @@ function ClienteDetalhesCoachContent() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmação de Exclusão */}
+      {mostrarModalExclusao && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Confirmar exclusão</h3>
+                <p className="text-sm text-gray-600 mt-1">Esta ação não pode ser desfeita</p>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-700">
+                Tem certeza que deseja excluir o cliente <strong>{cliente?.name}</strong>?
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                O cliente será marcado como finalizado e não aparecerá mais na lista ativa.
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setMostrarModalExclusao(false)}
+                disabled={excluindo}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExcluirCliente}
+                disabled={excluindo}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+              >
+                {excluindo && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                {excluindo ? 'Excluindo...' : 'Sim, excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -321,13 +409,38 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
     setSalvando(true)
 
     try {
-      const response = await fetch(`/api/c/clientes/${clientId}`, {
+      // Preparar payload removendo campos não suportados pela API
+      const { phone_country_code, ...payload } = formData
+      
+      // Preparar payload final
+      const finalPayload: any = {
+        name: payload.name.trim(),
+        email: payload.email?.trim() || null,
+        phone: payload.phone?.trim() || null,
+        birth_date: payload.birth_date || null,
+        gender: payload.gender || null,
+        cpf: payload.cpf?.trim() || null,
+        instagram: payload.instagram?.trim() || null,
+        status: payload.status,
+        goal: payload.goal?.trim() || null,
+        address: {
+          street: payload.address.street?.trim() || null,
+          number: payload.address.number?.trim() || null,
+          complement: payload.address.complement?.trim() || null,
+          neighborhood: payload.address.neighborhood?.trim() || null,
+          city: payload.address.city?.trim() || null,
+          state: payload.address.state?.trim() || null,
+          zipcode: payload.address.zipcode?.trim() || null
+        }
+      }
+
+      const response = await fetch(`/api/coach/clientes/${clientId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(formData)
+        body: JSON.stringify(finalPayload)
       })
 
       const data = await response.json()
@@ -339,9 +452,11 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
       if (data.success) {
         setSucesso(true)
         setEditando(false)
-        setTimeout(() => setSucesso(false), 3000)
-        // Recarregar página para atualizar dados
-        window.location.reload()
+        setTimeout(() => {
+          setSucesso(false)
+          // Recarregar página para atualizar dados
+          window.location.reload()
+        }, 1000)
       }
     } catch (error: any) {
       console.error('Erro ao atualizar cliente:', error)
@@ -821,7 +936,7 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     const carregarEvolucoes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/c/clientes/${clientId}/evolucao`, {
+        const response = await fetch(`/api/coach/clientes/${clientId}/evolucao`, {
           credentials: 'include'
         })
 
@@ -875,7 +990,7 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         photos_urls: formData.photos_urls
       }
 
-      const response = await fetch(`/api/c/clientes/${clientId}/evolucao`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/evolucao`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1322,7 +1437,7 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
       params.append('order', 'desc')
       params.append('limit', '100')
 
-      const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes?${params.toString()}`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -1438,7 +1553,7 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
         }
       }
 
-      const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1959,7 +2074,7 @@ function EmocionalTab({ cliente, clientId }: { cliente: any; clientId: string })
           params.append('record_type', tipoFiltro)
         }
 
-        const response = await fetch(`/api/c/clientes/${clientId}/emocional?${params.toString()}`, {
+        const response = await fetch(`/api/coach/clientes/${clientId}/emocional?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -2049,7 +2164,7 @@ function EmocionalTab({ cliente, clientId }: { cliente: any; clientId: string })
         notes: formData.notes || null
       }
 
-      const response = await fetch(`/api/c/clientes/${clientId}/emocional`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/emocional`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2704,7 +2819,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     const carregarAvaliacoes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
+        const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
           credentials: 'include'
         })
 
@@ -2737,7 +2852,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     const carregarComparacao = async () => {
       try {
         setCarregandoComparacao(true)
-        const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes/${avaliacaoSelecionada}/comparacao`, {
+        const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes/${avaliacaoSelecionada}/comparacao`, {
           credentials: 'include'
         })
 
@@ -3493,7 +3608,7 @@ function TimelineTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         params.append('end_date', `${endDate}T23:59:59Z`)
       }
 
-      const response = await fetch(`/api/c/clientes/${clientId}/historico?${params.toString()}`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/historico?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -3583,7 +3698,7 @@ function TimelineTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     setErro(null)
 
     try {
-      const response = await fetch(`/api/c/clientes/${clientId}/historico`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/historico`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -3897,7 +4012,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     try {
       setCarregando(true)
       setErro(null)
-      const response = await fetch(`/api/c/clientes/${clientId}/programas?order=desc&order_by=start_date`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/programas?order=desc&order_by=start_date`, {
         credentials: 'include'
       })
 
@@ -3994,7 +4109,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         }
       }
 
-      const response = await fetch(`/api/c/clientes/${clientId}/programas`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/programas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -4026,7 +4141,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
 
   const updateProgramContent = async (programId: string, updatedContent: any) => {
     try {
-      const response = await fetch(`/api/c/clientes/${clientId}/programas/${programId}`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/programas/${programId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

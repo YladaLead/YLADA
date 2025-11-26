@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Pergunta {
   id: string
@@ -61,11 +63,14 @@ interface QuizPersonalizado {
 }
 
 export default function QuizPersonalizadoPage() {
+  const { user } = useAuth()
+  const router = useRouter()
   const [etapaAtual, setEtapaAtual] = useState(1)
   const [perguntaPreviewAtual, setPerguntaPreviewAtual] = useState(0)
   const [paginaPreviewAtual, setPaginaPreviewAtual] = useState(0)
   const [salvando, setSalvando] = useState(false)
   const [slugQuiz, setSlugQuiz] = useState<string>('')
+  const [userSlug, setUserSlug] = useState<string>('')
   const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null)
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
   const [mensagemWhatsapp, setMensagemWhatsapp] = useState('')
@@ -74,16 +79,22 @@ export default function QuizPersonalizadoPage() {
   const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
   const [verificandoShortCode, setVerificandoShortCode] = useState(false)
   const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
+  const [quizSalvo, setQuizSalvo] = useState(false)
 
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
         setCarregandoPerfil(true)
-        const response = await fetch('/api/c/profile')
+        const response = await fetch('/api/coach/profile', {
+          credentials: 'include'
+        })
         if (response.ok) {
           const data = await response.json()
           if (data.profile?.whatsapp) {
             setPerfilWhatsapp(data.profile.whatsapp)
+          }
+          if (data.profile?.userSlug) {
+            setUserSlug(data.profile.userSlug)
           }
         }
       } catch (error) {
@@ -95,6 +106,17 @@ export default function QuizPersonalizadoPage() {
 
     carregarPerfil()
   }, [])
+
+  // Salvar automaticamente quando chegar na etapa 5
+  useEffect(() => {
+    if (etapaAtual === 5 && !quizSalvo && !salvando && user) {
+      const salvar = async () => {
+        await salvarQuiz()
+      }
+      salvar()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etapaAtual])
   // Função para calcular total de páginas do preview
   const calcularTotalPaginas = () => {
     let total = 1 // Página inicial
@@ -433,6 +455,15 @@ export default function QuizPersonalizadoPage() {
 
   // Função para salvar quiz no banco de dados
   const salvarQuiz = async () => {
+    if (!user) {
+      alert('Você precisa estar logado para salvar o quiz.')
+      return
+    }
+
+    if (quizSalvo) {
+      return // Já foi salvo
+    }
+
     setSalvando(true)
     try {
       // Gerar slug único
@@ -454,7 +485,7 @@ export default function QuizPersonalizadoPage() {
 
       // Preparar dados para salvar
       const quizData = {
-        user_id: 'user-temp-001', // TODO: Pegar do contexto de autenticação
+        user_id: user.id, // Usar user_id real do contexto de autenticação
         titulo: quiz.titulo,
         descricao: quiz.descricao,
         emoji: quiz.emoji,
@@ -474,6 +505,7 @@ export default function QuizPersonalizadoPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           quizData,
           perguntas: quiz.perguntas.map(p => ({
@@ -500,19 +532,32 @@ export default function QuizPersonalizadoPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           quizId: data.quiz.id,
           action: 'publish',
         }),
       })
 
-      // Atualizar slug
+      // Buscar user-slug se ainda não tiver
+      if (!userSlug) {
+        const perfilResponse = await fetch('/api/coach/profile', {
+          credentials: 'include'
+        })
+        if (perfilResponse.ok) {
+          const perfilData = await perfilResponse.json()
+          if (perfilData.profile?.userSlug) {
+            setUserSlug(perfilData.profile.userSlug)
+          }
+        }
+      }
+
+      // Atualizar slug e marcar como salvo
       setSlugQuiz(slug)
-      
-      alert('Quiz salvo e publicado com sucesso!')
-    } catch (error) {
+      setQuizSalvo(true)
+    } catch (error: any) {
       console.error('Erro ao salvar quiz:', error)
-      alert('Erro ao salvar quiz. Tente novamente.')
+      alert(`Erro ao salvar quiz: ${error.message || 'Tente novamente.'}`)
     } finally {
       setSalvando(false)
     }
@@ -664,13 +709,19 @@ export default function QuizPersonalizadoPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => router.push('/pt/coach/dashboard')}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    ← Voltar
+                  </button>
                   <button
                     onClick={() => setEtapaAtual(2)}
                     disabled={!quiz.titulo.trim()}
                     className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    Próximo: Criar Perguntas
+                    Próximo: Criar Perguntas →
                   </button>
                 </div>
               </div>
@@ -681,11 +732,20 @@ export default function QuizPersonalizadoPage() {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Criar Perguntas</h2>
+                </div>
+                
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={() => setEtapaAtual(1)}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    ← Voltar
+                  </button>
                   <button
                     onClick={() => setEtapaAtual(3)}
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                   >
-                    Próximo: Personalizar
+                    Próximo: Personalizar →
                   </button>
                 </div>
 
@@ -968,12 +1028,18 @@ export default function QuizPersonalizadoPage() {
                   </div>
                 </div>
 
-                <div className="mt-8 flex justify-end">
+                <div className="mt-8 flex justify-between">
+                  <button
+                    onClick={() => setEtapaAtual(2)}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    ← Voltar
+                  </button>
                   <button
                     onClick={() => setEtapaAtual(4)}
                     className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                   >
-                    Próximo: Configurar Entrega
+                    Próximo: Configurar Entrega →
                   </button>
                 </div>
               </div>
@@ -1684,9 +1750,22 @@ export default function QuizPersonalizadoPage() {
                  
                 <div className="bg-gray-50 rounded-lg p-4 mb-6 max-w-md mx-auto">
                   <p className="text-sm text-gray-500 mb-2">Link do seu quiz:</p>
-                  <code className="text-purple-600 font-mono text-sm break-all">
-                    {slugQuiz ? `ylada.app/pt/quiz/${slugQuiz}` : 'Gerando link...'}
-                  </code>
+                  {salvando ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                      <span className="ml-2 text-gray-600">Salvando e gerando link...</span>
+                    </div>
+                  ) : slugQuiz && userSlug ? (
+                    <code className="text-purple-600 font-mono text-sm break-all">
+                      {typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/pt/coach/{userSlug}/quiz/{slugQuiz}
+                    </code>
+                  ) : slugQuiz ? (
+                    <code className="text-purple-600 font-mono text-sm break-all">
+                      {typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/pt/coach/seu-nome/quiz/{slugQuiz}
+                    </code>
+                  ) : (
+                    <span className="text-gray-500">Aguardando salvamento...</span>
+                  )}
                 </div>
                  
                  <div className="flex justify-center space-x-4">
@@ -1696,13 +1775,14 @@ export default function QuizPersonalizadoPage() {
                    >
                      ← Voltar para Editar
                    </button>
-                  <button
-                    onClick={async () => {
-                      if (slugQuiz) {
-                        const linkText = `ylada.app/pt/quiz/${slugQuiz}`
-                        navigator.clipboard.writeText(linkText).then(() => {
-                          alert('Link copiado para a área de transferência!')
-                        }).catch(() => {
+                  {slugQuiz && userSlug && (
+                    <button
+                      onClick={async () => {
+                        const linkText = `${typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}/pt/coach/${userSlug}/quiz/${slugQuiz}`
+                        try {
+                          await navigator.clipboard.writeText(linkText)
+                          alert('✅ Link copiado para a área de transferência!')
+                        } catch {
                           // Fallback para navegadores mais antigos
                           const textArea = document.createElement('textarea')
                           textArea.value = linkText
@@ -1710,18 +1790,23 @@ export default function QuizPersonalizadoPage() {
                           textArea.select()
                           document.execCommand('copy')
                           document.body.removeChild(textArea)
-                          alert('Link copiado para a área de transferência!')
-                        })
-                      } else {
-                        // Salvar quiz primeiro
-                        await salvarQuiz()
-                      }
-                    }}
-                    disabled={salvando}
-                    className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  >
-                    {salvando ? '⏳ Salvando...' : slugQuiz ? '📋 Copiar Link' : '💾 Salvar e Publicar Quiz'}
-                  </button>
+                          alert('✅ Link copiado para a área de transferência!')
+                        }
+                      }}
+                      className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                    >
+                      📋 Copiar Link
+                    </button>
+                  )}
+                  {!slugQuiz && (
+                    <button
+                      onClick={salvarQuiz}
+                      disabled={salvando || !user}
+                      className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {salvando ? '⏳ Salvando...' : '💾 Salvar e Publicar Quiz'}
+                    </button>
+                  )}
                  </div>
                </div>
               </div>

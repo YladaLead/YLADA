@@ -83,7 +83,7 @@ function RelatoriosGestaoCoachContent() {
 
   const carregarRelatorioEvolucao = async (inicio: Date, fim: Date) => {
     // Buscar todos os clientes ativos
-    const clientesResponse = await fetch('/api/c/clientes?status=ativa&limit=100', {
+    const clientesResponse = await fetch('/api/coach/clientes?status=ativa&limit=100', {
       credentials: 'include'
     })
     const clientesData = await clientesResponse.json()
@@ -93,7 +93,7 @@ function RelatoriosGestaoCoachContent() {
     const evolucoesPorCliente: any[] = []
     for (const cliente of clientes) {
       const evolResponse = await fetch(
-        `/api/c/clientes/${cliente.id}/evolucao?limit=100&order=asc`,
+        `/api/coach/clientes/${cliente.id}/evolucao?limit=100&order=asc`,
         { credentials: 'include' }
       )
       const evolData = await evolResponse.json()
@@ -144,7 +144,7 @@ function RelatoriosGestaoCoachContent() {
 
   const carregarRelatorioAdesao = async (inicio: Date, fim: Date) => {
     // Buscar todos os programas ativos
-    const clientesResponse = await fetch('/api/c/clientes?status=ativa&limit=100', {
+    const clientesResponse = await fetch('/api/coach/clientes?status=ativa&limit=100', {
       credentials: 'include'
     })
     const clientesData = await clientesResponse.json()
@@ -153,7 +153,7 @@ function RelatoriosGestaoCoachContent() {
     const programasComAdesao: any[] = []
     for (const cliente of clientes) {
       const programasResponse = await fetch(
-        `/api/c/clientes/${cliente.id}/programas?status=ativo`,
+        `/api/coach/clientes/${cliente.id}/programas?status=ativo`,
         { credentials: 'include' }
       )
       const programasData = await programasResponse.json()
@@ -218,7 +218,7 @@ function RelatoriosGestaoCoachContent() {
 
   const carregarRelatorioAvaliacoes = async (inicio: Date, fim: Date) => {
     // Buscar todos os clientes
-    const clientesResponse = await fetch('/api/c/clientes?limit=100', {
+    const clientesResponse = await fetch('/api/coach/clientes?limit=100', {
       credentials: 'include'
     })
     const clientesData = await clientesResponse.json()
@@ -230,7 +230,7 @@ function RelatoriosGestaoCoachContent() {
 
     for (const cliente of clientes) {
       const avalResponse = await fetch(
-        `/api/c/clientes/${cliente.id}/avaliacoes?limit=100`,
+        `/api/coach/clientes/${cliente.id}/avaliacoes?limit=100`,
         { credentials: 'include' }
       )
       const avalData = await avalResponse.json()

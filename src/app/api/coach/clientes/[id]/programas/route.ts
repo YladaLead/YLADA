@@ -25,7 +25,7 @@ export async function GET(
 
     // Garantir que o cliente pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('coach_clients')
+      .from('clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -98,7 +98,7 @@ export async function POST(
     const authenticatedUserId = user.id
 
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('coach_clients')
+      .from('clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)

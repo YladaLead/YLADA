@@ -28,7 +28,7 @@ export async function GET(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('coach_clients')
+      .from('clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -99,7 +99,7 @@ export async function PUT(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('coach_clients')
+      .from('clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -225,7 +225,7 @@ export async function DELETE(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('coach_clients')
+      .from('clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)

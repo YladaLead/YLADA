@@ -737,7 +737,7 @@ function KanbanContent() {
   // Criar novo cliente
   const handleCreateClient = async (clientData: any) => {
     try {
-      const response = await fetch('/api/c/clientes', {
+      const response = await fetch('/api/coach/clientes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -754,7 +754,7 @@ function KanbanContent() {
 
       if (data.success) {
         // Recarregar clientes
-        const reloadResponse = await fetch(`/api/c/clientes?limit=200&order_by=created_at&order=asc`, {
+        const reloadResponse = await fetch(`/api/coach/clientes?limit=200&order_by=created_at&order=asc`, {
           credentials: 'include'
         })
         if (reloadResponse.ok) {
@@ -845,7 +845,7 @@ function KanbanContent() {
     const clientesNaColuna = clientes.filter(c => c.status === status)
     for (const cliente of clientesNaColuna) {
       try {
-        await fetch(`/api/c/clientes/${cliente.id}`, {
+        await fetch(`/api/coach/clientes/${cliente.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -865,7 +865,7 @@ function KanbanContent() {
     })
 
     // Recarregar clientes
-    const reloadResponse = await fetch(`/api/c/clientes?limit=200&order_by=created_at&order=asc`, {
+    const reloadResponse = await fetch(`/api/coach/clientes?limit=200&order_by=created_at&order=asc`, {
       credentials: 'include'
     })
     if (reloadResponse.ok) {
@@ -924,7 +924,7 @@ function KanbanContent() {
     setAtualizacaoPendente(clientId)
 
     try {
-      const response = await fetch(`/api/c/clientes/${clientId}`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

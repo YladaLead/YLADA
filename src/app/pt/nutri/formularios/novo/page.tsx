@@ -842,7 +842,7 @@ function NovoFormularioNutriContent() {
                   />
                   <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
                     Gerar URL Curta
-                  </label>
+                      </label>
                 </div>
                 {generateShortUrl && (
                   <div className="space-y-3">
@@ -865,7 +865,7 @@ function NovoFormularioNutriContent() {
                       </label>
                     </div>
                     {usarCodigoPersonalizado && (
-                      <div>
+                    <div>
                         <div className="flex gap-2">
                           <input
                             type="text"
@@ -894,8 +894,8 @@ function NovoFormularioNutriContent() {
                             }}
                             placeholder="meu-codigo"
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                          />
-                        </div>
+                      />
+                    </div>
                         {verificandoShortCode && (
                           <p className="text-xs text-gray-500 mt-1">Verificando...</p>
                         )}
@@ -908,7 +908,7 @@ function NovoFormularioNutriContent() {
                         {customShortCode.length > 0 && customShortCode.length < 3 && (
                           <p className="text-xs text-yellow-600 mt-1">⚠️ Mínimo de 3 caracteres</p>
                         )}
-                      </div>
+                    </div>
                     )}
                     {usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? (
                       <>
@@ -923,7 +923,7 @@ function NovoFormularioNutriContent() {
                               url={`${typeof window !== 'undefined' ? window.location.origin : ''}/p/${customShortCode}`} 
                               size={120} 
                             />
-                          </div>
+                  </div>
                           <p className="text-xs text-gray-400 text-center mt-2">
                             Escaneie para acessar o formulário
                           </p>
@@ -934,11 +934,11 @@ function NovoFormularioNutriContent() {
                         Uma URL curta será gerada automaticamente após salvar. O QR code estará disponível na página de envio do formulário.
                       </p>
                     )}
-                  </div>
-                )}
-              </div>
-              
-              {/* Componentes */}
+                </div>
+              )}
+            </div>
+
+            {/* Componentes */}
             <div className="flex-1 overflow-y-auto">
               <div className="px-4 py-4">
                 <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -949,13 +949,13 @@ function NovoFormularioNutriContent() {
                     💡 <strong>Como usar:</strong> Arraste para o preview à esquerda ou clique duas vezes.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 gap-2">
-                  {fieldTypes.map((fieldType) => (
-                    <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
-                      <DraggableComponent fieldType={fieldType} />
-                    </div>
-                  ))}
-                </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {fieldTypes.map((fieldType) => (
+                      <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
+                        <DraggableComponent fieldType={fieldType} />
+                      </div>
+                    ))}
+                  </div>
               </div>
             </div>
             </form>

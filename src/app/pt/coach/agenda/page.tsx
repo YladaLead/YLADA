@@ -57,7 +57,7 @@ function CoachAgendaContent() {
     const carregarClientes = async () => {
       try {
         setCarregandoClientes(true)
-        const response = await fetch('/api/c/clientes?limit=100&order=asc', {
+        const response = await fetch('/api/coach/clientes?limit=100&order=asc', {
           credentials: 'include'
         })
 
@@ -928,7 +928,7 @@ function ModalNovaConsulta({
 
   const criarClienteRapido = async (dadosCliente: { name: string; email?: string; phone?: string }) => {
     try {
-      const response = await fetch('/api/c/clientes', {
+      const response = await fetch('/api/coach/clientes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

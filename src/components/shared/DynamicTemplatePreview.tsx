@@ -454,13 +454,10 @@ export default function DynamicTemplatePreview({
           <p className="text-xs uppercase font-semibold text-gray-500 mb-2">
             O que sua cliente verá no resultado real:
           </p>
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4">
             <h5 className={`text-lg font-bold ${colors.text}`}>
               {formatResultadoLabel(entry.resultadoId)}
             </h5>
-            <span className={`${colors.badge} text-white px-3 py-1 rounded-full text-sm font-semibold`}>
-              Resultado #{index + 1}
-            </span>
           </div>
           <div className="bg-white rounded-lg p-4 space-y-2">
             <p className="font-semibold text-gray-900">{entry.diagnostico.diagnostico}</p>

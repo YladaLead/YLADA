@@ -415,12 +415,12 @@ function NovoFormularioCoachContent() {
       const novosFields = [...fields]
       novosFields[campoExistente] = fieldEditando
       setFields(novosFields)
-    } else {
-      setFields([...fields, fieldEditando])
-    }
-
-    setFieldEditando(null)
-    setMostrarModalCampo(false)
+      } else {
+        setFields([...fields, fieldEditando])
+      }
+      
+      setFieldEditando(null)
+      setMostrarModalCampo(false)
   }
 
   const editarCampo = (campo: Field) => {
@@ -640,50 +640,50 @@ function NovoFormularioCoachContent() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                  </div>
 
-                    {fields.length === 0 ? (
+                  {fields.length === 0 ? (
                       <div className="text-center py-12">
                         <div className="text-purple-400 mb-4">
-                          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                          </svg>
-                        </div>
+                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Solte os componentes aqui</h3>
-                        <p className="text-gray-600 mb-4 text-sm">
+                      <p className="text-gray-600 mb-4 text-sm">
                           Arraste da sidebar direita ou clique duas vezes
-                        </p>
+                      </p>
                         <div className="bg-white border border-purple-200 rounded-lg p-4 max-w-sm mx-auto shadow-sm">
                           <p className="text-xs text-purple-800">
-                            💡 <strong>Sugestão:</strong> Comece com "Nome" e "Email" para identificar o cliente
-                          </p>
+                          💡 <strong>Sugestão:</strong> Comece com "Nome" e "Email" para identificar o cliente
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg p-6">
+                      <form className="space-y-6">
+                        <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                          {fields.map((field) => (
+                            <DraggableFieldPreview 
+                              key={field.id} 
+                              field={field} 
+                              onEdit={editarCampo}
+                              onRemove={removerCampo}
+                            />
+                          ))}
+                        </SortableContext>
+                        <div className="pt-4 border-t border-gray-200">
+                          <button
+                            type="button"
+                            className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-medium hover:bg-purple-700 transition-colors"
+                            disabled
+                          >
+                            Enviar Formulário
+                          </button>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="bg-white rounded-lg p-6">
-                        <form className="space-y-6">
-                          <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                            {fields.map((field) => (
-                              <DraggableFieldPreview 
-                                key={field.id} 
-                                field={field} 
-                                onEdit={editarCampo}
-                                onRemove={removerCampo}
-                              />
-                            ))}
-                          </SortableContext>
-                          <div className="pt-4 border-t border-gray-200">
-                            <button
-                              type="button"
-                              className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-medium hover:bg-purple-700 transition-colors"
-                              disabled
-                            >
-                              Enviar Formulário
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    )}
+                      </form>
+                    </div>
+                  )}
                   </FormDropZone>
 
                   {/* Action Buttons */}
@@ -755,12 +755,12 @@ function NovoFormularioCoachContent() {
                       />
                       <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
                         Gerar URL Curta
-                      </label>
+                            </label>
                     </div>
                     {generateShortUrl && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                          <input
+                            <input
                             type="checkbox"
                             id="usarCodigoPersonalizado"
                             checked={usarCodigoPersonalizado}
@@ -776,7 +776,7 @@ function NovoFormularioCoachContent() {
                           <label htmlFor="usarCodigoPersonalizado" className="text-xs text-gray-600 cursor-pointer">
                             Usar código personalizado
                           </label>
-                        </div>
+                          </div>
                         {usarCodigoPersonalizado && (
                           <div>
                             <div className="flex gap-2">
@@ -807,8 +807,8 @@ function NovoFormularioCoachContent() {
                                 }}
                                 placeholder="meu-codigo"
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
-                              />
-                            </div>
+                            />
+                          </div>
                             {verificandoShortCode && (
                               <p className="text-xs text-gray-500 mt-1">Verificando...</p>
                             )}
@@ -836,7 +836,7 @@ function NovoFormularioCoachContent() {
                                   url={`${typeof window !== 'undefined' ? window.location.origin : ''}/p/${customShortCode}`} 
                                   size={120} 
                                 />
-                              </div>
+                        </div>
                               <p className="text-xs text-gray-400 text-center mt-2">
                                 Escaneie para acessar o formulário
                               </p>
@@ -850,7 +850,7 @@ function NovoFormularioCoachContent() {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Componentes */}
                   <div className="flex-1 overflow-y-auto">
                     <div className="px-4 py-4">
@@ -868,9 +868,9 @@ function NovoFormularioCoachContent() {
                             key={fieldType.type} 
                             onDoubleClick={() => adicionarCampo(fieldType.type)}
                             className="w-full"
-                          >
+                        >
                             <DraggableComponent fieldType={fieldType} />
-                          </div>
+                      </div>
                         ))}
                       </div>
                     </div>
@@ -1029,7 +1029,7 @@ export function getHelpTextExample(type: FieldType): string {
 
 export function renderFieldPreview(field: Field) {
   switch (field.type) {
-      case 'text':
+    case 'text':
     case 'email':
     case 'tel':
       return (

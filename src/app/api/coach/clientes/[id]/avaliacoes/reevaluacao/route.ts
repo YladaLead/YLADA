@@ -39,7 +39,7 @@ export async function POST(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('coach_clients')
+      .from('clients')
       .select('id, name')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)

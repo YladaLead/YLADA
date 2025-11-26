@@ -339,7 +339,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
         }))
         setFieldMappings(standardMappings)
         // Pular direto para validação
-        setStep('preview')
+      setStep('preview')
       } else {
         // Se não for template padrão, usar detecção inteligente + normalização
         const headers = parsed[0]?.headers || []
@@ -1103,26 +1103,26 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                   <p className="text-sm text-gray-600 mb-4 text-center">
                     Arraste ou selecione arquivo Excel, CSV ou imagem
                   </p>
-                  <div
-                    {...getRootProps()}
+              <div
+                {...getRootProps()}
                     className={`border-2 border-dashed rounded-lg p-6 transition-colors cursor-pointer text-center ${
-                      isDragActive 
+                  isDragActive 
                         ? 'border-blue-500 bg-blue-100' 
                         : 'border-blue-300 hover:border-blue-400 bg-white'
-                    }`}
-                  >
-                    <input {...getInputProps()} />
+                }`}
+              >
+                <input {...getInputProps()} />
                     <div className="text-4xl mb-2">📁</div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">
                       {isDragActive ? 'Solte aqui' : 'Arraste arquivo'}
                     </p>
                     <p className="text-xs text-gray-500">
                       ou clique para selecionar
-                    </p>
+                </p>
                   </div>
                 </div>
               </div>
-
+              
               {/* Informações Unificadas */}
               <div className="bg-gradient-to-r from-purple-50 via-green-50 to-blue-50 border-2 border-gray-200 rounded-xl p-6 mt-6">
                 <h4 className="font-bold text-gray-900 mb-4 text-center text-lg flex items-center justify-center gap-2">
@@ -1130,23 +1130,23 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                   Como Funciona a Importação
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
+                <div className="text-center">
                     <div className="text-3xl mb-2">⭐</div>
                     <h5 className="font-semibold text-gray-900 mb-2">Opção A: Template Padrão</h5>
                     <p className="text-sm text-gray-700">
                       <strong>100% automático</strong> - Baixe o template, preencha e importe. Sem mapeamento necessário, funciona sempre sem erros.
                     </p>
-                  </div>
+                </div>
                   
-                  <div className="text-center">
+                <div className="text-center">
                     <div className="text-3xl mb-2">📋</div>
                     <h5 className="font-semibold text-gray-900 mb-2">Opção B: Colar Dados/Imagem</h5>
                     <p className="text-sm text-gray-700">
                       <strong>Super rápido</strong> - Copie e cole dados do Excel ou cole uma imagem diretamente. OCR automático extrai dados de fotos/escaneamentos.
                     </p>
-                  </div>
+                </div>
                   
-                  <div className="text-center">
+                <div className="text-center">
                     <div className="text-3xl mb-2">📁</div>
                     <h5 className="font-semibold text-gray-900 mb-2">Opção C: Upload Arquivo</h5>
                     <p className="text-sm text-gray-700">
@@ -1387,8 +1387,8 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                     <p className="text-sm text-blue-800">
                       <strong>💡 Detecção automática aplicada:</strong> Os campos abaixo foram mapeados automaticamente com {detectionResult.overallConfidence}% de confiança. 
                       Você pode ajustar qualquer mapeamento se necessário.
-                    </p>
-                  </div>
+                </p>
+              </div>
                 )}
                 
                 {/* Exemplo visual */}
@@ -1455,13 +1455,13 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                   return (
                     <div key={field.key} className={`border-2 ${borderColor} rounded-lg p-4 bg-white hover:border-purple-300 transition-colors`}>
                       <div className="flex items-start gap-4">
-                        <div className="flex-1">
+                      <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <label className="block text-sm font-semibold text-gray-900">
-                              {field.label}
-                              {field.required && <span className="text-red-500 ml-1">*</span>}
+                          {field.label}
+                          {field.required && <span className="text-red-500 ml-1">*</span>}
                               {!field.required && <span className="text-gray-400 text-xs ml-2">(opcional)</span>}
-                            </label>
+                        </label>
                             {confidenceBadge}
                           </div>
                           <p className="text-xs text-gray-500 mb-2">
@@ -1483,31 +1483,31 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                               <span className="text-green-800 ml-1 font-mono">"{String(exampleValue).substring(0, 50)}{String(exampleValue).length > 50 ? '...' : ''}"</span>
                             </div>
                           )}
-                        </div>
-                        <div className="flex-1">
+                      </div>
+                      <div className="flex-1">
                           <label className="block text-xs font-medium text-gray-700 mb-1">
                             Selecione a coluna da planilha:
                           </label>
-                          <select
-                            value={mapping?.sourceColumn || ''}
-                            onChange={(e) => {
-                              const newMappings = fieldMappings.map(m => 
-                                m.targetField === field.key 
-                                  ? { ...m, sourceColumn: e.target.value }
-                                  : m
-                              )
-                              setFieldMappings(newMappings)
-                            }}
+                        <select
+                          value={mapping?.sourceColumn || ''}
+                          onChange={(e) => {
+                            const newMappings = fieldMappings.map(m => 
+                              m.targetField === field.key 
+                                ? { ...m, sourceColumn: e.target.value }
+                                : m
+                            )
+                            setFieldMappings(newMappings)
+                          }}
                             className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
-                          >
+                        >
                             <option value="">-- Selecione uma coluna --</option>
-                            {parsedData[0]?.headers.map((header) => (
-                              <option key={header} value={header}>
-                                {header}
-                              </option>
-                            ))}
-                          </select>
-                          {mapping?.sourceColumn && (
+                          {parsedData[0]?.headers.map((header) => (
+                            <option key={header} value={header}>
+                              {header}
+                            </option>
+                          ))}
+                        </select>
+                        {mapping?.sourceColumn && (
                             <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                               <span>✓</span>
                               Mapeado para: "{mapping.sourceColumn}"
@@ -1517,7 +1517,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                         <div className="w-16 text-center flex items-center justify-center">
                           {mapping?.sourceColumn ? (
                             <div className="bg-green-100 rounded-full p-2">
-                              <span className="text-green-600 text-xl">✅</span>
+                          <span className="text-green-600 text-xl">✅</span>
                             </div>
                           ) : field.required ? (
                             <div className="bg-red-100 rounded-full p-2">
@@ -1527,7 +1527,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                             <div className="bg-gray-100 rounded-full p-2">
                               <span className="text-gray-400 text-xl">○</span>
                             </div>
-                          )}
+                        )}
                         </div>
                       </div>
                     </div>
@@ -1576,8 +1576,8 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                 <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">✅</span>
-                    <div className="text-2xl font-bold text-green-600">{validationResult.validRows}</div>
-                  </div>
+                  <div className="text-2xl font-bold text-green-600">{validationResult.validRows}</div>
+                </div>
                   <div className="text-sm font-medium text-green-800">Registros Válidos</div>
                   <div className="text-xs text-green-700 mt-1">
                     Estes registros serão importados com sucesso
@@ -1586,8 +1586,8 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                 <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">⚠️</span>
-                    <div className="text-2xl font-bold text-yellow-600">{validationResult.duplicates}</div>
-                  </div>
+                  <div className="text-2xl font-bold text-yellow-600">{validationResult.duplicates}</div>
+                </div>
                   <div className="text-sm font-medium text-yellow-800">Duplicatas Removidas</div>
                   <div className="text-xs text-yellow-700 mt-1">
                     Registros duplicados que serão ignorados
@@ -1596,7 +1596,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                 <div className="bg-red-50 rounded-lg p-4 border border-red-200">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">❌</span>
-                    <div className="text-2xl font-bold text-red-600">{validationResult.errors.length}</div>
+                  <div className="text-2xl font-bold text-red-600">{validationResult.errors.length}</div>
                   </div>
                   <div className="text-sm font-medium text-red-800">Erros Encontrados</div>
                   <div className="text-xs text-red-700 mt-1">
@@ -1789,15 +1789,15 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                     ← Voltar e Corrigir
                   </button>
                 )}
-                <button
-                  onClick={importData}
+              <button
+                onClick={importData}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-                  disabled={importing}
-                >
+                disabled={importing}
+              >
                   {validationResult.errors.length > 0 
                     ? `Importar ${validationResult.validRows} Válidos` 
                     : 'Importar Agora'}
-                </button>
+              </button>
               </div>
             )}
             
