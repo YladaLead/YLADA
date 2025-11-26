@@ -367,16 +367,9 @@ export default function NutraLandingPage() {
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Anual</h3>
                 <p className="text-gray-600 text-center mb-6">Consultores e vendedores de suplementos e nutracêuticos</p>
                 <div className="text-center mb-6">
-                  <span className="text-4xl font-bold text-orange-600">R$ 97</span>
-                  <span className="text-gray-600">/mês</span>
-                  <div className="text-sm text-gray-500 mt-2">
-                    12 meses
-                  </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Total de <span className="font-semibold text-gray-700">R$ 1.164/ano</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    Pagamento único anual
+                  <div className="text-5xl font-black text-orange-600 mb-2">12x de R$ 97</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Total: R$ 1.164
                   </div>
                 </div>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
@@ -386,11 +379,19 @@ export default function NutraLandingPage() {
                   </li>
                   <li className="flex items-center">
                     <span className="text-orange-600 mr-2">✓</span>
-                    Pagamento único anual
+                    Formação profissional completa
                   </li>
                   <li className="flex items-center">
                     <span className="text-orange-600 mr-2">✓</span>
-                    Melhor custo-benefício
+                    Cursos e materiais exclusivos
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-orange-600 mr-2">✓</span>
+                    Planilhas e exercícios práticos
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-orange-600 mr-2">✓</span>
+                    Tudo que a formação proporciona
                   </li>
                 </ul>
                 <Link

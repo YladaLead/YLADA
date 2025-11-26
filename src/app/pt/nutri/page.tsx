@@ -448,34 +448,30 @@ export default function NutriLandingPage() {
                   </p>
                   
                   <div className="bg-white/20 rounded-lg p-6 mb-6">
-                    <p className="text-4xl font-black mb-2">R$ 970</p>
-                    <p className="text-lg">à vista ou 12x</p>
+                    <p className="text-5xl font-black mb-2">12x de R$ 97</p>
+                    <p className="text-xs text-white/70 mt-1">Total: R$ 1.164</p>
                   </div>
 
                   <ul className="space-y-3 mb-8 text-lg">
                     <li className="flex items-start">
                       <span className="mr-3 text-xl">✔</span>
-                      <span>Ferramentas de captação</span>
+                      <span>Tudo do plano mensal</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-3 text-xl">✔</span>
-                      <span>Gestão completa</span>
+                      <span>Formação profissional completa</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-3 text-xl">✔</span>
-                      <span>Formação Empresarial Nutri (R$ 970)</span>
+                      <span>Cursos e materiais exclusivos</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-3 text-xl">✔</span>
-                      <span>Comunidade</span>
+                      <span>Planilhas e exercícios práticos</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-3 text-xl">✔</span>
-                      <span>Lives semanais</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-xl">✔</span>
-                      <span>Suporte próximo</span>
+                      <span>Tudo que a formação proporciona</span>
                     </li>
                   </ul>
 
