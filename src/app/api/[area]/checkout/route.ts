@@ -32,11 +32,23 @@ export async function POST(
     const { user } = authResult
 
     const body = await request.json()
-    const { planType, language, paymentMethod } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es', 'auto' | 'pix'
+    const { planType, productType, language, paymentMethod } = body 
+    // planType: 'monthly' | 'annual'
+    // productType: 'platform_monthly' | 'platform_annual' | 'formation_only' (apenas para área Nutri)
+    // language: 'pt' | 'en' | 'es'
+    // paymentMethod: 'auto' | 'pix'
 
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
         { error: 'Tipo de plano inválido. Use "monthly" ou "annual"' },
+        { status: 400 }
+      )
+    }
+
+    // Validar productType apenas para área Nutri
+    if (area === 'nutri' && productType && !['platform_monthly', 'platform_annual', 'formation_only'].includes(productType)) {
+      return NextResponse.json(
+        { error: 'Tipo de produto inválido. Use "platform_monthly", "platform_annual" ou "formation_only"' },
         { status: 400 }
       )
     }
@@ -49,6 +61,7 @@ export async function POST(
     const checkout = await createCheckout({
       area,
       planType,
+      productType: area === 'nutri' ? productType : undefined, // Apenas para área Nutri
       userId: user.id,
       userEmail: user.email || '',
       countryCode,

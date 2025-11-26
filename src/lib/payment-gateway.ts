@@ -12,6 +12,7 @@ import Stripe from 'stripe'
 export interface CheckoutRequest {
   area: 'wellness' | 'nutri' | 'coach' | 'nutra'
   planType: 'monthly' | 'annual'
+  productType?: 'platform_monthly' | 'platform_annual' | 'formation_only' // Apenas para área Nutri
   userId: string
   userEmail: string
   countryCode?: string
@@ -29,17 +30,38 @@ export interface CheckoutResponse {
   metadata: {
     area: string
     planType: string
+    productType?: string // Adicionar productType no metadata
     countryCode: string
     gateway: PaymentGateway
+    isRecurring?: boolean // Adicionar isRecurring
+    paymentMethod?: string // Adicionar paymentMethod
   }
 }
 
 /**
- * Obtém preço baseado em área e plano
+ * Obtém preço baseado em área, plano e tipo de produto
  */
-function getPrice(area: string, planType: 'monthly' | 'annual', countryCode: string): number {
+function getPrice(
+  area: string, 
+  planType: 'monthly' | 'annual', 
+  countryCode: string,
+  productType?: 'platform_monthly' | 'platform_annual' | 'formation_only'
+): number {
   // Preços em BRL para Brasil
   if (countryCode === 'BR') {
+    // Área Nutri com productType específico
+    if (area === 'nutri' && productType) {
+      if (productType === 'formation_only') {
+        return 970.00 // R$ 970 (12x de R$ 97)
+      }
+      if (productType === 'platform_monthly') {
+        return 97.00 // R$ 97/mês (recorrente)
+      }
+      if (productType === 'platform_annual') {
+        return 970.00 // R$ 970 (12x de R$ 97)
+      }
+    }
+    
     const prices: Record<string, Record<string, number>> = {
       wellness: {
         monthly: 59.90,
@@ -47,7 +69,7 @@ function getPrice(area: string, planType: 'monthly' | 'annual', countryCode: str
       },
       nutri: {
         monthly: 97.00,
-        annual: 1164.00,
+        annual: 970.00, // Atualizado para R$ 970 (12x de R$ 97)
       },
       coach: {
         monthly: 97.00,
@@ -91,7 +113,7 @@ async function createMercadoPagoCheckout(
   baseUrl: string
 ): Promise<CheckoutResponse> {
   console.log('💳 Criando checkout Mercado Pago...')
-  const amount = getPrice(request.area, request.planType, request.countryCode || 'BR')
+  const amount = getPrice(request.area, request.planType, request.countryCode || 'BR', request.productType)
   
   // Validação: garantir que o valor está correto
   if (amount <= 0) {
@@ -161,10 +183,13 @@ async function createMercadoPagoCheckout(
       const subscriptionRequest: CreateSubscriptionRequest = {
         area: request.area,
         planType: request.planType,
+        productType: request.productType, // Passar productType para subscription
         userId: request.userId,
         userEmail: request.userEmail,
         amount,
-        description: `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
+        description: request.productType === 'formation_only' 
+          ? `YLADA ${request.area.toUpperCase()} - Formação Empresarial Nutri`
+          : `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
         successUrl,
         failureUrl,
         pendingUrl,
@@ -181,6 +206,7 @@ async function createMercadoPagoCheckout(
           metadata: {
             area: request.area,
             planType: request.planType,
+            productType: request.productType, // Adicionar productType no metadata
             countryCode: request.countryCode || 'BR',
             gateway: 'mercadopago',
             isRecurring: true, // Marcar como recorrente
@@ -199,10 +225,13 @@ async function createMercadoPagoCheckout(
       const preferenceRequest: CreatePreferenceRequest = {
         area: request.area,
         planType: request.planType,
+        productType: request.productType, // Passar productType para preference
         userId: request.userId,
         userEmail: request.userEmail,
         amount,
-        description: `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
+        description: request.productType === 'formation_only'
+          ? `YLADA ${request.area.toUpperCase()} - Formação Empresarial Nutri`
+          : `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
         successUrl,
         failureUrl,
         pendingUrl,
@@ -222,6 +251,7 @@ async function createMercadoPagoCheckout(
           metadata: {
             area: request.area,
             planType: request.planType,
+            productType: request.productType, // Adicionar productType no metadata
             countryCode: request.countryCode || 'BR',
             gateway: 'mercadopago',
             isRecurring: false, // Pagamento único (manual)
@@ -240,14 +270,17 @@ async function createMercadoPagoCheckout(
     const preferenceRequest: CreatePreferenceRequest = {
       area: request.area,
       planType: request.planType,
+      productType: request.productType, // Passar productType para preference
       userId: request.userId,
       userEmail: request.userEmail,
       amount,
-      description: `YLADA ${request.area.toUpperCase()} - Plano Anual`,
+      description: request.productType === 'formation_only'
+        ? `YLADA ${request.area.toUpperCase()} - Formação Empresarial Nutri`
+        : `YLADA ${request.area.toUpperCase()} - Plano Anual`,
       successUrl,
       failureUrl,
       pendingUrl,
-      maxInstallments: 12, // Plano anual: permite parcelamento até 12x
+      maxInstallments: 12, // Plano anual/formação: permite parcelamento até 12x
       payerFirstName: request.payerFirstName,
       payerLastName: request.payerLastName,
     }
@@ -263,6 +296,7 @@ async function createMercadoPagoCheckout(
         metadata: {
           area: request.area,
           planType: request.planType,
+          productType: request.productType, // Adicionar productType no metadata
           countryCode: request.countryCode || 'BR',
           gateway: 'mercadopago',
           isRecurring: false, // Pagamento único (anual)
@@ -312,6 +346,7 @@ async function createStripeCheckout(
       user_id: request.userId,
       area: request.area,
       plan_type: request.planType,
+      ...(request.productType && { product_type: request.productType }), // Adicionar productType apenas se existir
       country_code: request.countryCode || 'UNKNOWN',
       gateway: 'stripe',
     },

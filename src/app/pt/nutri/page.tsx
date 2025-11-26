@@ -437,7 +437,7 @@ export default function NutriLandingPage() {
                 Escolha o melhor plano para você
               </h2>
 
-              <div className="grid md:grid-cols-2 gap-8 mb-12">
+              <div className="grid md:grid-cols-3 gap-8 mb-12">
                 {/* PLANO ANUAL - DESTAQUE */}
                 <div className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] rounded-xl p-8 text-white shadow-2xl border-4 border-[#2572FF] transform scale-105">
                   <div className="text-4xl mb-4">🔥</div>
@@ -485,12 +485,25 @@ export default function NutriLandingPage() {
                     <p className="text-sm">👉 Acesso total por 1 ano.</p>
                   </div>
 
-                  <Link
-                    href="/pt/nutri/checkout"
+                  <button
+                    onClick={async () => {
+                      const response = await fetch('/api/nutri/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          planType: 'annual',
+                          productType: 'platform_annual',
+                          paymentMethod: 'auto'
+                        })
+                      })
+                      const data = await response.json()
+                      if (data.url) window.location.href = data.url
+                    }}
                     className="block w-full bg-white text-[#0B57FF] px-8 py-4 rounded-lg text-xl font-bold hover:bg-gray-100 transition-colors shadow-xl text-center"
                   >
                     Quero aproveitar o plano anual agora
-                  </Link>
+                  </button>
                 </div>
 
                 {/* PLANO MENSAL */}
@@ -525,12 +538,80 @@ export default function NutriLandingPage() {
                     </li>
                   </ul>
 
-                  <Link
-                    href="/pt/nutri/checkout"
+                  <button
+                    onClick={async () => {
+                      const response = await fetch('/api/nutri/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          planType: 'monthly',
+                          productType: 'platform_monthly',
+                          paymentMethod: 'auto'
+                        })
+                      })
+                      const data = await response.json()
+                      if (data.url) window.location.href = data.url
+                    }}
                     className="block w-full bg-[#0B57FF] text-white px-8 py-4 rounded-lg text-xl font-bold hover:bg-[#2572FF] transition-colors shadow-lg text-center"
                   >
                     Quero começar no mensal
-                  </Link>
+                  </button>
+                </div>
+
+                {/* FORMAÇÃO EMPRESARIAL NUTRI (STANDALONE) */}
+                <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-[#0B57FF]">
+                  <div className="text-4xl mb-4 text-center">🎓</div>
+                  <h3 className="text-2xl font-bold mb-4 text-[#1A1A1A] text-center">Formação Empresarial Nutri</h3>
+                  <p className="text-lg mb-2 font-semibold text-gray-700 text-center">R$ 970</p>
+                  <p className="text-sm text-gray-600 text-center mb-6">ou 12x de R$ 97</p>
+                  
+                  <ul className="space-y-3 mb-8 text-gray-700">
+                    <li className="flex items-start">
+                      <span className="mr-3 text-[#0B57FF]">✓</span>
+                      <span>Formação Empresarial Nutri completa</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-3 text-[#0B57FF]">✓</span>
+                      <span>Acesso vitalício ao conteúdo</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-3 text-[#0B57FF]">✓</span>
+                      <span>Transformação em Nutri-Empresária</span>
+                    </li>
+                    <li className="flex items-start text-gray-400">
+                      <span className="mr-3">✗</span>
+                      <span>Sem acesso à plataforma</span>
+                    </li>
+                    <li className="flex items-start text-gray-400">
+                      <span className="mr-3">✗</span>
+                      <span>Sem ferramentas de captação</span>
+                    </li>
+                    <li className="flex items-start text-gray-400">
+                      <span className="mr-3">✗</span>
+                      <span>Sem gestão de clientes</span>
+                    </li>
+                  </ul>
+
+                  <button
+                    onClick={async () => {
+                      const response = await fetch('/api/nutri/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          planType: 'annual',
+                          productType: 'formation_only',
+                          paymentMethod: 'auto'
+                        })
+                      })
+                      const data = await response.json()
+                      if (data.url) window.location.href = data.url
+                    }}
+                    className="block w-full bg-[#0B57FF] text-white px-8 py-4 rounded-lg text-xl font-bold hover:bg-[#2572FF] transition-colors shadow-lg text-center"
+                  >
+                    Quero apenas a Formação
+                  </button>
                 </div>
               </div>
             </div>

@@ -9,6 +9,7 @@ import { createMercadoPagoClient } from './mercado-pago'
 export interface CreateSubscriptionRequest {
   area: 'wellness' | 'nutri' | 'coach' | 'nutra'
   planType: 'monthly' | 'annual'
+  productType?: 'platform_monthly' | 'platform_annual' | 'formation_only' // Apenas para área Nutri
   userId: string
   userEmail: string
   amount: number // Valor em reais (ex: 59.90)
@@ -98,6 +99,7 @@ export async function createRecurringSubscription(
       user_id: request.userId,
       area: request.area,
       plan_type: request.planType,
+      product_type: request.productType || undefined, // Adicionar productType no metadata (apenas Nutri)
     },
     // status: NÃO enviar no create - o Mercado Pago define o status inicial
   }

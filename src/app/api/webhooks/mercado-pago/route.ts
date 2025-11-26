@@ -5,6 +5,37 @@ import { createAccessToken } from '@/lib/email-tokens'
 import { sendWelcomeEmail } from '@/lib/email-templates'
 
 /**
+ * Determina features baseado em área, planType e productType
+ * Apenas para área Nutri com productType específico
+ */
+function determineFeatures(
+  area: string,
+  planType: string,
+  productType?: string
+): string[] {
+  // Apenas para área Nutri com productType
+  if (area === 'nutri' && productType) {
+    if (productType === 'platform_monthly') {
+      return ['gestao', 'ferramentas'] // Mensal: apenas gestão e ferramentas
+    }
+    if (productType === 'platform_annual') {
+      return ['completo'] // Anual: acesso completo
+    }
+    if (productType === 'formation_only') {
+      return ['cursos'] // Formação standalone: apenas cursos
+    }
+  }
+  
+  // Para outras áreas ou sem productType, manter comportamento padrão
+  // Anual = completo, Mensal = gestão + ferramentas
+  if (planType === 'annual') {
+    return ['completo']
+  }
+  
+  return ['gestao', 'ferramentas']
+}
+
+/**
  * POST /api/webhooks/mercado-pago
  * Webhook para processar eventos do Mercado Pago
  */
@@ -236,7 +267,12 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     
     const area = metadata.area || (fullData.external_reference?.split('_')[0]) || 'wellness'
     const planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || 'monthly'
+    const productType = metadata.product_type || metadata.productType // Suportar ambos os formatos
     const paymentMethod = fullData.payment_method_id || 'unknown'
+    
+    // Determinar features baseado em productType (apenas Nutri)
+    const features = determineFeatures(area, planType, productType)
+    console.log('🎯 Features determinadas:', { area, planType, productType, features })
 
     // Obter informações do pagamento
     const amount = fullData.transaction_amount || 0
@@ -444,6 +480,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           amount: Math.round(amount * 100),
           currency: currency.toLowerCase(),
           status: 'active',
+          features: features, // Atualizar features na renovação
           cancel_at_period_end: false,
           reminder_sent: reminderSent,
           updated_at: new Date().toISOString(),
@@ -474,6 +511,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           user_id: userId,
           area: area,
           plan_type: planType,
+          features: features, // Adicionar features determinadas
           stripe_account: null,
           stripe_subscription_id: subscriptionId,
           stripe_customer_id: fullData.payer?.id?.toString() || 'mp_customer',
@@ -735,11 +773,16 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     const userId = metadata.user_id
     const area = metadata.area || 'wellness'
     const planType = metadata.plan_type || 'monthly'
+    const productType = metadata.product_type || metadata.productType // Suportar ambos os formatos
 
     if (!userId) {
       console.error('❌ User ID não encontrado no metadata da assinatura')
       return
     }
+    
+    // Determinar features baseado em productType (apenas Nutri)
+    const features = determineFeatures(area, planType, productType)
+    console.log('🎯 Features determinadas (Subscription):', { area, planType, productType, features })
 
     // Status da assinatura
     const status = data.status // 'authorized', 'paused', 'cancelled'
@@ -818,6 +861,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
         user_id: userId,
         area: area,
         plan_type: planType,
+        features: features, // Adicionar features determinadas
         stripe_account: null, // Mercado Pago não usa stripe_account
         stripe_subscription_id: subscriptionIdDb, // Usar como ID único
         stripe_customer_id: data.payer_id?.toString() || 'mp_customer',
