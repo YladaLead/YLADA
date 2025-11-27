@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { normalizeSlug } from '@/lib/slug-utils'
-import { normalizeSlug } from '@/lib/slug-utils'
 
 // GET - Listar portais do usuário autenticado
 export async function GET(request: NextRequest) {
