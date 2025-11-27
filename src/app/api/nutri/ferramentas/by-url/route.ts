@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { hasActiveSubscription } from '@/lib/subscription-helpers'
+import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 
 // Buscar ferramenta por URL completa (user-slug/tool-slug)
 export async function GET(request: NextRequest) {
@@ -18,6 +18,15 @@ export async function GET(request: NextRequest) {
 
     const ensureActiveSubscription = async (ownerId: string | null) => {
       if (!ownerId) return true
+      
+      // Verificar se é admin ou suporte (bypass)
+      const bypass = await canBypassSubscription(ownerId)
+      if (bypass) {
+        console.log(`✅ Usuário ${ownerId} pode bypassar (admin/suporte)`)
+        return true
+      }
+      
+      // Verificar assinatura ativa
       return await hasActiveSubscription(ownerId, 'nutri')
     }
 
