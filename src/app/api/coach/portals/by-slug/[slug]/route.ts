@@ -56,6 +56,25 @@ export async function GET(
         portal = portalCaseInsensitive
       }
     }
+    
+    // Se ainda não encontrou, tentar buscar SEM filtros de status/profession (para debug)
+    if (!portal && !portalError) {
+      console.warn('⚠️ Portal não encontrado com filtros, tentando busca sem filtros...')
+      const { data: portalSemFiltros } = await supabaseAdmin
+        .from('coach_portals')
+        .select('*')
+        .or(`slug.eq.${normalizedSlug},slug.ilike.${slug}`)
+        .maybeSingle()
+      
+      if (portalSemFiltros) {
+        console.warn('⚠️ Portal encontrado mas com status/profession incorretos:', {
+          slug: portalSemFiltros.slug,
+          status: portalSemFiltros.status,
+          profession: portalSemFiltros.profession
+        })
+        // Não usar este portal, mas logar para debug
+      }
+    }
 
     console.log('📊 Resultado da busca:', { 
       encontrado: !!portal, 
