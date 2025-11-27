@@ -664,7 +664,7 @@ function NovoPortalCoachContent() {
               <p className="text-sm text-purple-700">
                 <span className="font-medium">ℹ️ Informação:</span> As ferramentas disponíveis são apenas as que você criou. 
                 Para adicionar mais ferramentas ao portal,{' '}
-                <Link href="/pt/coach/ferramentas/nova" className="text-purple-600 hover:underline font-medium">
+                <Link href="/pt/coach/c/ferramentas/nova" className="text-purple-600 hover:underline font-medium">
                   crie-as individualmente primeiro
                 </Link>.
               </p>
@@ -708,7 +708,7 @@ function NovoPortalCoachContent() {
           {/* Botões */}
           <div className="flex justify-end space-x-3">
             <Link
-              href="/pt/coach/portals"
+              href="/pt/coach/c/portals"
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
             >
               Cancelar

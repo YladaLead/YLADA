@@ -39,6 +39,21 @@ export function middleware(request: NextRequest) {
     url.pathname = '/pt/nutri/ferramentas/templates'
     return NextResponse.redirect(url)
   }
+
+  // Redirecionar rotas antigas da área Coach para novas rotas com /c/
+  // /pt/coach/ferramentas/* -> /pt/coach/c/ferramentas/*
+  if (pathname.startsWith('/pt/coach/ferramentas/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace('/pt/coach/ferramentas/', '/pt/coach/c/ferramentas/')
+    return NextResponse.redirect(url)
+  }
+
+  // /pt/coach/portals/* -> /pt/coach/c/portals/*
+  if (pathname.startsWith('/pt/coach/portals/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace('/pt/coach/portals/', '/pt/coach/c/portals/')
+    return NextResponse.redirect(url)
+  }
   
   // Verificar se já tem idioma na URL
   const hasLanguage = pathname.startsWith('/pt') || pathname.startsWith('/en') || pathname.startsWith('/es')

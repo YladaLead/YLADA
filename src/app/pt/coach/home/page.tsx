@@ -279,7 +279,7 @@ function CoachHomeContent() {
                     Ver Meus Links →
                   </Link>
                   <Link
-                    href="/pt/coach/ferramentas/nova"
+                    href="/pt/coach/c/ferramentas/nova"
                     className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                   >
                     + Criar Novo Link
@@ -319,13 +319,13 @@ function CoachHomeContent() {
                 </div>
                 <div className="mt-4 flex flex-col gap-2">
                   <Link
-                    href="/pt/coach/portals"
+                    href="/pt/coach/c/portals"
                     className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                   >
                     Ver Meus Portais →
                   </Link>
                   <Link
-                    href="/pt/coach/portals/novo"
+                    href="/pt/coach/c/portals/novo"
                     className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                   >
                     + Criar Novo Portal
@@ -475,7 +475,7 @@ function CoachHomeContent() {
                 <div className="text-center py-8">
                   <p className="text-gray-600 text-sm mb-4">Nenhum lead recente</p>
                   <Link 
-                    href="/pt/coach/ferramentas/nova"
+                    href="/pt/coach/c/ferramentas/nova"
                     className="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                   >
                     Criar Ferramenta
@@ -559,7 +559,7 @@ function CoachHomeContent() {
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Link
-                href="/pt/coach/ferramentas/nova"
+                href="/pt/coach/c/ferramentas/nova"
                 className="bg-purple-50 hover:bg-purple-100 rounded-lg p-4 text-center transition-colors border border-purple-200"
               >
                 <div className="text-2xl mb-2">➕</div>

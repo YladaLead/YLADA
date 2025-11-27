@@ -458,7 +458,7 @@ function EditarPortalCoachContent() {
               <p className="text-sm text-purple-700">
                 <span className="font-medium">ℹ️ Informação:</span> As ferramentas disponíveis são apenas as que você criou. 
                 Para adicionar mais ferramentas ao portal,{' '}
-                <Link href="/pt/coach/ferramentas/nova" className="text-purple-600 hover:underline font-medium">
+                <Link href="/pt/coach/c/ferramentas/nova" className="text-purple-600 hover:underline font-medium">
                   crie-as individualmente primeiro
                 </Link>.
               </p>
@@ -467,7 +467,7 @@ function EditarPortalCoachContent() {
             {tools.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
                 Nenhuma ferramenta encontrada. Crie ferramentas primeiro em{' '}
-                <Link href="/pt/coach/ferramentas/nova" className="text-purple-600 hover:underline">
+                <Link href="/pt/coach/c/ferramentas/nova" className="text-purple-600 hover:underline">
                   Ferramentas → Nova
                 </Link>
               </p>
