@@ -283,11 +283,17 @@ export async function POST(request: NextRequest) {
     let content: any = null // Inicializar como null
     
     if (templateIdToUse) {
-      const { data: template, error: templateError } = await supabaseAdmin
+      let templateQuery = supabaseAdmin
         .from('templates_nutrition')
-        .select('content')
+        .select('content, profession')
         .eq('id', templateIdToUse)
-        .single()
+      
+      // ✅ CORRIGIDO: Filtrar por profession para garantir que é o template correto
+      if (profession) {
+        templateQuery = templateQuery.eq('profession', profession)
+      }
+      
+      const { data: template, error: templateError } = await templateQuery.single()
 
       if (templateError) {
         console.warn('⚠️ Erro ao buscar template:', templateError)
