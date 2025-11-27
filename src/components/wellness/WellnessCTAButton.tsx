@@ -127,20 +127,49 @@ export default function WellnessCTAButton({
         }
       } else {
         console.warn('⚠️ WhatsApp CTA - País não encontrado no CountrySelector:', config.country_code)
-        // Se país não foi encontrado, NÃO assumir Brasil - deixar número como está
+        // Se país não foi encontrado, tentar adicionar código padrão baseado no tamanho do número
+        // Números dos EUA têm 10 dígitos, então se tiver 10 dígitos e não começar com código, adicionar 1
+        if (numeroLimpo.length === 10 && !numeroLimpo.startsWith('1') && !numeroLimpo.startsWith('55')) {
+          // Provavelmente é número dos EUA
+          numeroLimpo = '1' + numeroLimpo
+          console.log('📱 WhatsApp CTA - Número de 10 dígitos, assumindo EUA:', {
+            numeroOriginal,
+            numeroFinal: numeroLimpo
+          })
+        }
       }
     } else {
-      // Se não tem country_code, NÃO assumir Brasil automaticamente
-      // Apenas adicionar se o número claramente não tem código (menos de 10 dígitos)
-      console.warn('⚠️ WhatsApp CTA - country_code não disponível:', {
+      // Se não tem country_code, tentar inferir pelo tamanho do número
+      console.warn('⚠️ WhatsApp CTA - country_code não disponível, tentando inferir:', {
         country_code: config.country_code,
         numeroOriginal,
-        acao: 'Número será usado como está (sem adicionar código)'
+        tamanho: numeroLimpo.length
       })
       
-      // Só adicionar código do Brasil se número tiver menos de 10 dígitos (claramente incompleto)
-      // E se não começar com nenhum código conhecido
-      if (numeroLimpo.length < 10 && !numeroLimpo.startsWith('1') && !numeroLimpo.startsWith('55')) {
+      // Números dos EUA têm 10 dígitos (sem código)
+      if (numeroLimpo.length === 10 && !numeroLimpo.startsWith('1') && !numeroLimpo.startsWith('55')) {
+        numeroLimpo = '1' + numeroLimpo
+        console.log('📱 WhatsApp CTA - Número de 10 dígitos, assumindo EUA:', {
+          numeroOriginal,
+          numeroFinal: numeroLimpo
+        })
+      }
+      // Números brasileiros têm 11 dígitos (2 DDD + 9 número) ou 13 com código 55
+      else if (numeroLimpo.length === 11 && numeroLimpo.startsWith('11') && !numeroLimpo.startsWith('55')) {
+        numeroLimpo = '55' + numeroLimpo
+        console.log('📱 WhatsApp CTA - Número de 11 dígitos começando com 11, assumindo Brasil:', {
+          numeroOriginal,
+          numeroFinal: numeroLimpo
+        })
+      }
+      // Se número já tem 11+ dígitos e começa com código conhecido, manter como está
+      else if (numeroLimpo.length >= 11 && (numeroLimpo.startsWith('1') || numeroLimpo.startsWith('55'))) {
+        console.log('ℹ️ WhatsApp CTA - Número já parece ter código do país:', {
+          numeroOriginal: numeroLimpo
+        })
+      }
+      // Se número tem menos de 10 dígitos, assumir Brasil (padrão)
+      else if (numeroLimpo.length < 10) {
         numeroLimpo = '55' + numeroLimpo
         console.log('📱 WhatsApp CTA - Número muito curto, assumindo Brasil:', {
           numeroOriginal,
