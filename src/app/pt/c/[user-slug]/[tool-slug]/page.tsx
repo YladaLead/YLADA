@@ -95,6 +95,14 @@ export default function FerramentaPersonalizadaCoachPage() {
 
       const data = await response.json()
       setTool(data.tool)
+      
+      // Debug: verificar se country_code está vindo da API
+      console.log('🔍 Tool carregado:', {
+        tool_id: data.tool?.id,
+        whatsapp_number: data.tool?.whatsapp_number,
+        country_code: data.tool?.user_profiles?.country_code,
+        user_profiles: data.tool?.user_profiles
+      })
 
       // Incrementar contador de visualizações
       if (data.tool?.id) {
@@ -168,6 +176,15 @@ export default function FerramentaPersonalizadaCoachPage() {
   // Renderizar template específico com configurações
   const renderizarTemplate = () => {
     // Passar configurações via props
+    const countryCode = tool.user_profiles?.country_code || null
+    
+    // Debug: verificar country_code antes de passar para o config
+    console.log('🔍 Config sendo criado:', {
+      whatsapp_number: tool.whatsapp_number,
+      country_code: countryCode,
+      user_profiles: tool.user_profiles
+    })
+    
     const config = {
       title: tool.title,
       description: tool.description,
@@ -178,7 +195,7 @@ export default function FerramentaPersonalizadaCoachPage() {
       external_url: tool.external_url,
       cta_button_text: tool.cta_button_text,
       custom_whatsapp_message: tool.custom_whatsapp_message,
-      country_code: tool.user_profiles?.country_code || null, // Incluir country_code do perfil
+      country_code: countryCode, // Incluir country_code do perfil
     }
 
     // ✅ Normalizar template_slug para garantir consistência
