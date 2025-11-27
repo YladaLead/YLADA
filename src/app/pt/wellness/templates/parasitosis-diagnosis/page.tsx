@@ -192,10 +192,8 @@ export default function DiagnosticoParasitose({ config }: TemplateBaseProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
       <WellnessHeader
-        title={config?.title}
-        description={config?.description}
         defaultTitle="Diagnóstico de Parasitose"
-        defaultDescription="Identifique e trate parasitoses de forma segura"
+        defaultDescription=""
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
