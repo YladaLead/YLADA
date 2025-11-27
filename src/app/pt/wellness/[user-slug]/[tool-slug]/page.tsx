@@ -177,6 +177,7 @@ export default function FerramentaPersonalizadaPage() {
       external_url: tool.external_url,
       cta_button_text: tool.cta_button_text,
       custom_whatsapp_message: tool.custom_whatsapp_message,
+      country_code: tool.user_profiles?.country_code || null, // Incluir country_code do perfil
     }
 
     // ✅ Normalizar template_slug para garantir consistência

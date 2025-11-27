@@ -72,7 +72,29 @@ export default function WellnessCTAButton({
 
   // Renderizar botão WhatsApp
   if (config.cta_type === 'whatsapp' && config.whatsapp_number) {
-    const numeroLimpo = config.whatsapp_number.replace(/[^0-9]/g, '')
+    // Limpar número e verificar se já tem código do país
+    let numeroLimpo = config.whatsapp_number.replace(/[^0-9]/g, '')
+    
+    // Se country_code está disponível e o número não começa com código de país conhecido, adicionar
+    if (config.country_code && config.country_code !== 'BR' && config.country_code !== 'OTHER') {
+      // Buscar código telefônico do país
+      const { getCountryByCode } = require('@/components/CountrySelector')
+      const country = getCountryByCode(config.country_code)
+      
+      if (country && country.phoneCode) {
+        const phoneCode = country.phoneCode.replace(/[^0-9]/g, '')
+        // Se o número não começa com o código do país, adicionar
+        if (!numeroLimpo.startsWith(phoneCode)) {
+          numeroLimpo = phoneCode + numeroLimpo
+        }
+      }
+    } else if (!config.country_code || config.country_code === 'BR') {
+      // Para Brasil, garantir que tem código 55 se não tiver
+      if (!numeroLimpo.startsWith('55')) {
+        numeroLimpo = '55' + numeroLimpo
+      }
+    }
+    
     const mensagem = config.custom_whatsapp_message
       ? formatarMensagem(config.custom_whatsapp_message)
       : 'Olá! Gostaria de saber mais sobre como posso melhorar minha saúde.'

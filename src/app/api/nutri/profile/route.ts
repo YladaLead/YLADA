@@ -184,6 +184,16 @@ export async function PUT(request: NextRequest) {
 
     // Verificar se user_slug já existe para outro usuário
     if (userSlug) {
+      // Lista de palavras reservadas que não podem ser usadas como user_slug
+      const palavrasReservadas = ['portal', 'ferramenta', 'ferramentas', 'home', 'configuracao', 'configuracoes', 'perfil', 'admin', 'api', 'pt', 'c', 'coach', 'nutri', 'wellness', 'nutra']
+      
+      if (palavrasReservadas.includes(userSlug.toLowerCase())) {
+        return NextResponse.json(
+          { error: `"${userSlug}" é uma palavra reservada e não pode ser usada como nome de URL. Escolha outro nome.` },
+          { status: 400 }
+        )
+      }
+      
       const { data: existingSlug } = await supabaseAdmin
         .from('user_profiles')
         .select('user_id')

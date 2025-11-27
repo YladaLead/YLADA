@@ -15,6 +15,7 @@ export interface ToolConfig {
   external_url?: string
   cta_button_text?: string
   custom_whatsapp_message?: string
+  country_code?: string // Código do país (ex: 'US', 'BR', 'OTHER')
 }
 
 export interface TemplateBaseProps {

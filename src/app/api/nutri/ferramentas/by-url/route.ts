@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       .from('user_templates')
       .select(`
         *,
-        user_profiles!inner(user_slug, user_id, nome_completo, email)
+        user_profiles!inner(user_slug, user_id, nome_completo, email, country_code)
       `)
       .eq('user_profiles.user_slug', userSlug)
       .eq('slug', toolSlug)
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
         // Buscar perfil separadamente e adicionar aos dados
         const { data: userProfile } = await supabaseAdmin
           .from('user_profiles')
-          .select('user_slug, user_id, nome_completo, email')
+          .select('user_slug, user_id, nome_completo, email, country_code')
           .eq('user_id', profile.user_id)
           .maybeSingle()
         
