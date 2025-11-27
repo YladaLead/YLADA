@@ -75,7 +75,17 @@ export default function WellnessCTAButton({
     // Limpar número e verificar se já tem código do país
     let numeroLimpo = config.whatsapp_number.replace(/[^0-9]/g, '')
     
-    // Se country_code está disponível e o número não começa com código de país conhecido, adicionar
+    // Função auxiliar para verificar se número já tem código do país
+    const numeroTemCodigoPais = (numero: string, phoneCode: string): boolean => {
+      // Para códigos de 1 dígito (EUA, Canadá), verificar se número tem 11+ dígitos
+      if (phoneCode === '1') {
+        return numero.length >= 11 && numero.startsWith('1')
+      }
+      // Para outros países, verificar se começa com o código
+      return numero.startsWith(phoneCode)
+    }
+    
+    // Se country_code está disponível e o número não tem código de país, adicionar
     if (config.country_code && config.country_code !== 'BR' && config.country_code !== 'OTHER') {
       // Buscar código telefônico do país
       const { getCountryByCode } = require('@/components/CountrySelector')
@@ -83,15 +93,19 @@ export default function WellnessCTAButton({
       
       if (country && country.phoneCode) {
         const phoneCode = country.phoneCode.replace(/[^0-9]/g, '')
-        // Se o número não começa com o código do país, adicionar
-        if (!numeroLimpo.startsWith(phoneCode)) {
+        // Verificar se número já tem código do país usando lógica melhorada
+        if (!numeroTemCodigoPais(numeroLimpo, phoneCode)) {
           numeroLimpo = phoneCode + numeroLimpo
         }
       }
     } else if (!config.country_code || config.country_code === 'BR') {
       // Para Brasil, garantir que tem código 55 se não tiver
-      if (!numeroLimpo.startsWith('55')) {
-        numeroLimpo = '55' + numeroLimpo
+      // Números brasileiros completos têm 13 dígitos (55 + 2 DDD + 9 dígitos)
+      if (numeroLimpo.length < 13 || !numeroLimpo.startsWith('55')) {
+        // Se não começa com 55, adicionar
+        if (!numeroLimpo.startsWith('55')) {
+          numeroLimpo = '55' + numeroLimpo
+        }
       }
     }
     
