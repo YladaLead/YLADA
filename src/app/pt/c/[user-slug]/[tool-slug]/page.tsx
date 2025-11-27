@@ -59,6 +59,7 @@ const TemplatePotentialAndGrowth = dynamic(() => import('@/app/pt/wellness/templ
 const TemplatePurposeAndBalance = dynamic(() => import('@/app/pt/wellness/templates/purpose-and-balance/page'), { ssr: false })
 const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-interativo/page'), { ssr: false })
 const TemplateInitialAssessment = dynamic(() => import('@/app/pt/wellness/templates/initial-assessment/page'), { ssr: false })
+const TemplateParasitosisDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/parasitosis-diagnosis/page'), { ssr: false })
 
 export default function FerramentaPersonalizadaCoachPage() {
   const params = useParams()
@@ -297,6 +298,11 @@ export default function FerramentaPersonalizadaCoachPage() {
       case 'avaliacao-inicial':
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
+      case 'template-diagnostico-parasitose':
+      case 'diagnostico-parasitose':
+      case 'diagnóstico-parasitose':
+      case 'parasitose':
+        return <TemplateParasitosisDiagnosis config={config} />
       default:
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
