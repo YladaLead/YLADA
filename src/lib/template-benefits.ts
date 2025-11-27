@@ -374,6 +374,27 @@ export function getTemplateBenefits(templateSlug: string): TemplateBenefits {
   }
 
   // ============================================
+  // DIAGNÓSTICOS
+  // ============================================
+
+  if (slug.includes('diagnostico-parasitose') || slug.includes('parasitose')) {
+    return {
+      discover: [
+        'Identifique sinais de parasitose',
+        'Nível de gravidade (básica, moderada ou avançada)',
+        'Protocolo direcionado e seguro',
+        'Estratégias para prevenir recorrências'
+      ],
+      whyUse: [
+        'Diagnóstico rápido e personalizado',
+        'Protocolo direcionado baseado no seu caso',
+        'Orientações seguras e eficazes',
+        'Acompanhamento especializado multidisciplinar'
+      ]
+    }
+  }
+
+  // ============================================
   // FALLBACK GENÉRICO
   // ============================================
   
