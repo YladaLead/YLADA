@@ -197,17 +197,72 @@ export async function validateTemplateBeforeCreate(
   // Se tem template_id, buscar direto pelo ID e retornar o slug do banco
   if (templateId) {
     try {
-      const { data: template } = await supabaseAdmin
+      let query = supabaseAdmin
         .from(tableName)
-        .select('id, slug, name')
+        .select('id, slug, name, profession')
         .eq('id', templateId)
-        .maybeSingle()
+      
+      // ✅ CORRIGIDO: Filtrar por profession se fornecido
+      if (profession) {
+        query = query.eq('profession', profession)
+      }
+      
+      const { data: template, error: templateError } = await query.maybeSingle()
+      
+      if (templateError) {
+        // Se profession não existir, buscar sem filtro
+        if (templateError.message?.includes('profession') || templateError.code === '42703') {
+          const { data: templateWithoutProfession } = await supabaseAdmin
+            .from(tableName)
+            .select('id, slug, name, profession')
+            .eq('id', templateId)
+            .maybeSingle()
+          
+          if (!templateWithoutProfession) {
+            return {
+              templateId: null,
+              templateSlug: null,
+              error: 'Template não encontrado. Por favor, selecione outro template.'
+            }
+          }
+          
+          // Filtrar por profession manualmente se necessário
+          if (profession && templateWithoutProfession.profession && templateWithoutProfession.profession !== profession) {
+            return {
+              templateId: null,
+              templateSlug: null,
+              error: `Template não é do tipo ${profession}. Por favor, selecione outro template.`
+            }
+          }
+          
+          const slugCanonico = templateWithoutProfession.slug || normalizeTemplateSlug(templateWithoutProfession.name)
+          return { 
+            templateId: templateWithoutProfession.id,
+            templateSlug: slugCanonico
+          }
+        }
+        
+        return {
+          templateId: null,
+          templateSlug: null,
+          error: 'Erro ao buscar template. Verifique se o template selecionado existe.'
+        }
+      }
       
       if (!template) {
         return {
           templateId: null,
           templateSlug: null,
           error: 'Template não encontrado. Por favor, selecione outro template.'
+        }
+      }
+      
+      // Verificar se o template é da profession correta (se especificado)
+      if (profession && template.profession && template.profession !== profession) {
+        return {
+          templateId: null,
+          templateSlug: null,
+          error: `Template não é do tipo ${profession}. Por favor, selecione outro template.`
         }
       }
       
