@@ -14,7 +14,13 @@ assinatura_referencia AS (
   SELECT 
     plan_type,
     features,
-    current_period_end
+    current_period_end,
+    stripe_account,
+    stripe_subscription_id,
+    stripe_customer_id,
+    stripe_price_id,
+    amount,
+    currency
   FROM subscriptions s
   JOIN user_profiles up ON s.user_id = up.id
   WHERE up.user_slug = 'andre'
@@ -32,17 +38,30 @@ INSERT INTO subscriptions (
   features,
   current_period_start,
   current_period_end,
+  stripe_account,
+  stripe_subscription_id,
+  stripe_customer_id,
+  stripe_price_id,
+  amount,
+  currency,
   created_at,
   updated_at
 )
 SELECT 
   ui.user_id,
   'coach' as area,
-  COALESCE(ar.plan_type, 'monthly') as plan_type,
+  COALESCE(ar.plan_type, 'free') as plan_type,
   'active' as status,
   COALESCE(ar.features, '["completo"]'::jsonb) as features,
   NOW() as current_period_start,
-  COALESCE(ar.current_period_end, (NOW() + INTERVAL '1 month')::timestamp) as current_period_end,
+  COALESCE(ar.current_period_end, (NOW() + INTERVAL '10 years')::timestamp) as current_period_end,
+  -- Campos Stripe obrigatórios (valores fictícios para plano gratuito)
+  COALESCE(ar.stripe_account, 'br') as stripe_account,
+  COALESCE(ar.stripe_subscription_id, 'free_' || ui.user_id::text || '_coach_' || EXTRACT(EPOCH FROM NOW())::bigint) as stripe_subscription_id,
+  COALESCE(ar.stripe_customer_id, 'free_' || ui.user_id::text) as stripe_customer_id,
+  COALESCE(ar.stripe_price_id, 'free') as stripe_price_id,
+  COALESCE(ar.amount, 0) as amount,
+  COALESCE(ar.currency, 'brl') as currency,
   NOW() as created_at,
   NOW() as updated_at
 FROM usuario_info ui
@@ -50,7 +69,13 @@ CROSS JOIN LATERAL (
   SELECT 
     plan_type,
     features,
-    current_period_end
+    current_period_end,
+    stripe_account,
+    stripe_subscription_id,
+    stripe_customer_id,
+    stripe_price_id,
+    amount,
+    currency
   FROM subscriptions s
   WHERE s.user_id = ui.user_id
     AND s.status = 'active'
@@ -111,16 +136,28 @@ BEGIN
       features,
       current_period_start,
       current_period_end,
+      stripe_account,
+      stripe_subscription_id,
+      stripe_customer_id,
+      stripe_price_id,
+      amount,
+      currency,
       created_at,
       updated_at
     ) VALUES (
       v_user_id,
       'coach',
-      'monthly',
+      'free',
       'active',
       '["completo"]'::jsonb,
       NOW(),
-      (NOW() + INTERVAL '1 month')::timestamp,
+      (NOW() + INTERVAL '10 years')::timestamp,
+      'br',
+      'free_' || v_user_id::text || '_coach_' || EXTRACT(EPOCH FROM NOW())::bigint,
+      'free_' || v_user_id::text,
+      'free',
+      0,
+      'brl',
       NOW(),
       NOW()
     );

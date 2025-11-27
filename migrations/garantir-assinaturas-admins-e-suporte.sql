@@ -47,17 +47,30 @@ INSERT INTO subscriptions (
   features,
   current_period_start,
   current_period_end,
+  stripe_account,
+  stripe_subscription_id,
+  stripe_customer_id,
+  stripe_price_id,
+  amount,
+  currency,
   created_at,
   updated_at
 )
 SELECT 
   uas.user_id,
   an.area,
-  'monthly' as plan_type,
+  'free' as plan_type,
   'active' as status,
   '["completo"]'::jsonb as features,
   NOW() as current_period_start,
   (NOW() + INTERVAL '10 years')::timestamp as current_period_end, -- 10 anos para admins/suporte
+  -- Campos Stripe obrigatórios (valores fictícios para plano gratuito)
+  'br' as stripe_account,
+  'free_' || uas.user_id::text || '_' || an.area || '_' || EXTRACT(EPOCH FROM NOW())::bigint as stripe_subscription_id,
+  'free_' || uas.user_id::text as stripe_customer_id,
+  'free' as stripe_price_id,
+  0 as amount,
+  'brl' as currency,
   NOW() as created_at,
   NOW() as updated_at
 FROM usuarios_admin_suporte uas
@@ -85,6 +98,8 @@ SET
   status = 'active',
   current_period_end = (NOW() + INTERVAL '10 years')::timestamp,
   features = '["completo"]'::jsonb,
+  amount = 0,
+  currency = 'brl',
   updated_at = NOW()
 WHERE EXISTS (
   SELECT 1 FROM user_profiles up

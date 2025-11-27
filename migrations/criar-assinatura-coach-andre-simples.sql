@@ -12,17 +12,30 @@ INSERT INTO subscriptions (
   features,
   current_period_start,
   current_period_end,
+  stripe_account,
+  stripe_subscription_id,
+  stripe_customer_id,
+  stripe_price_id,
+  amount,
+  currency,
   created_at,
   updated_at
 )
 SELECT 
   up.id as user_id,
   'coach' as area,
-  'monthly' as plan_type,
+  'free' as plan_type,
   'active' as status,
   '["completo"]'::jsonb as features,
   NOW() as current_period_start,
   (NOW() + INTERVAL '10 years')::timestamp as current_period_end,
+  -- Campos Stripe obrigatórios (valores fictícios para plano gratuito)
+  'br' as stripe_account,
+  'free_' || up.id::text || '_coach_' || EXTRACT(EPOCH FROM NOW())::bigint as stripe_subscription_id,
+  'free_' || up.id::text as stripe_customer_id,
+  'free' as stripe_price_id,
+  0 as amount,
+  'brl' as currency,
   NOW() as created_at,
   NOW() as updated_at
 FROM user_profiles up
