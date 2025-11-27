@@ -493,7 +493,7 @@ export default function EditarFerramentaCoach() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Carregando ferramenta...</p>
         </div>
       </div>
@@ -655,7 +655,7 @@ export default function EditarFerramentaCoach() {
                           <p className="text-sm font-semibold text-purple-900 mb-2">
                             🔗 Sua URL completa será:
                           </p>
-                          <div className={`px-3 py-2 rounded ${urlDisponivel ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                          <div className={`px-3 py-2 rounded ${urlDisponivel ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                             <p className="text-sm font-medium mb-1">
                               {urlDisponivel ? '✓ Disponível' : '✗ Já em uso por você'} 
                             </p>
@@ -859,7 +859,7 @@ export default function EditarFerramentaCoach() {
                         onChange={(e) => setDescricao(e.target.value)}
                         placeholder="Uma descrição breve que aparece abaixo do título"
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -917,7 +917,7 @@ export default function EditarFerramentaCoach() {
                                 cores: { ...prev.cores, principal: e.target.value }
                               }))}
                               placeholder="#10B981"
-                              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                           </div>
                         </div>
@@ -941,7 +941,7 @@ export default function EditarFerramentaCoach() {
                                 cores: { ...prev.cores, secundaria: e.target.value }
                               }))}
                               placeholder="#059669"
-                              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                           </div>
                         </div>
@@ -975,7 +975,7 @@ export default function EditarFerramentaCoach() {
                           }))
                           setErroUrlWhatsapp(false) // Limpar erro ao trocar tipo de CTA
                         }}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
                         <option value="whatsapp">WhatsApp</option>
                         <option value="url">URL Externa</option>
@@ -1039,7 +1039,7 @@ export default function EditarFerramentaCoach() {
                             }))}
                             placeholder="Olá! Calculei meu IMC através do YLADA..."
                             rows={4}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             disabled={!perfilWhatsapp}
                           />
                           <div className="mt-2 bg-purple-50 rounded-lg p-3">
@@ -1106,7 +1106,7 @@ export default function EditarFerramentaCoach() {
                           textoBotao: e.target.value
                         }))}
                         placeholder="Conversar com Especialista"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                   </div>
