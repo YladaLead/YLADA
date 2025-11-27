@@ -21,7 +21,7 @@ SET
       ]'::jsonb
     ),
     '{questions,4,options,0,label}',
-    '"(A) Quase nunca"'::jsonb
+    '"(A) Quase nunca Não pratico"'::jsonb
   ),
   updated_at = NOW()
 WHERE profession = 'nutri'
