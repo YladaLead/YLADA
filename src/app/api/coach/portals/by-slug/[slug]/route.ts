@@ -24,23 +24,27 @@ export async function GET(
     console.log('🔍 Buscando portal Coach por slug:', { original: slug, normalized: normalizedSlug })
 
     // Buscar portal ativo (público) com profession='coach'
-    // Usar ILIKE para busca case-insensitive e tentar tanto slug original quanto normalizado
+    // Primeiro tentar com slug normalizado (busca exata)
     let { data: portal, error: portalError } = await supabaseAdmin
       .from('coach_portals')
       .select('*')
-      .or(`slug.ilike.${slug},slug.ilike.${normalizedSlug}`)
+      .eq('slug', normalizedSlug)
+      .eq('status', 'active')
+      .eq('profession', 'coach')
       .maybeSingle()
     
-    // Se não encontrou, tentar busca exata também
+    // Se não encontrou, tentar busca case-insensitive com slug original
     if (!portal && !portalError) {
-      const { data: portalExact } = await supabaseAdmin
+      const { data: portalCaseInsensitive } = await supabaseAdmin
         .from('coach_portals')
         .select('*')
-        .eq('slug', normalizedSlug)
+        .ilike('slug', slug)
+        .eq('status', 'active')
+        .eq('profession', 'coach')
         .maybeSingle()
       
-      if (portalExact) {
-        portal = portalExact
+      if (portalCaseInsensitive) {
+        portal = portalCaseInsensitive
       }
     }
 
