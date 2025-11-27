@@ -182,7 +182,7 @@ SELECT
     ELSE '❌ PROBLEMA'
   END as status_final
 FROM subscriptions s
-JOIN user_profiles up ON s.user_id = up.id
+JOIN user_profiles up ON s.user_id = up.user_id
 WHERE up.user_slug = 'andre'
   AND s.area = 'coach'
 ORDER BY s.created_at DESC
