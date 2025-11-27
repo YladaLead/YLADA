@@ -19,15 +19,47 @@ export async function GET(
     }
 
     // Buscar portal ativo (público) com profession='coach'
-    const { data: portal, error: portalError } = await supabaseAdmin
+    // Primeiro tentar em coach_portals
+    let { data: portal, error: portalError } = await supabaseAdmin
       .from('coach_portals')
       .select('*')
       .eq('slug', slug)
       .eq('profession', 'coach')
       .eq('status', 'active')
-      .single()
+      .maybeSingle()
+
+    // Se não encontrou em coach_portals, tentar em wellness_portals (caso tenha sido criado na área errada)
+    // Isso pode acontecer se o portal foi criado na área Wellness mas o link está apontando para Coach
+    if (!portal && !portalError) {
+      const { data: wellnessPortal, error: wellnessError } = await supabaseAdmin
+        .from('wellness_portals')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'active')
+        .maybeSingle()
+      
+      if (wellnessPortal) {
+        // Portal encontrado em wellness_portals mas acessado via rota Coach
+        // Log para debug
+        console.warn('⚠️ Portal encontrado em wellness_portals mas acessado via rota Coach:', {
+          slug,
+          portal_id: wellnessPortal.id,
+          user_id: wellnessPortal.user_id
+        })
+        
+        // Retornar erro específico para indicar que está na área errada
+        return NextResponse.json(
+          { 
+            error: 'Portal não encontrado na área Coach. Este portal está na área Wellness.',
+            suggestion: `Acesse via: /pt/wellness/portal/${slug} ou /pt/wellness/[user-slug]/portal/${slug}`
+          },
+          { status: 404 }
+        )
+      }
+    }
 
     if (portalError || !portal) {
+      console.error('❌ Portal não encontrado:', { slug, error: portalError })
       return NextResponse.json(
         { error: 'Portal não encontrado ou inativo' },
         { status: 404 }

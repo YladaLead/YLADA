@@ -164,7 +164,7 @@ export default function PortalPublicCoachPage() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`/api/coach/portals/by-slug/${slug}`)
+      const response = await fetch(`/api/c/portals/by-slug/${slug}`)
 
       if (response.status === 403) {
         setError('link_indisponivel')
