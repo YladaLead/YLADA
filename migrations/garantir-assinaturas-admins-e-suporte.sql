@@ -7,7 +7,7 @@
 -- 1. Identificar todos os usuários admin e suporte
 WITH usuarios_admin_suporte AS (
   SELECT DISTINCT
-    up.id as user_id,
+    up.user_id,
     up.user_slug,
     up.nome_completo,
     up.email,
@@ -103,7 +103,7 @@ SET
   updated_at = NOW()
 WHERE EXISTS (
   SELECT 1 FROM user_profiles up
-  WHERE up.id = s.user_id
+  WHERE up.user_id = s.user_id
     AND (up.is_admin = true OR up.is_support = true)
 )
 AND s.status != 'active' 
@@ -127,7 +127,7 @@ SELECT
     ELSE '❌ PROBLEMA'
   END as status_assinatura
 FROM user_profiles up
-JOIN subscriptions s ON up.id = s.user_id
+JOIN subscriptions s ON up.user_id = s.user_id
 WHERE (up.is_admin = true OR up.is_support = true)
   AND s.status = 'active'
   AND s.current_period_end > NOW()
@@ -149,7 +149,7 @@ CROSS JOIN (VALUES ('coach'), ('nutri'), ('wellness'), ('nutra')) AS an(area)
 WHERE (up.is_admin = true OR up.is_support = true)
   AND NOT EXISTS (
     SELECT 1 FROM subscriptions s
-    WHERE s.user_id = up.id
+    WHERE s.user_id = up.user_id
       AND s.area = an.area
       AND s.status = 'active'
       AND s.current_period_end > NOW()

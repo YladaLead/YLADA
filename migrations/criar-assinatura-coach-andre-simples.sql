@@ -22,7 +22,7 @@ INSERT INTO subscriptions (
   updated_at
 )
 SELECT 
-  up.id as user_id,
+  up.user_id,
   'coach' as area,
   'free' as plan_type,
   'active' as status,
@@ -31,8 +31,8 @@ SELECT
   (NOW() + INTERVAL '10 years')::timestamp as current_period_end,
   -- Campos Stripe obrigatórios (valores fictícios para plano gratuito)
   'br' as stripe_account,
-  'free_' || up.id::text || '_coach_' || EXTRACT(EPOCH FROM NOW())::bigint as stripe_subscription_id,
-  'free_' || up.id::text as stripe_customer_id,
+  'free_' || up.user_id::text || '_coach_' || EXTRACT(EPOCH FROM NOW())::bigint as stripe_subscription_id,
+  'free_' || up.user_id::text as stripe_customer_id,
   'free' as stripe_price_id,
   0 as amount,
   'brl' as currency,
@@ -42,7 +42,7 @@ FROM user_profiles up
 WHERE up.user_slug = 'andre'
   AND NOT EXISTS (
     SELECT 1 FROM subscriptions s
-    WHERE s.user_id = up.id
+    WHERE s.user_id = up.user_id
       AND s.area = 'coach'
       AND s.status = 'active'
       AND s.current_period_end > NOW()
@@ -70,7 +70,7 @@ SELECT
     ELSE '❌ PROBLEMA'
   END as status_final
 FROM subscriptions s
-JOIN user_profiles up ON s.user_id = up.id
+JOIN user_profiles up ON s.user_id = up.user_id
 WHERE up.user_slug = 'andre'
   AND s.area = 'coach'
 ORDER BY s.created_at DESC

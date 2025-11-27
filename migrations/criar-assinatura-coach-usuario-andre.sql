@@ -5,7 +5,7 @@
 
 -- 1. Buscar user_id e informações de outras assinaturas
 WITH usuario_info AS (
-  SELECT id as user_id
+  SELECT user_id
   FROM user_profiles
   WHERE user_slug = 'andre'
   LIMIT 1
@@ -22,7 +22,7 @@ assinatura_referencia AS (
     amount,
     currency
   FROM subscriptions s
-  JOIN user_profiles up ON s.user_id = up.id
+  JOIN user_profiles up ON s.user_id = up.user_id
   WHERE up.user_slug = 'andre'
     AND s.status = 'active'
     AND s.current_period_end > NOW()
