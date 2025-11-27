@@ -20,7 +20,7 @@ SELECT
   'coach' as area,
   'monthly' as plan_type,
   'active' as status,
-  ARRAY['completo']::text[] as features,
+  '["completo"]'::jsonb as features,
   NOW() as current_period_start,
   (NOW() + INTERVAL '10 years')::timestamp as current_period_end,
   NOW() as created_at,

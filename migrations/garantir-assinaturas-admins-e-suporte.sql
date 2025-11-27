@@ -55,7 +55,7 @@ SELECT
   an.area,
   'monthly' as plan_type,
   'active' as status,
-  ARRAY['completo']::text[] as features,
+  '["completo"]'::jsonb as features,
   NOW() as current_period_start,
   (NOW() + INTERVAL '10 years')::timestamp as current_period_end, -- 10 anos para admins/suporte
   NOW() as created_at,
@@ -84,7 +84,7 @@ UPDATE subscriptions s
 SET 
   status = 'active',
   current_period_end = (NOW() + INTERVAL '10 years')::timestamp,
-  features = ARRAY['completo']::text[],
+  features = '["completo"]'::jsonb,
   updated_at = NOW()
 WHERE EXISTS (
   SELECT 1 FROM user_profiles up
