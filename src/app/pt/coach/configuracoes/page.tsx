@@ -1,11 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import CoachNavBar from "@/components/coach/CoachNavBar"
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function CoachConfiguracoes() {
+  const router = useRouter()
+  
+  useEffect(() => {
+    // Redirecionar para a página correta de configurações
+    router.replace('/pt/coach/configuracao')
+  }, [router])
+  
+  return null
   const [usuario, setUsuario] = useState({
     nome: 'Dr. Ana Maria Silva',
     crn: 'CRN-3 12345',

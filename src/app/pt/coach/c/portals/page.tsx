@@ -198,7 +198,7 @@ function PortalsCoachContent() {
                   Sem o slug configurado, suas URLs não serão personalizadas. Configure agora para ter URLs como: <span className="font-mono">ylada.app/pt/c/[seu-slug]/portal/[nome-portal]</span>
                 </p>
                 <Link
-                  href="/pt/coach/configuracoes"
+                  href="/pt/coach/configuracao"
                   className="inline-block text-sm text-yellow-900 underline hover:text-yellow-700 font-medium"
                 >
                   Ir para Configurações →

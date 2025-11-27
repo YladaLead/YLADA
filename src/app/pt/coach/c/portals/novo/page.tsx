@@ -354,7 +354,7 @@ function NovoPortalCoachContent() {
                       ⚠️ <strong>Configure seu slug pessoal</strong> para personalizar suas URLs
                     </p>
                     <Link
-                      href="/pt/coach/configuracoes"
+                      href="/pt/coach/configuracao"
                       className="text-sm text-yellow-900 underline hover:text-yellow-700"
                     >
                       Ir para Configurações →

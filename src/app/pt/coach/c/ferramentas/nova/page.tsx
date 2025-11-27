@@ -1213,7 +1213,7 @@ function NovaFerramentaCoachContent() {
                                     </p>
                                     <p className="text-xs text-gray-600">
                                       Este número será usado em todas as suas ferramentas. Para alterar, acesse{' '}
-                                      <Link href="/pt/coach/configuracoes" className="text-purple-600 underline font-semibold">
+                                      <Link href="/pt/coach/configuracao" className="text-purple-600 underline font-semibold">
                                         Configurações → Perfil
                                       </Link>
                                     </p>
@@ -1232,7 +1232,7 @@ function NovaFerramentaCoachContent() {
                                       Configure seu WhatsApp no perfil para usar esta opção.
                                     </p>
                                       <Link
-                                      href="/pt/coach/configuracoes"
+                                      href="/pt/coach/configuracao"
                                       className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
                                     >
                                       Ir para Configurações
