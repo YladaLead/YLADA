@@ -60,6 +60,14 @@ function CoachConfiguracaoContent() {
       setSlugValidando(true)
       const slugTratado = tratarSlug(slug)
       
+      // Verificar palavras reservadas
+      const palavrasReservadas = ['portal', 'ferramenta', 'ferramentas', 'home', 'configuracao', 'configuracoes', 'perfil', 'admin', 'api', 'pt', 'c', 'coach', 'nutri', 'wellness', 'nutra']
+      if (palavrasReservadas.includes(slugTratado.toLowerCase())) {
+        setSlugDisponivel(false)
+        setErro(`"${slugTratado}" é uma palavra reservada e não pode ser usada. Escolha outro nome.`)
+        return
+      }
+      
       // Verificar se slug já existe para outro usuário
       const response = await fetch(`/api/c/profile?user_slug=${encodeURIComponent(slugTratado)}`, {
         credentials: 'include'
