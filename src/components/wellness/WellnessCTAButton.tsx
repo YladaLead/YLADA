@@ -76,6 +76,13 @@ export default function WellnessCTAButton({
     let numeroLimpo = config.whatsapp_number.replace(/[^0-9]/g, '')
     const numeroOriginal = numeroLimpo
     
+    // Debug: verificar config recebido
+    console.log('📱 WhatsApp CTA - Config recebido:', {
+      whatsapp_number: config.whatsapp_number,
+      country_code: config.country_code,
+      numeroLimpo: numeroOriginal
+    })
+    
     // Função auxiliar para verificar se número já tem código do país
     const numeroTemCodigoPais = (numero: string, phoneCode: string): boolean => {
       // Para códigos de 1 dígito (EUA, Canadá), verificar se número tem 11+ dígitos E começa com 1
@@ -87,10 +94,15 @@ export default function WellnessCTAButton({
     }
     
     // SEMPRE tentar adicionar código do país se country_code estiver disponível
-    if (config.country_code && config.country_code !== 'OTHER') {
+    if (config.country_code && config.country_code !== 'OTHER' && config.country_code !== null && config.country_code !== '') {
       // Buscar código telefônico do país
       const { getCountryByCode } = require('@/components/CountrySelector')
       const country = getCountryByCode(config.country_code)
+      
+      console.log('📱 WhatsApp CTA - País encontrado:', {
+        country_code: config.country_code,
+        country: country ? { code: country.code, phoneCode: country.phoneCode } : null
+      })
       
       if (country && country.phoneCode) {
         const phoneCode = country.phoneCode.replace(/[^0-9]/g, '')
@@ -100,27 +112,37 @@ export default function WellnessCTAButton({
         
         if (!jaTemCodigo) {
           numeroLimpo = phoneCode + numeroLimpo
-          console.log('📱 WhatsApp CTA - Adicionado código do país:', {
+          console.log('✅ WhatsApp CTA - Adicionado código do país:', {
             country_code: config.country_code,
             phoneCode,
             numeroOriginal,
             numeroFinal: numeroLimpo
           })
         } else {
-          console.log('📱 WhatsApp CTA - Número já tem código do país:', {
+          console.log('ℹ️ WhatsApp CTA - Número já tem código do país:', {
             country_code: config.country_code,
             phoneCode,
             numeroOriginal: numeroLimpo
           })
         }
       } else {
-        console.warn('📱 WhatsApp CTA - País não encontrado:', config.country_code)
+        console.warn('⚠️ WhatsApp CTA - País não encontrado no CountrySelector:', config.country_code)
+        // Se país não foi encontrado, NÃO assumir Brasil - deixar número como está
       }
     } else {
-      // Se não tem country_code ou é 'OTHER', assumir Brasil como padrão
-      if (!numeroLimpo.startsWith('55')) {
+      // Se não tem country_code, NÃO assumir Brasil automaticamente
+      // Apenas adicionar se o número claramente não tem código (menos de 10 dígitos)
+      console.warn('⚠️ WhatsApp CTA - country_code não disponível:', {
+        country_code: config.country_code,
+        numeroOriginal,
+        acao: 'Número será usado como está (sem adicionar código)'
+      })
+      
+      // Só adicionar código do Brasil se número tiver menos de 10 dígitos (claramente incompleto)
+      // E se não começar com nenhum código conhecido
+      if (numeroLimpo.length < 10 && !numeroLimpo.startsWith('1') && !numeroLimpo.startsWith('55')) {
         numeroLimpo = '55' + numeroLimpo
-        console.log('📱 WhatsApp CTA - Sem country_code, assumindo Brasil:', {
+        console.log('📱 WhatsApp CTA - Número muito curto, assumindo Brasil:', {
           numeroOriginal,
           numeroFinal: numeroLimpo
         })
