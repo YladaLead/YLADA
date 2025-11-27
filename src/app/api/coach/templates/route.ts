@@ -90,6 +90,45 @@ export async function GET(request: NextRequest) {
       templates = templates.filter(t => t.profession === 'coach')
     }
 
+    // ✅ VALIDAÇÃO: Garantir que apenas templates com slugs válidos sejam retornados
+    // Lista dos 28 slugs válidos para Coach
+    const slugsValidos = [
+      'calc-hidratacao',
+      'calc-calorias',
+      'calc-imc',
+      'calc-proteina',
+      'retencao-liquidos',
+      'conhece-seu-corpo',
+      'disciplinado-emocional',
+      'nutrido-vs-alimentado',
+      'alimentacao-rotina',
+      'diagnostico-sintomas-intestinais',
+      'pronto-emagrecer',
+      'tipo-fome',
+      'perfil-intestino',
+      'quiz-bem-estar',
+      'quiz-perfil-nutricional',
+      'avaliacao-sono-energia',
+      'avaliacao-inicial',
+      'template-desafio-21dias',
+      'diagnostico-eletrolitos',
+      'diagnostico-parasitose',
+      'quiz-detox',
+      'quiz-energetico',
+      'quiz-interativo',
+      'quiz-alimentacao-saudavel',
+      'sindrome-metabolica',
+      'quiz-pedindo-detox',
+      'avaliacao-intolerancia',
+      'avaliacao-perfil-metabolico'
+    ]
+
+    // Filtrar apenas templates com slugs válidos
+    templates = templates.filter(t => {
+      const slug = t.slug || t.id
+      return slugsValidos.includes(slug)
+    })
+
     // Transformar para formato esperado pelo frontend
     const formattedTemplates = formatTemplates(templates)
 
