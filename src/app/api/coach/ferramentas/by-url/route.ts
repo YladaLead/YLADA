@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar ferramenta pela combinação user_slug + tool_slug
+    console.log('🔍 API Coach - Buscando ferramenta:', { userSlug, toolSlug })
+    
     const { data, error } = await supabaseAdmin
       .from('coach_user_templates')
       .select(`
@@ -35,7 +37,7 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('❌ Erro ao buscar ferramenta Nutri por URL:', {
+      console.error('❌ Erro ao buscar ferramenta Coach por URL:', {
         error,
         code: error.code,
         message: error.message,
@@ -92,8 +94,13 @@ export async function GET(request: NextRequest) {
         
         // Bloquear se assinatura venceu
         const ownerId = toolData?.user_id || profile.user_id
+        console.log('🔍 API Coach - Verificando assinatura (fallback):', { ownerId, tool_id: toolData?.id })
+        
         const subscriptionOk = await ensureActiveSubscription(ownerId)
+        console.log('🔍 API Coach - Resultado verificação assinatura (fallback):', { subscriptionOk, ownerId })
+        
         if (!subscriptionOk) {
+          console.warn('⚠️ API Coach - Assinatura não ativa ou expirada (fallback):', { ownerId, tool_id: toolData?.id })
           return NextResponse.json(
             { error: 'link_indisponivel', message: 'Assinatura expirada' },
             { status: 403 }
@@ -127,9 +134,13 @@ export async function GET(request: NextRequest) {
     }
 
     const ownerId = data.user_profiles?.user_id || data.user_id
+    console.log('🔍 API Coach - Verificando assinatura:', { ownerId, tool_id: data.id })
+    
     const subscriptionOk = await ensureActiveSubscription(ownerId)
+    console.log('🔍 API Coach - Resultado verificação assinatura:', { subscriptionOk, ownerId })
 
     if (!subscriptionOk) {
+      console.warn('⚠️ API Coach - Assinatura não ativa ou expirada:', { ownerId, tool_id: data.id })
       return NextResponse.json(
         { error: 'link_indisponivel', message: 'Assinatura expirada' },
         { status: 403 }
