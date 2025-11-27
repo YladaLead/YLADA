@@ -43,7 +43,7 @@ function PortalsCoachContent() {
       setCarregandoSlug(true)
       // TODO: Criar API /api/c/profile quando necessário
       // Por enquanto, usar wellness como fallback ou criar API genérica
-      const response = await fetch('/api/wellness/profile', {
+      const response = await fetch('/api/coach/profile', {
         credentials: 'include'
       })
       if (response.ok) {

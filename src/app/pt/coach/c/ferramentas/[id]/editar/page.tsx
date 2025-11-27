@@ -166,7 +166,7 @@ export default function EditarFerramentaCoach() {
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
-        const response = await fetch('/api/wellness/profile') // TODO: Criar /api/c/profile quando necessário
+        const response = await fetch('/api/coach/profile')
         if (response.ok) {
           const data = await response.json()
           if (data.profile?.userSlug) {
@@ -386,7 +386,7 @@ export default function EditarFerramentaCoach() {
         custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
       }
 
-      const response = await fetch('/api/wellness/ferramentas', {
+      const response = await fetch('/api/coach/ferramentas', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -406,7 +406,7 @@ export default function EditarFerramentaCoach() {
       
       // Redirecionar após 2 segundos
       setTimeout(() => {
-        router.push('/pt/wellness/ferramentas')
+        router.push('/pt/coach/c/ferramentas')
       }, 2000)
     } catch (error: any) {
       console.error('Erro ao salvar ferramenta:', error)
@@ -425,7 +425,7 @@ export default function EditarFerramentaCoach() {
       setSalvando(true)
       const novoStatus = toolData.status === 'active' ? 'inactive' : 'active'
       
-      const response = await fetch('/api/wellness/ferramentas', {
+      const response = await fetch('/api/coach/ferramentas', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -463,7 +463,7 @@ export default function EditarFerramentaCoach() {
     try {
       setExcluindo(true)
       
-      const response = await fetch(`/api/wellness/ferramentas?id=${toolData.id}`, {
+      const response = await fetch(`/api/coach/ferramentas?id=${toolData.id}`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -477,7 +477,7 @@ export default function EditarFerramentaCoach() {
       // Mostrar mensagem de sucesso e redirecionar
       setMensagemSucesso('Ferramenta excluída com sucesso!')
       setTimeout(() => {
-        router.push('/pt/wellness/ferramentas')
+        router.push('/pt/coach/c/ferramentas')
       }, 1500)
     } catch (error: any) {
       console.error('Erro ao excluir ferramenta:', error)
@@ -506,8 +506,8 @@ export default function EditarFerramentaCoach() {
         <div className="text-center">
           <p className="text-red-600 mb-4">Ferramenta não encontrada</p>
           <Link
-            href="/pt/wellness/ferramentas"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            href="/pt/coach/c/ferramentas"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
           >
             Voltar
           </Link>
@@ -518,7 +518,7 @@ export default function EditarFerramentaCoach() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <WellnessNavBar showTitle={true} title="Editar Ferramenta" />
+      <CoachNavBar showTitle={true} title="Editar Ferramenta" />
 
       {/* Mensagens de Sucesso/Erro */}
       {mensagemSucesso && (
@@ -601,14 +601,14 @@ export default function EditarFerramentaCoach() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Coluna Esquerda: Configuração */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border-2 border-green-200 p-6">
+            <div className="bg-white rounded-xl border-2 border-purple-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Configurações</h2>
 
               {/* Nome do Projeto - Colapsável */}
               <div className="mb-6">
                 <button
                   onClick={() => setAbaNomeProjeto(!abaNomeProjeto)}
-                  className="w-full flex items-center justify-between p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                  className="w-full flex items-center justify-between p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
                 >
                   <span className="font-semibold text-gray-900">Nome do Projeto</span>
                   <span>{abaNomeProjeto ? '▼' : '▶'}</span>
@@ -637,7 +637,7 @@ export default function EditarFerramentaCoach() {
                         placeholder="Ex: calculadora-imc"
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent ${
                           urlDisponivel 
-                            ? 'border-green-300 focus:ring-green-500' 
+                            ? 'border-purple-300 focus:ring-purple-500' 
                             : 'border-red-300 focus:ring-red-500'
                         }`}
                       />
@@ -678,14 +678,14 @@ export default function EditarFerramentaCoach() {
                       {!userSlug && (
                         <div className="mt-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
                           <p className="text-xs text-yellow-800">
-                            ⚠️ Configure seu slug no <Link href="/pt/wellness/configuracao" className="underline font-semibold">perfil</Link> para personalizar a URL.
+                            ⚠️ Configure seu slug no <Link href="/pt/coach/configuracao" className="underline font-semibold">perfil</Link> para personalizar a URL.
                           </p>
                         </div>
                       )}
                       
                       {/* Código Curto Existente */}
                       {shortCodeExistente && (
-                        <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div className="mt-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
                           <div className="flex items-center justify-between mb-2">
                             <div>
                               <span className="text-sm font-medium text-gray-900 block">
@@ -700,7 +700,7 @@ export default function EditarFerramentaCoach() {
                                 if (confirm('Tem certeza que deseja remover o código curto? Esta ação não pode ser desfeita.')) {
                                   try {
                                     setRemovendoShortCode(true)
-                                    const response = await fetch('/api/wellness/ferramentas', {
+                                    const response = await fetch('/api/coach/ferramentas', {
                                       method: 'PUT',
                                       headers: {
                                         'Content-Type': 'application/json',
@@ -811,7 +811,7 @@ export default function EditarFerramentaCoach() {
                                               setVerificandoShortCode(true)
                                               try {
                                                 const response = await fetch(
-                                                  `/api/wellness/ferramentas/check-short-code?code=${encodeURIComponent(value)}&excludeId=${toolId}`
+                                                  `/api/coach/ferramentas/check-short-code?code=${encodeURIComponent(value)}&excludeId=${toolId}`
                                                 )
                                                 const data = await response.json()
                                                 setShortCodeDisponivel(data.available)
@@ -870,7 +870,7 @@ export default function EditarFerramentaCoach() {
               <div className="mb-6">
                 <button
                   onClick={() => setAbaAparencia(!abaAparencia)}
-                  className="w-full flex items-center justify-between p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                  className="w-full flex items-center justify-between p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
                 >
                   <span className="font-semibold text-gray-900">Aparência</span>
                   <span>{abaAparencia ? '▼' : '▶'}</span>
@@ -886,7 +886,7 @@ export default function EditarFerramentaCoach() {
                         value={configuracao.emoji}
                         onChange={(e) => setConfiguracao(prev => ({ ...prev, emoji: e.target.value }))}
                         placeholder="Ex: 📊"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-center text-2xl"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-2xl"
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Digite um emoji ou cole do seu dispositivo (clique com botão direito)
@@ -955,7 +955,7 @@ export default function EditarFerramentaCoach() {
               <div className="mb-6">
                 <button
                   onClick={() => setAbaCTA(!abaCTA)}
-                  className="w-full flex items-center justify-between p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                  className="w-full flex items-center justify-between p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
                 >
                   <span className="font-semibold text-gray-900">CTA e Botão</span>
                   <span>{abaCTA ? '▼' : '▶'}</span>
@@ -987,7 +987,7 @@ export default function EditarFerramentaCoach() {
                         {carregandoPerfil ? (
                           <div className="animate-pulse bg-gray-100 h-20 rounded-lg"></div>
                         ) : perfilWhatsapp ? (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                             <div className="flex items-start space-x-3">
                               <span className="text-2xl">✅</span>
                               <div className="flex-1">
@@ -999,7 +999,7 @@ export default function EditarFerramentaCoach() {
                                 </p>
                                 <p className="text-xs text-gray-600">
                                   Este número será usado em todas as suas ferramentas. Para alterar, acesse{' '}
-                                  <Link href="/pt/wellness/configuracao" className="text-green-600 underline font-semibold">
+                                  <Link href="/pt/coach/configuracao" className="text-purple-600 underline font-semibold">
                                     Configurações → Perfil
                                   </Link>
                                 </p>
@@ -1018,8 +1018,8 @@ export default function EditarFerramentaCoach() {
                                   Configure seu WhatsApp no perfil para usar esta opção.
                                 </p>
                                 <Link
-                                  href="/pt/wellness/configuracao"
-                                  className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
+                                  href="/pt/coach/configuracao"
+                                  className="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
                                 >
                                   Ir para Configurações
                                 </Link>
@@ -1075,7 +1075,7 @@ export default function EditarFerramentaCoach() {
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent ${
                             erroUrlWhatsapp 
                               ? 'border-red-500 focus:ring-red-500' 
-                              : 'border-gray-300 focus:ring-green-500'
+                              : 'border-gray-300 focus:ring-purple-500'
                           }`}
                         />
                         {erroUrlWhatsapp && (
@@ -1129,8 +1129,8 @@ export default function EditarFerramentaCoach() {
                   <button
                     onClick={alternarStatus}
                     disabled={salvando}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                      toolData.status === 'active' ? 'bg-green-600' : 'bg-gray-300'
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                      toolData.status === 'active' ? 'bg-purple-600' : 'bg-gray-300'
                     } ${salvando ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <span
@@ -1144,7 +1144,7 @@ export default function EditarFerramentaCoach() {
 
               <div className="flex gap-4 mt-8">
                 <button
-                  onClick={() => router.push('/pt/wellness/ferramentas')}
+                  onClick={() => router.push('/pt/coach/c/ferramentas')}
                   disabled={salvando || excluindo}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -1153,7 +1153,7 @@ export default function EditarFerramentaCoach() {
                 <button
                   onClick={salvarFerramenta}
                   disabled={salvando || excluindo}
-                  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {salvando ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
@@ -1173,7 +1173,7 @@ export default function EditarFerramentaCoach() {
           </div>
 
           {/* Coluna Direita: Preview */}
-          <div className="bg-white rounded-xl border-2 border-green-200 p-8">
+            <div className="bg-white rounded-xl border-2 border-purple-200 p-8">
             <h3 className="text-lg font-bold text-gray-900 mb-4">📱 Preview</h3>
             <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
               {configuracao.emoji && (
