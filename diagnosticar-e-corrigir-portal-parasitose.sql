@@ -84,11 +84,12 @@ SELECT
     s.user_id,
     s.area,
     s.status,
-    s.features,
-    s.expires_at,
+    s.current_period_start,
+    s.current_period_end,
     CASE 
-        WHEN s.status = 'active' AND (s.expires_at IS NULL OR s.expires_at > NOW()) THEN '✅ Ativa'
-        ELSE '❌ Inativa ou expirada'
+        WHEN s.status = 'active' AND (s.current_period_end IS NULL OR s.current_period_end > NOW()) THEN '✅ Ativa'
+        WHEN s.status = 'active' AND s.current_period_end <= NOW() THEN '❌ Expirada'
+        ELSE '❌ Inativa'
     END as status_assinatura
 FROM subscriptions s
 WHERE s.user_id = (SELECT user_id FROM coach_portals WHERE slug = 'parasitose' LIMIT 1)
