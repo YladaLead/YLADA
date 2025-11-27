@@ -52,7 +52,7 @@ export default function CoachNavBar({ showTitle = false, title }: CoachNavBarPro
               Home
             </Link>
             <Link
-              href="/pt/coach/configuracoes"
+              href="/pt/coach/configuracao"
               className="text-gray-700 hover:text-purple-600 font-medium transition-colors"
             >
               Perfil
