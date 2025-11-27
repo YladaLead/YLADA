@@ -32,14 +32,23 @@ export default function WellnessHeader({
               style={{ backgroundColor: 'transparent' }}
             />
             <div className="h-10 w-px bg-gray-300"></div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                {title || defaultTitle}
-              </h1>
-              <p className="text-sm text-gray-600">
-                {description || defaultDescription}
-              </p>
-            </div>
+            {(title || defaultTitle) && (
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {title || defaultTitle}
+                </h1>
+                {description && description !== '' && (
+                  <p className="text-sm text-gray-600">
+                    {description}
+                  </p>
+                )}
+                {!description && defaultDescription && defaultDescription !== '' && (
+                  <p className="text-sm text-gray-600">
+                    {defaultDescription}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
