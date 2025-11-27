@@ -51,6 +51,7 @@ SET
 WHERE profession = 'nutri'
   AND language = 'pt'
   AND (
+    slug = 'quiz-interativo-nutri' OR
     slug LIKE '%interativo%' OR
     LOWER(name) LIKE '%quiz interativo%' OR
     LOWER(name) LIKE '%interativo%'
@@ -73,6 +74,7 @@ FROM templates_nutrition
 WHERE profession = 'nutri'
   AND language = 'pt'
   AND (
+    slug = 'quiz-interativo-nutri' OR
     slug LIKE '%interativo%' OR
     LOWER(name) LIKE '%quiz interativo%' OR
     LOWER(name) LIKE '%interativo%'
