@@ -11,8 +11,17 @@ export async function GET(
   try {
     const { slug } = await params
 
+    if (!slug) {
+      console.error('❌ Slug não fornecido na requisição')
+      return NextResponse.json(
+        { error: 'Slug é obrigatório' },
+        { status: 400 }
+      )
+    }
+
     // Verificar se supabaseAdmin está configurado
     if (!supabaseAdmin) {
+      console.error('❌ supabaseAdmin não configurado')
       return NextResponse.json(
         { error: 'Configuração do servidor incompleta. Contate o suporte.' },
         { status: 500 }
