@@ -107,6 +107,14 @@ export async function GET(request: NextRequest) {
           .eq('user_id', profile.user_id)
           .maybeSingle()
         
+        // Debug: verificar se country_code está sendo retornado
+        console.log('🔍 API Nutri - Ferramenta retornada (fallback):', {
+          tool_id: toolData.id,
+          whatsapp_number: toolData.whatsapp_number,
+          country_code: userProfile?.country_code,
+          user_profiles: userProfile
+        })
+        
         return NextResponse.json({ 
           tool: {
             ...toolData,
@@ -127,6 +135,14 @@ export async function GET(request: NextRequest) {
         { status: 403 }
       )
     }
+
+    // Debug: verificar se country_code está sendo retornado
+    console.log('🔍 API Nutri - Ferramenta retornada:', {
+      tool_id: data.id,
+      whatsapp_number: data.whatsapp_number,
+      country_code: data.user_profiles?.country_code,
+      user_profiles: data.user_profiles
+    })
 
     return NextResponse.json({ tool: data })
   } catch (error: any) {
