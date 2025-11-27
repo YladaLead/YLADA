@@ -18,19 +18,43 @@ export async function GET(
       )
     }
 
+    console.log('🔍 Buscando portal Coach por slug:', slug)
+
     // Buscar portal ativo (público) com profession='coach'
-    // Primeiro tentar em coach_portals
+    // Primeiro tentar em coach_portals - buscar sem filtro de status primeiro para debug
     let { data: portal, error: portalError } = await supabaseAdmin
       .from('coach_portals')
       .select('*')
       .eq('slug', slug)
-      .eq('profession', 'coach')
-      .eq('status', 'active')
       .maybeSingle()
 
-    // Se não encontrou em coach_portals, tentar em wellness_portals (caso tenha sido criado na área errada)
-    // Isso pode acontecer se o portal foi criado na área Wellness mas o link está apontando para Coach
-    if (!portal && !portalError) {
+    console.log('📊 Resultado da busca:', { 
+      encontrado: !!portal, 
+      error: portalError?.message,
+      status: portal?.status,
+      profession: portal?.profession
+    })
+
+    // Se encontrou mas não está ativo ou não tem profession='coach'
+    if (portal) {
+      if (portal.status !== 'active') {
+        console.warn('⚠️ Portal encontrado mas inativo:', { slug, status: portal.status })
+        return NextResponse.json(
+          { error: 'Portal não encontrado ou inativo' },
+          { status: 404 }
+        )
+      }
+      
+      if (portal.profession !== 'coach') {
+        console.warn('⚠️ Portal encontrado mas profession incorreto:', { 
+          slug, 
+          profession: portal.profession,
+          esperado: 'coach'
+        })
+        // Continuar mesmo assim, pode ser um portal antigo
+      }
+    } else if (!portalError) {
+      // Se não encontrou em coach_portals, tentar em wellness_portals (caso tenha sido criado na área errada)
       const { data: wellnessPortal, error: wellnessError } = await supabaseAdmin
         .from('wellness_portals')
         .select('*')
@@ -39,15 +63,12 @@ export async function GET(
         .maybeSingle()
       
       if (wellnessPortal) {
-        // Portal encontrado em wellness_portals mas acessado via rota Coach
-        // Log para debug
         console.warn('⚠️ Portal encontrado em wellness_portals mas acessado via rota Coach:', {
           slug,
           portal_id: wellnessPortal.id,
           user_id: wellnessPortal.user_id
         })
         
-        // Retornar erro específico para indicar que está na área errada
         return NextResponse.json(
           { 
             error: 'Portal não encontrado na área Coach. Este portal está na área Wellness.',
@@ -58,8 +79,16 @@ export async function GET(
       }
     }
 
-    if (portalError || !portal) {
-      console.error('❌ Portal não encontrado:', { slug, error: portalError })
+    if (portalError) {
+      console.error('❌ Erro ao buscar portal:', { slug, error: portalError })
+      return NextResponse.json(
+        { error: 'Erro ao buscar portal' },
+        { status: 500 }
+      )
+    }
+
+    if (!portal) {
+      console.error('❌ Portal não encontrado:', { slug })
       return NextResponse.json(
         { error: 'Portal não encontrado ou inativo' },
         { status: 404 }
