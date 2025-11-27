@@ -2,7 +2,6 @@
 // YLADA - COMPONENTE HEADER COMPARTILHADO WELLNESS
 // =====================================================
 
-import Image from 'next/image'
 import { ToolConfig } from '@/types/wellness'
 
 interface WellnessHeaderProps {
