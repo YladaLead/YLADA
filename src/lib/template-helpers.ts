@@ -49,15 +49,15 @@ export async function findTemplateBySlug(
       .eq('is_active', true)
       .eq('language', language)
 
-    if (profession && profession !== 'coach') {
-      // Para Coach, a tabela já filtra por profession='coach', então não precisa filtrar novamente
+    // ✅ CORRIGIDO: Filtrar por profession para Coach também
+    if (profession) {
       query = query.eq('profession', profession)
     }
 
     const { data: templates, error: templatesError } = await query
 
     if (templatesError) {
-      // Se profession não existir, buscar sem filtro
+      // Se profession não existir, buscar sem filtro de profession
       if (templatesError.message?.includes('profession') || templatesError.code === '42703') {
         const { data: allTemplates, error: allTemplatesError } = await supabaseAdmin
           .from(tableName)
@@ -69,12 +69,18 @@ export async function findTemplateBySlug(
           throw allTemplatesError
         }
 
+        // ✅ Filtrar por profession manualmente se necessário (quando coluna não existe na query)
+        let filteredTemplates = allTemplates || []
+        if (profession && allTemplates && allTemplates.length > 0 && allTemplates[0].profession !== undefined) {
+          filteredTemplates = allTemplates.filter(t => t.profession === profession)
+        }
+
         // ✅ PRIORIDADE 1: Buscar pelo slug do banco
-        let template = (allTemplates || []).find(t => t.slug === templateSlug)
+        let template = filteredTemplates.find(t => t.slug === templateSlug)
         
         // ✅ PRIORIDADE 2: Se não encontrou, buscar pelo slug gerado do name
         if (!template) {
-          template = (allTemplates || []).find(t => {
+          template = filteredTemplates.find(t => {
             const slugFromName = generateSlugFromName(t.name)
             return slugFromName === templateSlug
           })
