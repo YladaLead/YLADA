@@ -178,6 +178,24 @@ export default function WellnessCTAButton({
       }
     }
     
+    // Garantir que o número final não está vazio
+    if (!numeroLimpo || numeroLimpo.length === 0) {
+      console.error('❌ WhatsApp CTA - Número final está vazio!', {
+        whatsapp_number: config.whatsapp_number,
+        country_code: config.country_code,
+        numeroOriginal
+      })
+      numeroLimpo = numeroOriginal || '5511999999999' // Fallback para número padrão
+    }
+    
+    // Log final do número que será usado
+    console.log('📱 WhatsApp CTA - Número final que será usado:', {
+      numeroOriginal,
+      numeroFinal: numeroLimpo,
+      country_code: config.country_code,
+      link: `https://wa.me/${numeroLimpo}`
+    })
+    
     const mensagem = config.custom_whatsapp_message
       ? formatarMensagem(config.custom_whatsapp_message)
       : 'Olá! Gostaria de saber mais sobre como posso melhorar minha saúde.'
