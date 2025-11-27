@@ -101,10 +101,9 @@ ORDER BY type, name;
 -- PASSO 4: VERIFICAR SLUGS ESPECÍFICOS
 -- =====================================================
 
--- Listar templates com slugs que devem existir (baseado nos diagnósticos)
-SELECT 
-  'SLUGS ESPERADOS' as info,
-  unnest(ARRAY[
+-- Verificar quais slugs esperados NÃO existem (versão corrigida)
+WITH slugs_esperados AS (
+  SELECT unnest(ARRAY[
     'calc-hidratacao', 'calculadora-agua',
     'calc-calorias', 'calculadora-calorias',
     'calc-imc', 'calculadora-imc',
@@ -134,13 +133,24 @@ SELECT
     'avaliacao-intolerancia', 'quiz-intolerancia',
     'avaliacao-perfil-metabolico', 'perfil-metabolico'
   ]) as slug_esperado
-) AS slugs_esperados
+)
+SELECT 
+  se.slug_esperado,
+  CASE 
+    WHEN c.id IS NOT NULL THEN '✅ EXISTE'
+    ELSE '❌ FALTANDO'
+  END as status,
+  c.name as nome_no_banco,
+  c.slug as slug_no_banco
+FROM slugs_esperados se
 LEFT JOIN coach_templates_nutrition c
-  ON c.slug = slugs_esperados.slug_esperado
+  ON c.slug = se.slug_esperado
   AND c.language = 'pt'
   AND c.profession = 'coach'
-WHERE c.id IS NULL
-ORDER BY slugs_esperados.slug_esperado;
+  AND c.is_active = true
+ORDER BY 
+  CASE WHEN c.id IS NULL THEN 0 ELSE 1 END,
+  se.slug_esperado;
 
 -- Verificar quais slugs esperados NÃO existem
 WITH slugs_esperados AS (
