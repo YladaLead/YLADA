@@ -16,7 +16,7 @@ export default function WellnessHeader({
   title,
   description,
   defaultTitle = 'Ferramenta Wellness',
-  defaultDescription = 'Sua ferramenta personalizada'
+  defaultDescription = ''
 }: WellnessHeaderProps) {
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
