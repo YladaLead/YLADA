@@ -94,6 +94,7 @@ function NovoPortalCoachContent() {
     }
   }
 
+  // Importar função de normalização (será criada)
   const gerarSlug = (nome: string) => {
     return nome
       .toLowerCase()

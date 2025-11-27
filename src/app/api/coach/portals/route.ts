@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { normalizeSlug } from '@/lib/slug-utils'
+import { normalizeSlug } from '@/lib/slug-utils'
 
 // GET - Listar portais do usuário autenticado
 export async function GET(request: NextRequest) {
@@ -174,17 +176,7 @@ export async function POST(request: NextRequest) {
       leader_data_fields = null
     } = body
 
-    // Normalizar slug (mesma lógica do frontend)
-    const normalizeSlug = (s: string) => {
-      return s
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '')
-    }
-
+    // Normalizar slug automaticamente
     const slug = normalizeSlug(rawSlug || '')
 
     // Validações
@@ -360,21 +352,10 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Normalizar slug (mesma lógica do frontend)
-    const normalizeSlug = (s: string) => {
-      return s
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '')
-    }
-
     const body = await request.json()
     const { id, slug: rawSlug, ...updates } = body
 
-    // Normalizar slug se fornecido
+    // Normalizar slug automaticamente se fornecido
     if (rawSlug) {
       updates.slug = normalizeSlug(rawSlug)
     }

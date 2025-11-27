@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
+import { normalizeSlug } from '@/lib/slug-utils'
 
 // GET - Buscar portal público por slug (sem autenticação necessária)
 export async function GET(
@@ -18,17 +19,7 @@ export async function GET(
       )
     }
 
-    // Normalizar slug (mesma lógica do frontend)
-    const normalizeSlug = (s: string) => {
-      return s
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '')
-    }
-
+    // Normalizar slug automaticamente
     const normalizedSlug = normalizeSlug(slug)
     console.log('🔍 Buscando portal Coach por slug:', { original: slug, normalized: normalizedSlug })
 
