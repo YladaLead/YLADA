@@ -14,7 +14,7 @@ O usuário **Renan Lieiria** (`renan.mdlr@gmail.com`) **não existe** no Supabas
 
 3. **Preencha os dados:**
    - **Email**: `renan.mdlr@gmail.com`
-   - **Password**: `123456`
+   - **Password**: [Defina uma senha segura temporária - será necessário alterar após primeiro login]
    - **Auto Confirm User**: ✅ **MARCAR ESTA OPÇÃO** (importante!)
 
 4. **Clique em "Create User"**
@@ -49,16 +49,12 @@ curl -X POST http://localhost:3000/api/admin/create-support-user \
   -H "Content-Type: application/json" \
   -d '{
     "email": "renan.mdlr@gmail.com",
-    "password": "123456",
+    "password": "[DEFINA_UMA_SENHA_SEGURA]",
     "nome_completo": "Renan Lieiria"
   }'
 ```
 
-Ou use este comando direto:
-
-```bash
-curl -X POST http://localhost:3000/api/admin/create-support-user -H "Content-Type: application/json" -d '{"email":"renan.mdlr@gmail.com","password":"123456","nome_completo":"Renan Lieiria"}'
-```
+⚠️ **IMPORTANTE:** Substitua `[DEFINA_UMA_SENHA_SEGURA]` por uma senha forte. A senha será necessária apenas para o primeiro login.
 
 ---
 

@@ -23,16 +23,16 @@ https://www.ylada.com/api/admin/emergency-reset-password
 ## 📋 O que será feito:
 
 1. ✅ Busca o usuário `faulaandre@gmail.com`
-2. ✅ Define senha padrão: `YladaAdmin2025!`
+2. ✅ Define uma senha temporária segura
 3. ✅ Garante que `is_admin = true`
-4. ✅ Retorna a senha para você
+4. ✅ Retorna a senha temporária na resposta da API
 
 ---
 
 ## 🔑 Credenciais após reset:
 
 - **Email:** `faulaandre@gmail.com`
-- **Senha:** `YladaAdmin2025!`
+- **Senha:** Será retornada na resposta da API (não armazenada aqui por segurança)
 - **Login:** https://www.ylada.com/admin/login
 
 ---
@@ -82,12 +82,12 @@ curl -X POST https://www.ylada.com/api/admin/emergency-reset-password \
   "success": true,
   "message": "Senha resetada com sucesso para faulaandre@gmail.com",
   "email": "faulaandre@gmail.com",
-  "password": "YladaAdmin2025!",
+  "password": "[SENHA_TEMPORARIA_GERADA]",
   "loginUrl": "https://www.ylada.com/admin/login",
   "instructions": [
     "1. Acesse: https://www.ylada.com/admin/login",
     "2. Email: faulaandre@gmail.com",
-    "3. Senha: YladaAdmin2025!",
+    "3. Senha: [será retornada na resposta da API]",
     "4. Após fazer login, altere a senha para uma mais segura"
   ]
 }

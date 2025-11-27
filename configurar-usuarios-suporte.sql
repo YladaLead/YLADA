@@ -153,7 +153,7 @@ BEGIN
     
     RAISE NOTICE 'Perfil do Renan Lieiria criado/atualizado com user_id: %', v_user_id;
   ELSE
-    RAISE NOTICE 'Usuário renan.mdlr@gmail.com não encontrado em auth.users. Por favor, crie o usuário primeiro no Supabase Auth com senha: 123456';
+    RAISE NOTICE 'Usuário renan.mdlr@gmail.com não encontrado em auth.users. Por favor, crie o usuário primeiro no Supabase Auth com uma senha segura.';
   END IF;
 END $$;
 

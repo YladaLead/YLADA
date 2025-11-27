@@ -363,7 +363,7 @@ function PortalsCoachContent() {
                       Ver
                     </Link>
                     <Link
-                      href={`/pt/coach/portals/${portal.id}/editar`}
+                      href={`/pt/coach/c/portals/${portal.id}/editar`}
                       className="text-sm text-green-600 hover:text-green-700"
                     >
                       Editar

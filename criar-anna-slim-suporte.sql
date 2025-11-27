@@ -1,30 +1,27 @@
 -- =====================================================
--- SOLUÇÃO: Criar usuário Renan via SQL (se possível)
--- =====================================================
--- NOTA: Criar usuário diretamente em auth.users via SQL
--- pode não funcionar dependendo das permissões.
--- Se este script falhar, use a API Route ou crie manualmente.
+-- CRIAR USUÁRIO DE SUPORTE: ANNA SLIM
+-- Email: portalmagra@gmail.com
+-- Nome: Anna Slim
+-- Senha: 123456
+-- Área: Coach (mas com acesso a todas as áreas via is_support = true)
 -- =====================================================
 
--- Tentar criar usuário diretamente (pode não funcionar)
--- Se falhar, use a API Route: POST /api/admin/create-support-user
--- Ou crie manualmente no Dashboard
+-- NOTA: Este script SQL não pode criar o usuário diretamente em auth.users
+-- Você precisa criar o usuário primeiro no Supabase Dashboard ou usar a API
+-- Depois execute este script para criar/atualizar o perfil
 
 DO $$
 DECLARE
   v_user_id UUID;
-  v_encrypted_password TEXT;
 BEGIN
-  -- Verificar se já existe
+  -- Verificar se o usuário existe
   SELECT id INTO v_user_id
   FROM auth.users
-  WHERE email = 'renan.mdlr@gmail.com'
+  WHERE email = 'portalmagra@gmail.com'
   LIMIT 1;
 
-  IF v_user_id IS NOT NULL THEN
-    RAISE NOTICE '✅ Usuário já existe! user_id: %', v_user_id;
-  ELSE
-    RAISE NOTICE '⚠️ Não é possível criar usuário diretamente via SQL.';
+  IF v_user_id IS NULL THEN
+    RAISE NOTICE '⚠️ Usuário portalmagra@gmail.com NÃO encontrado em auth.users';
     RAISE NOTICE '';
     RAISE NOTICE '📋 OPÇÕES PARA CRIAR O USUÁRIO:';
     RAISE NOTICE '';
@@ -32,15 +29,16 @@ BEGIN
     RAISE NOTICE '  1. Acesse: Supabase Dashboard > Authentication > Users';
     RAISE NOTICE '  2. Clique em "Add User"';
     RAISE NOTICE '  3. Preencha:';
-    RAISE NOTICE '     - Email: renan.mdlr@gmail.com';
-    RAISE NOTICE '     - Password: [DEFINA_UMA_SENHA_SEGURA]';
+    RAISE NOTICE '     - Email: portalmagra@gmail.com';
+    RAISE NOTICE '     - Password: 123456';
     RAISE NOTICE '     - Auto Confirm User: ✅ (marcar)';
     RAISE NOTICE '  4. Clique em "Create User"';
     RAISE NOTICE '  5. Execute novamente este script para criar o perfil';
     RAISE NOTICE '';
     RAISE NOTICE 'OPÇÃO 2 - Via API Route (se servidor estiver rodando):';
-    RAISE NOTICE '  POST http://localhost:3000/api/admin/create-support-user';
-    RAISE NOTICE '  Body: {"email":"renan.mdlr@gmail.com","password":"[DEFINA_UMA_SENHA_SEGURA]","nome_completo":"Renan Lieiria"}';
+    RAISE NOTICE '  curl -X POST http://localhost:3000/api/admin/create-support-user \';
+    RAISE NOTICE '    -H "Content-Type: application/json" \';
+    RAISE NOTICE '    -d ''{"email":"portalmagra@gmail.com","password":"123456","nome_completo":"Anna Slim"}''';
     RAISE NOTICE '';
     RETURN;
   END IF;
@@ -58,33 +56,40 @@ BEGIN
     country_code
   ) VALUES (
     v_user_id,
-    'renan.mdlr@gmail.com',
-    'Renan Lieiria',
-    'wellness',
+    'portalmagra@gmail.com',
+    'Anna Slim',
+    'coach',
     false,
-    true,
+    true, -- is_support = true (acesso a todas as áreas)
     'Suporte',
-    'renan-lieiria',
+    'portalmagra',
     'BR'
   )
   ON CONFLICT (user_id) DO UPDATE SET
-    email = 'renan.mdlr@gmail.com',
-    nome_completo = 'Renan Lieiria',
-    perfil = 'wellness',
+    email = 'portalmagra@gmail.com',
+    nome_completo = 'Anna Slim',
+    perfil = 'coach',
     is_admin = false,
-    is_support = true,
+    is_support = true, -- Garantir que is_support está true
     bio = 'Suporte',
-    user_slug = COALESCE(user_profiles.user_slug, 'renan-lieiria'),
+    user_slug = COALESCE(user_profiles.user_slug, 'portalmagra'),
     country_code = COALESCE(user_profiles.country_code, 'BR'),
     updated_at = NOW();
 
   RAISE NOTICE '✅ Perfil criado/atualizado com is_support = true';
+  RAISE NOTICE '';
+  RAISE NOTICE '📋 INFORMAÇÕES:';
+  RAISE NOTICE '   Email: portalmagra@gmail.com';
+  RAISE NOTICE '   Nome: Anna Slim';
+  RAISE NOTICE '   Área: Coach';
+  RAISE NOTICE '   Suporte: ✅ Sim (acesso a todas as áreas)';
+  RAISE NOTICE '   Admin: ❌ Não';
 
 END $$;
 
--- Verificar resultado
+-- Verificar resultado da Anna Slim
 SELECT 
-  '✅ VERIFICAÇÃO FINAL' as status,
+  '✅ VERIFICAÇÃO FINAL - ANNA SLIM' as status,
   up.id as profile_id,
   up.user_id,
   up.email,
@@ -99,9 +104,9 @@ SELECT
   au.email_confirmed_at IS NOT NULL as email_confirmado
 FROM user_profiles up
 INNER JOIN auth.users au ON up.user_id = au.id
-WHERE au.email = 'renan.mdlr@gmail.com';
+WHERE au.email = 'portalmagra@gmail.com';
 
--- Listar todos os usuários de suporte
+-- Listar TODOS os usuários de suporte
 SELECT 
   '📋 LISTA DE USUÁRIOS DE SUPORTE' as titulo,
   up.email,

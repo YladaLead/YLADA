@@ -67,7 +67,7 @@ BEGIN
     RAISE NOTICE '   Você precisa criar o usuário primeiro no Supabase Dashboard:';
     RAISE NOTICE '   1. Authentication > Users > Add User';
     RAISE NOTICE '   2. Email: renan.mdlr@gmail.com';
-    RAISE NOTICE '   3. Password: 123456';
+    RAISE NOTICE '   3. Password: [Defina uma senha segura temporária]';
     RAISE NOTICE '   4. Marcar "Auto Confirm User"';
     RETURN;
   END IF;

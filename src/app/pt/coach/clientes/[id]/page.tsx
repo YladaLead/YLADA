@@ -202,12 +202,12 @@ function ClienteDetalhesCoachContent() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setActiveTab('info')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                >
-                  Editar
-                </button>
+              <button
+                onClick={() => setActiveTab('info')}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                Editar
+              </button>
                 <button
                   onClick={() => setMostrarModalExclusao(true)}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
@@ -454,8 +454,8 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
         setEditando(false)
         setTimeout(() => {
           setSucesso(false)
-          // Recarregar página para atualizar dados
-          window.location.reload()
+        // Recarregar página para atualizar dados
+        window.location.reload()
         }, 1000)
       }
     } catch (error: any) {

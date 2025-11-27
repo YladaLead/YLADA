@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       name,
-      slug,
+      slug: rawSlug,
       description,
       navigation_type = 'menu',
       custom_colors,
@@ -173,6 +173,19 @@ export async function POST(request: NextRequest) {
       collect_leader_data = false,
       leader_data_fields = null
     } = body
+
+    // Normalizar slug (mesma lógica do frontend)
+    const normalizeSlug = (s: string) => {
+      return s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+    }
+
+    const slug = normalizeSlug(rawSlug || '')
 
     // Validações
     if (!name || !slug) {
@@ -347,8 +360,24 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Normalizar slug (mesma lógica do frontend)
+    const normalizeSlug = (s: string) => {
+      return s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+    }
+
     const body = await request.json()
-    const { id, ...updates } = body
+    const { id, slug: rawSlug, ...updates } = body
+
+    // Normalizar slug se fornecido
+    if (rawSlug) {
+      updates.slug = normalizeSlug(rawSlug)
+    }
 
     if (!id) {
       return NextResponse.json(

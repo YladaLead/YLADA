@@ -18,15 +18,40 @@ export async function GET(
       )
     }
 
-    console.log('🔍 Buscando portal Coach por slug:', slug)
+    // Normalizar slug (mesma lógica do frontend)
+    const normalizeSlug = (s: string) => {
+      return s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+    }
+
+    const normalizedSlug = normalizeSlug(slug)
+    console.log('🔍 Buscando portal Coach por slug:', { original: slug, normalized: normalizedSlug })
 
     // Buscar portal ativo (público) com profession='coach'
-    // Primeiro tentar em coach_portals - buscar sem filtro de status primeiro para debug
+    // Usar ILIKE para busca case-insensitive e tentar tanto slug original quanto normalizado
     let { data: portal, error: portalError } = await supabaseAdmin
       .from('coach_portals')
       .select('*')
-      .eq('slug', slug)
+      .or(`slug.ilike.${slug},slug.ilike.${normalizedSlug}`)
       .maybeSingle()
+    
+    // Se não encontrou, tentar busca exata também
+    if (!portal && !portalError) {
+      const { data: portalExact } = await supabaseAdmin
+        .from('coach_portals')
+        .select('*')
+        .eq('slug', normalizedSlug)
+        .maybeSingle()
+      
+      if (portalExact) {
+        portal = portalExact
+      }
+    }
 
     console.log('📊 Resultado da busca:', { 
       encontrado: !!portal, 

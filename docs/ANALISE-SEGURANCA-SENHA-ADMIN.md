@@ -138,7 +138,7 @@ git log --all --grep="password\|senha\|reset" --oneline
 ## ✅ Ações Imediatas
 
 ### 1. **Resetar Senha (JÁ FEITO)**
-- ✅ Senha resetada para: `YladaAdmin2025!`
+- ✅ Senha resetada (senha temporária gerada automaticamente)
 - ✅ Status admin verificado
 
 ### 2. **Alterar Senha Imediatamente**

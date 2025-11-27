@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import SupportChatWidget from '@/components/nutri/support/SupportChatWidget'
 
 export const metadata: Metadata = {
   manifest: '/manifest-nutri.json',
@@ -10,6 +11,11 @@ export const metadata: Metadata = {
 }
 
 export default function NutriLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <SupportChatWidget />
+    </>
+  )
 }
 

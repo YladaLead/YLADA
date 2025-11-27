@@ -13,7 +13,7 @@ Este documento contém as instruções para configurar os dois usuários de supo
 
 2. **Renan Lieiria**
    - Email: `renan.mdlr@gmail.com`
-   - Senha: `123456`
+   - Senha: [Defina uma senha segura temporária - será necessário alterar após primeiro login]
    - Status: ⏳ Precisa ser criado
    - Ação: Criar usuário no Supabase Auth + Criar perfil com `is_support = true`
 
@@ -28,7 +28,7 @@ Este documento contém as instruções para configurar os dois usuários de supo
 3. Clique em **Add User** ou **Invite User**
 4. Preencha os dados:
    - **Email**: `renan.mdlr@gmail.com`
-   - **Password**: `123456`
+   - **Password**: [Defina uma senha segura temporária]
    - **Auto Confirm User**: ✅ (marcar esta opção para já estar autenticado)
 5. Clique em **Create User**
 
@@ -86,7 +86,7 @@ ORDER BY up.nome_completo;
 
 2. **Renan precisa ser criado primeiro**: Você precisa criar o usuário no Supabase Dashboard antes de executar o script SQL
 
-3. **Senha do Renan**: A senha sugerida é `123456`, mas você pode alterar depois se necessário
+3. **Senha do Renan**: Defina uma senha segura temporária. Será necessário alterar após o primeiro login por segurança.
 
 4. **Acesso a todas as áreas**: Com `is_support = true`, ambos os usuários poderão acessar Wellness, Nutri, Coach e Nutra
 

@@ -19,7 +19,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const providedKey = body.key
     const email = body.email || 'faulaandre@gmail.com'
-    const newPassword = body.newPassword || 'YladaAdmin2025!'
+    
+    // Gerar senha aleatória segura se não fornecida
+    const generateSecurePassword = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
+      let password = ''
+      for (let i = 0; i < 16; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length))
+      }
+      return password
+    }
+    
+    const newPassword = body.newPassword || generateSecurePassword()
 
     // Se forneceu chave, verificar
     if (providedKey && providedKey !== emergencyKey) {

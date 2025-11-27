@@ -170,6 +170,18 @@ export async function PUT(request: NextRequest) {
       userSlug
     } = body
 
+    // Log dos valores recebidos para debug
+    console.log('📥 Valores recebidos do frontend (Nutri):', {
+      telefone: telefone ? `${telefone.substring(0, 5)}...` : 'vazio/undefined',
+      whatsapp: whatsapp ? `${whatsapp.substring(0, 5)}...` : 'vazio/undefined',
+      countryCode: countryCode || 'não fornecido',
+      userSlug: userSlug || 'não fornecido',
+      hasTelefone: telefone !== undefined && telefone !== null,
+      hasWhatsapp: whatsapp !== undefined && whatsapp !== null,
+      hasCountryCode: countryCode !== undefined && countryCode !== null,
+      hasUserSlug: userSlug !== undefined && userSlug !== null
+    })
+
     // Verificar se user_slug já existe para outro usuário
     if (userSlug) {
       const { data: existingSlug } = await supabaseAdmin
@@ -223,21 +235,25 @@ export async function PUT(request: NextRequest) {
 
     // Adicionar campos opcionais apenas se fornecidos
     // Usar whatsapp (ou telefone como fallback) - apenas whatsapp existe no banco
-    // IMPORTANTE: Garantir que whatsapp seja salvo mesmo se for string vazia (será tratado como null)
-    const whatsappValue = whatsapp || telefone
-    if (whatsappValue && whatsappValue.trim() !== '') {
-      // Remover caracteres não numéricos e garantir que não está vazio
+    // IMPORTANTE: Sempre tentar salvar whatsapp se fornecido (mesmo que vazio, será null)
+    // Verificar se whatsapp ou telefone foram fornecidos (mesmo que vazios)
+    // Se o campo foi enviado no body, sempre processar (mesmo que seja string vazia)
+    const whatsappValue = whatsapp !== undefined ? whatsapp : (telefone !== undefined ? telefone : null)
+    
+    if (whatsappValue !== null && whatsappValue !== undefined) {
+      // Remover caracteres não numéricos
       const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
       if (whatsappLimpo.length > 0) {
         profileData.whatsapp = whatsappLimpo
         console.log('📱 WhatsApp que será salvo:', whatsappLimpo)
       } else {
-        console.warn('⚠️ ATENÇÃO: WhatsApp fornecido mas está vazio após limpeza!')
-        profileData.whatsapp = null // Garantir que seja null se vazio
+        // Se foi fornecido mas está vazio após limpeza, definir como null
+        profileData.whatsapp = null
+        console.log('📱 WhatsApp fornecido mas vazio após limpeza, definindo como null')
       }
     } else {
-      console.warn('⚠️ ATENÇÃO: Nenhum whatsapp ou telefone fornecido!')
-      // Não definir whatsapp se não foi fornecido (manter valor atual ou null)
+      // Se não foi fornecido explicitamente, não alterar o valor atual
+      console.log('📱 WhatsApp não fornecido no body, mantendo valor atual')
     }
     
     // Adicionar campos que podem não existir ainda (o Supabase vai ignorar se não existirem)
@@ -245,12 +261,20 @@ export async function PUT(request: NextRequest) {
       profileData.bio = bio || null
     }
     
-    if (userSlug !== undefined) {
+    // Sempre salvar userSlug se fornecido (mesmo que seja string vazia, será null)
+    if (userSlug !== undefined && userSlug !== null) {
       profileData.user_slug = userSlug || null
+      console.log('🔗 User slug que será salvo:', userSlug)
+    } else {
+      console.log('🔗 User slug não fornecido, mantendo valor atual')
     }
     
-    if (countryCode) {
-      profileData.country_code = countryCode
+    // Sempre salvar countryCode se fornecido (mesmo que seja string vazia, será null)
+    if (countryCode !== undefined && countryCode !== null) {
+      profileData.country_code = countryCode || null
+      console.log('🌍 Country code que será salvo:', countryCode)
+    } else {
+      console.log('🌍 Country code não fornecido, mantendo valor atual')
     }
 
     // Preparar dados completos para UPSERT
@@ -259,13 +283,16 @@ export async function PUT(request: NextRequest) {
       ...profileData
     }
 
-    console.log('📝 Salvando perfil (UPSERT):', {
+    console.log('📝 Salvando perfil (UPSERT - Nutri):', {
       userId: user.id,
       profileData: Object.keys(fullProfileData),
       dadosCompletos: {
         nome_completo: fullProfileData.nome_completo,
         email: fullProfileData.email,
         whatsapp: fullProfileData.whatsapp,
+        country_code: fullProfileData.country_code,
+        user_slug: fullProfileData.user_slug,
+        bio: fullProfileData.bio ? `${fullProfileData.bio.substring(0, 50)}...` : null,
         perfil: fullProfileData.perfil,
         profession: fullProfileData.profession
       }
@@ -305,17 +332,30 @@ export async function PUT(request: NextRequest) {
             updated_at: new Date().toISOString()
           }
           // Garantir que whatsapp seja salvo no salvamento básico também
-          const whatsappValue = whatsapp || telefone
-          if (whatsappValue && whatsappValue.toString().trim() !== '') {
+          const whatsappValue = whatsapp !== undefined ? whatsapp : (telefone !== undefined ? telefone : null)
+          if (whatsappValue !== null && whatsappValue !== undefined) {
             const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
             if (whatsappLimpo.length > 0) {
               basicData.whatsapp = whatsappLimpo
               console.log('📱 WhatsApp (básico) que será salvo:', whatsappLimpo)
             } else {
-              console.warn('⚠️ ATENÇÃO: WhatsApp fornecido mas está vazio após limpeza (básico)!')
+              basicData.whatsapp = null
+              console.log('📱 WhatsApp (básico) fornecido mas vazio, definindo como null')
             }
-          } else {
-            console.warn('⚠️ ATENÇÃO: Nenhum whatsapp fornecido no salvamento básico!')
+          }
+          // Garantir que countryCode seja salvo no salvamento básico também
+          if (countryCode !== undefined && countryCode !== null) {
+            basicData.country_code = countryCode || null
+            console.log('🌍 Country code (básico) que será salvo:', countryCode)
+          }
+          // Garantir que userSlug seja salvo no salvamento básico também
+          if (userSlug !== undefined && userSlug !== null) {
+            basicData.user_slug = userSlug || null
+            console.log('🔗 User slug (básico) que será salvo:', userSlug)
+          }
+          // Garantir que bio seja salvo no básico também
+          if (bio !== undefined) {
+            basicData.bio = bio || null
           }
           
           const { data: basicResult, error: basicError } = await supabaseAdmin
@@ -368,16 +408,23 @@ export async function PUT(request: NextRequest) {
           profession: 'nutri', // Garantir que profession está sincronizado
           updated_at: new Date().toISOString()
         }
-        // Se whatsapp não está em profileData mas foi fornecido, adicionar
-        if (!updateData.whatsapp && (whatsapp || telefone)) {
-          const whatsappValue = whatsapp || telefone
-          if (whatsappValue && whatsappValue.toString().trim() !== '') {
-            const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
-            if (whatsappLimpo.length > 0) {
-              updateData.whatsapp = whatsappLimpo
-              console.log('📱 Adicionando whatsapp no UPDATE manual:', whatsappLimpo)
-            }
+        // Garantir que whatsapp, countryCode e userSlug sejam salvos no UPDATE manual
+        const whatsappValueUpdate = whatsapp !== undefined ? whatsapp : (telefone !== undefined ? telefone : null)
+        if (whatsappValueUpdate !== undefined && whatsappValueUpdate !== null) {
+          const whatsappLimpo = whatsappValueUpdate.toString().replace(/\D/g, '')
+          if (whatsappLimpo.length > 0) {
+            updateData.whatsapp = whatsappLimpo
+            console.log('📱 Adicionando whatsapp no UPDATE manual:', whatsappLimpo)
+          } else {
+            updateData.whatsapp = null
+            console.log('📱 WhatsApp no UPDATE manual fornecido mas vazio, definindo como null')
           }
+        }
+        if (countryCode !== undefined && countryCode !== null) {
+          updateData.country_code = countryCode || null
+        }
+        if (userSlug !== undefined && userSlug !== null) {
+          updateData.user_slug = userSlug || null
         }
         
         const { data, error } = await supabaseAdmin
@@ -410,16 +457,23 @@ export async function PUT(request: NextRequest) {
           profession: 'nutri', // Garantir que profession está sincronizado
           updated_at: new Date().toISOString()
         }
-        // Se whatsapp não está em fullProfileData mas foi fornecido, adicionar
-        if (!insertData.whatsapp && (whatsapp || telefone)) {
-          const whatsappValue = whatsapp || telefone
-          if (whatsappValue && whatsappValue.toString().trim() !== '') {
-            const whatsappLimpo = whatsappValue.toString().replace(/\D/g, '')
-            if (whatsappLimpo.length > 0) {
-              insertData.whatsapp = whatsappLimpo
-              console.log('📱 Adicionando whatsapp no INSERT manual:', whatsappLimpo)
-            }
+        // Garantir que whatsapp, countryCode e userSlug sejam salvos no INSERT manual
+        const whatsappValueInsert = whatsapp !== undefined ? whatsapp : (telefone !== undefined ? telefone : null)
+        if (whatsappValueInsert !== undefined && whatsappValueInsert !== null) {
+          const whatsappLimpo = whatsappValueInsert.toString().replace(/\D/g, '')
+          if (whatsappLimpo.length > 0) {
+            insertData.whatsapp = whatsappLimpo
+            console.log('📱 Adicionando whatsapp no INSERT manual:', whatsappLimpo)
+          } else {
+            insertData.whatsapp = null
+            console.log('📱 WhatsApp no INSERT manual fornecido mas vazio, definindo como null')
           }
+        }
+        if (countryCode !== undefined && countryCode !== null) {
+          insertData.country_code = countryCode || null
+        }
+        if (userSlug !== undefined && userSlug !== null) {
+          insertData.user_slug = userSlug || null
         }
         
         const { data, error } = await supabaseAdmin

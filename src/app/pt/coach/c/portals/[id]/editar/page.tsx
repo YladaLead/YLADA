@@ -263,7 +263,7 @@ function EditarPortalCoachContent() {
       })
 
       alert('Portal atualizado com sucesso!')
-      router.push('/pt/coach/portals')
+      router.push('/pt/coach/c/portals')
     } catch (err: any) {
       console.error('Erro ao atualizar portal:', err)
       setError(err.message || 'Erro ao atualizar portal. Tente novamente.')
