@@ -117,7 +117,24 @@ export async function GET(
     }
 
     if (!portal) {
-      console.error('❌ Portal não encontrado:', { slug })
+      console.error('❌ Portal não encontrado:', { 
+        slug, 
+        normalizedSlug,
+        tentouBuscaExata: true,
+        tentouBuscaCaseInsensitive: true
+      })
+      
+      // Log adicional: verificar se existe algum portal com slug similar
+      const { data: similarPortals } = await supabaseAdmin
+        .from('coach_portals')
+        .select('id, name, slug, status, profession')
+        .ilike('slug', `%${slug}%`)
+        .limit(5)
+      
+      if (similarPortals && similarPortals.length > 0) {
+        console.warn('⚠️ Portais similares encontrados (mas não correspondem exatamente):', similarPortals)
+      }
+      
       return NextResponse.json(
         { error: 'Portal não encontrado ou inativo' },
         { status: 404 }
