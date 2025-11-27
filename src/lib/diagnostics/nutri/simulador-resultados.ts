@@ -7,21 +7,21 @@ import { DiagnosticosPorFerramenta } from '../types'
 export const simuladorResultadosDiagnosticos: DiagnosticosPorFerramenta = {
   nutri: {
     resultadosBasicos: {
-      diagnostico: '🔮 DIAGNÓSTICO: Você pode alcançar resultados básicos e sustentáveis através de mudanças simples e consistentes nos seus hábitos nutricionais',
-      causaRaiz: '🔍 CAUSA RAIZ: Pequenas mudanças consistentes geram resultados significativos ao longo do tempo. Estudos mostram que pessoas que fazem mudanças básicas e mantêm consistência de 70% têm 80% mais sucesso em alcançar resultados duradouros quando comparadas a abordagens extremas. Simular resultados básicos ajuda a criar expectativas realistas e aumenta motivação para começar',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Visualize resultados básicos alcançáveis através de mudanças simples (ex.: beber mais água, incluir vegetais, manter horários). Busque avaliação nutricional para receber simulação personalizada de resultados baseada no seu perfil atual',
+      diagnostico: '🔮 DIAGNÓSTICO: Você pode alcançar resultados básicos e sustentáveis através de mudanças simples e consistentes nos seus hábitos nutricionais.',
+      causaRaiz: '🔍 CAUSA RAIZ: Pequenas mudanças consistentes geram resultados significativos ao longo do tempo. Estudos mostram que pessoas que fazem mudanças básicas e mantêm consistência de 70% têm 80% mais sucesso em alcançar resultados duradouros quando comparadas a abordagens extremas. Simular resultados básicos ajuda a criar expectativas realistas e aumenta motivação para começar.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Visualize resultados básicos alcançáveis através de mudanças simples (ex.: beber mais água, incluir vegetais, manter horários). Busque avaliação nutricional para receber simulação personalizada de resultados baseada no seu perfil atual.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Pequenas mudanças podem gerar grandes resultados — descubra como simular seus resultados potenciais e transformar expectativas em realidade com orientações personalizadas.'
     },
     resultadosModerados: {
-      diagnostico: '🔮 DIAGNÓSTICO: Você pode alcançar resultados moderados e significativos através de mudanças estratégicas e consistência nos seus hábitos nutricionais',
-      causaRaiz: '🔍 CAUSA RAIZ: Mudanças moderadas com estratégia adequada aceleram resultados quando mantidas consistentemente. Pesquisas indicam que pessoas que implementam mudanças moderadas com foco estratégico alcançam resultados 60% mais rápido quando comparadas a mudanças básicas. Simular resultados moderados ajuda a definir metas realistas e manter motivação',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Visualize resultados moderados através de mudanças estratégicas (ex.: timing nutricional, qualidade alimentar, distribuição de macronutrientes). Considere avaliação nutricional para receber simulação personalizada de resultados baseada no seu perfil',
+      diagnostico: '🔮 DIAGNÓSTICO: Você pode alcançar resultados moderados e significativos através de mudanças estratégicas e consistência nos seus hábitos nutricionais.',
+      causaRaiz: '🔍 CAUSA RAIZ: Mudanças moderadas com estratégia adequada aceleram resultados quando mantidas consistentemente. Pesquisas indicam que pessoas que implementam mudanças moderadas com foco estratégico alcançam resultados 60% mais rápido quando comparadas a mudanças básicas. Simular resultados moderados ajuda a definir metas realistas e manter motivação.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Visualize resultados moderados através de mudanças estratégicas (ex.: timing nutricional, qualidade alimentar, distribuição de macronutrientes). Considere avaliação nutricional para receber simulação personalizada de resultados baseada no seu perfil.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Mudanças estratégicas aceleram resultados — descubra como simular seus resultados moderados e transformar metas em conquistas com orientações direcionadas.'
     },
     resultadosAvancados: {
-      diagnostico: '🔮 DIAGNÓSTICO: Você pode alcançar resultados avançados e otimizados através de estratégias refinadas e consistência de alta performance nos seus hábitos nutricionais',
-      causaRaiz: '🔍 CAUSA RAIZ: Estratégias avançadas com refinamentos específicos maximizam resultados para pessoas com experiência. Estudos mostram que estratégias avançadas podem potencializar resultados em até 75% quando comparadas a abordagens básicas para pessoas experientes. Simular resultados avançados ajuda a definir metas ambiciosas e manter motivação de elite',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Visualize resultados avançados através de estratégias refinadas (ex.: nutrigenômica, timing de precisão, combinações estratégicas). Considere avaliação nutricional avançada para receber simulação personalizada de resultados de elite',
+      diagnostico: '🔮 DIAGNÓSTICO: Você pode alcançar resultados avançados e otimizados através de estratégias refinadas e consistência de alta performance nos seus hábitos nutricionais.',
+      causaRaiz: '🔍 CAUSA RAIZ: Estratégias avançadas com refinamentos específicos maximizam resultados para pessoas com experiência. Estudos mostram que estratégias avançadas podem potencializar resultados em até 75% quando comparadas a abordagens básicas para pessoas experientes. Simular resultados avançados ajuda a definir metas ambiciosas e manter motivação de elite.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Visualize resultados avançados através de estratégias refinadas (ex.: nutrigenômica, timing de precisão, combinações estratégicas). Considere avaliação nutricional avançada para receber simulação personalizada de resultados de elite.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Estratégias avançadas maximizam resultados — descubra como simular seus resultados de elite e transformar ambição em conquista com orientações especializadas.'
     }
   }
