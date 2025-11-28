@@ -162,6 +162,15 @@ function AdminDashboardContent() {
       icon: '⚙️',
       link: '/admin/config',
       color: 'bg-gray-500'
+    },
+    {
+      id: 'support-agents',
+      title: 'Atendentes de Suporte',
+      description: 'Gerenciar equipe de atendimento',
+      icon: '👨‍💼',
+      link: '/admin/support/agents',
+      color: 'bg-pink-500',
+      destaque: true
     }
   ]
 

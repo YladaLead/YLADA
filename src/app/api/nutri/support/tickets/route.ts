@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { notifyAgentsNewTicket } from '@/lib/support-notifications'
 
 // GET - Listar tickets
 export async function GET(request: NextRequest) {
@@ -176,6 +177,22 @@ export async function POST(request: NextRequest) {
         message: primeira_mensagem,
         is_bot_response: false
       })
+
+    // Enviar notificação para atendentes (não bloqueia resposta)
+    notifyAgentsNewTicket({
+      ticketId: ticket.id,
+      area: 'nutri',
+      assunto: assunto.substring(0, 200),
+      primeiraMensagem: primeira_mensagem,
+      prioridade: prioridade || 'normal',
+      categoria: categoria || 'outras',
+      userName: user.email?.split('@')[0] || 'Usuário',
+      userEmail: user.email || undefined,
+      createdAt: ticket.created_at
+    }).catch(error => {
+      // Não falhar a requisição se notificação falhar
+      console.error('[Support Tickets] Erro ao enviar notificação:', error)
+    })
 
     return NextResponse.json({
       success: true,

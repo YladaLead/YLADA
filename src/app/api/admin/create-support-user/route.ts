@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireApiAuth } from '@/lib/api-auth'
 
 /**
  * API Route para criar usuário de suporte
@@ -9,6 +10,12 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function POST(request: NextRequest) {
   try {
+    // Verificar se é admin
+    const authResult = await requireApiAuth(request, ['admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+
     const { email, password, nome_completo } = await request.json()
 
     if (!email || !password || !nome_completo) {

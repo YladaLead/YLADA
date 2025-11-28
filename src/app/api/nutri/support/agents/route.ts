@@ -229,3 +229,54 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// DELETE - Remover atendente (apenas admin)
+export async function DELETE(request: NextRequest) {
+  try {
+    const authResult = await requireApiAuth(request, ['admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Configuração do servidor incompleta' },
+        { status: 500 }
+      )
+    }
+
+    const { searchParams } = new URL(request.url)
+    const agentId = searchParams.get('id')
+
+    if (!agentId) {
+      return NextResponse.json(
+        { error: 'id é obrigatório' },
+        { status: 400 }
+      )
+    }
+
+    const { error } = await supabaseAdmin
+      .from('support_agents')
+      .delete()
+      .eq('id', agentId)
+
+    if (error) {
+      console.error('Erro ao remover atendente:', error)
+      return NextResponse.json(
+        { error: 'Erro ao remover atendente' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Atendente removido com sucesso'
+    })
+  } catch (error: any) {
+    console.error('Erro ao remover atendente:', error)
+    return NextResponse.json(
+      { error: 'Erro ao remover atendente' },
+      { status: 500 }
+    )
+  }
+}
+
