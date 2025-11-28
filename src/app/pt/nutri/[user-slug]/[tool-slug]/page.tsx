@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
+import { normalizeNutriTemplateSlug } from '@/lib/template-slug-map-nutri'
 
 interface Tool {
   id: string
@@ -98,10 +99,20 @@ export default function FerramentaPersonalizadaNutriPage() {
       // Debug: verificar se country_code está vindo da API
       console.log('🔍 Tool carregado (Nutri):', {
         tool_id: data.tool?.id,
+        template_slug: data.tool?.template_slug,
         whatsapp_number: data.tool?.whatsapp_number,
         country_code: data.tool?.user_profiles?.country_code,
         user_profiles: data.tool?.user_profiles
       })
+      
+      // Debug: verificar normalização do slug
+      if (data.tool?.template_slug) {
+        const normalized = normalizeNutriTemplateSlug(data.tool.template_slug)
+        console.log('🔍 Normalização do template_slug:', {
+          original: data.tool.template_slug,
+          normalizado: normalized
+        })
+      }
 
       // Incrementar contador de visualizações
       if (data.tool?.id) {
@@ -197,17 +208,33 @@ export default function FerramentaPersonalizadaNutriPage() {
       country_code: countryCode, // Incluir country_code do perfil
     }
 
-    // ✅ Normalizar template_slug para garantir consistência
-    const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
+    // ✅ Normalizar template_slug usando mapeamento completo de Nutri
+    // Isso garante que todas as variações de slugs funcionem corretamente
+    const normalizedSlug = normalizeNutriTemplateSlug(tool.template_slug)
+    
+    // Debug: log do processo de normalização
+    console.log('🔍 Renderizando template:', {
+      template_slug_original: tool.template_slug,
+      normalized_slug: normalizedSlug,
+      tool_id: tool.id
+    })
 
     switch (normalizedSlug) {
       case 'calc-imc':
+      case 'calculadora-imc':
         return <TemplateIMC config={config} />
       case 'calc-proteina':
+      case 'calculadora-proteina':
         return <TemplateProteina config={config} />
       case 'calc-hidratacao':
+      case 'calculadora-agua':
+      case 'calculadora-de-agua':
+      case 'calculadora-hidratacao':
+      case 'calculadora-de-hidratacao':
         return <TemplateHidratacao config={config} />
       case 'calc-calorias':
+      case 'calculadora-calorias':
+      case 'calculadora-de-calorias':
         return <TemplateCalorias config={config} />
       case 'quiz-ganhos':
         return <TemplateGanhos config={config} />
@@ -316,6 +343,14 @@ export default function FerramentaPersonalizadaNutriPage() {
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
       default:
+        // Log detalhado para debug
+        console.error('❌ Template não encontrado:', {
+          template_slug_original: tool.template_slug,
+          normalized_slug: normalizedSlug,
+          tool_id: tool.id,
+          tool_title: tool.title
+        })
+        
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 border-yellow-200">
@@ -324,7 +359,10 @@ export default function FerramentaPersonalizadaNutriPage() {
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-2">Template não encontrado</h2>
               <p className="text-gray-600 mb-4">
-                O template "{tool.template_slug}" não está disponível no momento.
+                O template "{tool.template_slug}" (normalizado: "{normalizedSlug}") não está disponível no momento.
+              </p>
+              <p className="text-sm text-gray-500 mb-2">
+                <strong>Debug:</strong> Verifique o console do navegador para mais detalhes.
               </p>
               <p className="text-sm text-gray-500 mb-6">
                 Entre em contato com o suporte se este problema persistir.

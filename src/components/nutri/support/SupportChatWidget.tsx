@@ -31,6 +31,7 @@ export default function SupportChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [chatMode, setChatMode] = useState<'support' | null>(null) // Modo do chat (apenas suporte)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -48,7 +49,7 @@ export default function SupportChatWidget() {
 
   // Mensagem inicial quando abre
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && chatMode === 'support') {
       setMessages([{
         sender_type: 'bot',
         message: 'Olá! Sou o assistente virtual da plataforma YLADA. Como posso ajudar você hoje?',
@@ -56,11 +57,18 @@ export default function SupportChatWidget() {
       }])
       setShowMenu(true)
     }
+  }, [isOpen, chatMode])
+  
+  // Inicializar modo suporte quando abrir
+  useEffect(() => {
+    if (isOpen && !chatMode) {
+      setChatMode('support')
+    }
   }, [isOpen])
 
   const sendMessage = async (messageText?: string) => {
     const message = messageText || inputMessage.trim()
-    if (!message) return
+    if (!message || chatMode !== 'support') return
 
     setLoading(true)
     setInputMessage('')
@@ -191,11 +199,17 @@ export default function SupportChatWidget() {
     }
   }
 
+  // Função para abrir chat de suporte diretamente
+  const handleOpenChat = () => {
+    setIsOpen(true)
+    setChatMode('support')
+  }
+
   if (!isOpen) {
     return (
       <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-4 shadow-lg z-50 transition-all"
+        onClick={handleOpenChat}
+        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg z-50 transition-all"
         aria-label="Abrir chat de suporte"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +222,7 @@ export default function SupportChatWidget() {
   return (
     <div className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}>
       {/* Header */}
-      <div className="bg-purple-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-400 rounded-full"></div>
           <span className="font-semibold">Suporte YLADA</span>
@@ -216,7 +230,7 @@ export default function SupportChatWidget() {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="hover:bg-purple-700 rounded p-1"
+            className="hover:bg-blue-700 rounded p-1"
             aria-label={isMinimized ? 'Expandir' : 'Minimizar'}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,8 +242,10 @@ export default function SupportChatWidget() {
               setIsOpen(false)
               setIsMinimized(false)
               setShowMenu(false)
+              setChatMode(null)
+              setMessages([])
             }}
-            className="hover:bg-purple-700 rounded p-1"
+            className="hover:bg-blue-700 rounded p-1"
             aria-label="Fechar"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,7 +259,7 @@ export default function SupportChatWidget() {
         <>
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            {showMenu && (
+            {showMenu && chatMode === 'support' && (
               <SupportMenu onSelect={handleMenuSelect} />
             )}
 
@@ -255,7 +271,7 @@ export default function SupportChatWidget() {
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     msg.sender_type === 'user'
-                      ? 'bg-purple-600 text-white'
+                      ? 'bg-blue-600 text-white'
                       : msg.sender_type === 'system'
                       ? 'bg-yellow-100 text-yellow-800 text-sm'
                       : 'bg-white border border-gray-200 text-gray-800'
@@ -303,7 +319,7 @@ export default function SupportChatWidget() {
                   <button
                     key={index}
                     onClick={() => handleMenuSelect(option)}
-                    className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full hover:bg-purple-100 transition-colors"
+                    className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors"
                   >
                     {option}
                   </button>
@@ -312,29 +328,31 @@ export default function SupportChatWidget() {
             </div>
           )}
 
-          {/* Input */}
-          <div className="p-4 border-t border-gray-200 bg-white">
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Digite sua mensagem..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                disabled={loading}
-              />
-              <button
-                onClick={() => sendMessage()}
-                disabled={loading || !inputMessage.trim()}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
+          {/* Input - apenas para modo suporte */}
+          {chatMode === 'support' && (
+            <div className="p-4 border-t border-gray-200 bg-white">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Digite sua mensagem..."
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={loading}
+                />
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={loading || !inputMessage.trim()}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
     </div>

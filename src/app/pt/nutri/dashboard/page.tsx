@@ -49,6 +49,19 @@ function NutriDashboardContent() {
   const [chatAberto, setChatAberto] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Escutar evento para abrir ChatIA do botão unificado
+  useEffect(() => {
+    const handleOpenChatIA = () => {
+      setChatAberto(true)
+    }
+    
+    window.addEventListener('openChatIA', handleOpenChatIA)
+    
+    return () => {
+      window.removeEventListener('openChatIA', handleOpenChatIA)
+    }
+  }, [])
+
   // Carregar perfil do usuário - otimizado com timeout menor e fallback rápido
   useEffect(() => {
     // Só executar se houver usuário autenticado
@@ -684,20 +697,9 @@ function NutriDashboardContent() {
 
         </div>
 
-        {/* Chat com IA */}
+        {/* Chat com IA - Removido botão flutuante duplicado */}
+        {/* O botão unificado está no SupportChatWidget (layout) */}
         <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} area="nutri" />
-        
-        {/* Botão Flutuante do Chat */}
-        {!chatAberto && (
-          <div className="fixed bottom-6 right-6 z-50">
-            <button
-              onClick={() => setChatAberto(true)}
-              className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-            >
-              <span className="text-2xl">💬</span>
-            </button>
-          </div>
-        )}
       </div>
     </div>
   )

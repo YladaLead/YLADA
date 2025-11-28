@@ -75,14 +75,25 @@ export async function findTemplateBySlug(
           filteredTemplates = allTemplates.filter(t => t.profession === profession)
         }
 
-        // ✅ PRIORIDADE 1: Buscar pelo slug do banco
+        // ✅ PRIORIDADE 1: Buscar pelo slug do banco (exato)
         let template = filteredTemplates.find(t => t.slug === templateSlug)
         
-        // ✅ PRIORIDADE 2: Se não encontrou, buscar pelo slug gerado do name
+        // ✅ PRIORIDADE 2: Se não encontrou e é Nutri, tentar com sufixo -nutri
+        if (!template && profession === 'nutri') {
+          template = filteredTemplates.find(t => t.slug === `${templateSlug}-nutri`)
+        }
+        
+        // ✅ PRIORIDADE 3: Se não encontrou, tentar sem sufixo -nutri (se tinha)
+        if (!template && templateSlug.endsWith('-nutri')) {
+          const slugWithoutNutri = templateSlug.replace(/-nutri$/, '')
+          template = filteredTemplates.find(t => t.slug === slugWithoutNutri)
+        }
+        
+        // ✅ PRIORIDADE 4: Se não encontrou, buscar pelo slug gerado do name
         if (!template) {
           template = filteredTemplates.find(t => {
             const slugFromName = generateSlugFromName(t.name)
-            return slugFromName === templateSlug
+            return slugFromName === templateSlug || slugFromName === `${templateSlug}-nutri`
           })
         }
 
@@ -91,14 +102,25 @@ export async function findTemplateBySlug(
       throw templatesError
     }
 
-    // ✅ PRIORIDADE 1: Buscar pelo slug do banco
+    // ✅ PRIORIDADE 1: Buscar pelo slug do banco (exato)
     let template = (templates || []).find(t => t.slug === templateSlug)
     
-    // ✅ PRIORIDADE 2: Se não encontrou, buscar pelo slug gerado do name
+    // ✅ PRIORIDADE 2: Se não encontrou e é Nutri, tentar com sufixo -nutri
+    if (!template && profession === 'nutri') {
+      template = (templates || []).find(t => t.slug === `${templateSlug}-nutri`)
+    }
+    
+    // ✅ PRIORIDADE 3: Se não encontrou, tentar sem sufixo -nutri (se tinha)
+    if (!template && templateSlug.endsWith('-nutri')) {
+      const slugWithoutNutri = templateSlug.replace(/-nutri$/, '')
+      template = (templates || []).find(t => t.slug === slugWithoutNutri)
+    }
+    
+    // ✅ PRIORIDADE 4: Se não encontrou, buscar pelo slug gerado do name
     if (!template) {
       template = (templates || []).find(t => {
         const slugFromName = generateSlugFromName(t.name)
-        return slugFromName === templateSlug
+        return slugFromName === templateSlug || slugFromName === `${templateSlug}-nutri`
       })
     }
 

@@ -353,7 +353,7 @@ function NovoPortalNutriContent() {
                       ⚠️ <strong>Configure seu slug pessoal</strong> para personalizar suas URLs
                     </p>
                     <Link
-                      href="/pt/nutri/configuracoes"
+                      href="/pt/nutri/configuracao"
                       className="text-sm text-yellow-900 underline hover:text-yellow-700"
                     >
                       Ir para Configurações →

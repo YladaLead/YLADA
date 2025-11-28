@@ -345,6 +345,23 @@ export async function POST(request: NextRequest) {
     if (typeof content !== 'object' || Array.isArray(content)) {
       content = {}
     }
+    
+    // ✅ CORRIGIDO: Armazenar leader_data_collection dentro do content (igual Coach)
+    // Em vez de tentar criar uma coluna separada que não existe
+    if (leader_data_collection) {
+      content.leader_data_collection = leader_data_collection
+    } else {
+      // Se não fornecido, criar estrutura padrão
+      content.leader_data_collection = {
+        coletar_dados: false,
+        campos_coleta: {
+          nome: false,
+          email: false,
+          telefone: false
+        },
+        mensagem_personalizada: null
+      }
+    }
 
     // Gerar código curto se solicitado
     let shortCode = null
@@ -407,8 +424,9 @@ export async function POST(request: NextRequest) {
       profession: profession || 'nutri',
       status: 'active',
       views: 0,
-      leads_count: 0,
-      leader_data_collection: leader_data_collection || null
+      leads_count: 0
+      // ✅ REMOVIDO: leader_data_collection não é uma coluna separada
+      // Os dados são armazenados dentro de content.leader_data_collection (igual Coach)
     }
     
     // Adicionar content sempre (objeto vazio se não tiver)

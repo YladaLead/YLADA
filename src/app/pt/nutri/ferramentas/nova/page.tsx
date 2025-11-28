@@ -451,7 +451,8 @@ function NovaFerramentaNutriContent() {
       const nomeAmigavel = gerarTituloDoSlug(configuracao.urlPersonalizada)
 
       // ✅ NORMALIZAR template_slug para garantir que sempre use o slug canônico
-      const templateSlugNormalizado = normalizeTemplateSlug(templateSelecionado.slug)
+      // Passar 'nutri' como profession para manter slugs originais (calculadora-imc, etc)
+      const templateSlugNormalizado = normalizeTemplateSlug(templateSelecionado.slug, 'nutri')
       
       // ✅ VALIDAR se o template existe na lista de templates válidos
       if (!CANONICAL_TEMPLATE_SLUGS.includes(templateSlugNormalizado as any)) {
@@ -1214,7 +1215,7 @@ function NovaFerramentaNutriContent() {
                                     </p>
                                     <p className="text-xs text-gray-600">
                                       Este número será usado em todas as suas ferramentas. Para alterar, acesse{' '}
-                                      <Link href="/pt/nutri/configuracoes" className="text-blue-600 underline font-semibold">
+                                      <Link href="/pt/nutri/configuracao" className="text-blue-600 underline font-semibold">
                                         Configurações → Perfil
                                       </Link>
                                     </p>
@@ -1233,7 +1234,7 @@ function NovaFerramentaNutriContent() {
                                       Configure seu WhatsApp no perfil para usar esta opção.
                                     </p>
                                       <Link
-                                      href="/pt/nutri/configuracoes"
+                                      href="/pt/nutri/configuracao"
                                       className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
                                     >
                                       Ir para Configurações

@@ -209,38 +209,48 @@ export default function FerramentasNutri() {
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="mb-6 flex flex-wrap gap-3">
-          <button
-            onClick={() => setFiltroStatus('todas')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtroStatus === 'todas'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
-            }`}
+        {/* Filtros e Botão Criar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setFiltroStatus('todas')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtroStatus === 'todas'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              Todas
+            </button>
+            <button
+              onClick={() => setFiltroStatus('ativa')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtroStatus === 'ativa'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              Ativas
+            </button>
+            <button
+              onClick={() => setFiltroStatus('inativa')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtroStatus === 'inativa'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              Inativas
+            </button>
+          </div>
+          
+          <Link
+            href="/pt/nutri/ferramentas/nova"
+            className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-sm"
           >
-            Todas
-          </button>
-          <button
-            onClick={() => setFiltroStatus('ativa')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtroStatus === 'ativa'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
-            }`}
-          >
-            Ativas
-          </button>
-          <button
-            onClick={() => setFiltroStatus('inativa')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filtroStatus === 'inativa'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
-            }`}
-          >
-            Inativas
-          </button>
+            <span>➕</span>
+            Criar Link
+          </Link>
         </div>
 
         {/* Lista de Ferramentas */}
@@ -334,8 +344,24 @@ export default function FerramentasNutri() {
                           Copiar
                         </button>
                       </div>
-                      {ferramenta.shortCode && (
+                      {/* Link Curto e Código - sempre mostrar se existir */}
+                      {ferramenta.shortCode ? (
                         <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-gray-500">Código Curto:</span>
+                            <span className="text-xs text-purple-600 font-mono font-bold">
+                              {ferramenta.shortCode}
+                            </span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(ferramenta.shortCode || '')
+                                alert('Código copiado!')
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-700 underline"
+                            >
+                              Copiar
+                            </button>
+                          </div>
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs text-gray-500">URL Encurtada:</span>
                             <span className="text-xs text-purple-600 font-mono break-all">
@@ -359,6 +385,10 @@ export default function FerramentasNutri() {
                             />
                           </div>
                         </>
+                      ) : (
+                        <div className="text-xs text-gray-400 italic mb-2">
+                          Sem link curto configurado
+                        </div>
                       )}
                     </div>
                     <div className="flex flex-col space-y-2 ml-4 text-right sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:text-left">

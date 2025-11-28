@@ -198,7 +198,7 @@ function PortalsNutriContent() {
                   Sem o slug configurado, suas URLs não serão personalizadas. Configure agora para ter URLs como: <span className="font-mono">ylada.app/pt/nutri/[seu-slug]/portal/[nome-portal]</span>
                 </p>
                 <Link
-                  href="/pt/nutri/configuracoes"
+                  href="/pt/nutri/configuracao"
                   className="inline-block text-sm text-yellow-900 underline hover:text-yellow-700 font-medium"
                 >
                   Ir para Configurações →
@@ -313,7 +313,7 @@ function PortalsNutriContent() {
                   ) : (
                     <div className="text-xs text-gray-400">
                       <span className="font-mono">ylada.app/pt/nutri/[configure]/portal/{portal.slug}</span>
-                      <Link href="/pt/nutri/configuracoes" className="text-blue-600 hover:text-blue-700 underline ml-1">
+                      <Link href="/pt/nutri/configuracao" className="text-blue-600 hover:text-blue-700 underline ml-1">
                         Configurar
                       </Link>
                     </div>

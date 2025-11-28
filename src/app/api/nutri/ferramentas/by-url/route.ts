@@ -16,8 +16,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const ensureActiveSubscription = async (ownerId: string | null) => {
+    const ensureActiveSubscription = async (ownerId: string | null, userSlug?: string | null) => {
       if (!ownerId) return true
+      
+      // ✅ BYPASS: Conta de demonstração "ana" na área Nutri
+      if (userSlug === 'ana') {
+        console.log(`✅ Usuário ${ownerId} (${userSlug}) é conta demo Nutri - bypassando verificação`)
+        return true
+      }
       
       // Verificar se é admin ou suporte (bypass)
       const bypass = await canBypassSubscription(ownerId)
@@ -101,7 +107,7 @@ export async function GET(request: NextRequest) {
         
         // Bloquear se assinatura venceu
         const ownerId = toolData?.user_id || profile.user_id
-        const subscriptionOk = await ensureActiveSubscription(ownerId)
+        const subscriptionOk = await ensureActiveSubscription(ownerId, userSlug)
         if (!subscriptionOk) {
           return NextResponse.json(
             { error: 'link_indisponivel', message: 'Assinatura expirada' },
@@ -136,9 +142,31 @@ export async function GET(request: NextRequest) {
     }
 
     const ownerId = data.user_profiles?.user_id || data.user_id
-    const subscriptionOk = await ensureActiveSubscription(ownerId)
+    const ownerUserSlug = data.user_profiles?.user_slug || userSlug // userSlug vem do parâmetro da função
+    
+    // Debug: log antes de verificar assinatura
+    console.log('🔍 Verificando assinatura para ferramenta:', {
+      tool_id: data.id,
+      tool_slug: data.slug,
+      template_slug: data.template_slug,
+      owner_id: ownerId,
+      user_slug: ownerUserSlug
+    })
+    
+    const subscriptionOk = await ensureActiveSubscription(ownerId, ownerUserSlug)
+    
+    // Debug: log resultado da verificação
+    console.log('🔍 Resultado verificação assinatura:', {
+      owner_id: ownerId,
+      subscription_ok: subscriptionOk
+    })
 
     if (!subscriptionOk) {
+      console.error('❌ Assinatura não ativa para ferramenta:', {
+        tool_id: data.id,
+        tool_slug: data.slug,
+        owner_id: ownerId
+      })
       return NextResponse.json(
         { error: 'link_indisponivel', message: 'Assinatura expirada' },
         { status: 403 }

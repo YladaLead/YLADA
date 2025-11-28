@@ -111,15 +111,18 @@ export function getDiagnostico(
 
   switch (ferramentaId) {
     case 'quiz-interativo':
+    case 'quiz-interativo-nutri':
       diagnosticos = quizInterativoDiagnosticos
       break
     case 'quiz-bem-estar':
+    case 'quiz-bem-estar-nutri':
       diagnosticos = quizBemEstarDiagnosticos
       break
     case 'quiz-perfil-nutricional':
       diagnosticos = quizPerfilNutricionalDiagnosticos
       break
     case 'quiz-detox':
+    case 'quiz-detox-nutri':
       diagnosticos = quizDetoxDiagnosticos
       break
     case 'quiz-pedindo-detox':
@@ -127,9 +130,11 @@ export function getDiagnostico(
       diagnosticos = quizPedindoDetoxDiagnosticos
       break
     case 'disciplinado-emocional':
+    case 'disciplinado-emocional-nutri':
       diagnosticos = disciplinadoEmocionalDiagnosticos
       break
     case 'quiz-energetico':
+    case 'quiz-energetico-nutri':
       diagnosticos = quizEnergeticoDiagnosticos
       break
     case 'avaliacao-sono-energia':
@@ -141,28 +146,33 @@ export function getDiagnostico(
       diagnosticos = avaliacaoEmocionalDiagnosticos
       break
     case 'avaliacao-intolerancia':
+    case 'avaliacao-intolerancia-nutri':
     case 'quiz-intolerancia':
     case 'intolerancia':
       diagnosticos = avaliacaoIntoleranciaDiagnosticos
       break
     case 'avaliacao-perfil-metabolico':
+    case 'avaliacao-perfil-metabolico-nutri':
     case 'quiz-perfil-metabolico':
     case 'perfil-metabolico':
     case 'perfil-metabólico':
       diagnosticos = perfilMetabolicoDiagnosticos
       break
     case 'avaliacao-inicial':
+    case 'avaliacao-inicial-nutri':
     case 'quiz-avaliacao-inicial':
     case 'template-avaliacao-inicial':
       diagnosticos = avaliacaoInicialDiagnosticos
       break
     case 'diagnostico-eletrolitos':
+    case 'diagnostico-eletrolitos-nutri':
     case 'quiz-eletrolitos':
     case 'eletrolitos':
     case 'eletrólitos':
       diagnosticos = diagnosticoEletrolitosDiagnosticos
       break
     case 'diagnostico-sintomas-intestinais':
+    case 'diagnostico-sintomas-intestinais-nutri':
     case 'quiz-sintomas-intestinais':
     case 'sintomas-intestinais':
     case 'sintomas intestinais':
@@ -173,6 +183,7 @@ export function getDiagnostico(
       diagnosticos = perfilIntestinoDiagnosticos
       break
     case 'pronto-emagrecer':
+    case 'pronto-emagrecer-nutri':
     case 'quiz-pronto-emagrecer':
     case 'pronto para emagrecer':
       diagnosticos = prontoEmagrecerDiagnosticos
@@ -185,35 +196,41 @@ export function getDiagnostico(
       break
     case 'alimentacao-saudavel':
     case 'quiz-alimentacao-saudavel':
+    case 'quiz-alimentacao-nutri':
     case 'healthy-eating-quiz':
     case 'healthy-eating':
       diagnosticos = alimentacaoSaudavelDiagnosticos
       break
     case 'sindrome-metabolica':
+    case 'sindrome-metabolica-nutri':
     case 'risco-sindrome-metabolica':
     case 'metabolic-syndrome-risk':
     case 'metabolic-syndrome':
       diagnosticos = sindromeMetabolicaDiagnosticos
       break
     case 'retencao-liquidos':
+    case 'retencao-liquidos-nutri':
     case 'teste-retencao-liquidos':
     case 'water-retention-test':
     case 'water-retention':
       diagnosticos = retencaoLiquidosDiagnosticos
       break
     case 'conhece-seu-corpo':
+    case 'conhece-seu-corpo-nutri':
     case 'voce-conhece-seu-corpo':
     case 'body-awareness':
     case 'autoconhecimento-corporal':
       diagnosticos = conheceSeuCorpoDiagnosticos
       break
     case 'nutrido-vs-alimentado':
+    case 'nutrido-vs-alimentado-nutri':
     case 'voce-nutrido-ou-apenas-alimentado':
     case 'nourished-vs-fed':
     case 'nutrido ou alimentado':
       diagnosticos = nutridoVsAlimentadoDiagnosticos
       break
     case 'alimentacao-rotina':
+    case 'alimentacao-rotina-nutri':
     case 'voce-alimentando-conforme-rotina':
     case 'avaliacao-rotina-alimentar':
     case 'voce-esta-se-alimentando-conforme-sua-rotina':
@@ -278,6 +295,7 @@ export function getDiagnostico(
       break
     case 'template-desafio-21dias':
     case 'desafio-21-dias':
+    case 'desafio-21-dias-nutri':
       diagnosticos = desafio21DiasDiagnosticos
       break
     case 'guia-hidratacao':
@@ -315,16 +333,20 @@ export function getDiagnostico(
 
 export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'alimentacao-rotina': alimentacaoRotinaDiagnosticos,
+  'alimentacao-rotina-nutri': alimentacaoRotinaDiagnosticos,
   'voce-alimentando-conforme-rotina': alimentacaoRotinaDiagnosticos,
   'avaliacao-rotina-alimentar': alimentacaoRotinaDiagnosticos,
   'voce-esta-se-alimentando-conforme-sua-rotina': alimentacaoRotinaDiagnosticos,
   'alimentacao-saudavel': alimentacaoSaudavelDiagnosticos,
   'quiz-alimentacao-saudavel': alimentacaoSaudavelDiagnosticos,
+  'quiz-alimentacao-nutri': alimentacaoSaudavelDiagnosticos,
   'avaliacao-emocional': avaliacaoEmocionalDiagnosticos,
   'quiz-emocional': avaliacaoEmocionalDiagnosticos,
   'avaliacao-inicial': avaliacaoInicialDiagnosticos,
+  'avaliacao-inicial-nutri': avaliacaoInicialDiagnosticos,
   'template-avaliacao-inicial': avaliacaoInicialDiagnosticos,
   'avaliacao-intolerancia': avaliacaoIntoleranciaDiagnosticos,
+  'avaliacao-intolerancia-nutri': avaliacaoIntoleranciaDiagnosticos,
   'quiz-intolerancia': avaliacaoIntoleranciaDiagnosticos,
   'intolerancia': avaliacaoIntoleranciaDiagnosticos,
   'calculadora-agua': calculadoraAguaDiagnosticos,
@@ -335,20 +357,24 @@ export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'checklist-alimentar': checklistAlimentarDiagnosticos,
   'checklist-detox': checklistDetoxDiagnosticos,
   'conhece-seu-corpo': conheceSeuCorpoDiagnosticos,
+  'conhece-seu-corpo-nutri': conheceSeuCorpoDiagnosticos,
   'voce-conhece-seu-corpo': conheceSeuCorpoDiagnosticos,
   'autoconhecimento-corporal': conheceSeuCorpoDiagnosticos,
   'diario-alimentar': diarioAlimentarDiagnosticos,
   'desafio-7-dias': desafio7DiasDiagnosticos,
   'template-desafio-7dias': desafio7DiasDiagnosticos,
   'desafio-21-dias': desafio21DiasDiagnosticos,
+  'desafio-21-dias-nutri': desafio21DiasDiagnosticos,
   'template-desafio-21dias': desafio21DiasDiagnosticos,
   'diagnostico-eletrolitos': diagnosticoEletrolitosDiagnosticos,
+  'diagnostico-eletrolitos-nutri': diagnosticoEletrolitosDiagnosticos,
   'quiz-eletrolitos': diagnosticoEletrolitosDiagnosticos,
   'eletrolitos': diagnosticoEletrolitosDiagnosticos,
   'eletrólitos': diagnosticoEletrolitosDiagnosticos,
   'template-diagnostico-parasitose': diagnosticoParasitoseDiagnosticos,
   'diagnostico-parasitose': diagnosticoParasitoseDiagnosticos,
   'diagnostico-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
+  'diagnostico-sintomas-intestinais-nutri': diagnosticoSintomasIntestinaisDiagnosticos,
   'quiz-sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
   'sintomas-intestinais': diagnosticoSintomasIntestinaisDiagnosticos,
   'perfil-intestino': perfilIntestinoDiagnosticos,
@@ -360,34 +386,44 @@ export const diagnosticosNutri: Record<string, DiagnosticosPorFerramenta> = {
   'infografico-educativo': infograficoEducativoDiagnosticos,
   'mini-ebook': miniEbookDiagnosticos,
   'nutrido-vs-alimentado': nutridoVsAlimentadoDiagnosticos,
+  'nutrido-vs-alimentado-nutri': nutridoVsAlimentadoDiagnosticos,
   'voce-nutrido-ou-apenas-alimentado': nutridoVsAlimentadoDiagnosticos,
   'nutrido ou alimentado': nutridoVsAlimentadoDiagnosticos,
   'perfil-metabolico': perfilMetabolicoDiagnosticos,
   'avaliacao-perfil-metabolico': perfilMetabolicoDiagnosticos,
+  'avaliacao-perfil-metabolico-nutri': perfilMetabolicoDiagnosticos,
   'quiz-perfil-metabolico': perfilMetabolicoDiagnosticos,
   'planner-refeicoes': plannerRefeicoesDiagnosticos,
   'plano-alimentar-base': planoAlimentarBaseDiagnosticos,
   'pronto-emagrecer': prontoEmagrecerDiagnosticos,
+  'pronto-emagrecer-nutri': prontoEmagrecerDiagnosticos,
   'quiz-pronto-emagrecer': prontoEmagrecerDiagnosticos,
   'quiz-bem-estar': quizBemEstarDiagnosticos,
+  'quiz-bem-estar-nutri': quizBemEstarDiagnosticos,
   'descoberta-perfil-bem-estar': quizBemEstarDiagnosticos,
   'descubra-seu-perfil-de-bem-estar': quizBemEstarDiagnosticos,
   'disciplinado-emocional': disciplinadoEmocionalDiagnosticos,
+  'disciplinado-emocional-nutri': disciplinadoEmocionalDiagnosticos,
   'quiz-detox': quizDetoxDiagnosticos,
+  'quiz-detox-nutri': quizDetoxDiagnosticos,
   'quiz-pedindo-detox': quizPedindoDetoxDiagnosticos,
   'seu-corpo-esta-pedindo-detox': quizPedindoDetoxDiagnosticos,
   'quiz-energetico': quizEnergeticoDiagnosticos,
+  'quiz-energetico-nutri': quizEnergeticoDiagnosticos,
   'avaliacao-sono-energia': avaliacaoSonoEnergiaDiagnosticos,
   'quiz-sono-energia': avaliacaoSonoEnergiaDiagnosticos,
   'quiz-interativo': quizInterativoDiagnosticos,
+  'quiz-interativo-nutri': quizInterativoDiagnosticos,
   'quiz-perfil-nutricional': quizPerfilNutricionalDiagnosticos,
   'rastreador-alimentar': rastreadorAlimentarDiagnosticos,
   'receitas': receitasDiagnosticos,
   'template-receitas': receitasDiagnosticos,
   'retencao-liquidos': retencaoLiquidosDiagnosticos,
+  'retencao-liquidos-nutri': retencaoLiquidosDiagnosticos,
   'teste-retencao-liquidos': retencaoLiquidosDiagnosticos,
   'simulador-resultados': simuladorResultadosDiagnosticos,
   'sindrome-metabolica': sindromeMetabolicaDiagnosticos,
+  'sindrome-metabolica-nutri': sindromeMetabolicaDiagnosticos,
   'risco-sindrome-metabolica': sindromeMetabolicaDiagnosticos,
   'story-interativo': storyInterativoDiagnosticos,
   'template-story-interativo': storyInterativoDiagnosticos,

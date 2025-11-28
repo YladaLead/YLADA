@@ -37,6 +37,9 @@ ADD COLUMN IF NOT EXISTS profession VARCHAR(50);
 ALTER TABLE user_templates 
 ADD COLUMN IF NOT EXISTS custom_whatsapp_message TEXT;
 
+ALTER TABLE user_templates 
+ADD COLUMN IF NOT EXISTS leader_data_collection JSONB;
+
 -- 3. Garantir que content pode ser NULL (caso não tenha template_id)
 -- Remover NOT NULL se existir
 DO $$ 

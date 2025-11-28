@@ -52,7 +52,7 @@ export default function NutriNavBar({ showTitle = false, title }: NutriNavBarPro
               Nutri
             </Link>
             <Link
-              href="/pt/nutri/configuracoes"
+              href="/pt/nutri/configuracao"
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
               Perfil

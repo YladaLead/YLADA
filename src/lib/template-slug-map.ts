@@ -95,8 +95,11 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
 /**
  * Normaliza um slug de template para o slug canônico
  * Se não encontrar no mapeamento, retorna o slug original
+ * 
+ * @param slug - O slug a ser normalizado
+ * @param profession - A área/profissão ('nutri', 'wellness', 'coach') - opcional
  */
-export function normalizeTemplateSlug(slug: string | null | undefined): string {
+export function normalizeTemplateSlug(slug: string | null | undefined, profession?: string): string {
   if (!slug) return ''
   // Normalizar: lowercase, trim, substituir espaços por hífens, remover múltiplos hífens
   let normalized = slug.toLowerCase().trim()
@@ -107,7 +110,14 @@ export function normalizeTemplateSlug(slug: string | null | undefined): string {
   // Se for um slug duplicado para Nutri (ex: calc-imc-nutri ou calc-imc-nutri-2), remover o sufixo
   normalized = normalized.replace(/-nutri(?:-\d+)?$/, '')
   
-  // Tentar encontrar no mapeamento
+  // ✅ ÁREA NUTRI: Manter slugs originais (não converter para padrão Wellness)
+  if (profession === 'nutri') {
+    // Para Nutri, manter os slugs como estão no banco (calculadora-imc, calculadora-proteina, etc)
+    // Não aplicar conversões do TEMPLATE_SLUG_MAP que são para Wellness/Coach
+    return normalized
+  }
+  
+  // Para outras áreas (Wellness, Coach), aplicar o mapeamento
   if (TEMPLATE_SLUG_MAP[normalized]) {
     return TEMPLATE_SLUG_MAP[normalized]
   }
@@ -118,42 +128,99 @@ export function normalizeTemplateSlug(slug: string | null | undefined): string {
 
 /**
  * Lista de slugs canônicos válidos (para validação)
+ * Inclui slugs de todas as áreas (Wellness, Nutri, Coach)
  */
 export const CANONICAL_TEMPLATE_SLUGS = [
+  // Slugs Wellness/Coach (formato curto)
   'calc-imc',
   'calc-proteina',
   'calc-hidratacao',
   'calc-composicao',
+  'calc-calorias',
+  // Slugs Nutri (formato completo)
+  'calculadora-imc',
+  'calculadora-proteina',
+  'calculadora-agua',
+  'calculadora-calorias',
+  // Quizzes (comuns a todas as áreas)
+  'quiz-interativo',
+  'quiz-bem-estar',
+  'quiz-perfil-nutricional',
+  'quiz-detox',
+  'quiz-energetico',
   'quiz-ganhos',
   'quiz-potencial',
   'quiz-proposito',
   'quiz-parasitas',
   'quiz-alimentacao',
+  'quiz-alimentacao-saudavel',
+  'quiz-alimentacao-nutri',
   'quiz-wellness-profile',
   'quiz-nutrition-assessment',
+  'quiz-tipo-fome',
+  'quiz-pedindo-detox',
+  'quiz-sono-energia',
+  'quiz-emocional',
+  'quiz-intolerancia',
+  'quiz-perfil-metabolico',
+  'quiz-sintomas-intestinais',
+  'quiz-eletrolitos',
+  'quiz-pronto-emagrecer',
+  // Avaliações
+  'avaliacao-emocional',
+  'avaliacao-inicial',
+  'avaliacao-intolerancia',
+  'avaliacao-perfil-metabolico',
+  'avaliacao-sono-energia',
+  'avaliacao-rotina-alimentar',
+  // Diagnósticos
+  'diagnostico-eletrolitos',
+  'diagnostico-parasitose',
+  'diagnostico-sintomas-intestinais',
+  // Checklists
+  'checklist-detox',
+  'checklist-alimentar',
+  // Desafios
+  'template-desafio-7dias',
+  'desafio-7-dias',
+  'template-desafio-21dias',
+  'desafio-21-dias',
+  // Planilhas
   'planilha-meal-planner',
   'planilha-diario-alimentar',
   'planilha-metas-semanais',
-  'template-desafio-7dias',
-  'template-desafio-21dias',
+  'tabela-comparativa',
+  'tabela-substituicoes',
+  'tabela-sintomas',
+  'tabela-metas-semanais',
+  'plano-alimentar-base',
+  // Guias
   'guia-hidratacao',
-  'avaliacao-emocional',
-  'avaliacao-intolerancia',
-  'avaliacao-perfil-metabolico',
-  'diagnostico-eletrolitos',
-  'diagnostico-sintomas-intestinais',
+  'guia-nutraceutico',
+  'guia-proteico',
+  // Outros
   'pronto-emagrecer',
   'tipo-fome',
+  'perfil-intestino',
   'sindrome-metabolica',
   'retencao-liquidos',
+  'teste-retencao-liquidos',
   'conhece-seu-corpo',
+  'disciplinado-emocional',
   'nutrido-vs-alimentado',
   'alimentacao-rotina',
   'infografico-educativo',
   'template-receitas',
+  'receitas',
   'template-story-interativo',
+  'story-interativo',
   'cardapio-detox',
   'template-avaliacao-inicial',
   'formulario-recomendacao',
+  'diario-alimentar',
+  'planner-refeicoes',
+  'rastreador-alimentar',
+  'simulador-resultados',
+  'mini-ebook',
 ] as const
 

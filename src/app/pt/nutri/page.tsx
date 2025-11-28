@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LanguageSelector from '../../../components/LanguageSelector'
-import ChatVendasButton from '../../../components/ChatVendasButton'
 
 export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
@@ -744,9 +743,6 @@ export default function NutriLandingPage() {
           </div>
         </div>
       </footer>
-
-      {/* Botão de Chat com Atendente */}
-      <ChatVendasButton />
     </div>
   )
 }
