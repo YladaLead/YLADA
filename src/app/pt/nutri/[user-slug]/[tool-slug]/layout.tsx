@@ -26,7 +26,7 @@ function resolveAppBaseUrl() {
     return 'http://localhost:3000'
   }
 
-  return 'https://www.ylada.com'
+  return 'https://ylada.app'
 }
 
 async function fetchToolFromSupabase(userSlug: string, toolSlug: string) {
@@ -141,12 +141,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       // Tentar inferir template_slug do tool-slug para usar imagem correta mesmo se ferramenta não for encontrada
       const inferredSlug = normalizeNutriTemplateSlug(toolSlug)
       const inferredImage = getFullOGImageUrl(inferredSlug, baseUrl, area)
+      const inferredImageAbsolute = inferredImage.startsWith('http') 
+        ? inferredImage 
+        : `${baseUrl}${inferredImage.startsWith('/') ? inferredImage : `/${inferredImage}`}`
       const inferredMessages = getOGMessages(inferredSlug)
       
       console.log('[OG Metadata] 🔍 Using inferred metadata (fallback):', {
         toolSlug,
         inferredSlug,
         inferredImage,
+        inferredImageAbsolute,
+        baseUrl,
         hasInferredMessage: !!inferredMessages.title
       })
       
@@ -170,7 +175,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           type: 'website',
           locale: 'pt_BR',
           images: [{
-            url: inferredImage,
+            url: inferredImageAbsolute,
             width: 1200,
             height: 630,
             type: 'image/jpeg',
@@ -195,11 +200,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Obter imagem OG com baseUrl correto e área Nutri
     const ogImageUrl = getFullOGImageUrl(normalizedSlug, baseUrl, area)
     
+    // Garantir que a URL seja absoluta
+    const absoluteImageUrl = ogImageUrl.startsWith('http') 
+      ? ogImageUrl 
+      : `${baseUrl}${ogImageUrl.startsWith('/') ? ogImageUrl : `/${ogImageUrl}`}`
+    
     // Debug: log para verificar imagem OG
-    console.log('[OG Metadata] Image URL:', {
+    console.log('[OG Metadata] Image URL (Nutri):', {
       normalizedSlug,
       ogImageUrl,
-      imagePath: getOGImageUrl(normalizedSlug, area)
+      absoluteImageUrl,
+      baseUrl,
+      imagePath: getOGImageUrl(normalizedSlug, area),
+      area
     })
     
     // Obter mensagens estimulantes baseadas no tipo de ferramenta
@@ -240,7 +253,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         siteName: 'NUTRI - Your Leading Data System',
         images: [
           {
-            url: ogImageUrl,
+            url: absoluteImageUrl,
             width: 1200,
             height: 630,
             alt: ogTitle,
@@ -254,7 +267,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: 'summary_large_image',
         title: `${ogTitle} - NUTRI`,
         description: ogDescription,
-        images: [ogImageUrl],
+        images: [absoluteImageUrl],
       },
     }
   } catch (error) {
@@ -275,7 +288,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'website',
         locale: 'pt_BR',
         images: [{
-          url: getFullOGImageUrl('default', fallbackBaseUrl, area),
+          url: (() => {
+            const defaultImage = getFullOGImageUrl('default', fallbackBaseUrl, area)
+            return defaultImage.startsWith('http')
+              ? defaultImage
+              : `${fallbackBaseUrl}${defaultImage.startsWith('/') ? defaultImage : `/${defaultImage}`}`
+          })(),
           width: 1200,
           height: 630,
           type: 'image/jpeg',

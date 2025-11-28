@@ -24,12 +24,22 @@ export async function GET(request: NextRequest) {
     const user_id = searchParams.get('user_id')
     const agent_id = searchParams.get('agent_id')
 
-    // Verificar se é atendente
-    const { data: agent } = await supabaseAdmin
-      .from('support_agents')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
+    // Verificar se é atendente (com tratamento de erro se tabela não existir)
+    let agent = null
+    try {
+      const { data: agentData, error: agentError } = await supabaseAdmin
+        .from('support_agents')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+      
+      if (!agentError && agentData) {
+        agent = agentData
+      }
+    } catch (err: any) {
+      // Se tabela não existir, agent fica null (usuário comum)
+      console.warn('[Support Tickets] Tabela support_agents pode não existir:', err.message)
+    }
 
     let query = supabaseAdmin
       .from('support_tickets')
@@ -65,8 +75,23 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar tickets:', error)
+      
+      // Mensagem mais específica para erro de tabela não encontrada
+      if (error.message?.includes('relation') && error.message?.includes('does not exist')) {
+        return NextResponse.json(
+          { 
+            error: 'Tabelas de suporte não encontradas. Execute o SQL: migrations/criar-tabelas-chat-suporte-nutri.sql',
+            details: error.message
+          },
+          { status: 500 }
+        )
+      }
+      
       return NextResponse.json(
-        { error: 'Erro ao buscar tickets' },
+        { 
+          error: 'Erro ao buscar tickets',
+          details: error.message || 'Erro desconhecido'
+        },
         { status: 500 }
       )
     }

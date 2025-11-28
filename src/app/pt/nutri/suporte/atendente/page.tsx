@@ -90,7 +90,9 @@ export default function AtendentePage() {
       })
 
       if (!response.ok) {
-        throw new Error('Erro ao carregar tickets')
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || `Erro ${response.status}: ${response.statusText}`
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -113,7 +115,16 @@ export default function AtendentePage() {
       }
     } catch (err: any) {
       console.error('Erro ao carregar tickets:', err)
-      setError(err.message || 'Erro ao carregar tickets')
+      let errorMessage = err.message || 'Erro ao carregar tickets'
+      
+      // Mensagens mais amigáveis para erros comuns
+      if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
+        errorMessage = '⚠️ Tabelas não encontradas. Execute o SQL: migrations/criar-tabelas-chat-suporte-nutri.sql'
+      } else if (errorMessage.includes('permission denied') || errorMessage.includes('policy')) {
+        errorMessage = '⚠️ Sem permissão. Verifique se você está registrado como atendente em /admin/support/agents'
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
