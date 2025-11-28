@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import ConditionalWidget from '@/components/nutri/ConditionalWidget'
 
 export const metadata: Metadata = {
   manifest: '/manifest-coach.json',
@@ -10,6 +11,11 @@ export const metadata: Metadata = {
 }
 
 export default function CoachLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <ConditionalWidget />
+    </>
+  )
 }
 

@@ -13,21 +13,24 @@ export default function ConditionalWidget() {
     country_code?: string | null
   } | null>(null)
 
-  // Verificar se é página pública de ferramenta
-  const isPublicToolPage = pathname?.match(/^\/pt\/nutri\/[^\/]+\/[^\/]+$/)
+  // Verificar se é página pública de ferramenta (Nutri, Coach ou Wellness)
+  const isPublicToolPage = pathname?.match(/^\/pt\/(nutri|coach|wellness)\/[^\/]+\/[^\/]+$/)
+  const areaMatch = pathname?.match(/^\/pt\/(nutri|coach|wellness)\//)
+  const area = areaMatch ? areaMatch[1] : null
 
   useEffect(() => {
-    if (isPublicToolPage) {
+    if (isPublicToolPage && area) {
       // Buscar dados da ferramenta para obter WhatsApp
       const fetchToolData = async () => {
         try {
-          const match = pathname?.match(/^\/pt\/nutri\/([^\/]+)\/([^\/]+)$/)
+          const match = pathname?.match(/^\/pt\/(nutri|coach|wellness)\/([^\/]+)\/([^\/]+)$/)
           if (!match) return
 
-          const [, userSlug, toolSlug] = match
-          const response = await fetch(
-            `/api/nutri/ferramentas/by-url?user_slug=${userSlug}&tool_slug=${toolSlug}`
-          )
+          const [, areaSlug, userSlug, toolSlug] = match
+          
+          // Usar API apropriada para cada área
+          const apiUrl = `/api/${areaSlug}/ferramentas/by-url?user_slug=${userSlug}&tool_slug=${toolSlug}`
+          const response = await fetch(apiUrl)
 
           if (response.ok) {
             const data = await response.json()
@@ -53,7 +56,7 @@ export default function ConditionalWidget() {
       // Se não for página pública, limpar dados
       setToolData(null)
     }
-  }, [pathname, isPublicToolPage])
+  }, [pathname, isPublicToolPage, area])
 
   // Se for página pública de ferramenta, mostrar botão WhatsApp
   if (isPublicToolPage) {
@@ -66,7 +69,13 @@ export default function ConditionalWidget() {
     )
   }
 
-  // Caso contrário, mostrar chat de suporte
-  return <SupportChatWidget />
+  // Caso contrário, mostrar chat de suporte (apenas para Nutri por enquanto)
+  if (area === 'nutri') {
+    return <SupportChatWidget />
+  }
+
+  // Para Coach e Wellness, não mostrar nada por enquanto
+  // (pode adicionar chat de suporte específico depois se necessário)
+  return null
 }
 

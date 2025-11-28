@@ -17,9 +17,9 @@ export default function WhatsAppFloatingButton({
   const [isVisible, setIsVisible] = useState(false)
   const pathname = usePathname()
 
-  // Só mostrar em páginas públicas de ferramentas
+  // Só mostrar em páginas públicas de ferramentas (Nutri, Coach ou Wellness)
   useEffect(() => {
-    const isPublicToolPage = pathname?.match(/^\/pt\/nutri\/[^\/]+\/[^\/]+$/)
+    const isPublicToolPage = pathname?.match(/^\/pt\/(nutri|coach|wellness)\/[^\/]+\/[^\/]+$/)
     setIsVisible(!!isPublicToolPage && !!whatsappNumber)
   }, [pathname, whatsappNumber])
 
