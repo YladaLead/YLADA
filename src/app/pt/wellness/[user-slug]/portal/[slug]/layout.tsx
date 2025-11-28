@@ -13,6 +13,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params
   const { slug } = resolvedParams
+  const area: 'wellness' = 'wellness'
 
   try {
     // Buscar dados do portal
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           type: 'website',
           locale: 'pt_BR',
           images: [{
-            url: getFullOGImageUrl('portal', baseUrl),
+            url: getFullOGImageUrl('portal', baseUrl, area),
             width: 1200,
             height: 630,
             type: 'image/jpeg',
@@ -65,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
           title: 'Portal do Bem-Estar - WELLNESS',
           description: 'Portal personalizado de bem-estar',
-          images: [getFullOGImageUrl('portal')],
+          images: [getFullOGImageUrl('portal', undefined, area)],
         },
       }
     }
@@ -73,8 +74,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Construir URL base primeiro (usar www.ylada.com como padrão para produção)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
     
-    // Obter imagem OG para portal com baseUrl correto
-    const ogImageUrl = getFullOGImageUrl('portal', baseUrl)
+    // Obter imagem OG para portal com baseUrl correto e área Wellness
+    const ogImageUrl = getFullOGImageUrl('portal', baseUrl, area)
     
     // Obter mensagens estimulantes para portal
     const ogMessages = getOGMessages('portal')
@@ -131,7 +132,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'website',
         locale: 'pt_BR',
         images: [{
-          url: getFullOGImageUrl('portal', baseUrl),
+          url: getFullOGImageUrl('portal', baseUrl, area),
           width: 1200,
           height: 630,
           type: 'image/jpeg',

@@ -1,121 +1,135 @@
 /**
  * Mapeamento de template_slug para imagens Open Graph (OG)
- * Todas as imagens começam com o logo Wellness como padrão
+ * Suporta diferentes áreas: wellness, coach, nutri
+ * Todas as imagens começam com o logo da área como padrão
  * O usuário pode substituir as imagens depois conforme necessário
  */
 
 import { normalizeTemplateSlug } from './template-slug-map'
+import { normalizeNutriTemplateSlug } from './template-slug-map-nutri'
 
-export const OG_IMAGE_MAP: Record<string, string> = {
+export type AreaType = 'wellness' | 'coach' | 'nutri'
+
+// Mapeamento base de slugs para nomes de arquivos (sem área)
+const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   // Calculadoras
-  'calc-imc': '/images/og/wellness/calc-imc.jpg',
-  'calc-proteina': '/images/og/wellness/calc-proteina.jpg',
-  'calc-hidratacao': '/images/og/wellness/calc-hidratacao.jpg',
-  'calc-calorias': '/images/og/wellness/calc-calorias.jpg',
-  'calc-composicao': '/images/og/wellness/calc-composicao.jpg',
+  'calc-imc': 'calc-imc.jpg',
+  'calc-proteina': 'calc-proteina.jpg',
+  'calc-hidratacao': 'calc-hidratacao.jpg',
+  'calc-calorias': 'calc-calorias.jpg',
+  'calc-composicao': 'calc-composicao.jpg',
   
   // Quizzes
-  'quiz-ganhos': '/images/og/wellness/quiz-ganhos.jpg',
-  'quiz-potencial': '/images/og/wellness/quiz-potencial.jpg',
-  'quiz-proposito': '/images/og/wellness/quiz-proposito.jpg',
-  'quiz-alimentacao': '/images/og/wellness/quiz-alimentacao.jpg',
-  'quiz-wellness-profile': '/images/og/wellness/quiz-wellness-profile.jpg',
-  'quiz-nutrition-assessment': '/images/og/wellness/quiz-nutrition-assessment.jpg',
-  'quiz-personalizado': '/images/og/wellness/quiz-personalizado.jpg',
+  'quiz-ganhos': 'quiz-ganhos.jpg',
+  'quiz-potencial': 'quiz-potencial.jpg',
+  'quiz-proposito': 'quiz-proposito.jpg',
+  'quiz-alimentacao': 'quiz-alimentacao.jpg',
+  'quiz-wellness-profile': 'quiz-wellness-profile.jpg',
+  'quiz-nutrition-assessment': 'quiz-nutrition-assessment.jpg',
+  'quiz-personalizado': 'quiz-personalizado.jpg',
   
   // Desafios
-  'template-desafio-7dias': '/images/og/wellness/template-desafio-7dias.jpg',
-  'desafio-7-dias': '/images/og/wellness/template-desafio-7dias.jpg',
-  'template-desafio-21dias': '/images/og/wellness/template-desafio-21dias.jpg',
-  'desafio-21-dias': '/images/og/wellness/template-desafio-21dias.jpg',
+  'template-desafio-7dias': 'template-desafio-7dias.jpg',
+  'desafio-7-dias': 'template-desafio-7dias.jpg',
+  'template-desafio-21dias': 'template-desafio-21dias.jpg',
+  'desafio-21-dias': 'template-desafio-21dias.jpg',
   
   // Guias
-  'guia-hidratacao': '/images/og/wellness/guia-hidratacao.jpg',
-  'guia-de-hidratacao': '/images/og/wellness/guia-hidratacao.jpg',
+  'guia-hidratacao': 'guia-hidratacao.jpg',
+  'guia-de-hidratacao': 'guia-hidratacao.jpg',
   
   // Avaliações
-  'avaliacao-intolerancia': '/images/og/wellness/avaliacao-intolerancia.jpg',
-  'avaliacao-perfil-metabolico': '/images/og/wellness/avaliacao-perfil-metabolico.jpg',
-  'avaliacao-emocional': '/images/og/wellness/avaliacao-emocional.jpg',
-  'template-avaliacao-inicial': '/images/og/wellness/template-avaliacao-inicial.jpg',
-  'avaliacao-inicial': '/images/og/wellness/template-avaliacao-inicial.jpg',
+  'avaliacao-intolerancia': 'avaliacao-intolerancia.jpg',
+  'avaliacao-perfil-metabolico': 'avaliacao-perfil-metabolico.jpg',
+  'avaliacao-emocional': 'avaliacao-emocional.jpg',
+  'template-avaliacao-inicial': 'template-avaliacao-inicial.jpg',
+  'avaliacao-inicial': 'template-avaliacao-inicial.jpg',
   
   // Diagnósticos
-  'diagnostico-eletrolitos': '/images/og/wellness/diagnostico-eletrolitos.jpg',
-  'diagnostico-sintomas-intestinais': '/images/og/wellness/diagnostico-sintomas-intestinais.jpg',
+  'diagnostico-eletrolitos': 'diagnostico-eletrolitos.jpg',
+  'diagnostico-sintomas-intestinais': 'diagnostico-sintomas-intestinais.jpg',
   
   // Outros Quizzes
-  'pronto-emagrecer': '/images/og/wellness/pronto-emagrecer.jpg',
-  'tipo-fome': '/images/og/wellness/tipo-fome.jpg',
-  'sindrome-metabolica': '/images/og/wellness/sindrome-metabolica.jpg',
-  'retencao-liquidos': '/images/og/wellness/retencao-liquidos.jpg',
-  'conhece-seu-corpo': '/images/og/wellness/conhece-seu-corpo.jpg',
-  'nutrido-vs-alimentado': '/images/og/wellness/nutrido-vs-alimentado.jpg',
-  'alimentacao-rotina': '/images/og/wellness/alimentacao-rotina.jpg',
-  'template-story-interativo': '/images/og/wellness/template-story-interativo.jpg',
-  'story-interativo': '/images/og/wellness/template-story-interativo.jpg',
-  'quiz-interativo': '/images/og/wellness/template-story-interativo.jpg',
+  'pronto-emagrecer': 'pronto-emagrecer.jpg',
+  'tipo-fome': 'tipo-fome.jpg',
+  'sindrome-metabolica': 'sindrome-metabolica.jpg',
+  'retencao-liquidos': 'retencao-liquidos.jpg',
+  'conhece-seu-corpo': 'conhece-seu-corpo.jpg',
+  'nutrido-vs-alimentado': 'nutrido-vs-alimentado.jpg',
+  'alimentacao-rotina': 'alimentacao-rotina.jpg',
+  'template-story-interativo': 'template-story-interativo.jpg',
+  'story-interativo': 'template-story-interativo.jpg',
+  'quiz-interativo': 'template-story-interativo.jpg',
   
   // Planilhas
-  'planilha-meal-planner': '/images/og/wellness/planilha-meal-planner.jpg',
-  'planilha-diario-alimentar': '/images/og/wellness/planilha-diario-alimentar.jpg',
-  'planilha-metas-semanais': '/images/og/wellness/planilha-metas-semanais.jpg',
-  'cardapio-detox': '/images/og/wellness/cardapio-detox.jpg',
+  'planilha-meal-planner': 'planilha-meal-planner.jpg',
+  'planilha-diario-alimentar': 'planilha-diario-alimentar.jpg',
+  'planilha-metas-semanais': 'planilha-metas-semanais.jpg',
+  'cardapio-detox': 'cardapio-detox.jpg',
   
   // Portal
-  'portal': '/images/og/wellness/portal.jpg',
+  'portal': 'portal.jpg',
   
-  // Fallback padrão (logo Wellness)
-  'default': '/images/og/wellness/default.jpg',
+  // Fallback padrão
+  'default': 'default.jpg',
 }
 
 /**
  * Obtém a URL da imagem OG para um template_slug específico
- * Retorna a imagem padrão (logo Wellness) se não encontrar
- * Formato: JPG (recomendado para melhor performance e processamento mais rápido pelo Facebook)
+ * @param templateSlug - Slug do template
+ * @param area - Área da aplicação: 'wellness', 'coach' ou 'nutri' (padrão: 'wellness')
+ * @returns Caminho da imagem OG
  */
-export function getOGImageUrl(templateSlug: string | null | undefined): string {
+export function getOGImageUrl(
+  templateSlug: string | null | undefined,
+  area: AreaType = 'wellness'
+): string {
   if (!templateSlug) {
-    console.log('[OG Image] No template slug provided, using default')
-    return OG_IMAGE_MAP.default
+    console.log(`[OG Image] No template slug provided, using default for area: ${area}`)
+    return `/images/og/${area}/${OG_IMAGE_SLUG_MAP.default}`
   }
   
-  // IMPORTANTE: Normalizar usando o template-slug-map para garantir consistência
-  // Isso converte variações como "calculadora-de-proteina" para "calc-proteina"
-  const normalized = normalizeTemplateSlug(templateSlug)
+  // Normalizar template_slug baseado na área
+  let normalized: string
+  if (area === 'nutri') {
+    // Para Nutri, usar normalização específica
+    normalized = normalizeNutriTemplateSlug(templateSlug)
+  } else {
+    // Para Wellness e Coach, usar normalização padrão
+    normalized = normalizeTemplateSlug(templateSlug)
+  }
+  
+  // Obter nome do arquivo do mapeamento
+  const fileName = OG_IMAGE_SLUG_MAP[normalized] || OG_IMAGE_SLUG_MAP.default
+  
+  // Construir caminho completo com área
+  const imagePath = `/images/og/${area}/${fileName}`
   
   // Debug: log para verificar mapeamento
-  console.log('[OG Image] Looking for image:', {
+  console.log(`[OG Image] Looking for image (area: ${area}):`, {
     originalSlug: templateSlug,
     normalized,
-    hasMapping: !!OG_IMAGE_MAP[normalized],
-    mappedTo: OG_IMAGE_MAP[normalized] || 'default',
-    availableKeys: Object.keys(OG_IMAGE_MAP).filter(k => k.includes('proteina'))
+    fileName,
+    imagePath,
+    hasMapping: !!OG_IMAGE_SLUG_MAP[normalized],
   })
   
-  // Tentar encontrar no mapeamento com o slug normalizado
-  if (OG_IMAGE_MAP[normalized]) {
-    console.log('[OG Image] ✅ Found mapping:', OG_IMAGE_MAP[normalized])
-    return OG_IMAGE_MAP[normalized]
-  }
-  
-  // Fallback: tentar buscar diretamente se a normalização não funcionou
-  const directMatch = OG_IMAGE_MAP[templateSlug.toLowerCase().trim()]
-  if (directMatch) {
-    console.log('[OG Image] ✅ Found direct match:', directMatch)
-    return directMatch
-  }
-  
-  // Fallback para imagem padrão
-  console.log('[OG Image] ❌ No mapping found, using default. Normalized:', normalized, 'Original:', templateSlug)
-  return OG_IMAGE_MAP.default
+  return imagePath
 }
 
 /**
  * Obtém a URL completa da imagem OG (com domínio)
+ * @param templateSlug - Slug do template
+ * @param baseUrl - URL base do site (padrão: 'https://ylada.app')
+ * @param area - Área da aplicação: 'wellness', 'coach' ou 'nutri' (padrão: 'wellness')
+ * @returns URL completa da imagem OG
  */
-export function getFullOGImageUrl(templateSlug: string | null | undefined, baseUrl: string = 'https://ylada.app'): string {
-  const imagePath = getOGImageUrl(templateSlug)
+export function getFullOGImageUrl(
+  templateSlug: string | null | undefined,
+  baseUrl: string = 'https://ylada.app',
+  area: AreaType = 'wellness'
+): string {
+  const imagePath = getOGImageUrl(templateSlug, area)
   return `${baseUrl}${imagePath}`
 }
 
@@ -123,6 +137,6 @@ export function getFullOGImageUrl(templateSlug: string | null | undefined, baseU
  * Lista todos os template_slug que precisam de imagens OG
  */
 export function getAllTemplateSlugs(): string[] {
-  return Object.keys(OG_IMAGE_MAP).filter(slug => slug !== 'default')
+  return Object.keys(OG_IMAGE_SLUG_MAP).filter(slug => slug !== 'default')
 }
 

@@ -13,6 +13,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params
   const { slug } = resolvedParams
+  const area: 'wellness' = 'wellness'
 
   try {
     // Buscar dados do quiz
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           type: 'website',
           locale: 'pt_BR',
           images: [{
-            url: getFullOGImageUrl('quiz-personalizado', baseUrl),
+            url: getFullOGImageUrl('quiz-personalizado', baseUrl, area),
             width: 1200,
             height: 630,
             type: 'image/jpeg',
@@ -47,8 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Construir URL base primeiro (usar www.ylada.com como padrão para produção)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
     
-    // Obter imagem OG para quiz personalizado com baseUrl correto
-    const ogImageUrl = getFullOGImageUrl('quiz-personalizado', baseUrl)
+    // Obter imagem OG para quiz personalizado com baseUrl correto e área Wellness
+    const ogImageUrl = getFullOGImageUrl('quiz-personalizado', baseUrl, area)
     
     // Obter mensagens estimulantes para quiz
     const ogMessages = getOGMessages('quiz-personalizado')
@@ -105,7 +106,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'website',
         locale: 'pt_BR',
         images: [{
-          url: getFullOGImageUrl('quiz-personalizado', baseUrl),
+          url: getFullOGImageUrl('quiz-personalizado', baseUrl, area),
           width: 1200,
           height: 630,
           type: 'image/jpeg',
