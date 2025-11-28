@@ -434,27 +434,6 @@ function WellnessDashboardContent() {
       )}
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Seção: Renovação de Assinatura */}
-        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 sm:p-6 shadow-sm border-2 border-green-200">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex-1">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <span>💳</span>
-                <span>Gerenciar Assinatura</span>
-              </h2>
-              <p className="text-sm text-gray-600">
-                Renove ou atualize sua assinatura para continuar aproveitando todos os recursos da plataforma.
-              </p>
-            </div>
-            <Link
-              href="/pt/wellness/checkout"
-              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg whitespace-nowrap"
-            >
-              🔄 Renovar Assinatura
-            </Link>
-          </div>
-        </div>
-
         {/* Seção: Ferramentas do seu negócio */}
         <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">

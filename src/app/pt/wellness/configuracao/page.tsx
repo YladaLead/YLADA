@@ -35,6 +35,8 @@ export default function WellnessConfiguracaoPage() {
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [erroSenha, setErroSenha] = useState<string | null>(null)
   const [sucessoSenha, setSucessoSenha] = useState(false)
+  const [subscription, setSubscription] = useState<any>(null)
+  const [carregandoAssinatura, setCarregandoAssinatura] = useState(true)
 
   // Função para tratar slug (lowercase, sem espaços/acentos, SEM hífens - apenas um nome unificado)
   const tratarSlug = (texto: string): string => {
@@ -181,6 +183,27 @@ export default function WellnessConfiguracaoPage() {
     }
   }
 
+  // Carregar dados da assinatura
+  const carregarAssinatura = async () => {
+    if (!user) return
+    
+    try {
+      setCarregandoAssinatura(true)
+      const response = await fetch('/api/wellness/subscription', {
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setSubscription(data.subscription)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar assinatura:', error)
+    } finally {
+      setCarregandoAssinatura(false)
+    }
+  }
+
   // Preencher dados iniciais do usuário logado imediatamente
   useEffect(() => {
     if (user && user.email) {
@@ -192,6 +215,8 @@ export default function WellnessConfiguracaoPage() {
       }))
       // Carregar perfil completo da API
       carregarPerfil()
+      // Carregar dados da assinatura
+      carregarAssinatura()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
@@ -467,6 +492,125 @@ export default function WellnessConfiguracaoPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Minha Assinatura */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">💳 Minha Assinatura</h2>
+          {carregandoAssinatura ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 text-sm">Carregando informações da assinatura...</p>
+            </div>
+          ) : subscription ? (
+            <div className="space-y-4">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      {subscription.plan_type === 'annual' ? 'Plano Anual' : 'Plano Mensal'}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Status: <span className={`font-semibold ${subscription.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
+                        {subscription.status === 'active' ? '✅ Ativa' : '❌ Inativa'}
+                      </span>
+                    </p>
+                  </div>
+                  {subscription.status === 'active' && (
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500 mb-1">Vence em</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {subscription.current_period_end 
+                          ? new Date(subscription.current_period_end).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })
+                          : 'N/A'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                
+                {subscription.current_period_end && (
+                  <div className="mt-4 pt-4 border-t border-green-200">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Data de vencimento:</span>
+                      <span className="font-semibold text-gray-900">
+                        {new Date(subscription.current_period_end).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    {(() => {
+                      const vencimento = new Date(subscription.current_period_end)
+                      const hoje = new Date()
+                      const diasRestantes = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
+                      
+                      if (diasRestantes < 0) {
+                        return (
+                          <div className="mt-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-sm text-red-800 font-semibold">
+                              ⚠️ Sua assinatura venceu há {Math.abs(diasRestantes)} {Math.abs(diasRestantes) === 1 ? 'dia' : 'dias'}
+                            </p>
+                          </div>
+                        )
+                      } else if (diasRestantes <= 7) {
+                        return (
+                          <div className="mt-3 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                            <p className="text-sm text-orange-800 font-semibold">
+                              ⚠️ Sua assinatura vence em {diasRestantes} {diasRestantes === 1 ? 'dia' : 'dias'}
+                            </p>
+                          </div>
+                        )
+                      } else if (diasRestantes <= 30) {
+                        return (
+                          <div className="mt-3 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <p className="text-sm text-yellow-800">
+                              📅 Sua assinatura vence em {diasRestantes} dias
+                            </p>
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/pt/wellness/checkout"
+                  className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center shadow-md hover:shadow-lg"
+                >
+                  🔄 {subscription.status === 'active' ? 'Renovar Assinatura' : 'Ativar Assinatura'}
+                </Link>
+                {subscription.is_migrated && (
+                  <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800">
+                      ℹ️ Assinatura migrada - Renove para ativar renovação automática
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <p className="text-gray-600 mb-4">
+                  Você ainda não possui uma assinatura ativa. Assine agora para ter acesso a todas as ferramentas da plataforma.
+                </p>
+              </div>
+              <Link
+                href="/pt/wellness/checkout"
+                className="block w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center shadow-md hover:shadow-lg"
+              >
+                🚀 Assinar Agora
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Segurança */}
