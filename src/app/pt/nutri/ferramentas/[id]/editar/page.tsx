@@ -386,7 +386,7 @@ export default function EditarFerramentaNutri() {
         custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
       }
 
-      const response = await fetch('/api/wellness/ferramentas', {
+      const response = await fetch('/api/nutri/ferramentas', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -406,7 +406,7 @@ export default function EditarFerramentaNutri() {
       
       // Redirecionar após 2 segundos
       setTimeout(() => {
-        router.push('/pt/wellness/ferramentas')
+        router.push('/pt/nutri/ferramentas')
       }, 2000)
     } catch (error: any) {
       console.error('Erro ao salvar ferramenta:', error)
@@ -425,7 +425,7 @@ export default function EditarFerramentaNutri() {
       setSalvando(true)
       const novoStatus = toolData.status === 'active' ? 'inactive' : 'active'
       
-      const response = await fetch('/api/wellness/ferramentas', {
+      const response = await fetch('/api/nutri/ferramentas', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -463,7 +463,7 @@ export default function EditarFerramentaNutri() {
     try {
       setExcluindo(true)
       
-      const response = await fetch(`/api/wellness/ferramentas?id=${toolData.id}`, {
+      const response = await fetch(`/api/nutri/ferramentas?id=${toolData.id}`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -700,7 +700,7 @@ export default function EditarFerramentaNutri() {
                                 if (confirm('Tem certeza que deseja remover o código curto? Esta ação não pode ser desfeita.')) {
                                   try {
                                     setRemovendoShortCode(true)
-                                    const response = await fetch('/api/wellness/ferramentas', {
+                                    const response = await fetch('/api/nutri/ferramentas', {
                                       method: 'PUT',
                                       headers: {
                                         'Content-Type': 'application/json',
@@ -811,7 +811,7 @@ export default function EditarFerramentaNutri() {
                                               setVerificandoShortCode(true)
                                               try {
                                                 const response = await fetch(
-                                                  `/api/wellness/ferramentas/check-short-code?code=${encodeURIComponent(value)}&excludeId=${toolId}`
+                                                  `/api/nutri/ferramentas/check-short-code?code=${encodeURIComponent(value)}&excludeId=${toolId}`
                                                 )
                                                 const data = await response.json()
                                                 setShortCodeDisponivel(data.available)
