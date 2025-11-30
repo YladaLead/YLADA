@@ -156,6 +156,28 @@ export type TipoScript =
   | 'pos-venda'
   | 'recompra'
 
+export type FluxoId = 
+  | 'energia-matinal'
+  | 'energia-tarde'
+  | 'troca-cafe'
+  | 'anti-cansaco'
+  | 'rotina-puxada'
+  | 'foco-produtividade'
+  | 'motoristas'
+  | 'metabolismo-lento'
+  | 'sono-ruim'
+  | 'estresse-ansiedade'
+  | 'compulsao-doces'
+  | 'dores-inflamacao'
+  | 'baixa-imunidade'
+  | 'retencao-liquidos'
+  | 'cansaco-dia'
+  | 'falta-foco'
+  | 'fome-noturna'
+  | 'prisao-ventre'
+  | 'excesso-gases'
+  | 'mau-halito'
+
 export interface Script {
   id: string
   tipo: TipoScript
@@ -163,6 +185,8 @@ export interface Script {
   conteudo: string
   contexto: string // Quando usar
   variacoes?: string[] // Versões alternativas
+  fluxoId?: FluxoId // Script específico de um fluxo (opcional)
+  momento?: string // Ex: "2h depois", "24h depois", etc.
 }
 
 // ============================================

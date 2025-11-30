@@ -2,11 +2,22 @@
  * WELLNESS SYSTEM - Biblioteca de Scripts
  * 
  * Scripts organizados por tipo para uso nos fluxos
+ * Re-exporta os scripts completos da biblioteca oficial
  */
 
 import { Script, TipoScript } from '@/types/wellness-system'
+import { 
+  scriptsGerais, 
+  getAllScripts as getAllScriptsCompleto,
+  getScriptsByTipo as getScriptsByTipoCompleto,
+  getScriptById as getScriptByIdCompleto
+} from './scripts-completo'
 
-export const scripts: Record<TipoScript, Script[]> = {
+// Re-exportar scripts gerais como scripts principais
+export const scripts: Record<TipoScript, Script[]> = scriptsGerais
+
+// Manter compatibilidade com código existente
+export const scriptsLegacy: Record<TipoScript, Script[]> = {
   abertura: [
     {
       id: 'abertura-1',
@@ -311,18 +322,14 @@ Quer que eu te passe os valores? 💰`,
 }
 
 export function getScriptsByTipo(tipo: TipoScript): Script[] {
-  return scripts[tipo] || []
+  return getScriptsByTipoCompleto(tipo)
 }
 
 export function getScriptById(id: string): Script | undefined {
-  for (const tipoScripts of Object.values(scripts)) {
-    const script = tipoScripts.find(s => s.id === id)
-    if (script) return script
-  }
-  return undefined
+  return getScriptByIdCompleto(id)
 }
 
 export function getAllScripts(): Script[] {
-  return Object.values(scripts).flat()
+  return getAllScriptsCompleto()
 }
 
