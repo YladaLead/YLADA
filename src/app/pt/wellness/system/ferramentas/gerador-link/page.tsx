@@ -17,7 +17,7 @@ function GeradorLinkPageContent() {
 
   const fluxos = tipoFluxo === 'cliente' ? fluxosClientes : fluxosRecrutamento
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'
-  const userSlug = profile?.userSlug || 'seu-slug'
+  const userSlug = profile?.userSlug
 
   const gerarLink = () => {
     if (!fluxoSelecionado) {
@@ -25,9 +25,13 @@ function GeradorLinkPageContent() {
       return
     }
 
-    const rota = tipoFluxo === 'cliente'
-      ? `/pt/wellness/system/vender/fluxos/${fluxoSelecionado}`
-      : `/pt/wellness/system/recrutar/fluxos/${fluxoSelecionado}`
+    if (!userSlug) {
+      alert('Seu perfil não está configurado. Configure seu user_slug no perfil primeiro.')
+      return
+    }
+
+    // Gerar link personalizado com user_slug
+    const rota = `/pt/wellness/${userSlug}/fluxos/${tipoFluxo}/${fluxoSelecionado}`
 
     const linkCompleto = `${baseUrl}${rota}`
     setLinkGerado(linkCompleto)
@@ -74,6 +78,18 @@ São só ${fluxo?.perguntas.length || 5} perguntas e leva menos de 2 minutos! �
 
         {/* Formulário */}
         <div className="max-w-3xl mx-auto">
+          {/* Aviso se não tiver user_slug */}
+          {!userSlug && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+              <p className="text-yellow-800 text-sm">
+                ⚠️ <strong>Atenção:</strong> Configure seu user_slug no perfil para gerar links personalizados. 
+                <Link href="/pt/wellness/configuracao" className="underline ml-1">
+                  Configurar agora
+                </Link>
+              </p>
+            </div>
+          )}
+
           <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-6">
             {/* Tipo de Fluxo */}
             <div className="mb-6">

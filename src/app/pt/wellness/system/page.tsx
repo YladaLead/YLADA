@@ -2,13 +2,16 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 function WellnessSystemPageContent() {
+  const router = useRouter()
   const [moduloAberto, setModuloAberto] = useState<string | null>(null)
 
   const toggleModulo = (modulo: string) => {
+    // Fecha o módulo atual se estiver aberto, ou abre o novo
     setModuloAberto(moduloAberto === modulo ? null : modulo)
   }
 
@@ -92,6 +95,24 @@ function WellnessSystemPageContent() {
       <WellnessNavBar />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Botão Voltar - Discreto no topo */}
+        <div className="mb-4 sm:mb-6">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center space-x-2 text-sm text-gray-500 hover:text-gray-700 transition-colors group"
+          >
+            <svg
+              className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Voltar</span>
+          </button>
+        </div>
+
         {/* Cabeçalho */}
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -104,62 +125,89 @@ function WellnessSystemPageContent() {
 
         {/* Grid de Módulos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
-          {modulos.map((modulo) => (
-            <div
-              key={modulo.id}
-              className={`bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 transform hover:scale-105 ${moduloAberto === modulo.id ? 'ring-4 ring-green-400' : ''}`}
-            >
-              {/* Botão Principal do Módulo */}
-              <button
-                onClick={() => toggleModulo(modulo.id)}
-                className={`w-full p-6 sm:p-8 bg-gradient-to-r ${modulo.cor} ${modulo.corHover} text-white transition-all duration-300`}
+          {modulos.map((modulo) => {
+            const estaAberto = moduloAberto === modulo.id
+            
+            return (
+              <div
+                key={modulo.id}
+                className={`bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-500 ease-out ${
+                  estaAberto 
+                    ? 'ring-2 ring-green-400 shadow-2xl z-10' 
+                    : 'hover:shadow-xl'
+                }`}
+                style={{
+                  transform: estaAberto ? 'scale(1.02)' : 'scale(1)',
+                  transition: 'all 0.3s ease-out'
+                }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <span className="text-4xl sm:text-5xl">{modulo.emoji}</span>
-                    <h2 className="text-lg sm:text-xl font-bold text-left leading-tight">
-                      {modulo.titulo}
-                    </h2>
-                  </div>
-                  <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${moduloAberto === modulo.id ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-
-              {/* Subitens (Expandido) */}
-              {moduloAberto === modulo.id && (
-                <div className="p-4 sm:p-6 space-y-2 sm:space-y-3 bg-gray-50">
-                  {modulo.subitens.map((subitem) => (
-                    <Link
-                      key={subitem.id}
-                      href={subitem.rota}
-                      className="block p-3 sm:p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition-all duration-200 group"
+                {/* Botão Principal do Módulo */}
+                <button
+                  onClick={() => toggleModulo(modulo.id)}
+                  className={`w-full p-6 sm:p-8 bg-gradient-to-r ${modulo.cor} ${modulo.corHover} text-white transition-all duration-300 relative`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4 flex-1 min-w-0">
+                      <span className="text-4xl sm:text-5xl flex-shrink-0">{modulo.emoji}</span>
+                      <h2 className="text-lg sm:text-xl font-bold text-left leading-tight">
+                        {modulo.titulo}
+                      </h2>
+                    </div>
+                    <svg
+                      className={`w-6 h-6 flex-shrink-0 ml-2 transform transition-transform duration-300 ${
+                        estaAberto ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm sm:text-base font-medium text-gray-800 group-hover:text-green-700">
-                          {subitem.titulo}
-                        </span>
-                        <svg
-                          className="w-5 h-5 text-gray-400 group-hover:text-green-600 transform group-hover:translate-x-1 transition-all"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </button>
+
+                {/* Subitens (Expandido com animação suave) */}
+                <div
+                  className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                    estaAberto 
+                      ? 'max-h-[2000px] opacity-100' 
+                      : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  {estaAberto && (
+                    <div className="p-4 sm:p-6 space-y-2 sm:space-y-3 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
+                      {modulo.subitens.map((subitem, index) => (
+                        <Link
+                          key={subitem.id}
+                          href={subitem.rota}
+                          className="block p-3 sm:p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition-all duration-200 group shadow-sm hover:shadow-md hover:scale-[1.02]"
+                          style={{
+                            animation: 'fadeInUp 0.4s ease-out forwards',
+                            animationDelay: `${index * 60}ms`,
+                            opacity: 0
+                          }}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </Link>
-                  ))}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm sm:text-base font-medium text-gray-800 group-hover:text-green-700 flex-1">
+                              {subitem.titulo}
+                            </span>
+                            <svg
+                              className="w-5 h-5 text-gray-400 group-hover:text-green-600 transform group-hover:translate-x-1 transition-all flex-shrink-0 ml-2"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            )
+          })}
         </div>
 
         {/* Rodapé com informações */}
