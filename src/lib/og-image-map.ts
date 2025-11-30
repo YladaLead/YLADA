@@ -70,6 +70,10 @@ const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   // Portal
   'portal': 'portal.jpg',
   
+  // Wellness System
+  'system': 'default.jpg',
+  'wellness-system': 'default.jpg',
+  
   // Fallback padrão
   'default': 'default.jpg',
 }
