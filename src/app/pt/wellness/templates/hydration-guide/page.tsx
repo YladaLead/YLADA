@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -195,6 +196,7 @@ export default function GuiaHidratacao({ config }: TemplateBaseProps) {
               }
               discover={templateBenefits.discover}
               benefits={templateBenefits.whyUse}
+              benefitsTitle="A importância de saber a quantidade de água"
               onStart={iniciarGuia}
               buttonText="💧 Começar Guia de Hidratação - É Grátis"
             />
@@ -448,42 +450,33 @@ export default function GuiaHidratacao({ config }: TemplateBaseProps) {
               resultadoTexto={`Hidratação: ${resultado.nivelHidratacao === 'baixaHidratacao' ? 'Baixa' : resultado.nivelHidratacao === 'hidratacaoModerada' ? 'Moderada' : 'Alta'} | Necessidade: ${resultado.necessidadeAgua}L/dia`}
             />
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => {
-                  setDados({
-                    peso: '',
-                    atividade: '',
-                    clima: '',
-                    aguaAtual: '',
-                    sintomas: []
-                  })
-                  setResultado(null)
-                  setDiagnostico(null)
-                  setEtapa('formulario')
-                }}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
-                ↺ Refazer Cálculo
-              </button>
-              <button
-                onClick={() => {
-                  setDados({
-                    peso: '',
-                    atividade: '',
-                    clima: '',
-                    aguaAtual: '',
-                    sintomas: []
-                  })
-                  setResultado(null)
-                  setDiagnostico(null)
-                  setEtapa('landing')
-                }}
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                🏠 Voltar ao Início
-              </button>
-            </div>
+            <WellnessActionButtons
+              onRecalcular={() => {
+                setDados({
+                  peso: '',
+                  atividade: '',
+                  clima: '',
+                  aguaAtual: '',
+                  sintomas: []
+                })
+                setResultado(null)
+                setDiagnostico(null)
+                setEtapa('formulario')
+              }}
+              onVoltarInicio={() => {
+                setDados({
+                  peso: '',
+                  atividade: '',
+                  clima: '',
+                  aguaAtual: '',
+                  sintomas: []
+                })
+                setResultado(null)
+                setDiagnostico(null)
+                setEtapa('landing')
+              }}
+              textoRecalcular="↺ Refazer Cálculo"
+            />
           </div>
         )}
       </main>

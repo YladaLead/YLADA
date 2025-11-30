@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { checklistAlimentarDiagnosticos } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -464,16 +465,20 @@ export default function ChecklistAlimentar({ config }: TemplateBaseProps) {
             />
 
             {/* Botões de Ação */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={reiniciar}
-                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-              >
-                🔄 Fazer Novamente
-              </button>
+            <WellnessActionButtons
+              onRecalcular={reiniciar}
+              onVoltarInicio={() => {
+                setPerguntaAtual(0)
+                setRespostas([])
+                setResultado(null)
+                setEtapa('landing')
+              }}
+              textoRecalcular="🔄 Fazer Novamente"
+            />
+            <div className="flex justify-center mt-2">
               <button
                 onClick={() => window.print()}
-                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="text-xs text-gray-500 hover:text-gray-700 py-1.5 px-3 rounded-md hover:bg-gray-100 transition-colors border border-gray-200"
               >
                 🖨️ Imprimir Resultado
               </button>

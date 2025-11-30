@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
@@ -274,28 +275,19 @@ export default function QuizAlimentacao({ config }: TemplateBaseProps) {
               resultadoTexto={`${resultado.perfil} (Score: ${resultado.score}/12) - ${resultado.descricao}`}
             />
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => {
-                  setPerguntaAtual(0)
-                  setRespostas([])
-                  setEtapa('quiz')
-                }}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
-                ↺ Fazer Quiz Novamente
-              </button>
-              <button
-                onClick={() => {
-                  setPerguntaAtual(0)
-                  setRespostas([])
-                  setEtapa('landing')
-                }}
-                className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
-              >
-                🏠 Voltar ao Início
-              </button>
-            </div>
+            <WellnessActionButtons
+              onRecalcular={() => {
+                setPerguntaAtual(0)
+                setRespostas([])
+                setEtapa('quiz')
+              }}
+              onVoltarInicio={() => {
+                setPerguntaAtual(0)
+                setRespostas([])
+                setEtapa('landing')
+              }}
+              textoRecalcular="↺ Fazer Quiz Novamente"
+            />
           </div>
         )}
       </main>

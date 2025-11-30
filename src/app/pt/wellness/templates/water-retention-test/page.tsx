@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -353,30 +354,21 @@ export default function TesteRetencaoLiquidos({ config }: TemplateBaseProps) {
               resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
             />
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => {
-                  setPerguntaAtual(0)
-                  setRespostas([])
-                  setResultado(null)
-                  setEtapa('quiz')
-                }}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
-                ↺ Refazer Teste
-              </button>
-              <button
-                onClick={() => {
-                  setPerguntaAtual(0)
-                  setRespostas([])
-                  setResultado(null)
-                  setEtapa('landing')
-                }}
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                🏠 Voltar ao Início
-              </button>
-            </div>
+            <WellnessActionButtons
+              onRecalcular={() => {
+                setPerguntaAtual(0)
+                setRespostas([])
+                setResultado(null)
+                setEtapa('quiz')
+              }}
+              onVoltarInicio={() => {
+                setPerguntaAtual(0)
+                setRespostas([])
+                setResultado(null)
+                setEtapa('landing')
+              }}
+              textoRecalcular="↺ Refazer Teste"
+            />
           </div>
         )}
       </main>

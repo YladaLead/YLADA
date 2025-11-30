@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
     // CORRIGIDO: Incluir todos os campos usados no frontend (emoji, custom_colors, cta_type, etc)
     const { data: toolsData, error } = await supabaseAdmin
       .from('coach_user_templates')
-      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message, show_whatsapp_button')
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
       .eq('profession', profession)
       .order('created_at', { ascending: false })
@@ -187,6 +187,7 @@ export async function POST(request: NextRequest) {
       external_url,
       cta_button_text,
       custom_whatsapp_message,
+      show_whatsapp_button = true, // Mostrar botão WhatsApp pequeno (padrão: true)
       profession = 'coach',
       generate_short_url = false,
       collect_leader_data = false,
@@ -397,6 +398,7 @@ export async function POST(request: NextRequest) {
       external_url: external_url || null,
       cta_button_text: cta_button_text || 'Agendar Consulta', // CTA Nutri
       custom_whatsapp_message: custom_whatsapp_message || null,
+      show_whatsapp_button: show_whatsapp_button !== false, // Mostrar botão WhatsApp pequeno (padrão: true)
       profession: profession || 'coach',
       status: 'active',
       views: 0,
@@ -428,7 +430,7 @@ export async function POST(request: NextRequest) {
     const { data: insertedTool, error: insertError } = await supabaseAdmin
       .from('coach_user_templates')
       .insert(insertData)
-      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message')
+      .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message, show_whatsapp_button')
       .single()
 
     if (insertError) {
@@ -537,6 +539,7 @@ export async function PUT(request: NextRequest) {
       external_url,
       cta_button_text,
       custom_whatsapp_message,
+      show_whatsapp_button = true, // Mostrar botão WhatsApp pequeno (padrão: true)
       status,
       generate_short_url = false
     } = body
@@ -634,6 +637,7 @@ export async function PUT(request: NextRequest) {
     if (external_url !== undefined) updateData.external_url = external_url
     if (cta_button_text !== undefined) updateData.cta_button_text = cta_button_text
     if (custom_whatsapp_message !== undefined) updateData.custom_whatsapp_message = custom_whatsapp_message
+    if (show_whatsapp_button !== undefined) updateData.show_whatsapp_button = show_whatsapp_button
     if (status !== undefined) updateData.status = status
 
     // Remover código curto se solicitado

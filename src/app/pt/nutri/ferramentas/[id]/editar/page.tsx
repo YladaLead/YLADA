@@ -19,6 +19,7 @@ interface Configuracao {
   mensagemWhatsapp: string
   urlExterna: string
   textoBotao: string
+  mostrarBotaoWhatsapp: boolean // Mostrar botão WhatsApp pequeno ao lado do CTA principal
 }
 
 interface ToolData {
@@ -59,7 +60,8 @@ export default function EditarFerramentaNutri() {
     tipoCta: 'whatsapp',
     mensagemWhatsapp: '',
     urlExterna: '',
-    textoBotao: 'Conversar com Especialista'
+    textoBotao: 'Conversar com Especialista',
+    mostrarBotaoWhatsapp: true // Por padrão, mostrar o botão WhatsApp pequeno
   })
   const [urlDisponivel, setUrlDisponivel] = useState(true)
   const [slugOriginal, setSlugOriginal] = useState('')
@@ -236,7 +238,8 @@ export default function EditarFerramentaNutri() {
         tipoCta: tool.cta_type === 'whatsapp' ? 'whatsapp' : 'url',
         mensagemWhatsapp: tool.custom_whatsapp_message || '',
         urlExterna: tool.external_url || '',
-        textoBotao: tool.cta_button_text || 'Conversar com Especialista'
+        textoBotao: tool.cta_button_text || 'Conversar com Especialista',
+        mostrarBotaoWhatsapp: tool.show_whatsapp_button !== false // Por padrão true se não estiver definido
       })
       
       // Atualizar URL completa se userSlug mudar depois
@@ -382,6 +385,7 @@ export default function EditarFerramentaNutri() {
         external_url: configuracao.tipoCta === 'url' ? configuracao.urlExterna : null,
         cta_button_text: configuracao.textoBotao,
         custom_whatsapp_message: configuracao.mensagemWhatsapp,
+        show_whatsapp_button: configuracao.mostrarBotaoWhatsapp, // Mostrar botão WhatsApp pequeno
         generate_short_url: generateShortUrl,
         custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
       }
@@ -1050,6 +1054,26 @@ export default function EditarFerramentaNutri() {
                               [DATA] - Data/hora do uso
                             </p>
                           </div>
+                        </div>
+                        
+                        {/* Opção para mostrar botão WhatsApp pequeno */}
+                        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={configuracao.mostrarBotaoWhatsapp}
+                              onChange={(e) => setConfiguracao(prev => ({ ...prev, mostrarBotaoWhatsapp: e.target.checked }))}
+                              className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                            />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">
+                                Mostrar botão WhatsApp pequeno
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                Exibe um botão pequeno do WhatsApp ao lado do botão CTA principal, permitindo que o usuário entre em contato diretamente
+                              </p>
+                            </div>
+                          </label>
                         </div>
                       </>
                     )}

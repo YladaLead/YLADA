@@ -16,6 +16,7 @@ export interface ToolConfig {
   cta_button_text?: string
   custom_whatsapp_message?: string
   country_code?: string // Código do país (ex: 'US', 'BR', 'OTHER')
+  show_whatsapp_button?: boolean // Mostrar botão WhatsApp pequeno ao lado do CTA principal
 }
 
 export interface TemplateBaseProps {

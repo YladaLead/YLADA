@@ -186,6 +186,7 @@ export async function POST(request: NextRequest) {
       external_url,
       cta_button_text,
       custom_whatsapp_message,
+      show_whatsapp_button = true, // Mostrar botão WhatsApp pequeno (padrão: true)
       profession = 'wellness',
       generate_short_url = false
     } = body
@@ -371,6 +372,7 @@ export async function POST(request: NextRequest) {
       external_url: external_url || null,
       cta_button_text: cta_button_text || 'Conversar com Especialista',
       custom_whatsapp_message: custom_whatsapp_message || null,
+      show_whatsapp_button: show_whatsapp_button !== false, // Mostrar botão WhatsApp pequeno (padrão: true)
       profession: profession || 'wellness',
       status: 'active',
       views: 0,
@@ -511,6 +513,7 @@ export async function PUT(request: NextRequest) {
       external_url,
       cta_button_text,
       custom_whatsapp_message,
+      show_whatsapp_button = true, // Mostrar botão WhatsApp pequeno (padrão: true)
       status,
       generate_short_url = false
     } = body
@@ -608,6 +611,7 @@ export async function PUT(request: NextRequest) {
     if (external_url !== undefined) updateData.external_url = external_url
     if (cta_button_text !== undefined) updateData.cta_button_text = cta_button_text
     if (custom_whatsapp_message !== undefined) updateData.custom_whatsapp_message = custom_whatsapp_message
+    if (show_whatsapp_button !== undefined) updateData.show_whatsapp_button = show_whatsapp_button
     if (status !== undefined) updateData.status = status
 
     // Remover código curto se solicitado

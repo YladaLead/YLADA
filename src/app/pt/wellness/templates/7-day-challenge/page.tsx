@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -384,38 +385,29 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
               resultadoTexto={`Desafio: ${resultado.nivelDesafio === 'desafioBasico' ? 'Básico' : resultado.nivelDesafio === 'desafioModerado' ? 'Moderado' : 'Avançado'} | Objetivo: ${dados.objetivo}`}
             />
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => {
-                  setDados({
-                    experiencia: '',
-                    objetivo: '',
-                    disponibilidade: ''
-                  })
-                  setResultado(null)
-                  setDiagnostico(null)
-                  setEtapa('formulario')
-                }}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
-                ↺ Ajustar Desafio
-              </button>
-              <button
-                onClick={() => {
-                  setDados({
-                    experiencia: '',
-                    objetivo: '',
-                    disponibilidade: ''
-                  })
-                  setResultado(null)
-                  setDiagnostico(null)
-                  setEtapa('landing')
-                }}
-                className="flex-1 bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
-              >
-                🏠 Voltar ao Início
-              </button>
-            </div>
+            <WellnessActionButtons
+              onRecalcular={() => {
+                setDados({
+                  experiencia: '',
+                  objetivo: '',
+                  disponibilidade: ''
+                })
+                setResultado(null)
+                setDiagnostico(null)
+                setEtapa('formulario')
+              }}
+              onVoltarInicio={() => {
+                setDados({
+                  experiencia: '',
+                  objetivo: '',
+                  disponibilidade: ''
+                })
+                setResultado(null)
+                setDiagnostico(null)
+                setEtapa('landing')
+              }}
+              textoRecalcular="↺ Ajustar Desafio"
+            />
           </div>
         )}
       </main>

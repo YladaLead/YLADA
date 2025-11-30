@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoIMC {
@@ -300,20 +301,12 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
               />
             </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={resetar}
-                className="flex-1 bg-gray-200 text-gray-800 py-4 rounded-lg font-semibold text-lg hover:bg-gray-300 transition-all"
-              >
-                ↻ Calcular Novamente
-              </button>
-              <button
-                onClick={voltarInicio}
-                className="flex-1 bg-blue-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-all"
-              >
-                🏠 Início
-              </button>
-            </div>
+            <WellnessActionButtons
+              onRecalcular={resetar}
+              onVoltarInicio={voltarInicio}
+              textoRecalcular="↻ Calcular Novamente"
+              textoVoltar="🏠 Início"
+            />
           </div>
         )}
       </main>

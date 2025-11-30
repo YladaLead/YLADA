@@ -64,7 +64,7 @@ export function getTemplateBenefits(templateSlug: string): TemplateBenefits {
         'Sinais de desidratação e como evitar'
       ],
       whyUse: [
-        'Hidratação adequada melhora energia e disposição',
+        'A importância de saber a hidratação adequada',
         'Otimize seu desempenho físico e mental',
         'Prevenha problemas de saúde',
         'Aumente sua qualidade de vida'
@@ -246,7 +246,7 @@ export function getTemplateBenefits(templateSlug: string): TemplateBenefits {
         'Sinais de desidratação e como evitar'
       ],
       whyUse: [
-        'Hidratação adequada melhora energia e disposição',
+        'A importância de saber a hidratação adequada',
         'Otimize seu desempenho físico e mental',
         'Prevenha problemas de saúde',
         'Aumente sua qualidade de vida'

@@ -187,6 +187,7 @@ export async function POST(request: NextRequest) {
       external_url,
       cta_button_text,
       custom_whatsapp_message,
+      show_whatsapp_button = true, // Mostrar botão WhatsApp pequeno (padrão: true)
       profession = 'nutri',
       generate_short_url = false,
       leader_data_collection
@@ -421,6 +422,7 @@ export async function POST(request: NextRequest) {
       external_url: external_url || null,
       cta_button_text: cta_button_text || 'Agendar Consulta', // CTA Nutri
       custom_whatsapp_message: custom_whatsapp_message || null,
+      show_whatsapp_button: show_whatsapp_button !== false, // Mostrar botão WhatsApp pequeno (padrão: true)
       profession: profession || 'nutri',
       status: 'active',
       views: 0,
@@ -565,6 +567,7 @@ export async function PUT(request: NextRequest) {
       external_url,
       cta_button_text,
       custom_whatsapp_message,
+      show_whatsapp_button = true, // Mostrar botão WhatsApp pequeno (padrão: true)
       status,
       generate_short_url = false
     } = body

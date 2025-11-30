@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoHidratacao {
@@ -145,6 +146,7 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
               }
               discover={templateBenefits.discover || []}
               benefits={templateBenefits.whyUse || []}
+              benefitsTitle="A importância de saber a quantidade de água"
               onStart={iniciarCalculo}
               buttonText="▶️ Calcular Minha Hidratação - É Grátis"
             />
@@ -258,32 +260,22 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
               resultadoTexto={`${resultado.aguaDiaria}L de água/dia (${resultado.copos} copos) - ${resultado.interpretacao}`}
             />
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => {
-                  setPeso('')
-                  setAtividade('')
-                  setClima('')
-                  setResultado(null)
-                  setEtapa('formulario')
-                }}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
-                ↺ Fazer Novo Cálculo
-              </button>
-              <button
-                onClick={() => {
-                  setPeso('')
-                  setAtividade('')
-                  setClima('')
-                  setResultado(null)
-                  setEtapa('landing')
-                }}
-                className="flex-1 bg-cyan-600 text-white py-3 rounded-lg font-medium hover:bg-cyan-700 transition-colors"
-              >
-                🏠 Voltar ao Início
-              </button>
-            </div>
+            <WellnessActionButtons
+              onRecalcular={() => {
+                setPeso('')
+                setAtividade('')
+                setClima('')
+                setResultado(null)
+                setEtapa('formulario')
+              }}
+              onVoltarInicio={() => {
+                setPeso('')
+                setAtividade('')
+                setClima('')
+                setResultado(null)
+                setEtapa('landing')
+              }}
+            />
           </div>
         )}
       </main>

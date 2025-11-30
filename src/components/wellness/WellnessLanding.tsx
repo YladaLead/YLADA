@@ -10,6 +10,7 @@ interface WellnessLandingProps {
   defaultTitle?: string
   defaultDescription?: string | React.ReactNode
   benefits?: string[] // "Por que usar esta ferramenta"
+  benefitsTitle?: string // Título customizado para a seção de benefícios
   discover?: string[] // "O que você vai descobrir"
   onStart: () => void
   buttonText?: string
@@ -21,6 +22,7 @@ export default function WellnessLanding({
   defaultTitle = 'Ferramenta Wellness',
   defaultDescription,
   benefits = [], // "Por que usar esta ferramenta"
+  benefitsTitle, // Título customizado para a seção de benefícios
   discover = [], // "O que você vai descobrir"
   onStart,
   buttonText = '▶️ Começar Agora - É Grátis'
@@ -59,7 +61,7 @@ export default function WellnessLanding({
       {/* Seção: Por que usar esta ferramenta */}
       {benefits.length > 0 && (
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8 border-2 border-blue-200">
-          <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 Por que usar esta ferramenta?</h3>
+          <h3 className="font-semibold text-gray-900 mb-4 text-lg">💡 {benefitsTitle || 'Por que usar esta ferramenta?'}</h3>
           <ul className="text-left space-y-3 text-gray-700">
             {benefits.map((benefit, index) => (
               <li key={index} className="flex items-start">

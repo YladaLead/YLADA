@@ -31,6 +31,7 @@ interface Configuracao {
   mensagemWhatsapp: string
   urlExterna: string
   textoBotao: string
+  mostrarBotaoWhatsapp: boolean // Mostrar botão WhatsApp pequeno ao lado do CTA principal
   coletarDados: boolean
   camposColeta: {
     nome: boolean
@@ -57,6 +58,7 @@ function NovaFerramentaNutriContent() {
     mensagemWhatsapp: '',
     urlExterna: '',
     textoBotao: 'Agendar Consulta',
+    mostrarBotaoWhatsapp: true, // Por padrão, mostrar o botão WhatsApp pequeno
     coletarDados: true,
     camposColeta: {
       nome: true,
@@ -476,6 +478,7 @@ function NovaFerramentaNutriContent() {
         external_url: configuracao.tipoCta === 'url' ? configuracao.urlExterna : null,
         cta_button_text: configuracao.textoBotao,
         custom_whatsapp_message: configuracao.mensagemWhatsapp,
+        show_whatsapp_button: configuracao.mostrarBotaoWhatsapp, // Mostrar botão WhatsApp pequeno
         profession: 'nutri',
         generate_short_url: generateShortUrl,
         custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null,
@@ -1264,6 +1267,26 @@ function NovaFerramentaNutriContent() {
                                 </p>
                       </div>
                         </div>
+                        
+                        {/* Opção para mostrar botão WhatsApp pequeno */}
+                        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={configuracao.mostrarBotaoWhatsapp}
+                              onChange={(e) => setConfiguracao({ ...configuracao, mostrarBotaoWhatsapp: e.target.checked })}
+                              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">
+                                Mostrar botão WhatsApp pequeno
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                Exibe um botão pequeno do WhatsApp ao lado do botão CTA principal, permitindo que o usuário entre em contato diretamente
+                              </p>
+                            </div>
+                          </label>
+                        </div>
                           </>
                         )}
 
@@ -1303,6 +1326,29 @@ function NovaFerramentaNutriContent() {
                               💡 <strong>O que é?</strong> URL para onde o cliente será redirecionado após ver o resultado (ex: site, formulário, página de agendamento)
                             </p>
                   </div>
+                  
+                  {/* Opção para mostrar botão WhatsApp pequeno (quando CTA é URL externa) */}
+                  {perfilWhatsapp && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <label className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={configuracao.mostrarBotaoWhatsapp}
+                          onChange={(e) => setConfiguracao({ ...configuracao, mostrarBotaoWhatsapp: e.target.checked })}
+                          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            Mostrar botão WhatsApp pequeno
+                          </p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Exibe um botão pequeno do WhatsApp ao lado do botão CTA principal, permitindo que o usuário entre em contato diretamente
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+                  )}
+                        </>
                         )}
 
                         {/* Coletar Dados do Líder */}

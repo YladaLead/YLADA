@@ -5,6 +5,7 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoProteina {
@@ -335,21 +336,10 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
               resultadoTexto={`${resultado.proteinaDiaria}g de proteína/dia - ${resultado.interpretacao}`}
             />
 
-            {/* Botões */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={resetar}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
-                ↺ Fazer Novo Cálculo
-              </button>
-              <button
-                onClick={voltarInicio}
-                className="flex-1 bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
-              >
-                🏠 Voltar ao Início
-              </button>
-            </div>
+            <WellnessActionButtons
+              onRecalcular={resetar}
+              onVoltarInicio={voltarInicio}
+            />
           </div>
         )}
       </main>

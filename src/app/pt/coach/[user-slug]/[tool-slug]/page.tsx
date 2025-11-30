@@ -19,6 +19,7 @@ interface Tool {
   external_url?: string
   cta_button_text: string
   custom_whatsapp_message?: string
+  show_whatsapp_button?: boolean // Mostrar botão WhatsApp pequeno
   template_slug: string
   user_profiles?: {
     user_slug: string
@@ -165,6 +166,7 @@ export default function FerramentaPersonalizadaCoachPage() {
       external_url: tool.external_url,
       cta_button_text: tool.cta_button_text,
       custom_whatsapp_message: tool.custom_whatsapp_message,
+      show_whatsapp_button: tool.show_whatsapp_button !== false, // Mostrar botão WhatsApp pequeno (padrão: true)
     }
 
     // ✅ Normalizar template_slug para garantir consistência
