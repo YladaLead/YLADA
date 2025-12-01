@@ -451,112 +451,257 @@ export default function AdminReceitas() {
                   </button>
                   
                   {filtroAvancadoAberto && (
-                    <div className="mt-4 space-y-4">
-                      {/* Tipo de Filtro */}
+                    <div className="mt-4 space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      {/* Tipo de Filtro - Cards Visuais */}
                       <div>
-                        <label className="block text-xs text-gray-600 mb-2">Tipo de Filtro:</label>
-                        <div className="flex gap-2 flex-wrap">
-                          {['rapido', 'mes', 'trimestre', 'dia', 'custom'].map((tipo) => (
-                            <button
-                              key={tipo}
-                              onClick={() => setPeriodoTipo(tipo as any)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                periodoTipo === tipo
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                              }`}
-                            >
-                              {tipo === 'rapido' ? 'Rápido' : 
-                               tipo === 'mes' ? 'Mês' :
-                               tipo === 'trimestre' ? 'Trimestre' :
-                               tipo === 'dia' ? 'Dia' :
-                               tipo === 'custom' ? 'Personalizado' : tipo}
-                            </button>
-                          ))}
+                        <label className="block text-sm font-medium text-gray-700 mb-3">Escolha o tipo de filtro:</label>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                          <button
+                            onClick={() => setPeriodoTipo('rapido')}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                              periodoTipo === 'rapido'
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                            }`}
+                          >
+                            <div className="text-lg mb-1">⚡</div>
+                            <div>Rápido</div>
+                          </button>
+                          <button
+                            onClick={() => setPeriodoTipo('mes')}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                              periodoTipo === 'mes'
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                            }`}
+                          >
+                            <div className="text-lg mb-1">📅</div>
+                            <div>Mês</div>
+                          </button>
+                          <button
+                            onClick={() => setPeriodoTipo('trimestre')}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                              periodoTipo === 'trimestre'
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                            }`}
+                          >
+                            <div className="text-lg mb-1">📊</div>
+                            <div>Trimestre</div>
+                          </button>
+                          <button
+                            onClick={() => setPeriodoTipo('dia')}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                              periodoTipo === 'dia'
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                            }`}
+                          >
+                            <div className="text-lg mb-1">📆</div>
+                            <div>Dia</div>
+                          </button>
+                          <button
+                            onClick={() => setPeriodoTipo('custom')}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                              periodoTipo === 'custom'
+                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                            }`}
+                          >
+                            <div className="text-lg mb-1">🔧</div>
+                            <div>Personalizado</div>
+                          </button>
                         </div>
                       </div>
 
                       {/* Opções Específicas */}
                       {periodoTipo === 'rapido' && (
-                        <select
-                          value={periodoRapido}
-                          onChange={(e) => setPeriodoRapido(e.target.value as any)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        >
-                          <option value="todos">Todos os Períodos</option>
-                          <option value="este_mes">Este Mês</option>
-                          <option value="mes_passado">Mês Passado</option>
-                          <option value="ultimos_3">Últimos 3 Meses</option>
-                          <option value="ultimos_6">Últimos 6 Meses</option>
-                          <option value="ultimos_12">Últimos 12 Meses</option>
-                          <option value="este_trimestre">Este Trimestre</option>
-                          <option value="trimestre_passado">Trimestre Passado</option>
-                        </select>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Períodos rápidos:</label>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <button
+                              onClick={() => setPeriodoRapido('todos')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'todos'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Todos
+                            </button>
+                            <button
+                              onClick={() => setPeriodoRapido('este_mes')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'este_mes'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Este Mês
+                            </button>
+                            <button
+                              onClick={() => setPeriodoRapido('mes_passado')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'mes_passado'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Mês Passado
+                            </button>
+                            <button
+                              onClick={() => setPeriodoRapido('ultimos_3')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'ultimos_3'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Últimos 3 Meses
+                            </button>
+                            <button
+                              onClick={() => setPeriodoRapido('ultimos_6')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'ultimos_6'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Últimos 6 Meses
+                            </button>
+                            <button
+                              onClick={() => setPeriodoRapido('ultimos_12')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'ultimos_12'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Últimos 12 Meses
+                            </button>
+                            <button
+                              onClick={() => setPeriodoRapido('este_trimestre')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'este_trimestre'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Este Trimestre
+                            </button>
+                            <button
+                              onClick={() => setPeriodoRapido('trimestre_passado')}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                periodoRapido === 'trimestre_passado'
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              }`}
+                            >
+                              Trimestre Passado
+                            </button>
+                          </div>
+                        </div>
                       )}
 
                       {periodoTipo === 'mes' && (
-                        <input
-                          type="month"
-                          value={mesSelecionado}
-                          onChange={(e) => setMesSelecionado(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Selecione o mês e ano:
+                          </label>
+                          <input
+                            type="month"
+                            value={mesSelecionado}
+                            onChange={(e) => setMesSelecionado(e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+                            placeholder="Ex: 2025-01"
+                          />
+                          <p className="mt-2 text-xs text-gray-500">
+                            💡 Exemplo: Selecione "2025-01" para ver receitas de Janeiro de 2025
+                          </p>
+                        </div>
                       )}
 
                       {periodoTipo === 'trimestre' && (
-                        <select
-                          value={trimestreSelecionado}
-                          onChange={(e) => setTrimestreSelecionado(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        >
-                          <option value="">Selecione o Trimestre</option>
-                          {(() => {
-                            const hoje = new Date()
-                            const anoAtual = hoje.getFullYear()
-                            const trimestres = []
-                            for (let ano = anoAtual - 1; ano <= anoAtual + 1; ano++) {
-                              for (let q = 1; q <= 4; q++) {
-                                trimestres.push(`${ano}-Q${q}`)
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Selecione o trimestre:
+                          </label>
+                          <select
+                            value={trimestreSelecionado}
+                            onChange={(e) => setTrimestreSelecionado(e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+                          >
+                            <option value="">-- Selecione um trimestre --</option>
+                            {(() => {
+                              const hoje = new Date()
+                              const anoAtual = hoje.getFullYear()
+                              const trimestres = []
+                              const meses = ['Jan-Mar', 'Abr-Jun', 'Jul-Set', 'Out-Dez']
+                              
+                              for (let ano = anoAtual + 1; ano >= anoAtual - 1; ano--) {
+                                for (let q = 4; q >= 1; q--) {
+                                  trimestres.push({ ano, q, label: `${ano} - Q${q} (${meses[q-1]})` })
+                                }
                               }
-                            }
-                            return trimestres.map(t => (
-                              <option key={t} value={t}>
-                                {t.replace('-Q', ' - Q')}
-                              </option>
-                            ))
-                          })()}
-                        </select>
+                              
+                              return trimestres.map(t => (
+                                <option key={`${t.ano}-Q${t.q}`} value={`${t.ano}-Q${t.q}`}>
+                                  {t.label}
+                                </option>
+                              ))
+                            })()}
+                          </select>
+                          <p className="mt-2 text-xs text-gray-500">
+                            💡 Q1 = Jan-Mar | Q2 = Abr-Jun | Q3 = Jul-Set | Q4 = Out-Dez
+                          </p>
+                        </div>
                       )}
 
                       {periodoTipo === 'dia' && (
-                        <input
-                          type="date"
-                          value={diaSelecionado}
-                          onChange={(e) => setDiaSelecionado(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Selecione o dia:
+                          </label>
+                          <input
+                            type="date"
+                            value={diaSelecionado}
+                            onChange={(e) => setDiaSelecionado(e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+                          />
+                          <p className="mt-2 text-xs text-gray-500">
+                            💡 Selecione uma data específica para ver receitas apenas desse dia
+                          </p>
+                        </div>
                       )}
 
                       {periodoTipo === 'custom' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs text-gray-600 mb-1">Data Início</label>
-                            <input
-                              type="date"
-                              value={dataInicio}
-                              onChange={(e) => setDataInicio(e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                            />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Selecione o período personalizado:
+                          </label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-2">📅 Data Início</label>
+                              <input
+                                type="date"
+                                value={dataInicio}
+                                onChange={(e) => setDataInicio(e.target.value)}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-2">📅 Data Fim</label>
+                              <input
+                                type="date"
+                                value={dataFim}
+                                onChange={(e) => setDataFim(e.target.value)}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <label className="block text-xs text-gray-600 mb-1">Data Fim</label>
-                            <input
-                              type="date"
-                              value={dataFim}
-                              onChange={(e) => setDataFim(e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                            />
-                          </div>
+                          <p className="mt-2 text-xs text-gray-500">
+                            💡 Selecione o intervalo de datas que deseja analisar
+                          </p>
                         </div>
                       )}
                     </div>
