@@ -220,19 +220,46 @@ ORDER BY s.created_at DESC;
 -- 5. COMPARAÇÃO: PAGAMENTOS vs ASSINATURAS HOJE
 -- =====================================================
 -- Verificar se há discrepâncias entre pagamentos e assinaturas de hoje
+-- Usando UNION para evitar problemas com FULL OUTER JOIN
+WITH pagamentos_hoje AS (
+  SELECT 
+    p.id AS payment_id,
+    p.subscription_id,
+    p.status AS payment_status,
+    p.created_at
+  FROM payments p
+  WHERE p.created_at >= CURRENT_DATE
+    AND p.status = 'succeeded'
+),
+assinaturas_hoje AS (
+  SELECT 
+    s.id AS subscription_id,
+    s.created_at
+  FROM subscriptions s
+  WHERE s.created_at >= CURRENT_DATE
+)
 SELECT 
   'Comparação Hoje' AS tipo,
-  COUNT(DISTINCT p.id) AS total_pagamentos_aprovados,
-  COUNT(DISTINCT s.id) AS total_assinaturas_criadas,
-  COUNT(DISTINCT CASE WHEN p.subscription_id IS NOT NULL THEN p.id END) AS pagamentos_com_assinatura,
-  COUNT(DISTINCT CASE WHEN p.subscription_id IS NULL THEN p.id END) AS pagamentos_sem_assinatura,
-  COUNT(DISTINCT CASE WHEN EXISTS (SELECT 1 FROM payments p2 WHERE p2.subscription_id = s.id AND p2.status = 'succeeded') THEN s.id END) AS assinaturas_com_pagamento,
-  COUNT(DISTINCT CASE WHEN NOT EXISTS (SELECT 1 FROM payments p2 WHERE p2.subscription_id = s.id AND p2.status = 'succeeded') THEN s.id END) AS assinaturas_sem_pagamento
-FROM payments p
-FULL OUTER JOIN subscriptions s ON (
-  p.created_at >= CURRENT_DATE 
-  OR s.created_at >= CURRENT_DATE
-)
-WHERE (p.created_at >= CURRENT_DATE AND p.status = 'succeeded')
-   OR s.created_at >= CURRENT_DATE;
+  (SELECT COUNT(*) FROM pagamentos_hoje) AS total_pagamentos_aprovados,
+  (SELECT COUNT(*) FROM assinaturas_hoje) AS total_assinaturas_criadas,
+  (SELECT COUNT(*) FROM pagamentos_hoje WHERE subscription_id IS NOT NULL) AS pagamentos_com_assinatura,
+  (SELECT COUNT(*) FROM pagamentos_hoje WHERE subscription_id IS NULL) AS pagamentos_sem_assinatura,
+  (SELECT COUNT(DISTINCT s.id) 
+   FROM subscriptions s
+   WHERE s.created_at >= CURRENT_DATE
+     AND EXISTS (
+       SELECT 1 FROM payments p2 
+       WHERE p2.subscription_id = s.id 
+       AND p2.status = 'succeeded'
+     )
+  ) AS assinaturas_com_pagamento,
+  (SELECT COUNT(DISTINCT s.id) 
+   FROM subscriptions s
+   WHERE s.created_at >= CURRENT_DATE
+     AND NOT EXISTS (
+       SELECT 1 FROM payments p2 
+       WHERE p2.subscription_id = s.id 
+       AND p2.status = 'succeeded'
+     )
+  ) AS assinaturas_sem_pagamento;
 

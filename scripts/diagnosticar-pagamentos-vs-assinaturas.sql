@@ -169,19 +169,37 @@ LIMIT 100;
 -- 5. COMPARAÇÃO: PAGAMENTOS vs ASSINATURAS POR ÁREA
 -- =====================================================
 -- Resumo por área mostrando pagamentos e assinaturas
+-- Usando UNION para evitar problemas com FULL OUTER JOIN
+WITH assinaturas_por_area AS (
+  SELECT 
+    s.area,
+    COUNT(DISTINCT s.id) AS total_assinaturas_ativas,
+    COUNT(DISTINCT CASE WHEN s.status = 'active' AND s.amount > 0 THEN s.id END) AS assinaturas_pagantes,
+    SUM(CASE WHEN s.status = 'active' AND s.amount > 0 THEN s.amount ELSE 0 END) / 100.0 AS valor_assinaturas_reais
+  FROM subscriptions s
+  WHERE s.status = 'active'
+  GROUP BY s.area
+),
+pagamentos_por_area AS (
+  SELECT 
+    COALESCE(s.area, 'sem_area') AS area,
+    COUNT(DISTINCT p.id) AS total_pagamentos_aprovados,
+    SUM(CASE WHEN p.status = 'succeeded' THEN p.amount ELSE 0 END) / 100.0 AS valor_pagamentos_reais
+  FROM payments p
+  LEFT JOIN subscriptions s ON p.subscription_id = s.id
+  WHERE p.status = 'succeeded'
+  GROUP BY COALESCE(s.area, 'sem_area')
+)
 SELECT 
-  COALESCE(s.area, 'sem_area') AS area,
-  COUNT(DISTINCT s.id) AS total_assinaturas_ativas,
-  COUNT(DISTINCT CASE WHEN s.status = 'active' AND s.amount > 0 THEN s.id END) AS assinaturas_pagantes,
-  COUNT(DISTINCT p.id) AS total_pagamentos_aprovados,
-  SUM(CASE WHEN s.status = 'active' AND s.amount > 0 THEN s.amount ELSE 0 END) / 100.0 AS valor_assinaturas_reais,
-  SUM(CASE WHEN p.status = 'succeeded' THEN p.amount ELSE 0 END) / 100.0 AS valor_pagamentos_reais,
-  SUM(CASE WHEN s.status = 'active' AND s.amount > 0 THEN s.amount ELSE 0 END) / 100.0 - 
-  SUM(CASE WHEN p.status = 'succeeded' THEN p.amount ELSE 0 END) / 100.0 AS diferenca_reais
-FROM subscriptions s
-FULL OUTER JOIN payments p ON s.id = p.subscription_id
-WHERE s.status = 'active' OR p.status = 'succeeded'
-GROUP BY s.area
+  COALESCE(a.area, p.area, 'sem_area') AS area,
+  COALESCE(a.total_assinaturas_ativas, 0) AS total_assinaturas_ativas,
+  COALESCE(a.assinaturas_pagantes, 0) AS assinaturas_pagantes,
+  COALESCE(p.total_pagamentos_aprovados, 0) AS total_pagamentos_aprovados,
+  COALESCE(a.valor_assinaturas_reais, 0) AS valor_assinaturas_reais,
+  COALESCE(p.valor_pagamentos_reais, 0) AS valor_pagamentos_reais,
+  COALESCE(a.valor_assinaturas_reais, 0) - COALESCE(p.valor_pagamentos_reais, 0) AS diferenca_reais
+FROM assinaturas_por_area a
+FULL OUTER JOIN pagamentos_por_area p ON a.area = p.area
 ORDER BY area;
 
 -- =====================================================

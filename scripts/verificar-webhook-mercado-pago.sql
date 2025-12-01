@@ -153,24 +153,47 @@ LIMIT 50;
 -- 6. RESUMO GERAL: STATUS DO WEBHOOK
 -- =====================================================
 -- Resumo geral mostrando possíveis problemas
+-- Usando CTEs para evitar problemas com FULL OUTER JOIN
+WITH assinaturas_mp AS (
+  SELECT 
+    s.id,
+    s.status
+  FROM subscriptions s
+  WHERE s.stripe_subscription_id LIKE 'mp_%' 
+     OR s.gateway_subscription_id LIKE 'mp_%'
+),
+pagamentos_mp AS (
+  SELECT 
+    p.id,
+    p.status,
+    p.subscription_id
+  FROM payments p
+  WHERE p.stripe_payment_intent_id LIKE 'mp_%' 
+     OR p.gateway_payment_intent_id LIKE 'mp_%'
+     OR (p.stripe_payment_intent_id ~ '^[0-9]+$' AND p.stripe_payment_intent_id IS NOT NULL)
+)
 SELECT 
   'Resumo Webhook Mercado Pago' AS tipo,
-  COUNT(DISTINCT s.id) AS total_assinaturas_mp,
-  COUNT(DISTINCT CASE WHEN s.status = 'active' THEN s.id END) AS assinaturas_ativas_mp,
-  COUNT(DISTINCT p.id) AS total_pagamentos_mp,
-  COUNT(DISTINCT CASE WHEN p.status = 'succeeded' THEN p.id END) AS pagamentos_aprovados_mp,
-  COUNT(DISTINCT CASE WHEN s.status = 'active' AND NOT EXISTS (
-    SELECT 1 FROM payments p2 
-    WHERE p2.subscription_id = s.id 
-    AND p2.status = 'succeeded'
-  ) THEN s.id END) AS assinaturas_sem_pagamento,
-  COUNT(DISTINCT CASE WHEN p.status = 'succeeded' AND p.subscription_id IS NULL THEN p.id END) AS pagamentos_sem_assinatura
-FROM subscriptions s
-FULL OUTER JOIN payments p ON (
-  (s.stripe_subscription_id LIKE 'mp_%' OR s.gateway_subscription_id LIKE 'mp_%')
-  OR
-  (p.stripe_payment_intent_id LIKE 'mp_%' 
-   OR p.gateway_payment_intent_id LIKE 'mp_%'
-   OR (p.stripe_payment_intent_id ~ '^[0-9]+$' AND p.stripe_payment_intent_id IS NOT NULL))
-);
+  (SELECT COUNT(*) FROM assinaturas_mp) AS total_assinaturas_mp,
+  (SELECT COUNT(*) FROM assinaturas_mp WHERE status = 'active') AS assinaturas_ativas_mp,
+  (SELECT COUNT(*) FROM pagamentos_mp) AS total_pagamentos_mp,
+  (SELECT COUNT(*) FROM pagamentos_mp WHERE status = 'succeeded') AS pagamentos_aprovados_mp,
+  (SELECT COUNT(DISTINCT s.id) 
+   FROM subscriptions s
+   WHERE (s.stripe_subscription_id LIKE 'mp_%' OR s.gateway_subscription_id LIKE 'mp_%')
+     AND s.status = 'active'
+     AND NOT EXISTS (
+       SELECT 1 FROM payments p2 
+       WHERE p2.subscription_id = s.id 
+       AND p2.status = 'succeeded'
+     )
+  ) AS assinaturas_sem_pagamento,
+  (SELECT COUNT(DISTINCT p.id) 
+   FROM payments p
+   WHERE (p.stripe_payment_intent_id LIKE 'mp_%' 
+      OR p.gateway_payment_intent_id LIKE 'mp_%'
+      OR (p.stripe_payment_intent_id ~ '^[0-9]+$' AND p.stripe_payment_intent_id IS NOT NULL))
+     AND p.status = 'succeeded'
+     AND p.subscription_id IS NULL
+  ) AS pagamentos_sem_assinatura;
 
