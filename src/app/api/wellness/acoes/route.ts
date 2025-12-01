@@ -1,24 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createAdminClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { requireApiAuth } from '@/lib/api-auth'
+import { supabaseAdmin } from '@/lib/supabase'
 
 // POST - Registrar uma ação do distribuidor
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      )
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+
+    const { user } = authResult
 
     const body = await request.json()
     const { tipo, descricao, metadata, pagina, rota } = body
@@ -69,15 +62,13 @@ export async function POST(request: NextRequest) {
 // GET - Buscar ações recentes e gerar lembretes
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      )
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+
+    const { user } = authResult
 
     const { searchParams } = new URL(request.url)
     const limite = parseInt(searchParams.get('limite') || '50')

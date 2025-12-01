@@ -1,25 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { requireApiAuth } from '@/lib/api-auth'
+import { supabaseAdmin } from '@/lib/supabase'
 import { gerarLembretes, lembretesGerais, configuracaoLembretes, TipoAcao } from '@/lib/wellness-system/lembretes'
-
-const supabaseAdmin = createAdminClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 // GET - Buscar lembretes baseados em ações do distribuidor
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      )
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+
+    const { user } = authResult
 
     // Buscar ações recentes (últimos 7 dias)
     const dataLimite = new Date()
