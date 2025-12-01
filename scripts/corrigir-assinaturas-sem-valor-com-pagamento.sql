@@ -97,3 +97,36 @@ HAVING s.amount = 0 OR s.amount != SUM(CASE WHEN p.status = 'succeeded' THEN p.a
 ORDER BY s.updated_at DESC
 LIMIT 20;
 
+-- =====================================================
+-- 4. VERIFICAR AS 8 ASSINATURAS ESPECÍFICAS CORRIGIDAS
+-- =====================================================
+-- Verificar se as 8 assinaturas identificadas foram corrigidas
+SELECT 
+  s.id AS subscription_id,
+  up.email,
+  s.area,
+  s.plan_type,
+  s.amount / 100.0 AS valor_assinatura_corrigido,
+  SUM(CASE WHEN p.status = 'succeeded' THEN p.amount ELSE 0 END) / 100.0 AS valor_total_pago,
+  s.updated_at AS data_atualizacao,
+  CASE 
+    WHEN s.amount = SUM(CASE WHEN p.status = 'succeeded' THEN p.amount ELSE 0 END) THEN '✅ CORRIGIDO'
+    WHEN s.amount > 0 THEN '✅ TEM VALOR'
+    ELSE '⚠️ AINDA ZERO'
+  END AS status_correcao
+FROM subscriptions s
+LEFT JOIN payments p ON s.id = p.subscription_id
+LEFT JOIN user_profiles up ON s.user_id = up.user_id
+WHERE s.id IN (
+  '5cfd7997-84ac-4182-abb0-80865f36c598', -- olivio.ortola@gmail.com
+  '6f4213c5-6d27-4f35-aa6f-3198220b2b2b', -- marta421@outlook.com
+  '8330e936-0af0-4341-a0dd-063352951caa', -- mmg.monica@hotmail.com
+  'a7a36870-81f8-4c3c-ba76-bc1b436a4cbb', -- angelicafolego345@gmail.com
+  'c94f3059-ef84-4edf-a0a5-b53ff9f8f9af', -- claudiavitto@hotmail.com
+  'e8a8a085-be4b-4f52-a912-981d02b57eaf', -- vidasaudavelaracy@gmail.com
+  'f5f8415f-0f95-489e-a15f-6458a59b5310', -- gladisgordaliza@gmail.com
+  'fc1479b7-d984-4bd9-9343-bede5fd2050f'  -- albuquerquegaldino1959@gmail.com
+)
+GROUP BY s.id, up.email, s.area, s.plan_type, s.amount, s.updated_at
+ORDER BY up.email;
+
