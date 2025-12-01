@@ -153,28 +153,27 @@ export async function GET(request: NextRequest) {
       const isSupport = userProfile.is_support === true
       
       // =====================================================
-      // LÓGICA CORRIGIDA: Usar referência dos PAGANTES
+      // LÓGICA CORRIGIDA: Priorizar plan_type='free'
       // =====================================================
       // 
       // 1. SUPORTE: Admin ou Support sempre é suporte
-      // 2. PAGANTE: Não é admin/suporte E amount > 0 (referência principal)
-      // 3. GRATUITA: Não é admin/suporte E não é pagante E plan_type='free'
+      // 2. GRATUITA: Se plan_type='free' → SEMPRE é gratuita (prioridade máxima)
+      //              OU se amount=0 E não é admin/suporte
+      // 3. PAGANTE: Não é admin/suporte, não é gratuita, E amount > 0
       // 
-      // IMPORTANTE: Se amount > 0, é PAGANTE (mesmo que plan_type='free' por erro)
-      // Se amount = 0 mas plan_type != 'free', verificar se é migrada ou temporária
+      // IMPORTANTE: plan_type='free' tem PRIORIDADE - se está marcado como free, é gratuita
+      
+      // É gratuita SE:
+      // - plan_type = 'free' (PRIORIDADE MÁXIMA - se está marcado como free, é gratuita)
+      // OU
+      // - Não é admin/suporte E amount = 0
+      const isFree = sub.plan_type === 'free' || (!isAdmin && !isSupport && valor === 0)
       
       // É pagante SE:
       // - Não é admin/suporte
-      // - E amount > 0 (referência dos pagantes - se tem valor, é pagante)
-      const isPagante = !isAdmin && !isSupport && valor > 0
-      
-      // É gratuita SE:
-      // - Não é admin/suporte
-      // - Não é pagante (ou seja, amount = 0)
-      // - E plan_type = 'free' (confirmação de que é realmente gratuita)
-      // NOTA: Se amount = 0 mas plan_type != 'free', pode ser migrada/temporária
-      // Por segurança, só marcamos como gratuita se plan_type = 'free'
-      const isFree = !isAdmin && !isSupport && !isPagante && sub.plan_type === 'free'
+      // - Não é gratuita (ou seja, plan_type != 'free' E amount > 0)
+      // - E amount > 0
+      const isPagante = !isAdmin && !isSupport && !isFree && valor > 0
       
       // Calcular histórico (valor total pago até agora)
       // Por enquanto, vamos usar o valor da assinatura atual
