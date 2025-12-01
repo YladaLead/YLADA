@@ -153,25 +153,26 @@ export async function GET(request: NextRequest) {
       const isSupport = userProfile.is_support === true
       
       // =====================================================
-      // LÓGICA CORRIGIDA: Priorizar plan_type='free'
+      // LÓGICA CORRIGIDA: Priorizar amount=0 para identificar gratuitas
       // =====================================================
       // 
       // 1. SUPORTE: Admin ou Support sempre é suporte
-      // 2. GRATUITA: Se plan_type='free' → SEMPRE é gratuita (prioridade máxima)
-      //              OU se amount=0 E não é admin/suporte
+      // 2. GRATUITA: Se amount=0 E não é admin/suporte → SEMPRE é gratuita
+      //              OU se plan_type='free' E não é admin/suporte
       // 3. PAGANTE: Não é admin/suporte, não é gratuita, E amount > 0
       // 
-      // IMPORTANTE: plan_type='free' tem PRIORIDADE - se está marcado como free, é gratuita
+      // IMPORTANTE: amount=0 tem PRIORIDADE - se não tem valor, é gratuita
+      // Mesmo que plan_type='annual' ou 'monthly', se amount=0, é gratuita
       
       // É gratuita SE:
-      // - plan_type = 'free' (PRIORIDADE MÁXIMA - se está marcado como free, é gratuita)
+      // - Não é admin/suporte E amount = 0 (PRIORIDADE MÁXIMA - se não tem valor, é gratuita)
       // OU
-      // - Não é admin/suporte E amount = 0
-      const isFree = sub.plan_type === 'free' || (!isAdmin && !isSupport && valor === 0)
+      // - plan_type = 'free' E não é admin/suporte
+      const isFree = (!isAdmin && !isSupport && valor === 0) || (sub.plan_type === 'free' && !isAdmin && !isSupport)
       
       // É pagante SE:
       // - Não é admin/suporte
-      // - Não é gratuita (ou seja, plan_type != 'free' E amount > 0)
+      // - Não é gratuita (ou seja, amount > 0)
       // - E amount > 0
       const isPagante = !isAdmin && !isSupport && !isFree && valor > 0
       
@@ -186,7 +187,9 @@ export async function GET(request: NextRequest) {
         usuario: userProfile.nome_completo || userProfile.email || 'Usuário sem nome',
         email: userProfile.email || '',
         area: sub.area,
-        tipo: sub.plan_type === 'annual' ? 'anual' : sub.plan_type === 'monthly' ? 'mensal' : sub.plan_type === 'free' ? 'gratuito' : 'gratuito',
+        // Determinar tipo: se é gratuita (amount=0), sempre mostra como 'gratuito'
+        // Caso contrário, usa o plan_type
+        tipo: isFree ? 'gratuito' : (sub.plan_type === 'annual' ? 'anual' : sub.plan_type === 'monthly' ? 'mensal' : 'gratuito'),
         valor: Math.round(valor * 100) / 100, // Arredondar para 2 casas decimais
         status: sub.status === 'active' ? 'ativa' : 
                 sub.status === 'canceled' ? 'cancelada' : 
