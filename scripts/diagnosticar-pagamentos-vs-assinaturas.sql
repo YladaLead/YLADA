@@ -16,8 +16,7 @@ SELECT
 FROM payments p
 LEFT JOIN subscriptions s ON p.subscription_id = s.id
 WHERE p.status = 'succeeded'
-  AND (p.subscription_id IS NULL OR s.id IS NULL)
-ORDER BY p.created_at DESC;
+  AND (p.subscription_id IS NULL OR s.id IS NULL);
 
 -- Detalhes dos pagamentos sem assinatura
 SELECT 
