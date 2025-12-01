@@ -161,12 +161,23 @@ export const configuracaoLembretes: Record<TipoAcao, {
 // Lembretes gerais (não baseados em ações específicas)
 export const lembretesGerais: Lembrete[] = [
   {
+    id: 'trilha-aprendizado',
+    titulo: '📚 Trilha de Aprendizado',
+    mensagem: 'Em construção. Em breve você terá acesso a uma trilha completa de aprendizado.',
+    tipo: 'info',
+    acao: {
+      texto: 'Ver Trilha',
+      rota: '/pt/wellness/cursos'
+    },
+    prioridade: 'media'
+  },
+  {
     id: 'primeiro-link',
-    titulo: '🚀 Comece gerando seu primeiro link',
-    mensagem: 'Ainda não gerou nenhum link? Comece agora e compartilhe com seus contatos!',
+    titulo: '🚀 Gere seu primeiro link',
+    mensagem: 'Comece agora! Gere seu primeiro link personalizado e compartilhe com seus contatos.',
     tipo: 'action',
     acao: {
-      texto: 'Gerar Link',
+      texto: 'Gerar Link >',
       rota: '/pt/wellness/system/ferramentas/gerador-link'
     },
     prioridade: 'alta'

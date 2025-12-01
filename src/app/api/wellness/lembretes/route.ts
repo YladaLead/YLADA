@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         mensagem: 'Comece agora! Gere seu primeiro link personalizado e compartilhe com seus contatos.',
         tipo: 'action',
         acao: {
-          texto: 'Gerar Link',
+          texto: 'Gerar Link >',
           rota: '/pt/wellness/system/ferramentas/gerador-link'
         },
         prioridade: 'alta'
