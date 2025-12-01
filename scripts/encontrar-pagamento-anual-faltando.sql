@@ -27,7 +27,7 @@ SELECT
 FROM subscriptions s
 LEFT JOIN user_profiles up ON s.user_id = up.user_id
 WHERE s.plan_type = 'annual'
-  AND s.created_at >= NOW() - INTERVAL '24 hours'
+  AND s.created_at >= (NOW() - INTERVAL '24 hours')
 ORDER BY s.created_at DESC;
 
 -- 2. SUBSCRIPTIONS ANUAIS COM STATUS DIFERENTE DE 'active'
