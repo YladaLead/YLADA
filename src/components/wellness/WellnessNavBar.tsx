@@ -26,7 +26,7 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo e Título */}
-          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+          <div className="flex items-center min-w-0 flex-1">
             <Link href="/pt/wellness/dashboard" className="flex-shrink-0">
               <Image
                 src="/images/logo/wellness-horizontal.png"
@@ -35,15 +35,16 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
                 height={150}
                 className="h-10 sm:h-12 lg:h-14 w-auto object-contain"
                 style={{ backgroundColor: 'transparent' }}
+                priority
               />
             </Link>
             {showTitle && title && (
-              <>
-                <div className="h-6 sm:h-8 w-px bg-gray-300 hidden lg:block flex-shrink-0"></div>
-                <h1 className="hidden lg:block text-lg lg:text-xl font-semibold text-gray-900 truncate">
+              <div className="flex items-center ml-3 sm:ml-4 lg:ml-6 min-w-0">
+                <div className="h-6 sm:h-8 w-px bg-gray-300 flex-shrink-0"></div>
+                <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 truncate ml-3 sm:ml-4">
                   {title}
                 </h1>
-              </>
+              </div>
             )}
           </div>
 

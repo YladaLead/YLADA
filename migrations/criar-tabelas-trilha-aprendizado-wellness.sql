@@ -183,7 +183,7 @@ COMMENT ON TABLE wellness_passo_a_passo_diario IS 'Tarefas diárias do modo Pass
 INSERT INTO wellness_trilhas (nome, descricao, slug, ordem, is_ativo)
 VALUES (
   'Distribuidor Iniciante',
-  'Trilha completa para novos distribuidores Herbalife, com foco em vender ENERGY (NRG) + ACELERA (Herbal Concentrate), garantindo consumo médio de 50 PV por cliente.',
+  'Trilha completa para novos distribuidores, com foco em vender ENERGY (NRG) + ACELERA (Herbal Concentrate), garantindo consumo médio de 50 PV por cliente.',
   'distribuidor-iniciante',
   1,
   true
