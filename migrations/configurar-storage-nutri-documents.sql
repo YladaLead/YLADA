@@ -10,8 +10,11 @@
 -- 1. POLÍTICAS DE UPLOAD (INSERT)
 -- =====================================================
 
+-- Remover política existente (se houver)
+DROP POLICY IF EXISTS "Nutricionistas podem fazer upload de documentos" ON storage.objects;
+
 -- Permitir que nutricionistas autenticados façam upload
-CREATE POLICY IF NOT EXISTS "Nutricionistas podem fazer upload de documentos"
+CREATE POLICY "Nutricionistas podem fazer upload de documentos"
 ON storage.objects
 FOR INSERT
 TO authenticated
@@ -25,8 +28,11 @@ WITH CHECK (
 -- 2. POLÍTICAS DE LEITURA (SELECT)
 -- =====================================================
 
+-- Remover política existente (se houver)
+DROP POLICY IF EXISTS "Documentos Nutri são públicos para leitura" ON storage.objects;
+
 -- Permitir leitura pública (para visualização dos documentos)
-CREATE POLICY IF NOT EXISTS "Documentos Nutri são públicos para leitura"
+CREATE POLICY "Documentos Nutri são públicos para leitura"
 ON storage.objects
 FOR SELECT
 TO public
@@ -36,8 +42,11 @@ USING (bucket_id = 'nutri-documents');
 -- 3. POLÍTICAS DE EXCLUSÃO (DELETE)
 -- =====================================================
 
+-- Remover política existente (se houver)
+DROP POLICY IF EXISTS "Nutricionistas podem deletar seus documentos" ON storage.objects;
+
 -- Permitir que nutricionistas autenticados deletem documentos
-CREATE POLICY IF NOT EXISTS "Nutricionistas podem deletar seus documentos"
+CREATE POLICY "Nutricionistas podem deletar seus documentos"
 ON storage.objects
 FOR DELETE
 TO authenticated

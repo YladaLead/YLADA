@@ -26,44 +26,60 @@ A tabela `client_documents` já foi criada e funciona para **ambas as áreas** (
 
 ---
 
-## ✅ Passo 3: Executar Políticas RLS (SQL)
+## ✅ Passo 3: Executar SQL Completo
 
-**Execute este script no Supabase SQL Editor:**
+**Execute este script completo no Supabase SQL Editor:**
 
-```sql
--- migrations/configurar-storage-nutri-documents.sql
-```
+📄 **Arquivo:** `docs/SQL-COMPLETO-DOCUMENTOS-NUTRI.sql`
 
 Ou copie e cole diretamente:
 
 ```sql
 -- =====================================================
--- YLADA NUTRI - CONFIGURAÇÃO DO STORAGE PARA DOCUMENTOS
+-- YLADA NUTRI - SQL COMPLETO PARA DOCUMENTOS
 -- =====================================================
 
--- 1. POLÍTICA DE UPLOAD
-CREATE POLICY IF NOT EXISTS "Nutricionistas podem fazer upload de documentos"
-ON storage.objects
-FOR INSERT
-TO authenticated
+-- PARTE 1: CRIAR TABELA (se ainda não existe)
+CREATE TABLE IF NOT EXISTS client_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  file_url TEXT NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  file_size BIGINT,
+  file_type VARCHAR(50) NOT NULL,
+  file_extension VARCHAR(10),
+  document_type VARCHAR(50) NOT NULL DEFAULT 'outro',
+  category VARCHAR(100),
+  description TEXT,
+  created_by UUID REFERENCES auth.users(id),
+  uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_client_documents_client_id ON client_documents(client_id);
+CREATE INDEX IF NOT EXISTS idx_client_documents_user_id ON client_documents(user_id);
+CREATE INDEX IF NOT EXISTS idx_client_documents_document_type ON client_documents(document_type);
+
+-- PARTE 2: POLÍTICAS RLS DO STORAGE
+DROP POLICY IF EXISTS "Nutricionistas podem fazer upload de documentos" ON storage.objects;
+CREATE POLICY "Nutricionistas podem fazer upload de documentos"
+ON storage.objects FOR INSERT TO authenticated
 WITH CHECK (
   bucket_id = 'nutri-documents' AND
   (storage.foldername(name))[1] = 'nutri' AND
   (storage.foldername(name))[2] = 'client-documents'
 );
 
--- 2. POLÍTICA DE LEITURA (PÚBLICA)
-CREATE POLICY IF NOT EXISTS "Documentos Nutri são públicos para leitura"
-ON storage.objects
-FOR SELECT
-TO public
+DROP POLICY IF EXISTS "Documentos Nutri são públicos para leitura" ON storage.objects;
+CREATE POLICY "Documentos Nutri são públicos para leitura"
+ON storage.objects FOR SELECT TO public
 USING (bucket_id = 'nutri-documents');
 
--- 3. POLÍTICA DE EXCLUSÃO
-CREATE POLICY IF NOT EXISTS "Nutricionistas podem deletar seus documentos"
-ON storage.objects
-FOR DELETE
-TO authenticated
+DROP POLICY IF EXISTS "Nutricionistas podem deletar seus documentos" ON storage.objects;
+CREATE POLICY "Nutricionistas podem deletar seus documentos"
+ON storage.objects FOR DELETE TO authenticated
 USING (
   bucket_id = 'nutri-documents' AND
   (storage.foldername(name))[1] = 'nutri' AND
