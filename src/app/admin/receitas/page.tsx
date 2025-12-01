@@ -185,50 +185,58 @@ export default function AdminReceitas() {
   }, [filtroArea, filtroStatus, periodo, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, diaSelecionado, dataInicio, dataFim])
 
   // =====================================================
+  // VALORES LÍQUIDOS (JÁ DESCONTADAS AS TAXAS)
+  // =====================================================
+  const VALOR_MENSAL_LIQUIDO = 47 // R$ 47 (já descontado taxa Mercado Livre)
+  const VALOR_ANUAL_LIQUIDO = 450 // R$ 450 (já descontado taxa Mercado Livre)
+
+  // =====================================================
   // CALCULAR TOTAIS - APENAS PAGANTES (PARA ANÁLISE DE RECEITAS)
   // =====================================================
   const receitasAtivas = receitas.filter(r => r.status === 'ativa')
   const receitasPagantes = receitasAtivas.filter(r => r.categoria === 'pagante')
   
-  // Totais por área (apenas pagantes)
+  // Contar quantidades
+  const qtdMensais = receitasPagantes.filter(r => r.tipo === 'mensal').length
+  const qtdAnuais = receitasPagantes.filter(r => r.tipo === 'anual').length
+  
+  // Calcular totais usando valores líquidos
+  // ANUAL: Como é antecipado (recebe tudo de uma vez), soma o valor integral
+  // MENSAL: Soma o valor mensal por quantidade
+  const totalMensalPagante = qtdMensais * VALOR_MENSAL_LIQUIDO
+  const totalAnualPagante = qtdAnuais * VALOR_ANUAL_LIQUIDO
+  
+  // Total do mês: Anual (integral, pois entrou tudo no mês) + Mensal (do mês)
+  const totalReceitasPagante = totalAnualPagante + totalMensalPagante
+  
+  // Totais por área (apenas pagantes) - usando valores líquidos
   const totaisPorArea = verPorArea ? receitasPagantes.reduce((acc, r) => {
     if (!acc[r.area]) {
       acc[r.area] = {
         mensal: 0,
         anual: 0,
-        anualMensalizado: 0,
         total: 0,
-        pagantes: 0
+        pagantes: 0,
+        qtdMensais: 0,
+        qtdAnuais: 0
       }
     }
     
     if (r.tipo === 'mensal') {
-      acc[r.area].mensal += r.valor
+      acc[r.area].qtdMensais++
       acc[r.area].pagantes++
     } else if (r.tipo === 'anual') {
-      acc[r.area].anual += r.valor
-      acc[r.area].anualMensalizado += r.valor / 12
+      acc[r.area].qtdAnuais++
       acc[r.area].pagantes++
     }
     
-    acc[r.area].total = acc[r.area].mensal + acc[r.area].anualMensalizado
+    // Calcular usando valores líquidos
+    acc[r.area].mensal = acc[r.area].qtdMensais * VALOR_MENSAL_LIQUIDO
+    acc[r.area].anual = acc[r.area].qtdAnuais * VALOR_ANUAL_LIQUIDO
+    acc[r.area].total = acc[r.area].anual + acc[r.area].mensal // Anual integral + mensal
+    
     return acc
-  }, {} as Record<string, { mensal: number; anual: number; anualMensalizado: number; total: number; pagantes: number }>) : null
-
-  // Totais gerais (apenas pagantes)
-  const totalMensalPagante = receitasPagantes
-    .filter(r => r.tipo === 'mensal')
-    .reduce((sum, r) => sum + r.valor, 0)
-
-  const totalAnualPagante = receitasPagantes
-    .filter(r => r.tipo === 'anual')
-    .reduce((sum, r) => sum + r.valor, 0)
-
-  const totalAnualMensalizadoPagante = receitasPagantes
-    .filter(r => r.tipo === 'anual')
-    .reduce((sum, r) => sum + (r.valor / 12), 0)
-
-  const totalReceitasPagante = totalMensalPagante + totalAnualMensalizadoPagante
+  }, {} as Record<string, { mensal: number; anual: number; total: number; pagantes: number; qtdMensais: number; qtdAnuais: number }>) : null
 
   // Contadores por categoria (para seção de assinaturas)
   const totalPagantes = receitasPagantes.length
@@ -645,15 +653,17 @@ export default function AdminReceitas() {
                             <div>
                               <p className="text-xs text-gray-600">Mensal</p>
                               <p className="text-xl font-bold text-green-700">{formatCurrency(totais.mensal)}</p>
+                              <p className="text-xs text-gray-500">{totais.qtdMensais} × R$ {VALOR_MENSAL_LIQUIDO}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-600">Anual</p>
                               <p className="text-xl font-bold text-blue-700">{formatCurrency(totais.anual)}</p>
-                              <p className="text-xs text-gray-500">({formatCurrency(totais.anualMensalizado)}/mês)</p>
+                              <p className="text-xs text-gray-500">{totais.qtdAnuais} × R$ {VALOR_ANUAL_LIQUIDO} (integral)</p>
                             </div>
                             <div className="pt-2 border-t border-gray-200">
-                              <p className="text-xs text-gray-600">Total</p>
+                              <p className="text-xs text-gray-600">Total do Mês</p>
                               <p className="text-2xl font-bold text-purple-700">{formatCurrency(totais.total)}</p>
+                              <p className="text-xs text-gray-500">Anual integral + Mensal</p>
                             </div>
                             <p className="text-xs text-gray-500 mt-2">{totais.pagantes} pagantes</p>
                           </div>
@@ -680,7 +690,9 @@ export default function AdminReceitas() {
                           </div>
                         </div>
                         <p className="text-xs text-gray-600">
-                          {receitasPagantes.filter(r => r.tipo === 'mensal').length} assinaturas mensais pagantes
+                          {qtdMensais} assinaturas mensais pagantes
+                          <br />
+                          <span className="text-gray-500">R$ {VALOR_MENSAL_LIQUIDO} cada (líquido)</span>
                         </p>
                       </div>
 
@@ -696,9 +708,9 @@ export default function AdminReceitas() {
                           </div>
                         </div>
                         <p className="text-xs text-gray-600">
-                          {receitasPagantes.filter(r => r.tipo === 'anual').length} assinaturas anuais pagantes
+                          {qtdAnuais} assinaturas anuais pagantes
                           <br />
-                          <span className="text-gray-500">({formatCurrency(totalAnualMensalizadoPagante)}/mês equivalente)</span>
+                          <span className="text-gray-500">R$ {VALOR_ANUAL_LIQUIDO} cada (líquido, entrada integral)</span>
                         </p>
                       </div>
 
@@ -716,7 +728,7 @@ export default function AdminReceitas() {
                         <p className="text-xs text-gray-600">
                           {totalPagantes} pagantes ativos
                           <br />
-                          <span className="text-gray-500">(Mensal + Anual mensalizado)</span>
+                          <span className="text-gray-500">(Anual integral + Mensal do mês)</span>
                         </p>
                       </div>
                     </div>
