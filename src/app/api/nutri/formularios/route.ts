@@ -127,7 +127,8 @@ export async function POST(request: NextRequest) {
       is_active = true,
       is_template = false,
       generate_short_url = false,
-      custom_short_code = null
+      custom_short_code = null,
+      slug = null // Novo campo slug
     } = body
 
     // Validações
@@ -152,6 +153,52 @@ export async function POST(request: NextRequest) {
         { error: `Tipo de formulário inválido. Use um dos seguintes: ${validTypes.join(', ')}` },
         { status: 400 }
       )
+    }
+
+    // Gerar slug se não fornecido
+    const normalizeSlug = (value: string) => {
+      return value
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'formulario'
+    }
+
+    let finalSlug = slug ? normalizeSlug(slug) : normalizeSlug(name)
+    
+    // Verificar se slug já existe para este usuário
+    const slugExists = async (candidate: string) => {
+      const { data } = await supabaseAdmin
+        .from('custom_forms')
+        .select('id')
+        .eq('slug', candidate)
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+
+      return !!data
+    }
+
+    // Ajustar slug se necessário (adicionar número se já existir)
+    let slugAdjusted = false
+    if (await slugExists(finalSlug)) {
+      for (let attempt = 2; attempt <= 50; attempt++) {
+        const candidate = `${finalSlug}-${attempt}`
+        if (!(await slugExists(candidate))) {
+          finalSlug = candidate
+          slugAdjusted = true
+          break
+        }
+      }
+
+      if (!slugAdjusted) {
+        return NextResponse.json(
+          { error: 'Não foi possível gerar um link único automaticamente. Escolha outro nome e tente novamente.' },
+          { status: 409 }
+        )
+      }
     }
 
     // Gerar código curto se solicitado
@@ -206,7 +253,8 @@ export async function POST(request: NextRequest) {
       form_type: form_type,
       structure: structure,
       is_active: is_active,
-      is_template: is_template
+      is_template: is_template,
+      slug: finalSlug // Adicionar slug gerado
     }
 
     // Adicionar short_code se foi gerado

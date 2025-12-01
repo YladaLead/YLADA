@@ -363,6 +363,11 @@ function NovoFormularioNutriContent() {
   const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
   const [verificandoShortCode, setVerificandoShortCode] = useState(false)
   const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
+  
+  // Estados para slug
+  const [slug, setSlug] = useState('')
+  const [slugDisponivel, setSlugDisponivel] = useState<boolean | null>(null)
+  const [verificandoSlug, setVerificandoSlug] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -393,6 +398,56 @@ function NovoFormularioNutriContent() {
     }
   }
 
+  // Gerar slug a partir do nome
+  const gerarSlug = (texto: string) => {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+  }
+
+  // Verificar disponibilidade do slug
+  const verificarSlug = async (slugValue: string) => {
+    if (!slugValue || slugValue.trim() === '') {
+      setSlugDisponivel(null)
+      return
+    }
+
+    setVerificandoSlug(true)
+    try {
+      const response = await fetch(`/api/nutri/formularios/check-slug?slug=${encodeURIComponent(slugValue)}`, {
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSlugDisponivel(data.available)
+      } else {
+        setSlugDisponivel(false)
+      }
+    } catch (error) {
+      console.error('Erro ao verificar slug:', error)
+      setSlugDisponivel(false)
+    } finally {
+      setVerificandoSlug(false)
+    }
+  }
+
+  // Atualizar slug quando nome mudar (apenas se slug estiver vazio)
+  useEffect(() => {
+    if (formData.name && !slug) {
+      const slugGerado = gerarSlug(formData.name)
+      setSlug(slugGerado)
+      if (slugGerado) {
+        verificarSlug(slugGerado)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.name])
+
   const usarTemplate = (template: any) => {
     // Copiar dados do template - formulário vem pronto
     setFormData({
@@ -402,6 +457,13 @@ function NovoFormularioNutriContent() {
       nameAlign: template.structure?.nameAlign || 'left',
       descriptionAlign: template.structure?.descriptionAlign || 'left'
     })
+    
+    // Gerar slug do nome do template
+    if (template.name) {
+      const slugGerado = gerarSlug(template.name)
+      setSlug(slugGerado)
+      verificarSlug(slugGerado)
+    }
     
     // Copiar campos do template - garantir que todos os atributos sejam copiados
     if (template.structure && template.structure.fields) {
@@ -618,6 +680,7 @@ function NovoFormularioNutriContent() {
             nameAlign: formData.nameAlign,
             descriptionAlign: formData.descriptionAlign
           },
+          slug: slug || null, // Enviar slug se fornecido
           generate_short_url: generateShortUrl,
           custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
         })
@@ -993,6 +1056,42 @@ function NovoFormularioNutriContent() {
           {/* Right Sidebar - URL Curta e Componentes */}
           <div className="w-80 bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col">
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
+              {/* URL do Formulário (Slug) */}
+              <div className="border-b border-gray-200 px-4 py-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  URL do Formulário
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={async (e) => {
+                      const value = gerarSlug(e.target.value)
+                      setSlug(value)
+                      if (value) {
+                        verificarSlug(value)
+                      } else {
+                        setSlugDisponivel(null)
+                      }
+                    }}
+                    placeholder="nome-do-formulario"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                  />
+                  {verificandoSlug && (
+                    <p className="text-xs text-gray-500">Verificando...</p>
+                  )}
+                  {!verificandoSlug && slugDisponivel === true && slug && (
+                    <p className="text-xs text-blue-600">✅ Nome disponível!</p>
+                  )}
+                  {!verificandoSlug && slugDisponivel === false && slug && (
+                    <p className="text-xs text-red-600">❌ Este nome já está em uso</p>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    URL: <span className="font-mono text-blue-700">{typeof window !== 'undefined' ? window.location.origin : ''}/pt/nutri/[seu-usuario]/formulario/{slug || 'nome-do-formulario'}</span>
+                  </p>
+                </div>
+              </div>
+
               {/* URL Curta */}
               <div className="border-b border-gray-200 px-4 py-4">
                 <div className="flex items-center gap-2 mb-3">

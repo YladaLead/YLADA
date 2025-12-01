@@ -72,6 +72,22 @@ export function buildCoachToolUrlFallback(toolId: string): string {
 }
 
 /**
+ * Constrói URL completa para um formulário nutri
+ */
+export function buildNutriFormUrl(userSlug: string, formSlug: string): string {
+  const baseUrl = getAppUrl()
+  return `${baseUrl}/pt/nutri/${userSlug}/formulario/${formSlug}`
+}
+
+/**
+ * Constrói URL completa para um formulário nutri alternativa (sem user_slug)
+ */
+export function buildNutriFormUrlFallback(formId: string): string {
+  const baseUrl = getAppUrl()
+  return `${baseUrl}/f/${formId}`
+}
+
+/**
  * Constrói URL curta (encurtada)
  */
 export function buildShortUrl(shortCode: string): string {

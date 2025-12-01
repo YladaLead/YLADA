@@ -100,7 +100,8 @@ export async function PUT(
       form_type,
       structure,
       is_active,
-      is_template
+      is_template,
+      slug = null
     } = body
 
     // Preparar dados para atualização
@@ -121,6 +122,41 @@ export async function PUT(
     if (structure !== undefined) updateData.structure = structure
     if (is_active !== undefined) updateData.is_active = is_active
     if (is_template !== undefined) updateData.is_template = is_template
+    
+    // Atualizar slug se fornecido
+    if (slug !== null && slug !== undefined) {
+      const normalizeSlug = (value: string) => {
+        return value
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+          .replace(/[^a-z0-9-]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '') || 'formulario'
+      }
+
+      const normalizedSlug = normalizeSlug(slug)
+      
+      // Verificar se slug já existe para outro formulário deste usuário
+      const { data: existingFormWithSlug } = await supabaseAdmin
+        .from('custom_forms')
+        .select('id')
+        .eq('slug', normalizedSlug)
+        .eq('user_id', authenticatedUserId)
+        .neq('id', id)
+        .maybeSingle()
+
+      if (existingFormWithSlug) {
+        return NextResponse.json(
+          { error: 'Este nome já está em uso por outro formulário seu. Escolha outro nome.' },
+          { status: 409 }
+        )
+      }
+
+      updateData.slug = normalizedSlug
+    }
+    
     updateData.updated_at = new Date().toISOString()
 
     // Atualizar formulário

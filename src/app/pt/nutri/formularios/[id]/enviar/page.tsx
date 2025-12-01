@@ -21,8 +21,11 @@ function EnviarFormularioNutriContent() {
   const formId = params.id as string
   const [carregando, setCarregando] = useState(true)
   const [formulario, setFormulario] = useState<any>(null)
+  const [userSlug, setUserSlug] = useState<string | null>(null)
   const [linkGerado, setLinkGerado] = useState<string | null>(null)
+  const [linkEncurtado, setLinkEncurtado] = useState<string | null>(null)
   const [copiado, setCopiado] = useState(false)
+  const [copiadoEncurtado, setCopiadoEncurtado] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
   const [mensagemErro, setMensagemErro] = useState<string | null>(null)
@@ -33,6 +36,8 @@ function EnviarFormularioNutriContent() {
     const carregarFormulario = async () => {
       try {
         setCarregando(true)
+        
+        // Buscar formulário
         const response = await fetch(`/api/nutri/formularios/${formId}`, {
           credentials: 'include'
         })
@@ -44,10 +49,40 @@ function EnviarFormularioNutriContent() {
         const data = await response.json()
         if (data.success && data.data.form) {
           setFormulario(data.data.form)
-          // Gerar link automaticamente
+          
           const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-          const link = `${baseUrl}/f/${formId}`
-          setLinkGerado(link)
+          
+          // Buscar user_slug do perfil
+          const profileResponse = await fetch('/api/nutri/profile', {
+            credentials: 'include'
+          })
+          
+          if (profileResponse.ok) {
+            const profileData = await profileResponse.json()
+            const slug = profileData.user_slug || null
+            setUserSlug(slug)
+            
+            // Gerar link com user_slug e slug do formulário (se disponível)
+            if (slug && data.data.form.slug) {
+              // URL amigável: /pt/nutri/{user-slug}/formulario/{slug}
+              const link = `${baseUrl}/pt/nutri/${slug}/formulario/${data.data.form.slug}`
+              setLinkGerado(link)
+            } else {
+              // Fallback: URL antiga com ID
+              const link = `${baseUrl}/f/${formId}`
+              setLinkGerado(link)
+            }
+          } else {
+            // Fallback: URL antiga com ID
+            const link = `${baseUrl}/f/${formId}`
+            setLinkGerado(link)
+          }
+          
+          // Gerar link encurtado se houver short_code
+          if (data.data.form.short_code) {
+            const shortLink = `${baseUrl}/p/${data.data.form.short_code}`
+            setLinkEncurtado(shortLink)
+          }
         }
       } catch (error: any) {
         console.error('Erro ao carregar formulário:', error)
@@ -66,6 +101,15 @@ function EnviarFormularioNutriContent() {
       setCopiado(true)
       setMensagemSucesso('Link copiado para a área de transferência!')
       setTimeout(() => setCopiado(false), 2000)
+    }
+  }
+
+  const copiarLinkEncurtado = () => {
+    if (linkEncurtado) {
+      navigator.clipboard.writeText(linkEncurtado)
+      setCopiadoEncurtado(true)
+      setMensagemSucesso('Link encurtado copiado para a área de transferência!')
+      setTimeout(() => setCopiadoEncurtado(false), 2000)
     }
   }
 
@@ -200,27 +244,62 @@ function EnviarFormularioNutriContent() {
           {linkGerado && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Link do Formulário</h3>
-              <div className="flex gap-2 mb-4">
-                <input
-                  type="text"
-                  value={linkGerado}
-                  readOnly
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
-                />
-                <button
-                  onClick={copiarLink}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    copiado
-                      ? 'bg-green-600 text-white'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {copiado ? '✓ Copiado!' : '📋 Copiar'}
-                </button>
+              <div className="space-y-4">
+                {/* Link Completo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Link Completo</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={linkGerado}
+                      readOnly
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                    />
+                    <button
+                      onClick={copiarLink}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        copiado
+                          ? 'bg-green-600 text-white'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {copiado ? '✓ Copiado!' : '📋 Copiar'}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Link Encurtado (se disponível) */}
+                {linkEncurtado && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Link Encurtado</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={linkEncurtado}
+                        readOnly
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-purple-50 text-sm font-mono"
+                      />
+                      <button
+                        onClick={copiarLinkEncurtado}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          copiadoEncurtado
+                            ? 'bg-green-600 text-white'
+                            : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
+                      >
+                        {copiadoEncurtado ? '✓ Copiado!' : '📋 Copiar'}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Link mais curto e fácil de compartilhar
+                    </p>
+                  </div>
+                )}
+                
+                <p className="text-xs text-gray-500">
+                  Compartilhe este link com seus clientes. Eles poderão preencher o formulário diretamente.
+                </p>
               </div>
-              <p className="text-xs text-gray-500">
-                Compartilhe este link com seus clientes. Eles poderão preencher o formulário diretamente.
-              </p>
             </div>
           )}
 
@@ -252,19 +331,24 @@ function EnviarFormularioNutriContent() {
             </div>
           </div>
 
-          {/* QR Code (opcional) */}
-          {linkGerado && (
+          {/* QR Code */}
+          {(linkEncurtado || linkGerado) && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">QR Code</h3>
               <div className="flex flex-col items-center">
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(linkGerado)}`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(linkEncurtado || linkGerado || '')}`}
                   alt="QR Code"
                   className="mb-4"
                 />
                 <p className="text-xs text-gray-500 text-center">
                   Cliente pode escanear este código para acessar o formulário
                 </p>
+                {linkEncurtado && (
+                  <p className="text-xs text-purple-600 text-center mt-2 font-mono">
+                    {linkEncurtado}
+                  </p>
+                )}
               </div>
             </div>
           )}
