@@ -7,6 +7,7 @@ import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
+import DocumentosTab from '@/components/nutri/DocumentosTab'
 
 export default function ClienteDetalhesNutri() {
   return (
@@ -16,7 +17,7 @@ export default function ClienteDetalhesNutri() {
   )
 }
 
-type TabType = 'info' | 'evolucao' | 'avaliacao' | 'emocional' | 'reavaliacoes' | 'agenda' | 'timeline' | 'programa'
+type TabType = 'info' | 'evolucao' | 'avaliacao' | 'emocional' | 'reavaliacoes' | 'agenda' | 'timeline' | 'programa' | 'documentos'
 
 function ClienteDetalhesNutriContent() {
   const { user, loading } = useAuth()
@@ -101,7 +102,8 @@ function ClienteDetalhesNutriContent() {
     { id: 'reavaliacoes' as TabType, label: 'Reavaliações', icon: '🔄' },
     { id: 'agenda' as TabType, label: 'Agenda', icon: '📅' },
     { id: 'timeline' as TabType, label: 'Histórico', icon: '📜' },
-    { id: 'programa' as TabType, label: 'Programa Atual', icon: '📋' }
+    { id: 'programa' as TabType, label: 'Programa Atual', icon: '📋' },
+    { id: 'documentos' as TabType, label: 'Documentos', icon: '📁' }
   ]
 
   const getStatusColor = (status: string) => {
@@ -273,6 +275,9 @@ function ClienteDetalhesNutriContent() {
             )}
             {activeTab === 'programa' && (
               <ProgramaTab cliente={cliente} clientId={clientId} />
+            )}
+            {activeTab === 'documentos' && (
+              <DocumentosTab clientId={clientId} />
             )}
           </div>
         </div>
