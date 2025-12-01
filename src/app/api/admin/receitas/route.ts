@@ -82,40 +82,41 @@ export async function GET(request: NextRequest) {
 
     // Aplicar filtros de período (APENAS se especificamente solicitado)
     // IMPORTANTE: Se não houver filtro de período, retornar TODAS as assinaturas ativas
+    // 
+    // LÓGICA CORRIGIDA:
+    // - Para MENSAL: considerar assinaturas ATIVAS no período (current_period_start/end dentro do período)
+    // - Para ANUAL: considerar assinaturas CRIADAS no período (pagas de uma vez)
+    // - Isso garante que mensais ativas em dezembro apareçam ao filtrar por dezembro
+    // 
+    // NOTA: Como o Supabase não suporta OR complexo facilmente, vamos buscar todas e filtrar depois
+    let periodoInicioDate: Date | null = null
+    let periodoFimDate: Date | null = null
+    
     if (periodoInicio && periodoFim) {
-      // Filtro por período customizado (data início - data fim)
-      subscriptionsQuery = subscriptionsQuery
-        .gte('created_at', `${periodoInicio}T00:00:00.000Z`)
-        .lte('created_at', `${periodoFim}T23:59:59.999Z`)
+      periodoInicioDate = new Date(`${periodoInicio}T00:00:00.000Z`)
+      periodoFimDate = new Date(`${periodoFim}T23:59:59.999Z`)
     } else if (ultimosNMeses) {
-      // Filtro por últimos N meses
       const mesesAtras = parseInt(ultimosNMeses)
       const dataLimite = new Date()
       dataLimite.setMonth(dataLimite.getMonth() - mesesAtras)
-      subscriptionsQuery = subscriptionsQuery.gte('created_at', dataLimite.toISOString())
+      periodoInicioDate = dataLimite
+      periodoFimDate = new Date()
     } else if (periodoTipo === 'mes' && periodoInicio) {
-      // Filtro por mês específico (YYYY-MM)
       const [ano, mes] = periodoInicio.split('-')
-      const inicioMes = new Date(parseInt(ano), parseInt(mes) - 1, 1)
-      const fimMes = new Date(parseInt(ano), parseInt(mes), 0, 23, 59, 59)
-      subscriptionsQuery = subscriptionsQuery
-        .gte('created_at', inicioMes.toISOString())
-        .lte('created_at', fimMes.toISOString())
+      periodoInicioDate = new Date(parseInt(ano), parseInt(mes) - 1, 1)
+      periodoFimDate = new Date(parseInt(ano), parseInt(mes), 0, 23, 59, 59)
     } else if (periodoTipo === 'trimestre' && periodoInicio) {
-      // Filtro por trimestre (Q1, Q2, Q3, Q4)
       const [ano, trimestre] = periodoInicio.split('-Q')
       const mesInicio = (parseInt(trimestre) - 1) * 3
       const mesFim = parseInt(trimestre) * 3 - 1
-      const inicioTrimestre = new Date(parseInt(ano), mesInicio, 1)
-      const fimTrimestre = new Date(parseInt(ano), mesFim + 1, 0, 23, 59, 59)
-      subscriptionsQuery = subscriptionsQuery
-        .gte('created_at', inicioTrimestre.toISOString())
-        .lte('created_at', fimTrimestre.toISOString())
+      periodoInicioDate = new Date(parseInt(ano), mesInicio, 1)
+      periodoFimDate = new Date(parseInt(ano), mesFim + 1, 0, 23, 59, 59)
     }
+    
     // Se não houver filtro de período, não aplicar nenhum filtro de data
     // Isso garante que todas as assinaturas ativas sejam retornadas
 
-    const { data: subscriptions, error: subscriptionsError } = await subscriptionsQuery
+    const { data: allSubscriptions, error: subscriptionsError } = await subscriptionsQuery
 
     if (subscriptionsError) {
       console.error('Erro ao buscar assinaturas:', subscriptionsError)
@@ -123,6 +124,26 @@ export async function GET(request: NextRequest) {
         { error: 'Erro ao buscar assinaturas', details: subscriptionsError.message },
         { status: 500 }
       )
+    }
+
+    // Aplicar filtro de período no código (já que Supabase não suporta OR complexo facilmente)
+    // Para mensais: considerar assinaturas ATIVAS no período
+    // Para anuais: considerar assinaturas CRIADAS no período
+    let subscriptions = allSubscriptions || []
+    if (periodoInicioDate && periodoFimDate) {
+      subscriptions = subscriptions.filter((sub: any) => {
+        if (sub.plan_type === 'monthly') {
+          // Mensal: ativa no período se current_period_start <= fimPeriodo AND current_period_end >= inicioPeriodo
+          const periodStart = new Date(sub.current_period_start)
+          const periodEnd = new Date(sub.current_period_end)
+          return periodStart <= periodoFimDate! && periodEnd >= periodoInicioDate!
+        } else if (sub.plan_type === 'annual') {
+          // Anual: criada no período
+          const createdAt = new Date(sub.created_at)
+          return createdAt >= periodoInicioDate! && createdAt <= periodoFimDate!
+        }
+        return true // Outros tipos (free, etc) sempre incluir
+      })
     }
 
     // Buscar perfis de usuários em lote (incluindo is_admin e is_support)
@@ -147,7 +168,7 @@ export async function GET(request: NextRequest) {
     // =====================================================
     // FORMATAR DADOS PARA O FRONTEND
     // =====================================================
-    const receitas = (subscriptions || []).map((sub: any) => {
+    const receitas = subscriptions.map((sub: any) => {
       const userProfile = profilesMap.get(sub.user_id) || {}
       const valor = sub.amount ? sub.amount / 100 : 0 // Converter centavos para reais/dólares
       

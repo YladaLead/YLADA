@@ -41,12 +41,11 @@ export default function AdminReceitas() {
   // =====================================================
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'active' | 'canceled' | 'past_due' | 'unpaid'>('todos')
-  const [periodo, setPeriodo] = useState<'mes' | 'ano' | 'historico'>('mes')
   
   // =====================================================
-  // FILTRO AVANÇADO DE PERÍODO (COLAPSÁVEL)
+  // FILTRO DE PERÍODO (UNIFICADO E SIMPLIFICADO)
   // =====================================================
-  const [filtroAvancadoAberto, setFiltroAvancadoAberto] = useState(false)
+  const [filtroPeriodoAberto, setFiltroPeriodoAberto] = useState(false)
   const [periodoTipo, setPeriodoTipo] = useState<'rapido' | 'mes' | 'trimestre' | 'dia' | 'custom'>('rapido')
   const [periodoRapido, setPeriodoRapido] = useState<'todos' | 'este_mes' | 'mes_passado' | 'ultimos_3' | 'ultimos_6' | 'ultimos_12' | 'este_trimestre' | 'trimestre_passado'>('todos')
   const [mesSelecionado, setMesSelecionado] = useState<string>('')
@@ -84,7 +83,7 @@ export default function AdminReceitas() {
         if (filtroArea !== 'todos') {
           params.append('area', filtroArea)
         }
-        if (filtroStatus !== 'todos' && periodo !== 'historico') {
+        if (filtroStatus !== 'todos') {
           params.append('status', filtroStatus)
         }
 
@@ -182,7 +181,7 @@ export default function AdminReceitas() {
     }
 
     carregarDados()
-  }, [filtroArea, filtroStatus, periodo, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, diaSelecionado, dataInicio, dataFim])
+  }, [filtroArea, filtroStatus, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, diaSelecionado, dataInicio, dataFim])
 
   // =====================================================
   // ESTADOS PARA MODAIS DE DETALHES
@@ -293,15 +292,8 @@ export default function AdminReceitas() {
   const totalGratuitas = receitasAtivas.filter(r => r.categoria === 'gratuita').length
   const totalSuporte = receitasAtivas.filter(r => r.categoria === 'suporte').length
 
-  // Filtrar receitas para tabela
-  const receitasFiltradas = receitas.filter(r => {
-    if (periodo === 'mes') {
-      return r.tipo === 'mensal' || r.tipo === 'gratuito'
-    } else if (periodo === 'ano') {
-      return r.tipo === 'anual'
-    }
-    return true
-  })
+  // Filtrar receitas para tabela (agora mostra todas, o filtro de período é aplicado na API)
+  const receitasFiltradas = receitas
 
   const getAreaIcon = (area: string) => {
     switch (area) {
@@ -448,59 +440,127 @@ export default function AdminReceitas() {
               </div>
             </div>
 
-            {/* Filtro Período - SEMPRE VISÍVEL */}
+            {/* Filtro Período - UNIFICADO E SIMPLIFICADO */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <span className="text-lg">📅</span>
                 Filtrar por Período
+                {(periodoRapido !== 'todos' || mesSelecionado || trimestreSelecionado || diaSelecionado || (dataInicio && dataFim)) && (
+                  <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">
+                    Filtro Ativo
+                  </span>
+                )}
               </label>
-              <div className="space-y-3">
-                {/* Tipo de Plano - SEMPRE VISÍVEL */}
-                <div>
-                  <p className="text-xs text-gray-600 mb-2">Tipo de Plano:</p>
-                  <div className="flex gap-2">
-                    {['mes', 'ano', 'historico'].map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPeriodo(p as any)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          periodo === p
-                            ? 'bg-green-600 text-white shadow-md'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {p === 'mes' ? 'Mensal' : p === 'ano' ? 'Anual' : 'Histórico'}
-                      </button>
-                    ))}
+              
+              {/* Opções Rápidas - SEMPRE VISÍVEIS */}
+              {periodoTipo === 'rapido' && (
+                <div className="mb-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <button
+                      onClick={() => setPeriodoRapido('todos')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'todos'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Todos
+                    </button>
+                    <button
+                      onClick={() => setPeriodoRapido('este_mes')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'este_mes'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Este Mês
+                    </button>
+                    <button
+                      onClick={() => setPeriodoRapido('mes_passado')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'mes_passado'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Mês Passado
+                    </button>
+                    <button
+                      onClick={() => setPeriodoRapido('ultimos_3')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'ultimos_3'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Últimos 3 Meses
+                    </button>
+                    <button
+                      onClick={() => setPeriodoRapido('ultimos_6')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'ultimos_6'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Últimos 6 Meses
+                    </button>
+                    <button
+                      onClick={() => setPeriodoRapido('ultimos_12')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'ultimos_12'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Últimos 12 Meses
+                    </button>
+                    <button
+                      onClick={() => setPeriodoRapido('este_trimestre')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'este_trimestre'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Este Trimestre
+                    </button>
+                    <button
+                      onClick={() => setPeriodoRapido('trimestre_passado')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodoRapido === 'trimestre_passado'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Trimestre Passado
+                    </button>
                   </div>
                 </div>
+              )}
 
-                {/* Filtro Avançado - COLAPSÁVEL */}
-                <div className="border-t border-gray-200 pt-3">
-                  <button
-                    onClick={() => setFiltroAvancadoAberto(!filtroAvancadoAberto)}
-                    className="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              {/* Opções Avançadas - COLAPSÁVEL */}
+              <div className="border-t border-gray-200 pt-3">
+                <button
+                  onClick={() => setFiltroPeriodoAberto(!filtroPeriodoAberto)}
+                  className="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <span>⚙️</span>
+                    Opções Avançadas
+                  </span>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform ${filtroPeriodoAberto ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <span className="flex items-center gap-2">
-                      <span>⚙️</span>
-                      Filtro Avançado de Período
-                      {periodoRapido !== 'todos' && (
-                        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">
-                          Ativo
-                        </span>
-                      )}
-                    </span>
-                    <svg
-                      className={`w-5 h-5 text-gray-500 transition-transform ${filtroAvancadoAberto ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
                   
-                  {filtroAvancadoAberto && (
+                {filtroPeriodoAberto && (
                     <div className="mt-4 space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                       {/* Tipo de Filtro - Cards Visuais */}
                       <div>
@@ -564,95 +624,9 @@ export default function AdminReceitas() {
                         </div>
                       </div>
 
-                      {/* Opções Específicas */}
-                      {periodoTipo === 'rapido' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Períodos rápidos:</label>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <button
-                              onClick={() => setPeriodoRapido('todos')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'todos'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Todos
-                            </button>
-                            <button
-                              onClick={() => setPeriodoRapido('este_mes')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'este_mes'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Este Mês
-                            </button>
-                            <button
-                              onClick={() => setPeriodoRapido('mes_passado')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'mes_passado'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Mês Passado
-                            </button>
-                            <button
-                              onClick={() => setPeriodoRapido('ultimos_3')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'ultimos_3'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Últimos 3 Meses
-                            </button>
-                            <button
-                              onClick={() => setPeriodoRapido('ultimos_6')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'ultimos_6'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Últimos 6 Meses
-                            </button>
-                            <button
-                              onClick={() => setPeriodoRapido('ultimos_12')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'ultimos_12'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Últimos 12 Meses
-                            </button>
-                            <button
-                              onClick={() => setPeriodoRapido('este_trimestre')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'este_trimestre'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Este Trimestre
-                            </button>
-                            <button
-                              onClick={() => setPeriodoRapido('trimestre_passado')}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                periodoRapido === 'trimestre_passado'
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                              }`}
-                            >
-                              Trimestre Passado
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
+                      {/* Opções Específicas - Apenas quando não for 'rapido' */}
+                      {periodoTipo !== 'rapido' && (
+                        <>
                       {periodoTipo === 'mes' && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -753,6 +727,8 @@ export default function AdminReceitas() {
                             💡 Selecione o intervalo de datas que deseja analisar
                           </p>
                         </div>
+                      )}
+                        </>
                       )}
                     </div>
                   )}
