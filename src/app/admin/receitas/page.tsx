@@ -1029,6 +1029,124 @@ export default function AdminReceitas() {
             )}
           </div>
         )}
+
+        {/* ===================================================== */}
+        {/* MODAL: DETALHES RECEITA MENSAL */}
+        {/* ===================================================== */}
+        {mostrarDetalhesMensal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">💰 Receita Mensal - Detalhes</h2>
+                  <p className="text-green-100 text-sm mt-1">
+                    Total: {formatCurrency(totalMensalPagante)} • {receitasMensais.length} assinaturas
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMostrarDetalhesMensal(false)}
+                  className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                {receitasMensais.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <p className="text-lg">Nenhuma assinatura mensal pagante encontrada</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {receitasMensais.map((receita) => (
+                      <div key={receita.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-green-300 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-2xl">{getAreaIcon(receita.area)}</span>
+                              <div>
+                                <p className="font-semibold text-gray-900">{receita.usuario}</p>
+                                <p className="text-xs text-gray-500">{receita.email}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span className="capitalize">{receita.area}</span>
+                              <span>•</span>
+                              <span>Vence: {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xl font-bold text-green-700">{formatCurrency(receita.valor, receita.currency)}</p>
+                            <p className="text-xs text-gray-500">/mês</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================== */}
+        {/* MODAL: DETALHES RECEITA ANUAL */}
+        {/* ===================================================== */}
+        {mostrarDetalhesAnual && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">💎 Receita Anual - Detalhes</h2>
+                  <p className="text-blue-100 text-sm mt-1">
+                    Total: {formatCurrency(totalAnualPagante)} • {receitasAnuais.length} assinaturas (entrada integral)
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMostrarDetalhesAnual(false)}
+                  className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                {receitasAnuais.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <p className="text-lg">Nenhuma assinatura anual pagante encontrada</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {receitasAnuais.map((receita) => (
+                      <div key={receita.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-2xl">{getAreaIcon(receita.area)}</span>
+                              <div>
+                                <p className="font-semibold text-gray-900">{receita.usuario}</p>
+                                <p className="text-xs text-gray-500">{receita.email}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span className="capitalize">{receita.area}</span>
+                              <span>•</span>
+                              <span>Vence: {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xl font-bold text-blue-700">{formatCurrency(receita.valor, receita.currency)}</p>
+                            <p className="text-xs text-gray-500">entrada integral</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
