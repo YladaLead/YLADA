@@ -436,10 +436,24 @@ function UpgradeRequiredPage({ area }: { area: string }) {
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href={`/pt/${area}`}>
             <Image
-              src="/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
-              alt="YLADA Logo"
-              width={280}
-              height={84}
+              src={area === 'wellness' 
+                ? "/images/logo/wellness-horizontal.png"
+                : area === 'nutri'
+                ? "/images/logo/nutri-horizontal.png"
+                : area === 'coach'
+                ? "/images/logo/coach-horizontal.png"
+                : "/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
+              }
+              alt={area === 'wellness' 
+                ? "WELLNESS - Your Leading Data System"
+                : area === 'nutri'
+                ? "Nutri by YLADA"
+                : area === 'coach'
+                ? "Coach by YLADA"
+                : "YLADA Logo"
+              }
+              width={area === 'wellness' ? 572 : 280}
+              height={area === 'wellness' ? 150 : 84}
               className="bg-transparent object-contain h-12 sm:h-14 lg:h-16 w-auto"
               style={{ backgroundColor: 'transparent' }}
               priority
