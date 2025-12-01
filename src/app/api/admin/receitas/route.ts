@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
         usuario: userProfile.nome_completo || userProfile.email || 'Usuário sem nome',
         email: userProfile.email || '',
         area: sub.area,
-        tipo: sub.plan_type === 'annual' ? 'anual' : sub.plan_type === 'monthly' ? 'mensal' : 'gratuito',
+        tipo: sub.plan_type === 'annual' ? 'anual' : sub.plan_type === 'monthly' ? 'mensal' : sub.plan_type === 'free' ? 'gratuito' : 'gratuito',
         valor: Math.round(valor * 100) / 100, // Arredondar para 2 casas decimais
         status: sub.status === 'active' ? 'ativa' : 
                 sub.status === 'canceled' ? 'cancelada' : 
