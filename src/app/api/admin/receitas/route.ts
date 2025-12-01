@@ -152,20 +152,24 @@ export async function GET(request: NextRequest) {
       const isAdmin = userProfile.is_admin === true
       const isSupport = userProfile.is_support === true
       
-      // CORRIGIDO: Lógica mais precisa para identificar gratuitas
+      // CORRIGIDO: Lógica mais precisa para identificar categorias
+      // 
+      // 1. SUPORTE: Admin ou Support sempre é suporte
+      // 2. GRATUITA: Não é admin/suporte E (plan_type='free' OU amount=0)
+      // 3. PAGANTE: Não é admin/suporte E não é gratuita E amount > 0
+      
       // É gratuita SE:
-      // 1. plan_type === 'free' E amount === 0 (plano gratuito real)
-      // 2. OU amount === 0 E não é migrada (assinatura gratuita)
-      // 3. MAS não é admin/suporte (esses são suporte, não gratuitas)
+      // - Não é admin/suporte
+      // - E (plan_type === 'free' OU amount === 0)
+      // NOTA: Assinaturas migradas com amount=0 também são consideradas gratuitas
       const isFree = !isAdmin && !isSupport && 
-        (sub.plan_type === 'free' || (valor === 0 && sub.is_migrated !== true))
+        (sub.plan_type === 'free' || valor === 0)
       
       // É pagante SE:
-      // 1. Não é admin/suporte
-      // 2. Não é gratuita (segundo a lógica acima)
-      // 3. E tem valor > 0 OU é migrada com valor (mesmo que 0, se migrada pode ser pagante)
-      const isPagante = !isAdmin && !isSupport && !isFree && 
-        (valor > 0 || (sub.is_migrated === true && sub.plan_type !== 'free'))
+      // - Não é admin/suporte
+      // - Não é gratuita (ou seja, amount > 0 E plan_type != 'free')
+      // - E tem valor > 0
+      const isPagante = !isAdmin && !isSupport && !isFree && valor > 0
       
       // Calcular histórico (valor total pago até agora)
       // Por enquanto, vamos usar o valor da assinatura atual
