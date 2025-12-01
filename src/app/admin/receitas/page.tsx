@@ -201,7 +201,19 @@ export default function AdminReceitas() {
   const receitasAnuais = receitasPagantes.filter(r => r.tipo === 'anual')
   
   // DEBUG: Log para verificar (apenas em desenvolvimento)
-  if (process.env.NODE_ENV === 'development') {
+  if (typeof window !== 'undefined') {
+    // Verificar assinaturas criadas hoje
+    const hoje = new Date()
+    hoje.setHours(0, 0, 0, 0)
+    const receitasHoje = receitas.filter(r => {
+      const dataCriacao = new Date(r.dataInicio)
+      return dataCriacao >= hoje
+    })
+    const mensaisWellnessHoje = receitasMensais.filter(r => {
+      const dataCriacao = new Date(r.dataInicio)
+      return dataCriacao >= hoje && r.area === 'wellness'
+    })
+    
     console.log('🔍 DEBUG Receitas:', {
       totalReceitas: receitas.length,
       receitasAtivas: receitasAtivas.length,
@@ -214,8 +226,28 @@ export default function AdminReceitas() {
         email: r.email,
         valor: r.valor,
         categoria: r.categoria,
-        tipo: r.tipo
-      }))
+        tipo: r.tipo,
+        area: r.area,
+        status: r.status,
+        dataInicio: r.dataInicio
+      })),
+      // NOVO: Informações sobre assinaturas de hoje
+      receitasCriadasHoje: receitasHoje.length,
+      mensaisWellnessHoje: mensaisWellnessHoje.length,
+      mensaisWellnessHojeDetalhes: mensaisWellnessHoje.map(r => ({
+        usuario: r.usuario,
+        email: r.email,
+        valor: r.valor,
+        categoria: r.categoria,
+        tipo: r.tipo,
+        area: r.area,
+        status: r.status,
+        dataInicio: r.dataInicio
+      })),
+      totalMensalPagante,
+      filtroArea,
+      filtroStatus,
+      periodo
     })
   }
   
