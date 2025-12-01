@@ -797,12 +797,12 @@ export default function AdminReceitas() {
                             <div>
                               <p className="text-xs text-gray-600">Mensal</p>
                               <p className="text-xl font-bold text-green-700">{formatCurrency(totais.mensal)}</p>
-                              <p className="text-xs text-gray-500">{totais.qtdMensais} × R$ {VALOR_MENSAL_LIQUIDO}</p>
+                              <p className="text-xs text-gray-500">{totais.receitasMensais.length} assinaturas</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-600">Anual</p>
                               <p className="text-xl font-bold text-blue-700">{formatCurrency(totais.anual)}</p>
-                              <p className="text-xs text-gray-500">{totais.qtdAnuais} × R$ {VALOR_ANUAL_LIQUIDO} (integral)</p>
+                              <p className="text-xs text-gray-500">{totais.receitasAnuais.length} assinaturas (integral)</p>
                             </div>
                             <div className="pt-2 border-t border-gray-200">
                               <p className="text-xs text-gray-600">Total do Mês</p>
