@@ -20,6 +20,10 @@ interface Receita {
   migrated_from?: string | null
   requires_manual_renewal?: boolean
   currency?: string
+  is_admin?: boolean
+  is_support?: boolean
+  is_pagante?: boolean
+  categoria?: 'pagante' | 'gratuita' | 'suporte'
 }
 
 interface Totais {
@@ -34,6 +38,7 @@ interface Totais {
 export default function AdminReceitas() {
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'active' | 'canceled' | 'past_due' | 'unpaid'>('todos')
+  const [filtroCategoria, setFiltroCategoria] = useState<'todos' | 'pagante' | 'gratuita' | 'suporte'>('todos')
   const [periodo, setPeriodo] = useState<'mes' | 'ano' | 'historico'>('mes')
   const [receitas, setReceitas] = useState<Receita[]>([])
   const [totais, setTotais] = useState<Totais>({
@@ -98,8 +103,16 @@ export default function AdminReceitas() {
     carregarDados()
   }, [filtroArea, filtroStatus, periodo])
 
-  // Filtrar receitas por período (frontend)
+  // Filtrar receitas por período e categoria (frontend)
   const receitasFiltradas = receitas.filter(r => {
+    // Filtro de categoria
+    if (filtroCategoria !== 'todos') {
+      if (filtroCategoria === 'pagante' && r.categoria !== 'pagante') return false
+      if (filtroCategoria === 'gratuita' && r.categoria !== 'gratuita') return false
+      if (filtroCategoria === 'suporte' && r.categoria !== 'suporte') return false
+    }
+    
+    // Filtro de período
     if (periodo === 'mes') {
       return r.tipo === 'mensal' || r.tipo === 'gratuito'
     } else if (periodo === 'ano') {
@@ -110,26 +123,60 @@ export default function AdminReceitas() {
   })
 
   // Calcular totais SEMPRE (independente do período selecionado)
-  // Usar receitas completas (não filtradas) para ter visão geral
-  // Apenas assinaturas ATIVAS contam nos totais
+  // Separar por categoria: PAGANTES, GRATUITAS e SUPORTE
   
-  // Total Mensal: assinaturas mensais e gratuitas ATIVAS
-  const totalMensal = receitas
-    .filter(r => r.status === 'ativa' && (r.tipo === 'mensal' || r.tipo === 'gratuito'))
+  // =====================================================
+  // TOTAIS DE PAGANTES (apenas assinaturas que pagam)
+  // =====================================================
+  const receitasPagantes = receitas.filter(r => r.status === 'ativa' && r.categoria === 'pagante')
+  
+  // Total Mensal PAGANTE: assinaturas mensais que pagam
+  const totalMensalPagante = receitasPagantes
+    .filter(r => r.tipo === 'mensal')
     .reduce((sum, r) => sum + r.valor, 0)
 
-  // Total Anual: assinaturas anuais ATIVAS
-  const totalAnual = receitas
-    .filter(r => r.status === 'ativa' && r.tipo === 'anual')
+  // Total Anual PAGANTE: assinaturas anuais que pagam
+  const totalAnualPagante = receitasPagantes
+    .filter(r => r.tipo === 'anual')
     .reduce((sum, r) => sum + r.valor, 0)
 
-  // Total Anual Mensalizado: valor anual dividido por 12
-  const totalAnualMensalizado = receitas
-    .filter(r => r.status === 'ativa' && r.tipo === 'anual')
+  // Total Anual Mensalizado PAGANTE: valor anual dividido por 12
+  const totalAnualMensalizadoPagante = receitasPagantes
+    .filter(r => r.tipo === 'anual')
     .reduce((sum, r) => sum + (r.valor / 12), 0)
 
-  // Total Geral: mensal + anual mensalizado (receita recorrente mensal equivalente)
+  // Total Geral PAGANTE: mensal + anual mensalizado
+  const totalReceitasPagante = totalMensalPagante + totalAnualMensalizadoPagante
+
+  // =====================================================
+  // TOTAIS GERAIS (incluindo todas as categorias para referência)
+  // =====================================================
+  const receitasAtivas = receitas.filter(r => r.status === 'ativa')
+  
+  // Total Mensal GERAL: todas as assinaturas mensais/gratuitas ativas
+  const totalMensal = receitasAtivas
+    .filter(r => r.tipo === 'mensal' || r.tipo === 'gratuito')
+    .reduce((sum, r) => sum + r.valor, 0)
+
+  // Total Anual GERAL: todas as assinaturas anuais ativas
+  const totalAnual = receitasAtivas
+    .filter(r => r.tipo === 'anual')
+    .reduce((sum, r) => sum + r.valor, 0)
+
+  // Total Anual Mensalizado GERAL
+  const totalAnualMensalizado = receitasAtivas
+    .filter(r => r.tipo === 'anual')
+    .reduce((sum, r) => sum + (r.valor / 12), 0)
+
+  // Total Geral: mensal + anual mensalizado
   const totalReceitas = totalMensal + totalAnualMensalizado
+
+  // =====================================================
+  // CONTADORES POR CATEGORIA
+  // =====================================================
+  const totalPagantes = receitasPagantes.length
+  const totalGratuitas = receitas.filter(r => r.status === 'ativa' && r.categoria === 'gratuita').length
+  const totalSuporte = receitas.filter(r => r.status === 'ativa' && r.categoria === 'suporte').length
 
   const getAreaIcon = (area: string) => {
     switch (area) {
@@ -159,6 +206,18 @@ export default function AdminReceitas() {
         )}
       </div>
     )
+  }
+
+  const getCategoriaBadge = (categoria?: string) => {
+    if (!categoria) return null
+    
+    const badges: Record<string, JSX.Element> = {
+      'pagante': <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" title="Cliente pagante">💳 Pagante</span>,
+      'gratuita': <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Plano gratuito">🆓 Gratuita</span>,
+      'suporte': <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800" title="Admin/Suporte">🛟 Suporte</span>
+    }
+
+    return badges[categoria] || null
   }
 
   const formatCurrency = (valor: number, currency: string = 'usd') => {
@@ -286,54 +345,92 @@ export default function AdminReceitas() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Mensal</p>
-                    <p className="text-3xl font-bold text-green-700">{formatCurrency(totalMensal)}</p>
+            {/* TOTAIS PAGANTES (Destaque) */}
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">💰 Receita de Pagantes</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Mensal Pagante</p>
+                      <p className="text-3xl font-bold text-green-700">{formatCurrency(totalMensalPagante)}</p>
+                    </div>
+                    <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-2xl text-white">📅</span>
+                    </div>
                   </div>
-                  <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-2xl text-white">📅</span>
-                  </div>
+                  <p className="text-xs text-gray-600">
+                    {receitasPagantes.filter(r => r.tipo === 'mensal').length} assinaturas pagantes
+                  </p>
                 </div>
-                <p className="text-xs text-gray-600">
-                  {receitas.filter(r => r.status === 'ativa' && (r.tipo === 'mensal' || r.tipo === 'gratuito')).length} assinaturas ativas
-                </p>
-              </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Anual</p>
-                    <p className="text-3xl font-bold text-blue-700">{formatCurrency(totalAnual)}</p>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Anual Pagante</p>
+                      <p className="text-3xl font-bold text-blue-700">{formatCurrency(totalAnualPagante)}</p>
+                    </div>
+                    <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-2xl text-white">💎</span>
+                    </div>
                   </div>
-                  <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-2xl text-white">💎</span>
-                  </div>
+                  <p className="text-xs text-gray-600">
+                    {receitasPagantes.filter(r => r.tipo === 'anual').length} assinaturas pagantes
+                    <br />
+                    <span className="text-gray-500">({formatCurrency(totalAnualMensalizadoPagante)}/mês equivalente)</span>
+                  </p>
                 </div>
-                <p className="text-xs text-gray-600">
-                  {receitas.filter(r => r.status === 'ativa' && r.tipo === 'anual').length} assinaturas ativas
-                  <br />
-                  <span className="text-gray-500">({formatCurrency(totalAnualMensalizado)}/mês equivalente)</span>
-                </p>
-              </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Geral</p>
-                    <p className="text-3xl font-bold text-purple-700">{formatCurrency(totalReceitas)}</p>
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Pagante</p>
+                      <p className="text-3xl font-bold text-purple-700">{formatCurrency(totalReceitasPagante)}</p>
+                    </div>
+                    <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-2xl text-white">💰</span>
+                    </div>
                   </div>
-                  <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-2xl text-white">💰</span>
+                  <p className="text-xs text-gray-600">
+                    {totalPagantes} pagantes ativos
+                    <br />
+                    <span className="text-gray-500">(Receita recorrente mensal)</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* RESUMO POR CATEGORIA */}
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">📊 Resumo por Categoria</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Pagantes</p>
+                      <p className="text-2xl font-bold text-green-700">{totalPagantes}</p>
+                    </div>
+                    <span className="text-2xl">💳</span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-600">
-                  {totais.ativas} ativas de {totais.total} total
-                  <br />
-                  <span className="text-gray-500">(Mensal + Anual mensalizado)</span>
-                </p>
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Gratuitas</p>
+                      <p className="text-2xl font-bold text-blue-700">{totalGratuitas}</p>
+                    </div>
+                    <span className="text-2xl">🆓</span>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Suporte</p>
+                      <p className="text-2xl font-bold text-orange-700">{totalSuporte}</p>
+                    </div>
+                    <span className="text-2xl">🛟</span>
+                  </div>
+                </div>
               </div>
             </div>
           </>
@@ -350,6 +447,7 @@ export default function AdminReceitas() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximo Vencimento</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Histórico</th>
@@ -359,7 +457,7 @@ export default function AdminReceitas() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {receitasFiltradas.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                         Nenhuma receita encontrada
                       </td>
                     </tr>
@@ -394,6 +492,9 @@ export default function AdminReceitas() {
                           <div className="text-xs text-gray-500">
                             {receita.tipo === 'mensal' ? '/mês' : receita.tipo === 'anual' ? '/ano' : 'gratuito'}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getCategoriaBadge(receita.categoria)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getStatusBadge(receita.status, receita.is_migrated)}

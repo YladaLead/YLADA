@@ -84,11 +84,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar perfis de usuários em lote
+    // Buscar perfis de usuários em lote (incluindo is_admin e is_support)
     const userIds = [...new Set((subscriptions || []).map((sub: any) => sub.user_id))]
     const { data: userProfiles, error: profilesError } = await supabaseAdmin
       .from('user_profiles')
-      .select('user_id, nome_completo, email')
+      .select('user_id, nome_completo, email, is_admin, is_support')
       .in('user_id', userIds)
 
     if (profilesError) {
@@ -109,6 +109,12 @@ export async function GET(request: NextRequest) {
     const receitas = (subscriptions || []).map((sub: any) => {
       const userProfile = profilesMap.get(sub.user_id) || {}
       const valor = sub.amount ? sub.amount / 100 : 0 // Converter centavos para reais/dólares
+      
+      // Identificar tipo de assinatura
+      const isAdmin = userProfile.is_admin === true
+      const isSupport = userProfile.is_support === true
+      const isFree = sub.plan_type === 'free' || valor === 0
+      const isPagante = !isAdmin && !isSupport && !isFree && valor > 0
       
       // Calcular histórico (valor total pago até agora)
       // Por enquanto, vamos usar o valor da assinatura atual
@@ -135,7 +141,12 @@ export async function GET(request: NextRequest) {
         migrated_from: sub.migrated_from || null,
         requires_manual_renewal: sub.requires_manual_renewal || false,
         currency: sub.currency || 'usd',
-        created_at: sub.created_at
+        created_at: sub.created_at,
+        // Novos campos para categorização
+        is_admin: isAdmin,
+        is_support: isSupport,
+        is_pagante: isPagante,
+        categoria: isAdmin ? 'suporte' : isSupport ? 'suporte' : isFree ? 'gratuita' : 'pagante'
       }
     })
 
