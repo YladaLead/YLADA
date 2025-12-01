@@ -626,109 +626,109 @@ export default function AdminReceitas() {
 
                       {/* Opções Específicas - Apenas quando não for 'rapido' */}
                       {periodoTipo !== 'rapido' && (
-                        <>
-                      {periodoTipo === 'mes' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Selecione o mês e ano:
-                          </label>
-                          <input
-                            type="month"
-                            value={mesSelecionado}
-                            onChange={(e) => setMesSelecionado(e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
-                            placeholder="Ex: 2025-01"
-                          />
-                          <p className="mt-2 text-xs text-gray-500">
-                            💡 Exemplo: Selecione "2025-01" para ver receitas de Janeiro de 2025
-                          </p>
-                        </div>
-                      )}
-
-                      {periodoTipo === 'trimestre' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Selecione o trimestre:
-                          </label>
-                          <select
-                            value={trimestreSelecionado}
-                            onChange={(e) => setTrimestreSelecionado(e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
-                          >
-                            <option value="">-- Selecione um trimestre --</option>
-                            {(() => {
-                              const hoje = new Date()
-                              const anoAtual = hoje.getFullYear()
-                              const trimestres = []
-                              const meses = ['Jan-Mar', 'Abr-Jun', 'Jul-Set', 'Out-Dez']
-                              
-                              for (let ano = anoAtual + 1; ano >= anoAtual - 1; ano--) {
-                                for (let q = 4; q >= 1; q--) {
-                                  trimestres.push({ ano, q, label: `${ano} - Q${q} (${meses[q-1]})` })
-                                }
-                              }
-                              
-                              return trimestres.map(t => (
-                                <option key={`${t.ano}-Q${t.q}`} value={`${t.ano}-Q${t.q}`}>
-                                  {t.label}
-                                </option>
-                              ))
-                            })()}
-                          </select>
-                          <p className="mt-2 text-xs text-gray-500">
-                            💡 Q1 = Jan-Mar | Q2 = Abr-Jun | Q3 = Jul-Set | Q4 = Out-Dez
-                          </p>
-                        </div>
-                      )}
-
-                      {periodoTipo === 'dia' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Selecione o dia:
-                          </label>
-                          <input
-                            type="date"
-                            value={diaSelecionado}
-                            onChange={(e) => setDiaSelecionado(e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
-                          />
-                          <p className="mt-2 text-xs text-gray-500">
-                            💡 Selecione uma data específica para ver receitas apenas desse dia
-                          </p>
-                        </div>
-                      )}
-
-                      {periodoTipo === 'custom' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-3">
-                            Selecione o período personalizado:
-                          </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-4">
+                          {periodoTipo === 'mes' && (
                             <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-2">📅 Data Início</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Selecione o mês e ano:
+                              </label>
+                              <input
+                                type="month"
+                                value={mesSelecionado}
+                                onChange={(e) => setMesSelecionado(e.target.value)}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+                                placeholder="Ex: 2025-01"
+                              />
+                              <p className="mt-2 text-xs text-gray-500">
+                                💡 Exemplo: Selecione "2025-01" para ver receitas de Janeiro de 2025
+                              </p>
+                            </div>
+                          )}
+
+                          {periodoTipo === 'trimestre' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Selecione o trimestre:
+                              </label>
+                              <select
+                                value={trimestreSelecionado}
+                                onChange={(e) => setTrimestreSelecionado(e.target.value)}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+                              >
+                                <option value="">-- Selecione um trimestre --</option>
+                                {(() => {
+                                  const hoje = new Date()
+                                  const anoAtual = hoje.getFullYear()
+                                  const trimestres = []
+                                  const meses = ['Jan-Mar', 'Abr-Jun', 'Jul-Set', 'Out-Dez']
+                                  
+                                  for (let ano = anoAtual + 1; ano >= anoAtual - 1; ano--) {
+                                    for (let q = 4; q >= 1; q--) {
+                                      trimestres.push({ ano, q, label: `${ano} - Q${q} (${meses[q-1]})` })
+                                    }
+                                  }
+                                  
+                                  return trimestres.map(t => (
+                                    <option key={`${t.ano}-Q${t.q}`} value={`${t.ano}-Q${t.q}`}>
+                                      {t.label}
+                                    </option>
+                                  ))
+                                })()}
+                              </select>
+                              <p className="mt-2 text-xs text-gray-500">
+                                💡 Q1 = Jan-Mar | Q2 = Abr-Jun | Q3 = Jul-Set | Q4 = Out-Dez
+                              </p>
+                            </div>
+                          )}
+
+                          {periodoTipo === 'dia' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Selecione o dia:
+                              </label>
                               <input
                                 type="date"
-                                value={dataInicio}
-                                onChange={(e) => setDataInicio(e.target.value)}
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                value={diaSelecionado}
+                                onChange={(e) => setDiaSelecionado(e.target.value)}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
                               />
+                              <p className="mt-2 text-xs text-gray-500">
+                                💡 Selecione uma data específica para ver receitas apenas desse dia
+                              </p>
                             </div>
+                          )}
+
+                          {periodoTipo === 'custom' && (
                             <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-2">📅 Data Fim</label>
-                              <input
-                                type="date"
-                                value={dataFim}
-                                onChange={(e) => setDataFim(e.target.value)}
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                              />
+                              <label className="block text-sm font-medium text-gray-700 mb-3">
+                                Selecione o período personalizado:
+                              </label>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-600 mb-2">📅 Data Início</label>
+                                  <input
+                                    type="date"
+                                    value={dataInicio}
+                                    onChange={(e) => setDataInicio(e.target.value)}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-600 mb-2">📅 Data Fim</label>
+                                  <input
+                                    type="date"
+                                    value={dataFim}
+                                    onChange={(e) => setDataFim(e.target.value)}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                  />
+                                </div>
+                              </div>
+                              <p className="mt-2 text-xs text-gray-500">
+                                💡 Selecione o intervalo de datas que deseja analisar
+                              </p>
                             </div>
-                          </div>
-                          <p className="mt-2 text-xs text-gray-500">
-                            💡 Selecione o intervalo de datas que deseja analisar
-                          </p>
+                          )}
                         </div>
-                      )}
-                        </>
                       )}
                     </div>
                   )}
