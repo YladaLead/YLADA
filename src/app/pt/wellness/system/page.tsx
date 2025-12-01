@@ -82,54 +82,36 @@ function WellnessSystemPageContent() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <WellnessNavBar />
       
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Botão Voltar - Discreto no topo */}
-        <div className="mb-4 sm:mb-6">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center space-x-2 text-sm text-gray-500 hover:text-gray-700 transition-colors group"
-          >
-            <svg
-              className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            <span>Voltar</span>
-          </button>
-        </div>
-
-        {/* Cabeçalho */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        {/* Cabeçalho Compacto */}
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
             O que você quer fazer agora?
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
             Escolha uma opção abaixo para começar
           </p>
         </div>
 
-        {/* Grid de Módulos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
+        {/* Grid de Módulos Compacto */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-w-7xl mx-auto mb-4 sm:mb-6">
           {modulos.map((modulo) => (
             <Link
               key={modulo.id}
               href={modulo.rota}
-              className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.01] group"
             >
               {/* Botão Principal do Módulo */}
-              <div className={`w-full p-6 sm:p-8 bg-gradient-to-r ${modulo.cor} ${modulo.corHover} text-white transition-all duration-300 relative`}>
+              <div className={`w-full p-4 sm:p-5 bg-gradient-to-r ${modulo.cor} ${modulo.corHover} text-white transition-all duration-300 relative`}>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    <span className="text-4xl sm:text-5xl flex-shrink-0">{modulo.emoji}</span>
-                    <h2 className="text-lg sm:text-xl font-bold text-left leading-tight">
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <span className="text-3xl sm:text-4xl flex-shrink-0">{modulo.emoji}</span>
+                    <h2 className="text-sm sm:text-base font-bold text-left leading-tight">
                       {modulo.titulo}
                     </h2>
                   </div>
                   <svg
-                    className="w-6 h-6 flex-shrink-0 ml-2 transform group-hover:translate-x-1 transition-transform duration-300"
+                    className="w-5 h-5 flex-shrink-0 ml-2 transform group-hover:translate-x-1 transition-transform duration-300"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -142,16 +124,48 @@ function WellnessSystemPageContent() {
           ))}
         </div>
 
-        {/* Notificações/Lembretes - Movido para depois da seção de módulos */}
-        <div className="mt-8 sm:mt-12">
-          <WellnessNotificacoes />
+        {/* Trilha de Aprendizado - Destaque Especial */}
+        <div className="max-w-7xl mx-auto mb-4 sm:mb-6">
+          <Link
+            href="/pt/wellness/cursos"
+            className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] group relative"
+          >
+            <div className="p-5 sm:p-6 text-white relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4 flex-1">
+                  <div className="bg-white bg-opacity-20 rounded-full p-3 sm:p-4">
+                    <span className="text-3xl sm:text-4xl">📚</span>
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl sm:text-2xl font-bold mb-1">
+                      Trilha de Aprendizado
+                    </h2>
+                    <p className="text-sm sm:text-base text-white text-opacity-90">
+                      Aprenda tudo que precisa para ter sucesso no seu negócio
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm sm:text-base font-semibold hidden sm:inline">Acessar</span>
+                  <svg
+                    className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+              {/* Efeito de brilho animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-all duration-1000"></div>
+            </div>
+          </Link>
         </div>
 
-        {/* Rodapé com informações */}
-        <div className="mt-12 sm:mt-16 text-center">
-          <p className="text-sm text-gray-500">
-            💡 <strong>Dica:</strong> Clique em qualquer módulo para acessar suas opções
-          </p>
+        {/* Notificações/Lembretes - Compacto */}
+        <div className="max-w-7xl mx-auto">
+          <WellnessNotificacoes />
         </div>
       </main>
     </div>

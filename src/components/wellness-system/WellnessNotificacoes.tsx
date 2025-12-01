@@ -40,7 +40,14 @@ export default function WellnessNotificacoes() {
 
       const data = await response.json()
       if (data.success && data.data.lembretes) {
-        setLembretes(data.data.lembretes)
+        // Remover duplicatas baseado no ID e título
+        const lembretesUnicos = data.data.lembretes.filter((lembrete: Lembrete, index: number, self: Lembrete[]) => {
+          return index === self.findIndex((l: Lembrete) => 
+            l.id === lembrete.id || 
+            (l.titulo === lembrete.titulo && l.mensagem === lembrete.mensagem)
+          )
+        })
+        setLembretes(lembretesUnicos)
       }
     } catch (error) {
       console.error('Erro ao buscar lembretes:', error)
