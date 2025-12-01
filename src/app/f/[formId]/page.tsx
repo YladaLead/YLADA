@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import YLADALogo from '@/components/YLADALogo'
+import Image from 'next/image'
 
 export default function PreencherFormularioPage() {
   const params = useParams()
@@ -10,6 +10,7 @@ export default function PreencherFormularioPage() {
   const [carregando, setCarregando] = useState(true)
   const [enviando, setEnviando] = useState(false)
   const [formulario, setFormulario] = useState<any>(null)
+  const [area, setArea] = useState<string | null>(null)
   const [respostas, setRespostas] = useState<Record<string, any>>({})
   const [mensagemSucesso, setMensagemSucesso] = useState(false)
   const [responseId, setResponseId] = useState<string | null>(null)
@@ -31,6 +32,14 @@ export default function PreencherFormularioPage() {
         const data = await response.json()
         if (data.success && data.data.form) {
           setFormulario(data.data.form)
+          // Determinar área baseado no perfil do usuário ou form_type
+          const userArea = data.data.form.user_area
+          const formType = data.data.form.form_type
+          if (userArea === 'coach' || userArea === 'nutri') {
+            setArea(userArea)
+          } else if (formType === 'coach' || formType === 'nutri') {
+            setArea(formType)
+          }
           // Inicializar respostas vazias
           const respostasIniciais: Record<string, any> = {}
           data.data.form.structure?.fields?.forEach((field: any) => {
@@ -426,7 +435,27 @@ export default function PreencherFormularioPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <YLADALogo />
+          <Image
+            src={
+              area === 'coach'
+                ? "/images/logo/coach-horizontal.png"
+                : area === 'nutri'
+                ? "/images/logo/nutri-horizontal.png"
+                : "/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
+            }
+            alt={
+              area === 'coach'
+                ? "Coach by YLADA"
+                : area === 'nutri'
+                ? "Nutri by YLADA"
+                : "YLADA Logo"
+            }
+            width={area === 'coach' || area === 'nutri' ? 280 : 280}
+            height={area === 'coach' || area === 'nutri' ? 84 : 84}
+            className="h-12 w-auto object-contain"
+            style={{ backgroundColor: 'transparent' }}
+            priority
+          />
         </div>
       </div>
 

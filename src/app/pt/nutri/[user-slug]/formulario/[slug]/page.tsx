@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import YLADALogo from '@/components/YLADALogo'
+import Image from 'next/image'
 
 export default function PreencherFormularioNutriPage() {
   const params = useParams()
@@ -429,7 +429,15 @@ export default function PreencherFormularioNutriPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <YLADALogo />
+          <Image
+            src="/images/logo/nutri-horizontal.png"
+            alt="Nutri by YLADA"
+            width={280}
+            height={84}
+            className="h-12 w-auto object-contain"
+            style={{ backgroundColor: 'transparent' }}
+            priority
+          />
         </div>
       </div>
 

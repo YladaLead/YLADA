@@ -21,7 +21,7 @@ export async function GET(
     // Buscar formulário (apenas se estiver ativo)
     const { data: form, error } = await supabaseAdmin
       .from('custom_forms')
-      .select('id, name, description, form_type, structure, is_active')
+      .select('id, name, description, form_type, structure, is_active, user_id')
       .eq('id', formId)
       .eq('is_active', true)
       .single()
@@ -33,9 +33,28 @@ export async function GET(
       )
     }
 
+    // Buscar perfil do usuário para determinar a área
+    let userArea = null
+    if (form.user_id) {
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('perfil')
+        .eq('user_id', form.user_id)
+        .maybeSingle()
+      
+      if (profile?.perfil) {
+        userArea = profile.perfil
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      data: { form }
+      data: { 
+        form: {
+          ...form,
+          user_area: userArea
+        }
+      }
     })
 
   } catch (error: any) {

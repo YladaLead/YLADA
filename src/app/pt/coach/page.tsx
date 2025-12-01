@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import YLADALogo from '../../../components/YLADALogo'
 import LanguageSelector from '../../../components/LanguageSelector'
 
 export default function CoachLandingPage() {
