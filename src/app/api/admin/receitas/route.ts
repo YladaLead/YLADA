@@ -22,6 +22,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const areaFiltro = searchParams.get('area') || 'todos'
     const statusFiltro = searchParams.get('status') || 'todos'
+    
+    // Novos filtros de período
+    const periodoInicio = searchParams.get('periodo_inicio') // YYYY-MM-DD
+    const periodoFim = searchParams.get('periodo_fim') // YYYY-MM-DD
+    const periodoTipo = searchParams.get('periodo_tipo') // 'mes' | 'trimestre' | 'custom' | 'ultimos_n'
+    const ultimosNMeses = searchParams.get('ultimos_n') // número de meses
 
     // Validar área
     const areasValidas = ['todos', 'wellness', 'nutri', 'coach', 'nutra']
@@ -72,6 +78,38 @@ export async function GET(request: NextRequest) {
     // Aplicar filtro de status
     if (statusFiltro !== 'todos') {
       subscriptionsQuery = subscriptionsQuery.eq('status', statusFiltro)
+    }
+
+    // Aplicar filtros de período
+    if (periodoInicio && periodoFim) {
+      // Filtro por período customizado (data início - data fim)
+      subscriptionsQuery = subscriptionsQuery
+        .gte('created_at', `${periodoInicio}T00:00:00.000Z`)
+        .lte('created_at', `${periodoFim}T23:59:59.999Z`)
+    } else if (ultimosNMeses) {
+      // Filtro por últimos N meses
+      const mesesAtras = parseInt(ultimosNMeses)
+      const dataLimite = new Date()
+      dataLimite.setMonth(dataLimite.getMonth() - mesesAtras)
+      subscriptionsQuery = subscriptionsQuery.gte('created_at', dataLimite.toISOString())
+    } else if (periodoTipo === 'mes' && periodoInicio) {
+      // Filtro por mês específico (YYYY-MM)
+      const [ano, mes] = periodoInicio.split('-')
+      const inicioMes = new Date(parseInt(ano), parseInt(mes) - 1, 1)
+      const fimMes = new Date(parseInt(ano), parseInt(mes), 0, 23, 59, 59)
+      subscriptionsQuery = subscriptionsQuery
+        .gte('created_at', inicioMes.toISOString())
+        .lte('created_at', fimMes.toISOString())
+    } else if (periodoTipo === 'trimestre' && periodoInicio) {
+      // Filtro por trimestre (Q1, Q2, Q3, Q4)
+      const [ano, trimestre] = periodoInicio.split('-Q')
+      const mesInicio = (parseInt(trimestre) - 1) * 3
+      const mesFim = parseInt(trimestre) * 3 - 1
+      const inicioTrimestre = new Date(parseInt(ano), mesInicio, 1)
+      const fimTrimestre = new Date(parseInt(ano), mesFim + 1, 0, 23, 59, 59)
+      subscriptionsQuery = subscriptionsQuery
+        .gte('created_at', inicioTrimestre.toISOString())
+        .lte('created_at', fimTrimestre.toISOString())
     }
 
     const { data: subscriptions, error: subscriptionsError } = await subscriptionsQuery
