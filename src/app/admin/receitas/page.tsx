@@ -200,6 +200,25 @@ export default function AdminReceitas() {
   const receitasMensais = receitasPagantes.filter(r => r.tipo === 'mensal')
   const receitasAnuais = receitasPagantes.filter(r => r.tipo === 'anual')
   
+  // DEBUG: Log para verificar (apenas em desenvolvimento)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 DEBUG Receitas:', {
+      totalReceitas: receitas.length,
+      receitasAtivas: receitasAtivas.length,
+      receitasPagantes: receitasPagantes.length,
+      receitasMensais: receitasMensais.length,
+      receitasAnuais: receitasAnuais.length,
+      mensaisWellness: receitasMensais.filter(r => r.area === 'wellness').length,
+      mensaisWellnessDetalhes: receitasMensais.filter(r => r.area === 'wellness').map(r => ({
+        usuario: r.usuario,
+        email: r.email,
+        valor: r.valor,
+        categoria: r.categoria,
+        tipo: r.tipo
+      }))
+    })
+  }
+  
   // Calcular totais usando VALORES REAIS das assinaturas
   // ANUAL: Como é antecipado (recebe tudo de uma vez), soma o valor integral
   // MENSAL: Soma o valor mensal real de cada assinatura
