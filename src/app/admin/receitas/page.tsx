@@ -40,6 +40,14 @@ export default function AdminReceitas() {
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'active' | 'canceled' | 'past_due' | 'unpaid'>('todos')
   const [filtroCategoria, setFiltroCategoria] = useState<'todos' | 'pagante' | 'gratuita' | 'suporte'>('todos')
   const [periodo, setPeriodo] = useState<'mes' | 'ano' | 'historico'>('mes')
+  
+  // Novos filtros de período avançado
+  const [periodoTipo, setPeriodoTipo] = useState<'rapido' | 'mes' | 'trimestre' | 'custom'>('rapido')
+  const [periodoRapido, setPeriodoRapido] = useState<'este_mes' | 'mes_passado' | 'ultimos_3' | 'ultimos_6' | 'ultimos_12' | 'este_trimestre' | 'trimestre_passado'>('este_mes')
+  const [mesSelecionado, setMesSelecionado] = useState<string>('')
+  const [trimestreSelecionado, setTrimestreSelecionado] = useState<string>('')
+  const [dataInicio, setDataInicio] = useState<string>('')
+  const [dataFim, setDataFim] = useState<string>('')
   const [receitas, setReceitas] = useState<Receita[]>([])
   const [totais, setTotais] = useState<Totais>({
     mensal: 0,
@@ -66,6 +74,63 @@ export default function AdminReceitas() {
         // Se for histórico, buscar todas as assinaturas (não filtrar por status)
         if (filtroStatus !== 'todos' && periodo !== 'historico') {
           params.append('status', filtroStatus)
+        }
+
+        // Adicionar filtros de período avançado
+        if (periodoTipo === 'rapido') {
+          // Períodos rápidos
+          const hoje = new Date()
+          let inicio: Date, fim: Date
+          
+          switch (periodoRapido) {
+            case 'este_mes':
+              inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+              fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59)
+              break
+            case 'mes_passado':
+              inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
+              fim = new Date(hoje.getFullYear(), hoje.getMonth(), 0, 23, 59, 59)
+              break
+            case 'ultimos_3':
+              inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 3, 1)
+              fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59)
+              break
+            case 'ultimos_6':
+              inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 6, 1)
+              fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59)
+              break
+            case 'ultimos_12':
+              inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 12, 1)
+              fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59)
+              break
+            case 'este_trimestre':
+              const trimestreAtual = Math.floor(hoje.getMonth() / 3)
+              inicio = new Date(hoje.getFullYear(), trimestreAtual * 3, 1)
+              fim = new Date(hoje.getFullYear(), (trimestreAtual + 1) * 3, 0, 23, 59, 59)
+              break
+            case 'trimestre_passado':
+              const trimestrePassado = Math.floor(hoje.getMonth() / 3) - 1
+              inicio = new Date(hoje.getFullYear(), trimestrePassado * 3, 1)
+              fim = new Date(hoje.getFullYear(), (trimestrePassado + 1) * 3, 0, 23, 59, 59)
+              break
+            default:
+              inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+              fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59)
+          }
+          
+          params.append('periodo_inicio', inicio.toISOString().split('T')[0])
+          params.append('periodo_fim', fim.toISOString().split('T')[0])
+          params.append('periodo_tipo', 'custom')
+        } else if (periodoTipo === 'mes' && mesSelecionado) {
+          params.append('periodo_inicio', mesSelecionado)
+          params.append('periodo_tipo', 'mes')
+        } else if (periodoTipo === 'trimestre' && trimestreSelecionado) {
+          params.append('periodo_inicio', trimestreSelecionado)
+          params.append('periodo_tipo', 'trimestre')
+        } else if (periodoTipo === 'custom' && dataInicio && dataFim) {
+          params.append('periodo_inicio', dataInicio)
+          params.append('periodo_fim', dataFim)
+          params.append('periodo_tipo', 'custom')
         }
 
         const url = `/api/admin/receitas${params.toString() ? `?${params.toString()}` : ''}`
@@ -101,7 +166,7 @@ export default function AdminReceitas() {
     }
 
     carregarDados()
-  }, [filtroArea, filtroStatus, periodo])
+  }, [filtroArea, filtroStatus, periodo, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, dataInicio, dataFim])
 
   // Filtrar receitas por período e categoria (frontend)
   const receitasFiltradas = receitas.filter(r => {
