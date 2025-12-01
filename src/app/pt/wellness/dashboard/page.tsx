@@ -434,6 +434,31 @@ function WellnessDashboardContent() {
       )}
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Seção: Wellness System - Destaque */}
+        <div className="mb-6 sm:mb-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 shadow-lg border-2 border-blue-500">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-2 flex items-center justify-center sm:justify-start gap-2">
+                <span>🚀</span>
+                <span>Wellness System</span>
+              </h2>
+              <p className="text-blue-100 text-sm sm:text-base">
+                Sistema completo de recrutamento, vendas e scripts para seu negócio
+              </p>
+            </div>
+            <Link 
+              href="/pt/wellness/system"
+              className="inline-flex items-center justify-center px-6 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 whitespace-nowrap"
+            >
+              <span className="mr-2">🎯</span>
+              Acessar Sistema
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+
         {/* Seção: Ferramentas do seu negócio */}
         <div className="mb-6 sm:mb-8 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">

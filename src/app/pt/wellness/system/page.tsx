@@ -1,12 +1,39 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import WellnessNotificacoes from '@/components/wellness-system/WellnessNotificacoes'
 
 function WellnessSystemPageContent() {
   const router = useRouter()
+
+  // Registrar ação de acesso à página principal
+  useEffect(() => {
+    const registrarAcao = async () => {
+      try {
+        await fetch('/api/wellness/acoes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            tipo: 'acessou_sistema',
+            descricao: 'Acessou a página principal do sistema',
+            pagina: 'Sistema Principal',
+            rota: '/pt/wellness/system'
+          })
+        })
+      } catch (error) {
+        console.error('Erro ao registrar ação:', error)
+      }
+    }
+
+    registrarAcao()
+  }, [])
 
   const modulos = [
     {
@@ -73,6 +100,9 @@ function WellnessSystemPageContent() {
             <span>Voltar</span>
           </button>
         </div>
+
+        {/* Notificações/Lembretes */}
+        <WellnessNotificacoes />
 
         {/* Cabeçalho */}
         <div className="text-center mb-8 sm:mb-12">

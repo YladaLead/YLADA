@@ -1,19 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
 import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
+import { useWellnessAcoes } from '@/hooks/useWellnessAcoes'
 
 function GeradorLinkPageContent() {
   const { profile } = useWellnessProfile()
+  const { registrarAcao } = useWellnessAcoes()
   const [tipoFluxo, setTipoFluxo] = useState<'cliente' | 'recrutamento'>('cliente')
   const [fluxoSelecionado, setFluxoSelecionado] = useState<string>('')
   const [linkGerado, setLinkGerado] = useState<string>('')
   const [linkCopiado, setLinkCopiado] = useState(false)
+
+  // Registrar acesso à página
+  useEffect(() => {
+    registrarAcao({
+      tipo: 'acessou_ferramentas',
+      descricao: 'Acessou o gerador de links',
+      pagina: 'Gerador de Links',
+      rota: '/pt/wellness/system/ferramentas/gerador-link'
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const fluxos = tipoFluxo === 'cliente' ? fluxosClientes : fluxosRecrutamento
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'
@@ -36,6 +49,20 @@ function GeradorLinkPageContent() {
     const linkCompleto = `${baseUrl}${rota}`
     setLinkGerado(linkCompleto)
     setLinkCopiado(false)
+
+    // Registrar ação de gerar link
+    const fluxo = fluxos.find(f => f.id === fluxoSelecionado)
+    registrarAcao({
+      tipo: 'gerou_link',
+      descricao: `Gerou link para o fluxo: ${fluxo?.nome || fluxoSelecionado}`,
+      metadata: {
+        tipoFluxo,
+        fluxoId: fluxoSelecionado,
+        fluxoNome: fluxo?.nome
+      },
+      pagina: 'Gerador de Links',
+      rota: '/pt/wellness/system/ferramentas/gerador-link'
+    })
   }
 
   const copiarLink = () => {

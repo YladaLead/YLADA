@@ -66,6 +66,22 @@ export async function POST(request: NextRequest) {
     
     // Se expires_in_days não for fornecido, usar 365 dias (1 ano)
     const days = expires_in_days || 365
+    
+    // 🛡️ VALIDAÇÃO: Verificar que expires_in_days é razoável
+    if (days > 400) {
+      return NextResponse.json(
+        { error: 'Plano gratuito não pode ter mais de 400 dias de validade. Use um valor menor.' },
+        { status: 400 }
+      )
+    }
+    
+    if (days < 1) {
+      return NextResponse.json(
+        { error: 'Plano gratuito deve ter pelo menos 1 dia de validade.' },
+        { status: 400 }
+      )
+    }
+    
     const periodEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString()
 
     // Criar assinatura gratuita

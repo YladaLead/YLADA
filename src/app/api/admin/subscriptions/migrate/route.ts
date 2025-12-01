@@ -166,6 +166,30 @@ export async function POST(request: NextRequest) {
     const periodStart = now.toISOString()
     const periodEnd = expiryDate.toISOString()
 
+    // 🛡️ VALIDAÇÃO: Verificar que data de vencimento é razoável para o tipo de plano
+    const daysUntilExpiry = Math.floor((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (plan_type === 'monthly' && daysUntilExpiry > 60) {
+      return NextResponse.json(
+        { error: `Data de vencimento inválida para plano mensal. Máximo 60 dias, mas foi calculado ${daysUntilExpiry} dias. Use uma data mais próxima.` },
+        { status: 400 }
+      )
+    }
+    
+    if (plan_type === 'annual' && daysUntilExpiry > 400) {
+      return NextResponse.json(
+        { error: `Data de vencimento inválida para plano anual. Máximo 400 dias, mas foi calculado ${daysUntilExpiry} dias. Use uma data mais próxima.` },
+        { status: 400 }
+      )
+    }
+    
+    if (plan_type === 'free' && daysUntilExpiry > 400) {
+      return NextResponse.json(
+        { error: `Data de vencimento inválida para plano gratuito. Máximo 400 dias, mas foi calculado ${daysUntilExpiry} dias. Use uma data mais próxima.` },
+        { status: 400 }
+      )
+    }
+
     // Criar assinatura migrada
     const { data, error } = await supabaseAdmin
       .from('subscriptions')

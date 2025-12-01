@@ -444,6 +444,18 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         expiresAt.setMonth(expiresAt.getMonth() + 1)
       }
       
+      // 🛡️ VALIDAÇÃO: Verificar que data calculada é razoável
+      const daysUntilExpiry = Math.floor((expiresAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+      if (planType === 'monthly' && daysUntilExpiry > 60) {
+        console.error('⚠️ Data de vencimento inválida para mensal:', daysUntilExpiry, 'dias. Recalculando...')
+        expiresAt = new Date()
+        expiresAt.setMonth(expiresAt.getMonth() + 1)
+      } else if (planType === 'annual' && daysUntilExpiry > 400) {
+        console.error('⚠️ Data de vencimento inválida para anual:', daysUntilExpiry, 'dias. Recalculando...')
+        expiresAt = new Date()
+        expiresAt.setMonth(expiresAt.getMonth() + 12)
+      }
+      
       console.log('✅ Nova data de vencimento após renovação:', expiresAt.toISOString())
     } else {
       // NOVA ASSINATURA: Calcular a partir de agora
@@ -455,6 +467,19 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       } else {
         expiresAt.setMonth(expiresAt.getMonth() + 1)
       }
+      
+      // 🛡️ VALIDAÇÃO: Verificar que data calculada é razoável
+      const daysUntilExpiry = Math.floor((expiresAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+      if (planType === 'monthly' && daysUntilExpiry > 60) {
+        console.error('⚠️ Data de vencimento inválida para mensal:', daysUntilExpiry, 'dias. Recalculando...')
+        expiresAt = new Date()
+        expiresAt.setMonth(expiresAt.getMonth() + 1)
+      } else if (planType === 'annual' && daysUntilExpiry > 400) {
+        console.error('⚠️ Data de vencimento inválida para anual:', daysUntilExpiry, 'dias. Recalculando...')
+        expiresAt = new Date()
+        expiresAt.setMonth(expiresAt.getMonth() + 12)
+      }
+      
       console.log('🆕 Nova assinatura! Data de vencimento:', expiresAt.toISOString())
     }
 
