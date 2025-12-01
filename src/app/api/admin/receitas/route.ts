@@ -80,7 +80,8 @@ export async function GET(request: NextRequest) {
       subscriptionsQuery = subscriptionsQuery.eq('status', statusFiltro)
     }
 
-    // Aplicar filtros de período
+    // Aplicar filtros de período (APENAS se especificamente solicitado)
+    // IMPORTANTE: Se não houver filtro de período, retornar TODAS as assinaturas ativas
     if (periodoInicio && periodoFim) {
       // Filtro por período customizado (data início - data fim)
       subscriptionsQuery = subscriptionsQuery
@@ -111,6 +112,8 @@ export async function GET(request: NextRequest) {
         .gte('created_at', inicioTrimestre.toISOString())
         .lte('created_at', fimTrimestre.toISOString())
     }
+    // Se não houver filtro de período, não aplicar nenhum filtro de data
+    // Isso garante que todas as assinaturas ativas sejam retornadas
 
     const { data: subscriptions, error: subscriptionsError } = await subscriptionsQuery
 
