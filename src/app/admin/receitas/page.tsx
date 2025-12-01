@@ -109,44 +109,27 @@ export default function AdminReceitas() {
     return true
   })
 
-  // Calcular totais baseados no período selecionado
-  // No histórico, mostrar totais de todas as assinaturas (ativas e inativas)
-  const totalMensal = periodo === 'mes' || periodo === 'historico' 
-    ? receitasFiltradas
-        .filter(r => {
-          if (periodo === 'historico') {
-            // Histórico: todas as assinaturas mensais/gratuitas
-            return r.tipo === 'mensal' || r.tipo === 'gratuito'
-          } else {
-            // Mensal: apenas ativas
-            return r.status === 'ativa' && (r.tipo === 'mensal' || r.tipo === 'gratuito')
-          }
-        })
-        .reduce((sum, r) => sum + r.valor, 0)
-    : 0
+  // Calcular totais SEMPRE (independente do período selecionado)
+  // Usar receitas completas (não filtradas) para ter visão geral
+  // Apenas assinaturas ATIVAS contam nos totais
+  
+  // Total Mensal: assinaturas mensais e gratuitas ATIVAS
+  const totalMensal = receitas
+    .filter(r => r.status === 'ativa' && (r.tipo === 'mensal' || r.tipo === 'gratuito'))
+    .reduce((sum, r) => sum + r.valor, 0)
 
-  const totalAnual = periodo === 'ano' || periodo === 'historico'
-    ? receitasFiltradas
-        .filter(r => {
-          if (periodo === 'historico') {
-            // Histórico: todas as assinaturas anuais
-            return r.tipo === 'anual'
-          } else {
-            // Anual: apenas ativas
-            return r.status === 'ativa' && r.tipo === 'anual'
-          }
-        })
-        .reduce((sum, r) => sum + r.valor, 0)
-    : 0
+  // Total Anual: assinaturas anuais ATIVAS
+  const totalAnual = receitas
+    .filter(r => r.status === 'ativa' && r.tipo === 'anual')
+    .reduce((sum, r) => sum + r.valor, 0)
 
-  // Total geral: no histórico, somar todas as assinaturas (ativas e inativas)
-  const totalReceitas = periodo === 'historico'
-    ? receitasFiltradas.reduce((sum, r) => sum + r.valor, 0)
-    : periodo === 'mes' 
-    ? totais.geral 
-    : periodo === 'ano'
-    ? totalAnual
-    : totais.geral
+  // Total Anual Mensalizado: valor anual dividido por 12
+  const totalAnualMensalizado = receitas
+    .filter(r => r.status === 'ativa' && r.tipo === 'anual')
+    .reduce((sum, r) => sum + (r.valor / 12), 0)
+
+  // Total Geral: mensal + anual mensalizado (receita recorrente mensal equivalente)
+  const totalReceitas = totalMensal + totalAnualMensalizado
 
   const getAreaIcon = (area: string) => {
     switch (area) {
@@ -315,10 +298,7 @@ export default function AdminReceitas() {
                   </div>
                 </div>
                 <p className="text-xs text-gray-600">
-                  {periodo === 'historico' 
-                    ? receitasFiltradas.filter(r => r.tipo === 'mensal' || r.tipo === 'gratuito').length + ' assinaturas'
-                    : receitasFiltradas.filter(r => (r.tipo === 'mensal' || r.tipo === 'gratuito') && r.status === 'ativa').length + ' assinaturas ativas'
-                  }
+                  {receitas.filter(r => r.status === 'ativa' && (r.tipo === 'mensal' || r.tipo === 'gratuito')).length} assinaturas ativas
                 </p>
               </div>
 
@@ -333,10 +313,9 @@ export default function AdminReceitas() {
                   </div>
                 </div>
                 <p className="text-xs text-gray-600">
-                  {periodo === 'historico'
-                    ? receitasFiltradas.filter(r => r.tipo === 'anual').length + ' assinaturas'
-                    : receitasFiltradas.filter(r => r.tipo === 'anual' && r.status === 'ativa').length + ' assinaturas ativas'
-                  }
+                  {receitas.filter(r => r.status === 'ativa' && r.tipo === 'anual').length} assinaturas ativas
+                  <br />
+                  <span className="text-gray-500">({formatCurrency(totalAnualMensalizado)}/mês equivalente)</span>
                 </p>
               </div>
 
@@ -351,10 +330,9 @@ export default function AdminReceitas() {
                   </div>
                 </div>
                 <p className="text-xs text-gray-600">
-                  {periodo === 'historico'
-                    ? `${receitasFiltradas.length} assinaturas (todas)`
-                    : `${totais.ativas} ativas de ${totais.total} total`
-                  }
+                  {totais.ativas} ativas de {totais.total} total
+                  <br />
+                  <span className="text-gray-500">(Mensal + Anual mensalizado)</span>
                 </p>
               </div>
             </div>
