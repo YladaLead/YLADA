@@ -152,24 +152,29 @@ export async function GET(request: NextRequest) {
       const isAdmin = userProfile.is_admin === true
       const isSupport = userProfile.is_support === true
       
-      // CORRIGIDO: Lógica mais precisa para identificar categorias
+      // =====================================================
+      // LÓGICA CORRIGIDA: Usar referência dos PAGANTES
+      // =====================================================
       // 
       // 1. SUPORTE: Admin ou Support sempre é suporte
-      // 2. GRATUITA: Não é admin/suporte E (plan_type='free' OU amount=0)
-      // 3. PAGANTE: Não é admin/suporte E não é gratuita E amount > 0
-      
-      // É gratuita SE:
-      // - Não é admin/suporte
-      // - E (plan_type === 'free' OU amount === 0)
-      // NOTA: Assinaturas migradas com amount=0 também são consideradas gratuitas
-      const isFree = !isAdmin && !isSupport && 
-        (sub.plan_type === 'free' || valor === 0)
+      // 2. PAGANTE: Não é admin/suporte E amount > 0 (referência principal)
+      // 3. GRATUITA: Não é admin/suporte E não é pagante E plan_type='free'
+      // 
+      // IMPORTANTE: Se amount > 0, é PAGANTE (mesmo que plan_type='free' por erro)
+      // Se amount = 0 mas plan_type != 'free', verificar se é migrada ou temporária
       
       // É pagante SE:
       // - Não é admin/suporte
-      // - Não é gratuita (ou seja, amount > 0 E plan_type != 'free')
-      // - E tem valor > 0
-      const isPagante = !isAdmin && !isSupport && !isFree && valor > 0
+      // - E amount > 0 (referência dos pagantes - se tem valor, é pagante)
+      const isPagante = !isAdmin && !isSupport && valor > 0
+      
+      // É gratuita SE:
+      // - Não é admin/suporte
+      // - Não é pagante (ou seja, amount = 0)
+      // - E plan_type = 'free' (confirmação de que é realmente gratuita)
+      // NOTA: Se amount = 0 mas plan_type != 'free', pode ser migrada/temporária
+      // Por segurança, só marcamos como gratuita se plan_type = 'free'
+      const isFree = !isAdmin && !isSupport && !isPagante && sub.plan_type === 'free'
       
       // Calcular histórico (valor total pago até agora)
       // Por enquanto, vamos usar o valor da assinatura atual
