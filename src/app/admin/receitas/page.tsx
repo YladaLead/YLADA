@@ -200,6 +200,12 @@ export default function AdminReceitas() {
   const receitasMensais = receitasPagantes.filter(r => r.tipo === 'mensal')
   const receitasAnuais = receitasPagantes.filter(r => r.tipo === 'anual')
   
+  // Calcular totais usando VALORES REAIS das assinaturas
+  // ANUAL: Como é antecipado (recebe tudo de uma vez), soma o valor integral
+  // MENSAL: Soma o valor mensal real de cada assinatura
+  const totalMensalPagante = receitasMensais.reduce((sum, r) => sum + r.valor, 0)
+  const totalAnualPagante = receitasAnuais.reduce((sum, r) => sum + r.valor, 0)
+  
   // DEBUG: Log para verificar (apenas em desenvolvimento)
   if (typeof window !== 'undefined') {
     // Verificar assinaturas criadas hoje
@@ -250,12 +256,6 @@ export default function AdminReceitas() {
       periodo
     })
   }
-  
-  // Calcular totais usando VALORES REAIS das assinaturas
-  // ANUAL: Como é antecipado (recebe tudo de uma vez), soma o valor integral
-  // MENSAL: Soma o valor mensal real de cada assinatura
-  const totalMensalPagante = receitasMensais.reduce((sum, r) => sum + r.valor, 0)
-  const totalAnualPagante = receitasAnuais.reduce((sum, r) => sum + r.valor, 0)
   
   // Total do mês: Anual (integral, pois entrou tudo no mês) + Mensal (do mês)
   const totalReceitasPagante = totalAnualPagante + totalMensalPagante
