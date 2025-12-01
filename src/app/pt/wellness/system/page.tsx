@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
@@ -8,12 +7,6 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 function WellnessSystemPageContent() {
   const router = useRouter()
-  const [moduloAberto, setModuloAberto] = useState<string | null>(null)
-
-  const toggleModulo = (modulo: string) => {
-    // Fecha o módulo atual se estiver aberto, ou abre o novo
-    setModuloAberto(moduloAberto === modulo ? null : modulo)
-  }
 
   const modulos = [
     {
@@ -22,12 +15,7 @@ function WellnessSystemPageContent() {
       emoji: '👥',
       cor: 'from-blue-500 to-blue-600',
       corHover: 'hover:from-blue-600 hover:to-blue-700',
-      subitens: [
-        { id: 'fluxos-recrutamento', titulo: 'Ver Fluxos de Recrutamento', rota: '/pt/wellness/system/recrutar/fluxos' },
-        { id: 'scripts-recrutamento', titulo: 'Ver Scripts de Recrutamento', rota: '/pt/wellness/system/recrutar/scripts' },
-        { id: 'enviar-link', titulo: 'Enviar Link de Apresentação', rota: '/pt/wellness/system/recrutar/enviar-link' },
-        { id: 'objecoes-recrutamento', titulo: 'Objeções de Recrutamento', rota: '/pt/wellness/system/recrutar/objecoes' }
-      ]
+      rota: '/pt/wellness/system/recrutar'
     },
     {
       id: 'vender',
@@ -35,16 +23,7 @@ function WellnessSystemPageContent() {
       emoji: '💚',
       cor: 'from-green-500 to-green-600',
       corHover: 'hover:from-green-600 hover:to-green-700',
-      subitens: [
-        { id: 'fluxos-cliente', titulo: 'Fluxos de Cliente (20 fluxos)', rota: '/pt/wellness/system/vender/fluxos' },
-        { id: 'scripts-venda', titulo: 'Scripts de Venda', rota: '/pt/wellness/system/vender/scripts' },
-        { id: 'scripts-fechamento', titulo: 'Scripts de Fechamento', rota: '/pt/wellness/system/vender/fechamento' },
-        { id: 'scripts-objecoes', titulo: 'Scripts de Objeções (clientes)', rota: '/pt/wellness/system/vender/objecoes' },
-        { id: 'follow-up', titulo: 'Follow-up automático', rota: '/pt/wellness/system/vender/follow-up' },
-        { id: 'links-kits', titulo: 'Links de Venda do Kit Energia / Kit Acelera', rota: '/pt/wellness/system/vender/links-kits' },
-        { id: 'produto-fechado', titulo: 'Produto Fechado / Cliente Premium', rota: '/pt/wellness/system/vender/produto-fechado' }
-      ],
-      temSubmenu: true // Indica que tem submenu de fluxos
+      rota: '/pt/wellness/system/vender'
     },
     {
       id: 'scripts',
@@ -52,19 +31,7 @@ function WellnessSystemPageContent() {
       emoji: '📚',
       cor: 'from-purple-500 to-purple-600',
       corHover: 'hover:from-purple-600 hover:to-purple-700',
-      subitens: [
-        { id: 'todos-scripts', titulo: 'Ver Todos os Scripts', rota: '/pt/wellness/system/scripts' },
-        { id: 'abertura', titulo: 'Abertura', rota: '/pt/wellness/system/scripts/abertura' },
-        { id: 'pos-link', titulo: 'Pós-Link', rota: '/pt/wellness/system/scripts/pos-link' },
-        { id: 'pos-diagnostico', titulo: 'Pós-Diagnóstico', rota: '/pt/wellness/system/scripts/pos-diagnostico' },
-        { id: 'oferta', titulo: 'Oferta', rota: '/pt/wellness/system/scripts/oferta' },
-        { id: 'fechamento', titulo: 'Fechamento', rota: '/pt/wellness/system/scripts/fechamento' },
-        { id: 'objecoes', titulo: 'Objeções', rota: '/pt/wellness/system/scripts/objecoes' },
-        { id: 'recuperacao', titulo: 'Recuperação', rota: '/pt/wellness/system/scripts/recuperacao' },
-        { id: 'indicacoes', titulo: 'Indicações', rota: '/pt/wellness/system/scripts/indicacoes' },
-        { id: 'pos-venda', titulo: 'Pós-venda', rota: '/pt/wellness/system/scripts/pos-venda' },
-        { id: 'recompra', titulo: 'Recompra', rota: '/pt/wellness/system/scripts/recompra' }
-      ]
+      rota: '/pt/wellness/system/scripts'
     },
     {
       id: 'treinamento',
@@ -72,9 +39,7 @@ function WellnessSystemPageContent() {
       emoji: '🎓',
       cor: 'from-orange-500 to-orange-600',
       corHover: 'hover:from-orange-600 hover:to-orange-700',
-      subitens: [
-        { id: 'todos-treinamentos', titulo: 'Ver Todos os Treinamentos', rota: '/pt/wellness/system/treinamento' }
-      ]
+      rota: '/pt/wellness/system/treinamento'
     },
     {
       id: 'ferramentas',
@@ -82,11 +47,7 @@ function WellnessSystemPageContent() {
       emoji: '🛠️',
       cor: 'from-teal-500 to-teal-600',
       corHover: 'hover:from-teal-600 hover:to-teal-700',
-      subitens: [
-        { id: 'historico-diagnosticos', titulo: 'Histórico de Diagnósticos', rota: '/pt/wellness/system/diagnosticos' },
-        { id: 'painel-conversoes', titulo: 'Painel de Conversões', rota: '/pt/wellness/system/ferramentas/painel-conversoes' },
-        { id: 'gerador-link', titulo: 'Gerador de Link', rota: '/pt/wellness/system/ferramentas/gerador-link' }
-      ]
+      rota: '/pt/wellness/system/ferramentas'
     }
   ]
 
@@ -125,95 +86,39 @@ function WellnessSystemPageContent() {
 
         {/* Grid de Módulos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
-          {modulos.map((modulo) => {
-            const estaAberto = moduloAberto === modulo.id
-            
-            return (
-              <div
-                key={modulo.id}
-                className={`bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-500 ease-out ${
-                  estaAberto 
-                    ? 'ring-2 ring-green-400 shadow-2xl z-10' 
-                    : 'hover:shadow-xl'
-                }`}
-                style={{
-                  transform: estaAberto ? 'scale(1.02)' : 'scale(1)',
-                  transition: 'all 0.3s ease-out'
-                }}
-              >
-                {/* Botão Principal do Módulo */}
-                <button
-                  onClick={() => toggleModulo(modulo.id)}
-                  className={`w-full p-6 sm:p-8 bg-gradient-to-r ${modulo.cor} ${modulo.corHover} text-white transition-all duration-300 relative`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1 min-w-0">
-                      <span className="text-4xl sm:text-5xl flex-shrink-0">{modulo.emoji}</span>
-                      <h2 className="text-lg sm:text-xl font-bold text-left leading-tight">
-                        {modulo.titulo}
-                      </h2>
-                    </div>
-                    <svg
-                      className={`w-6 h-6 flex-shrink-0 ml-2 transform transition-transform duration-300 ${
-                        estaAberto ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+          {modulos.map((modulo) => (
+            <Link
+              key={modulo.id}
+              href={modulo.rota}
+              className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group"
+            >
+              {/* Botão Principal do Módulo */}
+              <div className={`w-full p-6 sm:p-8 bg-gradient-to-r ${modulo.cor} ${modulo.corHover} text-white transition-all duration-300 relative`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4 flex-1 min-w-0">
+                    <span className="text-4xl sm:text-5xl flex-shrink-0">{modulo.emoji}</span>
+                    <h2 className="text-lg sm:text-xl font-bold text-left leading-tight">
+                      {modulo.titulo}
+                    </h2>
                   </div>
-                </button>
-
-                {/* Subitens (Expandido com animação suave) */}
-                <div
-                  className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                    estaAberto 
-                      ? 'max-h-[2000px] opacity-100' 
-                      : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  {estaAberto && (
-                    <div className="p-4 sm:p-6 space-y-2 sm:space-y-3 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
-                      {modulo.subitens.map((subitem, index) => (
-                        <Link
-                          key={subitem.id}
-                          href={subitem.rota}
-                          className="block p-3 sm:p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition-all duration-200 group shadow-sm hover:shadow-md hover:scale-[1.02]"
-                          style={{
-                            animation: 'fadeInUp 0.4s ease-out forwards',
-                            animationDelay: `${index * 60}ms`,
-                            opacity: 0
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm sm:text-base font-medium text-gray-800 group-hover:text-green-700 flex-1">
-                              {subitem.titulo}
-                            </span>
-                            <svg
-                              className="w-5 h-5 text-gray-400 group-hover:text-green-600 transform group-hover:translate-x-1 transition-all flex-shrink-0 ml-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                  <svg
+                    className="w-6 h-6 flex-shrink-0 ml-2 transform group-hover:translate-x-1 transition-transform duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
-            )
-          })}
+            </Link>
+          ))}
         </div>
 
         {/* Rodapé com informações */}
         <div className="mt-12 sm:mt-16 text-center">
           <p className="text-sm text-gray-500">
-            💡 <strong>Dica:</strong> Clique em qualquer módulo para ver as opções disponíveis
+            💡 <strong>Dica:</strong> Clique em qualquer módulo para acessar suas opções
           </p>
         </div>
       </main>

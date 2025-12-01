@@ -66,6 +66,24 @@ São só ${fluxo?.perguntas.length || 5} perguntas e leva menos de 2 minutos! �
       <WellnessNavBar showTitle title="Gerador de Link" />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Botão Voltar ao Sistema - Bem visível no topo */}
+        <div className="mb-6">
+          <Link
+            href="/pt/wellness/system"
+            className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Voltar ao Sistema</span>
+          </Link>
+        </div>
+
         {/* Cabeçalho */}
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -206,15 +224,6 @@ São só ${fluxo?.perguntas.length || 5} perguntas e leva menos de 2 minutos! �
           </div>
         </div>
 
-        {/* Voltar */}
-        <div className="text-center mt-8">
-          <Link
-            href="/pt/wellness/system"
-            className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            ← Voltar ao Sistema
-          </Link>
-        </div>
       </main>
     </div>
   )

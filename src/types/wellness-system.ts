@@ -73,6 +73,16 @@ export type PerfilRecrutamento =
   | 'mae-flex-premium'
   | 'bem-estar-lucrativo'
   | 'digital-renda-flexivel'
+  | 'consumidor-tendencia'
+  | 'transicao-profissional'
+  | 'resiliente-reativado'
+  | 'digital-alta-afinidade'
+  | 'empreendedor-expansao'
+  | 'emagrecimento-ativo'
+  | 'comunicador-imediato'
+  | 'recomeco-acao-imediata'
+  | 'consumidor-inteligente'
+  | 'empreendedor-moderno'
 
 export interface PerfilRecrutamentoData {
   id: PerfilRecrutamento

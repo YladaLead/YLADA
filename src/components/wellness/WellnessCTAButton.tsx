@@ -214,9 +214,6 @@ export default function WellnessCTAButton({
         }}
       >
         <div className="text-center">
-          <p className="text-gray-700 font-medium mb-4">
-            💬 Quer orientações personalizadas para alcançar seu objetivo?
-          </p>
           <div className="flex items-center justify-center gap-3">
             <a
               href={`https://wa.me/${numeroLimpo}?text=${encodeURIComponent(mensagem)}`}

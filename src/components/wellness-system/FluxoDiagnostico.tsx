@@ -22,20 +22,27 @@ export default function FluxoDiagnostico({
   const [perguntaAtual, setPerguntaAtual] = useState(0)
   const [mostrarResultado, setMostrarResultado] = useState(false)
   const [diagnosticoId, setDiagnosticoId] = useState<string | null>(null)
+  const [respostaSelecionada, setRespostaSelecionada] = useState<string | number | null>(null)
 
   const pergunta = fluxo.perguntas[perguntaAtual]
   const todasRespondidas = perguntaAtual === fluxo.perguntas.length - 1 && respostas[pergunta.id] !== undefined
 
   const handleResposta = (valor: string | number) => {
+    // Mostrar feedback visual imediatamente
+    setRespostaSelecionada(valor)
     const novasRespostas = { ...respostas, [pergunta.id]: valor }
     setRespostas(novasRespostas)
 
-    if (perguntaAtual < fluxo.perguntas.length - 1) {
-      setPerguntaAtual(perguntaAtual + 1)
-    } else {
-      // Última pergunta respondida
-      setMostrarResultado(true)
-    }
+    // Aguardar um pouco para mostrar o feedback antes de mudar de pergunta
+    setTimeout(() => {
+      setRespostaSelecionada(null)
+      if (perguntaAtual < fluxo.perguntas.length - 1) {
+        setPerguntaAtual(perguntaAtual + 1)
+      } else {
+        // Última pergunta respondida
+        setMostrarResultado(true)
+      }
+    }, 300) // 300ms de delay para mostrar o feedback
   }
 
   const handleVoltar = () => {
@@ -272,13 +279,21 @@ export default function FluxoDiagnostico({
             <>
               <button
                 onClick={() => handleResposta('sim')}
-                className="w-full p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                className={`w-full p-4 rounded-lg transition-all font-medium transform ${
+                  respostaSelecionada === 'sim' || respostas[pergunta.id] === 'sim'
+                    ? 'bg-green-600 text-white shadow-lg scale-105'
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300 active:scale-95'
+                }`}
               >
                 Sim
               </button>
               <button
                 onClick={() => handleResposta('nao')}
-                className="w-full p-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                className={`w-full p-4 rounded-lg transition-all font-medium transform ${
+                  respostaSelecionada === 'nao' || respostas[pergunta.id] === 'nao'
+                    ? 'bg-green-600 text-white shadow-lg scale-105'
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300 active:scale-95'
+                }`}
               >
                 Não
               </button>
@@ -293,10 +308,10 @@ export default function FluxoDiagnostico({
                   <button
                     key={valor}
                     onClick={() => handleResposta(valor)}
-                    className={`p-4 rounded-lg font-medium transition-colors ${
-                      respostas[pergunta.id] === valor
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                    className={`p-4 rounded-lg font-medium transition-all transform ${
+                      respostaSelecionada === valor || respostas[pergunta.id] === valor
+                        ? 'bg-green-600 text-white shadow-lg scale-105'
+                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200 active:scale-95'
                     }`}
                   >
                     {valor}
@@ -312,10 +327,10 @@ export default function FluxoDiagnostico({
                 <button
                   key={index}
                   onClick={() => handleResposta(opcao)}
-                  className={`w-full p-4 rounded-lg font-medium transition-colors text-left ${
-                    respostas[pergunta.id] === opcao
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  className={`w-full p-4 rounded-lg font-medium transition-all transform text-left ${
+                    respostaSelecionada === opcao || respostas[pergunta.id] === opcao
+                      ? 'bg-green-600 text-white shadow-lg scale-105'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200 active:scale-95'
                   }`}
                 >
                   {opcao}
