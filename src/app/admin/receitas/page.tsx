@@ -185,31 +185,31 @@ export default function AdminReceitas() {
   }, [filtroArea, filtroStatus, periodo, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, diaSelecionado, dataInicio, dataFim])
 
   // =====================================================
-  // VALORES LÍQUIDOS (JÁ DESCONTADAS AS TAXAS)
+  // ESTADOS PARA MODAIS DE DETALHES
   // =====================================================
-  const VALOR_MENSAL_LIQUIDO = 47 // R$ 47 (já descontado taxa Mercado Livre)
-  const VALOR_ANUAL_LIQUIDO = 450 // R$ 450 (já descontado taxa Mercado Livre)
+  const [mostrarDetalhesMensal, setMostrarDetalhesMensal] = useState(false)
+  const [mostrarDetalhesAnual, setMostrarDetalhesAnual] = useState(false)
 
   // =====================================================
-  // CALCULAR TOTAIS - APENAS PAGANTES (PARA ANÁLISE DE RECEITAS)
+  // CALCULAR TOTAIS - APENAS PAGANTES (USANDO VALORES REAIS)
   // =====================================================
   const receitasAtivas = receitas.filter(r => r.status === 'ativa')
   const receitasPagantes = receitasAtivas.filter(r => r.categoria === 'pagante')
   
-  // Contar quantidades
-  const qtdMensais = receitasPagantes.filter(r => r.tipo === 'mensal').length
-  const qtdAnuais = receitasPagantes.filter(r => r.tipo === 'anual').length
+  // Separar mensais e anuais
+  const receitasMensais = receitasPagantes.filter(r => r.tipo === 'mensal')
+  const receitasAnuais = receitasPagantes.filter(r => r.tipo === 'anual')
   
-  // Calcular totais usando valores líquidos
+  // Calcular totais usando VALORES REAIS das assinaturas
   // ANUAL: Como é antecipado (recebe tudo de uma vez), soma o valor integral
-  // MENSAL: Soma o valor mensal por quantidade
-  const totalMensalPagante = qtdMensais * VALOR_MENSAL_LIQUIDO
-  const totalAnualPagante = qtdAnuais * VALOR_ANUAL_LIQUIDO
+  // MENSAL: Soma o valor mensal real de cada assinatura
+  const totalMensalPagante = receitasMensais.reduce((sum, r) => sum + r.valor, 0)
+  const totalAnualPagante = receitasAnuais.reduce((sum, r) => sum + r.valor, 0)
   
   // Total do mês: Anual (integral, pois entrou tudo no mês) + Mensal (do mês)
   const totalReceitasPagante = totalAnualPagante + totalMensalPagante
   
-  // Totais por área (apenas pagantes) - usando valores líquidos
+  // Totais por área (apenas pagantes) - usando valores reais
   const totaisPorArea = verPorArea ? receitasPagantes.reduce((acc, r) => {
     if (!acc[r.area]) {
       acc[r.area] = {
@@ -217,26 +217,25 @@ export default function AdminReceitas() {
         anual: 0,
         total: 0,
         pagantes: 0,
-        qtdMensais: 0,
-        qtdAnuais: 0
+        receitasMensais: [] as Receita[],
+        receitasAnuais: [] as Receita[]
       }
     }
     
     if (r.tipo === 'mensal') {
-      acc[r.area].qtdMensais++
+      acc[r.area].mensal += r.valor
+      acc[r.area].receitasMensais.push(r)
       acc[r.area].pagantes++
     } else if (r.tipo === 'anual') {
-      acc[r.area].qtdAnuais++
+      acc[r.area].anual += r.valor
+      acc[r.area].receitasAnuais.push(r)
       acc[r.area].pagantes++
     }
     
-    // Calcular usando valores líquidos
-    acc[r.area].mensal = acc[r.area].qtdMensais * VALOR_MENSAL_LIQUIDO
-    acc[r.area].anual = acc[r.area].qtdAnuais * VALOR_ANUAL_LIQUIDO
     acc[r.area].total = acc[r.area].anual + acc[r.area].mensal // Anual integral + mensal
     
     return acc
-  }, {} as Record<string, { mensal: number; anual: number; total: number; pagantes: number; qtdMensais: number; qtdAnuais: number }>) : null
+  }, {} as Record<string, { mensal: number; anual: number; total: number; pagantes: number; receitasMensais: Receita[]; receitasAnuais: Receita[] }>) : null
 
   // Contadores por categoria (para seção de assinaturas)
   const totalPagantes = receitasPagantes.length
@@ -824,7 +823,10 @@ export default function AdminReceitas() {
                     <h2 className="text-lg font-bold text-gray-900 mb-4">💰 Análise de Receitas (Apenas Pagantes)</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {/* Total Mensal */}
-                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200">
+                      <div 
+                        className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200 cursor-pointer hover:shadow-lg transition-all"
+                        onClick={() => setMostrarDetalhesMensal(true)}
+                      >
                         <div className="flex items-center justify-between mb-4">
                           <div>
                             <p className="text-sm font-medium text-gray-600">💰 Receita Mensal</p>
@@ -835,14 +837,19 @@ export default function AdminReceitas() {
                           </div>
                         </div>
                         <p className="text-xs text-gray-600">
-                          {qtdMensais} assinaturas mensais pagantes
+                          {receitasMensais.length} assinaturas mensais pagantes
                           <br />
-                          <span className="text-gray-500">R$ {VALOR_MENSAL_LIQUIDO} cada (líquido)</span>
+                          <span className="text-blue-600 hover:text-blue-800 underline text-xs mt-1 inline-block">
+                            Clique para ver detalhes →
+                          </span>
                         </p>
                       </div>
 
                       {/* Total Anual */}
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200">
+                      <div 
+                        className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200 cursor-pointer hover:shadow-lg transition-all"
+                        onClick={() => setMostrarDetalhesAnual(true)}
+                      >
                         <div className="flex items-center justify-between mb-4">
                           <div>
                             <p className="text-sm font-medium text-gray-600">💎 Receita Anual</p>
@@ -853,9 +860,11 @@ export default function AdminReceitas() {
                           </div>
                         </div>
                         <p className="text-xs text-gray-600">
-                          {qtdAnuais} assinaturas anuais pagantes
+                          {receitasAnuais.length} assinaturas anuais pagantes
                           <br />
-                          <span className="text-gray-500">R$ {VALOR_ANUAL_LIQUIDO} cada (líquido, entrada integral)</span>
+                          <span className="text-blue-600 hover:text-blue-800 underline text-xs mt-1 inline-block">
+                            Clique para ver detalhes →
+                          </span>
                         </p>
                       </div>
 
