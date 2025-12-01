@@ -36,12 +36,17 @@ interface Totais {
 }
 
 export default function AdminReceitas() {
+  // =====================================================
+  // ESTADOS DE FILTROS (SEMPRE VISÍVEIS)
+  // =====================================================
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'active' | 'canceled' | 'past_due' | 'unpaid'>('todos')
-  const [filtroCategoria, setFiltroCategoria] = useState<'todos' | 'pagante' | 'gratuita' | 'suporte'>('todos')
   const [periodo, setPeriodo] = useState<'mes' | 'ano' | 'historico'>('mes')
   
-  // Novos filtros de período avançado
+  // =====================================================
+  // FILTRO AVANÇADO DE PERÍODO (COLAPSÁVEL)
+  // =====================================================
+  const [filtroAvancadoAberto, setFiltroAvancadoAberto] = useState(false)
   const [periodoTipo, setPeriodoTipo] = useState<'rapido' | 'mes' | 'trimestre' | 'dia' | 'custom'>('rapido')
   const [periodoRapido, setPeriodoRapido] = useState<'todos' | 'este_mes' | 'mes_passado' | 'ultimos_3' | 'ultimos_6' | 'ultimos_12' | 'este_trimestre' | 'trimestre_passado'>('todos')
   const [mesSelecionado, setMesSelecionado] = useState<string>('')
@@ -50,12 +55,10 @@ export default function AdminReceitas() {
   const [dataInicio, setDataInicio] = useState<string>('')
   const [dataFim, setDataFim] = useState<string>('')
   
-  // Estados para filtros colapsáveis
-  const [filtroAreaAberto, setFiltroAreaAberto] = useState(true)
-  const [filtroStatusAberto, setFiltroStatusAberto] = useState(true)
-  const [filtroPeriodoAberto, setFiltroPeriodoAberto] = useState(true)
-  
-  // Toggle para ver por área ou totais gerais
+  // =====================================================
+  // TOGGLE PARA VISUALIZAÇÃO
+  // =====================================================
+  const [abaAtiva, setAbaAtiva] = useState<'receitas' | 'assinaturas'>('receitas') // Nova aba: Receitas vs Assinaturas
   const [verPorArea, setVerPorArea] = useState(false)
   
   const [receitas, setReceitas] = useState<Receita[]>([])
@@ -81,7 +84,6 @@ export default function AdminReceitas() {
         if (filtroArea !== 'todos') {
           params.append('area', filtroArea)
         }
-        // Se for histórico, buscar todas as assinaturas (não filtrar por status)
         if (filtroStatus !== 'todos' && periodo !== 'historico') {
           params.append('status', filtroStatus)
         }
@@ -182,34 +184,14 @@ export default function AdminReceitas() {
     carregarDados()
   }, [filtroArea, filtroStatus, periodo, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, diaSelecionado, dataInicio, dataFim])
 
-  // Filtrar receitas por período e categoria (frontend)
-  const receitasFiltradas = receitas.filter(r => {
-    // Filtro de categoria
-    if (filtroCategoria !== 'todos') {
-      if (filtroCategoria === 'pagante' && r.categoria !== 'pagante') return false
-      if (filtroCategoria === 'gratuita' && r.categoria !== 'gratuita') return false
-      if (filtroCategoria === 'suporte' && r.categoria !== 'suporte') return false
-    }
-    
-    // Filtro de período
-    if (periodo === 'mes') {
-      return r.tipo === 'mensal' || r.tipo === 'gratuito'
-    } else if (periodo === 'ano') {
-      return r.tipo === 'anual'
-    }
-    return true
-  })
-
   // =====================================================
-  // CALCULAR TOTAIS POR CATEGORIA E TIPO
+  // CALCULAR TOTAIS - APENAS PAGANTES (PARA ANÁLISE DE RECEITAS)
   // =====================================================
   const receitasAtivas = receitas.filter(r => r.status === 'ativa')
   const receitasPagantes = receitasAtivas.filter(r => r.categoria === 'pagante')
   
-  // =====================================================
-  // TOTAIS POR ÁREA (se verPorArea = true)
-  // =====================================================
-  const totaisPorArea = verPorArea ? receitasAtivas.reduce((acc, r) => {
+  // Totais por área (apenas pagantes)
+  const totaisPorArea = verPorArea ? receitasPagantes.reduce((acc, r) => {
     if (!acc[r.area]) {
       acc[r.area] = {
         mensal: 0,
@@ -220,10 +202,10 @@ export default function AdminReceitas() {
       }
     }
     
-    if (r.tipo === 'mensal' && r.categoria === 'pagante') {
+    if (r.tipo === 'mensal') {
       acc[r.area].mensal += r.valor
       acc[r.area].pagantes++
-    } else if (r.tipo === 'anual' && r.categoria === 'pagante') {
+    } else if (r.tipo === 'anual') {
       acc[r.area].anual += r.valor
       acc[r.area].anualMensalizado += r.valor / 12
       acc[r.area].pagantes++
@@ -233,34 +215,35 @@ export default function AdminReceitas() {
     return acc
   }, {} as Record<string, { mensal: number; anual: number; anualMensalizado: number; total: number; pagantes: number }>) : null
 
-  // =====================================================
-  // TOTAIS GERAIS (MENSAL, ANUAL, TOTAL)
-  // =====================================================
-  
-  // Total Mensal PAGANTE: apenas assinaturas mensais que pagam
+  // Totais gerais (apenas pagantes)
   const totalMensalPagante = receitasPagantes
     .filter(r => r.tipo === 'mensal')
     .reduce((sum, r) => sum + r.valor, 0)
 
-  // Total Anual PAGANTE: apenas assinaturas anuais que pagam
   const totalAnualPagante = receitasPagantes
     .filter(r => r.tipo === 'anual')
     .reduce((sum, r) => sum + r.valor, 0)
 
-  // Total Anual Mensalizado PAGANTE: valor anual dividido por 12
   const totalAnualMensalizadoPagante = receitasPagantes
     .filter(r => r.tipo === 'anual')
     .reduce((sum, r) => sum + (r.valor / 12), 0)
 
-  // Total Geral PAGANTE: mensal + anual mensalizado (receita recorrente mensal)
   const totalReceitasPagante = totalMensalPagante + totalAnualMensalizadoPagante
 
-  // =====================================================
-  // CONTADORES POR CATEGORIA
-  // =====================================================
+  // Contadores por categoria (para seção de assinaturas)
   const totalPagantes = receitasPagantes.length
   const totalGratuitas = receitasAtivas.filter(r => r.categoria === 'gratuita').length
   const totalSuporte = receitasAtivas.filter(r => r.categoria === 'suporte').length
+
+  // Filtrar receitas para tabela
+  const receitasFiltradas = receitas.filter(r => {
+    if (periodo === 'mes') {
+      return r.tipo === 'mensal' || r.tipo === 'gratuito'
+    } else if (periodo === 'ano') {
+      return r.tipo === 'anual'
+    }
+    return true
+  })
 
   const getAreaIcon = (area: string) => {
     switch (area) {
@@ -352,143 +335,71 @@ export default function AdminReceitas() {
           </div>
         )}
 
-        {/* Filtros Colapsáveis */}
+        {/* ===================================================== */}
+        {/* FILTROS SEMPRE VISÍVEIS */}
+        {/* ===================================================== */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-          {/* Filtro Área - Colapsável */}
-          <div className="border-b border-gray-200">
-            <button
-              onClick={() => setFiltroAreaAberto(!filtroAreaAberto)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
+          <div className="p-6 space-y-6">
+            {/* Filtro Área - SEMPRE VISÍVEL */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <span className="text-lg">🌐</span>
-                <span className="font-semibold text-gray-900">Filtrar por Área</span>
-                {filtroArea !== 'todos' && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                    {filtroArea.charAt(0).toUpperCase() + filtroArea.slice(1)}
-                  </span>
-                )}
+                Filtrar por Área
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {['todos', 'nutri', 'coach', 'nutra', 'wellness'].map((area) => (
+                  <button
+                    key={area}
+                    onClick={() => setFiltroArea(area as any)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filtroArea === area
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {area === 'todos' ? 'Todos' : area.charAt(0).toUpperCase() + area.slice(1)}
+                  </button>
+                ))}
               </div>
-              <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${filtroAreaAberto ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {filtroAreaAberto && (
-              <div className="px-6 pb-4">
-                <div className="flex flex-wrap gap-2">
-                  {['todos', 'nutri', 'coach', 'nutra', 'wellness'].map((area) => (
-                    <button
-                      key={area}
-                      onClick={() => setFiltroArea(area as any)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        filtroArea === area
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {area === 'todos' ? 'Todos' : area.charAt(0).toUpperCase() + area.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* Filtro Status - Colapsável */}
-          <div className="border-b border-gray-200">
-            <button
-              onClick={() => setFiltroStatusAberto(!filtroStatusAberto)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
+            {/* Filtro Status - SEMPRE VISÍVEL */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <span className="text-lg">📊</span>
-                <span className="font-semibold text-gray-900">Filtrar por Status</span>
-                {filtroStatus !== 'todos' && (
-                  <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-                    {filtroStatus === 'active' ? 'Ativas' : 
-                     filtroStatus === 'canceled' ? 'Canceladas' :
-                     filtroStatus === 'past_due' ? 'Atrasadas' :
-                     filtroStatus === 'unpaid' ? 'Não Pagas' : filtroStatus}
-                  </span>
-                )}
+                Filtrar por Status
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {['todos', 'active', 'canceled', 'past_due', 'unpaid'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setFiltroStatus(status as any)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filtroStatus === status
+                        ? 'bg-purple-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {status === 'todos' ? 'Todos' : 
+                     status === 'active' ? 'Ativas' :
+                     status === 'canceled' ? 'Canceladas' :
+                     status === 'past_due' ? 'Atrasadas' :
+                     status === 'unpaid' ? 'Não Pagas' : status}
+                  </button>
+                ))}
               </div>
-              <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${filtroStatusAberto ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {filtroStatusAberto && (
-              <div className="px-6 pb-4">
-                <div className="flex flex-wrap gap-2">
-                  {['todos', 'active', 'canceled', 'past_due', 'unpaid'].map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => setFiltroStatus(status as any)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        filtroStatus === status
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {status === 'todos' ? 'Todos' : 
-                       status === 'active' ? 'Ativas' :
-                       status === 'canceled' ? 'Canceladas' :
-                       status === 'past_due' ? 'Atrasadas' :
-                       status === 'unpaid' ? 'Não Pagas' : status}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* Filtro Período - Colapsável */}
-          <div>
-            <button
-              onClick={() => setFiltroPeriodoAberto(!filtroPeriodoAberto)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
+            {/* Filtro Período - SEMPRE VISÍVEL */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <span className="text-lg">📅</span>
-                <span className="font-semibold text-gray-900">Filtrar por Período</span>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    periodo === 'mes' ? 'bg-green-100 text-green-800' :
-                    periodo === 'ano' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {periodo === 'mes' ? 'Mensal' : periodo === 'ano' ? 'Anual' : 'Histórico'}
-                  </span>
-                  {periodoRapido !== 'todos' && (
-                    <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
-                      Filtro ativo
-                    </span>
-                  )}
-                </div>
-              </div>
-              <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${filtroPeriodoAberto ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {filtroPeriodoAberto && (
-              <div className="px-6 pb-6 space-y-4">
-                {/* Tipo de Plano (Mensal/Anual/Histórico) */}
+                Filtrar por Período
+              </label>
+              <div className="space-y-3">
+                {/* Tipo de Plano - SEMPRE VISÍVEL */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Plano</label>
+                  <p className="text-xs text-gray-600 mb-2">Tipo de Plano:</p>
                   <div className="flex gap-2">
                     {['mes', 'ano', 'historico'].map((p) => (
                       <button
@@ -496,7 +407,7 @@ export default function AdminReceitas() {
                         onClick={() => setPeriodo(p as any)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           periodo === p
-                            ? 'bg-green-600 text-white'
+                            ? 'bg-green-600 text-white shadow-md'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
@@ -506,378 +417,450 @@ export default function AdminReceitas() {
                   </div>
                 </div>
 
-                {/* Filtro de Período Avançado */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Filtro de Período</label>
+                {/* Filtro Avançado - COLAPSÁVEL */}
+                <div className="border-t border-gray-200 pt-3">
+                  <button
+                    onClick={() => setFiltroAvancadoAberto(!filtroAvancadoAberto)}
+                    className="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>⚙️</span>
+                      Filtro Avançado de Período
+                      {periodoRapido !== 'todos' && (
+                        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">
+                          Ativo
+                        </span>
+                      )}
+                    </span>
+                    <svg
+                      className={`w-5 h-5 text-gray-500 transition-transform ${filtroAvancadoAberto ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
                   
-                  {/* Tipo de Filtro */}
-                  <div className="mb-3">
-                    <div className="flex gap-2 flex-wrap">
-                      {['rapido', 'mes', 'trimestre', 'dia', 'custom'].map((tipo) => (
-                        <button
-                          key={tipo}
-                          onClick={() => setPeriodoTipo(tipo as any)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            periodoTipo === tipo
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
+                  {filtroAvancadoAberto && (
+                    <div className="mt-4 space-y-4">
+                      {/* Tipo de Filtro */}
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-2">Tipo de Filtro:</label>
+                        <div className="flex gap-2 flex-wrap">
+                          {['rapido', 'mes', 'trimestre', 'dia', 'custom'].map((tipo) => (
+                            <button
+                              key={tipo}
+                              onClick={() => setPeriodoTipo(tipo as any)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                periodoTipo === tipo
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {tipo === 'rapido' ? 'Rápido' : 
+                               tipo === 'mes' ? 'Mês' :
+                               tipo === 'trimestre' ? 'Trimestre' :
+                               tipo === 'dia' ? 'Dia' :
+                               tipo === 'custom' ? 'Personalizado' : tipo}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Opções Específicas */}
+                      {periodoTipo === 'rapido' && (
+                        <select
+                          value={periodoRapido}
+                          onChange={(e) => setPeriodoRapido(e.target.value as any)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                         >
-                          {tipo === 'rapido' ? 'Rápido' : 
-                           tipo === 'mes' ? 'Mês' :
-                           tipo === 'trimestre' ? 'Trimestre' :
-                           tipo === 'dia' ? 'Dia' :
-                           tipo === 'custom' ? 'Personalizado' : tipo}
-                        </button>
+                          <option value="todos">Todos os Períodos</option>
+                          <option value="este_mes">Este Mês</option>
+                          <option value="mes_passado">Mês Passado</option>
+                          <option value="ultimos_3">Últimos 3 Meses</option>
+                          <option value="ultimos_6">Últimos 6 Meses</option>
+                          <option value="ultimos_12">Últimos 12 Meses</option>
+                          <option value="este_trimestre">Este Trimestre</option>
+                          <option value="trimestre_passado">Trimestre Passado</option>
+                        </select>
+                      )}
+
+                      {periodoTipo === 'mes' && (
+                        <input
+                          type="month"
+                          value={mesSelecionado}
+                          onChange={(e) => setMesSelecionado(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        />
+                      )}
+
+                      {periodoTipo === 'trimestre' && (
+                        <select
+                          value={trimestreSelecionado}
+                          onChange={(e) => setTrimestreSelecionado(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        >
+                          <option value="">Selecione o Trimestre</option>
+                          {(() => {
+                            const hoje = new Date()
+                            const anoAtual = hoje.getFullYear()
+                            const trimestres = []
+                            for (let ano = anoAtual - 1; ano <= anoAtual + 1; ano++) {
+                              for (let q = 1; q <= 4; q++) {
+                                trimestres.push(`${ano}-Q${q}`)
+                              }
+                            }
+                            return trimestres.map(t => (
+                              <option key={t} value={t}>
+                                {t.replace('-Q', ' - Q')}
+                              </option>
+                            ))
+                          })()}
+                        </select>
+                      )}
+
+                      {periodoTipo === 'dia' && (
+                        <input
+                          type="date"
+                          value={diaSelecionado}
+                          onChange={(e) => setDiaSelecionado(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        />
+                      )}
+
+                      {periodoTipo === 'custom' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">Data Início</label>
+                            <input
+                              type="date"
+                              value={dataInicio}
+                              onChange={(e) => setDataInicio(e.target.value)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">Data Fim</label>
+                            <input
+                              type="date"
+                              value={dataFim}
+                              onChange={(e) => setDataFim(e.target.value)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ===================================================== */}
+        {/* ABAS: RECEITAS vs ASSINATURAS */}
+        {/* ===================================================== */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+          <div className="border-b border-gray-200">
+            <div className="flex">
+              <button
+                onClick={() => setAbaAtiva('receitas')}
+                className={`flex-1 px-6 py-4 text-center font-semibold transition-colors ${
+                  abaAtiva === 'receitas'
+                    ? 'bg-green-50 text-green-700 border-b-2 border-green-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                💰 Análise de Receitas
+              </button>
+              <button
+                onClick={() => setAbaAtiva('assinaturas')}
+                className={`flex-1 px-6 py-4 text-center font-semibold transition-colors ${
+                  abaAtiva === 'assinaturas'
+                    ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                📋 Assinaturas
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ===================================================== */}
+        {/* SEÇÃO 1: ANÁLISE DE RECEITAS (APENAS PAGANTES) */}
+        {/* ===================================================== */}
+        {abaAtiva === 'receitas' && (
+          <div>
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600">Carregando receitas...</p>
+              </div>
+            ) : (
+              <>
+                {/* Toggle Ver por Área / Totais Gerais */}
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Visualização:</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setVerPorArea(false)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          !verPorArea
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Totais Gerais
+                      </button>
+                      <button
+                        onClick={() => setVerPorArea(true)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          verPorArea
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Por Área
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* TOTAIS POR ÁREA */}
+                {verPorArea && totaisPorArea && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">📊 Receitas por Área (Apenas Pagantes)</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {Object.entries(totaisPorArea).map(([area, totais]) => (
+                        <div key={area} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="text-2xl">{getAreaIcon(area)}</span>
+                            <h3 className="font-bold text-gray-900 capitalize">{area}</h3>
+                          </div>
+                          <div className="space-y-2">
+                            <div>
+                              <p className="text-xs text-gray-600">Mensal</p>
+                              <p className="text-xl font-bold text-green-700">{formatCurrency(totais.mensal)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Anual</p>
+                              <p className="text-xl font-bold text-blue-700">{formatCurrency(totais.anual)}</p>
+                              <p className="text-xs text-gray-500">({formatCurrency(totais.anualMensalizado)}/mês)</p>
+                            </div>
+                            <div className="pt-2 border-t border-gray-200">
+                              <p className="text-xs text-gray-600">Total</p>
+                              <p className="text-2xl font-bold text-purple-700">{formatCurrency(totais.total)}</p>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">{totais.pagantes} pagantes</p>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
+                )}
 
-                  {/* Períodos Rápidos */}
-                  {periodoTipo === 'rapido' && (
-                    <select
-                      value={periodoRapido}
-                      onChange={(e) => setPeriodoRapido(e.target.value as any)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="todos">Todos os Períodos</option>
-                      <option value="este_mes">Este Mês</option>
-                      <option value="mes_passado">Mês Passado</option>
-                      <option value="ultimos_3">Últimos 3 Meses</option>
-                      <option value="ultimos_6">Últimos 6 Meses</option>
-                      <option value="ultimos_12">Últimos 12 Meses</option>
-                      <option value="este_trimestre">Este Trimestre</option>
-                      <option value="trimestre_passado">Trimestre Passado</option>
-                    </select>
-                  )}
-
-                  {/* Mês Específico */}
-                  {periodoTipo === 'mes' && (
-                    <input
-                      type="month"
-                      value={mesSelecionado}
-                      onChange={(e) => setMesSelecionado(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  )}
-
-                  {/* Trimestre */}
-                  {periodoTipo === 'trimestre' && (
-                    <select
-                      value={trimestreSelecionado}
-                      onChange={(e) => setTrimestreSelecionado(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Selecione o Trimestre</option>
-                      {(() => {
-                        const hoje = new Date()
-                        const anoAtual = hoje.getFullYear()
-                        const trimestres = []
-                        for (let ano = anoAtual - 1; ano <= anoAtual + 1; ano++) {
-                          for (let q = 1; q <= 4; q++) {
-                            trimestres.push(`${ano}-Q${q}`)
-                          }
-                        }
-                        return trimestres.map(t => (
-                          <option key={t} value={t}>
-                            {t.replace('-Q', ' - Q')}
-                          </option>
-                        ))
-                      })()}
-                    </select>
-                  )}
-
-                  {/* Dia Específico */}
-                  {periodoTipo === 'dia' && (
-                    <input
-                      type="date"
-                      value={diaSelecionado}
-                      onChange={(e) => setDiaSelecionado(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  )}
-
-                  {/* Período Customizado */}
-                  {periodoTipo === 'custom' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Data Início</label>
-                        <input
-                          type="date"
-                          value={dataInicio}
-                          onChange={(e) => setDataInicio(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                {/* TOTAIS GERAIS */}
+                {!verPorArea && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">💰 Análise de Receitas (Apenas Pagantes)</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {/* Total Mensal */}
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">💰 Receita Mensal</p>
+                            <p className="text-3xl font-bold text-green-700">{formatCurrency(totalMensalPagante)}</p>
+                          </div>
+                          <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
+                            <span className="text-2xl text-white">📅</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {receitasPagantes.filter(r => r.tipo === 'mensal').length} assinaturas mensais pagantes
+                        </p>
                       </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Data Fim</label>
-                        <input
-                          type="date"
-                          value={dataFim}
-                          onChange={(e) => setDataFim(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+
+                      {/* Total Anual */}
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">💎 Receita Anual</p>
+                            <p className="text-3xl font-bold text-blue-700">{formatCurrency(totalAnualPagante)}</p>
+                          </div>
+                          <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
+                            <span className="text-2xl text-white">💎</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {receitasPagantes.filter(r => r.tipo === 'anual').length} assinaturas anuais pagantes
+                          <br />
+                          <span className="text-gray-500">({formatCurrency(totalAnualMensalizadoPagante)}/mês equivalente)</span>
+                        </p>
+                      </div>
+
+                      {/* Total Geral */}
+                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">📊 Total Geral</p>
+                            <p className="text-3xl font-bold text-purple-700">{formatCurrency(totalReceitasPagante)}</p>
+                          </div>
+                          <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                            <span className="text-2xl text-white">💰</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {totalPagantes} pagantes ativos
+                          <br />
+                          <span className="text-gray-500">(Mensal + Anual mensalizado)</span>
+                        </p>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
-        </div>
-
-        {/* Toggle Ver por Área / Totais Gerais */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-6">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Visualização:</span>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setVerPorArea(false)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  !verPorArea
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Totais Gerais
-              </button>
-              <button
-                onClick={() => setVerPorArea(true)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  verPorArea
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Por Área
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Resumo Financeiro */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Carregando receitas...</p>
-          </div>
-        ) : (
-          <>
-            {/* TOTAIS POR ÁREA */}
-            {verPorArea && totaisPorArea && (
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">📊 Receitas por Área</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {Object.entries(totaisPorArea).map(([area, totais]) => (
-                    <div key={area} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-2xl">{getAreaIcon(area)}</span>
-                        <h3 className="font-bold text-gray-900 capitalize">{area}</h3>
-                      </div>
-                      <div className="space-y-2">
-                        <div>
-                          <p className="text-xs text-gray-600">Mensal</p>
-                          <p className="text-xl font-bold text-green-700">{formatCurrency(totais.mensal)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600">Anual</p>
-                          <p className="text-xl font-bold text-blue-700">{formatCurrency(totais.anual)}</p>
-                          <p className="text-xs text-gray-500">({formatCurrency(totais.anualMensalizado)}/mês)</p>
-                        </div>
-                        <div className="pt-2 border-t border-gray-200">
-                          <p className="text-xs text-gray-600">Total</p>
-                          <p className="text-2xl font-bold text-purple-700">{formatCurrency(totais.total)}</p>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">{totais.pagantes} pagantes</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TOTAIS GERAIS */}
-            {!verPorArea && (
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">💰 Análise de Receitas</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Total Mensal */}
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">💰 Receita Mensal</p>
-                        <p className="text-3xl font-bold text-green-700">{formatCurrency(totalMensalPagante)}</p>
-                      </div>
-                      <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
-                        <span className="text-2xl text-white">📅</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      {receitasPagantes.filter(r => r.tipo === 'mensal').length} assinaturas mensais pagantes
-                    </p>
-                  </div>
-
-                  {/* Total Anual */}
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">💎 Receita Anual</p>
-                        <p className="text-3xl font-bold text-blue-700">{formatCurrency(totalAnualPagante)}</p>
-                      </div>
-                      <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
-                        <span className="text-2xl text-white">💎</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      {receitasPagantes.filter(r => r.tipo === 'anual').length} assinaturas anuais pagantes
-                      <br />
-                      <span className="text-gray-500">({formatCurrency(totalAnualMensalizadoPagante)}/mês equivalente)</span>
-                    </p>
-                  </div>
-
-                  {/* Total Geral */}
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">📊 Total Geral</p>
-                        <p className="text-3xl font-bold text-purple-700">{formatCurrency(totalReceitasPagante)}</p>
-                      </div>
-                      <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
-                        <span className="text-2xl text-white">💰</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      {totalPagantes} pagantes ativos
-                      <br />
-                      <span className="text-gray-500">(Mensal + Anual mensalizado)</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* RESUMO POR CATEGORIA */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">📊 Resumo por Categoria</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Pagantes</p>
-                      <p className="text-2xl font-bold text-green-700">{totalPagantes}</p>
-                    </div>
-                    <span className="text-2xl">💳</span>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Gratuitas</p>
-                      <p className="text-2xl font-bold text-blue-700">{totalGratuitas}</p>
-                    </div>
-                    <span className="text-2xl">🆓</span>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Suporte</p>
-                      <p className="text-2xl font-bold text-orange-700">{totalSuporte}</p>
-                    </div>
-                    <span className="text-2xl">🛟</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
         )}
 
-        {/* Lista de Receitas */}
-        {loading ? null : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximo Vencimento</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Histórico</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {receitasFiltradas.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
-                        Nenhuma receita encontrada
-                      </td>
-                    </tr>
-                  ) : (
-                    receitasFiltradas.map((receita) => (
-                      <tr key={receita.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{receita.usuario}</div>
-                          {receita.email && (
-                            <div className="text-xs text-gray-500">{receita.email}</div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <span className="text-xl mr-2">{getAreaIcon(receita.area)}</span>
-                            <span className="text-sm text-gray-900 capitalize">{receita.area}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            receita.tipo === 'mensal' 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : receita.tipo === 'anual'
-                              ? 'bg-purple-100 text-purple-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {receita.tipo === 'mensal' ? 'Mensal' : receita.tipo === 'anual' ? 'Anual' : 'Gratuito'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-bold text-gray-900">{formatCurrency(receita.valor, receita.currency)}</div>
-                          <div className="text-xs text-gray-500">
-                            {receita.tipo === 'mensal' ? '/mês' : receita.tipo === 'anual' ? '/ano' : 'gratuito'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getCategoriaBadge(receita.categoria)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(receita.status, receita.is_migrated)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-bold text-gray-900">{formatCurrency(receita.historico, receita.currency)}</div>
-                          <div className="text-xs text-gray-500">Total pago</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <Link
-                            href={`/admin/subscriptions?user=${receita.user_id}`}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Ver
-                          </Link>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+        {/* ===================================================== */}
+        {/* SEÇÃO 2: ASSINATURAS (TODAS AS CATEGORIAS) */}
+        {/* ===================================================== */}
+        {abaAtiva === 'assinaturas' && (
+          <div>
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600">Carregando assinaturas...</p>
+              </div>
+            ) : (
+              <>
+                {/* Resumo por Categoria */}
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">📊 Resumo por Categoria</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-600">Pagantes</p>
+                          <p className="text-2xl font-bold text-green-700">{totalPagantes}</p>
+                        </div>
+                        <span className="text-2xl">💳</span>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-600">Gratuitas</p>
+                          <p className="text-2xl font-bold text-blue-700">{totalGratuitas}</p>
+                        </div>
+                        <span className="text-2xl">🆓</span>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-600">Suporte</p>
+                          <p className="text-2xl font-bold text-orange-700">{totalSuporte}</p>
+                        </div>
+                        <span className="text-2xl">🛟</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabela de Assinaturas */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximo Vencimento</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Histórico</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {receitasFiltradas.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
+                              Nenhuma assinatura encontrada
+                            </td>
+                          </tr>
+                        ) : (
+                          receitasFiltradas.map((receita) => (
+                            <tr key={receita.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">{receita.usuario}</div>
+                                {receita.email && (
+                                  <div className="text-xs text-gray-500">{receita.email}</div>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <span className="text-xl mr-2">{getAreaIcon(receita.area)}</span>
+                                  <span className="text-sm text-gray-900 capitalize">{receita.area}</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  receita.tipo === 'mensal' 
+                                    ? 'bg-blue-100 text-blue-800' 
+                                    : receita.tipo === 'anual'
+                                    ? 'bg-purple-100 text-purple-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {receita.tipo === 'mensal' ? 'Mensal' : receita.tipo === 'anual' ? 'Anual' : 'Gratuito'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-bold text-gray-900">{formatCurrency(receita.valor, receita.currency)}</div>
+                                <div className="text-xs text-gray-500">
+                                  {receita.tipo === 'mensal' ? '/mês' : receita.tipo === 'anual' ? '/ano' : 'gratuito'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {getCategoriaBadge(receita.categoria)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {getStatusBadge(receita.status, receita.is_migrated)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-bold text-gray-900">{formatCurrency(receita.historico, receita.currency)}</div>
+                                <div className="text-xs text-gray-500">Total pago</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <Link
+                                  href={`/admin/subscriptions?user=${receita.user_id}`}
+                                  className="text-blue-600 hover:text-blue-900"
+                                >
+                                  Ver
+                                </Link>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </main>
