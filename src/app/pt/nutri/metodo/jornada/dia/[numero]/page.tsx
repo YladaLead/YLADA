@@ -10,14 +10,13 @@ import ReflexaoDia from '@/components/formacao/ReflexaoDia'
 import BlockedDayModal from '@/components/jornada/BlockedDayModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
-import { canAccessDay } from '@/utils/jornada-access'
 import type { JourneyDay } from '@/types/formacao'
 
 export default function JornadaDiaPage() {
   const params = useParams()
   const router = useRouter()
   const { user } = useAuth()
-  const { progress, loading: progressLoading } = useJornadaProgress()
+  const { progress, loading: progressLoading, canAccessDay } = useJornadaProgress()
   const dayNumber = parseInt(params.numero as string)
 
   const [day, setDay] = useState<(JourneyDay & { 
@@ -39,14 +38,14 @@ export default function JornadaDiaPage() {
 
   // Verificar acesso ao dia antes de carregar
   useEffect(() => {
-    if (!progressLoading && progress) {
-      if (!canAccessDay(dayNumber, progress)) {
+    if (!progressLoading) {
+      if (!canAccessDay(dayNumber)) {
         setShowBlockedModal(true)
         setCarregando(false)
         return
       }
     }
-  }, [dayNumber, progress, progressLoading])
+  }, [dayNumber, progressLoading, canAccessDay])
 
   useEffect(() => {
     // Não carregar se o dia está bloqueado
@@ -475,7 +474,7 @@ export default function JornadaDiaPage() {
               onClick={() => {
                 const nextDay = dayNumber + 1
                 // Verificar se pode acessar o próximo dia
-                if (canAccessDay(nextDay, progress)) {
+                if (canAccessDay(nextDay)) {
                   router.push(`/pt/nutri/metodo/jornada/dia/${nextDay}`)
                 } else {
                   setShowBlockedModal(true)

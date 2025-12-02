@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react'
 import type { JourneyStats } from '@/types/formacao'
 import { canAccessDay, isDayLocked, getNextAvailableDay } from '@/utils/jornada-access'
 import type { JornadaProgress } from '@/utils/jornada-access'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function useJornadaProgress() {
+  const { user } = useAuth()
   const [progress, setProgress] = useState<JornadaProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const userEmail = user?.email || null
 
   useEffect(() => {
     const carregarProgresso = async () => {
@@ -83,10 +86,11 @@ export function useJornadaProgress() {
     progress,
     loading,
     error,
-    canAccessDay: (day: number) => canAccessDay(day, progress),
-    isDayLocked: (day: number) => isDayLocked(day, progress),
+    canAccessDay: (day: number) => canAccessDay(day, progress, userEmail),
+    isDayLocked: (day: number) => isDayLocked(day, progress, userEmail),
     getNextAvailableDay: () => getNextAvailableDay(progress),
-    refreshProgress
+    refreshProgress,
+    userEmail // Expor e-mail para uso em componentes
   }
 }
 

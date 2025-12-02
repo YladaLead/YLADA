@@ -2,6 +2,8 @@
  * Utilitários para verificar acesso aos dias da Jornada
  */
 
+import { isEmailUnlocked } from '@/config/jornada-unlocked-emails'
+
 export interface JornadaProgress {
   current_day: number | null
   completed_days: number
@@ -12,6 +14,7 @@ export interface JornadaProgress {
  * Verifica se o usuário pode acessar um dia específico
  * 
  * Regras:
+ * - E-mails na lista de liberados: acesso total (bypass)
  * - Dia 1 sempre liberado
  * - Dia X liberado se currentDay >= X (ou seja, já está no dia X ou passou dele)
  * - Dia X bloqueado se currentDay < X (ou seja, ainda não concluiu o dia anterior)
@@ -22,8 +25,14 @@ export interface JornadaProgress {
  */
 export function canAccessDay(
   targetDay: number,
-  progress: JornadaProgress | null
+  progress: JornadaProgress | null,
+  userEmail?: string | null
 ): boolean {
+  // Bypass para e-mails liberados
+  if (userEmail && isEmailUnlocked(userEmail)) {
+    return true
+  }
+
   if (!progress || !progress.current_day) {
     // Se não há progresso, só o dia 1 está liberado
     return targetDay === 1
@@ -45,9 +54,10 @@ export function canAccessDay(
  */
 export function isDayLocked(
   targetDay: number,
-  progress: JornadaProgress | null
+  progress: JornadaProgress | null,
+  userEmail?: string | null
 ): boolean {
-  return !canAccessDay(targetDay, progress)
+  return !canAccessDay(targetDay, progress, userEmail)
 }
 
 /**

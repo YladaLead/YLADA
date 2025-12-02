@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isEmailUnlocked } from '@/config/jornada-unlocked-emails'
 
 export async function GET(request: NextRequest) {
   try {
@@ -138,12 +139,18 @@ export async function GET(request: NextRequest) {
     // Mapear progresso por dia
     const progressMap = new Map(progress.filter(p => p).map(p => [p.day_number, p]))
 
+    // Buscar e-mail do usuário para verificar bypass
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(user.id)
+    const userEmail = authUser?.user?.email || null
+    const isUnlocked = isEmailUnlocked(userEmail)
+
     // Aplicar lógica de bloqueio inteligente
     const daysWithProgress = days.filter(d => d).map(day => {
       const isCompleted = progressMap.get(day.day_number)?.completed || false
       // Dia bloqueado se: não é o dia 1 E o dia é maior que currentDay
       // Regra: Dia X liberado se currentDay >= X
-      const isLocked = day.day_number > 1 && day.day_number > calculatedCurrentDay
+      // Bypass: Se e-mail está liberado, nunca bloqueia
+      const isLocked = !isUnlocked && day.day_number > 1 && day.day_number > calculatedCurrentDay
       
       return {
         ...day,

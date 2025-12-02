@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
-import { canAccessDay } from '@/utils/jornada-access'
 import BlockedDayModal from './BlockedDayModal'
 
 interface JornadaDaysChipsProps {
@@ -12,12 +11,12 @@ interface JornadaDaysChipsProps {
 }
 
 export default function JornadaDaysChips({ days, pilarId }: JornadaDaysChipsProps) {
-  const { progress } = useJornadaProgress()
+  const { progress, canAccessDay: canAccess } = useJornadaProgress()
   const [showModal, setShowModal] = useState(false)
   const [blockedDay, setBlockedDay] = useState<number | null>(null)
 
   const handleChipClick = (dayNumber: number) => {
-    if (canAccessDay(dayNumber, progress)) {
+    if (canAccess(dayNumber)) {
       // Se o dia está liberado, não fazer nada (apenas mostrar que é clicável)
       // O usuário pode ir para a jornada manualmente
     } else {
@@ -36,7 +35,7 @@ export default function JornadaDaysChips({ days, pilarId }: JornadaDaysChipsProp
         </div>
         <div className="flex flex-wrap gap-2 mb-3">
           {days.map((dayNumber) => {
-            const isAccessible = canAccessDay(dayNumber, progress)
+            const isAccessible = canAccess(dayNumber)
             return (
               <button
                 key={dayNumber}

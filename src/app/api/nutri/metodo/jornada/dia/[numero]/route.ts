@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isEmailUnlocked } from '@/config/jornada-unlocked-emails'
 
 export async function GET(
   request: NextRequest,
@@ -58,25 +59,33 @@ export async function GET(
       .eq('user_id', user.id)
       .eq('day_number', dayNumber)
 
+    // Buscar e-mail do usuário para verificar bypass
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(user.id)
+    const userEmail = authUser?.user?.email || null
+
     // Verificar bloqueio usando lógica inteligente (baseada em currentDay)
     let is_locked = false
     if (dayNumber > 1) {
-      // Buscar todos os progressos para calcular currentDay
-      const { data: allProgress } = await supabaseAdmin
-        .from('journey_progress')
-        .select('day_number, completed')
-        .eq('user_id', user.id)
-        .eq('completed', true)
-        .order('day_number', { ascending: true })
-      
-      // Calcular currentDay: maior dia concluído + 1, ou 1 se nenhum foi concluído
-      const maxCompletedDay = allProgress && allProgress.length > 0
-        ? Math.max(...allProgress.map((p: any) => p.day_number))
-        : 0
-      const currentDay = maxCompletedDay + 1
-      
-      // Dia bloqueado se: dayNumber > currentDay (ou seja, não concluiu o dia anterior)
-      is_locked = dayNumber > currentDay
+      // Bypass para e-mails liberados
+      if (!isEmailUnlocked(userEmail)) {
+        // Buscar todos os progressos para calcular currentDay
+        const { data: allProgress } = await supabaseAdmin
+          .from('journey_progress')
+          .select('day_number, completed')
+          .eq('user_id', user.id)
+          .eq('completed', true)
+          .order('day_number', { ascending: true })
+        
+        // Calcular currentDay: maior dia concluído + 1, ou 1 se nenhum foi concluído
+        const maxCompletedDay = allProgress && allProgress.length > 0
+          ? Math.max(...allProgress.map((p: any) => p.day_number))
+          : 0
+        const currentDay = maxCompletedDay + 1
+        
+        // Dia bloqueado se: dayNumber > currentDay (ou seja, não concluiu o dia anterior)
+        is_locked = dayNumber > currentDay
+      }
+      // Se e-mail está liberado, is_locked permanece false
     }
 
     // Mapear notas do checklist por índice (retornar como objeto simples para JSON)

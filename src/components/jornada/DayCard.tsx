@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import BlockedDayModal from './BlockedDayModal'
+import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 import type { JornadaProgress } from '@/utils/jornada-access'
-import { canAccessDay, isDayLocked } from '@/utils/jornada-access'
 
 interface DayCardProps {
   day: {
@@ -25,10 +25,11 @@ export default function DayCard({
   onDayClick
 }: DayCardProps) {
   const [showModal, setShowModal] = useState(false)
+  const { canAccessDay, isDayLocked, userEmail } = useJornadaProgress()
 
-  const isLocked = isDayLocked(day.day_number, progress) || day.is_locked
+  const isLocked = isDayLocked(day.day_number) || day.is_locked
   const isCurrent = day.day_number === currentDay
-  const canAccess = canAccessDay(day.day_number, progress) && !day.is_locked
+  const canAccess = canAccessDay(day.day_number) && !day.is_locked
 
   const handleClick = (e: React.MouseEvent) => {
     if (isLocked) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isEmailUnlocked } from '@/config/jornada-unlocked-emails'
 
 export async function POST(
   request: NextRequest,
@@ -26,11 +27,17 @@ export async function POST(
       return NextResponse.json({ error: 'Dia inválido' }, { status: 400 })
     }
 
+    // Buscar e-mail do usuário para verificar bypass
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(user.id)
+    const userEmail = authUser?.user?.email || null
+    const isUnlocked = require('@/config/jornada-unlocked-emails').isEmailUnlocked(userEmail)
+
     const body = await request.json()
     const checklistCompleted = body.checklist_completed || []
 
     // Verificar se o dia anterior foi concluído (bloqueio sequencial)
-    if (dayNumber > 1) {
+    // Bypass para e-mails liberados
+    if (dayNumber > 1 && !isUnlocked) {
       try {
         const { data: prevProgress, error: prevError } = await supabaseAdmin
           .from('journey_progress')
