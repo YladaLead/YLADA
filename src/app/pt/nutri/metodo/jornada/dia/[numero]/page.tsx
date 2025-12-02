@@ -181,10 +181,73 @@ export default function JornadaDiaPage() {
   const getActionLink = () => {
     if (!day) return '#'
     
-    if (day.action_type === 'pilar') {
-      if (day.action_id) {
+    // Se action_id está definido no banco, usar ele
+    if (day.action_id) {
+      if (day.action_type === 'pilar') {
         return `/pt/nutri/metodo/pilares/${day.action_id}`
+      } else if (day.action_type === 'exercicio') {
+        return `/pt/nutri/metodo/exercicios/${day.action_id}`
+      } else if (day.action_type === 'ferramenta') {
+        return `/pt/nutri/metodo/ferramentas/${day.action_id}`
       }
+    }
+    
+    // Mapeamento baseado no dia conforme tabela fornecida
+    const dayActionMap: Record<number, { type: 'pilar' | 'exercicio' | 'ferramenta', id: string }> = {
+      1: { type: 'pilar', id: '1' },
+      2: { type: 'pilar', id: '1' },
+      3: { type: 'pilar', id: '2' },
+      4: { type: 'pilar', id: '1' },
+      5: { type: 'pilar', id: '2' },
+      6: { type: 'pilar', id: '1' },
+      7: { type: 'pilar', id: '2' },
+      // Semana 2 - Captação
+      8: { type: 'pilar', id: '3' },
+      9: { type: 'pilar', id: '3' },
+      10: { type: 'exercicio', id: 'distribuicao-101010' },
+      11: { type: 'pilar', id: '3' },
+      12: { type: 'exercicio', id: 'objeções' },
+      13: { type: 'pilar', id: '3' },
+      14: { type: 'pilar', id: '3' },
+      // Semana 3 - Rotina
+      15: { type: 'pilar', id: '2' },
+      16: { type: 'pilar', id: '2' },
+      17: { type: 'exercicio', id: 'gestao-leads' },
+      18: { type: 'pilar', id: '4' },
+      19: { type: 'ferramenta', id: 'painel-diario' },
+      20: { type: 'pilar', id: '2' },
+      21: { type: 'pilar', id: '4' },
+      // Semana 4 - GSAL
+      22: { type: 'pilar', id: '5' },
+      23: { type: 'exercicio', id: 'gsal-gerar' },
+      24: { type: 'exercicio', id: 'gsal-servir' },
+      25: { type: 'exercicio', id: 'gsal-acompanhar' },
+      26: { type: 'ferramenta', id: 'agenda-estrategica' },
+      27: { type: 'exercicio', id: 'checklist-crescimento' },
+      28: { type: 'exercicio', id: 'plano-30' },
+      29: { type: 'exercicio', id: 'ritual-final' },
+      30: { type: 'exercicio', id: 'ritual-final' },
+    }
+    
+    const action = dayActionMap[dayNumber]
+    if (action) {
+      if (action.type === 'pilar') {
+        return `/pt/nutri/metodo/pilares/${action.id}`
+      } else if (action.type === 'exercicio') {
+        return `/pt/nutri/metodo/exercicios/${action.id}`
+      } else if (action.type === 'ferramenta') {
+        // Painel diário e agenda são rotas especiais
+        if (action.id === 'painel-diario') {
+          return `/pt/nutri/metodo/painel/diario`
+        } else if (action.id === 'agenda-estrategica') {
+          return `/pt/nutri/metodo/painel/agenda`
+        }
+        return `/pt/nutri/metodo/ferramentas/${action.id}`
+      }
+    }
+    
+    // Fallback para action_type do banco
+    if (day.action_type === 'pilar') {
       const pilarMap: Record<number, string> = {
         1: '1', 2: '1', 4: '1', 6: '1',
         3: '2', 5: '2',
@@ -192,14 +255,11 @@ export default function JornadaDiaPage() {
       const pilarId = pilarMap[dayNumber] || '1'
       return `/pt/nutri/metodo/pilares/${pilarId}`
     } else if (day.action_type === 'exercicio') {
-      return day.action_id 
-        ? `/pt/nutri/metodo/exercicios/${day.action_id}`
-        : '/pt/nutri/metodo/exercicios'
+      return '/pt/nutri/metodo/exercicios'
     } else if (day.action_type === 'ferramenta') {
-      return day.action_id
-        ? `/pt/nutri/metodo/ferramentas/${day.action_id}`
-        : '/pt/nutri/metodo/ferramentas'
+      return '/pt/nutri/metodo/ferramentas'
     }
+    
     return '#'
   }
 

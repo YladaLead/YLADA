@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import PilarSecao from '@/components/formacao/PilarSecao'
+import PilarAnotacao from '@/components/formacao/PilarAnotacao'
 import { pilaresConfig } from '@/types/pilares'
 
 export default function PilarPage() {
@@ -189,6 +190,14 @@ export default function PilarPage() {
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 text-center">
             <p className="text-gray-600">As seções deste pilar serão adicionadas em breve.</p>
           </div>
+        )}
+
+        {/* Campo de Anotação do Pilar */}
+        {pilar.campo_anotacao && (
+          <PilarAnotacao
+            pilarId={pilar.id}
+            placeholder={pilar.campo_anotacao}
+          />
         )}
 
         {/* Navegação */}

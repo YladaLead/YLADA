@@ -149,10 +149,10 @@ export default function JornadaSection() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">
                     Semana {semana}
-                    {semana === 1 && ' — Base e Filosofia YLADA'}
-                    {semana === 2 && ' — Atração YLADA (Leads Diários)'}
-                    {semana === 3 && ' — Encantamento YLADA (Conversão e Experiência)'}
-                    {semana === 4 && ' — Organização e Escala'}
+                    {semana === 1 && ' — Base YLADA (Identidade & Mentalidade)'}
+                    {semana === 2 && ' — Captação YLADA (Leads Diários)'}
+                    {semana === 3 && ' — Domínio da Rotina YLADA (Estrutura & Consistência)'}
+                    {semana === 4 && ' — Crescimento & GSAL (Domínio da Profissão)'}
                   </h3>
                   {semanaStats && (
                     <p className="text-sm text-gray-600 mt-1">

@@ -3,9 +3,10 @@
 export interface PilarSecao {
   id: string
   titulo: string
-  conteudo: string // Placeholder por enquanto
+  conteudo: string
   exercicios_relacionados?: string[] // IDs dos exercícios
   ferramentas_relacionadas?: string[] // IDs das ferramentas
+  checklist_items?: string[] // Itens de checklist quando aplicável
   order_index: number
 }
 
@@ -17,6 +18,7 @@ export interface Pilar {
   descricao_curta: string
   descricao_introducao: string
   secoes: PilarSecao[]
+  campo_anotacao?: string // Pergunta para o campo de anotação do Pilar
   created_at?: string
   updated_at?: string
 }
@@ -27,352 +29,275 @@ export const pilaresConfig: Pilar[] = [
     id: '1',
     numero: 1,
     nome: 'Filosofia YLADA',
-    subtitulo: 'Clareza mental, posicionamento e direção',
+    subtitulo: 'O que a faculdade não ensinou — a base que sustenta sua identidade profissional.',
     descricao_curta: 'A profissional que entende quem ela é, o valor que entrega e como se posiciona, se torna impossível de ser ignorada.',
-    descricao_introducao: 'Dar clareza mental, posicionamento e direção. A profissional que entende quem ela é, o valor que entrega e como se posiciona, se torna impossível de ser ignorada.',
+    descricao_introducao: 'O que a faculdade não ensinou — a base que sustenta sua identidade profissional.',
     secoes: [
       {
-        id: 'o-que-e',
-        titulo: 'O que é a Filosofia YLADA',
-        conteudo: `A Filosofia YLADA é um conjunto de princípios que orienta a postura, o comportamento e a visão empresarial da nutricionista.
+        id: 'o-que-e-nutri-empresaria',
+        titulo: 'O que é ser Nutri-Empresária',
+        conteudo: `A profissional age como marca, não como prestadora.
 
-Ela ensina:
+É sobre comportamento, postura e clareza.
 
-• como pensar
-• como agir
-• como se posicionar
-• como comunicar valor
-• como construir rotina e consistência
-
-É o manual não escrito da profissão, agora organizado de forma aplicável.`,
-        order_index: 1
-      },
-      {
-        id: 'identidade',
-        titulo: 'Identidade Profissional (Quem você é no mercado)',
-        conteudo: `Nutricionistas que prosperam têm clareza de identidade.
-
-Aqui, a usuária aprende a:
-
-• definir quem ela é profissionalmente
-• comunicar com firmeza e gentileza
-• abandonar comportamentos que a sabotam
-• assumir uma postura de liderança
-
-A identidade define o público, o posicionamento e o nível de autoridade.`,
-        order_index: 2
-      },
-      {
-        id: 'postura',
-        titulo: 'Postura & Posicionamento (Como você quer ser percebida)',
-        conteudo: `Postura não é arrogância — é clareza.
-Posicionamento não é marketing — é autoconsciência.
-
-Nesta seção, a YLADA ensina:
-
-• como ajustar a postura digital
-• como responder mensagens com segurança
-• como criar percepção de profissionalismo
-• como se comunicar sem parecer insegura
-
-A percepção que o mercado tem de você nasce aqui.`,
-        order_index: 3
-      },
-      {
-        id: 'metas',
-        titulo: 'Metas Inteligentes para Nutris',
-        conteudo: `A faculdade ensina nutrição, mas não ensina metas.
-O YLADA ensina metas que funcionam para quem trabalha com pessoas.
-
-Aqui, a usuária aprende a:
-
-• definir metas práticas e reais
-• criar metas de rotina e não só de resultado
-• conectar metas ao estilo de vida e não ao medo
-• evitar metas confusas impossíveis de sustentar
-
-Metas claras geram ações claras.`,
-        order_index: 4
-      },
-      {
-        id: 'mentalidade',
-        titulo: 'Mentalidade da Nutri-Empresária',
-        conteudo: `Tudo muda quando a profissional entende que ela não vende consulta — ela entrega transformação.
-
-Nesta seção, a usuária aprende:
-
-• postura de responsabilidade e liderança
-• como parar de pensar como técnica e começar a agir como solução
-• como tomar decisões com critério
-• como desenvolver visão de crescimento
-
-É a transição da Nutri Tradicional → Nutri Empresária.`,
-        order_index: 5
-      },
-      {
-        id: 'rotina-minima',
-        titulo: 'Rotina Mínima (O fundamento da consistência)',
-        conteudo: `Rotina mínima é o ritual diário que mantém a nutricionista sempre em movimento, sem sobrecarga.
-
-Nesta seção, ela aprende:
-
-• como funciona a rotina mínima
-• por que pequenos hábitos geram grandes resultados
-• como aplicar diariamente em 5 a 10 minutos
-
-Sem rotina, não existe método. Sem método, não existe crescimento.`,
-        order_index: 6
-      },
-      {
-        id: 'papel-metodo',
-        titulo: 'O Papel do Método na Vida da Nutri',
-        conteudo: `O YLADA devolve controle, clareza e direção.
-Ele tira a profissional do improviso e a coloca no caminho da previsibilidade.
-
-A filosofia explica:
-
-• por que o método funciona
-• como ele elimina ansiedade profissional
-• como ele transforma prática clínica em carreira
-
-É o coração do sistema.`,
-        order_index: 7
-      }
-    ]
-  },
-  {
-    id: '2',
-    numero: 2,
-    nome: 'Nutri-Empresária 2.0',
-    subtitulo: 'De profissional que atende para profissional que lidera resultados',
-    descricao_curta: 'Transformar a forma como a nutricionista opera no seu dia a dia. Dar clareza, autonomia e estrutura prática para que ela pare de trabalhar em modo reativo, ganhe controle da sua agenda, tenha processos simples e finalmente consiga crescer sem caos.',
-    descricao_introducao: `O Pilar 2 é onde a nutricionista deixa de operar no improviso e passa a atuar com intenção, postura empresarial e processos claros. É neste pilar que ela se transforma de "profissional que atende" para profissional que lidera resultados, com rotina, organização e posicionamento.
-
-A Nutri‑Empresária 2.0 entende que:
+A Nutri-Empresária entende que:
 
 • ela é a marca
 • ela é o sistema
 • ela é a experiência
 • ela define o padrão do seu atendimento e da sua carreira
 
-Este pilar estabelece como ela deve agir todos os dias para ter consistência, agenda cheia e segurança profissional.`,
-    secoes: [
-      {
-        id: 'transicao',
-        titulo: 'A Transição: de Nutri Tradicional → Nutri‑Empresária',
-        conteudo: `Aqui a profissional entende a diferença entre:
-
-• trabalhar para sobreviver
-• trabalhar para construir uma carreira
-
-Ela aprende:
-
-• por que muitos não conseguem crescer
-• como abandonar o papel técnico e assumir o papel de líder
-• como pensar como profissional que constrói valor, não apenas entrega serviço
-• como se tornar referência aos olhos das pessoas
-
-É o início da nova identidade.`,
+Quando você se vê como Nutri-Empresária, tudo muda: como você fala, como você atende, como você se posiciona e como você cresce.`,
         order_index: 1
       },
       {
-        id: 'rotina-minima',
-        titulo: 'Rotina Mínima da Nutri‑Empresária (A base da consistência)',
-        conteudo: `Rotina mínima é o ritual diário YLADA que mantém tudo funcionando com leveza.
-É simples. É possível. E é transformadora.
+        id: 'fundamentos',
+        titulo: 'Os 4 fundamentos da Filosofia YLADA',
+        conteudo: `A Filosofia YLADA se sustenta em 4 fundamentos essenciais:
 
-Aqui ela aprende:
+🔹 Identidade
 
-• a lógica da rotina mínima
-• por que 5–10 minutos mudam tudo
-• como organizar seu dia sem sobrecarregar
-• como transformar pequenas ações diárias em grandes resultados
+Quem você é profissionalmente. Como você se vê e como quer ser vista. A identidade define o público, o posicionamento e o nível de autoridade.
 
-Esta rotina sustenta o Método inteiro.`,
+🔹 Postura
+
+Como você quer ser percebida. Postura não é arrogância — é clareza. Posicionamento não é marketing — é autoconsciência.
+
+🔹 Estrutura
+
+Como você organiza seu trabalho. Rotina mínima, processos simples, sistemas que mantêm tudo fluindo sem sobrecarga.
+
+🔹 Consistência
+
+A constância que transforma pequenas ações em grandes resultados. É fazer todos os dias, mesmo nos dias difíceis.
+
+Esses 4 fundamentos trabalham juntos para criar a Nutri-Empresária completa.`,
         order_index: 2
       },
       {
-        id: 'organizacao',
-        titulo: 'Organização Essencial (Digital e Física)',
-        conteudo: `Organização é o que diferencia a Nutri que cresce da Nutri que se perde.
+        id: 'erro-silencioso',
+        titulo: 'O erro silencioso da Nutri brasileira',
+        conteudo: `A maioria das nutricionistas vive de improviso, sem estrutura, apagando incêndio.
 
-Nesta seção, a profissional descobre:
+A diferença entre Nutri Tradicional × Nutri-Empresária:
 
-• como criar sua pasta YLADA
-• como organizar materiais, scripts, ferramentas
-• como definir o espaço mínimo de trabalho
-• como evitar distrações
-• como montar seu ambiente de performance
+❌ Nutri Tradicional:
+• Trabalha reativamente
+• Sem rotina definida
+• Sem processos claros
+• Depende de sorte e indicações ocasionais
+• Vive no modo "apagar incêndio"
+• Agenda vazia ou lotada sem controle
 
-Organização gera clareza. Clareza gera ação. Ação gera resultado.`,
+✅ Nutri-Empresária:
+• Trabalha com intenção
+• Rotina mínima definida
+• Processos simples e repetíveis
+• Gera movimento diário
+• Tem controle da própria agenda
+• Crescimento previsível e sustentável
+
+O erro silencioso é acreditar que técnica sozinha é suficiente. Técnica + método = transformação real.`,
         order_index: 3
       },
       {
-        id: 'prioridades',
-        titulo: 'Prioridades e Foco (O que realmente importa)',
-        conteudo: `O erro mais comum das nutricionistas é tentar fazer tudo ao mesmo tempo.
-A Nutri‑Empresária aprende a fazer o que realmente importa.
+        id: 'promessa',
+        titulo: 'A promessa YLADA',
+        conteudo: `"Menos corrida. Mais lucro. Mais identidade."
 
-Aqui ela descobre:
+Essa é a promessa do Método YLADA.
 
-• como identificar prioridades
-• como eliminar distrações camufladas de produtividade
-• como decidir o que deve ser feito hoje, amanhã ou nunca
-• como usar o GSAL para dar direção
+Não é sobre trabalhar mais horas. É sobre trabalhar com método.
 
-Prioridade não é agenda cheia — é agenda consciente.`,
+Não é sobre fazer mais coisas. É sobre fazer as coisas certas.
+
+Não é sobre correr atrás de clientes. É sobre criar um sistema que traz clientes até você.
+
+A promessa YLADA é transformar sua prática em uma carreira previsível, organizada e lucrativa — sem perder sua essência, sem perder sua humanidade, sem perder sua paixão pela nutrição.`,
         order_index: 4
-      },
-      {
-        id: 'sistemas',
-        titulo: 'Sistemas Simples que Mantêm o Crescimento',
-        conteudo: `A Nutri‑Empresária 2.0 não cresce por intensidade — cresce por consistência.
-
-Nesta seção ela aprende:
-
-• o que é um sistema dentro do YLADA
-• como pensar em processos simples
-• como criar micro‑sistemas (captação, atendimento, organização)
-• como eliminar a sensação de estar sempre começando do zero
-
-Sistema = paz mental. Sistema = previsibilidade. Sistema = crescimento.`,
-        order_index: 5
-      },
-      {
-        id: 'postura-presenca',
-        titulo: 'O Papel da Rotina, da Postura e da Presença',
-        conteudo: `A Nutri‑Empresária entende que seu resultado não depende apenas de técnica, mas de:
-
-• como ela aparece
-• como ela responde
-• como ela se organiza
-• como ela se comunica
-
-Nesta seção ela aprende:
-
-• o padrão de postura da Nutri‑Empresária
-• como evitar mensagens inseguras
-• como comunicar autoridade sem arrogância
-• como manter constância mesmo em dias difíceis
-
-Aqui nasce a profissional madura.`,
-        order_index: 6
-      },
-      {
-        id: 'implementacao',
-        titulo: 'Implementando a Nutri‑Empresária na Vida Real',
-        conteudo: `É aqui que a teoria vira prática.
-
-Ela aprende:
-
-• como colocar a rotina mínima em funcionamento
-• como aplicar foco e prioridades
-• como usar micro‑sistemas no dia a dia
-• como lidar com dias ruins sem perder o ritmo
-• como revisar e ajustar o próprio método
-
-Esta seção prepara a profissional para a Semana 3 da Jornada (Encantamento e Conversão), quando a presença dela começa a gerar resultado real.`,
-        order_index: 7
       }
-    ]
+    ],
+    campo_anotacao: 'O que mais fez sentido para você neste Pilar?'
+  },
+  {
+    id: '2',
+    numero: 2,
+    nome: 'Rotina Mínima YLADA',
+    subtitulo: 'Sua rotina é a sua estratégia.',
+    descricao_curta: 'Transformar a forma como a nutricionista opera no seu dia a dia. Dar clareza, autonomia e estrutura prática para que ela pare de trabalhar em modo reativo, ganhe controle da sua agenda, tenha processos simples e finalmente consiga crescer sem caos.',
+    descricao_introducao: `Sua rotina é a sua estratégia.
+
+A rotina mínima mantém constância mesmo nos dias ruins. É o que diferencia a Nutri que cresce da Nutri que se perde.`,
+    secoes: [
+      {
+        id: 'o-que-e-rotina-minima',
+        titulo: 'O que é Rotina Mínima',
+        conteudo: `Rotina mínima mantém constância mesmo nos dias ruins.
+
+É o ritual diário que garante que você continue em movimento, mesmo quando não está motivada, mesmo quando está cansada, mesmo quando parece que nada está dando certo.
+
+A rotina mínima não é sobre fazer muito. É sobre fazer o essencial, todos os dias, sem exceção.
+
+Quando você tem uma rotina mínima definida, você nunca volta ao zero. Você sempre mantém o movimento, e o movimento gera oportunidades.`,
+        order_index: 1
+      },
+      {
+        id: 'tres-blocos-diarios',
+        titulo: 'Os 3 blocos diários da Nutri-Empresária',
+        conteudo: `A rotina mínima da Nutri-Empresária se divide em 3 blocos essenciais:
+
+🔹 Bloco de Captação
+
+Ações diárias para gerar movimento e atrair novas pessoas. Pode ser distribuir uma ferramenta, enviar um CTA, fazer um story, iniciar conversas.
+
+🔹 Bloco de Atendimento
+
+O tempo dedicado a atender clientes, responder mensagens, fazer follow-up, criar conexões reais.
+
+🔹 Bloco de Construção
+
+Tempo para construir marca, estudar, aplicar GSAL, organizar, planejar. É o investimento em você e no seu negócio.
+
+Esses 3 blocos trabalham juntos para criar um dia completo e produtivo, sem sobrecarga.`,
+        order_index: 2
+      },
+      {
+        id: 'rotina-minima-parte-1',
+        titulo: 'Rotina Mínima — Parte 1 (Dia 15)',
+        conteudo: `No Dia 15 da Jornada, você começa a estruturar sua rotina mínima oficial.
+
+Checklist:
+
+☐ Definir horários fixos
+
+Escolha horários fixos para cada bloco (Captação, Atendimento, Construção). Não precisa ser muitas horas — precisa ser consistente.
+
+☐ Criar 1 ação obrigatória
+
+Defina 1 ação mínima que você fará todos os dias, sem exceção. Pode ser distribuir 1 ferramenta, enviar 1 CTA, iniciar 3 conversas.
+
+☐ Registrar rotina
+
+Anote sua rotina oficial no app. Isso cria compromisso e clareza.
+
+A rotina mínima começa pequena e cresce naturalmente.`,
+        order_index: 3,
+        checklist_items: [
+          'Definir horários fixos',
+          'Criar 1 ação obrigatória',
+          'Registrar rotina'
+        ]
+      },
+      {
+        id: 'rotina-minima-parte-2',
+        titulo: 'Rotina Mínima — Parte 2 (Dia 16)',
+        conteudo: `No Dia 16, você revisa e ajusta sua rotina mínima.
+
+Checklist:
+
+☐ Revisar rotina
+
+Olhe para o que você definiu no Dia 15. Está realista? Está aplicável? Está sustentável?
+
+☐ Reduzir excessos
+
+Se você colocou muitas coisas, reduza. Rotina mínima é sobre o essencial, não sobre fazer tudo.
+
+☐ Confirmar rotina oficial
+
+Depois de revisar e ajustar, confirme sua rotina oficial. Esta será sua base para os próximos dias.
+
+A rotina mínima deve ser leve o suficiente para você fazer todos os dias, mas significativa o suficiente para gerar resultados.`,
+        order_index: 4,
+        checklist_items: [
+          'Revisar rotina',
+          'Reduzir excessos',
+          'Confirmar rotina oficial'
+        ]
+      }
+    ],
+    campo_anotacao: 'Como será sua Rotina Mínima daqui para frente?'
   },
   {
     id: '3',
     numero: 3,
-    nome: 'Captação com Ferramentas YLADA',
-    subtitulo: 'Gerar leads diários de forma leve, consistente e estratégica',
+    nome: 'Captação YLADA (Gerar Movimento)',
+    subtitulo: 'Como atrair pessoas todos os dias de forma leve e duplicável.',
     descricao_curta: 'Ensinar a nutricionista a construir atração diária, com estratégias simples que funcionam independentemente do número de seguidores. A profissional aprende a criar ferramentas que chamam atenção, usar frases que fazem as pessoas clicarem, distribuir sem timidez e organizar leads para priorizar quem está mais quente.',
-    descricao_introducao: `O Pilar 3 ensina a nutricionista a gerar leads diários, de forma leve, consistente e estratégica, usando ferramentas simples, CTAs inteligentes, distribuição e organização. É aqui que a Nutri deixa de depender de algoritmo, sorte ou indicações ocasionais — e passa a criar fluxo constante de oportunidades.
+    descricao_introducao: `Como atrair pessoas todos os dias de forma leve e duplicável.
 
-A Captação YLADA tem 3 pilares centrais:
-
-• Ferramentas que resolvem microproblemas
-• CTAs que despertam curiosidade
-• Distribuição diária sem esforço excessivo
-
-Quando essas peças se encaixam, a Nutri entra no estado de "movimento", essencial para gerar clientes todos os dias.`,
+Gerar movimento cria oportunidades.`,
     secoes: [
       {
-        id: 'ferramentas',
-        titulo: 'Ferramentas de Captação (O Motor do Movimento)',
-        conteudo: `Ferramentas são o coração da captação YLADA. Elas não precisam ser complexas — precisam ser úteis.
+        id: 'o-que-e-captacao',
+        titulo: 'O que é Captação YLADA',
+        conteudo: `Explicação resumida: "Gerar movimento cria oportunidades."
 
-Nesta seção, a profissional aprende:
+Captação YLADA não é sobre fazer anúncios caros ou ter milhares de seguidores. É sobre criar movimento diário, leve e consistente.
 
-• tipos de ferramentas que mais funcionam (checklists, testes, guias simples)
-• como escolher sua primeira ferramenta
-• como personalizar com sua identidade
-• onde hospedar e como compartilhar
-
-Ferramentas bem feitas abrem conversas automaticamente.`,
+Quando você gera movimento, você cria oportunidades. E oportunidades viram leads. E leads viram clientes.`,
         order_index: 1
       },
       {
-        id: 'ctas',
-        titulo: 'Criação de CTAs (Frases que fazem pessoas clicarem)',
-        conteudo: `A CTA é a "chamada" que move a pessoa do interesse para a ação.
+        id: 'ferramentas-captacao',
+        titulo: 'Ferramentas de Captação',
+        conteudo: `As ferramentas YLADA são o coração da captação. Elas resolvem microproblemas e abrem conversas automaticamente.
 
-A Nutri aprende:
+Lista de ferramentas disponíveis:
 
-• como escrever frases curtas que despertam curiosidade
-• como evitar CTAs genéricas que não convertem
-• como criar variações semanais
-• como conectar CTA → ferramenta → conversa
+• Avaliações
+• Quizzes
+• Calculadoras
+• Scripts
+• Stories
+• Lista de objeções
 
-Uma boa CTA é simples, clara e irresistível.`,
-        order_index: 2
+Cada ferramenta tem um propósito específico e pode ser personalizada com sua identidade.`,
+        order_index: 2,
+        exercicios_relacionados: [],
+        ferramentas_relacionadas: ['avaliacoes', 'quizzes', 'calculadoras', 'scripts', 'stories', 'objecoes']
       },
       {
-        id: 'distribuicao',
-        titulo: 'Distribuição 10–10–10 (A Fórmula da Alcance Diário)',
-        conteudo: `Distribuir é tão importante quanto criar.
+        id: 'ctas-inteligentes',
+        titulo: 'CTAs Inteligentes',
+        conteudo: `O formato YLADA de CTA:
 
-Nesta seção, a profissional aprende:
+Clareza → Ação simples → Zero pressão.
 
-• o método oficial de distribuição YLADA
-• como alcançar novas pessoas todos os dias
-• como organizar o envio em listas e grupos
-• como crescer sem depender de anúncios
+Uma boa CTA não vende. Ela convida. Ela desperta curiosidade. Ela faz a pessoa querer saber mais.
 
-Distribuição diária = leads diários.`,
+Exemplos de CTAs YLADA:
+
+• "Descubra seu perfil nutricional em 2 minutos"
+• "Quer saber se você está no caminho certo?"
+• "Teste grátis: como está sua rotina alimentar?"
+
+A CTA deve ser simples, clara e irresistível.`,
         order_index: 3
       },
       {
-        id: 'story',
-        titulo: 'Story de Captação (Conteúdo que gera clique, não curtida)',
-        conteudo: `Stories são um dos maiores motores de captação.
+        id: 'metodo-10-10-10',
+        titulo: 'Método de Distribuição 10–10–10',
+        conteudo: `O método 10–10–10 é a fórmula oficial de distribuição YLADA.
 
-A Nutri aprende:
+Funciona assim:
 
-• o modelo de story que realmente funciona
-• como fazer stories simples, sem estética exagerada
-• como inserir CTA de forma natural
-• como medir o que gerou mais resposta
+• 10 pessoas por WhatsApp
+• 10 pessoas por Instagram
+• 10 pessoas por outras plataformas
 
-Story não vende pela beleza — vende pela clareza.`,
-        order_index: 4
+Total: 30 pessoas por dia, sem esforço excessivo.
+
+Este método garante que você alcance novas pessoas todos os dias, de forma leve e consistente.`,
+        order_index: 4,
+        exercicios_relacionados: ['distribuicao-10-10-10']
       },
       {
-        id: 'objecoes',
-        titulo: 'Objeções Inteligentes (Transformando dúvidas em oportunidades)',
-        conteudo: `Objeções são parte natural do processo.
-
-Aqui a profissional aprende:
-
-• como interpretar objeções
-• como responder de forma leve e segura
-• frases‑curinga para usar no dia a dia
-• como não perder leads por insegurança
-
-Objeções bem respondidas viram clientes.`,
-        order_index: 5
-      },
-      {
-        id: 'gestao-leads',
-        titulo: 'Gestão de Leads YLADA (Organização que gera conversões)',
+        id: 'gestao-leads-ylada',
+        titulo: 'Gestão de Leads YLADA',
         conteudo: `Leads precisam ser organizados para virar clientes.
 
-Nesta seção, ela aprende:
+A gestão de leads YLADA ensina:
 
 • como separar leads quentes, mornos e frios
 • como priorizar quem responde
@@ -380,33 +305,29 @@ Nesta seção, ela aprende:
 • como planejar retornos estratégicos
 
 Lead organizado = dinheiro organizado.`,
-        order_index: 6
-      },
-      {
-        id: 'implementacao-captacao',
-        titulo: 'Implementação da Semana de Captação',
-        conteudo: `Nesta parte a nutricionista aprende a:
-
-• montar sua semana de captação
-• escolher suas ferramentas principais
-• definir CTA da semana
-• distribuir diariamente sem cansar
-• revisar diariamente o movimento
-
-A intenção aqui é criar constância.`,
-        order_index: 7
+        order_index: 5,
+        exercicios_relacionados: ['gestao-leads'],
+        ferramentas_relacionadas: ['gestao-leads']
       }
-    ]
+    ],
+    campo_anotacao: 'Qual ferramenta você vai usar esta semana?'
   },
   {
     id: '4',
     numero: 4,
     nome: 'Atendimento que Encanta',
-    subtitulo: 'Conexão, conversão e fidelização',
+    subtitulo: 'Atendimento não é conversa — é estratégia.',
     descricao_curta: 'Ensinar a nutricionista a dominar as quatro etapas da conversão natural: primeiro contato que cria conexão, atendimento que orienta sem pressionar, pós-atendimento que fideliza, e indicações e encantamentos que multiplicam oportunidades.',
-    descricao_introducao: `O Pilar 4 é o coração da conversão dentro do Método YLADA. É aqui que a nutricionista aprende a transformar conversas em conexões reais, conexões em agendamentos, e agendamentos em clientes fiéis — tudo com leveza, humanidade e método.
+    descricao_introducao: `Atendimento não é conversa — é estratégia.`,
+    secoes: [
+      {
+        id: 'o-que-e-atendimento-ylada',
+        titulo: 'O que é um atendimento YLADA',
+        conteudo: `Explicar: simples, leve, intencional e eficiente.
 
-O atendimento YLADA não é técnico. É emocional + estratégico. Ele faz a pessoa sentir:
+O atendimento YLADA não é técnico. É emocional + estratégico.
+
+Ele faz a pessoa sentir:
 
 • segurança
 • clareza
@@ -414,38 +335,60 @@ O atendimento YLADA não é técnico. É emocional + estratégico. Ele faz a pes
 • profissionalismo
 • e vontade de continuar
 
-Este pilar é responsável por construir uma experiência tão boa, que o cliente não quer ir embora.`,
-    secoes: [
-      {
-        id: 'primeiro-contato',
-        titulo: 'Primeiro Contato YLADA (Abertura que Conecta)',
-        conteudo: `O primeiro contato define todo o restante. Nesta seção, a profissional aprende:
-
-• como iniciar conversas de forma acolhedora
-• frases que geram conexão imediata
-• como evitar respostas frias que afastam o lead
-• como mostrar interesse sem parecer vendedora
-
-Princípio YLADA: "Quem conecta, converte."`,
+É sobre criar uma experiência tão boa, que o cliente não quer ir embora.`,
         order_index: 1
       },
       {
-        id: 'script',
-        titulo: 'Script Oficial de Atendimento (A Conversa que Conduz)',
-        conteudo: `A nutricionista descobre o script que torna o atendimento mais leve e natural. Ela aprende:
+        id: 'estrutura-atendimento',
+        titulo: 'Estrutura do atendimento profissional',
+        conteudo: `O atendimento YLADA se divide em 4 blocos essenciais:
 
-• como identificar a dor principal da pessoa
-• como conduzir sem pressionar
-• como usar perguntas estratégicas
-• como criar desejo genuíno pelo atendimento
+🔹 Acolhimento
 
-Script não é rigidez. Script é um mapa.`,
+O primeiro contato que cria conexão. Como você recebe a pessoa, como você inicia a conversa, como você mostra interesse genuíno.
+
+🔹 Entendimento real
+
+Como você identifica a dor principal, como você faz perguntas estratégicas, como você demonstra que realmente entende o que a pessoa precisa.
+
+🔹 Direcionamento
+
+Como você conduz sem pressionar, como você orienta com clareza, como você cria desejo genuíno pelo atendimento.
+
+🔹 Encerramento estratégico
+
+Como você fecha a conversa, como você faz o convite natural, como você cria expectativa positiva.
+
+Esses 4 blocos trabalham juntos para criar um atendimento completo e eficiente.`,
         order_index: 2
       },
       {
-        id: 'pos-atendimento',
-        titulo: 'Pós-Atendimento que Fideliza (Onde a Magia Acontece)',
-        conteudo: `A maioria das nutricionistas perde clientes depois da conversa. Aqui, ela aprende o ritual YLADA de fidelização:
+        id: 'perguntas-poder',
+        titulo: 'Perguntas-Poder YLADA',
+        conteudo: `As perguntas-poder são aquelas que realmente fazem a diferença no atendimento.
+
+Elas não são perguntas técnicas. São perguntas que:
+
+• criam conexão emocional
+• identificam necessidades reais
+• geram reflexão
+• abrem espaço para você orientar
+
+Exemplos de perguntas-poder:
+
+• "O que mais te incomoda na sua relação com a comida?"
+• "Como você se sente quando pensa em mudar seus hábitos?"
+• "O que seria diferente na sua vida se você tivesse mais energia?"
+
+Perguntas-poder transformam conversas em conexões.`,
+        order_index: 3
+      },
+      {
+        id: 'pos-atendimento-ylada',
+        titulo: 'Pós-atendimento YLADA',
+        conteudo: `A maioria das nutricionistas perde clientes depois da conversa.
+
+O pós-atendimento YLADA é onde a magia acontece:
 
 • mensagem de cuidado
 • lembrete estratégico
@@ -454,196 +397,123 @@ Script não é rigidez. Script é um mapa.`,
 • criação do vínculo emocional
 
 Clientes fiéis surgem do pós-atendimento — não do atendimento.`,
-        order_index: 3
-      },
-      {
-        id: 'momento-certo',
-        titulo: 'Momento Certo de Convidar para Agendar',
-        conteudo: `Conversão não é sobre empurrar — é sobre percepção do timing.
-
-Nesta seção, ela aprende:
-
-• identificar quando o lead está pronto
-• como fazer o convite sem parecer venda
-• frases de convite natural
-• como evitar ansiedade na hora de convidar
-
-"When você guia, o cliente diz sim com leveza."`,
-        order_index: 4
-      },
-      {
-        id: 'indicacoes',
-        titulo: 'Indicações YLADA (O Sistema de Crescimento Orgânico)',
-        conteudo: `Indicação não é milagre. É método.
-
-Aqui, a nutricionista aprende:
-
-• como pedir indicações com confiança
-• quando pedir para não parecer forçada
-• mensagens prontas para pedir indicações
-• como organizar respostas
-
-Indicação é o maior sinal de confiança que existe.`,
-        order_index: 5
-      },
-      {
-        id: 'encantamentos',
-        titulo: 'Pequenos Encantamentos (Detalhes que Criam Memória)',
-        conteudo: `Pequenos gestos criam grandes percepções. Nesta seção, ela descobre:
-
-• como encantar sem gastar nada
-• como surpreender através de pequenas atitudes
-• mensagens curtas de impacto emocional
-• como criar experiências memoráveis
-
-Encantamento = retenção.`,
-        order_index: 6
-      },
-      {
-        id: 'implementacao-encantamento',
-        titulo: 'Implementação da Semana de Encantamento',
-        conteudo: `Nesta parte, a profissional aprende a:
-
-• aplicar o script oficial
-• encantar nos detalhes
-• conduzir conversas reais
-• fazer pós-atendimento estratégico
-• pedir indicações naturalmente
-
-Esta parte prepara completamente para a Semana 3 da Jornada.`,
-        order_index: 7
+        order_index: 4,
+        exercicios_relacionados: ['roteiro-atendimento'],
+        ferramentas_relacionadas: ['modelo-pos-atendimento']
       }
-    ]
+    ],
+    campo_anotacao: 'Como você quer que o cliente se sinta após falar com você?'
   },
   {
     id: '5',
     numero: 5,
-    nome: 'GSAL & Crescimento',
-    subtitulo: 'Gestão, organização, rotina e escala',
+    nome: 'GSAL: Gerar, Servir, Acompanhar, Lucrar',
+    subtitulo: 'O método definitivo para lotar agendas.',
     descricao_curta: 'Transformar o crescimento da nutricionista em algo leve, organizado, sustentável, contínuo e previsível. E não algo caótico, por impulso ou por "sorte". Este pilar entrega o que toda profissional deseja: controle da própria carreira.',
-    descricao_introducao: `O Pilar 5 é o fechamento do Método YLADA — o ponto onde tudo se conecta para criar rotina previsível, agenda organizada, crescimento contínuo e leveza profissional. É aqui que a nutricionista entende como manter o movimento sem perder energia, como crescer sem caos e como construir uma carreira estável.
+    descricao_introducao: `O método definitivo para lotar agendas.
 
-O GSAL significa:
-
-• G — Gestão (claridade sobre o que está acontecendo)
-• S — Sistema (passos repetíveis que mantêm tudo fluindo)
-• A — Agenda (previsibilidade e organização real)
-• L — Leveza (crescimento sem exaustão)
-
-O GSAL é o método que evita que a nutricionista volte ao improviso.`,
+O GSAL é a estrutura que transforma seu trabalho em algo previsível. Quando você domina GSAL, sua agenda começa a encher naturalmente.`,
     secoes: [
       {
-        id: 'fundamentos-gsal',
-        titulo: 'Fundamentos do GSAL (A Nova Forma de Gerir Sua Rotina)',
-        conteudo: `Aqui a nutricionista compreende que:
+        id: 'explicacao-geral-gsal',
+        titulo: 'Explicação geral do GSAL',
+        conteudo: `O GSAL é a estrutura que transforma seu trabalho em algo previsível.
 
-• crescer não é fazer mais; é fazer certo
-• organização libera energia mental
-• rotina previsível reduz ansiedade
-• sistemas simples evitam sobrecarga
+Criar 4 caixas:
 
-Ela aprende:
+🔹 G — Gerar
 
-• o que é GSAL
-• por que ele funciona
-• como ele se relaciona com todos os outros pilares
-• como iniciar o GSAL imediatamente
+Criar fluxo contínuo de oportunidades. Colocar seu trabalho em movimento diário, criando novas oportunidades de contato.
 
-O GSAL é o antídoto oficial contra a correria.`,
+🔹 S — Servir
+
+Entregar valor que conecta. Não é trabalhar de graça — é entregar clareza e ajuda real, aquilo que aproxima as pessoas do seu método.
+
+🔹 A — Acompanhar
+
+Transformar interesses em fechamentos. A maioria das vendas acontece no acompanhamento — não na primeira conversa.
+
+🔹 L — Lucrar
+
+Estruturar sua agenda para crescer. É estruturar o fluxo de trabalho para que tudo leve naturalmente a fechamentos.
+
+Essas 4 etapas trabalham juntas para criar um ciclo completo de crescimento.`,
         order_index: 1
       },
       {
-        id: 'painel-prioridades',
-        titulo: 'Painel de Prioridades YLADA (O Coração da Semana)',
-        conteudo: `O painel de prioridades dá clareza sobre o que realmente precisa ser feito. Ele substitui a sensação de estar perdida por uma visão clara da semana.
+        id: 'exercicio-gerar',
+        titulo: 'Exercício G de Gerar',
+        conteudo: `Aplicar a primeira etapa do GSAL: GERAR.
 
-Nesta seção, a profissional aprende:
+Gerar é colocar seu trabalho em movimento diário, criando novas oportunidades de contato.
 
-• como montar seu painel semanal
-• como definir 3 prioridades profissionais e 2 pessoais
-• como revisar e ajustar ao longo da semana
-• como manter foco mesmo com imprevistos
+Ações práticas:
 
-O painel é onde a semana nasce.`,
-        order_index: 2
+• Escolher 1 ferramenta para gerar movimento hoje
+• Executar 1 ação de distribuição
+• Iniciar 5 novas conversas
+• Registrar resultados no app
+
+Quem gera movimento, cria oportunidades.`,
+        order_index: 2,
+        exercicios_relacionados: ['g-de-gerar']
       },
       {
-        id: 'organizacao-leads-gsal',
-        titulo: 'Organização de Leads GSAL (Não Perder Oportunidades)',
-        conteudo: `Leads desorganizados = dinheiro perdido.
+        id: 'exercicio-servir',
+        titulo: 'Exercício S de Servir',
+        conteudo: `Dominar a etapa SERVIR para criar conexão e confiança.
 
-Aqui, a nutricionista aprende:
+Servir não é trabalhar de graça — é entregar clareza e ajuda real, aquilo que aproxima as pessoas do seu método.
 
-• como dividir leads entre quentes, mornos e frios
-• como identificar quem precisa de retorno imediato
-• como criar lembretes (48h, 7 dias, 14 dias)
-• como organizar tudo dentro do SAS
+Ações práticas:
 
-Lead organizado = conversão previsível.`,
-        order_index: 3
+• Escolher 1 microconteúdo de valor
+• Enviar para 3 pessoas específicas
+• Responder dúvidas com intenção
+• Registrar impacto no app
+
+Quando você serve, você se torna inesquecível.`,
+        order_index: 3,
+        exercicios_relacionados: ['s-de-servir']
       },
       {
-        id: 'agenda-cheia',
-        titulo: 'Agenda Cheia YLADA (Previsibilidade Real)',
-        conteudo: `Agenda cheia não é lotar tudo. Agenda cheia é previsibilidade + constância.
+        id: 'exercicio-acompanhar',
+        titulo: 'Exercício A de Acompanhar',
+        conteudo: `Dominar o acompanhamento que realmente converte.
 
-Ela aprende:
+A maioria das vendas acontece no acompanhamento — não na primeira conversa.
 
-• como criar blocos fixos de trabalho
-• como organizar horários de captação, atendimento e GSAL
-• como criar espaçamento inteligente
-• como evitar exaustão
+Ações práticas:
 
-A agenda cheia YLADA é construída, não improvisada.`,
-        order_index: 4
+• Revisar leads quentes dos últimos 7 dias
+• Enviar mensagem de acompanhamento para 5 pessoas
+• Registrar quem respondeu
+• Marcar quem avançou
+
+Acompanhamento é profissionalismo, não insistência.`,
+        order_index: 4,
+        exercicios_relacionados: ['a-de-acompanhar']
       },
       {
-        id: 'checklist-gsal',
-        titulo: 'Checklist GSAL (O Sistema que Mantém Tudo Fluindo)',
-        conteudo: `O checklist GSAL é o mecanismo de manutenção diária e semanal.
+        id: 'exercicio-lucrar',
+        titulo: 'Exercício L de Lucrar',
+        conteudo: `Criar uma estrutura de agenda que apoia seu crescimento.
 
-Nesta seção, ela aprende:
+Lucrar é estruturar o fluxo de trabalho para que tudo leve naturalmente a fechamentos.
 
-• checklist diário (3–5 minutos)
-• checklist semanal (10–15 minutos)
-• como revisar o que ainda está travando
-• como ajustar a rotina
+Ações práticas:
 
-Checklists garantem que o método continue funcionando.`,
-        order_index: 5
-      },
-      {
-        id: 'retencao',
-        titulo: 'Retenção & Relacionamento (Crescimento Inteligente)',
-        conteudo: `Crescer não é apenas vender — é manter.
+• Definir horários fixos de atendimento
+• Reservar horários de captação
+• Ajustar agenda mínima semanal
+• Registrar agenda oficial no app
 
-Aqui, a profissional descobre:
-
-• como criar relacionamento contínuo com clientes ativos
-• como enviar mensagens de cuidado genuínas
-• como acompanhar casos com estratégia
-• como criar confiança de longo prazo
-
-Retenção = crescimento silencioso, porém poderoso.`,
-        order_index: 6
-      },
-      {
-        id: 'crescimento-30-dias',
-        titulo: 'Crescimento em 30 Dias (Plano Estratégico YLADA)',
-        conteudo: `Nesta seção, a Nutri cria o seu plano de crescimento com base no que funciona.
-
-Ela aprende:
-
-• como definir metas reais para o próximo ciclo
-• como escolher 3 ações de captação
-• como escolher 2 ações de encantamento
-• como escolher 1 foco principal de gestão
-• como repetir o ciclo a cada 30 dias
-
-Crescimento YLADA é repetição inteligente.`,
-        order_index: 7
+Lucrar é consequência de estruturar.`,
+        order_index: 5,
+        exercicios_relacionados: ['l-de-lucrar', 'agenda-estrategica']
       }
-    ]
+    ],
+    campo_anotacao: 'Qual etapa do GSAL você quer dominar primeiro?'
   }
 ]
 
