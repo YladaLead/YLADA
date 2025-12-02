@@ -89,3 +89,47 @@ export interface ProgressoTrilha {
   updated_at: string
 }
 
+// Jornada de 30 Dias
+export interface JourneyDay {
+  id: string
+  day_number: number
+  week_number: number
+  title: string
+  objective: string
+  guidance: string
+  action_type: 'pilar' | 'exercicio' | 'ferramenta'
+  action_id?: string
+  action_title: string
+  checklist_items: string[]
+  motivational_phrase?: string
+  order_index: number
+  created_at: string
+  updated_at: string
+}
+
+export interface JourneyProgress {
+  id: string
+  user_id: string
+  day_number: number
+  week_number: number
+  completed: boolean
+  completed_at?: string
+  checklist_completed: boolean[]
+  created_at: string
+  updated_at: string
+}
+
+export interface JourneyStats {
+  total_days: number
+  completed_days: number
+  progress_percentage: number
+  current_day?: number
+  current_week: number
+  week_progress: {
+    week: number
+    completed: number
+    total: number
+    percentage: number
+  }[]
+}
+

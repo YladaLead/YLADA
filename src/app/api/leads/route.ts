@@ -156,7 +156,42 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // 🔒 Inserir lead (user_id sempre vem do link, nunca do body)
+      // 🔒 Verificar se o usuário é Coach para salvar também em coach_leads
+      const { data: userProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('profession')
+        .eq('user_id', link.user_id)
+        .maybeSingle()
+
+      const isCoach = userProfile?.profession === 'coach'
+
+      // 🔒 Buscar template_id se o link estiver relacionado a uma ferramenta Coach
+      let templateId = null
+      if (isCoach) {
+        // Tentar encontrar o template_id relacionado ao link pelo slug
+        const { data: coachTemplate } = await supabaseAdmin
+          .from('coach_user_templates')
+          .select('id')
+          .eq('user_id', link.user_id)
+          .eq('slug', validated.slug)
+          .maybeSingle()
+        
+        templateId = coachTemplate?.id || null
+        
+        // Se não encontrou pelo slug, tentar buscar pelo short_code se existir
+        if (!templateId && link.short_code) {
+          const { data: coachTemplateByCode } = await supabaseAdmin
+            .from('coach_user_templates')
+            .select('id')
+            .eq('user_id', link.user_id)
+            .eq('short_code', link.short_code)
+            .maybeSingle()
+          
+          templateId = coachTemplateByCode?.id || null
+        }
+      }
+
+      // 🔒 Inserir lead na tabela geral
       const { data: newLead, error: leadError } = await supabaseAdmin
         .from('leads')
         .insert({
@@ -180,6 +215,30 @@ export async function POST(request: NextRequest) {
           { success: false, error: 'Erro ao salvar lead' },
           { status: 500 }
         )
+      }
+
+      // 🔒 Se for Coach, salvar também em coach_leads
+      if (isCoach && templateId) {
+        const { error: coachLeadError } = await supabaseAdmin
+          .from('coach_leads')
+          .insert({
+            template_id: templateId,
+            user_id: link.user_id,
+            name: sanitizedData.name,
+            email: sanitizedData.email || null,
+            phone: sanitizedData.phone || null,
+            whatsapp: sanitizedData.phone || null,
+            additional_data: sanitizedData.additionalData,
+            source: 'template',
+            ip_address: ip,
+            user_agent: userAgent.substring(0, 500),
+            created_at: new Date().toISOString()
+          })
+
+        if (coachLeadError) {
+          console.error('Erro ao salvar lead do Coach:', coachLeadError)
+          // Não falhar a requisição, apenas logar o erro
+        }
       }
 
       // 🔒 Atualizar contador de leads do link

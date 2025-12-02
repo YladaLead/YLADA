@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import FormacaoTabs from '@/components/formacao/FormacaoTabs'
 import MetodoYLADAIntro from '@/components/formacao/MetodoYLADAIntro'
+import JornadaSection from '@/components/formacao/JornadaSection'
 import TrilhasSection from '@/components/formacao/TrilhasSection'
 import MicrocursosSection from '@/components/formacao/MicrocursosSection'
 import BibliotecaSection from '@/components/formacao/BibliotecaSection'
@@ -15,6 +16,17 @@ import type { Trilha, Microcurso, BibliotecaItem, Tutorial } from '@/types/forma
 export default function FormacaoPage() {
   const { user, loading } = useAuth()
   const [activeTab, setActiveTab] = useState<'jornada' | 'trilhas' | 'microcursos' | 'biblioteca' | 'tutoriais'>('jornada')
+
+  // Verificar se há parâmetro de tab na URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const tab = params.get('tab')
+      if (tab && ['jornada', 'trilhas', 'microcursos', 'biblioteca', 'tutoriais'].includes(tab)) {
+        setActiveTab(tab as any)
+      }
+    }
+  }, [])
   
   const [trilhas, setTrilhas] = useState<Trilha[]>([])
   const [microcursos, setMicrocursos] = useState<Microcurso[]>([])
@@ -185,19 +197,7 @@ export default function FormacaoPage() {
         ) : (
           <>
             {activeTab === 'jornada' && (
-              <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
-                <div className="text-6xl mb-4">🗺️</div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Jornada YLADA de 30 Dias</h2>
-                <p className="text-lg text-gray-600 mb-6">
-                  Sua transformação passo a passo, dia a dia, organizada e guiada.
-                </p>
-                <p className="text-gray-500">
-                  A Jornada de 30 Dias está sendo preparada e estará disponível em breve.
-                </p>
-                <p className="text-sm text-gray-400 mt-4">
-                  Enquanto isso, explore os Pilares, Exercícios e Ferramentas do Método YLADA.
-                </p>
-              </div>
+              <JornadaSection />
             )}
             {activeTab === 'trilhas' && <TrilhasSection trilhas={trilhas} />}
             {activeTab === 'microcursos' && <MicrocursosSection microcursos={microcursos} />}

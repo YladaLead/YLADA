@@ -12,10 +12,11 @@ export default function ConditionalSidebar({ children }: ConditionalSidebarProps
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Esconder sidebar em rotas de formacao
+  // Esconder sidebar em rotas de formacao e metodo (modo imersivo)
   const isFormacaoRoute = pathname?.startsWith('/pt/nutri/formacao')
+  const isMetodoRoute = pathname?.startsWith('/pt/nutri/metodo')
 
-  if (isFormacaoRoute) {
+  if (isFormacaoRoute || isMetodoRoute) {
     return <>{children}</>
   }
 

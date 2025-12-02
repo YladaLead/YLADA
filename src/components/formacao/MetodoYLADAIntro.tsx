@@ -123,7 +123,7 @@ export default function MetodoYLADAIntro() {
         {/* CTA Principal */}
         <div className="text-center">
           <Link
-            href="/pt/nutri/formacao/jornada"
+            href="/pt/nutri/formacao"
             className="inline-block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white text-xl font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
           >
             🚀 Iniciar Minha Jornada de 30 Dias

@@ -15,7 +15,7 @@ export default function FormacaoTabs({ activeTab, onTabChange }: FormacaoTabsPro
   ]
 
   return (
-    <div className="mb-8">
+    <div className="mb-8" data-tabs>
       <div className="bg-white rounded-xl p-1 shadow-sm border border-gray-200 inline-flex flex-wrap gap-1">
         {tabs.map((tab) => (
           <button

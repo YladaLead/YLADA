@@ -1,0 +1,403 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import FormacaoHeader from '@/components/formacao/FormacaoHeader'
+import AcaoPraticaCard from '@/components/formacao/AcaoPraticaCard'
+import ChecklistItem from '@/components/formacao/ChecklistItem'
+import ReflexaoDia from '@/components/formacao/ReflexaoDia'
+import { useAuth } from '@/hooks/useAuth'
+import type { JourneyDay } from '@/types/formacao'
+
+export default function JornadaDiaPage() {
+  const params = useParams()
+  const router = useRouter()
+  const { user } = useAuth()
+  const dayNumber = parseInt(params.numero as string)
+
+  const [day, setDay] = useState<(JourneyDay & { 
+    progress: any
+    is_completed: boolean
+    is_locked: boolean
+    checklist_notes?: Map<number, string>
+    checklist_logs?: Map<number, boolean>
+    daily_note?: string
+  }) | null>(null)
+  
+  const [checklist, setChecklist] = useState<boolean[]>([])
+  const [checklistNotes, setChecklistNotes] = useState<Map<number, string>>(new Map())
+  const [dailyNote, setDailyNote] = useState('')
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
+  const [concluindo, setConcluindo] = useState(false)
+
+  useEffect(() => {
+    const carregarDia = async () => {
+      try {
+        setCarregando(true)
+        setErro(null)
+
+        const res = await fetch(`/api/nutri/metodo/jornada/dia/${dayNumber}`, {
+          credentials: 'include'
+        })
+
+        if (!res.ok) {
+          const errorData = await res.json()
+          throw new Error(errorData.error || 'Erro ao carregar dia')
+        }
+
+        const data = await res.json()
+        setDay(data.data)
+        
+        // Inicializar checklist com base nos logs
+        // checklist_logs vem como objeto simples do JSON, converter para Map
+        const logsObj = data.data.checklist_logs || {}
+        const logsMap = new Map(Object.entries(logsObj).map(([k, v]) => [parseInt(k), v]))
+        const initialChecklist = (data.data.checklist_items || []).map((_: any, index: number) => {
+          return logsMap.get(index) || false
+        })
+        setChecklist(initialChecklist)
+
+        // Inicializar notas do checklist
+        // checklist_notes vem como objeto simples do JSON, converter para Map
+        if (data.data.checklist_notes) {
+          const notesObj = data.data.checklist_notes
+          setChecklistNotes(new Map(Object.entries(notesObj).map(([k, v]: [string, any]) => [parseInt(k), v])))
+        }
+
+        // Inicializar anotação diária
+        setDailyNote(data.data.daily_note || '')
+      } catch (error: any) {
+        console.error('Erro ao carregar dia:', error)
+        setErro(error.message || 'Erro ao carregar dia')
+      } finally {
+        setCarregando(false)
+      }
+    }
+
+    if (dayNumber) {
+      carregarDia()
+    }
+  }, [dayNumber])
+
+  const toggleChecklistItem = async (index: number) => {
+    const newChecklist = [...checklist]
+    newChecklist[index] = !newChecklist[index]
+    setChecklist(newChecklist)
+
+    // Salvar log no backend
+    try {
+      await fetch('/api/nutri/metodo/jornada/checklist/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          day_number: dayNumber,
+          item_index: index,
+          marcado: newChecklist[index]
+        })
+      })
+    } catch (error) {
+      console.error('Erro ao salvar log do checklist:', error)
+    }
+  }
+
+  // Nota: handleChecklistNoteChange não é mais necessário
+  // O componente ChecklistItem agora salva automaticamente com debounce
+
+  const handleDailyNoteSave = async (content: string) => {
+    setDailyNote(content)
+
+    // Salvar anotação diária no backend
+    try {
+      await fetch('/api/nutri/metodo/jornada/daily-note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          day_number: dayNumber,
+          conteudo: content
+        })
+      })
+    } catch (error) {
+      console.error('Erro ao salvar anotação diária:', error)
+    }
+  }
+
+  const concluirDia = async () => {
+    try {
+      setConcluindo(true)
+
+      const res = await fetch(`/api/nutri/metodo/jornada/dia/${dayNumber}/concluir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          checklist_completed: checklist
+        })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Erro ao concluir dia:', errorData)
+        
+        if (errorData.requires_previous_day) {
+          alert('Conclua o dia anterior primeiro!')
+          router.push(`/pt/nutri/metodo/jornada/dia/${dayNumber - 1}`)
+          return
+        }
+        
+        // Mensagem de erro mais detalhada
+        const errorMessage = errorData.details 
+          ? `${errorData.error}\n\nDetalhes: ${errorData.details}`
+          : errorData.error || 'Erro ao concluir dia'
+        
+        alert(errorMessage)
+        throw new Error(errorMessage)
+      }
+
+      const result = await res.json()
+      
+      // Sucesso - redirecionar para a jornada ou próximo dia
+      const nextDay = dayNumber < 30 ? dayNumber + 1 : null
+      if (nextDay) {
+        router.push(`/pt/nutri/metodo/jornada/dia/${nextDay}`)
+      } else {
+        // Último dia concluído - ir para página de conclusão
+        router.push('/pt/nutri/metodo/jornada/concluida')
+      }
+    } catch (error: any) {
+      console.error('Erro ao concluir dia:', error)
+      // Não mostrar alert novamente se já foi mostrado
+      if (!error.message?.includes('Erro ao concluir dia')) {
+        alert(error.message || 'Erro ao concluir dia')
+      }
+    } finally {
+      setConcluindo(false)
+    }
+  }
+
+  const getActionLink = () => {
+    if (!day) return '#'
+    
+    if (day.action_type === 'pilar') {
+      if (day.action_id) {
+        return `/pt/nutri/metodo/pilares/${day.action_id}`
+      }
+      const pilarMap: Record<number, string> = {
+        1: '1', 2: '1', 4: '1', 6: '1',
+        3: '2', 5: '2',
+      }
+      const pilarId = pilarMap[dayNumber] || '1'
+      return `/pt/nutri/metodo/pilares/${pilarId}`
+    } else if (day.action_type === 'exercicio') {
+      return day.action_id 
+        ? `/pt/nutri/metodo/exercicios/${day.action_id}`
+        : '/pt/nutri/metodo/exercicios'
+    } else if (day.action_type === 'ferramenta') {
+      return day.action_id
+        ? `/pt/nutri/metodo/ferramentas/${day.action_id}`
+        : '/pt/nutri/metodo/ferramentas'
+    }
+    return '#'
+  }
+
+  if (carregando) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <FormacaoHeader />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando dia...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (erro || !day) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <FormacaoHeader />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+            <p className="text-red-800">{erro || 'Dia não encontrado'}</p>
+            <Link
+              href="/pt/nutri/metodo/jornada"
+              className="mt-4 inline-block text-blue-600 hover:text-blue-700"
+            >
+              ← Voltar para Jornada
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (day.is_locked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <FormacaoHeader />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6 text-center">
+            <div className="text-6xl mb-4">🔒</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Dia Bloqueado</h2>
+            <p className="text-gray-700 mb-4">
+              Conclua o dia anterior para desbloquear este dia.
+            </p>
+            <Link
+              href={`/pt/nutri/metodo/jornada/dia/${dayNumber - 1}`}
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Ir para Dia {dayNumber - 1}
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <FormacaoHeader />
+      
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Link
+            href="/pt/nutri/metodo/jornada"
+            className="text-blue-600 hover:text-blue-700 text-sm"
+          >
+            ← Voltar para Jornada
+          </Link>
+        </div>
+
+        {/* Header do Dia */}
+        <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold">
+              {day.day_number}
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{day.title}</h1>
+              <p className="text-sm text-gray-500">Semana {day.week_number} • Dia {day.day_number}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 1. OBJETIVO */}
+        <div className="bg-blue-50 rounded-xl p-6 mb-6 border-l-4 border-blue-500">
+          <h2 className="font-bold text-gray-900 mb-2 text-lg">🎯 Objetivo do Dia</h2>
+          <p className="text-gray-700">{day.objective}</p>
+        </div>
+
+        {/* 2. ORIENTAÇÃO */}
+        <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
+          <h2 className="font-bold text-gray-900 mb-3 text-lg">📖 Orientação</h2>
+          <p className="text-gray-700 leading-relaxed">{day.guidance}</p>
+        </div>
+
+        {/* 3. AÇÃO PRÁTICA */}
+        <AcaoPraticaCard
+          title={day.action_title}
+          description={day.action_title} // Pode ser expandido no futuro
+          actionType={day.action_type}
+          actionLink={getActionLink()}
+          actionId={day.action_id}
+        />
+
+        {/* 4. CHECKLIST DE FIXAÇÃO */}
+        <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
+          <h2 className="font-bold text-gray-900 mb-2 text-lg">✓ Checklist de Fixação</h2>
+          <p className="text-sm text-gray-600 mb-4 italic">
+            Use este checklist depois de concluir a ação prática para garantir que absorveu o conteúdo.
+          </p>
+          <div className="space-y-3">
+            {day.checklist_items.map((item, index) => (
+              <ChecklistItem
+                key={index}
+                id={`day-${dayNumber}-item-${index}`}
+                label={item}
+                dayNumber={dayNumber}
+                userId={user?.id || ''}
+                itemIndex={index}
+                checked={checklist[index] || false}
+                note={checklistNotes.get(index) || ''}
+                onToggle={toggleChecklistItem}
+                disabled={day.is_completed}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 5. CAMPO DE REFLEXÃO DO DIA */}
+        <ReflexaoDia
+          dayNumber={dayNumber}
+          initialContent={dailyNote}
+          onSave={handleDailyNoteSave}
+          disabled={day.is_completed}
+        />
+
+        {/* 6. MENSAGEM DO DIA */}
+        {day.motivational_phrase && (
+          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-6 mb-6 border-l-4 border-amber-400">
+            <p className="text-lg text-gray-800 italic text-center">
+              "{day.motivational_phrase}"
+            </p>
+          </div>
+        )}
+
+        {/* Botão Concluir Dia */}
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <button
+            onClick={concluirDia}
+            disabled={concluindo || day.is_completed}
+            className={`
+              w-full py-4 px-6 rounded-lg font-bold text-lg transition-all
+              ${day.is_completed
+                ? 'bg-green-600 text-white cursor-not-allowed'
+                : concluindo
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:scale-105'
+              }
+            `}
+          >
+            {day.is_completed
+              ? '✓ Dia Concluído'
+              : concluindo
+              ? 'Concluindo...'
+              : 'Concluir Dia'
+            }
+          </button>
+          {day.is_completed && (
+            <p className="text-center text-sm text-gray-600 mt-3">
+              Concluído em {day.progress?.completed_at ? new Date(day.progress.completed_at).toLocaleDateString('pt-BR') : ''}
+            </p>
+          )}
+        </div>
+
+        {/* Navegação */}
+        <div className="flex items-center justify-between mt-6">
+          {dayNumber > 1 && (
+            <Link
+              href={`/pt/nutri/metodo/jornada/dia/${dayNumber - 1}`}
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              ← Dia Anterior
+            </Link>
+          )}
+          {dayNumber < 30 && (
+            <Link
+              href={`/pt/nutri/metodo/jornada/dia/${dayNumber + 1}`}
+              className="text-blue-600 hover:text-blue-700 font-medium ml-auto"
+            >
+              Próximo Dia →
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

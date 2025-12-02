@@ -113,14 +113,15 @@ function CoachLeadsContent() {
     }
   ]
 
-  // Carregar leads reais da API
+  // Carregar leads reais da API do Coach
   useEffect(() => {
     if (!user) return
 
     const carregarLeads = async () => {
       try {
         setCarregando(true)
-        const response = await fetch('/api/leads', {
+        // ✅ Buscar da API específica do Coach que retorna da tabela coach_leads
+        const response = await fetch('/api/coach/leads', {
           credentials: 'include'
         })
 
@@ -134,7 +135,7 @@ function CoachLeadsContent() {
             id: l.id,
             nome: l.name,
             email: l.email,
-            telefone: l.phone,
+            telefone: l.phone || l.whatsapp,
             idade: l.additional_data?.idade || null,
             cidade: l.additional_data?.cidade || '-',
             ferramenta: l.additional_data?.ferramenta || l.template_id || 'Ferramenta',
@@ -164,7 +165,8 @@ function CoachLeadsContent() {
     if (!user) return
 
     try {
-      const response = await fetch(`/api/c/leads/alerts?days=${diasAlerta}`, {
+      // ✅ Usar a rota correta para alertas do Coach
+      const response = await fetch(`/api/coach/leads/alerts?days=${diasAlerta}`, {
         credentials: 'include'
       })
 
