@@ -90,20 +90,32 @@ export async function POST(request: NextRequest) {
 
         user = newUser.user
 
-        // Criar perfil do usuário
-        const { error: profileError } = await supabaseAdmin
+        // Criar perfil do usuário (apenas se não existir)
+        const { data: existingProfile } = await supabaseAdmin
           .from('user_profiles')
-          .insert({
-            user_id: user.id,
-            nome_completo: name || email.split('@')[0],
-            email: email.toLowerCase(),
-            perfil: area,
-            created_at: new Date().toISOString()
-          })
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle()
 
-        if (profileError) {
-          console.error(`Erro ao criar perfil para ${email}:`, profileError)
-          // Não falhar se o perfil não for criado, mas logar o erro
+        if (!existingProfile) {
+          // Apenas criar perfil se não existir
+          const { error: profileError } = await supabaseAdmin
+            .from('user_profiles')
+            .insert({
+              user_id: user.id,
+              nome_completo: name || email.split('@')[0],
+              email: email.toLowerCase(),
+              perfil: area,
+              created_at: new Date().toISOString()
+            })
+
+          if (profileError) {
+            console.error(`Erro ao criar perfil para ${email}:`, profileError)
+            // Não falhar se o perfil não for criado, mas logar o erro
+          }
+        } else {
+          // Perfil já existe - não alterar, apenas criar a assinatura
+          console.log(`✅ Perfil já existe para ${email}, mantendo área original do perfil`)
         }
       }
     }
