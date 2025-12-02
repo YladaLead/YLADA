@@ -24,6 +24,10 @@ interface Receita {
   is_support?: boolean
   is_pagante?: boolean
   categoria?: 'pagante' | 'gratuita' | 'suporte'
+  dataCriacao?: string // Data de criação (quando entrou na conta)
+  is_nova?: boolean // Se é nova assinatura
+  is_renovacao?: boolean // Se é renovação
+  data_ultimo_pagamento?: string | null // Data do último pagamento
 }
 
 interface Totais {
@@ -33,6 +37,24 @@ interface Totais {
   geral: number
   ativas: number
   total: number
+  novas?: {
+    mensal: number
+    anual: number
+    anualMensalizado: number
+    geral: number
+    quantidade: number
+    quantidadeMensais: number
+    quantidadeAnuais: number
+  }
+  renovacoes?: {
+    mensal: number
+    anual: number
+    anualMensalizado: number
+    geral: number
+    quantidade: number
+    quantidadeMensais: number
+    quantidadeAnuais: number
+  }
 }
 
 export default function AdminReceitas() {
@@ -94,8 +116,9 @@ export default function AdminReceitas() {
           
           switch (periodoRapido) {
             case 'este_mes':
-              inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
-              fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59)
+              // Criar datas no início e fim do mês atual (timezone local)
+              inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1, 0, 0, 0, 0)
+              fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59, 999)
               break
             case 'mes_passado':
               inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
@@ -128,9 +151,27 @@ export default function AdminReceitas() {
           }
           
           if (inicio && fim) {
-            params.append('periodo_inicio', inicio.toISOString().split('T')[0])
-            params.append('periodo_fim', fim.toISOString().split('T')[0])
+            // Converter para YYYY-MM-DD sem usar toISOString (que converte para UTC)
+            // Isso evita problemas de timezone
+            const formatarData = (data: Date) => {
+              const ano = data.getFullYear()
+              const mes = String(data.getMonth() + 1).padStart(2, '0')
+              const dia = String(data.getDate()).padStart(2, '0')
+              return `${ano}-${mes}-${dia}`
+            }
+            
+            params.append('periodo_inicio', formatarData(inicio))
+            params.append('periodo_fim', formatarData(fim))
             params.append('periodo_tipo', 'custom')
+            
+            // Log para debug
+            console.log('📤 Enviando filtro de período:', {
+              periodoRapido,
+              inicio: formatarData(inicio),
+              fim: formatarData(fim),
+              inicioISO: inicio.toISOString(),
+              fimISO: fim.toISOString()
+            })
           }
         } else if (periodoTipo === 'mes' && mesSelecionado) {
           params.append('periodo_inicio', mesSelecionado)
@@ -154,12 +195,75 @@ export default function AdminReceitas() {
         })
 
         if (!response.ok) {
-          throw new Error('Erro ao carregar receitas')
+          if (response.status === 401) {
+            throw new Error('Sessão expirada. Por favor, faça login novamente.')
+          } else if (response.status === 403) {
+            throw new Error('Acesso negado. Você não tem permissão para acessar esta página.')
+          } else {
+            const errorData = await response.json().catch(() => ({}))
+            throw new Error(errorData.error || `Erro ao carregar receitas (${response.status})`)
+          }
         }
 
         const data = await response.json()
 
         if (data.success && data.receitas) {
+          // Log para debug
+          const hoje = new Date()
+          hoje.setHours(0, 0, 0, 0)
+          // Usar formato local para evitar problemas de timezone
+          const ano = hoje.getFullYear()
+          const mes = String(hoje.getMonth() + 1).padStart(2, '0')
+          const dia = String(hoje.getDate()).padStart(2, '0')
+          const hojeStr = `${ano}-${mes}-${dia}`
+          
+          const receitasHoje = data.receitas.filter((r: Receita) => {
+            const dataCriacaoStr = r.dataCriacao || r.dataInicio
+            if (!dataCriacaoStr) return false
+            
+            // Converter para formato YYYY-MM-DD sem usar toISOString (que converte para UTC)
+            const dataCriacao = new Date(dataCriacaoStr)
+            const anoCriacao = dataCriacao.getFullYear()
+            const mesCriacao = String(dataCriacao.getMonth() + 1).padStart(2, '0')
+            const diaCriacao = String(dataCriacao.getDate()).padStart(2, '0')
+            const dataCriacaoStrOnly = `${anoCriacao}-${mesCriacao}-${diaCriacao}`
+            
+            return dataCriacaoStrOnly === hojeStr
+          })
+          
+          console.log('📥 Dados recebidos da API:', {
+            totalReceitas: data.receitas.length,
+            receitasMensais: data.receitas.filter((r: Receita) => r.tipo === 'mensal' && r.categoria === 'pagante').length,
+            receitasAnuais: data.receitas.filter((r: Receita) => r.tipo === 'anual' && r.categoria === 'pagante').length,
+            receitasHoje: receitasHoje.length,
+            hojeStr,
+            todasReceitas: data.receitas.map((r: Receita) => {
+              // Converter datas para formato YYYY-MM-DD sem usar toISOString
+              const formatarData = (dataStr: string | undefined) => {
+                if (!dataStr) return null
+                const d = new Date(dataStr)
+                const ano = d.getFullYear()
+                const mes = String(d.getMonth() + 1).padStart(2, '0')
+                const dia = String(d.getDate()).padStart(2, '0')
+                return `${ano}-${mes}-${dia}`
+              }
+              
+              return {
+                id: r.id,
+                tipo: r.tipo,
+                categoria: r.categoria,
+                valor: r.valor,
+                currency: r.currency,
+                dataCriacao: r.dataCriacao,
+                dataInicio: r.dataInicio,
+                dataCriacaoDate: formatarData(r.dataCriacao),
+                dataInicioDate: formatarData(r.dataInicio),
+                status: r.status,
+                area: r.area
+              }
+            })
+          })
+          
           setReceitas(data.receitas)
           setTotais(data.totais || {
             mensal: 0,
@@ -211,12 +315,19 @@ export default function AdminReceitas() {
     const hoje = new Date()
     hoje.setHours(0, 0, 0, 0)
     const receitasHoje = receitas.filter(r => {
-      const dataCriacao = new Date(r.dataInicio)
-      return dataCriacao >= hoje
+      // Usar dataCriacao se disponível, senão usar dataInicio
+      const dataCriacaoStr = r.dataCriacao || r.dataInicio
+      if (!dataCriacaoStr) return false
+      const dataCriacao = new Date(dataCriacaoStr)
+      dataCriacao.setHours(0, 0, 0, 0)
+      return dataCriacao.getTime() === hoje.getTime()
     })
     const mensaisWellnessHoje = receitasMensais.filter(r => {
-      const dataCriacao = new Date(r.dataInicio)
-      return dataCriacao >= hoje && r.area === 'wellness'
+      const dataCriacaoStr = r.dataCriacao || r.dataInicio
+      if (!dataCriacaoStr) return false
+      const dataCriacao = new Date(dataCriacaoStr)
+      dataCriacao.setHours(0, 0, 0, 0)
+      return dataCriacao.getTime() === hoje.getTime() && r.area === 'wellness'
     })
     
     console.log('🔍 DEBUG Receitas:', {
@@ -252,7 +363,8 @@ export default function AdminReceitas() {
       totalMensalPagante,
       filtroArea,
       filtroStatus,
-      periodo
+      periodoTipo,
+      periodoRapido
     })
   }
   
@@ -736,7 +848,6 @@ export default function AdminReceitas() {
               </div>
             </div>
           </div>
-        </div>
 
         {/* ===================================================== */}
         {/* ABAS: RECEITAS vs ASSINATURAS */}
@@ -846,71 +957,116 @@ export default function AdminReceitas() {
 
                 {/* TOTAIS GERAIS */}
                 {!verPorArea && (
-                  <div className="mb-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">💰 Análise de Receitas (Apenas Pagantes)</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* Total Mensal */}
-                      <div 
-                        className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200 cursor-pointer hover:shadow-lg transition-all"
-                        onClick={() => setMostrarDetalhesMensal(true)}
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">💰 Receita Mensal</p>
-                            <p className="text-3xl font-bold text-green-700">{formatCurrency(totalMensalPagante)}</p>
+                  <div className="mb-6 space-y-6">
+                    <h2 className="text-lg font-bold text-gray-900">💰 Análise de Receitas (Apenas Pagantes)</h2>
+                    
+                    {/* Separador: Novas vs Renovações */}
+                    {totais.novas && totais.renovacoes && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        {/* Novas Assinaturas */}
+                        <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 shadow-sm border-2 border-emerald-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">🆕 Novas Assinaturas</p>
+                              <p className="text-2xl font-bold text-emerald-700">{formatCurrency(totais.novas.geral)}</p>
+                            </div>
+                            <div className="h-12 w-12 bg-emerald-500 rounded-lg flex items-center justify-center shadow-md">
+                              <span className="text-2xl text-white">🆕</span>
+                            </div>
                           </div>
-                          <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
-                            <span className="text-2xl text-white">📅</span>
+                          <div className="space-y-2 text-xs text-gray-600">
+                            <p>Mensal: {formatCurrency(totais.novas.mensal)} ({totais.novas.quantidadeMensais})</p>
+                            <p>Anual: {formatCurrency(totais.novas.anual)} ({totais.novas.quantidadeAnuais})</p>
+                            <p className="text-gray-500">{totais.novas.quantidade} novas assinaturas</p>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-600">
-                          {receitasMensais.length} assinaturas mensais pagantes
-                          <br />
-                          <span className="text-blue-600 hover:text-blue-800 underline text-xs mt-1 inline-block">
-                            Clique para ver detalhes →
-                          </span>
-                        </p>
-                      </div>
 
-                      {/* Total Anual */}
-                      <div 
-                        className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200 cursor-pointer hover:shadow-lg transition-all"
-                        onClick={() => setMostrarDetalhesAnual(true)}
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">💎 Receita Anual</p>
-                            <p className="text-3xl font-bold text-blue-700">{formatCurrency(totalAnualPagante)}</p>
+                        {/* Renovações */}
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 shadow-sm border-2 border-amber-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">🔄 Renovações</p>
+                              <p className="text-2xl font-bold text-amber-700">{formatCurrency(totais.renovacoes.geral)}</p>
+                            </div>
+                            <div className="h-12 w-12 bg-amber-500 rounded-lg flex items-center justify-center shadow-md">
+                              <span className="text-2xl text-white">🔄</span>
+                            </div>
                           </div>
-                          <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
-                            <span className="text-2xl text-white">💎</span>
+                          <div className="space-y-2 text-xs text-gray-600">
+                            <p>Mensal: {formatCurrency(totais.renovacoes.mensal)} ({totais.renovacoes.quantidadeMensais})</p>
+                            <p>Anual: {formatCurrency(totais.renovacoes.anual)} ({totais.renovacoes.quantidadeAnuais})</p>
+                            <p className="text-gray-500">{totais.renovacoes.quantidade} renovações</p>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-600">
-                          {receitasAnuais.length} assinaturas anuais pagantes
-                          <br />
-                          <span className="text-blue-600 hover:text-blue-800 underline text-xs mt-1 inline-block">
-                            Clique para ver detalhes →
-                          </span>
-                        </p>
                       </div>
+                    )}
 
-                      {/* Total Geral */}
-                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">📊 Total Geral</p>
-                            <p className="text-3xl font-bold text-purple-700">{formatCurrency(totalReceitasPagante)}</p>
+                    {/* Totais Gerais */}
+                    <div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Total Mensal */}
+                        <div 
+                          className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border-2 border-green-200 cursor-pointer hover:shadow-lg transition-all"
+                          onClick={() => setMostrarDetalhesMensal(true)}
+                        >
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">💰 Receita Mensal</p>
+                              <p className="text-3xl font-bold text-green-700">{formatCurrency(totalMensalPagante)}</p>
+                            </div>
+                            <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center shadow-md">
+                              <span className="text-2xl text-white">📅</span>
+                            </div>
                           </div>
-                          <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
-                            <span className="text-2xl text-white">💰</span>
-                          </div>
+                          <p className="text-xs text-gray-600">
+                            {receitasMensais.length} assinaturas mensais pagantes
+                            <br />
+                            <span className="text-blue-600 hover:text-blue-800 underline text-xs mt-1 inline-block">
+                              Clique para ver detalhes →
+                            </span>
+                          </p>
                         </div>
-                        <p className="text-xs text-gray-600">
-                          {totalPagantes} pagantes ativos
-                          <br />
-                          <span className="text-gray-500">(Anual integral + Mensal do mês)</span>
-                        </p>
+
+                        {/* Total Anual */}
+                        <div 
+                          className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border-2 border-blue-200 cursor-pointer hover:shadow-lg transition-all"
+                          onClick={() => setMostrarDetalhesAnual(true)}
+                        >
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">💎 Receita Anual</p>
+                              <p className="text-3xl font-bold text-blue-700">{formatCurrency(totalAnualPagante)}</p>
+                            </div>
+                            <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
+                              <span className="text-2xl text-white">💎</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600">
+                            {receitasAnuais.length} assinaturas anuais pagantes
+                            <br />
+                            <span className="text-blue-600 hover:text-blue-800 underline text-xs mt-1 inline-block">
+                              Clique para ver detalhes →
+                            </span>
+                          </p>
+                        </div>
+
+                        {/* Total Geral */}
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 shadow-sm border-2 border-purple-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">📊 Total Geral</p>
+                              <p className="text-3xl font-bold text-purple-700">{formatCurrency(totalReceitasPagante)}</p>
+                            </div>
+                            <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                              <span className="text-2xl text-white">💰</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600">
+                            {totalPagantes} pagantes ativos
+                            <br />
+                            <span className="text-gray-500">(Anual integral + Mensal do mês)</span>
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1056,125 +1212,125 @@ export default function AdminReceitas() {
             )}
           </div>
         )}
-
-        {/* ===================================================== */}
-        {/* MODAL: DETALHES RECEITA MENSAL */}
-        {/* ===================================================== */}
-        {mostrarDetalhesMensal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">💰 Receita Mensal - Detalhes</h2>
-                  <p className="text-green-100 text-sm mt-1">
-                    Total: {formatCurrency(totalMensalPagante)} • {receitasMensais.length} assinaturas
-                  </p>
-                </div>
-                <button
-                  onClick={() => setMostrarDetalhesMensal(false)}
-                  className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
-                >
-                  ×
-                </button>
-              </div>
-              
-              <div className="flex-1 overflow-y-auto p-6">
-                {receitasMensais.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <p className="text-lg">Nenhuma assinatura mensal pagante encontrada</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {receitasMensais.map((receita) => (
-                      <div key={receita.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-green-300 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-2xl">{getAreaIcon(receita.area)}</span>
-                              <div>
-                                <p className="font-semibold text-gray-900">{receita.usuario}</p>
-                                <p className="text-xs text-gray-500">{receita.email}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <span className="capitalize">{receita.area}</span>
-                              <span>•</span>
-                              <span>Vence: {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}</span>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xl font-bold text-green-700">{formatCurrency(receita.valor, receita.currency)}</p>
-                            <p className="text-xs text-gray-500">/mês</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ===================================================== */}
-        {/* MODAL: DETALHES RECEITA ANUAL */}
-        {/* ===================================================== */}
-        {mostrarDetalhesAnual && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">💎 Receita Anual - Detalhes</h2>
-                  <p className="text-blue-100 text-sm mt-1">
-                    Total: {formatCurrency(totalAnualPagante)} • {receitasAnuais.length} assinaturas (entrada integral)
-                  </p>
-                </div>
-                <button
-                  onClick={() => setMostrarDetalhesAnual(false)}
-                  className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
-                >
-                  ×
-                </button>
-              </div>
-              
-              <div className="flex-1 overflow-y-auto p-6">
-                {receitasAnuais.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <p className="text-lg">Nenhuma assinatura anual pagante encontrada</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {receitasAnuais.map((receita) => (
-                      <div key={receita.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-2xl">{getAreaIcon(receita.area)}</span>
-                              <div>
-                                <p className="font-semibold text-gray-900">{receita.usuario}</p>
-                                <p className="text-xs text-gray-500">{receita.email}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <span className="capitalize">{receita.area}</span>
-                              <span>•</span>
-                              <span>Vence: {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}</span>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xl font-bold text-blue-700">{formatCurrency(receita.valor, receita.currency)}</p>
-                            <p className="text-xs text-gray-500">entrada integral</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </main>
+
+      {/* ===================================================== */}
+      {/* MODAL: DETALHES RECEITA MENSAL */}
+      {/* ===================================================== */}
+      {mostrarDetalhesMensal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">💰 Receita Mensal - Detalhes</h2>
+                <p className="text-green-100 text-sm mt-1">
+                  Total: {formatCurrency(totalMensalPagante)} • {receitasMensais.length} assinaturas
+                </p>
+              </div>
+              <button
+                onClick={() => setMostrarDetalhesMensal(false)}
+                className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6">
+              {receitasMensais.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p className="text-lg">Nenhuma assinatura mensal pagante encontrada</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {receitasMensais.map((receita) => (
+                    <div key={receita.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-green-300 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-2xl">{getAreaIcon(receita.area)}</span>
+                            <div>
+                              <p className="font-semibold text-gray-900">{receita.usuario}</p>
+                              <p className="text-xs text-gray-500">{receita.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="capitalize">{receita.area}</span>
+                            <span>•</span>
+                            <span>Vence: {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-green-700">{formatCurrency(receita.valor, receita.currency)}</p>
+                          <p className="text-xs text-gray-500">/mês</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================== */}
+      {/* MODAL: DETALHES RECEITA ANUAL */}
+      {/* ===================================================== */}
+      {mostrarDetalhesAnual && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">💎 Receita Anual - Detalhes</h2>
+                <p className="text-blue-100 text-sm mt-1">
+                  Total: {formatCurrency(totalAnualPagante)} • {receitasAnuais.length} assinaturas (entrada integral)
+                </p>
+              </div>
+              <button
+                onClick={() => setMostrarDetalhesAnual(false)}
+                className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6">
+              {receitasAnuais.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p className="text-lg">Nenhuma assinatura anual pagante encontrada</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {receitasAnuais.map((receita) => (
+                    <div key={receita.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-2xl">{getAreaIcon(receita.area)}</span>
+                            <div>
+                              <p className="font-semibold text-gray-900">{receita.usuario}</p>
+                              <p className="text-xs text-gray-500">{receita.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="capitalize">{receita.area}</span>
+                            <span>•</span>
+                            <span>Vence: {receita.proxVencimento ? new Date(receita.proxVencimento).toLocaleDateString('pt-BR') : '-'}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-blue-700">{formatCurrency(receita.valor, receita.currency)}</p>
+                          <p className="text-xs text-gray-500">entrada integral</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
