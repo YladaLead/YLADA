@@ -122,6 +122,15 @@ function AdminDashboardContent() {
       color: 'bg-yellow-500'
     },
     {
+      id: 'subscriptions',
+      title: 'Gerenciar Assinaturas',
+      description: 'Criar planos gratuitos e migrar assinaturas',
+      icon: '🎁',
+      link: '/admin/subscriptions',
+      color: 'bg-green-500',
+      destaque: true
+    },
+    {
       id: 'email-authorizations',
       title: 'Autorizações por Email',
       description: 'Autorizar emails antes do cadastro',

@@ -477,12 +477,20 @@ export default function AdminReceitas() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
+              <Link
+                href="/admin/subscriptions"
+                className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                🎁 Criar Plano Gratuito
+              </Link>
               <Link
                 href="/admin"
                 className="text-gray-600 hover:text-gray-900 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 ← Voltar
               </Link>
+            </div>
             </div>
           </div>
         </div>
