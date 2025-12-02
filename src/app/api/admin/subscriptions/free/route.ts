@@ -178,31 +178,66 @@ export async function POST(request: NextRequest) {
     const periodEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString()
 
     // Criar assinatura gratuita
-    const { data, error } = await supabaseAdmin
-      .from('subscriptions')
-      .insert({
-        user_id: finalUserId,
-        area,
-        plan_type: 'free',
-        status: 'active',
-        current_period_start: periodStart,
-        current_period_end: periodEnd,
-        // Campos Stripe vazios para plano gratuito
-        stripe_account: 'br',
-        stripe_subscription_id: `free_${finalUserId}_${area}_${Date.now()}`,
-        stripe_customer_id: `free_${finalUserId}`,
-        stripe_price_id: 'free',
-        amount: 0,
-        currency: 'brl',
-        requires_manual_renewal: false, // Plano gratuito não precisa renovação manual
-      })
-      .select()
-      .single()
+    const subscriptionData: any = {
+      user_id: finalUserId,
+      area,
+      plan_type: 'free',
+      status: 'active',
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
+      // Campos Stripe vazios para plano gratuito
+      stripe_account: 'br',
+      stripe_subscription_id: `free_${finalUserId}_${area}_${Date.now()}`,
+      stripe_customer_id: `free_${finalUserId}`,
+      stripe_price_id: 'free',
+      amount: 0,
+      currency: 'brl',
+    }
 
-    if (error) {
-      console.error('❌ Erro ao criar plano gratuito:', error)
+    // Adicionar requires_manual_renewal apenas se a coluna existir
+    // (evita erro se a migração não foi executada)
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('subscriptions')
+        .insert(subscriptionData)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('❌ Erro ao criar plano gratuito:', error)
+        console.error('❌ Detalhes do erro:', JSON.stringify(error, null, 2))
+        
+        // Verificar se é erro de constraint
+        if (error.message?.includes('plan_type') || error.message?.includes('check constraint')) {
+          return NextResponse.json(
+            { 
+              error: 'Erro: O banco de dados não permite plan_type "free". Execute a migração add-free-to-plan-type.sql no Supabase primeiro.',
+              details: error.message,
+              migration_required: true
+            },
+            { status: 500 }
+          )
+        }
+        
+        return NextResponse.json(
+          { error: 'Erro ao criar plano gratuito', details: error.message },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        subscription: data,
+        message: `Plano gratuito criado com sucesso. Válido por ${days} dias.`
+      })
+    } catch (insertError: any) {
+      console.error('❌ Erro ao inserir assinatura:', insertError)
       return NextResponse.json(
-        { error: 'Erro ao criar plano gratuito', details: error.message },
+        { 
+          error: 'Erro ao criar plano gratuito', 
+          details: insertError.message || 'Erro desconhecido',
+          stack: process.env.NODE_ENV === 'development' ? insertError.stack : undefined
+        },
         { status: 500 }
       )
     }
