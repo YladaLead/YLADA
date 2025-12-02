@@ -120,18 +120,25 @@ export async function POST(request: NextRequest) {
     // Verificar se já tem assinatura ativa para esta área
     const { data: existing } = await supabaseAdmin
       .from('subscriptions')
-      .select('id')
+      .select('id, current_period_end')
       .eq('user_id', finalUserId)
       .eq('area', area)
       .eq('status', 'active')
       .gt('current_period_end', new Date().toISOString())
       .maybeSingle()
 
+    // Se já tem assinatura ativa, cancelar a antiga antes de criar a nova
     if (existing) {
-      return NextResponse.json(
-        { error: 'Usuário já tem assinatura ativa para esta área' },
-        { status: 400 }
-      )
+      await supabaseAdmin
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          canceled_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id)
+      
+      console.log(`✅ Assinatura antiga cancelada (ID: ${existing.id}) antes de criar nova para área ${area}`)
     }
 
     // Calcular datas
