@@ -41,6 +41,12 @@ function AdminSubscriptionsContent() {
     expires_in_days: 365
   })
 
+  // Estados para busca de usuário
+  const [buscaUsuario, setBuscaUsuario] = useState('')
+  const [usuariosEncontrados, setUsuariosEncontrados] = useState<any[]>([])
+  const [buscandoUsuario, setBuscandoUsuario] = useState(false)
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState<any>(null)
+
   // Formulário para migrar assinatura
   const [migrateForm, setMigrateForm] = useState({
     user_id: '',
@@ -82,8 +88,63 @@ function AdminSubscriptionsContent() {
   }, [])
 
 
+  // Buscar usuários por nome, email ou telefone
+  const buscarUsuarios = async () => {
+    if (!buscaUsuario.trim()) {
+      setUsuariosEncontrados([])
+      return
+    }
+
+    try {
+      setBuscandoUsuario(true)
+      const response = await fetch(`/api/admin/usuarios?busca=${encodeURIComponent(buscaUsuario)}`, {
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.usuarios) {
+          setUsuariosEncontrados(data.usuarios.slice(0, 10)) // Limitar a 10 resultados
+        } else {
+          setUsuariosEncontrados([])
+        }
+      } else {
+        setUsuariosEncontrados([])
+      }
+    } catch (err) {
+      console.error('Erro ao buscar usuários:', err)
+      setUsuariosEncontrados([])
+    } finally {
+      setBuscandoUsuario(false)
+    }
+  }
+
+  // Debounce para busca
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      buscarUsuarios()
+    }, buscaUsuario ? 500 : 0)
+
+    return () => clearTimeout(timeoutId)
+  }, [buscaUsuario])
+
+  // Selecionar usuário
+  const selecionarUsuario = (usuario: any) => {
+    setUsuarioSelecionado(usuario)
+    // A API retorna 'id' que é o user_id
+    setFreePlanForm({ ...freePlanForm, user_id: usuario.id })
+    setBuscaUsuario(`${usuario.nome} (${usuario.email})`)
+    setUsuariosEncontrados([])
+  }
+
   const handleCreateFreePlan = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!freePlanForm.user_id) {
+      setError('Selecione um usuário primeiro')
+      return
+    }
+
     setLoading(true)
     setError(null)
     setSuccess(null)
@@ -117,6 +178,8 @@ function AdminSubscriptionsContent() {
         area: 'wellness',
         expires_in_days: 365
       })
+      setBuscaUsuario('')
+      setUsuarioSelecionado(null)
     } catch (err: any) {
       setError(err.message || 'Erro ao criar plano gratuito')
     } finally {
@@ -360,16 +423,67 @@ function AdminSubscriptionsContent() {
             <form onSubmit={handleCreateFreePlan} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  User ID (UUID)
+                  Buscar Usuário (Nome, Email ou Telefone)
                 </label>
-                <input
-                  type="text"
-                  value={freePlanForm.user_id}
-                  onChange={(e) => setFreePlanForm({ ...freePlanForm, user_id: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="uuid-do-usuario"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={buscaUsuario}
+                    onChange={(e) => {
+                      setBuscaUsuario(e.target.value)
+                      setUsuarioSelecionado(null)
+                      setFreePlanForm({ ...freePlanForm, user_id: '' })
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Digite nome, email ou telefone..."
+                  />
+                  {buscandoUsuario && (
+                    <div className="absolute right-3 top-2.5">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Lista de usuários encontrados */}
+                {usuariosEncontrados.length > 0 && !usuarioSelecionado && (
+                  <div className="mt-2 border border-gray-200 rounded-lg bg-white shadow-lg max-h-60 overflow-y-auto">
+                    {usuariosEncontrados.map((usuario) => (
+                      <button
+                        key={usuario.id || usuario.user_id}
+                        type="button"
+                        onClick={() => selecionarUsuario(usuario)}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                      >
+                        <div className="font-medium text-gray-900">{usuario.nome}</div>
+                        <div className="text-sm text-gray-600">{usuario.email}</div>
+                        <div className="text-xs text-gray-500">Área: {usuario.area}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Usuário selecionado */}
+                {usuarioSelecionado && (
+                  <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-green-900">{usuarioSelecionado.nome}</div>
+                        <div className="text-sm text-green-700">{usuarioSelecionado.email}</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUsuarioSelecionado(null)
+                          setBuscaUsuario('')
+                          setFreePlanForm({ ...freePlanForm, user_id: '' })
+                        }}
+                        className="text-green-600 hover:text-green-800 text-sm"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
