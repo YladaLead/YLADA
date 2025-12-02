@@ -412,18 +412,6 @@ ON CONFLICT (day_number) DO UPDATE SET
   motivational_phrase = EXCLUDED.motivational_phrase,
   order_index = EXCLUDED.order_index,
   updated_at = NOW();
-ON CONFLICT (day_number) DO UPDATE SET
-  week_number = EXCLUDED.week_number,
-  title = EXCLUDED.title,
-  objective = EXCLUDED.objective,
-  guidance = EXCLUDED.guidance,
-  action_type = EXCLUDED.action_type,
-  action_id = EXCLUDED.action_id,
-  action_title = EXCLUDED.action_title,
-  checklist_items = EXCLUDED.checklist_items,
-  motivational_phrase = EXCLUDED.motivational_phrase,
-  order_index = EXCLUDED.order_index,
-  updated_at = NOW();
 
 -- SEMANA 3 - ENCANTAMENTO YLADA
 INSERT INTO journey_days (id, day_number, week_number, title, objective, guidance, action_type, action_id, action_title, checklist_items, motivational_phrase, order_index)
