@@ -1,0 +1,40 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+import { requireApiAuth } from '@/lib/api-auth'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { user, error: authError } = await requireApiAuth(request)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const tutorialId = params.id
+
+    const { data: tutorial, error } = await supabaseAdmin
+      .from('tutorials')
+      .select('*')
+      .eq('id', tutorialId)
+      .eq('is_active', true)
+      .single()
+
+    if (error || !tutorial) {
+      return NextResponse.json({ error: 'Tutorial não encontrado' }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: tutorial
+    })
+  } catch (error: any) {
+    console.error('Erro na API de tutorial:', error)
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
+  }
+}
+

@@ -79,7 +79,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
     {
       title: 'Formação Empresarial',
       icon: '🎓',
-      href: '/pt/nutri/cursos',
+      href: '/pt/nutri/formacao',
       color: 'yellow'
     },
     {
