@@ -10,9 +10,9 @@ interface PilarSecaoProps {
 
 export default function PilarSecao({ secao, pilarId }: PilarSecaoProps) {
   return (
-    <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
+    <div className="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 ease-out hover:scale-[1.01]">
       {/* Título da Seção */}
-      <h3 className="text-2xl font-bold text-gray-900 mb-4">
+      <h3 className="text-2xl font-semibold text-gray-900 mb-6">
         {secao.titulo}
       </h3>
 
@@ -86,16 +86,16 @@ export default function PilarSecao({ secao, pilarId }: PilarSecaoProps) {
 
       {/* Checklist Items (se houver) */}
       {secao.checklist_items && secao.checklist_items.length > 0 && (
-        <div className="mb-4 bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
-          <h4 className="font-semibold text-gray-900 mb-3">✔ Checklist</h4>
+        <div className="mb-4 bg-purple-50 rounded-lg p-4 border border-gray-100 shadow-sm">
+          <h4 className="font-medium text-gray-900 mb-3">✔ Checklist</h4>
           <div className="space-y-2">
             {secao.checklist_items.map((item, index) => (
               <div key={index} className="flex items-start gap-2">
                 <input
                   type="checkbox"
-                  className="mt-1 w-5 h-5 text-purple-600 rounded focus:ring-purple-500 focus:ring-2"
+                  className="mt-1 w-5 h-5 text-purple-600 rounded focus:ring-purple-500 focus:ring-2 transition-all duration-200 ease-out"
                 />
-                <span className="text-gray-700">{item}</span>
+                <span className="text-gray-700 leading-relaxed">{item}</span>
               </div>
             ))}
           </div>
@@ -139,7 +139,7 @@ export default function PilarSecao({ secao, pilarId }: PilarSecaoProps) {
                 <Link
                   key={exercicioId}
                   href={getExercicioRoute(exercicioId)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 ease-out hover:shadow-md hover:opacity-90 text-sm font-medium"
                 >
                   Acessar {getExercicioLabel(exercicioId)} →
                 </Link>
@@ -180,7 +180,7 @@ export default function PilarSecao({ secao, pilarId }: PilarSecaoProps) {
                 <Link
                   key={ferramentaId}
                   href={getFerramentaRoute(ferramentaId)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 ease-out hover:shadow-md hover:opacity-90 text-sm font-medium"
                 >
                   Acessar {getFerramentaLabel(ferramentaId)} →
                 </Link>

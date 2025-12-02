@@ -50,21 +50,25 @@ export default function PilarAnotacao({
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
-      <h2 className="font-bold text-gray-900 mb-3 text-lg">📝 Anotações do Pilar</h2>
-      <p className="text-sm text-gray-600 mb-4">{placeholder}</p>
+    <div className="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 ease-out">
+      <h2 className="font-semibold text-gray-900 mb-3 text-lg">📝 Anotações do Pilar</h2>
+      <p className="text-sm text-gray-500 mb-4">{placeholder}</p>
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onBlur={handleBlur}
         disabled={disabled}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full px-5 py-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed bg-gray-50 placeholder:text-gray-400 transition-all duration-200 ease-out"
         rows={6}
       />
-      {isSaving && (
-        <p className="text-xs text-gray-500 mt-2">Salvando...</p>
-      )}
+      <div className="mt-3 flex items-center justify-between">
+        {isSaving ? (
+          <p className="text-xs text-gray-500">Salvando...</p>
+        ) : (
+          <p className="text-xs text-gray-400 italic">Salvo automaticamente</p>
+        )}
+      </div>
     </div>
   )
 }

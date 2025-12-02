@@ -26,29 +26,44 @@ export default function JornadaDaysChips({ days, pilarId }: JornadaDaysChipsProp
     }
   }
 
+  const isCurrentDay = (dayNumber: number) => progress?.current_day === dayNumber
+
   return (
     <>
-      <div className="bg-blue-50 rounded-xl p-4 mb-6 border-l-4 border-blue-500">
+      <div className="bg-blue-50 rounded-xl p-4 mb-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 ease-out">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-lg">📅</span>
-          <h3 className="font-bold text-gray-900 text-sm">Este Pilar é usado nos Dias:</h3>
+          <h3 className="font-semibold text-gray-900 text-sm">Este Pilar é usado nos Dias:</h3>
         </div>
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-3 overflow-x-auto pb-2">
           {days.map((dayNumber) => {
             const isAccessible = canAccess(dayNumber)
+            const isCurrent = isCurrentDay(dayNumber)
+            
             return (
               <button
                 key={dayNumber}
                 onClick={() => handleChipClick(dayNumber)}
                 className={`
-                  px-3 py-1 rounded-full text-xs font-medium transition-all
-                  ${isAccessible
-                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed opacity-60'
+                  px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ease-out
+                  ${isCurrent
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-md'
+                    : isAccessible
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200 cursor-pointer hover:shadow-md'
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed opacity-60 hover:opacity-70'
                   }
                 `}
-                title={isAccessible ? `Dia ${dayNumber} da Jornada` : 'Conclua os dias anteriores para acessar'}
+                title={
+                  isCurrent 
+                    ? `Dia ${dayNumber} - Dia Atual` 
+                    : isAccessible 
+                    ? `Dia ${dayNumber} da Jornada` 
+                    : 'Conclua os dias anteriores para acessar'
+                }
               >
+                {isCurrent && <span className="mr-1">AGORA</span>}
+                {isAccessible && !isCurrent && <span className="mr-1">✓</span>}
+                {!isAccessible && <span className="mr-1">🔒</span>}
                 Dia {dayNumber}
               </button>
             )
@@ -56,7 +71,7 @@ export default function JornadaDaysChips({ days, pilarId }: JornadaDaysChipsProp
         </div>
         <Link
           href="/pt/nutri/metodo/jornada"
-          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-all duration-200 ease-out hover:opacity-90"
         >
           Ver Jornada →
         </Link>
