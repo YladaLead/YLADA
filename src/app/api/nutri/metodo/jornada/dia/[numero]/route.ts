@@ -58,17 +58,25 @@ export async function GET(
       .eq('user_id', user.id)
       .eq('day_number', dayNumber)
 
-    // Verificar se o dia anterior foi concluído (para bloquear)
+    // Verificar bloqueio usando lógica inteligente (baseada em currentDay)
     let is_locked = false
     if (dayNumber > 1) {
-      const { data: prevProgress } = await supabaseAdmin
+      // Buscar todos os progressos para calcular currentDay
+      const { data: allProgress } = await supabaseAdmin
         .from('journey_progress')
-        .select('completed')
+        .select('day_number, completed')
         .eq('user_id', user.id)
-        .eq('day_number', dayNumber - 1)
-        .single()
+        .eq('completed', true)
+        .order('day_number', { ascending: true })
       
-      is_locked = !prevProgress?.completed
+      // Calcular currentDay: maior dia concluído + 1, ou 1 se nenhum foi concluído
+      const maxCompletedDay = allProgress && allProgress.length > 0
+        ? Math.max(...allProgress.map((p: any) => p.day_number))
+        : 0
+      const currentDay = maxCompletedDay + 1
+      
+      // Dia bloqueado se: dayNumber > currentDay (ou seja, não concluiu o dia anterior)
+      is_locked = dayNumber > currentDay
     }
 
     // Mapear notas do checklist por índice (retornar como objeto simples para JSON)

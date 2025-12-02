@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import DayCard from '@/components/jornada/DayCard'
+import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 import type { JourneyDay, JourneyStats } from '@/types/formacao'
 
 export default function JornadaSection() {
@@ -9,6 +11,7 @@ export default function JornadaSection() {
   const [stats, setStats] = useState<JourneyStats | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
+  const { progress, refreshProgress } = useJornadaProgress()
 
   useEffect(() => {
     const carregarJornada = async () => {
@@ -33,6 +36,8 @@ export default function JornadaSection() {
         if (data.success && data.data) {
           setDays(data.data.days || [])
           setStats(data.data.stats || null)
+          // Atualizar progresso local após carregar
+          refreshProgress()
         } else {
           // Se não há dados ainda, inicializar com arrays vazios
           setDays([])
@@ -181,45 +186,17 @@ export default function JornadaSection() {
               {/* Dias da Semana */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
                 {diasSemana.map((day) => (
-                  <Link
+                  <DayCard
                     key={day.id}
-                    href={`/pt/nutri/metodo/jornada/dia/${day.day_number}`}
-                    className={`
-                      relative p-4 rounded-lg border-2 transition-all
-                      ${day.is_completed
-                        ? 'bg-green-50 border-green-300 hover:border-green-400'
-                        : day.is_locked || isWeekLocked
-                        ? 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed'
-                        : day.day_number === stats?.current_day
-                        ? 'bg-blue-50 border-blue-400 hover:border-blue-500 shadow-md'
-                        : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
-                      }
-                    `}
-                  >
-                    {day.is_completed && (
-                      <div className="absolute top-2 right-2">
-                        <span className="text-green-600 text-xl">✓</span>
-                      </div>
-                    )}
-                    {day.is_locked && (
-                      <div className="absolute top-2 right-2">
-                        <span className="text-gray-400 text-lg">🔒</span>
-                      </div>
-                    )}
-                    <div className="text-center">
-                      <div className={`text-2xl font-bold mb-1 ${
-                        day.is_completed ? 'text-green-700' :
-                        day.is_locked ? 'text-gray-400' :
-                        day.day_number === stats?.current_day ? 'text-blue-700' :
-                        'text-gray-700'
-                      }`}>
-                        {day.day_number}
-                      </div>
-                      <div className="text-xs font-medium text-gray-600 line-clamp-2">
-                        {day.title}
-                      </div>
-                    </div>
-                  </Link>
+                    day={{
+                      day_number: day.day_number,
+                      title: day.title,
+                      is_completed: day.is_completed,
+                      is_locked: day.is_locked || isWeekLocked
+                    }}
+                    progress={progress}
+                    currentDay={stats?.current_day || null}
+                  />
                 ))}
               </div>
 

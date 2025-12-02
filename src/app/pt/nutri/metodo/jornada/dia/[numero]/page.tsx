@@ -7,13 +7,17 @@ import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import AcaoPraticaCard from '@/components/formacao/AcaoPraticaCard'
 import ChecklistItem from '@/components/formacao/ChecklistItem'
 import ReflexaoDia from '@/components/formacao/ReflexaoDia'
+import BlockedDayModal from '@/components/jornada/BlockedDayModal'
 import { useAuth } from '@/hooks/useAuth'
+import { useJornadaProgress } from '@/hooks/useJornadaProgress'
+import { canAccessDay } from '@/utils/jornada-access'
 import type { JourneyDay } from '@/types/formacao'
 
 export default function JornadaDiaPage() {
   const params = useParams()
   const router = useRouter()
   const { user } = useAuth()
+  const { progress, loading: progressLoading } = useJornadaProgress()
   const dayNumber = parseInt(params.numero as string)
 
   const [day, setDay] = useState<(JourneyDay & { 
@@ -31,8 +35,23 @@ export default function JornadaDiaPage() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [concluindo, setConcluindo] = useState(false)
+  const [showBlockedModal, setShowBlockedModal] = useState(false)
+
+  // Verificar acesso ao dia antes de carregar
+  useEffect(() => {
+    if (!progressLoading && progress) {
+      if (!canAccessDay(dayNumber, progress)) {
+        setShowBlockedModal(true)
+        setCarregando(false)
+        return
+      }
+    }
+  }, [dayNumber, progress, progressLoading])
 
   useEffect(() => {
+    // Não carregar se o dia está bloqueado
+    if (showBlockedModal) return
+
     const carregarDia = async () => {
       try {
         setCarregando(true)
@@ -44,6 +63,12 @@ export default function JornadaDiaPage() {
 
         if (!res.ok) {
           const errorData = await res.json()
+          // Se o erro for de bloqueio, mostrar modal
+          if (errorData.requires_previous_day || errorData.error?.includes('anterior')) {
+            setShowBlockedModal(true)
+            setCarregando(false)
+            return
+          }
           throw new Error(errorData.error || 'Erro ao carregar dia')
         }
 
@@ -143,8 +168,7 @@ export default function JornadaDiaPage() {
         console.error('Erro ao concluir dia:', errorData)
         
         if (errorData.requires_previous_day) {
-          alert('Conclua o dia anterior primeiro!')
-          router.push(`/pt/nutri/metodo/jornada/dia/${dayNumber - 1}`)
+          setShowBlockedModal(true)
           return
         }
         
@@ -154,12 +178,15 @@ export default function JornadaDiaPage() {
           : errorData.error || 'Erro ao concluir dia'
         
         alert(errorMessage)
-        throw new Error(errorMessage)
+        return
       }
 
       const result = await res.json()
       
-      // Sucesso - redirecionar para a jornada ou próximo dia
+      // Mostrar feedback visual de sucesso
+      alert('✔ Dia concluído! Continue avançando.')
+      
+      // Sucesso - redirecionar para o próximo dia disponível
       const nextDay = dayNumber < 30 ? dayNumber + 1 : null
       if (nextDay) {
         router.push(`/pt/nutri/metodo/jornada/dia/${nextDay}`)
@@ -296,26 +323,20 @@ export default function JornadaDiaPage() {
     )
   }
 
-  if (day.is_locked) {
+  // Se o dia está bloqueado, mostrar apenas o modal
+  if (showBlockedModal || (day && day.is_locked)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-        <FormacaoHeader />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6 text-center">
-            <div className="text-6xl mb-4">🔒</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Dia Bloqueado</h2>
-            <p className="text-gray-700 mb-4">
-              Conclua o dia anterior para desbloquear este dia.
-            </p>
-            <Link
-              href={`/pt/nutri/metodo/jornada/dia/${dayNumber - 1}`}
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Ir para Dia {dayNumber - 1}
-            </Link>
-          </div>
+      <>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+          <FormacaoHeader />
         </div>
-      </div>
+        <BlockedDayModal
+          isOpen={true}
+          onClose={() => router.push('/pt/nutri/metodo/jornada')}
+          blockedDay={dayNumber}
+          currentDay={progress?.current_day || 1}
+        />
+      </>
     )
   }
 
@@ -366,6 +387,7 @@ export default function JornadaDiaPage() {
           actionType={day.action_type}
           actionLink={getActionLink()}
           actionId={day.action_id}
+          dayNumber={dayNumber}
         />
 
         {/* 4. CHECKLIST DE FIXAÇÃO */}
@@ -448,16 +470,35 @@ export default function JornadaDiaPage() {
               ← Dia Anterior
             </Link>
           )}
-          {dayNumber < 30 && (
-            <Link
-              href={`/pt/nutri/metodo/jornada/dia/${dayNumber + 1}`}
+          {dayNumber < 30 && !day.is_completed && (
+            <button
+              onClick={() => {
+                const nextDay = dayNumber + 1
+                // Verificar se pode acessar o próximo dia
+                if (canAccessDay(nextDay, progress)) {
+                  router.push(`/pt/nutri/metodo/jornada/dia/${nextDay}`)
+                } else {
+                  setShowBlockedModal(true)
+                }
+              }}
               className="text-blue-600 hover:text-blue-700 font-medium ml-auto"
             >
               Próximo Dia →
-            </Link>
+            </button>
           )}
         </div>
       </div>
+
+      {/* Modal de Bloqueio */}
+      <BlockedDayModal
+        isOpen={showBlockedModal}
+        onClose={() => {
+          setShowBlockedModal(false)
+          router.push('/pt/nutri/metodo/jornada')
+        }}
+        blockedDay={dayNumber}
+        currentDay={progress?.current_day || 1}
+      />
     </div>
   )
 }

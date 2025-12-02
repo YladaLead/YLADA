@@ -11,6 +11,7 @@ interface Ferramenta {
   id: string
   nome: string
   categoria: string
+  tipo?: 'fluxos' | 'quizzes' | 'templates'
   objetivo: string
   url: string
   shortUrl?: string
@@ -30,6 +31,7 @@ interface Ferramenta {
 export default function FerramentasNutri() {
   const [ferramentas, setFerramentas] = useState<Ferramenta[]>([])
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'ativa' | 'inativa'>('todas')
+  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'fluxos' | 'quizzes' | 'templates'>('todos')
   const [loading, setLoading] = useState(true)
   const [ferramentaExcluindoId, setFerramentaExcluindoId] = useState<string | null>(null)
 
@@ -57,14 +59,24 @@ export default function FerramentasNutri() {
       
       // Transformar dados da API para o formato da interface
       const ferramentasFormatadas: Ferramenta[] = (data.tools || []).map((tool: any) => {
-        // Determinar categoria
+        // Determinar categoria e tipo
         let categoria = 'Planilha'
+        let tipo: 'fluxos' | 'quizzes' | 'templates' = 'fluxos'
+        
         if (tool.is_quiz || tool.template_slug === 'quiz-personalizado') {
           categoria = 'Quiz Personalizado'
+          tipo = 'quizzes'
         } else if (tool.template_slug?.startsWith('calc-')) {
           categoria = 'Calculadora'
+          tipo = 'templates'
         } else if (tool.template_slug?.startsWith('quiz-')) {
           categoria = 'Quiz'
+          tipo = 'quizzes'
+        } else if (tool.template_slug?.startsWith('template-')) {
+          categoria = 'Template'
+          tipo = 'templates'
+        } else {
+          tipo = 'fluxos'
         }
 
         // Construir URL - quizzes personalizados usam rota diferente
@@ -88,6 +100,7 @@ export default function FerramentasNutri() {
           id: tool.id,
           nome: tool.title,
           categoria: categoria,
+          tipo: tipo,
           objetivo: tool.description || '',
           url: url,
           shortUrl: tool.short_code ? buildShortUrl(tool.short_code) : undefined,
@@ -150,7 +163,8 @@ export default function FerramentasNutri() {
 
   const ferramentasFiltradas = ferramentas.filter(ferramenta => {
     const statusMatch = filtroStatus === 'todas' || ferramenta.status === filtroStatus
-    return statusMatch
+    const tipoMatch = filtroTipo === 'todos' || ferramenta.tipo === filtroTipo
+    return statusMatch && tipoMatch
   })
 
   return (
@@ -158,6 +172,78 @@ export default function FerramentasNutri() {
       <NutriNavBar showTitle={true} title="Meus Links" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Atalhos Rápidos */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Atalhos Rápidos</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link
+              href="/pt/nutri/quiz-personalizado"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-lg transition-colors font-medium text-center shadow-sm"
+            >
+              Criar Quiz
+            </Link>
+            <Link
+              href="/pt/nutri/ferramentas/nova"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-lg transition-colors font-medium text-center shadow-sm"
+            >
+              Criar Fluxo
+            </Link>
+            <Link
+              href="/pt/nutri/ferramentas/templates"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-lg transition-colors font-medium text-center shadow-sm"
+            >
+              Biblioteca de Templates
+            </Link>
+          </div>
+        </div>
+
+        {/* Filtros por Tipo */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Filtrar por Tipo</h3>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setFiltroTipo('todos')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtroTipo === 'todos'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setFiltroTipo('fluxos')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtroTipo === 'fluxos'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              Fluxos
+            </button>
+            <button
+              onClick={() => setFiltroTipo('quizzes')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtroTipo === 'quizzes'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              Quizzes
+            </button>
+            <button
+              onClick={() => setFiltroTipo('templates')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filtroTipo === 'templates'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 border border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              Templates
+            </button>
+          </div>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -392,6 +478,16 @@ export default function FerramentasNutri() {
                       )}
                     </div>
                     <div className="flex flex-col space-y-2 ml-4 text-right sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:text-left">
+                      {/* Botão Abrir no GSAL - apenas para fluxos e quizzes */}
+                      {(ferramenta.tipo === 'fluxos' || ferramenta.tipo === 'quizzes') && (
+                        <Link
+                          href={`/pt/nutri/gsal?attachTool=${ferramenta.id}`}
+                          className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800 font-medium"
+                        >
+                          <span>📊</span>
+                          <span>Abrir no GSAL</span>
+                        </Link>
+                      )}
                       <Link
                         href={ferramenta.url}
                         target="_blank"

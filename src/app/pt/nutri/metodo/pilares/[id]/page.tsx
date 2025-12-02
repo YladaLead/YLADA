@@ -1,16 +1,22 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import PilarSecao from '@/components/formacao/PilarSecao'
 import PilarAnotacao from '@/components/formacao/PilarAnotacao'
+import VoltarJornadaButton from '@/components/jornada/VoltarJornadaButton'
+import JornadaDaysChips from '@/components/jornada/JornadaDaysChips'
 import { pilaresConfig } from '@/types/pilares'
+import { getJornadaDaysForPilar } from '@/utils/jornada-pilares-mapping'
 
 export default function PilarPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const pilarId = params.id as string
   const pilar = pilaresConfig.find(p => p.id === pilarId) || pilaresConfig[0]
+  const jornadaDay = searchParams.get('fromDay') // Se veio de um dia da jornada
+  const jornadaDays = getJornadaDaysForPilar(parseInt(pilarId))
 
   if (!pilar) {
     return (
@@ -36,6 +42,11 @@ export default function PilarPage() {
       <FormacaoHeader />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Botão Voltar para Jornada - Destaque */}
+        <div className="mb-4">
+          <VoltarJornadaButton />
+        </div>
+
         {/* Breadcrumb */}
         <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
           <Link href="/pt/nutri/metodo" className="hover:text-blue-600">
@@ -48,6 +59,26 @@ export default function PilarPage() {
           <span>→</span>
           <span className="text-gray-900">Pilar {pilar.numero}</span>
         </div>
+
+        {/* Se veio de um dia da jornada, mostrar link de volta */}
+        {jornadaDay && (
+          <div className="mb-4 bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500">
+            <p className="text-sm text-gray-700 mb-2">
+              Este conteúdo faz parte do <strong>Dia {jornadaDay}</strong> da Jornada.
+            </p>
+            <Link
+              href={`/pt/nutri/metodo/jornada/dia/${jornadaDay}`}
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+            >
+              ← Voltar para Dia {jornadaDay}
+            </Link>
+          </div>
+        )}
+
+        {/* Chips de dias relacionados */}
+        {jornadaDays.length > 0 && (
+          <JornadaDaysChips days={jornadaDays} pilarId={parseInt(pilarId)} />
+        )}
 
         {/* Header do Pilar */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">

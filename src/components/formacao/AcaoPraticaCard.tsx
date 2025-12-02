@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 interface AcaoPraticaCardProps {
   title: string
@@ -8,6 +9,7 @@ interface AcaoPraticaCardProps {
   actionType: 'pilar' | 'exercicio' | 'ferramenta'
   actionLink: string
   actionId?: string
+  dayNumber?: number // Número do dia da jornada (para navegação bidirecional)
 }
 
 export default function AcaoPraticaCard({
@@ -15,12 +17,20 @@ export default function AcaoPraticaCard({
   description,
   actionType,
   actionLink,
-  actionId
+  actionId,
+  dayNumber
 }: AcaoPraticaCardProps) {
+  const params = useParams()
+  
+  // Se estiver na página de um dia da jornada e a ação for um Pilar, adicionar parâmetro fromDay
+  const finalActionLink = actionType === 'pilar' && dayNumber && params.numero
+    ? `${actionLink}?fromDay=${dayNumber}`
+    : actionLink
+
   const getActionLabel = () => {
     switch (actionType) {
       case 'pilar':
-        return 'Acessar Pilar'
+        return 'Acessar Pilar Relacionado'
       case 'exercicio':
         return 'Acessar Exercício'
       case 'ferramenta':
@@ -45,7 +55,7 @@ export default function AcaoPraticaCard({
       )}
       
       <Link
-        href={actionLink}
+        href={finalActionLink}
         className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-105"
       >
         {getActionLabel()} →

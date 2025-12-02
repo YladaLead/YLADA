@@ -47,40 +47,54 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       color: 'gray'
     },
     {
-      title: 'Captação',
-      icon: '🎯',
-      color: 'blue',
-      items: [
-        { title: 'Home / Visão Geral', icon: '🏠', href: '/pt/nutri/home' },
-        { title: 'Meus Links', icon: '🔗', href: '/pt/nutri/ferramentas' },
-        { title: 'Quizzes', icon: '🎯', href: '/pt/nutri/quizzes' },
-        { title: 'Templates', icon: '🎨', href: '/pt/nutri/ferramentas/templates' },
-        { title: 'Leads', icon: '📈', href: '/pt/nutri/leads' },
-      ]
+      title: 'Jornada 30 Dias',
+      icon: '📘',
+      href: '/pt/nutri/metodo/jornada',
+      color: 'blue'
     },
     {
-      title: 'Gestão',
-      icon: '📁',
-      color: 'green',
-      items: [
-        { title: 'Meus Clientes', icon: '👤', href: '/pt/nutri/clientes' },
-        { title: 'Kanban de Clientes', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
-        { title: 'Agenda', icon: '📅', href: '/pt/nutri/agenda' },
-        { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
-        { title: 'Relatórios de Gestão', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
-      ]
-    },
-    {
-      title: 'Formulários',
-      icon: '🧩',
-      href: '/pt/nutri/formularios',
+      title: 'Pilares do Método',
+      icon: '📚',
+      href: '/pt/nutri/metodo/pilares',
       color: 'purple'
     },
     {
-      title: 'Formação Empresarial',
-      icon: '🎓',
-      href: '/pt/nutri/formacao',
+      title: 'Ferramentas',
+      icon: '🧰',
+      color: 'blue',
+      items: [
+        { title: 'Meus Links', icon: '🔗', href: '/pt/nutri/ferramentas' },
+        { title: 'Criar Fluxo', icon: '➕', href: '/pt/nutri/ferramentas/nova' },
+        { title: 'Criar Quiz', icon: '🎯', href: '/pt/nutri/quiz-personalizado' },
+        { title: 'Templates', icon: '🎨', href: '/pt/nutri/ferramentas/templates' },
+        { title: 'Quizzes', icon: '📝', href: '/pt/nutri/quizzes' },
+      ]
+    },
+    {
+      title: 'Gestão GSAL',
+      icon: '📊',
+      color: 'green',
+      href: '/pt/nutri/gsal',
+      items: [
+        { title: 'Painel GSAL', icon: '📊', href: '/pt/nutri/gsal' },
+        { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
+        { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
+        { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
+        { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
+        { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
+      ]
+    },
+    {
+      title: 'Biblioteca',
+      icon: '🎒',
+      href: '/pt/nutri/metodo/manual',
       color: 'yellow'
+    },
+    {
+      title: 'Minhas Anotações',
+      icon: '📝',
+      href: '/pt/nutri/anotacoes',
+      color: 'purple'
     },
     {
       title: 'Configurações',

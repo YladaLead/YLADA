@@ -1,30 +1,74 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import FormacaoHeader from '@/components/formacao/FormacaoHeader'
+import { useState } from 'react'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import NutriSidebar from '@/components/nutri/NutriSidebar'
+import { useAuth } from '@/contexts/AuthContext'
+import PageLayout from '@/components/shared/PageLayout'
+import Section from '@/components/shared/Section'
 import JornadaSection from '@/components/formacao/JornadaSection'
 
 export default function JornadaPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      <FormacaoHeader />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header da Jornada */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Jornada de 30 Dias – Método YLADA
-          </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-            Lote sua agenda e transforme sua rotina em 30 dias aplicando o Método YLADA – O que a faculdade não ensinou.
-          </p>
-        </div>
+    <ProtectedRoute perfil="nutri" allowAdmin={true}>
+      <JornadaPageContent />
+    </ProtectedRoute>
+  )
+}
 
-        {/* Componente da Jornada */}
-        <JornadaSection />
+function JornadaPageContent() {
+  const { user, loading } = useAuth()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
       </div>
-    </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
+  return (
+    <PageLayout>
+      <div className="min-h-screen bg-gray-50 flex">
+        <NutriSidebar
+          isMobileOpen={mobileMenuOpen}
+          onMobileClose={() => setMobileMenuOpen(false)}
+        />
+
+        <div className="flex-1 lg:ml-56">
+          {/* Mobile Header */}
+          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 text-gray-600 hover:text-gray-900"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold text-gray-900">Jornada 30 Dias</h1>
+            <div className="w-10"></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
+            <Section
+              title="📘 Jornada de Transformação YLADA"
+              subtitle="Lote sua agenda e transforme sua rotina em 30 dias aplicando o Método YLADA – O que a faculdade não ensinou."
+            >
+              <JornadaSection />
+            </Section>
+          </div>
+        </div>
+      </div>
+    </PageLayout>
   )
 }
 

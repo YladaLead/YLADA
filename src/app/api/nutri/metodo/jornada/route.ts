@@ -107,6 +107,12 @@ export async function GET(request: NextRequest) {
     // Encontrar dia atual (primeiro não concluído)
     const completedDayNumbers = new Set(progress.filter(p => p && p.completed).map(p => p.day_number) || [])
     const currentDay = days.find(d => d && !completedDayNumbers.has(d.day_number))
+    
+    // Calcular currentDay: o maior dia concluído + 1, ou 1 se nenhum foi concluído
+    const maxCompletedDay = progress.filter(p => p && p.completed).length > 0
+      ? Math.max(...progress.filter(p => p && p.completed).map(p => p.day_number))
+      : 0
+    const calculatedCurrentDay = maxCompletedDay + 1
 
     // Calcular progresso por semana
     const weekProgress = [1, 2, 3, 4].map(week => {
@@ -124,7 +130,7 @@ export async function GET(request: NextRequest) {
       total_days: totalDays,
       completed_days: completedDays,
       progress_percentage: progressPercentage,
-      current_day: currentDay?.day_number || null,
+      current_day: calculatedCurrentDay || 1, // Usar o dia calculado (maior concluído + 1)
       current_week: currentDay?.week_number || 1,
       week_progress: weekProgress
     }
@@ -132,12 +138,20 @@ export async function GET(request: NextRequest) {
     // Mapear progresso por dia
     const progressMap = new Map(progress.filter(p => p).map(p => [p.day_number, p]))
 
-    const daysWithProgress = days.filter(d => d).map(day => ({
-      ...day,
-      progress: progressMap.get(day.day_number) || null,
-      is_completed: progressMap.get(day.day_number)?.completed || false,
-      is_locked: day.day_number > 1 && !progressMap.get(day.day_number - 1)?.completed
-    }))
+    // Aplicar lógica de bloqueio inteligente
+    const daysWithProgress = days.filter(d => d).map(day => {
+      const isCompleted = progressMap.get(day.day_number)?.completed || false
+      // Dia bloqueado se: não é o dia 1 E o dia é maior que currentDay
+      // Regra: Dia X liberado se currentDay >= X
+      const isLocked = day.day_number > 1 && day.day_number > calculatedCurrentDay
+      
+      return {
+        ...day,
+        progress: progressMap.get(day.day_number) || null,
+        is_completed: isCompleted,
+        is_locked: isLocked
+      }
+    })
 
     return NextResponse.json({
       success: true,

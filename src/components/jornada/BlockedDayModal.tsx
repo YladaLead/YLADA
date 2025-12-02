@@ -1,0 +1,128 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import PrimaryButton from '@/components/shared/PrimaryButton'
+import SecondaryButton from '@/components/shared/SecondaryButton'
+
+interface BlockedDayModalProps {
+  isOpen: boolean
+  onClose: () => void
+  blockedDay: number
+  currentDay: number | null
+}
+
+export default function BlockedDayModal({
+  isOpen,
+  onClose,
+  blockedDay,
+  currentDay
+}: BlockedDayModalProps) {
+  const router = useRouter()
+
+  if (!isOpen) return null
+
+  const handleContinue = () => {
+    onClose()
+    if (currentDay) {
+      router.push(`/pt/nutri/metodo/jornada/dia/${currentDay}`)
+    } else {
+      router.push('/pt/nutri/metodo/jornada/dia/1')
+    }
+  }
+
+  const handleViewJourney = () => {
+    onClose()
+    router.push('/pt/nutri/metodo/jornada')
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-250"
+        onClick={onClose}
+        style={{ animation: 'fadeIn 0.25s ease-in' }}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 transform transition-all duration-250"
+          style={{ animation: 'slideIn 0.25s ease-out' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Dia ainda não disponível
+              </h2>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="mb-6">
+            <p className="text-gray-700 leading-relaxed mb-4">
+              Para desbloquear este dia, conclua primeiro o <strong>Dia {currentDay || 1}</strong>.
+            </p>
+            <p className="text-gray-600 leading-relaxed">
+              A Jornada YLADA segue uma sequência que garante a sua transformação profissional.
+            </p>
+            <p className="text-gray-600 leading-relaxed mt-2">
+              Continue de onde parou para avançar.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <PrimaryButton
+              onClick={handleContinue}
+              fullWidth
+              className="flex-1"
+            >
+              🔵 Continuar de onde parei
+            </PrimaryButton>
+            <SecondaryButton
+              onClick={handleViewJourney}
+              fullWidth
+              className="flex-1"
+            >
+              ⚪ Ver Jornada Completa
+            </SecondaryButton>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
+    </>
+  )
+}
+
