@@ -116,6 +116,9 @@ export function getDiagnostico(
       break
     case 'quiz-bem-estar':
     case 'quiz-bem-estar-nutri':
+    case 'wellness-profile':
+    case 'descubra-seu-perfil-de-bem-estar':
+    case 'descoberta-perfil-bem-estar':
       diagnosticos = quizBemEstarDiagnosticos
       break
     case 'quiz-perfil-nutricional':
@@ -170,6 +173,11 @@ export function getDiagnostico(
     case 'eletrolitos':
     case 'eletrólitos':
       diagnosticos = diagnosticoEletrolitosDiagnosticos
+      break
+    case 'template-diagnostico-parasitose':
+    case 'diagnostico-parasitose':
+    case 'parasitose':
+      diagnosticos = diagnosticoParasitoseDiagnosticos
       break
     case 'diagnostico-sintomas-intestinais':
     case 'diagnostico-sintomas-intestinais-nutri':

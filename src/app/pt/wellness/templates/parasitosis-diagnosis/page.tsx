@@ -6,7 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-coach'
+import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface Pergunta {
@@ -166,7 +166,7 @@ export default function DiagnosticoParasitose({ config }: TemplateBaseProps) {
       diagnosticoId = 'parasitoseBasica'
     }
 
-    const diagnostico = getDiagnostico('template-diagnostico-parasitose', 'coach', diagnosticoId)
+    const diagnostico = getDiagnostico('template-diagnostico-parasitose', 'nutri', diagnosticoId)
 
     setResultado({
       score: pontuacaoTotal,

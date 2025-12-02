@@ -7,6 +7,7 @@ import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 
 interface Pergunta {
   id: number
@@ -21,6 +22,7 @@ interface Resultado {
   descricao: string
   cor: string
   recomendacoes: string[]
+  diagnostico: DiagnosticoCompleto | null
 }
 
 export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
@@ -112,6 +114,8 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
     let cor = ''
     let recomendacoes: string[] = []
 
+    let diagnosticoId = 'bemEstarAlto'
+
     if (score >= 9) {
       perfil = 'Equilibrado'
       descricao = 'Parabéns! Você tem excelente equilíbrio e bem-estar. Continue mantendo os bons hábitos!'
@@ -122,6 +126,7 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
         'Compartilhar sabedoria com outros',
         'Monitorar e otimizar continuamente'
       ]
+      diagnosticoId = 'bemEstarAlto'
     } else if (score >= 6) {
       perfil = 'Moderado'
       descricao = 'Você está no caminho certo! Com otimizações estratégicas, pode alcançar equilíbrio total.'
@@ -132,6 +137,7 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
         'Desenvolver estratégias anti-stress',
         'Criar rotina de autocuidado'
       ]
+      diagnosticoId = 'bemEstarModerado'
     } else if (score >= 3) {
       perfil = 'Precisa de Desenvolvimento'
       descricao = 'Você tem potencial, mas precisa priorizar sua saúde e bem-estar agora.'
@@ -142,6 +148,7 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
         'Desenvolver técnicas de gerenciamento de stress',
         'Buscar orientação para planejar bem-estar'
       ]
+      diagnosticoId = 'bemEstarModerado'
     } else {
       perfil = 'Priorizar Saúde'
       descricao = 'Você precisa urgentemente investir em seu bem-estar. É hora de mudar!'
@@ -152,9 +159,12 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
         'Desenvolver estratégias anti-stress diárias',
         'Buscar mentoria para criar plano de bem-estar'
       ]
+      diagnosticoId = 'bemEstarBaixo'
     }
 
-    setResultado({ score, perfil, descricao, cor, recomendacoes })
+    const diagnostico = getDiagnostico('quiz-bem-estar', 'nutri', diagnosticoId)
+
+    setResultado({ score, perfil, descricao, cor, recomendacoes, diagnostico })
     setEtapa('resultado')
   }
 
@@ -252,7 +262,7 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
                 <p className="text-sm text-gray-600 mt-2">Score: {resultado.score}/12</p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="bg-gray-50 rounded-xl p-6 mb-6">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                   <span className="text-2xl mr-2">💡</span>
                   Estratégias para Bem-Estar
@@ -266,6 +276,49 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
                   ))}
                 </ul>
               </div>
+
+              {/* Diagnóstico Completo */}
+              {resultado.diagnostico && (
+                <div className="space-y-4 mb-6">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
+                    <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
+                      <span className="text-2xl mr-2">📋</span>
+                      Diagnóstico Completo
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.diagnostico}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.causaRaiz}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.acaoImediata}</p>
+                      </div>
+                      {resultado.diagnostico.plano7Dias && (
+                        <div className="bg-white rounded-lg p-4">
+                          <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.plano7Dias}</p>
+                        </div>
+                      )}
+                      {resultado.diagnostico.suplementacao && (
+                        <div className="bg-white rounded-lg p-4">
+                          <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.suplementacao}</p>
+                        </div>
+                      )}
+                      {resultado.diagnostico.alimentacao && (
+                        <div className="bg-white rounded-lg p-4">
+                          <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.alimentacao}</p>
+                        </div>
+                      )}
+                      {resultado.diagnostico.proximoPasso && (
+                        <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg p-4 border-l-4 border-green-500">
+                          <p className="text-gray-900 font-semibold whitespace-pre-line">{resultado.diagnostico.proximoPasso}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <WellnessCTAButton

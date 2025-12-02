@@ -13,7 +13,7 @@ export const quizDetoxDiagnosticos: DiagnosticosPorFerramenta = {
       proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu equilíbrio atual é um ótimo ponto de partida. Descubra como estratégias preventivas avançadas podem preservar e potencializar ainda mais sua saúde.'
     },
     toxicidadeModerada: {
-      diagnostico: '📋 DIAGNÓSTICO: Seu corpo mostra sinais de acúmulo tóxico moderado de toxinas que precisam de intervenção estratégica.',
+      diagnostico: '📋 DIAGNÓSTICO: Seu corpo mostra sinais de acúmulo moderado de toxinas que precisam de intervenção estratégica.',
       causaRaiz: '🔍 CAUSA RAIZ: Exposição ambiental e alimentação podem estar aumentando toxinas no organismo. Estudos indicam que protocolos detox personalizados podem reduzir carga de toxinas em até 45% em poucos meses. Uma avaliação completa identifica exatamente a origem e estratégias para reduzir.',
       acaoImediata: '⚡ AÇÃO IMEDIATA: Observe sinais de cansaço ou inchaço e evite protocolos por conta própria. Busque orientação profissional para um detox adequado ao seu perfil.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo está pedindo equilíbrio — e você já deu o primeiro passo. O próximo é descobrir como reduzir toxinas com um plano personalizado.'

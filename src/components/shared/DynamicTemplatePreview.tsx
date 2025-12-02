@@ -104,7 +104,14 @@ const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
   'guia-proteico': wellnessDiagnostics.guiaProteicoDiagnosticos,
   'guia-hidratacao': wellnessDiagnostics.guiaHidratacaoDiagnosticos,
   'desafio-7-dias': wellnessDiagnostics.desafio7DiasDiagnosticos,
-  'desafio-21-dias': wellnessDiagnostics.desafio21DiasDiagnosticos
+  'desafio-21-dias': wellnessDiagnostics.desafio21DiasDiagnosticos,
+  'wellness-profile': wellnessDiagnostics.quizBemEstarDiagnosticos,
+  'descubra-seu-perfil-de-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
+  'descoberta-perfil-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
+  'quiz-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
+  'template-diagnostico-parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos,
+  'diagnostico-parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos,
+  'parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos
 }
 
 const diagnosticsMapsByProfession: Record<'nutri' | 'wellness' | 'coach', Record<string, DiagnosticosPorFerramenta>> = {
@@ -122,12 +129,100 @@ const resultColorPalette = [
 ]
 
 const formatResultadoLabel = (resultadoId: string) => {
+  // Mapeamento de chaves conhecidas para títulos com acentuação correta
+  const titleMap: Record<string, string> = {
+    // Calculadora de Água
+    'baixaHidratacao': 'Baixa Hidratação',
+    'hidratacaoModerada': 'Hidratação Moderada',
+    'altaHidratacao': 'Alta Hidratação',
+    // Calculadora de Calorias
+    'caloriasBaixas': 'Calorias Baixas',
+    'caloriasModeradas': 'Calorias Moderadas',
+    'caloriasAltas': 'Calorias Altas',
+    // Calculadora de Proteína
+    'proteinaBaixa': 'Proteína Baixa',
+    'proteinaModerada': 'Proteína Moderada',
+    'proteinaAlta': 'Proteína Alta',
+    // Avaliação de Intolerância
+    'intoleranciaBaixa': 'Intolerância Baixa',
+    'intoleranciaModerada': 'Intolerância Moderada',
+    'intoleranciaAlta': 'Intolerância Alta',
+    // Perfil Metabólico
+    'metabolicoLento': 'Metabólico Lento',
+    'metabolicoModerado': 'Metabólico Moderado',
+    'metabolicoRapido': 'Metabólico Rápido',
+    // Avaliação Inicial
+    'avaliacaoBasica': 'Avaliação Básica',
+    'avaliacaoModerada': 'Avaliação Moderada',
+    'avaliacaoAvancada': 'Avaliação Avançada',
+    // Desafio 21 Dias
+    'desafioBasico': 'Desafio Básico',
+    'desafioModerado': 'Desafio Moderado',
+    'desafioAvancado': 'Desafio Avançado',
+    // Eletrólitos
+    'eletrolitosBaixos': 'Eletrólitos Baixos',
+    'eletrolitosModerados': 'Eletrólitos Moderados',
+    'eletrolitosAltos': 'Eletrólitos Altos',
+    // Pronto para Emagrecer
+    'prontoBasico': 'Pronto Básico',
+    'prontoModerado': 'Pronto Moderado',
+    'prontoAvancado': 'Pronto Avançado',
+    // Tipo de Fome
+    'fomeFisica': 'Fome Física',
+    'fomeEmocional': 'Fome Emocional',
+    'fomeMista': 'Fome Mista',
+    // Perfil de Intestino
+    'intestinoSaudavel': 'Intestino Saudável',
+    'intestinoModerado': 'Intestino Moderado',
+    'intestinoComprometido': 'Intestino Comprometido',
+    // Quiz Perfil Nutricional
+    'perfilNutricionalBaixo': 'Perfil Nutricional Baixo',
+    'perfilNutricionalModerado': 'Perfil Nutricional Moderado',
+    'perfilNutricionalAlto': 'Perfil Nutricional Alto',
+    // Bem-Estar
+    'bemEstarBaixo': 'Bem-Estar Baixo',
+    'bemEstarModerado': 'Bem-Estar Moderado',
+    'bemEstarAlto': 'Bem-Estar Alto',
+    // Parasitose
+    'parasitoseBasica': 'Parasitose Básica',
+    'parasitoseModerada': 'Parasitose Moderada',
+    'parasitoseAvancada': 'Parasitose Avançada',
+  }
+
+  // Se existe mapeamento, retorna o título formatado
+  if (titleMap[resultadoId]) {
+    return titleMap[resultadoId]
+  }
+
+  // Fallback: formatação genérica (mantém comportamento original)
   return resultadoId
     .replace(/([A-Z])/g, ' $1')
     .replace(/[-_]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b\w/g, (match) => match.toUpperCase())
+    // Tenta adicionar acentuação comum
+    .replace(/Hidratacao/gi, 'Hidratação')
+    .replace(/Hidratacao/gi, 'Hidratação')
+    .replace(/Avaliacao/gi, 'Avaliação')
+    .replace(/Recuperacao/gi, 'Recuperação')
+    .replace(/Desidratacao/gi, 'Desidratação')
+    .replace(/Proteina/gi, 'Proteína')
+    .replace(/Calorica/gi, 'Calórica')
+    .replace(/Metabolico/gi, 'Metabólico')
+    .replace(/Eletrolitico/gi, 'Eletrolítico')
+    .replace(/Intolerancia/gi, 'Intolerância')
+    .replace(/Absorcao/gi, 'Absorção')
+    .replace(/Desequilibrio/gi, 'Desequilíbrio')
+    .replace(/Nutricao/gi, 'Nutrição')
+    .replace(/Nutricional/gi, 'Nutricional')
+    .replace(/Nutricionista/gi, 'Nutricionista')
+    .replace(/Avancada/gi, 'Avançada')
+    .replace(/Avancado/gi, 'Avançado')
+    .replace(/Basica/gi, 'Básica')
+    .replace(/Basico/gi, 'Básico')
+    .replace(/Saudavel/gi, 'Saudável')
+    .replace(/Rapido/gi, 'Rápido')
 }
 
 type CalculadoraMockRespostas = Record<string, string | number>

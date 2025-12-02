@@ -285,6 +285,16 @@ export function getDiagnostico(
     case 'desafio-21-dias':
       diagnosticos = desafio21DiasDiagnosticos
       break
+    case 'template-diagnostico-parasitose':
+    case 'diagnostico-parasitose':
+    case 'parasitose':
+      diagnosticos = diagnosticoParasitoseDiagnosticos
+      break
+    case 'wellness-profile':
+    case 'descubra-seu-perfil-de-bem-estar':
+    case 'descoberta-perfil-bem-estar':
+      diagnosticos = quizBemEstarDiagnosticos
+      break
     case 'guia-hidratacao':
       diagnosticos = guiaHidratacaoDiagnosticos
       break
