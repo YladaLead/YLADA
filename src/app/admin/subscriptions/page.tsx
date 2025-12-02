@@ -37,6 +37,8 @@ function AdminSubscriptionsContent() {
   // Formulário para criar plano gratuito
   const [freePlanForm, setFreePlanForm] = useState({
     user_id: '',
+    email: '',
+    name: '',
     area: 'wellness' as 'wellness' | 'nutri' | 'coach' | 'nutra',
     expires_in_days: 365
   })
@@ -126,8 +128,15 @@ function AdminSubscriptionsContent() {
   const handleCreateFreePlan = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!freePlanForm.user_id) {
-      setError('Selecione um usuário primeiro')
+    // Validar que tem user_id (selecionado) OU email (para criar novo)
+    if (!freePlanForm.user_id && !freePlanForm.email) {
+      setError('Selecione um usuário existente ou preencha email e nome para criar novo usuário')
+      return
+    }
+
+    // Se for criar novo usuário, validar email e nome
+    if (!freePlanForm.user_id && (!freePlanForm.email || !freePlanForm.name)) {
+      setError('Para criar novo usuário, preencha email e nome')
       return
     }
 
@@ -142,13 +151,26 @@ function AdminSubscriptionsContent() {
         return
       }
 
+      // Preparar body (remover campos vazios)
+      const body: any = {
+        area: freePlanForm.area,
+        expires_in_days: freePlanForm.expires_in_days
+      }
+
+      if (freePlanForm.user_id) {
+        body.user_id = freePlanForm.user_id
+      } else {
+        body.email = freePlanForm.email
+        body.name = freePlanForm.name
+      }
+
       const response = await fetch('/api/admin/subscriptions/free', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify(freePlanForm)
+        body: JSON.stringify(body)
       })
 
       const data = await response.json()
@@ -158,9 +180,16 @@ function AdminSubscriptionsContent() {
         return
       }
 
-      setSuccess(`Plano gratuito criado com sucesso! Válido por ${freePlanForm.expires_in_days} dias.`)
+      const wasNewUser = !freePlanForm.user_id
+      setSuccess(
+        wasNewUser 
+          ? `Usuário criado e plano gratuito criado com sucesso! Válido por ${freePlanForm.expires_in_days} dias.`
+          : `Plano gratuito criado com sucesso! Válido por ${freePlanForm.expires_in_days} dias.`
+      )
       setFreePlanForm({
         user_id: '',
+        email: '',
+        name: '',
         area: 'wellness',
         expires_in_days: 365
       })
@@ -290,6 +319,42 @@ function AdminSubscriptionsContent() {
                   </div>
                 )}
               </div>
+
+              {/* Opção: Criar novo usuário se não encontrou */}
+              {usuariosEncontrados.length === 0 && buscaUsuario.trim() && !usuarioSelecionado && !buscandoUsuario && (
+                <div className="mt-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800 mb-3">
+                    <strong>Usuário não encontrado.</strong> Preencha os campos abaixo para criar um novo usuário:
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-blue-900 mb-1">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        value={freePlanForm.email}
+                        onChange={(e) => setFreePlanForm({ ...freePlanForm, email: e.target.value })}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        placeholder="email@exemplo.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-blue-900 mb-1">
+                        Nome Completo *
+                      </label>
+                      <input
+                        type="text"
+                        value={freePlanForm.name}
+                        onChange={(e) => setFreePlanForm({ ...freePlanForm, name: e.target.value })}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        placeholder="Nome do usuário"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Área
