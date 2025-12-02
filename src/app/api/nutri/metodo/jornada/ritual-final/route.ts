@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
           .select('campo_id, conteudo')
           .eq('user_id', user.id)
           .eq('exercicio_id', 'ritual-final')
-          .in('campo_id', ['maior-aprendizado', 'mudanca-interna', 'novo-posicionamento')
+          .in('campo_id', ['maior-aprendizado', 'mudanca-interna', 'novo-posicionamento'])
 
         if (!notesError && notes) {
           notes.forEach((note: any) => {
