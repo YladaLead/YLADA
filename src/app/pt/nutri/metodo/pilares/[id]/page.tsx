@@ -86,16 +86,77 @@ export default function PilarPage() {
           <JornadaDaysChips days={jornadaDays} pilarId={parseInt(pilarId)} />
         )}
 
-        {/* Material complementar recomendado (Pilar 1) */}
+        {/* Material complementar recomendado por Pilar */}
         {pilar.id === '1' && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-gray-100 shadow-sm">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>Materiais complementares recomendados:</strong>
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-1-guia-completo"
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-all duration-200 ease-out hover:opacity-90"
+              >
+                📘 Guia Completo do Método YLADA
+              </Link>
+              <span className="text-gray-400">•</span>
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-2-identidade-postura"
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-all duration-200 ease-out hover:opacity-90"
+              >
+                📄 Identidade & Postura Profissional
+              </Link>
+            </div>
+          </div>
+        )}
+        {pilar.id === '2' && (
           <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-gray-100 shadow-sm">
             <p className="text-sm text-gray-700 mb-2">
               <strong>Material complementar recomendado:</strong>{' '}
               <Link
-                href="/pt/nutri/metodo/biblioteca/guia-metodo-ylada"
+                href="/pt/nutri/metodo/biblioteca/pdf-3-rotina-produtividade"
                 className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 ease-out hover:opacity-90"
               >
-                Guia Completo do Método YLADA
+                📄 Rotina & Produtividade YLADA
+              </Link>
+            </p>
+          </div>
+        )}
+        {pilar.id === '3' && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-gray-100 shadow-sm">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>Material complementar recomendado:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-4-captacao-inteligente"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                📄 Captação Inteligente YLADA
+              </Link>
+            </p>
+          </div>
+        )}
+        {pilar.id === '4' && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-gray-100 shadow-sm">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>Material complementar recomendado:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-5-fidelizacao-experiencia"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                📄 Fidelização & Experiência da Cliente
+              </Link>
+            </p>
+          </div>
+        )}
+        {pilar.id === '5' && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-gray-100 shadow-sm">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>Material complementar recomendado:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-6-gestao-gsal"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                📄 Gestão & Organização de Clientes (GSAL)
               </Link>
             </p>
           </div>

@@ -389,6 +389,60 @@ export default function JornadaDiaPage() {
           dayNumber={dayNumber}
         />
 
+        {/* Material complementar (PDFs) - apenas para dias específicos */}
+        {dayNumber === 1 && (
+          <div className="bg-purple-50 rounded-xl p-4 mb-6 border border-gray-100">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>📘 Material complementar:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-1-guia-completo"
+                className="text-purple-700 hover:text-purple-800 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                Ler Guia Completo do Método YLADA
+              </Link>
+            </p>
+          </div>
+        )}
+        {(dayNumber >= 8 && dayNumber <= 14) && (
+          <div className="bg-green-50 rounded-xl p-4 mb-6 border border-gray-100">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>📄 Material complementar:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-4-captacao-inteligente"
+                className="text-green-700 hover:text-green-800 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                Ler PDF: Captação Inteligente YLADA
+              </Link>
+            </p>
+          </div>
+        )}
+        {(dayNumber >= 15 && dayNumber <= 16) && (
+          <div className="bg-orange-50 rounded-xl p-4 mb-6 border border-gray-100">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>📄 Material complementar:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-3-rotina-produtividade"
+                className="text-orange-700 hover:text-orange-800 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                Ler PDF: Rotina & Produtividade YLADA
+              </Link>
+            </p>
+          </div>
+        )}
+        {(dayNumber >= 22 && dayNumber <= 30) && (
+          <div className="bg-indigo-50 rounded-xl p-4 mb-6 border border-gray-100">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>📄 Material complementar:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/pdf-6-gestao-gsal"
+                className="text-indigo-700 hover:text-indigo-800 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                Ler PDF: Gestão & Organização de Clientes (GSAL)
+              </Link>
+            </p>
+          </div>
+        )}
+
         {/* 4. CHECKLIST DE FIXAÇÃO */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
           <h2 className="font-bold text-gray-900 mb-2 text-lg">✓ Checklist de Fixação</h2>
