@@ -8,10 +8,11 @@ export async function GET(
   { params }: { params: { numero: string } }
 ) {
   try {
-    const user = await requireApiAuth(request)
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user, profile } = authResult
 
     const dayNumber = parseInt(params.numero)
     if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 30) {

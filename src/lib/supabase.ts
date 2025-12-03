@@ -30,16 +30,28 @@ export const supabase = (() => {
 })()
 
 // Cliente para operações do servidor (API routes)
+// NOTA: Esta função só deve ser usada no SERVIDOR (API routes), nunca no browser
 export const supabaseAdmin = (() => {
-  // Verificar se as variáveis de ambiente existem
-  if (!supabaseUrl || !serviceRoleKey) {
-    console.warn('Supabase Admin não configurado: NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não encontrados')
-    // Retornar um cliente mock para evitar erros durante desenvolvimento
+  // Só executar no servidor (typeof window === 'undefined')
+  if (typeof window !== 'undefined') {
+    // No browser, retornar null silenciosamente (não logar avisos)
+    return null as unknown as SupabaseClient
+  }
+  
+  // No servidor, verificar variáveis de ambiente
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!url || !key) {
+    console.error('❌ [SERVER] Supabase Admin não configurado:')
+    console.error('   NEXT_PUBLIC_SUPABASE_URL:', url ? '✅' : '❌')
+    console.error('   SUPABASE_SERVICE_ROLE_KEY:', key ? '✅' : '❌')
     return null as unknown as SupabaseClient
   }
   
   if (!supabaseAdminInstance) {
-    supabaseAdminInstance = createClient(supabaseUrl, serviceRoleKey, {
+    console.log('✅ [SERVER] Criando instância do Supabase Admin...')
+    supabaseAdminInstance = createClient(url, key, {
       auth: {
         persistSession: false,
         autoRefreshToken: false

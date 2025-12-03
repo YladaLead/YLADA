@@ -7,10 +7,11 @@ import { requireApiAuth } from '@/lib/api-auth'
  */
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request)
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user, profile } = authResult
 
     if (!supabaseAdmin) {
       return NextResponse.json(
