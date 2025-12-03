@@ -486,6 +486,18 @@ export default function JornadaDiaPage() {
             </button>
           )}
         </div>
+
+        {/* Link para Guia Completo (Dia 1) */}
+        {dayNumber === 1 && (
+          <div className="mt-8 bg-blue-50 rounded-xl p-4 border border-gray-100 text-center">
+            <Link
+              href="/pt/nutri/metodo/biblioteca/guia-metodo-ylada"
+              className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800 font-medium transition-all duration-200 ease-out hover:opacity-90"
+            >
+              📘 Ler Guia Completo do Método YLADA →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Modal de Bloqueio */}

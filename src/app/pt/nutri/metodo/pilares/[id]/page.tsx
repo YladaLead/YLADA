@@ -86,6 +86,21 @@ export default function PilarPage() {
           <JornadaDaysChips days={jornadaDays} pilarId={parseInt(pilarId)} />
         )}
 
+        {/* Material complementar recomendado (Pilar 1) */}
+        {pilar.id === '1' && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-gray-100 shadow-sm">
+            <p className="text-sm text-gray-700 mb-2">
+              <strong>Material complementar recomendado:</strong>{' '}
+              <Link
+                href="/pt/nutri/metodo/biblioteca/guia-metodo-ylada"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-all duration-200 ease-out hover:opacity-90"
+              >
+                Guia Completo do Método YLADA
+              </Link>
+            </p>
+          </div>
+        )}
+
         {/* Header do Pilar */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 ease-out">
           <div className="flex items-center gap-4 mb-4">
