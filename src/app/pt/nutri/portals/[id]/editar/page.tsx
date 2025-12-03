@@ -37,8 +37,8 @@ function EditarPortalNutriContent() {
   const [userSlug, setUserSlug] = useState<string | null>(null)
   const [carregandoSlug, setCarregandoSlug] = useState(true)
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
+    name: '', // Título com acentos para exibição
+    slug: '', // Slug sem acentos para URL (gerado automaticamente)
     description: '',
     navigation_type: 'menu' as 'menu' | 'sequential',
     header_text: '',
@@ -46,6 +46,7 @@ function EditarPortalNutriContent() {
   })
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [checkingSlug, setCheckingSlug] = useState(false)
+  const [slugNormalizado, setSlugNormalizado] = useState(false) // Flag para mostrar aviso de normalização
   const [error, setError] = useState<string | null>(null)
   const [shortCodeExistente, setShortCodeExistente] = useState<string | null>(null)
   const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
@@ -184,10 +185,21 @@ function EditarPortalNutriContent() {
   }
 
   const handleNameChange = (name: string) => {
-    setFormData({ ...formData, name })
-    const slug = gerarSlug(name)
-    setFormData(prev => ({ ...prev, slug }))
-    verificarSlug(slug)
+    // Gerar slug automaticamente a partir do nome
+    const slugGerado = gerarSlug(name)
+    
+    // Se foi normalizado, mostrar aviso
+    if (name !== slugGerado && name.length > 0) {
+      setSlugNormalizado(true)
+      setTimeout(() => setSlugNormalizado(false), 3000)
+    }
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      name, // Mantém nome original com acentos
+      slug: slugGerado // Gera slug automaticamente
+    }))
+    verificarSlug(slugGerado)
   }
 
   const toggleTool = (toolId: string) => {
@@ -302,7 +314,7 @@ function EditarPortalNutriContent() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome do Portal <span className="text-red-500">*</span>
+                  Título do Portal <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -310,12 +322,33 @@ function EditarPortalNutriContent() {
                   onChange={(e) => handleNameChange(e.target.value)}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ex: Portal de Bem-Estar Completo"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  💡 <strong>Este é o título que aparecerá na tela do cliente.</strong> Você pode usar acentos e espaços normalmente.
+                </p>
+                
+                {/* Mostrar preview do slug gerado */}
+                {formData.slug && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">
+                      <strong>🔗 Slug para URL (gerado automaticamente):</strong>
+                    </p>
+                    <p className="text-sm font-mono text-gray-800 bg-white px-2 py-1 rounded border border-gray-300">
+                      {formData.slug}
+                    </p>
+                    {slugNormalizado && (
+                      <p className="text-xs text-blue-600 mt-2">
+                        ℹ️ O slug foi normalizado automaticamente (acentos e espaços removidos para a URL)
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  URL do Portal <span className="text-red-500">*</span>
+                  Slug da URL (gerado automaticamente) <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500">
@@ -335,6 +368,9 @@ function EditarPortalNutriContent() {
                       setFormData(prev => ({ ...prev, slug }))
                       verificarSlug(slug)
                     }}
+                    readOnly={!!formData.name} // Read-only se tiver nome (slug gerado automaticamente)
+                    title={formData.name ? "Slug gerado automaticamente a partir do título. Edite o título para alterar o slug." : "Digite o slug manualmente ou preencha o título acima para gerar automaticamente"}
+                    className={formData.name ? "flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" : "flex-1 px-3 py-2 border border-gray-300 rounded-lg"}
                     required
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />

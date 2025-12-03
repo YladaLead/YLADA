@@ -122,18 +122,23 @@ export async function GET(request: NextRequest) {
           .eq('user_id', profile.user_id)
           .maybeSingle()
         
+        // Extrair leader_data_collection de content se existir
+        const leaderDataCollection = toolData.content?.leader_data_collection || null
+        
         // Debug: verificar se country_code está sendo retornado
         console.log('🔍 API Nutri - Ferramenta retornada (fallback):', {
           tool_id: toolData.id,
           whatsapp_number: toolData.whatsapp_number,
           country_code: userProfile?.country_code,
-          user_profiles: userProfile
+          user_profiles: userProfile,
+          leader_data_collection: leaderDataCollection
         })
         
         return NextResponse.json({ 
           tool: {
             ...toolData,
-            user_profiles: userProfile
+            user_profiles: userProfile,
+            leader_data_collection: leaderDataCollection
           }
         })
       }
@@ -173,15 +178,24 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Extrair leader_data_collection de content se existir
+    const leaderDataCollection = data.content?.leader_data_collection || null
+    
     // Debug: verificar se country_code está sendo retornado
     console.log('🔍 API Nutri - Ferramenta retornada:', {
       tool_id: data.id,
       whatsapp_number: data.whatsapp_number,
       country_code: data.user_profiles?.country_code,
-      user_profiles: data.user_profiles
+      user_profiles: data.user_profiles,
+      leader_data_collection: leaderDataCollection
     })
 
-    return NextResponse.json({ tool: data })
+    return NextResponse.json({ 
+      tool: {
+        ...data,
+        leader_data_collection: leaderDataCollection
+      }
+    })
   } catch (error: any) {
     console.error('Erro ao buscar ferramenta Nutri por URL:', error)
     return NextResponse.json(

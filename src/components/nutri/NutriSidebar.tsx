@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -29,6 +29,35 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
   const pathname = usePathname()
   const [hoveredSection, setHoveredSection] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState<string[]>([])
+  const [novosLeadsCount, setNovosLeadsCount] = useState<number>(0)
+
+  // Carregar contador de novos leads
+  useEffect(() => {
+    const carregarNovosLeads = async () => {
+      try {
+        const response = await fetch('/api/leads', {
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data.leads) {
+            const novosLeads = data.data.leads.filter((l: any) => {
+              const status = l.additional_data?.status || 'novo'
+              return status === 'novo'
+            })
+            setNovosLeadsCount(novosLeads.length)
+          }
+        }
+      } catch (error) {
+        // Ignorar erros silenciosamente
+      }
+    }
+    
+    carregarNovosLeads()
+    // Atualizar a cada 30 segundos
+    const interval = setInterval(carregarNovosLeads, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const toggleSection = (section: string) => {
     const sectionId = section.toLowerCase().replace(/\s+/g, '-')
@@ -77,6 +106,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       href: '/pt/nutri/gsal',
       items: [
         { title: 'Painel GSAL', icon: '📊', href: '/pt/nutri/gsal' },
+        { title: 'Leads', icon: '🎯', href: '/pt/nutri/leads', badge: novosLeadsCount > 0 ? novosLeadsCount : undefined },
         { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
         { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
         { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },

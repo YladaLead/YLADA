@@ -69,7 +69,7 @@ export default function QuizPersonalizadoPage() {
   const [perguntaPreviewAtual, setPerguntaPreviewAtual] = useState(0)
   const [paginaPreviewAtual, setPaginaPreviewAtual] = useState(0)
   const [salvando, setSalvando] = useState(false)
-  const [slugQuiz, setSlugQuiz] = useState<string>('')
+  const [slugQuiz, setSlugQuiz] = useState<string>('') // Slug gerado automaticamente (sem acentos)
   const [userSlug, setUserSlug] = useState<string>('')
   const [perfilWhatsapp, setPerfilWhatsapp] = useState<string | null>(null)
   const [carregandoPerfil, setCarregandoPerfil] = useState(true)
@@ -80,6 +80,20 @@ export default function QuizPersonalizadoPage() {
   const [verificandoShortCode, setVerificandoShortCode] = useState(false)
   const [usarCodigoPersonalizado, setUsarCodigoPersonalizado] = useState(false)
   const [quizSalvo, setQuizSalvo] = useState(false)
+  const [slugNormalizado, setSlugNormalizado] = useState(false) // Flag para mostrar aviso de normalização
+
+  // Função para gerar slug a partir do título (sem acentos)
+  const gerarSlugDoTitulo = (titulo: string): string => {
+    if (!titulo) return ''
+    return titulo
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^a-z0-9-]/g, '-') // Substitui caracteres especiais por hífen
+      .replace(/-+/g, '-') // Remove múltiplos hífens
+      .replace(/^-|-$/g, '') // Remove hífens do início e fim
+      .trim()
+  }
 
   useEffect(() => {
     const carregarPerfil = async () => {
@@ -464,15 +478,8 @@ export default function QuizPersonalizadoPage() {
 
     setSalvando(true)
     try {
-      // Gerar slug único
-      const slugBase = quiz.titulo
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9-]/g, '-')
-        .replace(/-+/g, '-')
-        .trim()
-      
+      // Usar slug gerado automaticamente ou gerar agora se não tiver
+      const slugBase = slugQuiz || gerarSlugDoTitulo(quiz.titulo)
       const slug = `quiz-${slugBase}-${Date.now()}`
       
       let urlRedirecionamento = quiz.entrega.urlRedirecionamento
@@ -649,11 +656,41 @@ export default function QuizPersonalizadoPage() {
                           placeholder="Ex: Quiz de Avaliação Nutricional Completa"
                           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           value={quiz.titulo}
-                          onChange={(e) => setQuiz({ ...quiz, titulo: e.target.value })}
+                          onChange={(e) => {
+                            const tituloOriginal = e.target.value
+                            // Gerar slug automaticamente a partir do título
+                            const slugGerado = gerarSlugDoTitulo(tituloOriginal)
+                            
+                            // Se foi normalizado, mostrar aviso
+                            if (tituloOriginal !== slugGerado && tituloOriginal.length > 0) {
+                              setSlugNormalizado(true)
+                              setTimeout(() => setSlugNormalizado(false), 3000)
+                            }
+                            
+                            setQuiz({ ...quiz, titulo: tituloOriginal }) // Mantém título original com acentos
+                            setSlugQuiz(slugGerado) // Gera slug automaticamente
+                          }}
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          💡 Dica: Use um título claro que desperte curiosidade
+                          💡 <strong>Este é o título que aparecerá na tela do cliente.</strong> Você pode usar acentos e espaços normalmente.
                         </p>
+                        
+                        {/* Mostrar preview do slug gerado */}
+                        {slugQuiz && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <p className="text-xs text-gray-600 mb-1">
+                              <strong>🔗 Slug para URL (gerado automaticamente):</strong>
+                            </p>
+                            <p className="text-sm font-mono text-gray-800 bg-white px-2 py-1 rounded border border-gray-300">
+                              quiz-{slugQuiz}-{Date.now()}
+                            </p>
+                            {slugNormalizado && (
+                              <p className="text-xs text-blue-600 mt-2">
+                                ℹ️ O slug foi normalizado automaticamente (acentos e espaços removidos para a URL)
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

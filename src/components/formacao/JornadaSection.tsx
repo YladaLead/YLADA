@@ -33,6 +33,11 @@ export default function JornadaSection() {
         }
 
         const data = await res.json()
+        console.log('📊 Dados da API Jornada:', { 
+          success: data.success, 
+          daysCount: data.data?.days?.length || 0,
+          days: data.data?.days || []
+        })
         if (data.success && data.data) {
           setDays(data.data.days || [])
           setStats(data.data.stats || null)
@@ -145,7 +150,7 @@ export default function JornadaSection() {
         {semanas.map((semana) => {
           const diasSemana = days.filter(d => d.week_number === semana)
           const semanaStats = stats?.week_progress.find(w => w.week === semana)
-          const isWeekLocked = semana > 1 && stats?.week_progress.find(w => w.week === semana - 1)?.percentage !== 100
+          // REMOVIDO: isWeekLocked - não bloqueia mais semanas
 
           return (
             <div key={semana} className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
@@ -185,26 +190,31 @@ export default function JornadaSection() {
 
               {/* Dias da Semana */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
-                {diasSemana.map((day) => (
-                  <DayCard
-                    key={day.id}
-                    day={{
-                      day_number: day.day_number,
-                      title: day.title,
-                      is_completed: day.is_completed,
-                      is_locked: day.is_locked || isWeekLocked
-                    }}
-                    progress={progress}
-                    currentDay={stats?.current_day || null}
-                  />
-                ))}
+                {diasSemana.length > 0 ? (
+                  diasSemana
+                    .sort((a, b) => a.day_number - b.day_number)
+                    .map((day) => (
+                      <DayCard
+                        key={day.id}
+                        day={{
+                          day_number: day.day_number,
+                          title: day.title,
+                          is_completed: day.is_completed,
+                          is_locked: false // SEM bloqueio - todos os dias acessíveis
+                        }}
+                        progress={progress}
+                        currentDay={stats?.current_day || null}
+                      />
+                    ))
+                ) : (
+                  <div className="col-span-full text-center py-8 text-gray-500 text-sm">
+                    {days.length === 0 
+                      ? '⚠️ Execute as migrations no Supabase para carregar os 30 dias da jornada.'
+                      : `Nenhum dia encontrado para a Semana ${semana}.`
+                    }
+                  </div>
+                )}
               </div>
-
-              {isWeekLocked && (
-                <p className="text-sm text-gray-500 text-center mt-4">
-                  Conclua a semana anterior para desbloquear
-                </p>
-              )}
             </div>
           )
         })}
@@ -233,4 +243,3 @@ export default function JornadaSection() {
     </div>
   )
 }
-

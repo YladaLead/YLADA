@@ -4,6 +4,7 @@
 // YLADA - COMPONENTE CTA BUTTON COMPARTILHADO WELLNESS
 // =====================================================
 
+import { useState } from 'react'
 import { ToolConfig } from '@/types/wellness'
 import { useParams } from 'next/navigation'
 
@@ -32,6 +33,81 @@ export default function WellnessCTAButton({
   // Tentar obter slug da URL se não tiver template_id
   const params = useParams()
   const toolSlug = params?.['tool-slug'] as string | undefined
+  const userSlug = params?.['user-slug'] as string | undefined
+
+  // Estado para campos de coleta de dados
+  const [dadosColeta, setDadosColeta] = useState({
+    nome: '',
+    email: '',
+    telefone: ''
+  })
+  const [dadosEnviados, setDadosEnviados] = useState(false)
+
+  // Verificar se precisa coletar dados
+  const precisaColetarDados = config.leader_data_collection?.coletar_dados === true
+  const camposColeta = config.leader_data_collection?.campos_coleta || {}
+  
+  // Função para enviar dados coletados
+  const enviarDadosColetados = async () => {
+    if (!precisaColetarDados) return true
+
+    // Validar campos obrigatórios
+    if (camposColeta.nome && !dadosColeta.nome.trim()) {
+      alert('Por favor, preencha seu nome.')
+      return false
+    }
+    if (camposColeta.email && !dadosColeta.email.trim()) {
+      alert('Por favor, preencha seu email.')
+      return false
+    }
+    if (camposColeta.telefone && !dadosColeta.telefone.trim()) {
+      alert('Por favor, preencha seu telefone.')
+      return false
+    }
+
+    // Validar formato de email
+    if (camposColeta.email && dadosColeta.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(dadosColeta.email)) {
+        alert('Por favor, insira um email válido.')
+        return false
+      }
+    }
+
+    try {
+      // Enviar dados para API de leads
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          slug: toolSlug && userSlug ? `${userSlug}/${toolSlug}` : undefined,
+          name: dadosColeta.nome,
+          email: dadosColeta.email,
+          phone: dadosColeta.telefone,
+          additionalData: {
+            resultado: resultadoTexto,
+            template_id: template_id
+          }
+        }),
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setDadosEnviados(true)
+        return true
+      } else {
+        alert('Erro ao enviar dados. Tente novamente.')
+        return false
+      }
+    } catch (error) {
+      console.error('Erro ao enviar dados coletados:', error)
+      alert('Erro ao enviar dados. Tente novamente.')
+      return false
+    }
+  }
 
   // Função para rastrear conversão quando botão é clicado
   const rastrearConversao = async () => {
@@ -213,22 +289,109 @@ export default function WellnessCTAButton({
           borderColor: config.custom_colors?.principal || '#93c5fd'
         }}
       >
+        {/* Campos de Coleta de Dados */}
+        {precisaColetarDados && !dadosEnviados && (
+          <div className="mb-6 space-y-4">
+            <h4 className="text-lg font-semibold text-gray-900 mb-3 text-center">
+              {config.leader_data_collection?.mensagem_personalizada || 'Receba seu resultado personalizado'}
+            </h4>
+            <div className="space-y-3">
+              {camposColeta.nome && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nome {camposColeta.nome && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={dadosColeta.nome}
+                    onChange={(e) => setDadosColeta({ ...dadosColeta, nome: e.target.value })}
+                    placeholder="Seu nome completo"
+                    required={camposColeta.nome}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+              {camposColeta.email && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email {camposColeta.email && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="email"
+                    value={dadosColeta.email}
+                    onChange={(e) => setDadosColeta({ ...dadosColeta, email: e.target.value })}
+                    placeholder="seu@email.com"
+                    required={camposColeta.email}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+              {camposColeta.telefone && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Telefone {camposColeta.telefone && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="tel"
+                    value={dadosColeta.telefone}
+                    onChange={(e) => setDadosColeta({ ...dadosColeta, telefone: e.target.value })}
+                    placeholder="(11) 99999-9999"
+                    required={camposColeta.telefone}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mensagem de sucesso após envio */}
+        {precisaColetarDados && dadosEnviados && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-green-800 text-sm text-center">
+              ✅ {config.leader_data_collection?.mensagem_personalizada || 'Dados enviados com sucesso!'}
+            </p>
+          </div>
+        )}
+
         <div className="text-center">
           <div className="flex items-center justify-center gap-3">
-            <a
-              href={`https://wa.me/${numeroLimpo}?text=${encodeURIComponent(mensagem)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={rastrearConversao}
-              className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
-              style={{
-                background: config.custom_colors
-                  ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                  : '#16a34a'
-              }}
-            >
-              📱 {config.cta_button_text || 'Falar no WhatsApp'}
-            </a>
+            {precisaColetarDados && !dadosEnviados ? (
+              <button
+                onClick={async (e) => {
+                  e.preventDefault()
+                  const sucesso = await enviarDadosColetados()
+                  if (sucesso) {
+                    // Após enviar dados, abrir WhatsApp
+                    window.open(`https://wa.me/${numeroLimpo}?text=${encodeURIComponent(mensagem)}`, '_blank')
+                    rastrearConversao()
+                  }
+                }}
+                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                style={{
+                  background: config.custom_colors
+                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                    : '#16a34a'
+                }}
+              >
+                📱 {config.cta_button_text || 'Enviar Dados e Falar no WhatsApp'}
+              </button>
+            ) : (
+              <a
+                href={`https://wa.me/${numeroLimpo}?text=${encodeURIComponent(mensagem)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={rastrearConversao}
+                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                style={{
+                  background: config.custom_colors
+                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                    : '#16a34a'
+                }}
+              >
+                📱 {config.cta_button_text || 'Falar no WhatsApp'}
+              </a>
+            )}
             <a
               href={`https://wa.me/${numeroLimpo}?text=${encodeURIComponent(mensagemSimples)}`}
               target="_blank"
@@ -282,25 +445,112 @@ export default function WellnessCTAButton({
           borderColor: config.custom_colors?.principal || '#93c5fd'
         }}
       >
+        {/* Campos de Coleta de Dados */}
+        {precisaColetarDados && !dadosEnviados && (
+          <div className="mb-6 space-y-4">
+            <h4 className="text-lg font-semibold text-gray-900 mb-3 text-center">
+              {config.leader_data_collection?.mensagem_personalizada || 'Receba seu resultado personalizado'}
+            </h4>
+            <div className="space-y-3">
+              {camposColeta.nome && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nome {camposColeta.nome && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={dadosColeta.nome}
+                    onChange={(e) => setDadosColeta({ ...dadosColeta, nome: e.target.value })}
+                    placeholder="Seu nome completo"
+                    required={camposColeta.nome}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+              {camposColeta.email && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email {camposColeta.email && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="email"
+                    value={dadosColeta.email}
+                    onChange={(e) => setDadosColeta({ ...dadosColeta, email: e.target.value })}
+                    placeholder="seu@email.com"
+                    required={camposColeta.email}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+              {camposColeta.telefone && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Telefone {camposColeta.telefone && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="tel"
+                    value={dadosColeta.telefone}
+                    onChange={(e) => setDadosColeta({ ...dadosColeta, telefone: e.target.value })}
+                    placeholder="(11) 99999-9999"
+                    required={camposColeta.telefone}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mensagem de sucesso após envio */}
+        {precisaColetarDados && dadosEnviados && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-green-800 text-sm text-center">
+              ✅ {config.leader_data_collection?.mensagem_personalizada || 'Dados enviados com sucesso!'}
+            </p>
+          </div>
+        )}
+
         <div className="text-center">
           <p className="text-gray-700 font-medium mb-4">
             💬 Quer saber mais?
           </p>
           <div className="flex items-center justify-center gap-3">
-            <a
-              href={config.external_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={rastrearConversao}
-              className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
-              style={{
-                background: config.custom_colors
-                  ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                  : '#16a34a'
-              }}
-            >
-              {config.cta_button_text || 'Saiba Mais'}
-            </a>
+            {precisaColetarDados && !dadosEnviados ? (
+              <button
+                onClick={async (e) => {
+                  e.preventDefault()
+                  const sucesso = await enviarDadosColetados()
+                  if (sucesso) {
+                    // Após enviar dados, abrir URL externa
+                    window.open(config.external_url, '_blank')
+                    rastrearConversao()
+                  }
+                }}
+                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                style={{
+                  background: config.custom_colors
+                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                    : '#16a34a'
+                }}
+              >
+                {config.cta_button_text || 'Enviar Dados e Saiba Mais'}
+              </button>
+            ) : (
+              <a
+                href={config.external_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={rastrearConversao}
+                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                style={{
+                  background: config.custom_colors
+                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                    : '#16a34a'
+                }}
+              >
+                {config.cta_button_text || 'Saiba Mais'}
+              </a>
+            )}
             {numeroLimpo && config.show_whatsapp_button !== false && (
               <a
                 href={`https://wa.me/${numeroLimpo}?text=${encodeURIComponent(mensagemSimples)}`}

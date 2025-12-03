@@ -206,6 +206,7 @@ export default function FerramentaPersonalizadaNutriPage() {
       cta_button_text: tool.cta_button_text,
       custom_whatsapp_message: tool.custom_whatsapp_message,
       country_code: countryCode, // Incluir country_code do perfil
+      leader_data_collection: tool.leader_data_collection, // Incluir configuração de coleta de dados
     }
 
     // ✅ Normalizar template_slug usando mapeamento completo de Nutri

@@ -20,7 +20,8 @@ interface Template {
 }
 
 interface Configuracao {
-  urlPersonalizada: string // Ex: "calculadora-imc" - agora é o nome principal também
+  urlPersonalizada: string // Ex: "calculadora-imc" - slug para URL (sem acentos)
+  tituloProjeto: string // Ex: "Calculadora de Água" - título para exibição (com acentos)
   urlCompleta: string
   emoji: string
   cores: {
@@ -48,6 +49,7 @@ function NovaFerramentaNutriContent() {
   const [busca, setBusca] = useState('')
   const [configuracao, setConfiguracao] = useState<Configuracao>({
     urlPersonalizada: '',
+    tituloProjeto: '', // Título com acentos para exibição
     urlCompleta: '',
     emoji: '',
     cores: {
@@ -329,10 +331,15 @@ function NovaFerramentaNutriContent() {
       if (!configuracao.emoji && !emojiEditadoManual) {
         setConfiguracao(prev => ({ ...prev, emoji: templateSelecionado.icon }))
       }
-      if (!configuracao.urlPersonalizada) {
-        // Sugerir baseado no nome do template
-        const sugestao = tratarUrl(templateSelecionado.nome)
-        setConfiguracao(prev => ({ ...prev, urlPersonalizada: sugestao }))
+      if (!configuracao.tituloProjeto) {
+        // Sugerir título baseado no nome do template (com acentos)
+        const tituloSugerido = templateSelecionado.nome
+        const slugSugerido = tratarUrl(tituloSugerido)
+        setConfiguracao(prev => ({ 
+          ...prev, 
+          tituloProjeto: tituloSugerido,
+          urlPersonalizada: slugSugerido 
+        }))
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -341,22 +348,20 @@ function NovaFerramentaNutriContent() {
   // Atualizar URL completa automaticamente e validar disponibilidade
   useEffect(() => {
     if (configuracao.urlPersonalizada && templateSelecionado) {
-      const slugTratado = tratarUrl(configuracao.urlPersonalizada)
       // Usar user_slug do perfil, ou fallback se não tiver
       const urlNome = userSlug || 'seu-usuario' // Fallback temporário até ter user_slug
       const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
-      const url = `${baseUrl}/pt/nutri/${urlNome}/${slugTratado}`
+      const url = `${baseUrl}/pt/nutri/${urlNome}/${configuracao.urlPersonalizada}`
       
-      // Atualizar URL completa
+      // Atualizar URL completa (slug já está tratado no onChange do título)
       setConfiguracao(prev => ({ 
         ...prev, 
-        urlPersonalizada: slugTratado, // Mantém sempre tratado
         urlCompleta: url
       }))
       
       // Validar disponibilidade via API (debounce)
       const timeoutId = setTimeout(() => {
-        validarUrl(slugTratado)
+        validarUrl(configuracao.urlPersonalizada)
       }, 500) // Aguarda 500ms após parar de digitar
 
       return () => clearTimeout(timeoutId)
@@ -420,8 +425,8 @@ function NovaFerramentaNutriContent() {
       }
 
       // Validar campos obrigatórios
-      if (!configuracao.urlPersonalizada) {
-        setErroSalvamento('Preencha o nome do projeto.')
+      if (!configuracao.tituloProjeto || !configuracao.urlPersonalizada) {
+        setErroSalvamento('Preencha o título do projeto.')
         setTimeout(() => setErroSalvamento(null), 8000)
         setSalvando(false)
         return
@@ -449,9 +454,6 @@ function NovaFerramentaNutriContent() {
         return
       }
 
-      // Converter slug para nome amigável usando função melhorada
-      const nomeAmigavel = gerarTituloDoSlug(configuracao.urlPersonalizada)
-
       // ✅ NORMALIZAR template_slug para garantir que sempre use o slug canônico
       // Passar 'nutri' como profession para manter slugs originais (calculadora-imc, etc)
       const templateSlugNormalizado = normalizeTemplateSlug(templateSelecionado.slug, 'nutri')
@@ -466,9 +468,12 @@ function NovaFerramentaNutriContent() {
         // Continuar mesmo assim, mas logar o problema
       }
 
+      // Usar título do projeto (com acentos) ou gerar a partir do slug se não tiver título
+      const tituloFinal = configuracao.tituloProjeto || gerarTituloDoSlug(configuracao.urlPersonalizada)
+
       const payload = {
         template_slug: templateSlugNormalizado, // ✅ Usar slug normalizado
-        title: nomeAmigavel, // Usar o nome do projeto formatado como título
+        title: tituloFinal, // Usar título do projeto (com acentos) para exibição
         description: descricao || templateSelecionado.descricao, // Usar descrição personalizada ou padrão
         slug: configuracao.urlPersonalizada,
         emoji: configuracao.emoji,
@@ -861,29 +866,51 @@ function NovaFerramentaNutriContent() {
                       <div className="p-6 space-y-4 border-t border-gray-200">
                       <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nome do Projeto <span className="text-red-500">*</span>
+                            Título do Projeto <span className="text-red-500">*</span>
                           </label>
                         <input
                             type="text"
-                            value={configuracao.urlPersonalizada}
+                            value={configuracao.tituloProjeto}
                             onChange={(e) => {
-                              const valorOriginal = e.target.value
-                              const valorTratado = tratarUrl(valorOriginal)
+                              const tituloOriginal = e.target.value
+                              // Gerar slug automaticamente a partir do título
+                              const slugGerado = tratarUrl(tituloOriginal)
                               
                               // Se foi normalizado, mostrar aviso
-                              if (valorOriginal !== valorTratado && valorOriginal.length > 0) {
+                              if (tituloOriginal !== slugGerado && tituloOriginal.length > 0) {
                                 setSlugNormalizado(true)
                                 setTimeout(() => setSlugNormalizado(false), 3000) // Esconde após 3s
                               }
                               
-                              setConfiguracao({ ...configuracao, urlPersonalizada: valorTratado })
+                              setConfiguracao({ 
+                                ...configuracao, 
+                                tituloProjeto: tituloOriginal, // Mantém título original com acentos
+                                urlPersonalizada: slugGerado // Gera slug automaticamente
+                              })
                             }}
-                            placeholder="Ex: calculadora-imc"
+                            placeholder="Ex: Calculadora de Água"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                           <p className="text-xs text-gray-500 mt-2">
-                            💡 <strong>O que é?</strong> Nome da sua ferramenta (aparecerá como título) e também será usado na URL. Ex: "calculadora-imc", "quiz-ganhos", "agua". O sistema ajusta automaticamente enquanto você digita.
+                            💡 <strong>Este é o título que aparecerá na tela do cliente.</strong> Você pode usar acentos e espaços normalmente. Ex: "Calculadora de Água", "Quiz de Ganhos".
                           </p>
+                          
+                          {/* Mostrar preview do slug gerado */}
+                          {configuracao.urlPersonalizada && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              <p className="text-xs text-gray-600 mb-1">
+                                <strong>🔗 Slug para URL (gerado automaticamente):</strong>
+                              </p>
+                              <p className="text-sm font-mono text-gray-800 bg-white px-2 py-1 rounded border border-gray-300">
+                                {configuracao.urlPersonalizada}
+                              </p>
+                              {slugNormalizado && (
+                                <p className="text-xs text-blue-600 mt-2">
+                                  ℹ️ O slug foi normalizado automaticamente (acentos e espaços removidos para a URL)
+                                </p>
+                              )}
+                            </div>
+                          )}
                           
                           {/* 🚀 MELHORIA: Mostrar composição completa da URL com user_slug */}
                           {configuracao.urlCompleta && (
@@ -1070,8 +1097,8 @@ function NovaFerramentaNutriContent() {
                           </label>
                           <div className="px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700">
                             {configuracao.urlPersonalizada 
-                              ? gerarTituloDoSlug(configuracao.urlPersonalizada)
-                              : 'Digite o nome do projeto acima'}
+                              ? configuracao.tituloProjeto
+                              : 'Digite o título do projeto acima'}
                             </div>
                           <p className="text-xs text-gray-500 mt-1">
                             Este título será gerado automaticamente a partir do "Nome do Projeto" enquanto você digita
@@ -1495,8 +1522,8 @@ function NovaFerramentaNutriContent() {
                 {/* 2. Título (Nome do Projeto formatado) */}
                 <h4 className="text-2xl font-bold text-gray-900 mb-3 text-center">
                   {configuracao.urlPersonalizada 
-                    ? gerarTituloDoSlug(configuracao.urlPersonalizada)
-                    : 'Nome do Projeto'}
+                    ? configuracao.tituloProjeto
+                    : 'Título do Projeto'}
                 </h4>
 
                 {/* 3. Descrição (se tiver) */}

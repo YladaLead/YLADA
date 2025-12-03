@@ -8,7 +8,8 @@ import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { getAppUrl, buildWellnessToolUrl } from '@/lib/url-utils'
 
 interface Configuracao {
-  urlPersonalizada: string
+  urlPersonalizada: string // Slug para URL (sem acentos)
+  tituloProjeto: string // Título para exibição (com acentos)
   urlCompleta: string
   emoji: string
   cores: {
@@ -50,6 +51,7 @@ export default function EditarFerramentaWellness() {
   const [paisTelefone, setPaisTelefone] = useState('BR')
   const [configuracao, setConfiguracao] = useState<Configuracao>({
     urlPersonalizada: '',
+    tituloProjeto: '', // Título com acentos para exibição
     urlCompleta: '',
     emoji: '',
     cores: {
@@ -231,6 +233,7 @@ export default function EditarFerramentaWellness() {
       
       setConfiguracao({
         urlPersonalizada: tool.slug,
+        tituloProjeto: tool.title || '', // Título com acentos para exibição
         urlCompleta: urlCompletaCalculada,
         emoji: tool.emoji || '',
         cores: tool.custom_colors || { principal: '#10B981', secundaria: '#059669' },
@@ -340,8 +343,8 @@ export default function EditarFerramentaWellness() {
     }
 
     // Validar campos obrigatórios
-    if (!configuracao.urlPersonalizada) {
-      setMensagemErro('Preencha o nome do projeto.')
+    if (!configuracao.tituloProjeto || !configuracao.urlPersonalizada) {
+      setMensagemErro('Preencha o título do projeto.')
       setTimeout(() => setMensagemErro(null), 5000)
       return
     }
@@ -369,12 +372,12 @@ export default function EditarFerramentaWellness() {
       setSalvando(true)
       setMensagemErro(null)
       
-      // Formatar título usando função melhorada
-      const nomeAmigavel = gerarTituloDoSlug(configuracao.urlPersonalizada)
+      // Usar título do projeto (com acentos) ou gerar a partir do slug se não tiver título
+      const tituloFinal = configuracao.tituloProjeto || gerarTituloDoSlug(configuracao.urlPersonalizada)
 
       const payload = {
         id: toolData.id,
-        title: nomeAmigavel,
+        title: tituloFinal, // Usar título do projeto (com acentos) para exibição
         description: descricao || toolData.description,
         slug: configuracao.urlPersonalizada,
         emoji: configuracao.emoji,
@@ -620,35 +623,53 @@ export default function EditarFerramentaWellness() {
                   <div className="mt-4 space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nome do Projeto (para URL) <span className="text-red-500">*</span>
+                        Título do Projeto <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        value={configuracao.urlPersonalizada}
+                        value={configuracao.tituloProjeto}
                         onChange={(e) => {
-                          const valorOriginal = e.target.value
-                          const valorTratado = tratarUrl(valorOriginal)
+                          const tituloOriginal = e.target.value
+                          // Gerar slug automaticamente a partir do título
+                          const slugGerado = tratarUrl(tituloOriginal)
                           
                           // Se foi normalizado, mostrar aviso
-                          if (valorOriginal !== valorTratado && valorOriginal.length > 0) {
+                          if (tituloOriginal !== slugGerado && tituloOriginal.length > 0) {
                             setSlugNormalizado(true)
                             setTimeout(() => setSlugNormalizado(false), 3000)
                           }
                           
-                          setConfiguracao(prev => ({ ...prev, urlPersonalizada: valorTratado }))
+                          setConfiguracao(prev => ({ 
+                            ...prev, 
+                            tituloProjeto: tituloOriginal, // Mantém título original com acentos
+                            urlPersonalizada: slugGerado // Gera slug automaticamente
+                          }))
                         }}
-                        placeholder="Ex: calculadora-imc"
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent ${
-                          urlDisponivel 
-                            ? 'border-green-300 focus:ring-green-500' 
-                            : 'border-red-300 focus:ring-red-500'
-                        }`}
+                        placeholder="Ex: Calculadora de Água"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       />
-                      {slugNormalizado && (
-                        <div className="mt-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                          <p className="text-xs text-blue-800">
-                            ℹ️ <strong>Normalizado automaticamente:</strong> Acentos, espaços e caracteres especiais foram convertidos para formato de URL válido.
+                      <p className="text-xs text-gray-500 mt-1">
+                        💡 <strong>Este é o título que aparecerá na tela do cliente.</strong> Você pode usar acentos e espaços normalmente.
+                      </p>
+                      
+                      {/* Mostrar preview do slug gerado */}
+                      {configuracao.urlPersonalizada && (
+                        <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-600 mb-1">
+                            <strong>🔗 Slug para URL (gerado automaticamente):</strong>
                           </p>
+                          <p className={`text-sm font-mono px-2 py-1 rounded border ${
+                            urlDisponivel 
+                              ? 'bg-white text-gray-800 border-gray-300' 
+                              : 'bg-red-50 text-red-800 border-red-300'
+                          }`}>
+                            {configuracao.urlPersonalizada}
+                          </p>
+                          {slugNormalizado && (
+                            <p className="text-xs text-blue-600 mt-2">
+                              ℹ️ O slug foi normalizado automaticamente (acentos e espaços removidos para a URL)
+                            </p>
+                          )}
                         </div>
                       )}
                       

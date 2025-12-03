@@ -34,8 +34,8 @@ function NovoPortalNutriContent() {
   const [userSlug, setUserSlug] = useState<string | null>(null)
   const [carregandoSlug, setCarregandoSlug] = useState(true)
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
+    name: '', // Título com acentos para exibição
+    slug: '', // Slug sem acentos para URL (gerado automaticamente)
     description: '',
     navigation_type: 'menu' as 'menu' | 'sequential',
     header_text: '',
@@ -43,6 +43,7 @@ function NovoPortalNutriContent() {
   })
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
   const [checkingSlug, setCheckingSlug] = useState(false)
+  const [slugNormalizado, setSlugNormalizado] = useState(false) // Flag para mostrar aviso de normalização
   const [generateShortUrl, setGenerateShortUrl] = useState(false) // Gerar URL encurtada
   const [customShortCode, setCustomShortCode] = useState('')
   const [shortCodeDisponivel, setShortCodeDisponivel] = useState<boolean | null>(null)
@@ -132,10 +133,21 @@ function NovoPortalNutriContent() {
   }
 
   const handleNameChange = (name: string) => {
-    setFormData({ ...formData, name })
-    const slug = gerarSlug(name)
-    setFormData(prev => ({ ...prev, slug }))
-    verificarSlug(slug)
+    // Gerar slug automaticamente a partir do nome
+    const slugGerado = gerarSlug(name)
+    
+    // Se foi normalizado, mostrar aviso
+    if (name !== slugGerado && name.length > 0) {
+      setSlugNormalizado(true)
+      setTimeout(() => setSlugNormalizado(false), 3000)
+    }
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      name, // Mantém nome original com acentos
+      slug: slugGerado // Gera slug automaticamente
+    }))
+    verificarSlug(slugGerado)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -327,7 +339,7 @@ function NovoPortalNutriContent() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome do Portal *
+                  Título do Portal *
                 </label>
                 <input
                   type="text"
@@ -337,11 +349,31 @@ function NovoPortalNutriContent() {
                   placeholder="Ex: Portal de Bem-Estar Completo"
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  💡 <strong>Este é o título que aparecerá na tela do cliente.</strong> Você pode usar acentos e espaços normalmente.
+                </p>
+                
+                {/* Mostrar preview do slug gerado */}
+                {formData.slug && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">
+                      <strong>🔗 Slug para URL (gerado automaticamente):</strong>
+                    </p>
+                    <p className="text-sm font-mono text-gray-800 bg-white px-2 py-1 rounded border border-gray-300">
+                      {formData.slug}
+                    </p>
+                    {slugNormalizado && (
+                      <p className="text-xs text-blue-600 mt-2">
+                        ℹ️ O slug foi normalizado automaticamente (acentos e espaços removidos para a URL)
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL do Portal *
+                  Slug da URL (gerado automaticamente) *
                 </label>
                 {carregandoSlug ? (
                   <div className="flex items-center space-x-2">
@@ -379,9 +411,11 @@ function NovoPortalNutriContent() {
                           setFormData({ ...formData, slug })
                           verificarSlug(slug)
                         }}
-                        className="flex-1 min-w-[120px] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 min-w-[120px] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
                         placeholder="meu-portal"
                         required
+                        readOnly={!!formData.name} // Read-only se tiver nome (slug gerado automaticamente)
+                        title={formData.name ? "Slug gerado automaticamente a partir do título. Edite o título para alterar o slug." : "Digite o slug manualmente ou preencha o título acima para gerar automaticamente"}
                       />
                       {checkingSlug && (
                         <span className="text-gray-500 text-sm">Verificando...</span>

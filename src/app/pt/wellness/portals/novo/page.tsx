@@ -125,10 +125,15 @@ function NovoPortalWellnessContent() {
   }
 
   const handleNameChange = (name: string) => {
-    setFormData({ ...formData, name })
-    const slug = gerarSlug(name)
-    setFormData(prev => ({ ...prev, slug }))
-    verificarSlug(slug)
+    // Gerar slug automaticamente a partir do nome
+    const slugGerado = gerarSlug(name)
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      name, // Mantém nome original com acentos
+      slug: slugGerado // Gera slug automaticamente
+    }))
+    verificarSlug(slugGerado)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -27,9 +27,10 @@ export default function DayCard({
   const [showModal, setShowModal] = useState(false)
   const { canAccessDay, isDayLocked, userEmail } = useJornadaProgress()
 
-  const isLocked = isDayLocked(day.day_number) || day.is_locked
+  // Se is_locked for explicitamente false, não bloquear
+  const isLocked = day.is_locked === false ? false : (isDayLocked(day.day_number) || day.is_locked)
   const isCurrent = day.day_number === currentDay
-  const canAccess = canAccessDay(day.day_number) && !day.is_locked
+  const canAccess = day.is_locked === false ? true : (canAccessDay(day.day_number) && !day.is_locked)
 
   const handleClick = (e: React.MouseEvent) => {
     if (isLocked) {
