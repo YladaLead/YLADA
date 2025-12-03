@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import MetodoYLADAIntro from '@/components/formacao/MetodoYLADAIntro'
+import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 
 // Pilares do Método YLADA
 const pilares = [
@@ -44,6 +45,16 @@ export default function MetodoYLADAPage() {
       <FormacaoHeader />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Vídeo 2 — Método YLADA */}
+        <div className="mb-8">
+          <VideoPlayerYLADA
+            videoUrl={process.env.NEXT_PUBLIC_VIDEO_METODO_YLADA}
+            title="Método YLADA — Introdução"
+            description="Conheça o método que transforma nutricionistas em Nutri-Empresárias de sucesso."
+            className="mb-6"
+          />
+        </div>
+
         {/* Introdução Oficial */}
         <MetodoYLADAIntro />
 

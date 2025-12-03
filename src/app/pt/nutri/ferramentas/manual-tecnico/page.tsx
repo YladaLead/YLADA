@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
+import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 import { ContentContainer, Heading, Paragraph, Section, InfoBox } from '@/components/formacao/ContentComponents'
 
 export default function FerramentasManualTecnicoPage() {
@@ -35,6 +36,15 @@ export default function FerramentasManualTecnicoPage() {
               ← Voltar
             </Link>
           </div>
+        </div>
+
+        {/* Vídeo 5 — Portal de Ferramentas */}
+        <div className="mb-6">
+          <VideoPlayerYLADA
+            videoUrl={process.env.NEXT_PUBLIC_VIDEO_PORTAL_FERRAMENTAS}
+            title="Portal de Ferramentas YLADA"
+            description="Aprenda a usar o portal de ferramentas para criar, gerenciar e divulgar suas ferramentas."
+          />
         </div>
 
         {/* Link para PDF 9 */}

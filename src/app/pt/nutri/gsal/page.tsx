@@ -13,6 +13,7 @@ import KPICard from '@/components/shared/KPICard'
 import PrimaryButton from '@/components/shared/PrimaryButton'
 import RotinaMinimaChecklist from '@/components/nutri/RotinaMinimaChecklist'
 import AttachToolModal from '@/components/gsal/AttachToolModal'
+import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 
 export default function GSALPage() {
   return (
@@ -167,6 +168,15 @@ function GSALPageContent() {
               title="📊 Gestão GSAL"
               subtitle="Gerar, Servir, Acompanhar, Lucrar"
             >
+              {/* Vídeo 4 — GSAL */}
+              <div className="mb-6">
+                <VideoPlayerYLADA
+                  videoUrl={process.env.NEXT_PUBLIC_VIDEO_GSAL}
+                  title="GSAL — Gestão Simplificada"
+                  description="Aprenda a usar o GSAL para gerenciar seus clientes de forma simples e eficiente."
+                />
+              </div>
+
               {/* Rotina Mínima (Checklist Diário) */}
               <Card className="mb-6">
                 <div className="flex items-center justify-between mb-4">

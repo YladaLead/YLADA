@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import QRCode from '@/components/QRCode'
 import NutriNavBar from '@/components/nutri/NutriNavBar'
+import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 import { buildNutriToolUrl, buildNutriToolUrlFallback, buildShortUrl } from '@/lib/url-utils'
 
 interface Ferramenta {
@@ -34,6 +35,9 @@ export default function FerramentasNutri() {
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'fluxos' | 'quizzes' | 'templates'>('todos')
   const [loading, setLoading] = useState(true)
   const [ferramentaExcluindoId, setFerramentaExcluindoId] = useState<string | null>(null)
+  const [ferramentaDuplicandoId, setFerramentaDuplicandoId] = useState<string | null>(null)
+  const [previewFerramentaId, setPreviewFerramentaId] = useState<string | null>(null)
+  const [previewFerramenta, setPreviewFerramenta] = useState<Ferramenta | null>(null)
 
   // Carregar ferramentas do banco de dados
   useEffect(() => {
@@ -152,6 +156,76 @@ export default function FerramentasNutri() {
     }
   }
 
+  const [ferramentaDuplicandoId, setFerramentaDuplicandoId] = useState<string | null>(null)
+
+  const duplicarFerramenta = async (ferramenta: Ferramenta) => {
+    try {
+      setFerramentaDuplicandoId(ferramenta.id)
+      
+      // Buscar dados completos da ferramenta
+      const response = await fetch(`/api/nutri/ferramentas?id=${ferramenta.id}`, {
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar dados da ferramenta')
+      }
+
+      const data = await response.json()
+      const toolData = data.tool
+
+      if (!toolData) {
+        throw new Error('Ferramenta não encontrada')
+      }
+
+      // Criar nova ferramenta com dados duplicados
+      const newSlug = `${toolData.slug}-copia-${Date.now()}`
+      const newTitle = `${toolData.title} (Cópia)`
+
+      const duplicateResponse = await fetch('/api/nutri/ferramentas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          template_slug: toolData.template_slug,
+          title: newTitle,
+          description: toolData.description,
+          slug: newSlug,
+          emoji: toolData.emoji,
+          custom_colors: toolData.custom_colors,
+          cta_type: toolData.cta_type,
+          external_url: toolData.external_url,
+          cta_button_text: toolData.cta_button_text,
+          custom_whatsapp_message: toolData.custom_whatsapp_message,
+          content: toolData.content,
+          profession: 'nutri'
+        })
+      })
+
+      if (!duplicateResponse.ok) {
+        const errorData = await duplicateResponse.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Erro ao duplicar ferramenta')
+      }
+
+      // Recarregar lista
+      await carregarFerramentas()
+      alert('Ferramenta duplicada com sucesso!')
+    } catch (error: any) {
+      console.error('Erro ao duplicar ferramenta:', error)
+      alert(error.message || 'Erro ao duplicar ferramenta. Tente novamente.')
+    } finally {
+      setFerramentaDuplicandoId(null)
+    }
+  }
+
+  const [previewFerramentaId, setPreviewFerramentaId] = useState<string | null>(null)
+  const [previewFerramenta, setPreviewFerramenta] = useState<Ferramenta | null>(null)
+
+  const abrirPreview = async (ferramenta: Ferramenta) => {
+    setPreviewFerramenta(ferramenta)
+    setPreviewFerramentaId(ferramenta.id)
+  }
+
   const stats = {
     totalFerramentas: ferramentas.length,
     ferramentasAtivas: ferramentas.filter(f => f.status === 'ativa').length,
@@ -172,6 +246,15 @@ export default function FerramentasNutri() {
       <NutriNavBar showTitle={true} title="Meus Links" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Vídeo 3 — Ferramentas YLADA */}
+        <div className="mb-8">
+          <VideoPlayerYLADA
+            videoUrl={process.env.NEXT_PUBLIC_VIDEO_FERRAMENTAS_YLADA}
+            title="Ferramentas YLADA — Guia Completo"
+            description="Aprenda a usar todas as ferramentas de captação e atendimento do YLADA."
+          />
+        </div>
+
         {/* Atalhos Rápidos */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Atalhos Rápidos</h2>
@@ -478,6 +561,23 @@ export default function FerramentasNutri() {
                       )}
                     </div>
                     <div className="flex flex-col space-y-2 ml-4 text-right sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4 sm:text-left">
+                      {/* Botão Pré-visualizar */}
+                      <button
+                        onClick={() => abrirPreview(ferramenta)}
+                        className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                      >
+                        👁️ Pré-visualizar
+                      </button>
+                      
+                      {/* Botão Duplicar */}
+                      <button
+                        onClick={() => duplicarFerramenta(ferramenta)}
+                        disabled={ferramentaDuplicandoId === ferramenta.id}
+                        className="text-sm text-green-600 hover:text-green-800 font-medium disabled:opacity-50"
+                      >
+                        {ferramentaDuplicandoId === ferramenta.id ? 'Duplicando...' : '📋 Duplicar'}
+                      </button>
+
                       {/* Botão Abrir no GSAL - apenas para fluxos e quizzes */}
                       {(ferramenta.tipo === 'fluxos' || ferramenta.tipo === 'quizzes') && (
                         <Link
@@ -517,6 +617,66 @@ export default function FerramentasNutri() {
         )}
 
       </div>
+
+      {/* Modal de Pré-visualização */}
+      {previewFerramenta && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={() => {
+            setPreviewFerramenta(null)
+            setPreviewFerramentaId(null)
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Pré-visualização</h3>
+                <p className="text-sm text-gray-600">{previewFerramenta.nome}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setPreviewFerramenta(null)
+                  setPreviewFerramentaId(null)
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
+                <div className="text-center mb-4">
+                  {previewFerramenta.cores && (
+                    <div 
+                      className="w-16 h-16 rounded-lg mx-auto mb-4 flex items-center justify-center text-2xl"
+                      style={{ backgroundColor: previewFerramenta.cores.primaria || '#3B82F6' }}
+                    >
+                      🎯
+                    </div>
+                  )}
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">{previewFerramenta.nome}</h4>
+                  <p className="text-sm text-gray-600 mb-4">{previewFerramenta.objetivo}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 mb-4">
+                    Esta é uma pré-visualização da estrutura. Para ver a ferramenta completa, use "Ver Link".
+                  </p>
+                  <Link
+                    href={previewFerramenta.url}
+                    target="_blank"
+                    className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    Ver Ferramenta Completa →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

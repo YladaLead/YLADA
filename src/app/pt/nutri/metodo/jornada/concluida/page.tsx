@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
+import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 
 export default function JornadaConcluidaPage() {
   return (
@@ -47,6 +48,15 @@ export default function JornadaConcluidaPage() {
               <div className="font-bold text-gray-900">Pronto</div>
               <div className="text-sm text-gray-600">Para Aplicar</div>
             </div>
+          </div>
+
+          {/* Vídeo 7 — Ativação & Próximos Passos */}
+          <div className="mb-8">
+            <VideoPlayerYLADA
+              videoUrl={process.env.NEXT_PUBLIC_VIDEO_ATIVACAO_PROXIMOS_PASSOS}
+              title="Ativação & Próximos Passos"
+              description="Agora que você completou a Jornada, descubra como continuar sua transformação e aplicar tudo que aprendeu."
+            />
           </div>
 
           {/* CTAs */}

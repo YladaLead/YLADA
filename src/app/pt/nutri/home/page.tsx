@@ -12,6 +12,7 @@ import FerramentasBlock from '@/components/nutri/home/FerramentasBlock'
 import GSALBlock from '@/components/nutri/home/GSALBlock'
 import BibliotecaBlock from '@/components/nutri/home/BibliotecaBlock'
 import AnotacoesBlock from '@/components/nutri/home/AnotacoesBlock'
+import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 
 export default function NutriHome() {
   return (
@@ -66,6 +67,15 @@ function NutriHomeContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
+          {/* Vídeo 1 — Boas-vindas (apenas na primeira visita) */}
+          <div className="mb-8">
+            <VideoPlayerYLADA
+              videoUrl={process.env.NEXT_PUBLIC_VIDEO_BOAS_VINDAS}
+              title="Bem-vindo ao YLADA Premium"
+              description="Descubra como o YLADA vai transformar sua prática profissional."
+            />
+          </div>
+
           {/* Bloco 1: Jornada de Transformação */}
           <div className="mb-8">
             <JornadaBlock />

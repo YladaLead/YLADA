@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import PageLayout from '@/components/shared/PageLayout'
 import Section from '@/components/shared/Section'
 import JornadaSection from '@/components/formacao/JornadaSection'
+import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 
 export default function JornadaPage() {
   return (
@@ -63,6 +64,15 @@ function JornadaPageContent() {
               title="📘 Jornada de Transformação YLADA"
               subtitle="Lote sua agenda e transforme sua rotina em 30 dias aplicando o Método YLADA – O que a faculdade não ensinou."
             >
+              {/* Vídeo 6 — Jornada 30 dias */}
+              <div className="mb-8">
+                <VideoPlayerYLADA
+                  videoUrl={process.env.NEXT_PUBLIC_VIDEO_JORNADA_30_DIAS}
+                  title="Jornada de 30 Dias — Como Funciona"
+                  description="Entenda como a Jornada YLADA vai transformar sua prática profissional em 30 dias."
+                />
+              </div>
+
               <JornadaSection />
             </Section>
           </div>
