@@ -111,13 +111,35 @@ export default function RequireSubscription({
           return
         }
 
-        // Verificar assinatura via API (com timeout de 5s)
+        // Verificar assinatura via API (com timeout reduzido para 3s)
         controller = new AbortController()
-        const timeoutId = setTimeout(() => controller?.abort(), 5000)
+        const timeoutId = setTimeout(() => controller?.abort(), 3000)
+        
+        // Obter access token para enviar no header (fallback quando cookies falharem)
+        let accessToken: string | null = null
+        try {
+          const { createClient } = await import('@/lib/supabase-client')
+          const supabase = createClient()
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.access_token) {
+            accessToken = session.access_token
+          }
+        } catch (tokenErr) {
+          // Se falhar, continuar sem token (vai tentar com cookies)
+        }
+        
+        // Preparar headers com access token se disponível
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        }
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`
+        }
         
         try {
           const response = await fetch(`/api/${area}/subscription/check`, {
             credentials: 'include',
+            headers,
             signal: controller.signal,
           })
 

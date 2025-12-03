@@ -122,9 +122,29 @@ function NutriDashboardContent() {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 8000) // 8s timeout
         
+        // Obter access token para enviar no header (fallback quando cookies falharem)
+        let accessToken: string | null = null
+        try {
+          const { createClient } = await import('@/lib/supabase-client')
+          const supabase = createClient()
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.access_token) {
+            accessToken = session.access_token
+          }
+        } catch (tokenErr) {
+          // Se falhar, continuar sem token
+        }
+        
+        // Preparar headers com access token se disponível
+        const headers: HeadersInit = {}
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`
+        }
+        
         // Usar API do dashboard que já calcula conversões
         const response = await fetch('/api/nutri/dashboard', {
           credentials: 'include',
+          headers,
           signal: controller.signal
         })
         

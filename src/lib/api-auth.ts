@@ -12,6 +12,13 @@ export async function requireApiAuth(
   allowedProfiles?: ('nutri' | 'wellness' | 'coach' | 'nutra' | 'admin')[]
 ): Promise<{ user: any; profile: any } | NextResponse> {
   try {
+    // NOVO: Tentar ler access token do header Authorization (fallback quando cookies falharem)
+    const authHeader = request.headers.get('authorization')
+    let accessToken: string | null = null
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      accessToken = authHeader.substring(7)
+    }
+    
     // Ler cookies diretamente do header do request (mais confiável em API routes)
     const requestCookies = request.headers.get('cookie') || ''
     
@@ -85,7 +92,39 @@ export async function requireApiAuth(
     )
     
     // Obter sessão do cookie
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    let { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    // FALLBACK: Se não encontrou sessão nos cookies, tentar usar access token do header
+    if ((sessionError || !session || !session.user) && accessToken) {
+      try {
+        // Validar o access token diretamente
+        const { data: { user }, error: tokenError } = await supabase.auth.getUser(accessToken)
+        
+        if (!tokenError && user) {
+          // Criar uma sessão "sintética" a partir do token
+          // Isso permite que a API funcione mesmo quando cookies falharem
+          session = {
+            user,
+            access_token: accessToken,
+            refresh_token: '', // Não temos refresh token aqui, mas não é crítico para APIs
+            expires_in: 3600,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            token_type: 'bearer'
+          } as any
+          
+          sessionError = null
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log('✅ API Auth - Sessão recuperada via access token (fallback)')
+          }
+        }
+      } catch (tokenErr) {
+        // Se o token também falhar, continuar com o fluxo normal de erro
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ Access token também falhou:', tokenErr)
+        }
+      }
+    }
     
     // Debug: log da sessão (apenas em desenvolvimento)
     if (process.env.NODE_ENV === 'development') {
@@ -95,7 +134,8 @@ export async function requireApiAuth(
         userId: session?.user?.id,
         error: sessionError?.message,
         errorCode: sessionError?.status,
-        hasCookies: !!requestCookies
+        hasCookies: !!requestCookies,
+        usedAccessToken: !!accessToken && !!session
       })
     }
     
@@ -107,7 +147,8 @@ export async function requireApiAuth(
             sessionError: sessionError?.message,
             errorCode: sessionError?.status,
             hasRequestCookies: !!requestCookies,
-            cookieHeaderLength: requestCookies.length
+            cookieHeaderLength: requestCookies.length,
+            hasAccessToken: !!accessToken
           } : undefined
         },
         { status: 401 }

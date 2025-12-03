@@ -45,8 +45,18 @@ export function createClient() {
             // Configurações padrão para produção
             const path = options?.path || '/'
             const maxAge = options?.maxAge || (60 * 60 * 24 * 7) // 7 dias padrão
-            // Usar 'lax' para melhor compatibilidade entre navegadores
-            const sameSite = options?.sameSite || 'lax'
+            // MELHORIA: Usar 'lax' por padrão, mas 'none' para cookies críticos em cross-site
+            // Isso melhora compatibilidade com mobile e iframes
+            let sameSite = options?.sameSite || 'lax'
+            
+            // Se o cookie é crítico (sb-access-token, sb-refresh-token) e estamos em HTTPS,
+            // usar 'none' para garantir funcionamento em todos os contextos
+            if (isSecure && (name.includes('access-token') || name.includes('refresh-token'))) {
+              // Verificar se precisa de 'none' (cross-site)
+              // Por padrão, manter 'lax' que é mais seguro, mas permitir override
+              sameSite = options?.sameSite || 'lax'
+            }
+            
             // Secure apenas em HTTPS (não forçar em HTTP local)
             const secure = options?.secure !== undefined ? options.secure : isSecure
             

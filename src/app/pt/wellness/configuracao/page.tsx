@@ -6,10 +6,12 @@ import Image from 'next/image'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { translateError } from '@/lib/error-messages'
 
 export default function WellnessConfiguracaoPage() {
   const { user, userProfile } = useAuth()
+  const authenticatedFetch = useAuthenticatedFetch()
   const [perfil, setPerfil] = useState({
     nome: '',
     email: '',
@@ -68,9 +70,7 @@ export default function WellnessConfiguracaoPage() {
       }
       
       // Verificar se slug já existe para outro usuário
-      const response = await fetch(`/api/wellness/profile?user_slug=${encodeURIComponent(slugTratado)}`, {
-        credentials: 'include'
-      })
+      const response = await authenticatedFetch(`/api/wellness/profile?user_slug=${encodeURIComponent(slugTratado)}`)
       
       if (response.ok) {
         const data = await response.json()
@@ -126,8 +126,7 @@ export default function WellnessConfiguracaoPage() {
       setCarregando(true)
       
       // Adicionar timestamp para evitar cache
-      const response = await fetch(`/api/wellness/profile?t=${Date.now()}`, {
-        credentials: 'include',
+      const response = await authenticatedFetch(`/api/wellness/profile?t=${Date.now()}`, {
         cache: 'no-store' // Forçar não usar cache
       })
       
@@ -189,7 +188,7 @@ export default function WellnessConfiguracaoPage() {
     
     try {
       setCarregandoAssinatura(true)
-      const response = await fetch('/api/wellness/subscription', {
+      const response = await authenticatedFetch('/api/wellness/subscription', {
         credentials: 'include'
       })
       
@@ -259,10 +258,9 @@ export default function WellnessConfiguracaoPage() {
       setSalvando(true)
       setSalvoComSucesso(false)
 
-      const response = await fetch('/api/wellness/profile', {
+      const response = await authenticatedFetch('/api/wellness/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           nome: perfil.nome,
           email: perfil.email,
@@ -742,12 +740,11 @@ export default function WellnessConfiguracaoPage() {
 
                 try {
                   setSalvandoSenha(true)
-                  const response = await fetch('/api/wellness/change-password', {
+                  const response = await authenticatedFetch('/api/wellness/change-password', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
                     },
-                    credentials: 'include',
                     body: JSON.stringify({
                       currentPassword: senhaAtual,
                       newPassword: novaSenha,
