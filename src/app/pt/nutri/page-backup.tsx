@@ -27,7 +27,7 @@ export default function NutriLandingPage() {
               priority
             />
           </Link>
-          {/* <LanguageSelector /> */}
+          <LanguageSelector />
         </div>
       </header>
 

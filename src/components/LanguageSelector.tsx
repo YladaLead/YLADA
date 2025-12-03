@@ -18,12 +18,14 @@ export default function LanguageSelector({ className = '' }: LanguageSelectorPro
     changeLanguage(langCode)
     setIsOpen(false)
     
-    // Navegar para a rota do idioma selecionado
-    const currentPath = window.location.pathname
-    const pathWithoutLang = currentPath.replace(/^\/[a-z]{2}/, '') || '/'
-    const newPath = `/${langCode}${pathWithoutLang}`
-    
-    window.location.href = newPath
+    // Navegar para a rota do idioma selecionado (apenas no cliente)
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname
+      const pathWithoutLang = currentPath.replace(/^\/[a-z]{2}/, '') || '/'
+      const newPath = `/${langCode}${pathWithoutLang}`
+      
+      window.location.href = newPath
+    }
   }
 
   return (

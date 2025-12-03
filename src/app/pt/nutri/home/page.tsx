@@ -5,7 +5,6 @@ import ChatIA from '../../../../components/ChatIA'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import NutriSidebar from '../../../../components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
-import PageLayout from '@/components/shared/PageLayout'
 import JornadaBlock from '@/components/nutri/home/JornadaBlock'
 import PilaresBlock from '@/components/nutri/home/PilaresBlock'
 import FerramentasBlock from '@/components/nutri/home/FerramentasBlock'
@@ -43,6 +42,11 @@ function NutriHomeContent() {
     return null
   }
 
+  // Obter URL do vídeo de forma segura
+  const videoUrl = typeof window !== 'undefined' 
+    ? (process.env.NEXT_PUBLIC_VIDEO_BOAS_VINDAS || '')
+    : (process.env.NEXT_PUBLIC_VIDEO_BOAS_VINDAS || '')
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <NutriSidebar 
@@ -68,13 +72,15 @@ function NutriHomeContent() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
           {/* Vídeo 1 — Boas-vindas (apenas na primeira visita) */}
-          <div className="mb-8">
-            <VideoPlayerYLADA
-              videoUrl={process.env.NEXT_PUBLIC_VIDEO_BOAS_VINDAS}
-              title="Bem-vindo ao YLADA Premium"
-              description="Descubra como o YLADA vai transformar sua prática profissional."
-            />
-          </div>
+          {videoUrl && (
+            <div className="mb-8">
+              <VideoPlayerYLADA
+                videoUrl={videoUrl}
+                title="Bem-vindo ao YLADA Premium"
+                description="Descubra como o YLADA vai transformar sua prática profissional."
+              />
+            </div>
+          )}
 
           {/* Bloco 1: Jornada de Transformação */}
           <div className="mb-8">
