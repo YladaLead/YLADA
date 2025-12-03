@@ -156,8 +156,6 @@ export default function FerramentasNutri() {
     }
   }
 
-  const [ferramentaDuplicandoId, setFerramentaDuplicandoId] = useState<string | null>(null)
-
   const duplicarFerramenta = async (ferramenta: Ferramenta) => {
     try {
       setFerramentaDuplicandoId(ferramenta.id)
@@ -217,9 +215,6 @@ export default function FerramentasNutri() {
       setFerramentaDuplicandoId(null)
     }
   }
-
-  const [previewFerramentaId, setPreviewFerramentaId] = useState<string | null>(null)
-  const [previewFerramenta, setPreviewFerramenta] = useState<Ferramenta | null>(null)
 
   const abrirPreview = async (ferramenta: Ferramenta) => {
     setPreviewFerramenta(ferramenta)
