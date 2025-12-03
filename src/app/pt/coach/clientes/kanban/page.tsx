@@ -19,6 +19,7 @@ import CoachSidebar from "@/components/coach/CoachSidebar"
 import KanbanConfigModal from '@/components/nutri/KanbanConfigModal'
 import { useAuth } from '@/contexts/AuthContext'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 interface Cliente {
   id: string
@@ -247,6 +248,7 @@ function AddClientForm({
   })
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [phoneCountryCode, setPhoneCountryCode] = useState('BR')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -376,12 +378,14 @@ function AddClientForm({
             <label className="block text-xs font-medium text-gray-700 mb-1">
               Telefone
             </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            <PhoneInputWithCountry
+              value={formData.phone || ''}
+              onChange={(phone, countryCode) => {
+                setFormData(prev => ({ ...prev, phone }))
+                setPhoneCountryCode(countryCode || 'BR')
+              }}
+              defaultCountryCode={phoneCountryCode}
+              className="w-full"
               placeholder="11 99999-9999"
             />
           </div>

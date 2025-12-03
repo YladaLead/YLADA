@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { ToolConfig } from '@/types/wellness'
 import { useParams } from 'next/navigation'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 interface WellnessCTAButtonProps {
   config?: ToolConfig
@@ -41,6 +42,7 @@ export default function WellnessCTAButton({
     email: '',
     telefone: ''
   })
+  const [telefoneCountryCode, setTelefoneCountryCode] = useState('BR')
   const [dadosEnviados, setDadosEnviados] = useState(false)
 
   // Verificar se precisa coletar dados
@@ -331,13 +333,15 @@ export default function WellnessCTAButton({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Telefone {camposColeta.telefone && <span className="text-red-500">*</span>}
                   </label>
-                  <input
-                    type="tel"
-                    value={dadosColeta.telefone}
-                    onChange={(e) => setDadosColeta({ ...dadosColeta, telefone: e.target.value })}
-                    placeholder="(11) 99999-9999"
-                    required={camposColeta.telefone}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <PhoneInputWithCountry
+                    value={dadosColeta.telefone || ''}
+                    onChange={(phone, countryCode) => {
+                      setDadosColeta({ ...dadosColeta, telefone: phone })
+                      setTelefoneCountryCode(countryCode || 'BR')
+                    }}
+                    defaultCountryCode={telefoneCountryCode}
+                    className="w-full"
+                    placeholder="11 99999-9999"
                   />
                 </div>
               )}
@@ -487,13 +491,15 @@ export default function WellnessCTAButton({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Telefone {camposColeta.telefone && <span className="text-red-500">*</span>}
                   </label>
-                  <input
-                    type="tel"
-                    value={dadosColeta.telefone}
-                    onChange={(e) => setDadosColeta({ ...dadosColeta, telefone: e.target.value })}
-                    placeholder="(11) 99999-9999"
-                    required={camposColeta.telefone}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  <PhoneInputWithCountry
+                    value={dadosColeta.telefone || ''}
+                    onChange={(phone, countryCode) => {
+                      setDadosColeta({ ...dadosColeta, telefone: phone })
+                      setTelefoneCountryCode(countryCode || 'BR')
+                    }}
+                    defaultCountryCode={telefoneCountryCode}
+                    className="w-full"
+                    placeholder="11 99999-9999"
                   />
                 </div>
               )}

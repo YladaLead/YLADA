@@ -16,6 +16,7 @@ function BemVindoContent() {
   const [saving, setSaving] = useState(false)
   const [nomeCompleto, setNomeCompleto] = useState('')
   const [telefone, setTelefone] = useState('')
+  const [telefoneCountryCode, setTelefoneCountryCode] = useState('BR')
   const [senha, setSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
@@ -411,18 +412,18 @@ function BemVindoContent() {
                     <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-2">
                       Telefone/WhatsApp *
                     </label>
-                    <input
-                      id="telefone"
-                      type="tel"
-                      value={telefone}
-                      onChange={(e) => setTelefone(e.target.value)}
-                      placeholder="Ex: (11) 98765-4321"
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
-                      disabled={saving}
+                    <PhoneInputWithCountry
+                      value={telefone || ''}
+                      onChange={(phone, countryCode) => {
+                        setTelefone(phone)
+                        setTelefoneCountryCode(countryCode || 'BR')
+                      }}
+                      defaultCountryCode={telefoneCountryCode}
+                      className="w-full"
+                      placeholder="11 99999-9999"
                     />
                     <p className="text-xs text-gray-500 mt-2">
-                      💡 Seu telefone será usado para contato e suporte.
+                      💡 Seu telefone será usado para contato e suporte. Selecione o país pela bandeira para formatação automática.
                     </p>
                   </div>
 

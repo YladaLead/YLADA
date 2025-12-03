@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 export default function PreencherFormularioPage() {
   const params = useParams()
@@ -15,6 +16,7 @@ export default function PreencherFormularioPage() {
   const [mensagemSucesso, setMensagemSucesso] = useState(false)
   const [responseId, setResponseId] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+  const [countryCodes, setCountryCodes] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!formId) return
@@ -122,7 +124,6 @@ export default function PreencherFormularioPage() {
     switch (field.type) {
       case 'text':
       case 'email':
-      case 'tel':
         return (
           <input
             type={field.type}
@@ -131,6 +132,19 @@ export default function PreencherFormularioPage() {
             placeholder={field.placeholder}
             required={field.required}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        )
+      case 'tel':
+        return (
+          <PhoneInputWithCountry
+            value={value || ''}
+            onChange={(phone, countryCode) => {
+              handleChange(field.id, phone)
+              setCountryCodes(prev => ({ ...prev, [field.id]: countryCode }))
+            }}
+            defaultCountryCode={countryCodes[field.id] || 'BR'}
+            className="w-full"
+            placeholder={field.placeholder || "11 99999-9999"}
           />
         )
       case 'textarea':

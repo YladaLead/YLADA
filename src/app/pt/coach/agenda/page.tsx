@@ -21,6 +21,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 export default function CoachAgenda() {
   return (
@@ -1291,6 +1292,7 @@ function ModalNovoClienteRapido({
     email: '',
     phone: ''
   })
+  const [phoneCountryCode, setPhoneCountryCode] = useState('BR')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -1386,14 +1388,15 @@ function ModalNovoClienteRapido({
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
               Telefone
             </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              placeholder="Ex: (11) 99999-9999"
+            <PhoneInputWithCountry
+              value={formData.phone || ''}
+              onChange={(phone, countryCode) => {
+                setFormData(prev => ({ ...prev, phone }))
+                setPhoneCountryCode(countryCode || 'BR')
+              }}
+              defaultCountryCode={phoneCountryCode}
+              className="w-full"
+              placeholder="11 99999-9999"
             />
           </div>
 
