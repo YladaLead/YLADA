@@ -139,6 +139,9 @@ const formatResultadoLabel = (resultadoId: string) => {
     'caloriasBaixas': 'Calorias Baixas',
     'caloriasModeradas': 'Calorias Moderadas',
     'caloriasAltas': 'Calorias Altas',
+    'deficitCalorico': 'Déficit Calórico',
+    'manutencaoCalorica': 'Manutenção Calórica',
+    'superavitCalorico': 'Superávit Calórico',
     // Calculadora de Proteína
     'proteinaBaixa': 'Proteína Baixa',
     'proteinaModerada': 'Proteína Moderada',
@@ -159,14 +162,19 @@ const formatResultadoLabel = (resultadoId: string) => {
     'desafioBasico': 'Desafio Básico',
     'desafioModerado': 'Desafio Moderado',
     'desafioAvancado': 'Desafio Avançado',
+    'prontoParaTransformacao': 'Pronto Para Transformação',
+    'altaMotivacaoParaMudanca': 'Alta Motivação Para Mudança',
     // Eletrólitos
     'eletrolitosBaixos': 'Eletrólitos Baixos',
     'eletrolitosModerados': 'Eletrólitos Moderados',
     'eletrolitosAltos': 'Eletrólitos Altos',
+    'equilibrioAdequado': 'Equilíbrio Adequado',
+    'equilibrioEletroliticoAdequado': 'Equilíbrio Eletrolítico Adequado',
     // Pronto para Emagrecer
     'prontoBasico': 'Pronto Básico',
     'prontoModerado': 'Pronto Moderado',
     'prontoAvancado': 'Pronto Avançado',
+    'precisaMaisInformacoesEmagrecer': 'Precisa Mais Informações Emagrecer',
     // Tipo de Fome
     'fomeFisica': 'Fome Física',
     'fomeEmocional': 'Fome Emocional',
@@ -175,6 +183,7 @@ const formatResultadoLabel = (resultadoId: string) => {
     'intestinoSaudavel': 'Intestino Saudável',
     'intestinoModerado': 'Intestino Moderado',
     'intestinoComprometido': 'Intestino Comprometido',
+    'intestinoSensivel': 'Intestino Sensível',
     // Quiz Perfil Nutricional
     'perfilNutricionalBaixo': 'Perfil Nutricional Baixo',
     'perfilNutricionalModerado': 'Perfil Nutricional Moderado',
@@ -209,8 +218,18 @@ const formatResultadoLabel = (resultadoId: string) => {
     .replace(/Desidratacao/gi, 'Desidratação')
     .replace(/Proteina/gi, 'Proteína')
     .replace(/Calorica/gi, 'Calórica')
+    .replace(/Calorico/gi, 'Calórico')
     .replace(/Metabolico/gi, 'Metabólico')
     .replace(/Eletrolitico/gi, 'Eletrolítico')
+    .replace(/Equilibrio/gi, 'Equilíbrio')
+    .replace(/Manutencao/gi, 'Manutenção')
+    .replace(/Superavit/gi, 'Superávit')
+    .replace(/Deficit/gi, 'Déficit')
+    .replace(/Transformacao/gi, 'Transformação')
+    .replace(/Motivacao/gi, 'Motivação')
+    .replace(/Mudanca/gi, 'Mudança')
+    .replace(/Informacoes/gi, 'Informações')
+    .replace(/Sensivel/gi, 'Sensível')
     .replace(/Intolerancia/gi, 'Intolerância')
     .replace(/Absorcao/gi, 'Absorção')
     .replace(/Desequilibrio/gi, 'Desequilíbrio')
