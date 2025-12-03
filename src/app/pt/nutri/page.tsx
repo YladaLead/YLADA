@@ -7,13 +7,18 @@ import Image from 'next/image'
 
 export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
+  const [showMensalModal, setShowMensalModal] = useState(false)
 
   const toggleFaq = (index: number) => {
     setFaqOpen(faqOpen === index ? null : index)
   }
 
+  const openWhatsApp = () => {
+    window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20tirar%20dúvidas%20sobre%20o%20YLADA%20Nutri', '_blank')
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
@@ -428,189 +433,171 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* SEÇÃO 8 – A OFERTA (MODELO DE PLANOS) */}
-        <section className="py-16 sm:py-24 bg-[#F5F7FA]">
+        {/* SEÇÃO 8 – A OFERTA (PLANO ÚNICO PREMIUM) */}
+        <section className="py-16 sm:py-24 bg-gradient-to-br from-[#0B57FF] to-[#2572FF] relative">
           <div className="container mx-auto px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                Escolha o melhor plano para você
-              </h2>
+            <div className="max-w-4xl mx-auto">
+              {/* PLANO ANUAL PREMIUM - ÚNICO PLANO VISÍVEL */}
+              <div className="bg-white rounded-2xl p-8 sm:p-12 shadow-2xl border-4 border-white/20">
+                {/* 1. Selo Premium */}
+                <div className="text-center mb-6">
+                  <span className="inline-block bg-[#F8D77F] text-[#1A1A1A] px-5 py-2.5 rounded-full text-sm font-semibold">
+                    ⭐ Escolha da Maioria — 87% das Nutris preferem este plano
+                  </span>
+                </div>
 
-              <div className="grid md:grid-cols-3 gap-8 mb-12">
-                {/* PLANO ANUAL - DESTAQUE */}
-                <div className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] rounded-xl p-8 text-white shadow-2xl border-4 border-[#2572FF] transform scale-105">
-                  <div className="text-4xl mb-4">🔥</div>
-                  <h3 className="text-3xl font-bold mb-4">Plano Anual Completo</h3>
-                  <p className="text-xl mb-2 font-semibold">O caminho da Nutri-Empresária</p>
-                  <p className="text-lg mb-6 text-white/90">
-                    A forma mais inteligente de crescer rápido, com tudo incluso.
+                {/* 2. Título (sem emojis, duas linhas) */}
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-3 text-[#1A1A1A] leading-tight">
+                  <span className="block">Plano Anual Premium</span>
+                  <span className="block">Transformação Completa</span>
+                </h2>
+                
+                {/* 3. Subtítulo */}
+                <p className="text-lg sm:text-xl lg:text-2xl text-center mb-6 text-gray-700 font-semibold">
+                  O único plano que te torna uma Nutri-Empresária.
+                </p>
+
+                {/* 4. Botão pequeno de dúvidas */}
+                <div className="text-center sm:text-left mb-6">
+                  <button
+                    onClick={openWhatsApp}
+                    className="text-sm sm:text-base text-[#2572FF] hover:text-[#0B57FF] font-medium transition-colors"
+                  >
+                    Tem alguma dúvida? Fale com uma consultora →
+                  </button>
+                </div>
+
+                {/* 5. Caixa azul com preço */}
+                <div className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] rounded-xl p-8 mb-8 text-center text-white">
+                  <p className="text-4xl sm:text-5xl font-bold mb-2">
+                    12× de R$197/mês <span className="text-2xl sm:text-3xl font-semibold">sem juros</span>
                   </p>
-                  
-                  <div className="bg-white/20 rounded-lg p-6 mb-6">
-                    <p className="text-5xl font-black mb-2">12x de R$ 97</p>
-                    <p className="text-xs text-white/70 mt-1">Total: R$ 1.164</p>
-                  </div>
-
-                  <ul className="space-y-3 mb-8 text-lg">
-                    <li className="flex items-start">
-                      <span className="mr-3 text-xl">✔</span>
-                      <span>Tudo do plano mensal</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-xl">✔</span>
-                      <span>Formação profissional completa</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-xl">✔</span>
-                      <span>Cursos e materiais exclusivos</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-xl">✔</span>
-                      <span>Planilhas e exercícios práticos</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-xl">✔</span>
-                      <span>Tudo que a formação proporciona</span>
-                    </li>
-                  </ul>
-
-                  <div className="bg-white/20 rounded-lg p-4 mb-6">
-                    <p className="text-sm mb-2">👉 O único plano que te transforma em Nutri-Empresária.</p>
-                    <p className="text-sm mb-2">👉 Economize 10 meses de mensalidade.</p>
-                    <p className="text-sm">👉 Acesso total por 1 ano.</p>
-                  </div>
-
-                  <button
-                    onClick={async () => {
-                      const response = await fetch('/api/nutri/checkout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                          planType: 'annual',
-                          productType: 'platform_annual',
-                          paymentMethod: 'auto'
-                        })
-                      })
-                      const data = await response.json()
-                      if (data.url) window.location.href = data.url
-                    }}
-                    className="block w-full bg-white text-[#0B57FF] px-8 py-4 rounded-lg text-xl font-bold hover:bg-gray-100 transition-colors shadow-xl text-center"
-                  >
-                    Quero aproveitar o plano anual agora
-                  </button>
+                  <p className="text-xl sm:text-2xl font-semibold">ou R$1.970 à vista</p>
                 </div>
 
-                {/* PLANO MENSAL */}
-                <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-gray-200">
-                  <h3 className="text-2xl font-bold mb-4 text-[#1A1A1A]">Plano Mensal</h3>
-                  <p className="text-lg mb-2 font-semibold text-gray-700">R$ 97/mês</p>
-                  
-                  <ul className="space-y-3 mb-8 text-gray-700">
-                    <li className="flex items-start">
-                      <span className="mr-3 text-[#0B57FF]">✓</span>
-                      <span>Ferramentas de captação</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-[#0B57FF]">✓</span>
-                      <span>Gestão completa</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-[#0B57FF]">✓</span>
-                      <span>Suporte</span>
-                    </li>
-                    <li className="flex items-start text-gray-400">
-                      <span className="mr-3">✗</span>
-                      <span>Sem formação</span>
-                    </li>
-                    <li className="flex items-start text-gray-400">
-                      <span className="mr-3">✗</span>
-                      <span>Sem comunidade completa</span>
-                    </li>
-                    <li className="flex items-start text-gray-400">
-                      <span className="mr-3">✗</span>
-                      <span>Sem lives</span>
-                    </li>
-                  </ul>
-
-                  <button
-                    onClick={async () => {
-                      const response = await fetch('/api/nutri/checkout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                          planType: 'monthly',
-                          productType: 'platform_monthly',
-                          paymentMethod: 'auto'
-                        })
-                      })
-                      const data = await response.json()
-                      if (data.url) window.location.href = data.url
-                    }}
-                    className="block w-full bg-[#0B57FF] text-white px-8 py-4 rounded-lg text-xl font-bold hover:bg-[#2572FF] transition-colors shadow-lg text-center"
-                  >
-                    Quero começar no mensal
-                  </button>
-                </div>
-
-                {/* FORMAÇÃO EMPRESARIAL NUTRI (STANDALONE) */}
-                <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-[#0B57FF]">
-                  <div className="text-4xl mb-4 text-center">🎓</div>
-                  <h3 className="text-2xl font-bold mb-4 text-[#1A1A1A] text-center">Formação Empresarial Nutri</h3>
-                  <p className="text-lg mb-2 font-semibold text-gray-700 text-center">R$ 970</p>
-                  <p className="text-sm text-gray-600 text-center mb-6">ou 12x de R$ 97</p>
-                  
-                  <ul className="space-y-3 mb-8 text-gray-700">
-                    <li className="flex items-start">
-                      <span className="mr-3 text-[#0B57FF]">✓</span>
+                {/* 6. Benefícios */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold mb-6 text-[#1A1A1A] text-center sm:text-left">Benefícios incluídos:</h3>
+                  <ul className="space-y-3 sm:space-y-4 text-base sm:text-lg text-gray-700 text-center sm:text-left">
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
                       <span>Formação Empresarial Nutri completa</span>
                     </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-[#0B57FF]">✓</span>
-                      <span>Acesso vitalício ao conteúdo</span>
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
+                      <span>Ferramentas profissionais de captação</span>
                     </li>
-                    <li className="flex items-start">
-                      <span className="mr-3 text-[#0B57FF]">✓</span>
-                      <span>Transformação em Nutri-Empresária</span>
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
+                      <span>Gestão completa da cliente</span>
                     </li>
-                    <li className="flex items-start text-gray-400">
-                      <span className="mr-3">✗</span>
-                      <span>Sem acesso à plataforma</span>
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
+                      <span>Estratégia empresarial aplicada</span>
                     </li>
-                    <li className="flex items-start text-gray-400">
-                      <span className="mr-3">✗</span>
-                      <span>Sem ferramentas de captação</span>
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
+                      <span>Material, aulas e exercícios</span>
                     </li>
-                    <li className="flex items-start text-gray-400">
-                      <span className="mr-3">✗</span>
-                      <span>Sem gestão de clientes</span>
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
+                      <span>Acesso total por 1 ano</span>
+                    </li>
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
+                      <span>Suporte</span>
+                    </li>
+                    <li className="flex items-start justify-center sm:justify-start">
+                      <span className="text-[#00C853] mr-3 text-2xl font-bold">✓</span>
+                      <span>Atualizações constantes</span>
                     </li>
                   </ul>
+                </div>
 
-                  <button
-                    onClick={async () => {
-                      const response = await fetch('/api/nutri/checkout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                          planType: 'annual',
-                          productType: 'formation_only',
-                          paymentMethod: 'auto'
-                        })
+                {/* 7. CTA principal */}
+                <button
+                  onClick={async () => {
+                    const response = await fetch('/api/nutri/checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({
+                        planType: 'annual',
+                        productType: 'platform_annual',
+                        paymentMethod: 'auto'
                       })
-                      const data = await response.json()
-                      if (data.url) window.location.href = data.url
-                    }}
-                    className="block w-full bg-[#0B57FF] text-white px-8 py-4 rounded-lg text-xl font-bold hover:bg-[#2572FF] transition-colors shadow-lg text-center"
+                    })
+                    const data = await response.json()
+                    if (data.url) window.location.href = data.url
+                  }}
+                  className="block w-full bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-8 py-6 rounded-xl text-xl sm:text-2xl font-bold hover:from-[#2572FF] hover:to-[#0B57FF] transition-all shadow-xl text-center mb-6"
+                >
+                  Quero me tornar uma Nutri-Empresária
+                </button>
+
+                {/* 8. Link discreto do plano mensal */}
+                <div className="text-center">
+                  <button
+                    onClick={() => setShowMensalModal(true)}
+                    className="text-sm text-gray-500 hover:text-gray-700 underline"
                   >
-                    Quero apenas a Formação
+                    Prefere começar no plano mensal? Clique aqui.
                   </button>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Modal do plano mensal (discreto) */}
+          {showMensalModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowMensalModal(false)}>
+              <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-2xl font-bold text-[#1A1A1A]">Plano Mensal</h3>
+                  <button
+                    onClick={() => setShowMensalModal(false)}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <p className="text-xl font-semibold text-gray-700 mb-4">R$297/mês</p>
+                <ul className="space-y-2 text-gray-600 mb-6">
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Sem formação</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Sem estratégia completa</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Sem transformação empresarial</span>
+                  </li>
+                </ul>
+                <button
+                  onClick={async () => {
+                    const response = await fetch('/api/nutri/checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({
+                        planType: 'monthly',
+                        productType: 'platform_monthly',
+                        paymentMethod: 'auto'
+                      })
+                    })
+                    const data = await response.json()
+                    if (data.url) window.location.href = data.url
+                  }}
+                  className="block w-full bg-[#0B57FF] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#2572FF] transition-colors"
+                >
+                  Escolher plano mensal
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* SEÇÃO 9 – GARANTIA */}
@@ -714,6 +701,16 @@ export default function NutriLandingPage() {
           </div>
         </section>
       </main>
+
+      {/* Botão flutuante fixo - WhatsApp (visível em toda a página) */}
+      <button
+        onClick={openWhatsApp}
+        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#2572FF] hover:to-[#0B57FF] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base w-[160px] sm:w-[240px] justify-center"
+        style={{ bottom: '80px' }}
+      >
+        <span className="text-xl sm:text-2xl">💬</span>
+        <span>Tirar dúvida com uma consultora</span>
+      </button>
 
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-16">

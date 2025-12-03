@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
+import WellnessChatWidget from '@/components/wellness/WellnessChatWidget'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import WellnessNotificacoes from '@/components/wellness-system/WellnessNotificacoes'
 
@@ -168,6 +169,9 @@ function WellnessSystemPageContent() {
           <WellnessNotificacoes />
         </div>
       </main>
+
+      {/* Chat Widget Flutuante - Mentor como padrão no System */}
+      <WellnessChatWidget chatbotId="mentor" />
     </div>
   )
 }

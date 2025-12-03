@@ -7,6 +7,7 @@ import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
 import { useAuth } from '@/contexts/AuthContext'
 import dynamic from 'next/dynamic'
+import WellnessChatWidget from '@/components/wellness/WellnessChatWidget'
 
 const WellnessNavBar = dynamic(() => import('@/components/wellness/WellnessNavBar'), {
   ssr: true, // NavBar pode ser SSR pois é importante para SEO
@@ -642,6 +643,9 @@ function WellnessDashboardContent() {
         </div>
 
       </div>
+
+      {/* Chat Widget Flutuante - Noel como padrão */}
+      <WellnessChatWidget chatbotId="noel" />
     </div>
   )
 }
