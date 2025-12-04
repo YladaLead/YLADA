@@ -23,7 +23,7 @@ export const WELLNESS_CHATBOTS: Record<string, ChatbotConfig> = {
     corHex: '#2563EB',
     descricao: 'Suporte geral',
     foco: ['suporte', 'ajuda', 'dúvidas', 'orientações gerais'],
-    mensagemInicial: `Olá! Eu sou o **Noel** 💬\n\nEstou aqui para te ajudar com suporte geral e dúvidas sobre a plataforma.\n\nPosso te ajudar com:\n\n📋 **Dúvidas Gerais:** Qualquer questão sobre o sistema\n🛠️ **Ferramentas:** Como usar as ferramentas disponíveis\n🎨 **Templates:** Explorar e usar templates prontos\n🌐 **Portals:** Criar portais de captação\n❓ **Quizzes:** Criar e gerenciar quizzes\n📊 **Dashboard:** Navegar e usar o dashboard\n⚙️ **Configuração:** Ajustar perfil e configurações\n\nComo posso te ajudar hoje?`
+    mensagemInicial: `Olá! Eu sou o **Noel** 💬\n\nEstou aqui para te ajudar com suporte geral e dúvidas sobre a plataforma.\n\n**Posso te ajudar com:**\n\n📋 **Dúvidas Gerais** — Qualquer questão sobre o sistema\n\n🛠️ **Ferramentas** — Como usar as ferramentas disponíveis\n\n🎨 **Templates** — Explorar e usar templates prontos\n\n🌐 **Portals** — Criar portais de captação\n\n❓ **Quizzes** — Criar e gerenciar quizzes\n\n📊 **Dashboard** — Navegar e usar o dashboard\n\n⚙️ **Configuração** — Ajustar perfil e configurações\n\nComo posso te ajudar hoje?`
   },
   'mentor': {
     id: 'mentor',
@@ -33,7 +33,7 @@ export const WELLNESS_CHATBOTS: Record<string, ChatbotConfig> = {
     corHex: '#16A34A',
     descricao: 'Especialista em estratégias de recrutamento e vendas',
     foco: ['recrutamento', 'vendas', 'scripts', 'fluxos', 'treinamento'],
-    mensagemInicial: `Olá! Eu sou o **Mentor** 🎯\n\nSou seu especialista em estratégias de recrutamento e vendas no Wellness System.\n\nPosso te ajudar com:\n\n📋 **Recrutamento:** Como identificar e recrutar pessoas para o negócio\n💚 **Vendas:** Estratégias para vender bebidas funcionais\n📚 **Scripts:** Biblioteca completa de scripts de conversão\n🔄 **Fluxos:** Como usar os fluxos de cliente e recrutamento\n🎓 **Treinamento:** Guias passo a passo do sistema\n\nVou te guiar passo a passo seguindo o Wellness System. Como posso te ajudar hoje?`
+    mensagemInicial: `Olá! Eu sou o **Mentor** 🎯\n\nSou seu especialista em estratégias de recrutamento e vendas no Wellness System.\n\n**Posso te ajudar com:**\n\n📋 **Recrutamento** — Como identificar e recrutar pessoas para o negócio\n\n💚 **Vendas** — Estratégias para vender bebidas funcionais\n\n📚 **Scripts** — Biblioteca completa de scripts de conversão\n\n🔄 **Fluxos** — Como usar os fluxos de cliente e recrutamento\n\n🎓 **Treinamento** — Guias passo a passo do sistema\n\nVou te guiar passo a passo seguindo o Wellness System. Como posso te ajudar hoje?`
   }
 }
 

@@ -58,14 +58,14 @@ export default function OrientacaoTecnica({
 
       {/* Passo a Passo */}
       <div className="mb-6">
-        <h4 className="font-semibold text-gray-900 mb-3">Passo a Passo:</h4>
-        <ol className="space-y-2">
+        <h4 className="font-bold text-gray-900 mb-4 text-base">Passo a Passo:</h4>
+        <ol className="space-y-3">
           {item.passo_a_passo.map((passo, index) => (
             <li key={index} className="flex gap-3 text-gray-700">
-              <span className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-sm font-semibold">
+              <span className="flex-shrink-0 w-7 h-7 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-sm font-bold">
                 {index + 1}
               </span>
-              <span className="flex-1">{passo}</span>
+              <span className="flex-1 leading-relaxed">{passo}</span>
             </li>
           ))}
         </ol>

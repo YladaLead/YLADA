@@ -12,6 +12,7 @@ import GSALBlock from '@/components/nutri/home/GSALBlock'
 import BibliotecaBlock from '@/components/nutri/home/BibliotecaBlock'
 import AnotacoesBlock from '@/components/nutri/home/AnotacoesBlock'
 import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
+import NutriChatWidget from '@/components/nutri/NutriChatWidget'
 
 export default function NutriHome() {
   return (
@@ -113,20 +114,8 @@ function NutriHomeContent() {
           </div>
         </div>
 
-        {/* Chat com IA */}
-        <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} area="nutri" />
-        
-        {/* Botão Flutuante do Chat */}
-        {!chatAberto && (
-          <div className="fixed bottom-6 right-6 z-50">
-            <button
-              onClick={() => setChatAberto(true)}
-              className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-            >
-              <span className="text-2xl">💬</span>
-            </button>
-          </div>
-        )}
+        {/* Chat Widget Flutuante - Assistente de Formação como padrão na Home */}
+        <NutriChatWidget chatbotId="formacao" />
       </div>
     </div>
   )

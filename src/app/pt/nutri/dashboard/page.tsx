@@ -721,6 +721,9 @@ function NutriDashboardContent() {
         {/* O botão unificado está no SupportChatWidget (layout) */}
         <ChatIA isOpen={chatAberto} onClose={() => setChatAberto(false)} area="nutri" />
       </div>
+
+      {/* Chat Widget Flutuante - Suporte GSAL como padrão no Dashboard */}
+      <NutriChatWidget chatbotId="gsal" />
     </div>
   )
 }

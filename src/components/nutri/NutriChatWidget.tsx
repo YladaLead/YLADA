@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
-import OrientacaoTecnica from './OrientacaoTecnica'
-import FormatarMensagem from './FormatarMensagem'
-import { getChatbotConfig, getAllChatbots, type ChatbotConfig } from '@/lib/wellness-chatbots'
+import OrientacaoTecnica from '@/components/wellness/OrientacaoTecnica'
+import FormatarMensagem from '@/components/wellness/FormatarMensagem'
+import { getChatbotConfig, getAllChatbots } from '@/lib/nutri-chatbots'
 import type { OrientacaoResposta } from '@/types/orientation'
 
 interface Mensagem {
@@ -15,35 +15,22 @@ interface Mensagem {
   orientacao?: OrientacaoResposta
 }
 
-interface WellnessChatWidgetProps {
-  chatbotId?: string // 'noel' | 'mentor'
+interface NutriChatWidgetProps {
+  chatbotId?: string // 'formacao' | 'gsal'
   defaultOpen?: boolean
 }
 
-export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: WellnessChatWidgetProps = {} as WellnessChatWidgetProps) {
+export default function NutriChatWidget({ chatbotId, defaultOpen = false }: NutriChatWidgetProps = {} as NutriChatWidgetProps) {
   const [aberto, setAberto] = useState(defaultOpen)
   const [chatbotSelecionado, setChatbotSelecionado] = useState<string>(chatbotId || '')
-  const [mostrarSelecaoInicial, setMostrarSelecaoInicial] = useState(!chatbotId) // Mostrar seleção se não tiver chatbot pré-definido
+  const [mostrarSelecaoInicial, setMostrarSelecaoInicial] = useState(!chatbotId)
   const chatbotConfig = chatbotSelecionado ? getChatbotConfig(chatbotSelecionado) : null
-  const [mostrarSelecaoChatbot, setMostrarSelecaoChatbot] = useState(false)
   
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
   const [perguntaAtual, setPerguntaAtual] = useState('')
   const [enviando, setEnviando] = useState(false)
-  const [mostrarOrientacao, setMostrarOrientacao] = useState<OrientacaoResposta | null>(null)
   const authenticatedFetch = useAuthenticatedFetch()
   const mensagensEndRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = () => {
-    mensagensEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  // Remover scroll automático - deixar usuário controlar
-  // useEffect(() => {
-  //   if (aberto) {
-  //     scrollToBottom()
-  //   }
-  // }, [mensagens, aberto])
 
   // Inicializar mensagem quando selecionar chatbot
   useEffect(() => {
@@ -55,9 +42,9 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
         timestamp: new Date()
       }])
     }
-  }, [chatbotSelecionado, mostrarSelecaoInicial])
+  }, [chatbotSelecionado, mostrarSelecaoInicial, chatbotConfig, mensagens.length])
 
-  const selecionarTipoAjuda = (tipo: 'mentor' | 'noel') => {
+  const selecionarTipoAjuda = (tipo: 'formacao' | 'gsal') => {
     setChatbotSelecionado(tipo)
     setMostrarSelecaoInicial(false)
     const config = getChatbotConfig(tipo)
@@ -70,7 +57,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
   }
 
   const enviarMensagem = async () => {
-    if (!perguntaAtual.trim() || enviando) return
+    if (!perguntaAtual.trim() || enviando || !chatbotSelecionado) return
 
     const pergunta = perguntaAtual.trim()
     setPerguntaAtual('')
@@ -88,7 +75,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
     try {
       // Buscar orientação técnica
       const response = await authenticatedFetch(
-        `/api/wellness/orientation?pergunta=${encodeURIComponent(pergunta)}`
+        `/api/nutri/orientation?pergunta=${encodeURIComponent(pergunta)}`
       )
 
       if (!response.ok) {
@@ -98,21 +85,20 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
       const data: OrientacaoResposta = await response.json()
 
       if (data.tipo === 'tecnica' && data.item) {
-        // Encontrou orientação técnica - seguir passo a passo do Wellness System
+        // Encontrou orientação técnica
         const mensagemSistema: Mensagem = {
           id: (Date.now() + 1).toString(),
-          texto: `Perfeito! Encontrei uma orientação seguindo o Wellness System. Vou te guiar passo a passo! 🎯\n\n**Seguindo o sistema:**`,
+          texto: `Perfeito! Encontrei exatamente o que você precisa! 🎯\n\nVou te mostrar um passo a passo bem detalhado para você conseguir fazer isso facilmente. 👇`,
           tipo: 'sistema',
           timestamp: new Date(),
           orientacao: data
         }
         setMensagens(prev => [...prev, mensagemSistema])
-        setMostrarOrientacao(data)
       } else {
         // Não encontrou orientação técnica
         const mensagemSistema: Mensagem = {
           id: (Date.now() + 1).toString(),
-          texto: `Não encontrei uma orientação específica no Wellness System para "${pergunta}".\n\n💡 **Dica:** Tente perguntar sobre:\n- Como usar scripts\n- Como criar ferramentas\n- Como usar fluxos\n- Como acessar treinamentos\n\nOu entre em contato pelo WhatsApp para ajuda personalizada. 💬`,
+          texto: `Hmm, não encontrei uma orientação específica para "${pergunta}". 😔\n\n**Mas não se preocupe!** Posso te ajudar de outras formas:\n\n💡 **Dicas:**\n• Tente reformular sua pergunta com outras palavras\n• Use termos mais específicos (ex: "kanban" em vez de "organizar")\n• Me pergunte sobre funcionalidades específicas\n\n💬 **Precisa de ajuda personalizada?**\nEntre em contato pelo WhatsApp e nossa equipe vai te ajudar rapidinho!\n\nO que mais você gostaria de saber? 😊`,
           tipo: 'sistema',
           timestamp: new Date()
         }
@@ -121,7 +107,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
     } catch (error: any) {
       const mensagemErro: Mensagem = {
         id: (Date.now() + 1).toString(),
-        texto: 'Desculpe, ocorreu um erro. Tente novamente ou entre em contato pelo WhatsApp. 💬',
+        texto: `Ops! Algo deu errado aqui. 😅\n\n**Não se preocupe!** Você pode:\n\n🔄 **Tentar novamente** — Às vezes é só um problema momentâneo\n💬 **Falar com nossa equipe** — Entre em contato pelo WhatsApp que vamos resolver rapidinho!\n\nDesculpe pelo inconveniente! 😊`,
         tipo: 'sistema',
         timestamp: new Date()
       }
@@ -139,36 +125,29 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
   }
 
   const getSugestoesRapidas = () => {
-    if (chatbotSelecionado === 'noel') {
+    if (chatbotSelecionado === 'formacao') {
       return [
-        'como criar ferramenta',
-        'onde estão os templates',
-        'como criar portal',
-        'como criar quiz',
-        'editar perfil'
+        'como acessar jornada 30 dias',
+        'onde estão os pilares do método',
+        'como usar a biblioteca',
+        'como criar anotação',
+        'ver certificados'
       ]
-    } else if (chatbotSelecionado === 'mentor') {
+    } else if (chatbotSelecionado === 'gsal') {
       return [
-        'como recrutar pessoas',
-        'onde estão os scripts',
-        'como usar fluxos de recrutamento',
-        'scripts de vendas',
-        'treinamento do consultor'
+        'como gerenciar leads',
+        'como usar kanban',
+        'como criar ferramenta',
+        'como ver relatórios',
+        'como cadastrar cliente'
       ]
     }
-    return [
-      'onde estão os scripts',
-      'como criar quiz',
-      'editar perfil',
-      'ver templates',
-      'criar portal'
-    ]
+    return []
   }
 
   const trocarChatbot = (novoChatbotId: string) => {
     setChatbotSelecionado(novoChatbotId)
-    setMostrarSelecaoChatbot(false)
-    // Resetar conversa com novo chatbot
+    setMostrarSelecaoInicial(false)
     const novoConfig = getChatbotConfig(novoChatbotId)
     setMensagens([{
       id: '1',
@@ -184,7 +163,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
       {!aberto && (
         <button
           onClick={() => setAberto(true)}
-          className="fixed bottom-6 right-6 z-50 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg transition-all transform hover:scale-105"
+          className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-all transform hover:scale-105"
           style={{ width: '56px', height: '56px', padding: '12px' }}
           title="Abrir chat de suporte"
         >
@@ -202,7 +181,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
             style={{ 
               background: chatbotConfig 
                 ? `linear-gradient(135deg, ${chatbotConfig.corHex} 0%, ${chatbotConfig.corHex}dd 100%)`
-                : 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)'
+                : 'linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)'
             }}
           >
             <div className="flex items-center gap-3 flex-1">
@@ -227,7 +206,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
               )}
               {!chatbotConfig && (
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg">Como posso ajudar?</h3>
+                  <h3 className="font-bold text-lg">Suporte Nutri</h3>
                   <p className="text-xs opacity-90">Escolha o tipo de assistência</p>
                 </div>
               )}
@@ -235,7 +214,6 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
             <button
               onClick={() => {
                 setAberto(false)
-                setMostrarOrientacao(null)
                 setMostrarSelecaoInicial(true)
                 setChatbotSelecionado('')
                 setMensagens([])
@@ -246,8 +224,8 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
             </button>
           </div>
 
-          {/* Seleção de Chatbot */}
-          {mostrarSelecaoChatbot && (
+          {/* Seleção de Chatbot (quando já tem um selecionado) */}
+          {chatbotSelecionado && !mostrarSelecaoInicial && (
             <div className="bg-white border-b border-gray-200 p-3">
               <p className="text-xs text-gray-600 mb-2 font-semibold">Escolha seu assistente:</p>
               <div className="flex gap-2">
@@ -257,7 +235,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
                     onClick={() => trocarChatbot(chatbot.id)}
                     className={`flex-1 p-2 rounded-lg border-2 transition-all ${
                       chatbotSelecionado === chatbot.id
-                        ? 'border-green-600 bg-green-50'
+                        ? 'border-blue-600 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -272,78 +250,79 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
           {/* Mensagens */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {/* Tela de Seleção Inicial */}
-            {mostrarSelecaoInicial && !chatbotSelecionado && (
+            {mostrarSelecaoInicial && !chatbotSelecionado ? (
               <div className="space-y-4">
                 <div className="text-center mb-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Como posso te ajudar?</h3>
-                  <p className="text-sm text-gray-600">Escolha o tipo de assistência que você precisa:</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">👋 Olá! Bem-vinda ao Suporte Nutri</h3>
+                  <p className="text-sm text-gray-600 mb-1">Estou aqui para te ajudar no que precisar!</p>
+                  <p className="text-sm text-gray-500">Escolha o tipo de assistência que você precisa:</p>
                 </div>
                 
                 <button
-                  onClick={() => selecionarTipoAjuda('mentor')}
-                  className="w-full p-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">🎯</span>
-                      <div className="text-left">
-                        <h4 className="font-bold text-lg">Mentor</h4>
-                        <p className="text-sm opacity-90">Sobre o sistema de negócio</p>
-                        <p className="text-xs opacity-75 mt-1">Recrutamento, vendas, scripts e estratégias</p>
-                      </div>
-                    </div>
-                    <span className="text-2xl">→</span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => selecionarTipoAjuda('noel')}
+                  onClick={() => selecionarTipoAjuda('formacao')}
                   className="w-full p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105 shadow-lg"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl">💬</span>
+                      <span className="text-3xl">🎓</span>
                       <div className="text-left">
-                        <h4 className="font-bold text-lg">Suporte</h4>
-                        <p className="text-sm opacity-90">Sobre a ferramenta</p>
-                        <p className="text-xs opacity-75 mt-1">Como usar templates, quizzes, portals e configurações</p>
+                        <h4 className="font-bold text-lg">Assistente de Formação</h4>
+                        <p className="text-sm opacity-90">Sobre Formação Empresarial</p>
+                        <p className="text-xs opacity-75 mt-1">Jornada 30 Dias, Pilares, Biblioteca e Anotações</p>
+                      </div>
+                    </div>
+                    <span className="text-2xl">→</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => selecionarTipoAjuda('gsal')}
+                  className="w-full p-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">📊</span>
+                      <div className="text-left">
+                        <h4 className="font-bold text-lg">Suporte GSAL</h4>
+                        <p className="text-sm opacity-90">Sobre Gestão e Ferramentas</p>
+                        <p className="text-xs opacity-75 mt-1">Leads, Clientes, Kanban, Ferramentas e Relatórios</p>
                       </div>
                     </div>
                     <span className="text-2xl">→</span>
                   </div>
                 </button>
               </div>
-            )}
-
-            {mensagens.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}
-              >
+            ) : (
+              mensagens.map((msg) => (
                 <div
-                  className={`max-w-[85%] rounded-lg p-4 ${
-                    msg.tipo === 'usuario'
-                      ? 'bg-green-600 text-white shadow-sm'
-                      : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
-                  }`}
+                  key={msg.id}
+                  className={`flex ${msg.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}
                 >
-                  {msg.tipo === 'usuario' ? (
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.texto}</p>
-                  ) : (
-                    <FormatarMensagem texto={msg.texto} />
-                  )}
-                  {msg.orientacao && msg.orientacao.item && (
-                    <div className="mt-3 -mx-3 -mb-3">
-                      <OrientacaoTecnica
-                        item={msg.orientacao.item}
-                        mentor={msg.orientacao.mentor}
-                        sugestaoMentor={msg.orientacao.sugestaoMentor}
-                      />
-                    </div>
-                  )}
+                  <div
+                    className={`max-w-[85%] rounded-lg p-4 ${
+                      msg.tipo === 'usuario'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
+                    }`}
+                  >
+                    {msg.tipo === 'usuario' ? (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.texto}</p>
+                    ) : (
+                      <FormatarMensagem texto={msg.texto} />
+                    )}
+                    {msg.orientacao && msg.orientacao.item && (
+                      <div className="mt-3 -mx-3 -mb-3">
+                        <OrientacaoTecnica
+                          item={msg.orientacao.item}
+                          mentor={msg.orientacao.mentor}
+                          sugestaoMentor={msg.orientacao.sugestaoMentor}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
 
             {/* Sugestões Rápidas (apenas na primeira mensagem) */}
             {mensagens.length === 1 && chatbotConfig && (
@@ -357,7 +336,7 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
                         setPerguntaAtual(sugestao)
                         setTimeout(() => enviarMensagem(), 100)
                       }}
-                      className="text-left px-4 py-2.5 text-sm bg-white hover:bg-green-50 border border-gray-300 rounded-lg transition-all hover:border-green-400 hover:shadow-sm"
+                      className="text-left px-4 py-3 text-sm bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-lg transition-all hover:shadow-md font-medium text-gray-700 hover:text-blue-700"
                     >
                       {sugestao}
                     </button>
@@ -382,35 +361,27 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
           </div>
 
           {/* Input */}
-          <div className="border-t border-gray-200 p-3 bg-white rounded-b-xl">
-            <div className="flex gap-2 mb-2">
+          <div className="border-t border-gray-200 p-4 bg-white rounded-b-xl">
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={perguntaAtual}
                 onChange={(e) => setPerguntaAtual(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={chatbotConfig ? "Digite sua dúvida..." : "Selecione um tipo de ajuda acima"}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
-                disabled={enviando || !chatbotConfig}
+                placeholder="Digite sua dúvida..."
+                className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                disabled={enviando || !chatbotSelecionado}
               />
               <button
                 onClick={enviarMensagem}
-                disabled={!perguntaAtual.trim() || enviando || !chatbotConfig}
-                className="px-5 py-2.5 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
-                style={{ backgroundColor: chatbotConfig?.corHex || '#6B7280' }}
-                onMouseEnter={(e) => {
-                  if (!e.currentTarget.disabled) e.currentTarget.style.opacity = '0.9'
-                }}
-                onMouseLeave={(e) => {
-                  if (!e.currentTarget.disabled) e.currentTarget.style.opacity = '1'
-                }}
-                title="Enviar mensagem"
+                disabled={!perguntaAtual.trim() || enviando || !chatbotSelecionado}
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg font-semibold shadow-sm"
               >
-                <span className="text-lg">➤</span>
+                ➤
               </button>
             </div>
-            <p className="text-xs text-gray-500 text-center">
-              Ou entre em contato: <a href="https://wa.me/5519996049800" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 hover:underline font-medium">WhatsApp</a>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Ou entre em contato: <a href="https://wa.me/5519996049800" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">WhatsApp</a>
             </p>
           </div>
         </div>

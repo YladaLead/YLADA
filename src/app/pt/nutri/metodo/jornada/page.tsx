@@ -4,6 +4,7 @@ import { useState } from 'react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
+import NutriChatWidget from '@/components/nutri/NutriChatWidget'
 import PageLayout from '@/components/shared/PageLayout'
 import Section from '@/components/shared/Section'
 import JornadaSection from '@/components/formacao/JornadaSection'
@@ -68,6 +69,9 @@ function JornadaPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Chat Widget Flutuante - Assistente de Formação como padrão na Jornada */}
+      <NutriChatWidget chatbotId="formacao" />
     </PageLayout>
   )
 }

@@ -1,0 +1,43 @@
+-- ============================================
+-- SEED MASTER - PLANO COMPLETO 90 DIAS
+-- Sistema NOEL Wellness
+-- ============================================
+-- 
+-- Este arquivo consolida TODOS os 90 dias do plano
+-- Execute este arquivo para inserir todos os dias de uma vez
+-- 
+-- Estrutura:
+-- - Fase 1: Fundamentos (dias 1-7)
+-- - Fase 2: Ritmo (dias 8-14)
+-- - Fase 3: Consistência (dias 15-30)
+-- - Fase 4: Crescimento Progressivo (dias 31-90)
+--   - Bloco 1: dias 31-40
+--   - Bloco 2: dias 41-50
+--   - Bloco 3: dias 51-60
+--   - Bloco 4: dias 61-70
+--   - Bloco 5: dias 71-80
+--   - Bloco 6: dias 81-90
+-- ============================================
+-- 
+-- IMPORTANTE: Execute os arquivos individuais por fase
+-- ou use este arquivo master que consolida tudo
+-- ============================================
+
+-- Para executar todos os dias de uma vez, execute na ordem:
+-- 1. scripts/seed-fase1-wellness-planos-dias.sql (dias 1-7)
+-- 2. scripts/seed-fase2-wellness-planos-dias.sql (dias 8-14)
+-- 3. scripts/seed-fase3-wellness-planos-dias.sql (dias 15-30)
+-- 4. scripts/seed-fase4-bloco1-wellness-planos-dias.sql (dias 31-40)
+-- 5. scripts/seed-fase4-bloco2-wellness-planos-dias.sql (dias 41-50)
+-- 6. scripts/seed-fase4-bloco3-wellness-planos-dias.sql (dias 51-60)
+-- 7. scripts/seed-fase4-bloco4-wellness-planos-dias.sql (dias 61-70)
+-- 8. scripts/seed-fase4-bloco5-wellness-planos-dias.sql (dias 71-80)
+-- 9. scripts/seed-fase4-bloco6-wellness-planos-dias.sql (dias 81-90)
+
+-- ============================================
+-- RESUMO:
+-- Total de dias: 90
+-- Total de arquivos: 9
+-- Status: ✅ COMPLETO
+-- ============================================
+

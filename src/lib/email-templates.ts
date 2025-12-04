@@ -1,153 +1,19 @@
-import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from './resend'
+// ... existing code ...
 
-export interface WelcomeEmailData {
+/**
+ * Envia e-mail de recuperação de senha (reset password) customizado
+ */
+export async function sendPasswordResetEmail(data: {
   email: string
   userName?: string
   area: 'wellness' | 'nutri' | 'coach' | 'nutra'
-  planType: 'monthly' | 'annual'
-  accessToken: string
+  resetLink: string
   baseUrl: string
-}
-
-export interface RecoveryEmailData {
-  email: string
-  userName?: string
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
-  accessToken: string
-  baseUrl: string
-}
-
-export interface RenewalReminderData {
-  email: string
-  userName?: string
-  area: string
-  expiresAt: string
-  renewalUrl: string
-}
-
-/**
- * Envia e-mail de boas-vindas após pagamento confirmado
- */
-export async function sendWelcomeEmail(data: WelcomeEmailData): Promise<void> {
-  const areaName = {
-    wellness: 'Wellness',
-    nutri: 'Nutri',
-    coach: 'Coach',
-    nutra: 'Nutra',
-  }[data.area]
-
-  const planName = data.planType === 'monthly' ? 'Mensal' : 'Anual'
-  // Link vai para página de acesso que redireciona para bem-vindo após login
-  const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}&redirect=/pt/${data.area}/bem-vindo?payment=success`
-
-  // Verificar se Resend está configurado
-  if (!isResendConfigured() || !resend) {
-    const errorMsg = 'Resend não está configurado. Verifique RESEND_API_KEY.'
-    console.error('❌', errorMsg)
-    throw new Error(errorMsg)
-  }
-
-  console.log('📧 Enviando e-mail de boas-vindas via Resend:', {
-    from: `${FROM_NAME} <${FROM_EMAIL}>`,
-    to: data.email,
-    subject: '🎉 Bem-vindo ao YLADA! Seu acesso está pronto',
-    accessUrl,
-    hasResend: !!resend,
-  })
-
-  const { error, data: emailData } = await resend.emails.send({
-    from: `${FROM_NAME} <${FROM_EMAIL}>`,
-    to: data.email,
-    subject: '🎉 Bem-vindo ao YLADA! Seu acesso está pronto',
-    html: `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">🎉 Bem-vindo ao YLADA!</h1>
-          </div>
-          
-          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-            <p style="font-size: 16px; margin-bottom: 20px;">
-              Olá${data.userName ? ` ${data.userName}` : ''}!
-            </p>
-            
-            <p style="font-size: 16px; margin-bottom: 20px;">
-              Parabéns! Sua assinatura do <strong>YLADA ${areaName} - Plano ${planName}</strong> foi ativada com sucesso.
-            </p>
-            
-            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 5px;">
-              <p style="margin: 0; font-size: 16px; font-weight: 600; color: #065f46;">
-                ✅ Seu acesso está pronto!
-              </p>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${accessUrl}" 
-                 style="display: inline-block; background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                ✨ Completar meu Cadastro e Começar
-              </a>
-            </div>
-            
-            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 5px;">
-              <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 14px; color: #065f46;">📋 O que acontece agora:</p>
-              <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #047857;">
-                <li style="margin-bottom: 8px;">Clique no botão acima para acessar a plataforma</li>
-                <li style="margin-bottom: 8px;">Complete seu cadastro com seu nome (leva menos de 1 minuto)</li>
-                <li style="margin-bottom: 8px;">Comece a criar suas ferramentas e gerar leads!</li>
-              </ol>
-            </div>
-            
-            <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
-              <strong>⚠️ Importante:</strong> Este link de acesso é válido por 30 dias. 
-              Se você perder este e-mail, pode solicitar um novo link na página de login.
-            </p>
-            
-            <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
-              Precisa de ajuda? Entre em contato conosco através do suporte no dashboard.
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 20px; padding: 20px; color: #9ca3af; font-size: 12px;">
-            <p style="margin: 0;">© ${new Date().getFullYear()} YLADA. Todos os direitos reservados.</p>
-            <p style="margin: 5px 0 0 0;">Este e-mail foi enviado para ${data.email}</p>
-          </div>
-        </body>
-      </html>
-    `,
-  })
-
-  if (error) {
-    console.error('❌ Erro ao enviar e-mail de boas-vindas:', {
-      error,
-      message: error.message,
-      name: error.name,
-      details: JSON.stringify(error, null, 2),
-      email: data.email,
-    })
-    throw new Error(`Erro ao enviar e-mail: ${error.message || 'Erro desconhecido'}`)
-  }
-
-  console.log('✅ E-mail de boas-vindas enviado com sucesso:', {
-    email: data.email,
-    emailId: emailData?.id,
-    area: data.area,
-    planType: data.planType,
-  })
-}
-
-/**
- * Envia e-mail de recuperação de acesso
- */
-export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> {
-  console.log('📧 sendRecoveryEmail chamado:', {
+}): Promise<void> {
+  console.log('📧 sendPasswordResetEmail chamado:', {
     email: data.email,
     area: data.area,
-    hasToken: !!data.accessToken,
+    hasResetLink: !!data.resetLink,
     baseUrl: data.baseUrl,
   })
 
@@ -165,66 +31,92 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
     nutra: 'Nutra',
   }[data.area]
 
-  // Link vai para página de acesso
-  // Para recuperação: redireciona para dashboard (usuário já tem conta)
-  // Para pagamento: redireciona para bem-vindo (novo usuário)
-  // Como este é e-mail de recuperação, vai para dashboard
-  const accessUrl = `${data.baseUrl}/pt/${data.area}/acesso?token=${data.accessToken}&redirect=/pt/${data.area}/dashboard`
+  const userName = data.userName || 'Nutri-Empresária'
 
-  console.log('📧 Enviando e-mail via Resend:', {
+  console.log('📧 Enviando e-mail de reset de senha via Resend:', {
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: data.email,
-    subject: `🔐 Acesso ao seu YLADA ${areaName}`,
-    accessUrl,
+    subject: `🔐 Redefinir sua senha - YLADA ${areaName}`,
+    resetLink: data.resetLink,
     hasResend: !!resend,
   })
 
   const { error, data: emailData } = await resend.emails.send({
     from: `${FROM_NAME} <${FROM_EMAIL}>`,
     to: data.email,
-    subject: `🔐 Acesso ao seu YLADA ${areaName}`,
+    subject: `🔐 Redefinir sua senha - YLADA ${areaName}`,
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Redefinir Senha - YLADA ${areaName}</title>
         </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">🔐 Acesso ao YLADA</h1>
-          </div>
-          
-          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-            <p style="font-size: 16px; margin-bottom: 20px;">
-              Olá${data.userName ? ` ${data.userName}` : ''}!
-            </p>
-            
-            <p style="font-size: 16px; margin-bottom: 20px;">
-              Você solicitou um link de acesso ao seu YLADA ${areaName}. Clique no botão abaixo para acessar seu dashboard:
-            </p>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${accessUrl}" 
-                 style="display: inline-block; background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                🚀 Acessar Dashboard
-              </a>
-            </div>
-            
-            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 5px;">
-              <p style="margin: 0; font-size: 14px; color: #92400e;">
-                <strong>⚠️ Segurança:</strong> Este link é válido por 30 dias e pode ser usado apenas uma vez.
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 0;">
+            <!-- Header com gradiente -->
+            <div style="background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">
+                🔐 Redefinir Senha
+              </h1>
+              <p style="color: #e0e7ff; margin: 10px 0 0 0; font-size: 16px;">
+                YLADA ${areaName}
               </p>
             </div>
             
-            <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
-              Se você não solicitou este link, pode ignorar este e-mail com segurança.
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 20px; padding: 20px; color: #9ca3af; font-size: 12px;">
-            <p style="margin: 0;">© ${new Date().getFullYear()} YLADA. Todos os direitos reservados.</p>
-            <p style="margin: 5px 0 0 0;">Este e-mail foi enviado para ${data.email}</p>
+            <!-- Conteúdo principal -->
+            <div style="padding: 40px 30px;">
+              <p style="font-size: 16px; color: #1f2937; line-height: 1.6; margin: 0 0 20px 0;">
+                Olá, <strong>${userName}</strong>! 👋
+              </p>
+              
+              <p style="font-size: 16px; color: #1f2937; line-height: 1.6; margin: 0 0 20px 0;">
+                Recebemos uma solicitação para redefinir a senha da sua conta no YLADA ${areaName}.
+              </p>
+              
+              <p style="font-size: 16px; color: #1f2937; line-height: 1.6; margin: 0 0 30px 0;">
+                Clique no botão abaixo para criar uma nova senha:
+              </p>
+              
+              <div style="text-align: center; margin: 40px 0;">
+                <a href="${data.resetLink}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);">
+                  🔑 Redefinir Minha Senha
+                </a>
+              </div>
+              
+              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 5px;">
+                <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.6;">
+                  <strong>⚠️ Importante:</strong> Este link é válido por <strong>1 hora</strong> e pode ser usado apenas <strong>uma vez</strong>. Se você não solicitou esta redefinição, pode ignorar este e-mail com segurança.
+                </p>
+              </div>
+              
+              <p style="font-size: 14px; color: #6b7280; margin-top: 30px; line-height: 1.6;">
+                Se o botão não funcionar, copie e cole o link abaixo no seu navegador:
+              </p>
+              
+              <p style="font-size: 12px; color: #9ca3af; word-break: break-all; background: #f3f4f6; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                ${data.resetLink}
+              </p>
+              
+              <p style="font-size: 14px; color: #6b7280; margin-top: 30px; line-height: 1.6;">
+                Se você não solicitou esta redefinição, sua senha permanecerá a mesma.
+              </p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                © ${new Date().getFullYear()} YLADA. Todos os direitos reservados.
+              </p>
+              <p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px;">
+                Este e-mail foi enviado para ${data.email}
+              </p>
+              <p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px;">
+                Portal Solutions Tech & Innovation LTDA - CNPJ: 63.447.492/0001-88
+              </p>
+            </div>
           </div>
         </body>
       </html>
@@ -232,7 +124,7 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
   })
 
   if (error) {
-    console.error('❌ Erro ao enviar e-mail de recuperação:', {
+    console.error('❌ Erro ao enviar e-mail de reset de senha:', {
       error,
       message: error.message,
       name: error.name,
@@ -241,80 +133,9 @@ export async function sendRecoveryEmail(data: RecoveryEmailData): Promise<void> 
     throw new Error(`Erro ao enviar e-mail: ${error.message || 'Erro desconhecido'}`)
   }
 
-  console.log('✅ E-mail de recuperação enviado com sucesso:', {
+  console.log('✅ E-mail de reset de senha enviado com sucesso:', {
     email: data.email,
     emailId: emailData?.id,
     area: data.area,
   })
 }
-
-/**
- * Envia e-mail de lembrete de renovação (PIX/Boleto)
- */
-export async function sendRenewalReminder(data: RenewalReminderData): Promise<void> {
-  const expiresDate = new Date(data.expiresAt).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
-
-  const { error } = await resend.emails.send({
-    from: `${FROM_NAME} <${FROM_EMAIL}>`,
-    to: data.email,
-    subject: `⏰ Sua assinatura YLADA vence em breve`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">⏰ Renovação Pendente</h1>
-          </div>
-          
-          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-            <p style="font-size: 16px; margin-bottom: 20px;">
-              Olá${data.userName ? ` ${data.userName}` : ''}!
-            </p>
-            
-            <p style="font-size: 16px; margin-bottom: 20px;">
-              Sua assinatura do <strong>YLADA ${data.area}</strong> vence em <strong>${expiresDate}</strong>.
-            </p>
-            
-            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 5px;">
-              <p style="margin: 0; font-size: 16px; font-weight: 600; color: #92400e;">
-                ⚠️ Para continuar usando o YLADA sem interrupções, renove sua assinatura agora.
-              </p>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${data.renewalUrl}" 
-                 style="display: inline-block; background: #f59e0b; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                🔄 Renovar Assinatura
-              </a>
-            </div>
-            
-            <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
-              Se você já renovou, pode ignorar este e-mail.
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 20px; padding: 20px; color: #9ca3af; font-size: 12px;">
-            <p style="margin: 0;">© ${new Date().getFullYear()} YLADA. Todos os direitos reservados.</p>
-            <p style="margin: 5px 0 0 0;">Este e-mail foi enviado para ${data.email}</p>
-          </div>
-        </body>
-      </html>
-    `,
-  })
-
-  if (error) {
-    console.error('❌ Erro ao enviar lembrete de renovação:', error)
-    throw new Error(`Erro ao enviar e-mail: ${error.message}`)
-  }
-
-  console.log('✅ Lembrete de renovação enviado:', data.email)
-}
-

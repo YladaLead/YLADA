@@ -6,6 +6,7 @@ import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
+import NutriChatWidget from '@/components/nutri/NutriChatWidget'
 import PageLayout from '@/components/shared/PageLayout'
 import Section from '@/components/shared/Section'
 import Card from '@/components/shared/Card'
@@ -300,6 +301,9 @@ function GSALPageContent() {
           toolName={toolName || undefined}
         />
       )}
+
+      {/* Chat Widget Flutuante - Suporte GSAL como padrão na página GSAL */}
+      <NutriChatWidget chatbotId="gsal" />
     </PageLayout>
   )
 }
