@@ -49,9 +49,10 @@ Isso inclui:
 - Todos os 15 few-shots
 
 #### **B) Model - OBRIGATÓRIO**
-- **NOEL Mentor:** `gpt-4o` (análises profundas)
-- **NOEL Suporte:** `gpt-4o-mini` (respostas diretas)
-- **NOEL Técnico:** `gpt-4o-mini` (conteúdo operacional)
+- **NOEL Mentor:** `gpt-4.1` ou `gpt-4-turbo` (análises profundas)
+- **NOEL Suporte:** `gpt-4.1` ou `gpt-4-turbo` (respostas diretas)
+- **NOEL Técnico:** `gpt-4.1` ou `gpt-4-turbo` (conteúdo operacional)
+- **Nota:** Use o modelo disponível na sua conta OpenAI (ChatGPT 4.1)
 
 #### **C) Temperature - OPCIONAL (recomendado: 0.7)**
 - `0.7` - Balanceado (recomendado)
@@ -107,7 +108,7 @@ Isso inclui:
 ### **Agent:**
 - [ ] Criar nó Agent
 - [ ] Colar Instructions (prompt completo)
-- [ ] Escolher Model (gpt-4o ou gpt-4o-mini)
+- [ ] Escolher Model (gpt-4.1 ou gpt-4-turbo - conforme disponível)
 - [ ] Configurar Temperature (0.7)
 - [ ] Conectar Agent → End
 

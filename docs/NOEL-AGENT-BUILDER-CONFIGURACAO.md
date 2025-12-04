@@ -67,7 +67,7 @@ OPENAI_AGENT_NOEL_TECNICO_ID=asst_xxxxxxxxxxxxx
 3. Configure:
    - **Name:** NOEL Mentor (ou Wellness Mentor)
    - **Instructions:** Cole o prompt completo de `docs/PROMPT-NOEL-MENTOR-COMPLETO-COM-FEW-SHOTS.md`
-   - **Model:** `gpt-4o` (para Mentor) ou `gpt-4o-mini` (para Suporte/Técnico)
+   - **Model:** `gpt-4.1` ou `gpt-4-turbo` (ChatGPT 4.1 - conforme disponível na sua conta)
    - **Tools:** (opcional) Adicione se necessário
 4. **Salve** e copie o **Agent ID**
 

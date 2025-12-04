@@ -53,9 +53,12 @@ async function generateAIResponse(
   consultantContext?: string
 ): Promise<{ response: string; tokensUsed: number; modelUsed: string }> {
   // Determinar modelo baseado no módulo
+  // Usando ChatGPT 4.1 (gpt-4-turbo ou gpt-4.1 conforme disponível)
   const useGPT4 = module === 'mentor' && message.length > 200 // análises profundas
   
-  const model = useGPT4 ? 'gpt-4o' : 'gpt-4o-mini'
+  // Usar gpt-4-turbo como padrão (ChatGPT 4.1)
+  // Se tiver gpt-4.1 disponível, pode usar também
+  const model = useGPT4 ? (process.env.OPENAI_MODEL || 'gpt-4-turbo') : (process.env.OPENAI_MODEL || 'gpt-4-turbo')
   
   // Construir system prompt baseado no módulo (com contexto do consultor)
   const systemPrompt = buildSystemPrompt(module, knowledgeContext, consultantContext)

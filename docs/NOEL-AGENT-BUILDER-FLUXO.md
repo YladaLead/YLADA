@@ -87,8 +87,8 @@ No nó **Agent**, você deve ter:
    - Isso define o comportamento do NOEL
 
 2. **Model:**
-   - `gpt-4o` (para Mentor - análises profundas)
-   - `gpt-4o-mini` (para Suporte/Técnico - respostas diretas)
+   - `gpt-4.1` ou `gpt-4-turbo` (ChatGPT 4.1 - conforme disponível na sua conta)
+   - Use o modelo mais recente disponível na OpenAI Platform
 
 3. **Temperature:**
    - `0.7` (recomendado)
@@ -104,7 +104,7 @@ No nó **Agent**, você deve ter:
 ### **Agent (AQUI você configura tudo):**
 - [ ] Nó **Agent** criado
 - [ ] **Instructions:** Prompt completo do NOEL colado
-- [ ] **Model:** `gpt-4o` (Mentor) ou `gpt-4o-mini` (Suporte/Técnico)
+- [ ] **Model:** `gpt-4.1` ou `gpt-4-turbo` (ChatGPT 4.1 - conforme disponível)
 - [ ] **Temperature:** `0.7`
 - [ ] Conexão **Agent → End** criada
 
