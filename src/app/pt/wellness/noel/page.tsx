@@ -203,9 +203,9 @@ export default function NoelChatPage() {
 
         {/* Chat Container */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
             {/* Mensagens */}
-            <div className="h-full overflow-y-auto p-6 space-y-4 bg-gray-50">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
               {mensagens.map((msg) => (
                 <div
                   key={msg.id}

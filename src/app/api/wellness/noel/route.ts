@@ -19,6 +19,7 @@ import {
   generatePersonalizedContext,
   generateProactiveSuggestions 
 } from '@/lib/noel-wellness/history-analyzer'
+import { NOEL_FEW_SHOTS } from '@/lib/noel-wellness/few-shots'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -123,7 +124,9 @@ MODO ATIVO: NOEL MENTOR
 - Ajude com metas de PV, metas financeiras e metas de clientes.
 - Ensine duplicação, convite, follow-up e vendas.
 - Seja motivacional mas realista.
-- Personalize baseado no perfil do consultor.`
+- Personalize baseado no perfil do consultor.
+
+${NOEL_FEW_SHOTS}`
 
     case 'suporte':
       return `${basePrompt}
