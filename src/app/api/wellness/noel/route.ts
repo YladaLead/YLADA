@@ -4,7 +4,10 @@
  * Endpoint: POST /api/wellness/noel
  * 
  * Processa mensagens do usuário e retorna resposta do NOEL
- * usando sistema híbrido: Base de Conhecimento → IA
+ * 
+ * PRIORIDADE:
+ * 1. Tenta usar Agent Builder (se configurado)
+ * 2. Fallback para sistema híbrido: Base de Conhecimento → IA
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -25,6 +28,61 @@ import OpenAI from 'openai'
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
+
+/**
+ * Tenta usar Agent Builder primeiro (se configurado)
+ * 
+ * NOTA: A API de Agents pode não estar disponível em todas as contas ainda.
+ * Se não funcionar, o sistema usa fallback híbrido automaticamente.
+ */
+async function tryAgentBuilder(message: string): Promise<{ success: boolean; response?: string; error?: string }> {
+  const workflowId = process.env.NEXT_PUBLIC_CHATKIT_WORKFLOW_ID || 
+                     process.env.OPENAI_WORKFLOW_ID
+
+  if (!workflowId) {
+    return { success: false, error: 'Workflow ID não configurado' }
+  }
+
+  try {
+    console.log('🤖 Tentando usar Agent Builder...', { workflowId })
+    
+    // Tentar Agents SDK (pode não estar disponível em todas as contas)
+    if ((openai as any).agents?.workflowRuns) {
+      const run = await (openai as any).agents.workflowRuns.createAndPoll(
+        workflowId,
+        {
+          input: message,
+        }
+      )
+
+      if (run.status === 'completed' && run.output) {
+        let response = ''
+        if (typeof run.output === 'string') {
+          response = run.output
+        } else if (run.output && typeof run.output === 'object') {
+          response = (run.output as any).response || 
+                    (run.output as any).message || 
+                    (run.output as any).text ||
+                    JSON.stringify(run.output)
+        }
+
+        if (response && response.trim().length > 0) {
+          console.log('✅ Agent Builder retornou resposta')
+          return { success: true, response }
+        }
+      }
+
+      return { success: false, error: 'Workflow não retornou resposta válida' }
+    } else {
+      // Agents SDK não disponível - retornar erro para usar fallback
+      console.warn('⚠️ Agents SDK não disponível nesta conta OpenAI')
+      return { success: false, error: 'Agents SDK não disponível. Use ChatKit ou fallback híbrido.' }
+    }
+  } catch (error: any) {
+    console.warn('⚠️ Agent Builder não disponível, usando fallback:', error.message)
+    return { success: false, error: error.message }
+  }
+}
 
 interface NoelRequest {
   message: string
@@ -176,6 +234,54 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ============================================
+    // PRIORIDADE 1: Tentar usar Agent Builder
+    // ============================================
+    const agentBuilderResult = await tryAgentBuilder(message)
+    
+    if (agentBuilderResult.success && agentBuilderResult.response) {
+      console.log('✅ NOEL usando Agent Builder')
+      
+      // Classificar módulo para logging
+      const classification = classifyIntention(message)
+      const module = classification.module
+      
+      // Salvar query no log
+      try {
+        const queryAnalysis = analyzeQuery(message, module)
+        await supabaseAdmin
+          .from('wellness_user_queries')
+          .insert({
+            user_id: user.id,
+            query: message,
+            response: agentBuilderResult.response.substring(0, 5000),
+            source_type: 'agent_builder',
+            module_type: module,
+            detected_topic: queryAnalysis.topic,
+            detected_challenge: queryAnalysis.challenge,
+            career_stage: queryAnalysis.careerStage,
+            priority_area: queryAnalysis.priorityArea,
+            sentiment: queryAnalysis.sentiment,
+          })
+        
+        await supabaseAdmin.rpc('update_consultant_profile', { p_user_id: user.id })
+      } catch (logError) {
+        console.error('⚠️ Erro ao salvar log (não crítico):', logError)
+      }
+      
+      // Retornar resposta do Agent Builder
+      return NextResponse.json({
+        response: agentBuilderResult.response,
+        module: classification.module,
+        source: 'agent_builder' as const,
+      })
+    }
+    
+    // ============================================
+    // PRIORIDADE 2: Fallback para sistema híbrido
+    // ============================================
+    console.log('⚠️ Agent Builder não disponível, usando fallback híbrido')
+    
     // 1. Buscar perfil do consultor (para personalização)
     const consultantProfile = await getConsultantProfile(user.id)
     const personalizedContext = generatePersonalizedContext(consultantProfile)
