@@ -158,33 +158,25 @@ export async function POST(request: NextRequest) {
 
     // Enviar email customizado usando Resend
     try {
-      console.log('📧 Enviando email customizado de reset de senha:', {
+      console.log('📧 Enviando email customizado de reset de senha via Resend:', {
         email,
         area,
         hasResetLink: !!resetLink,
         resetLinkPreview: resetLink ? resetLink.substring(0, 100) + '...' : null
       })
 
-      // Se não temos link customizado, usar o método padrão do Supabase como fallback
-      if (!resetLink) {
-        console.warn('⚠️ Link customizado não disponível, usando método padrão do Supabase')
-        // Tentar usar o método resetPasswordForEmail do Supabase
-        const { error: resetError } = await supabaseAdmin.auth.admin.generateLink({
-          type: 'recovery',
-          email: email,
+      // Verificar se Resend está configurado ANTES de tentar enviar
+      const { isResendConfigured } = await import('@/lib/resend')
+      if (!isResendConfigured()) {
+        console.error('❌ Resend não está configurado! Verifique RESEND_API_KEY.')
+        // Por segurança, sempre retornar sucesso mesmo se Resend não estiver configurado
+        return NextResponse.json({
+          success: true,
+          message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
         })
-        
-        if (resetError) {
-          console.error('❌ Erro ao gerar link padrão do Supabase:', resetError)
-        } else {
-          console.log('✅ Link padrão do Supabase gerado (email será enviado automaticamente)')
-          return NextResponse.json({
-            success: true,
-            message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
-          })
-        }
       }
 
+      // Enviar email via Resend
       await sendPasswordResetEmail({
         email,
         userName,
@@ -193,15 +185,24 @@ export async function POST(request: NextRequest) {
         baseUrl,
       })
 
-      console.log('✅ Email customizado de reset enviado com sucesso para:', email)
+      console.log('✅ Email customizado de reset enviado com sucesso via Resend para:', email)
 
       return NextResponse.json({
         success: true,
         message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
       })
     } catch (emailError: any) {
-      console.error('❌ Erro ao enviar email customizado:', emailError)
+      console.error('❌ Erro ao enviar email customizado via Resend:', {
+        error: emailError.message,
+        stack: emailError.stack,
+        name: emailError.name
+      })
+      
+      // Log detalhado para debug
+      console.error('❌ Detalhes do erro de envio de email:', JSON.stringify(emailError, null, 2))
+      
       // Por segurança, sempre retornar sucesso mesmo se email falhar
+      // (não revelar se o email existe ou não)
       return NextResponse.json({
         success: true,
         message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
