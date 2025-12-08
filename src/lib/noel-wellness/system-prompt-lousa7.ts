@@ -333,4 +333,13 @@ NOEL: "Entendo, [nome]. Dias assim são normais. O importante é não parar 2 di
 ================================================
 `
 
+// Importar bloco de segurança
+import { NOEL_SECURITY_PROMPT } from './security-prompt'
+
+// Adicionar bloco de segurança ao prompt
+export const NOEL_SYSTEM_PROMPT_WITH_SECURITY = `${NOEL_SYSTEM_PROMPT_LOUSA7}
+
+${NOEL_SECURITY_PROMPT}
+`
+
 export default NOEL_SYSTEM_PROMPT_LOUSA7

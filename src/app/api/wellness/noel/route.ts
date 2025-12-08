@@ -28,8 +28,11 @@ import {
   generateProactiveSuggestions 
 } from '@/lib/noel-wellness/history-analyzer'
 import { NOEL_FEW_SHOTS } from '@/lib/noel-wellness/few-shots'
-import { NOEL_SYSTEM_PROMPT_LOUSA7 } from '@/lib/noel-wellness/system-prompt-lousa7'
+import { NOEL_SYSTEM_PROMPT_LOUSA7, NOEL_SYSTEM_PROMPT_WITH_SECURITY } from '@/lib/noel-wellness/system-prompt-lousa7'
 import { generateHOMContext, isHOMRelated } from '@/lib/noel-wellness/hom-integration'
+import { detectMaliciousIntent } from '@/lib/noel-wellness/security-detector'
+import { checkRateLimit } from '@/lib/noel-wellness/rate-limiter'
+import { logSecurityFromFlags } from '@/lib/noel-wellness/security-logger'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -209,8 +212,8 @@ function detectInstitutionalQuery(message: string): boolean {
  * Constrói o system prompt baseado no módulo
  */
 function buildSystemPrompt(module: NoelModule, knowledgeContext: string | null, consultantContext?: string): string {
-  // Base do prompt com Lousa 7 integrada
-  const lousa7Base = NOEL_SYSTEM_PROMPT_LOUSA7
+  // Base do prompt com Lousa 7 integrada + Segurança
+  const lousa7Base = NOEL_SYSTEM_PROMPT_WITH_SECURITY
   
   const basePrompt = `${lousa7Base}
 
@@ -472,6 +475,77 @@ export async function POST(request: NextRequest) {
         { error: 'Mensagem é obrigatória' },
         { status: 400 }
       )
+    }
+
+    // ============================================
+    // SEGURANÇA: Detecção de Intenções Maliciosas
+    // ============================================
+    const recentMessages = conversationHistory
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .slice(-5) // Últimas 5 mensagens do usuário
+
+    const securityFlags = detectMaliciousIntent(message, recentMessages)
+    
+    if (securityFlags.isSuspicious) {
+      console.warn('⚠️ [NOEL] Intenção suspeita detectada:', {
+        riskLevel: securityFlags.riskLevel,
+        patterns: securityFlags.detectedPatterns,
+        shouldBlock: securityFlags.shouldBlock,
+      })
+
+      // Logar evento de segurança
+      const ipAddress = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       undefined
+      const userAgent = request.headers.get('user-agent') || undefined
+
+      await logSecurityFromFlags(
+        securityFlags,
+        user.id,
+        message,
+        securityFlags.suggestedResponse || undefined,
+        { ip: ipAddress, userAgent }
+      )
+
+      // Se deve bloquear, retornar resposta de segurança
+      if (securityFlags.shouldBlock) {
+        return NextResponse.json({
+          response: securityFlags.suggestedResponse || 
+            'Por motivos de ética e proteção do sistema, não posso atender essa solicitação. Como posso te ajudar com seu negócio?',
+          module: 'mentor',
+          source: 'assistant_api',
+          securityBlocked: true,
+          riskLevel: securityFlags.riskLevel,
+        })
+      }
+    }
+
+    // ============================================
+    // SEGURANÇA: Rate Limiting
+    // ============================================
+    const rateLimitResult = await checkRateLimit(user.id)
+    
+    if (!rateLimitResult.allowed) {
+      console.warn('⚠️ [NOEL] Rate limit excedido:', {
+        userId: user.id,
+        blocked: rateLimitResult.blocked,
+        resetAt: rateLimitResult.resetAt,
+      })
+
+      if (rateLimitResult.blocked) {
+        const minutesUntilReset = Math.ceil(
+          (rateLimitResult.blockUntil!.getTime() - Date.now()) / (60 * 1000)
+        )
+
+        return NextResponse.json({
+          response: `Você fez muitas solicitações em sequência. Para manter o sistema estável, aguarde ${minutesUntilReset} minuto(s) antes de tentar novamente. Vamos focar em uma ação por vez para manter o sistema estável. Em qual cliente ou fluxo você quer focar agora?`,
+          module: 'mentor',
+          source: 'assistant_api',
+          rateLimited: true,
+          resetAt: rateLimitResult.resetAt.toISOString(),
+        }, { status: 429 })
+      }
     }
 
     // ============================================
