@@ -185,7 +185,7 @@ export default function WellnessCheckoutPage() {
       description: 'Plano Mensal',
     },
     annual: {
-      price: 574.80, // Valor total (12x de R$ 47,90) - Atual até 9/10
+      price: 574.80, // Valor total (12x de R$ 47,90) - Atual até 9/12
       priceFormatted: 'R$ 574,80',
       period: 'ano',
       description: 'Plano Anual',
@@ -226,19 +226,6 @@ export default function WellnessCheckoutPage() {
           <p className="text-center text-lg sm:text-xl mb-4 text-green-50">
             Agora não é só uma ferramenta. É um <strong>sistema completo de mentoria inteligente</strong> que guia você passo a passo na construção do seu negócio Herbalife.
           </p>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-            <div className="grid sm:grid-cols-2 gap-4 text-center">
-              <div>
-                <div className="text-3xl font-bold mb-1">R$ 97,00</div>
-                <div className="text-sm text-green-100">Plano Mensal</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold mb-1">R$ 59,90/mês</div>
-                <div className="text-sm text-green-100">Plano Anual (12x sem juros)</div>
-                <div className="text-xs text-green-200 mt-1">Economia de R$ 445,20/ano</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Seção: O que mudou com NOEL */}
@@ -376,7 +363,7 @@ export default function WellnessCheckoutPage() {
                 <span className="text-gray-600">Valor:</span>
                 <span className="font-bold text-green-600 text-lg">
                   {planType === 'annual' 
-                    ? `R$ 59,90/mês (12x sem juros)`
+                    ? `R$ 47,90/mês (12x sem juros)`
                     : `${currentPlan.priceFormatted}/mês`
                   }
                 </span>

@@ -34,53 +34,6 @@ export default function WellnessPage() {
       </header>
 
       <main>
-        {/* 🚨 BANNER PROMOCIONAL - NOEL E DESCONTO ATÉ 9/10 */}
-        <section className="bg-gradient-to-r from-red-600 via-orange-600 to-red-700 py-6 sm:py-8 text-white shadow-xl border-b-4 border-yellow-400">
-          <div className="container mx-auto px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 sm:p-8 border-2 border-white/30 shadow-2xl">
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-                  <div className="text-5xl sm:text-6xl">🤖</div>
-                  <div className="flex-1 text-center sm:text-left">
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3">
-                      ⚡ NOEL - Sistema Inteligente Já Disponível!
-                    </h2>
-                    <div className="bg-yellow-500 text-yellow-900 text-lg sm:text-xl font-bold px-4 py-2 rounded-lg mb-3 sm:mb-4 inline-block">
-                      ⏰ ÚLTIMO DIA COM DESCONTO: 9/10
-                    </div>
-                    <p className="text-base sm:text-lg text-red-50 mb-3 sm:mb-4">
-                      <strong>A partir de 10/10</strong>, os valores serão atualizados para:
-                    </p>
-                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/30 mb-4">
-                      <div className="grid sm:grid-cols-2 gap-4 text-center">
-                        <div>
-                          <div className="text-2xl sm:text-3xl font-bold text-white mb-1">R$ 97,00</div>
-                          <div className="text-sm text-red-100">Plano Mensal</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl sm:text-3xl font-bold text-white mb-1">R$ 59,90/mês</div>
-                          <div className="text-sm text-red-100">Plano Anual (12x sem juros)</div>
-                          <div className="text-xs text-yellow-200 mt-1 font-semibold">
-                            Total: R$ 718,80/ano
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm sm:text-base text-red-100 font-semibold mb-4">
-                      🎯 <strong>Garanta seu desconto agora!</strong> O sistema NOEL já está ativo com mentoria inteligente 24/7, acompanhamento de metas, fluxos e scripts prontos.
-                    </p>
-                    <Link
-                      href="/pt/wellness/checkout"
-                      className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-red-600 text-lg font-bold rounded-xl hover:bg-red-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                    >
-                      🎯 Garantir Desconto Agora
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* 🟩 1️⃣ HERO – INSPIRAÇÃO E PROPÓSITO */}
         <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16 sm:py-20 lg:py-24">
@@ -341,9 +294,6 @@ export default function WellnessPage() {
                 <div className="text-center mb-6">
                   <span className="text-4xl font-bold text-green-600">R$ 59,90</span>
                   <span className="text-gray-600">/mês</span>
-                  <div className="text-xs text-red-600 font-semibold mt-2">
-                    ⚠️ A partir de 10/10: R$ 97,00/mês
-                  </div>
                 </div>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
@@ -369,31 +319,23 @@ export default function WellnessPage() {
               
               {/* Plano Anual */}
               <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-green-500 hover:border-green-600 transition-all transform scale-105 relative">
-                <div className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full text-center mb-4 inline-block absolute -top-3 left-1/2 transform -translate-x-1/2 animate-pulse">
-                  ⏰ ÚLTIMO DIA: 9/10
-                </div>
                 <div className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full text-center mb-2 inline-block">
-                  ECONOMIA DE 38%
+                  ECONOMIA DE 20%
                 </div>
                 <div className="text-4xl mb-4 text-center mt-4">💚</div>
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Anual</h3>
                 <p className="text-gray-600 text-center mb-6">Distribuidores, Supervisores e Líderes de Equipe</p>
                 <div className="text-center mb-6">
-                  <span className="text-4xl font-bold text-green-600">R$ 47,50</span>
+                  <span className="text-4xl font-bold text-green-600">R$ 47,90</span>
                   <span className="text-gray-600">/mês</span>
                   <div className="text-sm text-gray-500 mt-2">
                     12 meses
                   </div>
                   <div className="text-sm text-gray-500 mt-1">
-                    Total de <span className="font-semibold text-gray-700">R$ 570/ano</span>
+                    Total de <span className="font-semibold text-gray-700">R$ 574,80/ano</span>
                   </div>
                   <div className="text-xs text-gray-500 mt-2">
-                    <span className="line-through text-gray-400">R$ 720</span> você economiza R$ 150
-                  </div>
-                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-xs text-yellow-800 font-semibold">
-                      ⚠️ A partir de 10/10: R$ 59,90/mês (R$ 718,80/ano)
-                    </p>
+                    <span className="line-through text-gray-400">R$ 718,80</span> você economiza R$ 144,00
                   </div>
                 </div>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
