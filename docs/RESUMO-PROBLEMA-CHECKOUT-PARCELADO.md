@@ -46,18 +46,39 @@
 
 ## 🔧 SOLUÇÃO: Configurar no Painel do Mercado Pago
 
+### ⚠️ IMPORTANTE: Verificar "Checkout Pro" (não apenas "Link de pagamento")
+
+O código usa **Preference API (Checkout Pro)**, que pode ter configuração separada de "Link de pagamento"!
+
 ### PASSO 1: Acessar Configurações
 
 1. Acesse: https://www.mercadopago.com.br/
-2. Login → **"Seu Negócio"** → **"Custos"** → **"Cobrar"** → **"Link de pagamento"**
-3. Aba **"Parcelamento"**
+2. Login → **"Seu Negócio"** → **"Custos"** ou **"Taxas e parcelas"**
 
-### PASSO 2: Habilitar 12x Parcelado Vendedor
+### PASSO 2: Verificar TODAS as Seções de Parcelamento
 
-1. Na seção **"Parcelado vendedor"**, verifique se está **ATIVADO** (toggle azul)
-2. Verifique se **12x** está na lista de parcelas
-3. Se não estiver, procure por **"Configurar"** ou **"Adicionar parcelas"**
-4. Adicione/habilite **12x** para "Parcelado vendedor"
+Procure por **TODAS** estas seções (podem estar em lugares diferentes):
+
+#### A) "Link de pagamento" → "Parcelamento"
+- ✅ Você já configurou aqui
+- Verifique se 12x está habilitado
+
+#### B) "Checkout Pro" → "Parcelamento" ⚠️ **VERIFIQUE AQUI!**
+- Pode estar em: **"Cobrar"** → **"Checkout Pro"** → **"Parcelamento"**
+- Ou: **"Checkout"** → **"Checkout Pro"** → **"Parcelamento"**
+- Ou: **"Integrações"** → **"Checkout Pro"** → **"Parcelamento"**
+
+#### C) "Preference API" → "Parcelamento" ⚠️ **VERIFIQUE AQUI!**
+- Pode estar em: **"Integrações"** → **"APIs"** → **"Preference"** → **"Parcelamento"**
+
+### PASSO 3: Habilitar 12x Parcelado Vendedor em TODAS as Seções
+
+1. Em **CADA seção encontrada**, na opção **"Parcelado vendedor"**:
+   - Verifique se está **ATIVADO** (toggle azul)
+   - Verifique se **12x** está na lista de parcelas
+   - Se não estiver, adicione/habilite **12x**
+
+2. **Salve as alterações** em cada seção
 
 **Taxa esperada:** ~15-17% (você absorve essa taxa)
 
@@ -82,8 +103,14 @@
 
 1. **O código NÃO precisa ser alterado** ✅
 2. **O problema é 100% no painel do Mercado Pago** ⚠️
-3. **Se não conseguir habilitar 12x**, contate o suporte do Mercado Pago
-4. **A taxa de ~15-17% é normal** - você absorve para oferecer sem juros
+3. **Verifique "Checkout Pro" ESPECIFICAMENTE** - pode ter configuração separada de "Link de pagamento"
+4. **Se não conseguir habilitar 12x**, contate o suporte do Mercado Pago informando que usa Preference API (Checkout Pro)
+5. **A taxa de ~15-17% é normal** - você absorve para oferecer sem juros
+
+## 📚 DOCUMENTAÇÃO ADICIONAL
+
+Para instruções detalhadas sobre como verificar configuração do Checkout Pro, veja:
+- `docs/CONFIGURAR-CHECKOUT-PRO-PARCELADO-VENDEDOR.md`
 
 ---
 
