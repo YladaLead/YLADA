@@ -339,14 +339,11 @@ export default function WellnessPage() {
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Mensal</h3>
                 <p className="text-gray-600 text-center mb-6">Distribuidores, Supervisores e Líderes de Equipe</p>
                 <div className="text-center mb-6">
-                  <div className="text-sm text-red-600 font-semibold mb-2">
-                    ⚠️ A partir de 10/10: R$ 97,00/mês
-                  </div>
-                  <div className="text-xs text-gray-500 mb-2">
-                    Preço atual (até 9/10):
-                  </div>
                   <span className="text-4xl font-bold text-green-600">R$ 59,90</span>
                   <span className="text-gray-600">/mês</span>
+                  <div className="text-xs text-red-600 font-semibold mt-2">
+                    ⚠️ A partir de 10/10: R$ 97,00/mês
+                  </div>
                 </div>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
@@ -382,12 +379,6 @@ export default function WellnessPage() {
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Anual</h3>
                 <p className="text-gray-600 text-center mb-6">Distribuidores, Supervisores e Líderes de Equipe</p>
                 <div className="text-center mb-6">
-                  <div className="text-sm text-red-600 font-semibold mb-2">
-                    ⚠️ A partir de 10/10: R$ 59,90/mês
-                  </div>
-                  <div className="text-xs text-gray-500 mb-2">
-                    Preço atual (até 9/10):
-                  </div>
                   <span className="text-4xl font-bold text-green-600">R$ 47,50</span>
                   <span className="text-gray-600">/mês</span>
                   <div className="text-sm text-gray-500 mt-2">
@@ -397,11 +388,11 @@ export default function WellnessPage() {
                     Total de <span className="font-semibold text-gray-700">R$ 570/ano</span>
                   </div>
                   <div className="text-xs text-gray-500 mt-2">
-                    <span className="line-through text-gray-400">R$ 1.164</span> você economiza R$ 594
+                    <span className="line-through text-gray-400">R$ 720</span> você economiza R$ 150
                   </div>
                   <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-xs text-yellow-800 font-semibold">
-                      💰 Economia de R$ 445,20 comparado ao novo preço anual
+                      ⚠️ A partir de 10/10: R$ 59,90/mês (R$ 718,80/ano)
                     </p>
                   </div>
                 </div>

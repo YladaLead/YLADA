@@ -179,19 +179,19 @@ export default function WellnessCheckoutPage() {
 
   const planDetails = {
     monthly: {
-      price: 97.00,
-      priceFormatted: 'R$ 97,00',
+      price: 59.90,
+      priceFormatted: 'R$ 59,90',
       period: 'mês',
       description: 'Plano Mensal',
     },
     annual: {
-      price: 718.80, // Valor total (12x de R$ 59,90)
-      priceFormatted: 'R$ 718,80',
+      price: 574.80, // Valor total (12x de R$ 47,90) - Atual até 9/10
+      priceFormatted: 'R$ 574,80',
       period: 'ano',
       description: 'Plano Anual',
-      monthlyEquivalent: 59.90, // 12x de R$ 59,90 (sem juros para cliente)
-      totalParcelado: 718.80, // Total parcelado
-      savings: 445.20, // (97.00 * 12) - 718.80 = 1164.00 - 718.80 = 445.20
+      monthlyEquivalent: 47.90, // 12x de R$ 47,90 (sem juros para cliente)
+      totalParcelado: 574.80, // Total parcelado
+      savings: 144.00, // (59.90 * 12) - 574.80 = 718.80 - 574.80 = 144.00
     },
   }
 
@@ -326,7 +326,7 @@ export default function WellnessCheckoutPage() {
                     Mensal
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 97,00
+                    R$ 59,90
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                 </div>
@@ -342,18 +342,18 @@ export default function WellnessCheckoutPage() {
                 }`}
               >
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
-                  ECONOMIA DE 38%
+                  ECONOMIA DE 21%
                 </div>
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
                     Anual
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 59,90
+                    R$ 47,90
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                   <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 718,80/ano (12x sem juros)
+                    Total: R$ 574,80/ano (12x sem juros)
                   </div>
                 </div>
               </button>
@@ -451,7 +451,7 @@ export default function WellnessCheckoutPage() {
                     💳 Parcelamento Disponível
                   </h3>
                   <p className="text-sm text-blue-800">
-                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12x de R$ 59,90 sem juros</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
+                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12x de R$ 47,90 sem juros</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
                   </p>
                 </div>
               </div>

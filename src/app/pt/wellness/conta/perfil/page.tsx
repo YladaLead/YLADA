@@ -65,6 +65,12 @@ export default function ContaPerfilPage() {
   }
 
   const handleSave = async () => {
+    // Proteção: evitar múltiplos salvamentos simultâneos
+    if (saving) {
+      console.warn('⚠️ Salvamento já em andamento, ignorando novo clique')
+      return
+    }
+
     try {
       setSaving(true)
       setError(null)
@@ -103,44 +109,67 @@ export default function ContaPerfilPage() {
 
       console.log('💾 Salvando perfil com dados:', dataToSave)
 
-      // Salvar perfil NOEL
-      const response = await fetch('/api/wellness/noel/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSave),
-      })
+      // Criar AbortController para timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos timeout
 
-      const responseData = await response.json()
-
-      if (!response.ok) {
-        console.error('❌ Erro ao salvar perfil:', {
-          status: response.status,
-          error: responseData
+      try {
+        // Salvar perfil NOEL
+        const response = await fetch('/api/wellness/noel/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dataToSave),
+          signal: controller.signal,
         })
+
+        clearTimeout(timeoutId)
+
+        const responseData = await response.json()
+
+        if (!response.ok) {
+          console.error('❌ Erro ao salvar perfil:', {
+            status: response.status,
+            error: responseData
+          })
+          
+          // Mensagem de erro mais amigável
+          let errorMessage = responseData.error || 'Erro ao salvar perfil'
+          
+          if (responseData.message) {
+            errorMessage = responseData.message
+          } else if (responseData.required) {
+            errorMessage = `Por favor, preencha: ${responseData.required.join(', ')}`
+          }
+          
+          throw new Error(errorMessage)
+        }
+
+        console.log('✅ Perfil salvo com sucesso:', responseData)
+
+        // O profile_type já é salvo automaticamente pelo endpoint de onboarding
+
+        setSuccess(true)
         
-        // Mensagem de erro mais amigável
-        let errorMessage = responseData.error || 'Erro ao salvar perfil'
-        
-        if (responseData.message) {
-          errorMessage = responseData.message
-        } else if (responseData.required) {
-          errorMessage = `Por favor, preencha: ${responseData.required.join(', ')}`
+        // NÃO recarregar perfil imediatamente - pode causar loop
+        // Apenas atualizar os dados locais se necessário
+        if (responseData.profile) {
+          setProfile(prev => ({ ...prev, ...responseData.profile }))
+        }
+        if (responseData.profile_type) {
+          setProfileType(responseData.profile_type)
         }
         
-        throw new Error(errorMessage)
+        // Mostrar mensagem de sucesso por mais tempo
+        setTimeout(() => setSuccess(false), 5000)
+
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
+        
+        if (fetchError.name === 'AbortError') {
+          throw new Error('O salvamento demorou muito. Verifique sua conexão e tente novamente.')
+        }
+        throw fetchError
       }
-
-      console.log('✅ Perfil salvo com sucesso:', responseData)
-
-      // O profile_type já é salvo automaticamente pelo endpoint de onboarding
-
-      setSuccess(true)
-      
-      // Recarregar perfil para garantir sincronização
-      await loadProfile()
-      
-      // Mostrar mensagem de sucesso por mais tempo
-      setTimeout(() => setSuccess(false), 5000)
 
     } catch (err: any) {
       console.error('❌ Erro ao salvar perfil:', err)
@@ -149,7 +178,7 @@ export default function ContaPerfilPage() {
       let errorMessage = err.message || 'Erro ao salvar perfil. Tente novamente.'
       
       // Se for erro de rede, dar mensagem específica
-      if (err.message?.includes('fetch') || err.message?.includes('network')) {
+      if (err.message?.includes('fetch') || err.message?.includes('network') || err.message?.includes('AbortError')) {
         errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.'
       }
       
@@ -158,6 +187,7 @@ export default function ContaPerfilPage() {
       // Esconder erro após 8 segundos
       setTimeout(() => setError(null), 8000)
     } finally {
+      // SEMPRE garantir que setSaving(false) seja chamado
       setSaving(false)
     }
   }
