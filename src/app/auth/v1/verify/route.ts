@@ -182,7 +182,7 @@ export async function GET(request: NextRequest) {
       .maybeSingle()
 
     // Determinar para onde redirecionar
-    let redirectPath = '/pt/wellness/dashboard'
+    let redirectPath = '/pt/wellness/home'
     
     // Sempre redirecionar para dashboard
     // O admin já preencheu todos os dados, usuário só precisa trocar senha se necessário

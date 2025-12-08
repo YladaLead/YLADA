@@ -27,7 +27,7 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo e Título */}
           <div className="flex items-center min-w-0 flex-1">
-            <Link href="/pt/wellness/dashboard" className="flex-shrink-0">
+            <Link href="/pt/wellness/home" className="flex-shrink-0">
               <Image
                 src="/images/logo/wellness-horizontal.png"
                 alt="WELLNESS - Your Leading Data System"
@@ -51,7 +51,7 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
           {/* Navegação - Responsiva */}
           <nav className="flex items-center space-x-2 sm:space-x-3 lg:space-x-6 flex-shrink-0">
             <Link
-              href="/pt/wellness/dashboard"
+              href="/pt/wellness/home"
               className="text-xs sm:text-sm lg:text-base text-gray-700 hover:text-green-600 font-medium transition-colors whitespace-nowrap hidden sm:inline-block"
             >
               Home

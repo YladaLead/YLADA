@@ -83,12 +83,31 @@ export async function GET(request: NextRequest) {
       .maybeSingle()
 
     // Determinar para onde redirecionar
-    let redirectPath = '/pt/wellness/dashboard'
+    // Verificar perfil do usuário para redirecionar corretamente
+    let redirectPath = '/pt/wellness/home' // Padrão Wellness
 
-    // Sempre redirecionar para dashboard
-    // O admin já preencheu todos os dados, usuário só precisa trocar senha se necessário
+    // Verificar perfil do usuário
+    const { data: userProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('perfil')
+      .eq('user_id', data.session.user.id)
+      .maybeSingle()
+
+    // Se tiver perfil, redirecionar para área correta
+    if (userProfile?.perfil) {
+      if (userProfile.perfil === 'nutri') {
+        redirectPath = '/pt/nutri/home'
+      } else if (userProfile.perfil === 'coach') {
+        redirectPath = '/pt/coach/home'
+      } else if (userProfile.perfil === 'nutra') {
+        redirectPath = '/pt/nutra/home'
+      } else {
+        redirectPath = '/pt/wellness/home'
+      }
+    }
+
+    // Se tem 'next' na URL, usar ele (tem prioridade)
     if (next) {
-      // Se tem perfil completo e tem 'next', usar ele
       try {
         const decodedNext = decodeURIComponent(next)
         // Validar que é uma URL relativa (segurança)
@@ -100,9 +119,7 @@ export async function GET(request: NextRequest) {
         console.warn('⚠️ Erro ao decodificar next:', e)
       }
     } else {
-      // Se não houver 'next' e perfil completo, usar padrão: dashboard
-      console.log('ℹ️ Sem parâmetro next, usando padrão: dashboard')
-      redirectPath = '/pt/wellness/dashboard'
+      console.log('ℹ️ Sem parâmetro next, usando padrão baseado no perfil:', redirectPath)
     }
 
     console.log('🔄 Redirecionando para:', redirectPath)

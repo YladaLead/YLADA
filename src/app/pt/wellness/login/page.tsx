@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import LoginForm from '@/components/auth/LoginForm'
 
 export default function WellnessLoginPage() {
-  const [redirectPath, setRedirectPath] = useState('/pt/wellness/dashboard')
+  const [redirectPath, setRedirectPath] = useState('/pt/wellness/home')
   const [startWithSignUp, setStartWithSignUp] = useState(false)
 
   useEffect(() => {

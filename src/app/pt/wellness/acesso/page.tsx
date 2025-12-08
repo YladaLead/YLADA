@@ -73,7 +73,7 @@ function AcessoPorTokenContent() {
             // Se não tem, assumir recuperação e ir para dashboard
             const redirectPath = redirect 
               ? decodeURIComponent(redirect) 
-              : '/pt/wellness/dashboard'
+              : '/pt/wellness/home'
             
             console.log('🔄 Redirecionando para (fallback):', redirectPath)
             setTimeout(() => {

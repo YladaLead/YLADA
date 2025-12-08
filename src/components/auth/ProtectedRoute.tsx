@@ -90,9 +90,16 @@ export default function ProtectedRoute({
       }
       
       // Se passou o timeout, redirecionar
+      // IMPORTANTE: Evitar loop - não redirecionar se já está na página de login
       if (authCheckTimeout) {
         const redirectPath = redirectTo || (perfil === 'admin' ? '/admin/login' : `/pt/${perfil || 'nutri'}/login`)
-        router.push(redirectPath)
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+        
+        // Evitar loop: não redirecionar se já está na página de login
+        if (!currentPath.includes('/login')) {
+          console.log('🔄 ProtectedRoute: Usuário não autenticado, redirecionando para:', redirectPath)
+          router.replace(redirectPath) // Usar replace ao invés de push
+        }
         return
       }
       
@@ -154,7 +161,7 @@ export default function ProtectedRoute({
         // Verificar se a URL atual já está na área correta (evitar loop)
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
         // Mapear dashboard para home (dashboard não existe mais)
-        const correctAreaPath = userProfile.perfil === 'nutri' 
+        const correctAreaPath = (userProfile.perfil === 'nutri' || userProfile.perfil === 'wellness')
           ? `/pt/${userProfile.perfil}/home`
           : `/pt/${userProfile.perfil}/dashboard`
         
@@ -164,11 +171,18 @@ export default function ProtectedRoute({
           return
         }
         
-        console.log('❌ Perfil não corresponde, redirecionando para:', correctAreaPath)
-        router.push(correctAreaPath)
+        // Evitar loop: não redirecionar se já está na área correta ou na página de login
+        if (!currentPath.includes('/login') && !currentPath.startsWith(`/pt/${userProfile.perfil}/`)) {
+          console.log('❌ Perfil não corresponde, redirecionando para:', correctAreaPath)
+          router.replace(correctAreaPath) // Usar replace ao invés de push
+        }
       } else {
-        console.log('❌ Perfil não encontrado, redirecionando para login:', `/pt/${perfil}/login`)
-        router.push(`/pt/${perfil}/login`)
+        // Evitar loop: não redirecionar se já está na página de login
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+        if (!currentPath.includes('/login')) {
+          console.log('❌ Perfil não encontrado, redirecionando para login:', `/pt/${perfil}/login`)
+          router.replace(`/pt/${perfil}/login`) // Usar replace ao invés de push
+        }
       }
     } else {
       console.log('✅ Perfil corresponde, permitindo acesso')

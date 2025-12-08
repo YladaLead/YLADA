@@ -280,9 +280,16 @@ export default function RequireSubscription({
   }
 
   // Se não está autenticado, redirecionar para login
-  if (!user) {
+  // IMPORTANTE: Só redirecionar se não estiver já na página de login (evitar loop)
+  if (!user && !authLoading) {
     const loginPath = redirectTo || `/pt/${area}/login`
-    router.push(loginPath)
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+    
+    // Evitar loop: não redirecionar se já está na página de login
+    if (!currentPath.includes('/login')) {
+      console.log('🔄 RequireSubscription: Usuário não autenticado, redirecionando para:', loginPath)
+      router.replace(loginPath) // Usar replace ao invés de push
+    }
     return null
   }
 

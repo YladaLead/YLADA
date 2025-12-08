@@ -56,15 +56,15 @@ export async function POST(request: NextRequest) {
     const redirectParam = url.searchParams.get('redirect')
     
     // Se tem redirect no parâmetro, usar ele
-    // Se não tem, verificar se é recuperação (padrão: dashboard) ou pagamento
-    let finalRedirect = '/pt/wellness/dashboard' // Padrão: dashboard (recuperação)
+    // Se não tem, verificar se é recuperação (padrão: home) ou pagamento
+    let finalRedirect = '/pt/wellness/home' // Padrão: home (recuperação)
     
     if (redirectParam) {
       finalRedirect = decodeURIComponent(redirectParam)
     } else {
-      // Se não tem redirect, assumir que é recuperação e ir para dashboard
+      // Se não tem redirect, assumir que é recuperação e ir para home
       // (pagamento sempre terá redirect=/pt/wellness/bem-vindo no e-mail)
-      finalRedirect = '/pt/wellness/dashboard'
+      finalRedirect = '/pt/wellness/home'
     }
     
     // IMPORTANTE: O Supabase precisa que o redirectTo seja uma URL completa e válida

@@ -341,7 +341,7 @@ function BemVindoContent() {
               
               {/* Botão para ir imediatamente */}
               <button
-                onClick={() => router.push('/pt/wellness/dashboard')}
+                onClick={() => router.push('/pt/wellness/home')}
                 className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg text-lg transform hover:scale-105"
               >
                 🚀 Ir para o Dashboard Agora

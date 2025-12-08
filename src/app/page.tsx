@@ -41,9 +41,9 @@ export default function HomePage() {
             const { data: { session } } = await supabase.auth.getSession()
             
             if (session) {
-              console.log('✅ Sessão criada, redirecionando para dashboard')
-              // Redirecionar para dashboard (recuperação de acesso)
-              window.location.href = '/pt/wellness/dashboard'
+              console.log('✅ Sessão criada, redirecionando para home')
+              // Redirecionar para home (recuperação de acesso)
+              window.location.href = '/pt/wellness/home'
             } else {
               console.warn('⚠️ Sessão não criada, redirecionando para login')
               window.location.href = '/pt/wellness/login'

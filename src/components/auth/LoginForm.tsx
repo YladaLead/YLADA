@@ -51,15 +51,35 @@ export default function LoginForm({
   }, [])
 
   // 🚀 CORREÇÃO: Verificar autenticação apenas UMA VEZ ao carregar (sem loop)
+  // IMPORTANTE: Só verificar se NÃO estiver em processo de login/cadastro
   useEffect(() => {
+    // Se estiver carregando (processando login/cadastro), não verificar
+    if (loading) {
+      return
+    }
+
     let mounted = true
     let checkTimeout: NodeJS.Timeout | null = null
+    let hasRedirected = false
 
     const checkAuth = async () => {
+      // Evitar múltiplos redirecionamentos
+      if (hasRedirected || !mounted) {
+        return
+      }
+
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        if (mounted && session?.user) {
+        if (mounted && session?.user && !hasRedirected) {
+          // Verificar se já está na página de destino para evitar loop
+          const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+          if (currentPath === redirectPath || currentPath.startsWith(redirectPath + '/')) {
+            console.log('✅ Já está na página de destino, não redirecionar')
+            return
+          }
+
           console.log('✅ Já autenticado, redirecionando para:', redirectPath)
+          hasRedirected = true
           // Usar replace para evitar adicionar ao histórico
           router.replace(redirectPath)
         }
@@ -70,18 +90,19 @@ export default function LoginForm({
 
     // Aguardar um pouco para garantir que cookies foram carregados
     checkTimeout = setTimeout(() => {
-      if (mounted) {
+      if (mounted && !loading && !hasRedirected) {
         checkAuth()
       }
-    }, 100)
+    }, 300) // Aumentado para 300ms para dar mais tempo aos cookies
 
     return () => {
       mounted = false
+      hasRedirected = true // Marcar como redirecionado ao desmontar
       if (checkTimeout) {
         clearTimeout(checkTimeout)
       }
     }
-  }, [redirectPath, router])
+  }, [redirectPath, router, loading]) // Adicionar loading como dependência
 
   // Atualizar valor dos inputs
   const handleInputChange = (setter: (value: string) => void) => {
@@ -177,9 +198,19 @@ export default function LoginForm({
         if (data.user) {
           // Verificar se precisa confirmar email
           if (!data.session) {
-            setError('Verifique seu email para confirmar a conta antes de fazer login.')
+            // Usuário criado mas precisa confirmar email
+            setSuccessMessage('Conta criada com sucesso! Verifique seu email para confirmar a conta antes de fazer login.')
             setIsSignUp(false)
+            setLoading(false)
+            // Limpar formulário
+            setEmail('')
+            setPassword('')
+            setName('')
+            return
           } else {
+            // Sessão criada - usuário já está logado
+            console.log('✅ Cadastro bem-sucedido com sessão ativa')
+            
             // Verificar e ativar autorizações pendentes para este email
             try {
               await fetch('/api/auth/activate-pending-authorization', {
@@ -191,8 +222,24 @@ export default function LoginForm({
               console.warn('Aviso: Não foi possível verificar autorizações pendentes:', e)
             }
             
-            router.push(redirectPath)
+            // Aguardar um pouco para garantir que a sessão foi persistida
+            console.log('🔄 Redirecionando após cadastro para:', redirectPath)
+            
+            // Verificar se já está na página de destino para evitar loop
+            const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+            if (currentPath === redirectPath || currentPath.startsWith(redirectPath + '/')) {
+              console.log('✅ Já está na página de destino, não redirecionar')
+              setLoading(false)
+              return
+            }
+            
+            setTimeout(() => {
+              router.replace(redirectPath) // Usar replace ao invés de push
+            }, 300) // Aumentado para 300ms para garantir persistência da sessão
           }
+        } else {
+          setError('Erro ao criar conta. Tente novamente.')
+          setLoading(false)
         }
       } else {
         // LOGIN: Verificar se perfil corresponde à área
@@ -263,12 +310,20 @@ export default function LoginForm({
 
         // 🚀 CORREÇÃO: Redirecionar imediatamente após login bem-sucedido
         // Aguardar um pouco para garantir que a sessão foi persistida
-        console.log('🔄 Redirecionando para:', redirectPath)
+        console.log('🔄 Redirecionando após login para:', redirectPath)
         
-        // Usar setTimeout para garantir que o estado foi atualizado
+        // Verificar se já está na página de destino para evitar loop
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+        if (currentPath === redirectPath || currentPath.startsWith(redirectPath + '/')) {
+          console.log('✅ Já está na página de destino, não redirecionar')
+          setLoading(false)
+          return
+        }
+        
+        // Usar setTimeout para garantir que o estado foi atualizado e sessão persistida
         setTimeout(() => {
-          router.replace(redirectPath)
-        }, 100)
+          router.replace(redirectPath) // Usar replace para não adicionar ao histórico
+        }, 200) // Aumentado para 200ms para garantir persistência da sessão
 
         return
       }
