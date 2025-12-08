@@ -64,28 +64,52 @@ function ResetPasswordContent() {
 
     try {
       if (token) {
-        console.log('🔄 Processando reset de senha com token...')
+        console.log('🔄 Processando reset de senha com token...', { hasToken: !!token, type })
         
-        const { data, error: verifyError } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: (type as any) || 'recovery',
-        })
+        // Criar AbortController para timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos
 
-        if (verifyError) {
-          console.error('❌ Erro ao verificar token:', verifyError)
-          setError(verifyError.message || 'Token inválido ou expirado. Solicite um novo link de reset.')
-          setLoading(false)
-          return
-        }
+        try {
+          // Tentar verificar o token
+          // O token pode vir como hash direto ou precisar ser processado
+          console.log('🔍 Verificando token:', { 
+            tokenLength: token.length, 
+            tokenStart: token.substring(0, 20) + '...',
+            type: type || 'recovery'
+          })
+          
+          const { data, error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: token,
+            type: (type as any) || 'recovery',
+          })
 
-        if (data.session) {
+          clearTimeout(timeoutId)
+
+          if (verifyError) {
+            console.error('❌ Erro ao verificar token:', verifyError)
+            setError(verifyError.message || 'Token inválido ou expirado. Solicite um novo link de reset.')
+            setLoading(false)
+            return
+          }
+
+          if (!data.session) {
+            console.error('❌ Sessão não criada após verificação do token')
+            setError('Erro ao processar token. Solicite um novo link de reset.')
+            setLoading(false)
+            return
+          }
+
+          console.log('✅ Token verificado, atualizando senha...')
+
+          // Atualizar senha
           const { error: updateError } = await supabase.auth.updateUser({
             password: password
           })
 
           if (updateError) {
             console.error('❌ Erro ao atualizar senha:', updateError)
-            setError(updateError.message || 'Erro ao atualizar senha')
+            setError(updateError.message || 'Erro ao atualizar senha. Tente novamente.')
             setLoading(false)
             return
           }
@@ -93,9 +117,30 @@ function ResetPasswordContent() {
           console.log('✅ Senha atualizada com sucesso!')
           setSuccess(true)
           
+          // Limpar senha provisória no perfil (se existir)
+          try {
+            await fetch('/api/wellness/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ temporary_password_expires_at: null })
+            })
+          } catch (e) {
+            // Não crítico, apenas logar
+            console.warn('⚠️ Não foi possível limpar senha provisória:', e)
+          }
+          
           setTimeout(() => {
             router.push('/pt/wellness/login?password_reset=success')
           }, 2000)
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId)
+          if (fetchError.name === 'AbortError') {
+            setError('O processo demorou muito. Verifique sua conexão e tente novamente.')
+          } else {
+            throw fetchError
+          }
+          setLoading(false)
         }
       } else {
         setError('Token não encontrado. Por favor, use o link enviado por email.')

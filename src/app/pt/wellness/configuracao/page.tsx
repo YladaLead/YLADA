@@ -850,40 +850,73 @@ export default function WellnessConfiguracaoPage() {
 
                 try {
                   setSalvandoSenha(true)
-                  const response = await authenticatedFetch('/api/wellness/change-password', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      currentPassword: senhaAtual,
-                      newPassword: novaSenha,
-                    }),
-                  })
+                  setErroSenha(null)
+                  setSucessoSenha(false)
 
-                  const data = await response.json()
+                  // Criar AbortController para timeout
+                  const controller = new AbortController()
+                  const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos
 
-                  if (!response.ok) {
-                    throw new Error(data.error || 'Erro ao alterar senha')
+                  try {
+                    const response = await authenticatedFetch('/api/wellness/change-password', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        currentPassword: senhaAtual,
+                        newPassword: novaSenha,
+                      }),
+                      signal: controller.signal,
+                    })
+
+                    clearTimeout(timeoutId)
+
+                    const data = await response.json()
+
+                    if (!response.ok) {
+                      console.error('❌ Erro na resposta da API:', {
+                        status: response.status,
+                        error: data
+                      })
+                      throw new Error(data.error || data.message || 'Erro ao alterar senha')
+                    }
+
+                    console.log('✅ Senha alterada com sucesso:', data)
+
+                    // Senha alterada com sucesso
+                    setSucessoSenha(true)
+                    setSenhaAtual('')
+                    setNovaSenha('')
+                    setConfirmarSenha('')
+
+                    // Mostrar mensagem e fazer logout após 2 segundos
+                    setTimeout(async () => {
+                      try {
+                        // Fazer logout para invalidar sessão antiga
+                        await signOut()
+                        // Redirecionar para login com mensagem de sucesso
+                        router.push('/pt/wellness/login?password_changed=success')
+                      } catch (logoutError) {
+                        console.error('Erro ao fazer logout:', logoutError)
+                        // Mesmo se logout falhar, redirecionar
+                        router.push('/pt/wellness/login?password_changed=success')
+                      }
+                    }, 2000)
+                  } catch (fetchError: any) {
+                    clearTimeout(timeoutId)
+                    
+                    if (fetchError.name === 'AbortError') {
+                      throw new Error('O processo demorou muito. Verifique sua conexão e tente novamente.')
+                    }
+                    throw fetchError
                   }
-
-                  // Senha alterada com sucesso
-                  setSucessoSenha(true)
-                  setSenhaAtual('')
-                  setNovaSenha('')
-                  setConfirmarSenha('')
-
-                  // Mostrar mensagem e fazer logout após 2 segundos
-                  setTimeout(async () => {
-                    // Fazer logout para invalidar sessão antiga
-                    await signOut()
-                    // Redirecionar para login com mensagem de sucesso
-                    router.push('/pt/wellness/login?password_changed=success')
-                  }, 2000)
                 } catch (err: any) {
-                  console.error('Erro ao alterar senha:', err)
-                  setErroSenha(err.message || 'Erro ao alterar senha')
+                  console.error('❌ Erro ao alterar senha:', err)
+                  setErroSenha(err.message || 'Erro ao alterar senha. Verifique sua senha atual e tente novamente.')
+                  setSucessoSenha(false)
                 } finally {
+                  // SEMPRE garantir que setSalvandoSenha(false) seja chamado
                   setSalvandoSenha(false)
                 }
               }}
