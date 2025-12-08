@@ -3,7 +3,7 @@
  * Recomenda links baseado em contexto, perfil e necessidade
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export type TipoLead = 'frio' | 'morno' | 'quente'
 export type ObjetivoLink = 'captacao' | 'diagnostico' | 'engajamento' | 'recrutamento'
@@ -54,10 +54,9 @@ const palavrasChaveMap: Record<string, string[]> = {
 export async function recommendLink(
   contexto: RecomendacaoContext
 ): Promise<LinkWellness | null> {
-  const supabase = await createClient()
 
   try {
-    let query = supabase
+    let query = supabaseAdmin
       .from('wellness_links')
       .select('*')
       .eq('ativo', true)
