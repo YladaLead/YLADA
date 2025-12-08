@@ -86,7 +86,7 @@ export async function createRecurringSubscription(
     auto_recurring: {
       frequency: frequency, // 12 para anual, 1 para mensal
       frequency_type: frequencyType,
-      transaction_amount: unitPrice, // Valor em reais (ex: 59.90 ou 574.80)
+      transaction_amount: unitPrice, // Valor em reais (ex: 97.00 ou 718.80)
       currency_id: 'BRL' as const,
       // IMPORTANTE: start_date deve ser no futuro (pelo menos 1 minuto à frente)
       // Mercado Pago não aceita datas no passado
