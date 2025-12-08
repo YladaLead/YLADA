@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
-import { useUser } from '@/hooks/useUser'
+import { useAuth } from '@/contexts/AuthContext'
 import { WellnessConsultantProfile } from '@/types/wellness-system'
 
 export default function ContaPerfilPage() {
-  const { user } = useUser()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
