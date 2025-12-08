@@ -212,7 +212,11 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
                     {item.href ? (
                       <Link
                         href={item.href}
-                        onClick={onMobileClose}
+                        onClick={(e) => {
+                          // Se clicar no link principal, não expandir (só navegar)
+                          // Mas permitir que o botão de expandir funcione
+                          onMobileClose?.()
+                        }}
                         className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
                           sectionIsActive || isHovered
                             ? `${colors.bg} ${colors.text} font-medium`
@@ -234,15 +238,24 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
                     )}
                     {/* Botão para expandir/recolher */}
                     <button
-                      onClick={() => toggleSection(sectionId)}
-                      className={`p-2 rounded-lg transition-all ${
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        toggleSection(sectionId)
+                      }}
+                      onMouseEnter={(e) => {
+                        // Manter hover ao passar mouse sobre a seta
+                        e.stopPropagation()
+                      }}
+                      className={`p-2 rounded-lg transition-all flex-shrink-0 ${
                         sectionIsActive || isHovered
                           ? `${colors.bg} ${colors.text}`
                           : 'text-gray-500 hover:bg-gray-50'
                       }`}
+                      title={isExpanded ? 'Recolher' : 'Expandir'}
                     >
                       <svg
-                        className={`w-4 h-4 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -256,7 +269,12 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
                   {(isHovered || isExpanded) && (
                     <div className={`
                       mt-1 space-y-1
-                      ${isHovered ? 'lg:absolute lg:left-full lg:ml-2 lg:top-0 lg:bg-white lg:border lg:border-gray-200 lg:rounded-lg lg:shadow-lg lg:p-2 lg:min-w-[200px]' : 'lg:hidden'}
+                      ${isExpanded 
+                        ? 'block' // Se expandido via clique, sempre mostrar embaixo
+                        : isHovered 
+                          ? 'lg:absolute lg:left-full lg:ml-2 lg:top-0 lg:bg-white lg:border lg:border-gray-200 lg:rounded-lg lg:shadow-lg lg:p-2 lg:min-w-[200px] lg:z-50' // Hover no desktop mostra popup
+                          : 'hidden'
+                      }
                     `}>
                       {item.items.map((subItem) => {
                         const subItemActive = isItemActive(subItem.href)
