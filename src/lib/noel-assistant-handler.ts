@@ -110,6 +110,37 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
         }
         break
 
+      case 'getFluxoInfo':
+        url = `${baseUrl}/api/noel/getFluxoInfo`
+        body = {
+          fluxo_codigo: arguments_.fluxo_codigo || null,
+          fluxo_id: arguments_.fluxo_id || null
+        }
+        break
+
+      case 'getFerramentaInfo':
+        url = `${baseUrl}/api/noel/getFerramentaInfo`
+        body = {
+          ferramenta_slug: arguments_.ferramenta_slug || arguments_.slug || null,
+          user_id: userId // Sempre incluir user_id para gerar link personalizado
+        }
+        break
+
+      case 'getQuizInfo':
+        url = `${baseUrl}/api/noel/getQuizInfo`
+        body = {
+          quiz_slug: arguments_.quiz_slug || arguments_.slug || null,
+          user_id: userId // Sempre incluir user_id para gerar link personalizado
+        }
+        break
+
+      case 'getLinkInfo':
+        url = `${baseUrl}/api/noel/getLinkInfo`
+        body = {
+          link_codigo: arguments_.link_codigo || arguments_.codigo || null
+        }
+        break
+
       default:
         throw new Error(`Function desconhecida: ${functionName}`)
     }
@@ -420,9 +451,19 @@ export async function processMessageWithAssistant(
   // Verificar se completou com sucesso
   if (runStatus.status !== 'completed') {
     if (iterations >= maxIterations) {
-      throw new Error(`Run excedeu limite de iterações (${maxIterations}). Status final: ${runStatus.status}`)
+      const errorMsg = `Run excedeu limite de iterações (${maxIterations}). Status final: ${runStatus.status}`
+      console.error('❌ [NOEL Handler]', errorMsg)
+      throw new Error(errorMsg)
     }
-    throw new Error(`Run falhou com status: ${runStatus.status}. Último erro: ${(runStatus as any).last_error?.message || 'N/A'}`)
+    
+    const lastError = (runStatus as any).last_error
+    const errorMsg = lastError?.message || `Run falhou com status: ${runStatus.status}`
+    console.error('❌ [NOEL Handler] Run falhou:', {
+      status: runStatus.status,
+      error: lastError,
+      message: errorMsg
+    })
+    throw new Error(errorMsg)
   }
 
   // Buscar mensagens do thread

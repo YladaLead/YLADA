@@ -78,18 +78,32 @@ export default function NoelChatPage() {
           content: m.texto
         }))
 
-      // Chamar API NOEL
-      const response = await authenticatedFetch('/api/wellness/noel', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: pergunta,
-          conversationHistory: historico,
-          threadId: threadId, // Enviar threadId se existir (para manter conversa)
-        }),
-      })
+      // Chamar API NOEL com timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 segundos
+      
+      let response
+      try {
+        response = await authenticatedFetch('/api/wellness/noel', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: pergunta,
+            conversationHistory: historico,
+            threadId: threadId, // Enviar threadId se existir (para manter conversa)
+          }),
+          signal: controller.signal,
+        })
+        clearTimeout(timeoutId)
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Timeout: A requisição demorou muito. Tente novamente.')
+        }
+        throw fetchError
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
@@ -131,10 +145,26 @@ export default function NoelChatPage() {
       }
       setMensagens(prev => [...prev, mensagemNoel])
     } catch (error: any) {
-      console.error('Erro ao enviar mensagem:', error)
+      console.error('❌ Erro ao enviar mensagem:', error)
+      
+      // Mensagem de erro mais amigável
+      let mensagemErroTexto = '❌ Erro ao processar sua mensagem.'
+      
+      if (error.message?.includes('Load failed') || error.message?.includes('fetch')) {
+        mensagemErroTexto = '❌ Erro de conexão. Verifique sua internet e tente novamente.'
+      } else if (error.message?.includes('timeout') || error.message?.includes('Timeout')) {
+        mensagemErroTexto = '⏱️ A requisição demorou muito. Tente novamente.'
+      } else if (error.message?.includes('500') || error.message?.includes('Erro ao processar')) {
+        mensagemErroTexto = '⚠️ Erro no servidor. Tente novamente em alguns instantes.'
+      } else if (error.message) {
+        mensagemErroTexto = `❌ ${error.message}`
+      }
+      
+      mensagemErroTexto += '\n\n💡 Dica: Se o problema persistir, tente recarregar a página.'
+      
       const mensagemErro: Mensagem = {
         id: (Date.now() + 1).toString(),
-        texto: `❌ Erro ao processar sua mensagem: ${error.message || 'Erro desconhecido'}\n\nTente novamente ou entre em contato pelo WhatsApp. 💬`,
+        texto: mensagemErroTexto,
         tipo: 'noel',
         timestamp: new Date()
       }

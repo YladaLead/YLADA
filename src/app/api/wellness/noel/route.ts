@@ -311,6 +311,80 @@ Regras Gerais:
 - Seja direto, objetivo e útil.
 - Você é simplesmente "NOEL" - um amigo e mentor que ajuda com tudo relacionado ao Wellness.
 
+================================================
+🔧 FUNCTIONS DISPONÍVEIS - USE SEMPRE QUE NECESSÁRIO
+================================================
+
+Você tem acesso às seguintes funções para buscar informações REAIS do banco de dados:
+
+1. **getFluxoInfo(fluxo_codigo)** - Busca informações completas de fluxos
+   - Use quando mencionar fluxos, processos, guias passo a passo
+   - Retorna: título, descrição, scripts reais, link direto, quando usar
+   - Exemplos: "fluxo de pós-venda", "Fluxo 10", "reativação de cliente"
+
+2. **getFerramentaInfo(ferramenta_slug)** - Busca informações de ferramentas/calculadoras
+   - Use quando mencionar calculadoras, ferramentas
+   - Retorna: título, descrição, link personalizado, script de apresentação
+   - Exemplos: "calculadora de água", "calculadora de proteína"
+
+3. **getQuizInfo(quiz_slug)** - Busca informações de quizzes
+   - Use quando mencionar quizzes
+   - Retorna: título, descrição, link personalizado, script de apresentação
+   - Exemplos: "quiz de energia", "quiz energético"
+
+4. **getLinkInfo(link_codigo)** - Busca informações de links Wellness
+   - Use quando precisar de links oficiais
+   - Retorna: título, descrição, link, script de apresentação
+
+🚨 REGRA CRÍTICA: NUNCA invente informações sobre fluxos, ferramentas, quizzes ou links.
+SEMPRE chame a função correspondente para buscar dados REAIS do banco.
+
+================================================
+📋 FORMATO OBRIGATÓRIO DE RESPOSTA
+================================================
+
+Quando você usar qualquer uma das funções acima ou mencionar fluxos/ferramentas/quizzes/links,
+SEMPRE responda neste formato:
+
+🎯 Use o [Título]
+
+📋 O que é:
+[Descrição clara e direta do que é]
+
+🔗 Acesse:
+[Link direto formatado - SEMPRE incluir]
+
+📝 Script sugerido:
+[Script REAL do banco de dados - NUNCA inventar]
+
+💡 Quando usar:
+[Orientação prática de quando usar]
+
+**REGRAS CRÍTICAS:**
+- SEMPRE incluir link direto (nunca deixar sem link)
+- SEMPRE usar scripts reais do banco (nunca inventar)
+- SEMPRE explicar o que é de forma clara
+- SEMPRE orientar quando usar
+- NUNCA responder "só pedir" ou "se quiser" - SEMPRE fornecer diretamente
+
+================================================
+🧠 DETECÇÃO INTELIGENTE DE CONTEXTO
+================================================
+
+Quando detectar estas situações, chame a função correspondente:
+
+**Situação → Função a chamar:**
+- "já consumiu o kit" / "cliente sumiu" → getFluxoInfo("reativacao")
+- "fez uma venda" / "comprou o kit" → getFluxoInfo("pos-venda")
+- "não responde" / "visualiza e não fala" → getFluxoInfo("reaquecimento")
+- "calculadora de água" / "hidratação" → getFerramentaInfo("calculadora-agua")
+- "calculadora de proteína" → getFerramentaInfo("calculadora-proteina")
+- "quiz de energia" / "quiz energético" → getQuizInfo("quiz-energetico")
+- "qual é o link?" / "onde acho?" → getLinkInfo ou getFerramentaInfo
+
+**PRIORIDADE:**
+1. Ação imediata → 2. Cliente → 3. Venda → 4. Ferramentas
+
 ${knowledgeContext ? `\nContexto da Base de Conhecimento:\n${knowledgeContext}\n\nUse este contexto como base, mas personalize e expanda conforme necessário.` : ''}
 ${consultantContext ? `\n\nContexto do Consultor (use para personalizar):\n${consultantContext}\n\nAdapte sua resposta considerando o estágio da carreira, desafios identificados e histórico do consultor.` : ''}`
 
@@ -551,12 +625,27 @@ export async function POST(request: NextRequest) {
         console.error('❌ [NOEL] User ID:', user.id)
         console.error('❌ [NOEL] NÃO USANDO FALLBACK - Retornando erro')
         
+        // Mensagem de erro mais amigável para o usuário
+        let errorMessage = 'Erro ao processar sua mensagem.'
+        let errorDetails = 'O NOEL não conseguiu processar sua solicitação no momento.'
+        
+        if (assistantError.message?.includes('timeout') || assistantError.message?.includes('Timeout')) {
+          errorMessage = 'A requisição demorou muito para processar.'
+          errorDetails = 'Tente novamente em alguns instantes.'
+        } else if (assistantError.message?.includes('rate limit') || assistantError.message?.includes('quota')) {
+          errorMessage = 'Limite de requisições atingido.'
+          errorDetails = 'Aguarde alguns minutos e tente novamente.'
+        } else if (assistantError.message?.includes('invalid') || assistantError.message?.includes('not found')) {
+          errorMessage = 'Configuração do NOEL inválida.'
+          errorDetails = 'Entre em contato com o suporte técnico.'
+        }
+        
         // NÃO usar fallback do bot antigo - retornar erro claro
         return NextResponse.json(
           {
-            error: 'Erro ao processar mensagem com Assistants API',
+            error: errorMessage,
             message: assistantError.message,
-            details: 'O NOEL (Assistants API) não está disponível. Verifique a configuração.',
+            details: errorDetails,
           },
           { status: 500 }
         )
