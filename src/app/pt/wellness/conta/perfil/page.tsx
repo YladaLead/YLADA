@@ -94,6 +94,9 @@ export default function ContaPerfilPage() {
       if (profile.canal_principal) {
         dataToSave.canal_principal = profile.canal_principal
       }
+      if (profile.situacoes_particulares !== undefined && profile.situacoes_particulares !== null) {
+        dataToSave.situacoes_particulares = profile.situacoes_particulares.trim()
+      }
       if (profileType) {
         dataToSave.profile_type = profileType
       }
@@ -438,6 +441,40 @@ export default function ContaPerfilPage() {
                         </button>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                {/* SITUAÇÕES PARTICULARES */}
+                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">📝 Situações Particulares</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Descreva situações pessoais importantes que podem ajudar o NOEL a ser um melhor orientador para você.
+                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <p className="text-xs text-blue-800 leading-relaxed">
+                      <strong>💡 O que descrever:</strong> Mudanças na sua vida (cidade, emprego, rotina), desafios pessoais que afetam o negócio, objetivos específicos, limitações de tempo ou recursos, situações familiares relevantes, ou qualquer contexto que ajude o NOEL a entender melhor sua realidade e oferecer orientações mais personalizadas.
+                    </p>
+                  </div>
+                  <textarea
+                    value={profile.situacoes_particulares || ''}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      if (value.length <= 500) {
+                        setProfile(prev => ({ ...prev, situacoes_particulares: value }))
+                      }
+                    }}
+                    rows={5}
+                    maxLength={500}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                    placeholder="Ex: Acabei de me mudar para uma nova cidade e estou começando do zero. Tenho disponibilidade apenas à noite após o trabalho..."
+                  />
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs text-gray-500">
+                      Seja objetivo e descreva apenas o essencial
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {(profile.situacoes_particulares || '').length}/500 caracteres
+                    </p>
                   </div>
                 </div>
 

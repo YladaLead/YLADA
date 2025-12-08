@@ -1,18 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import ChatIA from '../../../../components/ChatIA'
-import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
-import NutriSidebar from '../../../../components/nutri/NutriSidebar'
-import { useAuth } from '@/contexts/AuthContext'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function NutriDashboard() {
+  const router = useRouter()
+  
+  useEffect(() => {
+    // Redirecionar automaticamente para /home
+    router.replace('/pt/nutri/home')
+  }, [router])
+
   return (
-    <ProtectedRoute perfil="nutri" allowAdmin={true}>
-      <NutriDashboardContent />
-    </ProtectedRoute>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Redirecionando...</p>
+      </div>
+    </div>
   )
 }
 

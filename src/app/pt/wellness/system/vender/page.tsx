@@ -27,7 +27,7 @@ function VenderPageContent() {
         {/* Botão Voltar ao Sistema - Bem visível no topo */}
         <div className="mb-6">
           <Link
-            href="/pt/wellness/system"
+            href="/pt/wellness/home"
             className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
           >
             <svg

@@ -45,7 +45,7 @@ function FluxoRecrutamentoPageContent() {
               Fluxo não encontrado
             </h1>
             <Link
-              href="/pt/wellness/system"
+              href="/pt/wellness/home"
               className="text-green-600 hover:text-green-700"
             >
               Voltar ao Sistema

@@ -153,7 +153,10 @@ export default function ProtectedRoute({
       if (userProfile?.perfil) {
         // Verificar se a URL atual já está na área correta (evitar loop)
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-        const correctAreaPath = `/pt/${userProfile.perfil}/dashboard`
+        // Mapear dashboard para home (dashboard não existe mais)
+        const correctAreaPath = userProfile.perfil === 'nutri' 
+          ? `/pt/${userProfile.perfil}/home`
+          : `/pt/${userProfile.perfil}/dashboard`
         
         // Se já está na área correta, não redirecionar novamente
         if (currentPath.startsWith(`/pt/${userProfile.perfil}/`)) {

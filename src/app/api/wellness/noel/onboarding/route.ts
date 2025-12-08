@@ -53,13 +53,27 @@ async function criarMetasAutomaticas(
     nivelCarreiraAlvo = 'equipe_mundial'
   }
 
-  // Meta de royalties baseada no nível de carreira alvo
-  if (nivelCarreiraAlvo === 'get') {
-    metaRoyalties = 1000 // GET gera ~1000 royalties
+  // Meta de royalties: SEMPRE criar desde o início
+  // A pessoa precisa construir royalties desde o início para virar supervisor e depois GET
+  // Mesmo com equipe mundial, já está construindo royalties para virar supervisor
+  if (nivelCarreiraAlvo === 'presidente') {
+    metaRoyalties = 10000 // Presidente gera ~10000 royalties
   } else if (nivelCarreiraAlvo === 'milionario') {
     metaRoyalties = 4000 // Milionário gera ~4000 royalties
-  } else if (nivelCarreiraAlvo === 'presidente') {
-    metaRoyalties = 10000 // Presidente gera ~10000 royalties
+  } else if (nivelCarreiraAlvo === 'get') {
+    metaRoyalties = 1000 // GET gera ~1000 royalties
+  } else if (nivelCarreiraAlvo === 'equipe_mundial') {
+    // Equipe Mundial: construindo para virar supervisor e depois GET
+    // Meta de royalties intermediária (R$ 500-800)
+    metaRoyalties = 600
+  } else if (nivelCarreiraAlvo === 'consultor_1000pv') {
+    // Consultor 1000 PV: começando a construir equipe, royalties iniciais
+    // Meta de royalties inicial (R$ 200-400)
+    metaRoyalties = 300
+  } else {
+    // Consultor Ativo: meta de royalties bem inicial (R$ 100-200)
+    // Mesmo iniciante pode começar a construir royalties desde o início
+    metaRoyalties = 150
   }
 
   // Criar registro de metas
@@ -209,6 +223,9 @@ export async function POST(request: NextRequest) {
       ritmo,
       lembretes,
       
+      // Situações Particulares
+      situacoes_particulares,
+      
       // Dados antigos (compatibilidade)
       tem_lista_contatos,
     } = body
@@ -315,6 +332,10 @@ export async function POST(request: NextRequest) {
     if (tom !== undefined && tom !== null && tom !== '') profileData.tom = tom
     if (ritmo !== undefined && ritmo !== null && ritmo !== '') profileData.ritmo = ritmo
     if (lembretes !== undefined && lembretes !== null) profileData.lembretes = lembretes
+    if (situacoes_particulares !== undefined && situacoes_particulares !== null && situacoes_particulares.trim() !== '') {
+      // Limitar a 500 caracteres
+      profileData.situacoes_particulares = situacoes_particulares.trim().substring(0, 500)
+    }
     // profile_type não é salvo em wellness_noel_profile, apenas em user_profiles (veja abaixo)
 
     // Compatibilidade com versão antiga

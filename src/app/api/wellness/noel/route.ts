@@ -224,6 +224,25 @@ IMPORTANTE: Você se apresenta apenas como "NOEL" (sem mencionar "MENTOR"). Voc�
 - Explicações de fluxos, campanhas, scripts e bebidas funcionais
 - Qualquer dúvida relacionada ao Wellness
 
+📅 DEFINIÇÃO CRÍTICA - HOM (PRIORIDADE ABSOLUTA - PALAVRA MATRIZ):
+HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio do Herbalife)
+
+HOM é a PALAVRA MATRIZ do sistema de recrutamento e duplicação.
+É o ENCONTRO OFICIAL de apresentação de negócio do Herbalife.
+É onde direcionamos tudo relacionado a recrutamento e duplicação.
+
+⚠️ NUNCA CONFUNDIR - HOM NÃO É:
+- "Hora do Mentor" - essa tradução NÃO é usada
+- "Hábito, Oferta e Mensagem" - ERRADO
+- "Histórico de Ocorrências de Mix" - ERRADO
+- Qualquer outra coisa que não seja "Herbalife Opportunity Meeting" - ERRADO
+
+Quando perguntarem sobre HOM:
+- SEMPRE explique que HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio)
+- Explique que é a palavra matriz do recrutamento e duplicação
+- Forneça horários e links das apresentações
+- Se o contexto HOM for fornecido, SEMPRE use essas informações com prioridade máxima
+
 🚨 PRIORIDADE ABSOLUTA - REGRAS DE ROTEAMENTO:
 
 1. **PERGUNTAS INSTITUCIONAIS/TÉCNICAS** (responder DIRETAMENTE, sem scripts):
@@ -1009,19 +1028,48 @@ export async function POST(request: NextRequest) {
     let tokensUsed = 0
     let modelUsed: string | undefined
 
+    // Adicionar contexto HOM SEMPRE que detectado (com prioridade máxima)
+    const homContext = isHOMRelated(message) 
+      ? `\n\n🚨 CONTEXTO HOM (PRIORIDADE MÁXIMA - PALAVRA MATRIZ):\n${generateHOMContext(process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')}\n\n⚠️ REGRA CRÍTICA: HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio). É a palavra matriz do recrutamento e duplicação. NUNCA use "Hora do Mentor" ou qualquer outra definição. SEMPRE use as informações acima.`
+      : ''
+
     // 6. Decidir estratégia baseado na similaridade (ou tipo de pergunta)
     if (similarityScore >= 0.80 && bestMatch) {
-      // Alta similaridade → usar resposta exata
-      response = bestMatch.content
-      source = 'knowledge_base'
-      knowledgeItemId = bestMatch.id
-      console.log('✅ NOEL - Resposta da base de conhecimento (alta similaridade)')
+      // Alta similaridade → usar resposta exata, MAS se for HOM, priorizar contexto HOM
+      if (isHOMRelated(message)) {
+        // HOM tem prioridade → usar IA com contexto HOM
+        const fullContext = [
+          homContext,
+          personalizedContext ? `\n\nContexto do Consultor:\n${personalizedContext}` : null,
+          `\n\nINSTRUÇÕES CRÍTICAS:\n- SEMPRE use as informações do CONTEXTO HOM acima com prioridade máxima\n- HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio do Herbalife)\n- HOM é a PALAVRA MATRIZ do recrutamento e duplicação\n- NUNCA use "Hora do Mentor" - essa tradução não é usada\n- NUNCA invente outras definições de HOM\n- NUNCA diga que HOM significa "Histórico de Ocorrências de Mix" ou "Hábito, Oferta e Mensagem"`
+        ].filter(Boolean).join('\n')
+
+        const aiResult = await generateAIResponse(
+          message,
+          module,
+          fullContext,
+          conversationHistory,
+          personalizedContext
+        )
+        response = aiResult.response
+        source = 'hybrid'
+        tokensUsed = aiResult.tokensUsed
+        modelUsed = aiResult.modelUsed
+        console.log('✅ NOEL - Resposta HOM (prioridade sobre base de conhecimento)')
+      } else {
+        response = bestMatch.content
+        source = 'knowledge_base'
+        knowledgeItemId = bestMatch.id
+        console.log('✅ NOEL - Resposta da base de conhecimento (alta similaridade)')
+      }
     } else if (similarityScore >= 0.60 && bestMatch) {
       // Média similaridade → personalizar com IA
-      // Adicionar contexto do consultor se disponível
-      const contextWithProfile = personalizedContext 
-        ? `${bestMatch.content}\n\nContexto do Consultor:\n${personalizedContext}`
-        : bestMatch.content
+      // Adicionar contexto do consultor e HOM se disponível
+      const contextWithProfile = [
+        homContext,
+        personalizedContext ? `\n\nContexto do Consultor:\n${personalizedContext}` : null,
+        bestMatch.content
+      ].filter(Boolean).join('\n\n')
 
       // Usar o módulo detectado para buscar conteúdo, mas sempre apresentar como mentor
       const aiResult = await generateAIResponse(
@@ -1045,16 +1093,11 @@ export async function POST(request: NextRequest) {
           `**${item.title}** (${item.category}):\n${item.content}`
         ).join('\n\n---\n\n')
 
-        // Adicionar contexto HOM se relevante
-        const homContext = isHOMRelated(message) 
-          ? `\n\n${generateHOMContext(process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')}`
-          : ''
-
         const fullContext = [
+          homContext, // HOM sempre primeiro (prioridade)
           `Base de Conhecimento encontrada:\n${knowledgeContext}`,
           personalizedContext ? `\n\nContexto do Consultor:\n${personalizedContext}` : null,
-          homContext,
-          `\n\nINSTRUÇÕES IMPORTANTES:\n- Use o conteúdo da Base de Conhecimento acima como base\n- NÃO invente scripts, use os scripts fornecidos\n- Se houver múltiplos scripts, ofereça todos\n- Formate os scripts claramente com título e conteúdo completo\n- Mencione quando usar cada script e para quem`
+          `\n\nINSTRUÇÕES IMPORTANTES:\n- Se houver CONTEXTO HOM acima, SEMPRE use essas informações com prioridade máxima\n- Use o conteúdo da Base de Conhecimento como base adicional\n- NÃO invente scripts, use os scripts fornecidos\n- Se houver múltiplos scripts, ofereça todos\n- Formate os scripts claramente com título e conteúdo completo\n- Mencione quando usar cada script e para quem`
         ].filter(Boolean).join('\n')
 
         const aiResult = await generateAIResponse(
@@ -1072,14 +1115,10 @@ export async function POST(request: NextRequest) {
         console.log('✅ NOEL - Resposta híbrida (baixa similaridade mas usando conteúdo encontrado)')
       } else {
         // Nenhum conteúdo encontrado → gerar com IA
-        // Adicionar contexto HOM se relevante
-        const homContext = isHOMRelated(message) 
-          ? `\n\n${generateHOMContext(process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')}`
-          : ''
-
         const fullContext = [
+          homContext, // HOM sempre primeiro (prioridade)
           personalizedContext ? `\n\nContexto do Consultor:\n${personalizedContext}` : null,
-          homContext
+          `\n\nINSTRUÇÕES CRÍTICAS:\n- Se houver CONTEXTO HOM acima, SEMPRE use essas informações com prioridade máxima\n- HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio do Herbalife)\n- HOM é a PALAVRA MATRIZ do recrutamento e duplicação\n- NUNCA use "Hora do Mentor" - essa tradução não é usada\n- NUNCA invente outras definições de HOM`
         ].filter(Boolean).join('\n') || null
 
         const aiResult = await generateAIResponse(

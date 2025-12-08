@@ -323,7 +323,10 @@ export default function ContaMetasPage() {
                 <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">👑 Meta de Royalties</h2>
                   <p className="text-sm text-gray-600 mb-4">
-                    Royalties que você quer atingir (GET: R$ 1.000, Milionário: R$ 4.000, Presidente: R$ 10.000)
+                    Royalties que você quer construir. Você pode começar desde o início! Mesmo como Consultor Ativo ou Equipe Mundial, você já está construindo royalties para virar Supervisor e depois GET.
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4 bg-blue-50 p-3 rounded-lg">
+                    💡 <strong>Dica:</strong> Para virar Supervisor e depois GET, você precisa construir royalties desde o início. Mesmo com Equipe Mundial, você já está construindo royalties!
                   </p>
                   <div className="space-y-4">
                     <div>
@@ -334,17 +337,21 @@ export default function ContaMetasPage() {
                         <span className="absolute left-3 top-3 text-gray-500">R$</span>
                         <input
                           type="number"
-                          min="0"
+                          min="100"
                           max="50000"
+                          step="50"
                           value={metasConstrucao.meta_royalties || ''}
                           onChange={(e) => setMetasConstrucao(prev => ({ 
                             ...prev, 
                             meta_royalties: e.target.value ? parseFloat(e.target.value) : 0 
                           }))}
                           className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          placeholder="Ex: 1000"
+                          placeholder="Ex: 300 (inicial) ou 1000 (GET)"
                         />
                       </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        💡 Valores sugeridos: R$ 150-300 (inicial), R$ 500-800 (Equipe Mundial), R$ 1.000+ (GET)
+                      </p>
                     </div>
                     {metasConstrucao.royalties_atual > 0 && (
                       <div className="bg-gray-50 rounded-lg p-4">

@@ -124,6 +124,9 @@ export interface WellnessConsultantProfile {
   ritmo?: RitmoTrabalho
   lembretes?: boolean
   
+  // Situações Particulares
+  situacoes_particulares?: string // Situações pessoais importantes para o NOEL (máx 500 caracteres)
+  
   // Dados antigos (compatibilidade)
   experiencia_vendas?: string
   tem_lista_contatos?: string

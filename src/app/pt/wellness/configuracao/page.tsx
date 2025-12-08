@@ -9,6 +9,7 @@ import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { translateError } from '@/lib/error-messages'
+import PushNotificationManager from '@/components/push/PushNotificationManager'
 
 export default function WellnessConfiguracaoPage() {
   const router = useRouter()
@@ -578,6 +579,27 @@ export default function WellnessConfiguracaoPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Notificações Push */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">🔔 Notificações Push</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Ative notificações para receber comunicados mesmo com o app fechado. Funciona quando você adiciona o app à tela inicial.
+          </p>
+          {typeof window !== 'undefined' && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && (
+            <PushNotificationManager
+              vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+              autoRegister={false}
+            />
+          )}
+          {(!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                ⚠️ Notificações push não configuradas. Configure NEXT_PUBLIC_VAPID_PUBLIC_KEY no ambiente.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Minha Assinatura */}

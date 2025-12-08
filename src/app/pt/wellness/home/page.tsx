@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
 import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto'
+import WellnessOnboardingBanners from '@/components/wellness/WellnessOnboardingBanners'
 
 interface PlanProgress {
   current_day: number
@@ -68,6 +69,27 @@ function WellnessHomeContent() {
   const [acoesSemana, setAcoesSemana] = useState(0)
   const [nivelEngajamento, setNivelEngajamento] = useState('iniciante')
   const [loading, setLoading] = useState(true)
+  const [noelProfile, setNoelProfile] = useState<any>(null)
+
+  // Carregar perfil NOEL para verificar situações particulares
+  useEffect(() => {
+    const loadNoelProfile = async () => {
+      try {
+        const response = await fetch('/api/wellness/noel/onboarding/check', {
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile) {
+            setNoelProfile(data.profile)
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao carregar perfil NOEL:', e)
+      }
+    }
+    loadNoelProfile()
+  }, [])
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -268,7 +290,7 @@ function WellnessHomeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-24 sm:pb-20">
       {/* Onboarding Modal */}
       {showOnboarding && (
         <NoelOnboardingCompleto 
@@ -278,6 +300,9 @@ function WellnessHomeContent() {
       )}
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Banners de Onboarding */}
+        <WellnessOnboardingBanners profile={noelProfile} />
+
         {/* BLOCO 1 — Boas-vindas do NOEL */}
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 sm:p-6 border border-green-200 shadow-sm mb-6">
           <div className="flex items-start gap-4">

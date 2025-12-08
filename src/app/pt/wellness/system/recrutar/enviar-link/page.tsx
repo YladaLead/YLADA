@@ -34,7 +34,17 @@ function EnviarLinkApresentacaoPageContent() {
     }
   ]
 
-  const copiarLink = (tipo: 'apresentacao' | string, link?: string) => {
+  const copiarLink = (tipo: 'apresentacao' | string, link?: string, apresentacaoItem?: typeof apresentacoes[0]) => {
+    // Se for link do Zoom de uma apresentação específica, copiar mensagem formatada
+    if (apresentacaoItem && link && link.includes('zoom.us')) {
+      const mensagem = `📅 Apresentação ao vivo:\n${apresentacaoItem.dia} às ${apresentacaoItem.horarioTexto}\n\n🔗 Link do Zoom:\n${link}\n\nAlguns minutos podem mudar a sua perspectiva! 🚀`
+      navigator.clipboard.writeText(mensagem)
+      setLinkCopiado(apresentacaoItem.id)
+      setTimeout(() => setLinkCopiado(null), 2000)
+      return
+    }
+    
+    // Para outros casos, copiar apenas o link
     const textoParaCopiar = tipo === 'apresentacao' ? linkApresentacao : link || ''
     navigator.clipboard.writeText(textoParaCopiar)
     setLinkCopiado(tipo)
@@ -71,7 +81,7 @@ ${linkApresentacao}`
         {/* Botão Voltar ao Sistema - Bem visível no topo */}
         <div className="mb-6">
           <Link
-            href="/pt/wellness/system"
+            href="/pt/wellness/home"
             className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
           >
             <svg
@@ -128,14 +138,14 @@ ${linkApresentacao}`
                   
                   <div className="flex flex-col gap-2">
                     <button
-                      onClick={() => copiarLink(apresentacaoItem.id, apresentacaoItem.linkZoom)}
+                      onClick={() => copiarLink(apresentacaoItem.id, apresentacaoItem.linkZoom, apresentacaoItem)}
                       className={`w-full px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
                         linkCopiado === apresentacaoItem.id
                           ? 'bg-green-600 text-white'
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
                     >
-                      {linkCopiado === apresentacaoItem.id ? '✓ Link Copiado!' : '📋 Copiar Link do Zoom'}
+                      {linkCopiado === apresentacaoItem.id ? '✓ Mensagem Copiada!' : '📋 Copiar Link do Zoom'}
                     </button>
                     <button
                       onClick={() => copiarMensagemComLink(apresentacaoItem)}
@@ -253,7 +263,7 @@ ${linkApresentacao}`
         {/* Voltar */}
         <div className="text-center mt-8">
           <Link
-            href="/pt/wellness/system"
+            href="/pt/wellness/home"
             className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
             ← Voltar ao Sistema

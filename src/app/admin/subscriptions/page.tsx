@@ -254,10 +254,71 @@ function AdminSubscriptionsContent() {
           {/* Criar Plano Gratuito */}
           <div className="bg-white rounded-lg shadow p-6 w-full">
             <h2 className="text-xl font-bold mb-4">🎁 Criar Plano Gratuito</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Você pode criar planos para <strong>usuários já cadastrados</strong> ou para <strong>pessoas não cadastradas</strong> (será criado um novo usuário automaticamente).
+            </p>
+            
+            {/* Opção rápida: Criar para pessoa não cadastrada */}
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-blue-900">✨ Criar para pessoa NÃO cadastrada</h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBuscaUsuario('')
+                    setUsuarioSelecionado(null)
+                    setFreePlanForm({ ...freePlanForm, user_id: '', email: '', name: '' })
+                  }}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Usar esta opção →
+                </button>
+              </div>
+              <p className="text-xs text-blue-700 mb-3">
+                Se a pessoa ainda não tem cadastro, preencha email e nome abaixo. Um novo usuário será criado automaticamente.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-blue-900 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={freePlanForm.email}
+                    onChange={(e) => setFreePlanForm({ ...freePlanForm, email: e.target.value, user_id: '' })}
+                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-blue-900 mb-1">
+                    Nome Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={freePlanForm.name}
+                    onChange={(e) => setFreePlanForm({ ...freePlanForm, name: e.target.value, user_id: '' })}
+                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="Nome do usuário"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Divisor */}
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">OU</span>
+              </div>
+            </div>
+
             <form onSubmit={handleCreateFreePlan} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Buscar Usuário (Nome, Email ou Telefone)
+                  Buscar Usuário Já Cadastrado (Nome, Email ou Telefone)
                 </label>
                 <div className="relative">
                   <input
@@ -322,36 +383,10 @@ function AdminSubscriptionsContent() {
 
               {/* Opção: Criar novo usuário se não encontrou */}
               {usuariosEncontrados.length === 0 && buscaUsuario.trim() && !usuarioSelecionado && !buscandoUsuario && (
-                <div className="mt-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800 mb-3">
-                    <strong>Usuário não encontrado.</strong> Preencha os campos abaixo para criar um novo usuário:
+                <div className="mt-2 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800 mb-3">
+                    <strong>⚠️ Usuário não encontrado.</strong> Se você preencheu email e nome acima, o sistema criará um novo usuário automaticamente. Caso contrário, preencha os campos acima.
                   </p>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-medium text-blue-900 mb-1">
-                        Email *
-                      </label>
-                      <input
-                        type="email"
-                        value={freePlanForm.email}
-                        onChange={(e) => setFreePlanForm({ ...freePlanForm, email: e.target.value })}
-                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="email@exemplo.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-blue-900 mb-1">
-                        Nome Completo *
-                      </label>
-                      <input
-                        type="text"
-                        value={freePlanForm.name}
-                        onChange={(e) => setFreePlanForm({ ...freePlanForm, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="Nome do usuário"
-                      />
-                    </div>
-                  </div>
                 </div>
               )}
 

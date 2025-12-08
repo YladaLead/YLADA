@@ -302,8 +302,15 @@ export default function RequireSubscription({
 
   // Se tem assinatura ou pode bypassar, mostrar conteúdo
   if (hasSubscription || canBypass) {
+    // Verificar se deve mostrar banner para adicionar padding
+    const isMigrated = subscriptionData?.is_migrated || subscriptionData?.requires_manual_renewal
+    const shouldShowBanner = daysUntilExpiry !== null && (
+      (isMigrated && daysUntilExpiry <= 30) || 
+      (!isMigrated && daysUntilExpiry <= 7)
+    )
+    
     return (
-      <>
+      <div className={shouldShowBanner && !canBypass ? 'pb-24 sm:pb-20' : ''}>
         {children}
         {/* Sempre renderizar banner, mas controlar visibilidade internamente */}
         <SubscriptionExpiryBanner 
@@ -312,7 +319,7 @@ export default function RequireSubscription({
           subscription={subscriptionData}
           canBypass={canBypass}
         />
-      </>
+      </div>
     )
   }
 
@@ -412,23 +419,23 @@ function SubscriptionExpiryBanner({
     : 'Renove agora para continuar aproveitando todos os recursos'
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 ${bgColor} border-t shadow-lg z-50`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center space-x-3">
-            <span className={`${textColor} text-2xl`}>{icon}</span>
-            <div>
-              <p className={`text-sm font-medium ${textColor}`}>
+    <div className={`fixed bottom-0 left-0 right-0 ${bgColor} border-t-2 shadow-xl z-50`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+            <span className={`${textColor} text-2xl sm:text-3xl flex-shrink-0`}>{icon}</span>
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm sm:text-base font-bold ${textColor} mb-1`}>
                 {message}
               </p>
-              <p className={`text-xs ${textColor.replace('800', '600')} mt-1`}>
+              <p className={`text-xs sm:text-sm ${textColor.replace('800', '600')} leading-relaxed`}>
                 {subMessage}
               </p>
             </div>
           </div>
           <Link
             href={`/pt/${area}/checkout?plan=${subscription?.plan_type || 'monthly'}`}
-            className={`${buttonColor} text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap`}
+            className={`${buttonColor} text-white px-6 py-3 rounded-lg text-sm font-bold transition-colors whitespace-nowrap flex-shrink-0 w-full sm:w-auto text-center shadow-md hover:shadow-lg`}
           >
             {isMigrated ? 'Refazer Checkout' : 'Renovar Agora'}
           </Link>
