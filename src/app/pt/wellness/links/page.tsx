@@ -597,6 +597,30 @@ function LinksUnificadosPageContent() {
           </div>
         </div>
 
+        {/* Card HOM - Apresentações */}
+        <div className="max-w-7xl mx-auto mb-8">
+          <Link
+            href="/pt/wellness/system/recrutar/enviar-link"
+            className="block bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 text-white"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">📅</div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">HOM - Apresentações de Negócio</h3>
+                  <p className="text-blue-100 text-sm">
+                    Segunda-feira às 20h • Quarta-feira às 9h
+                  </p>
+                  <p className="text-blue-50 text-xs mt-1">
+                    Links do Zoom e apresentação online
+                  </p>
+                </div>
+              </div>
+              <div className="text-3xl">→</div>
+            </div>
+          </Link>
+        </div>
+
         {/* Grid de Itens */}
         {itensFiltrados.length === 0 ? (
           <div className="text-center py-12">

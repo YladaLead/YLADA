@@ -29,6 +29,7 @@ import {
 } from '@/lib/noel-wellness/history-analyzer'
 import { NOEL_FEW_SHOTS } from '@/lib/noel-wellness/few-shots'
 import { NOEL_SYSTEM_PROMPT_LOUSA7 } from '@/lib/noel-wellness/system-prompt-lousa7'
+import { generateHOMContext, isHOMRelated } from '@/lib/noel-wellness/hom-integration'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -1044,9 +1045,15 @@ export async function POST(request: NextRequest) {
           `**${item.title}** (${item.category}):\n${item.content}`
         ).join('\n\n---\n\n')
 
+        // Adicionar contexto HOM se relevante
+        const homContext = isHOMRelated(message) 
+          ? `\n\n${generateHOMContext(process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')}`
+          : ''
+
         const fullContext = [
           `Base de Conhecimento encontrada:\n${knowledgeContext}`,
           personalizedContext ? `\n\nContexto do Consultor:\n${personalizedContext}` : null,
+          homContext,
           `\n\nINSTRUÇÕES IMPORTANTES:\n- Use o conteúdo da Base de Conhecimento acima como base\n- NÃO invente scripts, use os scripts fornecidos\n- Se houver múltiplos scripts, ofereça todos\n- Formate os scripts claramente com título e conteúdo completo\n- Mencione quando usar cada script e para quem`
         ].filter(Boolean).join('\n')
 
@@ -1065,9 +1072,15 @@ export async function POST(request: NextRequest) {
         console.log('✅ NOEL - Resposta híbrida (baixa similaridade mas usando conteúdo encontrado)')
       } else {
         // Nenhum conteúdo encontrado → gerar com IA
-        const fullContext = personalizedContext 
-          ? `\n\nContexto do Consultor:\n${personalizedContext}`
-          : null
+        // Adicionar contexto HOM se relevante
+        const homContext = isHOMRelated(message) 
+          ? `\n\n${generateHOMContext(process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')}`
+          : ''
+
+        const fullContext = [
+          personalizedContext ? `\n\nContexto do Consultor:\n${personalizedContext}` : null,
+          homContext
+        ].filter(Boolean).join('\n') || null
 
         const aiResult = await generateAIResponse(
           message,

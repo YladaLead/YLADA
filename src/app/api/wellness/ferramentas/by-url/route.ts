@@ -163,10 +163,10 @@ export async function GET(request: NextRequest) {
           const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
           
           if (!subscriptionOk) {
-            return NextResponse.json(
+          return NextResponse.json(
               { error: 'link_indisponivel', message: 'Assinatura expirada' },
               { status: 403 }
-            )
+          )
           }
           
           return NextResponse.json({ 
@@ -231,8 +231,8 @@ export async function GET(request: NextRequest) {
             .ilike('slug', `%${slugNormalizado}%`)
             .or('profession.is.null,profession.eq.wellness')
             .limit(1)
-            .maybeSingle()
-          
+                .maybeSingle()
+              
           if (!errorNormalizado && templateNormalizado) {
             templateBase = templateNormalizado
           } else {
@@ -241,21 +241,21 @@ export async function GET(request: NextRequest) {
         }
         
         if (templateBase) {
-          // Verificar assinatura
-          const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
-          if (!subscriptionOk) {
-            return NextResponse.json(
-              { error: 'link_indisponivel', message: 'Assinatura expirada' },
-              { status: 403 }
-            )
-          }
-          
+              // Verificar assinatura
+              const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
+              if (!subscriptionOk) {
+                return NextResponse.json(
+                  { error: 'link_indisponivel', message: 'Assinatura expirada' },
+                  { status: 403 }
+                )
+              }
+              
           // Criar ferramenta virtual baseada no template
-          return NextResponse.json({
-            tool: {
+              return NextResponse.json({
+                tool: {
               id: `template-${templateBase.id}`,
               title: templateBase.name,
-              slug: toolSlug,
+                  slug: toolSlug,
               template_slug: toolSlug,
               template_id: templateBase.id,
               description: templateBase.description || templateBase.title || '',
@@ -264,20 +264,20 @@ export async function GET(request: NextRequest) {
               cta_type: 'whatsapp',
               whatsapp_number: userProfile.whatsapp || null,
               cta_button_text: 'Conversar com Especialista',
-              profession: 'wellness',
-              status: 'active',
+                  profession: 'wellness',
+                  status: 'active',
               content: templateBase.content || {},
-              user_profiles: userProfile,
+                  user_profiles: userProfile,
               is_template_base: true // Flag para indicar que é template base
+                }
+              })
             }
-          })
-        }
-        
-        return NextResponse.json(
-          { error: 'Ferramenta não encontrada' },
-          { status: 404 }
-        )
-    }
+            
+            return NextResponse.json(
+              { error: 'Ferramenta não encontrada' },
+              { status: 404 }
+            )
+          }
   } catch (error: any) {
     console.error('Erro ao buscar ferramenta por URL:', error)
     return NextResponse.json(

@@ -3,6 +3,122 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**
+ * Cria metas automaticamente para novo usuário baseado no perfil
+ */
+async function criarMetasAutomaticas(
+  userId: string,
+  contexto: {
+    meta_pv?: number
+    objetivo_principal?: string
+    experiencia_herbalife?: string
+    profile_type?: string
+  }
+) {
+  // Calcular metas padrão baseadas no perfil
+  let metaPVEquipe = 0
+  let metaRecrutamento = 0
+  let metaRoyalties = 0
+  let nivelCarreiraAlvo: string = 'consultor_ativo'
+  let prazoMeses = 12
+
+  // Se já tem meta_pv definida, usar como base
+  const metaPVPessoal = contexto.meta_pv || 500 // Padrão: 500 PV
+
+  // Determinar metas baseadas no objetivo e experiência
+  if (contexto.objetivo_principal === 'plano_presidente' || contexto.objetivo_principal === 'carteira') {
+    // Foco em construção de equipe
+    metaPVEquipe = metaPVPessoal * 4 // Meta de equipe = 4x o PV pessoal
+    metaRecrutamento = 5 // Recrutar 5 pessoas no primeiro ano
+    nivelCarreiraAlvo = 'equipe_mundial'
+    prazoMeses = 12
+  } else if (contexto.objetivo_principal === 'renda_extra' || contexto.objetivo_principal === 'usar_recomendar') {
+    // Foco em vendas pessoais primeiro
+    metaPVEquipe = metaPVPessoal * 2 // Meta menor de equipe
+    metaRecrutamento = 2 // Recrutar 2 pessoas
+    nivelCarreiraAlvo = 'consultor_1000pv'
+    prazoMeses = 12
+  } else {
+    // Padrão: construção moderada
+    metaPVEquipe = metaPVPessoal * 3
+    metaRecrutamento = 3
+    nivelCarreiraAlvo = 'consultor_1000pv'
+    prazoMeses = 12
+  }
+
+  // Ajustar baseado na experiência
+  if (contexto.experiencia_herbalife === 'supervisor' || contexto.experiencia_herbalife === 'get_plus') {
+    // Experiência avançada = metas maiores
+    metaPVEquipe = metaPVEquipe * 2
+    metaRecrutamento = metaRecrutamento * 2
+    nivelCarreiraAlvo = 'equipe_mundial'
+  }
+
+  // Meta de royalties baseada no nível de carreira alvo
+  if (nivelCarreiraAlvo === 'get') {
+    metaRoyalties = 1000 // GET gera ~1000 royalties
+  } else if (nivelCarreiraAlvo === 'milionario') {
+    metaRoyalties = 4000 // Milionário gera ~4000 royalties
+  } else if (nivelCarreiraAlvo === 'presidente') {
+    metaRoyalties = 10000 // Presidente gera ~10000 royalties
+  }
+
+  // Criar registro de metas
+  const { error: metasError } = await supabaseAdmin
+    .from('wellness_metas_construcao')
+    .upsert({
+      user_id: userId,
+      meta_pv_equipe: metaPVEquipe,
+      pv_equipe_atual: 0,
+      meta_recrutamento: metaRecrutamento,
+      recrutamento_atual: 0,
+      meta_royalties: metaRoyalties,
+      royalties_atual: 0,
+      nivel_carreira_alvo: nivelCarreiraAlvo,
+      prazo_meses: prazoMeses,
+      ativo: true,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id'
+    })
+
+  if (metasError) {
+    console.error('❌ Erro ao criar metas de construção:', metasError)
+    throw metasError
+  }
+
+  console.log('✅ Metas de construção criadas automaticamente:', {
+    user_id: userId,
+    meta_pv_equipe: metaPVEquipe,
+    meta_recrutamento: metaRecrutamento,
+    meta_royalties: metaRoyalties,
+    nivel_carreira_alvo: nivelCarreiraAlvo
+  })
+
+  // Criar também registro mensal de PV se não existir
+  const mesAno = new Date().toISOString().slice(0, 7) // '2025-01'
+  const { error: pvError } = await supabaseAdmin
+    .from('wellness_consultant_pv_monthly')
+    .upsert({
+      consultant_id: userId,
+      mes_ano: mesAno,
+      pv_total: 0,
+      pv_kits: 0,
+      pv_produtos_fechados: 0,
+      meta_pv: metaPVPessoal, // Usar meta_pv do onboarding ou padrão
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'consultant_id,mes_ano'
+    })
+
+  if (pvError) {
+    console.warn('⚠️ Aviso: Não foi possível criar registro mensal de PV:', pvError)
+    // Não falhar se isso der erro
+  } else {
+    console.log('✅ Registro mensal de PV criado:', { user_id: userId, mes_ano: mesAno, meta_pv: metaPVPessoal })
+  }
+}
+
+/**
  * GET - Verifica se o usuário já completou o onboarding
  */
 export async function GET(request: NextRequest) {
@@ -97,15 +213,38 @@ export async function POST(request: NextRequest) {
       tem_lista_contatos,
     } = body
 
-    // Validações básicas (campos obrigatórios)
-    if (!objetivo_principal || !tempo_disponivel) {
-      return NextResponse.json(
-        { 
-          error: 'Campos obrigatórios faltando',
-          required: ['objetivo_principal', 'tempo_disponivel']
-        },
-        { status: 400 }
-      )
+    // Verificar se já existe perfil (edição) ou é novo (onboarding)
+    const { data: existingProfile } = await supabaseAdmin
+      .from('wellness_noel_profile')
+      .select('objetivo_principal, tempo_disponivel, onboarding_completo')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const isEditing = existingProfile && existingProfile.onboarding_completo
+
+    // Validações: apenas para novos perfis (onboarding inicial)
+    // Para edições, permitir atualizar campos individualmente
+    if (!isEditing) {
+      // Novo onboarding: campos obrigatórios
+      if (!objetivo_principal || !tempo_disponivel) {
+        return NextResponse.json(
+          { 
+            error: 'Campos obrigatórios faltando',
+            required: ['objetivo_principal', 'tempo_disponivel'],
+            message: 'Por favor, preencha o objetivo principal e o tempo disponível.'
+          },
+          { status: 400 }
+        )
+      }
+    } else {
+      // Edição: usar valores existentes se não fornecidos (mas não obrigar)
+      // Permitir que o usuário edite apenas os campos que quiser
+      if (!objetivo_principal && existingProfile?.objetivo_principal) {
+        objetivo_principal = existingProfile.objetivo_principal
+      }
+      if (!tempo_disponivel && existingProfile?.tempo_disponivel) {
+        tempo_disponivel = existingProfile.tempo_disponivel
+      }
     }
 
     // Mapear experiencia_vendas para experiencia_herbalife se necessário
@@ -122,30 +261,60 @@ export async function POST(request: NextRequest) {
     // Preparar dados do perfil
     const profileData: any = {
       user_id: user.id,
-      objetivo_principal,
-      tempo_disponivel,
-      onboarding_completo: true,
-      onboarding_completado_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
 
-    // Adicionar campos opcionais se fornecidos
-    if (idade !== undefined) profileData.idade = idade
-    if (cidade) profileData.cidade = cidade
-    if (experienciaFinal) profileData.experiencia_herbalife = experienciaFinal
-    if (canalFinal) profileData.canal_principal = canalFinal
-    if (prepara_bebidas) profileData.prepara_bebidas = prepara_bebidas
-    if (trabalha_com) profileData.trabalha_com = trabalha_com
-    if (estoque_atual) profileData.estoque_atual = estoque_atual
-    if (meta_pv !== undefined) profileData.meta_pv = meta_pv
-    if (meta_financeira !== undefined) profileData.meta_financeira = meta_financeira
-    if (contatos_whatsapp !== undefined) profileData.contatos_whatsapp = contatos_whatsapp
-    if (seguidores_instagram !== undefined) profileData.seguidores_instagram = seguidores_instagram
-    if (abertura_recrutar) profileData.abertura_recrutar = abertura_recrutar
-    if (publico_preferido) profileData.publico_preferido = publico_preferido
-    if (tom) profileData.tom = tom
-    if (ritmo) profileData.ritmo = ritmo
-    if (lembretes !== undefined) profileData.lembretes = lembretes
+    // Apenas atualizar campos que foram fornecidos (ou obrigatórios)
+    if (objetivo_principal !== undefined && objetivo_principal !== null && objetivo_principal !== '') {
+      profileData.objetivo_principal = objetivo_principal
+    }
+    if (tempo_disponivel !== undefined && tempo_disponivel !== null && tempo_disponivel !== '') {
+      profileData.tempo_disponivel = tempo_disponivel
+    }
+
+    // Se for novo onboarding, marcar como completo
+    if (!isEditing) {
+      profileData.onboarding_completo = true
+      profileData.onboarding_completado_at = new Date().toISOString()
+    } else {
+      // Em edição, manter o status existente (não sobrescrever se já estiver completo)
+      // Não precisamos incluir onboarding_completo se já estiver true
+      // O upsert vai manter o valor existente se não incluirmos
+    }
+
+    // Adicionar campos opcionais se fornecidos (não enviar undefined/null)
+    if (idade !== undefined && idade !== null && idade !== '') profileData.idade = idade
+    if (cidade !== undefined && cidade !== null && cidade !== '') profileData.cidade = cidade
+    if (experienciaFinal !== undefined && experienciaFinal !== null && experienciaFinal !== '') {
+      profileData.experiencia_herbalife = experienciaFinal
+    }
+    if (canalFinal !== undefined && canalFinal !== null && canalFinal !== '') {
+      profileData.canal_principal = canalFinal
+    }
+    if (prepara_bebidas !== undefined && prepara_bebidas !== null) profileData.prepara_bebidas = prepara_bebidas
+    if (trabalha_com !== undefined && trabalha_com !== null && trabalha_com !== '') {
+      profileData.trabalha_com = trabalha_com
+    }
+    if (estoque_atual !== undefined && estoque_atual !== null) profileData.estoque_atual = estoque_atual
+    if (meta_pv !== undefined && meta_pv !== null && meta_pv !== '') profileData.meta_pv = meta_pv
+    if (meta_financeira !== undefined && meta_financeira !== null && meta_financeira !== '') {
+      profileData.meta_financeira = meta_financeira
+    }
+    if (contatos_whatsapp !== undefined && contatos_whatsapp !== null && contatos_whatsapp !== '') {
+      profileData.contatos_whatsapp = contatos_whatsapp
+    }
+    if (seguidores_instagram !== undefined && seguidores_instagram !== null && seguidores_instagram !== '') {
+      profileData.seguidores_instagram = seguidores_instagram
+    }
+    if (abertura_recrutar !== undefined && abertura_recrutar !== null && abertura_recrutar !== '') {
+      profileData.abertura_recrutar = abertura_recrutar
+    }
+    if (publico_preferido !== undefined && publico_preferido !== null) {
+      profileData.publico_preferido = publico_preferido
+    }
+    if (tom !== undefined && tom !== null && tom !== '') profileData.tom = tom
+    if (ritmo !== undefined && ritmo !== null && ritmo !== '') profileData.ritmo = ritmo
+    if (lembretes !== undefined && lembretes !== null) profileData.lembretes = lembretes
     // profile_type não é salvo em wellness_noel_profile, apenas em user_profiles (veja abaixo)
 
     // Compatibilidade com versão antiga
@@ -249,11 +418,46 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('💾 Tentando salvar perfil:', JSON.stringify(profileData, null, 2))
+    // Limpar campos undefined/null/vazios antes de salvar
+    const cleanedProfileData: any = {
+      user_id: user.id,
+      updated_at: new Date().toISOString(),
+    }
+
+    // Adicionar apenas campos válidos
+    Object.keys(profileData).forEach(key => {
+      if (key === 'user_id' || key === 'updated_at') return
+      
+      const value = profileData[key]
+      // Incluir apenas se tiver valor válido
+      if (value !== undefined && value !== null && value !== '') {
+        // Para arrays, verificar se não está vazio
+        if (Array.isArray(value) && value.length > 0) {
+          cleanedProfileData[key] = value
+        } else if (!Array.isArray(value)) {
+          cleanedProfileData[key] = value
+        }
+      }
+    })
+
+    console.log('💾 Tentando salvar perfil:', JSON.stringify(cleanedProfileData, null, 2))
+    console.log('💾 Modo:', isEditing ? 'EDIÇÃO' : 'NOVO ONBOARDING')
+
+    // Validar que temos pelo menos algum dado para salvar (além de user_id e updated_at)
+    const camposParaSalvar = Object.keys(cleanedProfileData).filter(key => key !== 'user_id' && key !== 'updated_at')
+    if (camposParaSalvar.length === 0) {
+      return NextResponse.json(
+        { 
+          error: 'Nenhum dado para salvar',
+          message: 'Por favor, preencha pelo menos um campo antes de salvar.'
+        },
+        { status: 400 }
+      )
+    }
 
     const { data, error } = await supabaseAdmin
       .from('wellness_noel_profile')
-      .upsert(profileData, {
+      .upsert(cleanedProfileData, {
         onConflict: 'user_id',
       })
       .select()
@@ -267,10 +471,23 @@ export async function POST(request: NextRequest) {
         details: error.details,
         hint: error.hint
       })
-      console.error('❌ Dados que tentaram ser salvos:', JSON.stringify(profileData, null, 2))
+      console.error('❌ Dados que tentaram ser salvos:', JSON.stringify(cleanedProfileData, null, 2))
+      
+      // Mensagem de erro mais amigável
+      let errorMessage = 'Erro ao salvar perfil'
+      if (error.code === '23505') {
+        errorMessage = 'Este perfil já existe. Tente atualizar a página.'
+      } else if (error.code === '23503') {
+        errorMessage = 'Erro de referência. Verifique se o usuário existe.'
+      } else if (error.message?.includes('column') || error.message?.includes('schema')) {
+        errorMessage = 'Estamos atualizando o sistema. Por favor, atualize a página (F5) e tente novamente.'
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       return NextResponse.json(
         { 
-          error: 'Erro ao salvar perfil',
+          error: errorMessage,
           details: error.message,
           code: error.code,
           hint: error.hint
@@ -302,6 +519,21 @@ export async function POST(request: NextRequest) {
         console.warn('⚠️ Aviso: Erro ao atualizar profile_type em user_profiles:', err)
         // Não falhar o request se isso der erro
       }
+    }
+
+    // ============================================
+    // CRIAR METAS AUTOMATICAMENTE
+    // ============================================
+    try {
+      await criarMetasAutomaticas(user.id, {
+        meta_pv: profileData.meta_pv,
+        objetivo_principal: objetivo_principal,
+        experiencia_herbalife: experienciaFinal,
+        profile_type: profile_type
+      })
+    } catch (metasError) {
+      console.warn('⚠️ Aviso: Erro ao criar metas automaticamente (não crítico):', metasError)
+      // Não falhar o request se isso der erro, apenas logar
     }
 
     return NextResponse.json({

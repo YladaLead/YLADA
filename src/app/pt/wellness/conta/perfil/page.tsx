@@ -70,16 +70,35 @@ export default function ContaPerfilPage() {
       setError(null)
       setSuccess(false)
 
-      // Preparar dados para salvar
-      const dataToSave: any = {
-        objetivo_principal: profile.objetivo_principal,
-        tempo_disponivel: profile.tempo_disponivel,
-        meta_pv: profile.meta_pv,
-        meta_financeira: profile.meta_financeira,
-        experiencia_herbalife: profile.experiencia_herbalife,
-        canal_principal: profile.canal_principal,
-        profile_type: profileType, // Incluir profile_type
+      // Preparar dados para salvar - apenas enviar campos que têm valor
+      const dataToSave: any = {}
+
+      // Campos obrigatórios (se existirem)
+      if (profile.objetivo_principal) {
+        dataToSave.objetivo_principal = profile.objetivo_principal
       }
+      if (profile.tempo_disponivel) {
+        dataToSave.tempo_disponivel = profile.tempo_disponivel
+      }
+
+      // Campos opcionais (apenas se tiverem valor)
+      if (profile.meta_pv !== undefined && profile.meta_pv !== null && profile.meta_pv !== '') {
+        dataToSave.meta_pv = profile.meta_pv
+      }
+      if (profile.meta_financeira !== undefined && profile.meta_financeira !== null && profile.meta_financeira !== '') {
+        dataToSave.meta_financeira = profile.meta_financeira
+      }
+      if (profile.experiencia_herbalife) {
+        dataToSave.experiencia_herbalife = profile.experiencia_herbalife
+      }
+      if (profile.canal_principal) {
+        dataToSave.canal_principal = profile.canal_principal
+      }
+      if (profileType) {
+        dataToSave.profile_type = profileType
+      }
+
+      console.log('💾 Salvando perfil com dados:', dataToSave)
 
       // Salvar perfil NOEL
       const response = await fetch('/api/wellness/noel/onboarding', {
@@ -88,19 +107,53 @@ export default function ContaPerfilPage() {
         body: JSON.stringify(dataToSave),
       })
 
+      const responseData = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Erro ao salvar perfil')
+        console.error('❌ Erro ao salvar perfil:', {
+          status: response.status,
+          error: responseData
+        })
+        
+        // Mensagem de erro mais amigável
+        let errorMessage = responseData.error || 'Erro ao salvar perfil'
+        
+        if (responseData.message) {
+          errorMessage = responseData.message
+        } else if (responseData.required) {
+          errorMessage = `Por favor, preencha: ${responseData.required.join(', ')}`
+        }
+        
+        throw new Error(errorMessage)
       }
+
+      console.log('✅ Perfil salvo com sucesso:', responseData)
 
       // O profile_type já é salvo automaticamente pelo endpoint de onboarding
 
       setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      
+      // Recarregar perfil para garantir sincronização
+      await loadProfile()
+      
+      // Mostrar mensagem de sucesso por mais tempo
+      setTimeout(() => setSuccess(false), 5000)
 
     } catch (err: any) {
-      console.error('Erro ao salvar perfil:', err)
-      setError(err.message || 'Erro ao salvar perfil. Tente novamente.')
+      console.error('❌ Erro ao salvar perfil:', err)
+      
+      // Mensagem de erro mais detalhada
+      let errorMessage = err.message || 'Erro ao salvar perfil. Tente novamente.'
+      
+      // Se for erro de rede, dar mensagem específica
+      if (err.message?.includes('fetch') || err.message?.includes('network')) {
+        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.'
+      }
+      
+      setError(errorMessage)
+      
+      // Esconder erro após 8 segundos
+      setTimeout(() => setError(null), 8000)
     } finally {
       setSaving(false)
     }
@@ -136,14 +189,25 @@ export default function ContaPerfilPage() {
 
               {/* Mensagens de feedback */}
               {error && (
-                <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  {error}
+                <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start gap-3">
+                  <span className="text-xl">⚠️</span>
+                  <div className="flex-1">
+                    <p className="font-medium">Erro ao salvar</p>
+                    <p className="text-sm mt-1">{error}</p>
+                  </div>
+                  <button
+                    onClick={() => setError(null)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
 
               {success && (
-                <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                  ✅ Perfil atualizado com sucesso!
+                <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-3">
+                  <span className="text-xl">✅</span>
+                  <p className="font-medium">Perfil atualizado com sucesso!</p>
                 </div>
               )}
 
@@ -379,13 +443,28 @@ export default function ContaPerfilPage() {
 
                 {/* BOTÃO SALVAR */}
                 <div className="pt-6 border-t border-gray-200">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="w-full bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {saving ? 'Salvando...' : '💾 Salvar Alterações'}
-                  </button>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {saving ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Salvando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>💾</span>
+                          <span>Salvar Alterações</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    Você pode salvar apenas os campos que desejar alterar
+                  </p>
                 </div>
 
               </div>
