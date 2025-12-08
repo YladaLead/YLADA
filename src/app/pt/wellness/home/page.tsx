@@ -249,6 +249,8 @@ function WellnessHomeContent() {
 
   const handleOnboardingComplete = async (onboardingData: any): Promise<void> => {
     try {
+      console.log('💾 Salvando onboarding:', onboardingData)
+      
       const response = await fetch('/api/wellness/noel/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -257,12 +259,33 @@ function WellnessHomeContent() {
       })
 
       const responseData = await response.json()
-      if (response.ok && responseData.success) {
+      console.log('📡 Resposta da API:', responseData)
+
+      if (!response.ok) {
+        // Se não for OK, lançar erro com mensagem amigável
+        const errorMessage = responseData.message || 
+                            responseData.error || 
+                            'Erro ao salvar perfil. Tente novamente.'
+        console.error('❌ Erro ao salvar onboarding:', {
+          status: response.status,
+          error: responseData.error,
+          message: responseData.message,
+          required: responseData.required
+        })
+        throw new Error(errorMessage)
+      }
+
+      if (responseData.success) {
+        console.log('✅ Onboarding salvo com sucesso')
         setShowOnboarding(false)
         setOnboardingComplete(true)
+      } else {
+        // Se não tiver success: true, lançar erro
+        throw new Error(responseData.error || 'Erro ao salvar perfil. Tente novamente.')
       }
     } catch (error: any) {
-      console.error('Erro ao salvar onboarding:', error)
+      console.error('❌ Erro ao salvar onboarding:', error)
+      // Re-throw para o componente tratar
       throw error
     }
   }

@@ -308,7 +308,10 @@ export async function POST(request: NextRequest) {
     if (canalFinal !== undefined && canalFinal !== null && canalFinal !== '') {
       profileData.canal_principal = canalFinal
     }
-    if (prepara_bebidas !== undefined && prepara_bebidas !== null) profileData.prepara_bebidas = prepara_bebidas
+    // prepara_bebidas pode ser boolean, então incluir mesmo se for false
+    if (prepara_bebidas !== undefined && prepara_bebidas !== null) {
+      profileData.prepara_bebidas = prepara_bebidas
+    }
     if (trabalha_com !== undefined && trabalha_com !== null && trabalha_com !== '') {
       profileData.trabalha_com = trabalha_com
     }
@@ -331,7 +334,10 @@ export async function POST(request: NextRequest) {
     }
     if (tom !== undefined && tom !== null && tom !== '') profileData.tom = tom
     if (ritmo !== undefined && ritmo !== null && ritmo !== '') profileData.ritmo = ritmo
-    if (lembretes !== undefined && lembretes !== null) profileData.lembretes = lembretes
+    // lembretes pode ser boolean, então incluir mesmo se for false
+    if (lembretes !== undefined && lembretes !== null) {
+      profileData.lembretes = lembretes
+    }
     if (situacoes_particulares !== undefined && situacoes_particulares !== null && situacoes_particulares.trim() !== '') {
       // Limitar a 500 caracteres
       profileData.situacoes_particulares = situacoes_particulares.trim().substring(0, 500)
@@ -451,11 +457,26 @@ export async function POST(request: NextRequest) {
       
       const value = profileData[key]
       // Incluir apenas se tiver valor válido
-      if (value !== undefined && value !== null && value !== '') {
-        // Para arrays, verificar se não está vazio
-        if (Array.isArray(value) && value.length > 0) {
+      // IMPORTANTE: Para campos booleanos, incluir mesmo se for false
+      if (value !== undefined && value !== null) {
+        // Campos booleanos: incluir mesmo se for false
+        if (typeof value === 'boolean') {
           cleanedProfileData[key] = value
-        } else if (!Array.isArray(value)) {
+        }
+        // Strings: incluir apenas se não estiver vazio
+        else if (typeof value === 'string' && value !== '') {
+          cleanedProfileData[key] = value
+        }
+        // Números: incluir se for válido
+        else if (typeof value === 'number' && !isNaN(value)) {
+          cleanedProfileData[key] = value
+        }
+        // Arrays: verificar se não está vazio
+        else if (Array.isArray(value) && value.length > 0) {
+          cleanedProfileData[key] = value
+        }
+        // Outros tipos: incluir se não for undefined/null
+        else if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean' && !Array.isArray(value)) {
           cleanedProfileData[key] = value
         }
       }

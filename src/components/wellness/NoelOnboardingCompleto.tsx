@@ -98,16 +98,53 @@ export default function NoelOnboardingCompleto({
   }
 
   const handleSave = async () => {
+    // Proteção: evitar múltiplos salvamentos simultâneos
+    if (saving) {
+      console.warn('⚠️ Salvamento já em andamento, ignorando novo clique')
+      return
+    }
+
     setSaving(true)
     setError(null)
     
     try {
       console.log('💾 Dados que serão salvos:', JSON.stringify(data, null, 2))
-      await onComplete(data)
+      
+      // Validar campos obrigatórios antes de salvar
+      if (!data.objetivo_principal || !data.tempo_disponivel) {
+        throw new Error('Por favor, preencha o objetivo principal e o tempo disponível.')
+      }
+      
+      // Criar AbortController para timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos timeout
+      
+      try {
+        await onComplete(data)
+        // Se chegou aqui, salvou com sucesso
+        console.log('✅ Perfil salvo com sucesso')
+        clearTimeout(timeoutId)
+        
+        // Fechar modal após sucesso (se onClose estiver disponível)
+        if (onClose) {
+          setTimeout(() => {
+            onClose()
+          }, 500) // Pequeno delay para mostrar feedback visual
+        }
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
+        
+        if (fetchError.name === 'AbortError') {
+          throw new Error('O salvamento demorou muito. Verifique sua conexão e tente novamente.')
+        }
+        throw fetchError
+      }
     } catch (err: any) {
       console.error('❌ Erro ao salvar:', err)
       const errorMessage = err.message || 'Erro ao salvar. Tente novamente.'
       setError(errorMessage)
+    } finally {
+      // SEMPRE garantir que setSaving(false) seja chamado
       setSaving(false)
     }
   }
