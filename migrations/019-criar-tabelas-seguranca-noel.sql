@@ -8,16 +8,27 @@
 -- Tabela para rate limiting
 CREATE TABLE IF NOT EXISTS noel_rate_limits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
   request_count INTEGER NOT NULL DEFAULT 1,
   is_blocked BOOLEAN NOT NULL DEFAULT false,
   blocked_until TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  
-  -- Índices para performance
-  CONSTRAINT noel_rate_limits_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Adicionar constraint apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'noel_rate_limits_user_id_fkey'
+  ) THEN
+    ALTER TABLE noel_rate_limits
+    ADD CONSTRAINT noel_rate_limits_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
+-- Criar índices apenas se não existirem
 CREATE INDEX IF NOT EXISTS idx_noel_rate_limits_user_id ON noel_rate_limits(user_id);
 CREATE INDEX IF NOT EXISTS idx_noel_rate_limits_created_at ON noel_rate_limits(created_at);
 CREATE INDEX IF NOT EXISTS idx_noel_rate_limits_blocked ON noel_rate_limits(user_id, is_blocked, blocked_until) WHERE is_blocked = true;
@@ -25,26 +36,51 @@ CREATE INDEX IF NOT EXISTS idx_noel_rate_limits_blocked ON noel_rate_limits(user
 -- Tabela para logging de segurança
 CREATE TABLE IF NOT EXISTS noel_security_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_id UUID,
   message TEXT NOT NULL,
-  risk_level TEXT NOT NULL CHECK (risk_level IN ('low', 'medium', 'high', 'critical')),
+  risk_level TEXT NOT NULL,
   detected_patterns TEXT[] NOT NULL DEFAULT '{}',
   was_blocked BOOLEAN NOT NULL DEFAULT false,
   response_sent TEXT,
   ip_address INET,
   user_agent TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  
-  -- Índices para análise
-  CONSTRAINT noel_security_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE SET NULL
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Adicionar constraint apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'noel_security_logs_user_id_fkey'
+  ) THEN
+    ALTER TABLE noel_security_logs
+    ADD CONSTRAINT noel_security_logs_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+-- Adicionar check constraint apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'noel_security_logs_risk_level_check'
+  ) THEN
+    ALTER TABLE noel_security_logs
+    ADD CONSTRAINT noel_security_logs_risk_level_check 
+    CHECK (risk_level IN ('low', 'medium', 'high', 'critical'));
+  END IF;
+END $$;
+
+-- Criar índices apenas se não existirem
 CREATE INDEX IF NOT EXISTS idx_noel_security_logs_user_id ON noel_security_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_noel_security_logs_risk_level ON noel_security_logs(risk_level);
 CREATE INDEX IF NOT EXISTS idx_noel_security_logs_created_at ON noel_security_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_noel_security_logs_blocked ON noel_security_logs(was_blocked, created_at) WHERE was_blocked = true;
 
 -- Função para limpar registros antigos (manutenção)
+-- Usar CREATE OR REPLACE para permitir reexecução
 CREATE OR REPLACE FUNCTION cleanup_old_rate_limits()
 RETURNS void AS $$
 BEGIN
