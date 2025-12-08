@@ -1,0 +1,102 @@
+========================================
+FUNCTION 1: getFluxoInfo
+========================================
+Cole este JSON completo:
+
+{
+  "type": "function",
+  "function": {
+    "name": "getFluxoInfo",
+    "description": "Busca informações completas de um fluxo (processo passo a passo) do sistema Wellness. Retorna título, descrição, scripts, link direto e quando usar. Use quando o usuário mencionar fluxos, processos, ou precisar de um guia passo a passo.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "fluxo_codigo": {
+          "type": "string",
+          "description": "Código do fluxo (ex: 'pos-venda', 'reativacao', 'convite-leve', '2-5-10')"
+        },
+        "fluxo_id": {
+          "type": "string",
+          "description": "ID UUID do fluxo (alternativa ao código)"
+        }
+      },
+      "required": []
+    }
+  }
+}
+
+========================================
+FUNCTION 2: getFerramentaInfo
+========================================
+Cole este JSON completo:
+
+{
+  "type": "function",
+  "function": {
+    "name": "getFerramentaInfo",
+    "description": "Busca informações de ferramentas/calculadoras do sistema Wellness. Retorna título, descrição, link personalizado do usuário, script de apresentação e quando usar. Use quando o usuário mencionar calculadoras, ferramentas ou precisar de um link para enviar.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ferramenta_slug": {
+          "type": "string",
+          "description": "Slug da ferramenta (ex: 'calculadora-agua', 'calculadora-proteina', 'calc-hidratacao')"
+        }
+      },
+      "required": ["ferramenta_slug"]
+    }
+  }
+}
+
+========================================
+FUNCTION 3: getQuizInfo
+========================================
+Cole este JSON completo:
+
+{
+  "type": "function",
+  "function": {
+    "name": "getQuizInfo",
+    "description": "Busca informações de quizzes do sistema Wellness. Retorna título, descrição, link personalizado do usuário, script de apresentação e quando usar. Use quando o usuário mencionar quizzes ou precisar engajar leads.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "quiz_slug": {
+          "type": "string",
+          "description": "Slug do quiz (ex: 'quiz-energetico', 'quiz-ganhos', 'quiz-potencial')"
+        }
+      },
+      "required": ["quiz_slug"]
+    }
+  }
+}
+
+========================================
+FUNCTION 4: getLinkInfo
+========================================
+Cole este JSON completo:
+
+{
+  "type": "function",
+  "function": {
+    "name": "getLinkInfo",
+    "description": "Busca informações de links Wellness oficiais. Retorna título, descrição, link, script de apresentação e quando usar. Use quando o usuário precisar de links oficiais do sistema.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "link_codigo": {
+          "type": "string",
+          "description": "Código do link wellness (ex: 'calculadora-agua', 'quiz-energetico')"
+        }
+      },
+      "required": ["link_codigo"]
+    }
+  }
+}
+
+========================================
+IMPORTANTE:
+- NÃO configure URL nas funções
+- O backend já gerencia isso automaticamente
+- Apenas cole o JSON e salve
+========================================
