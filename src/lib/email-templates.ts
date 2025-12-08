@@ -1,4 +1,4 @@
-// ... existing code ...
+import { resend, isResendConfigured, FROM_EMAIL, FROM_NAME } from '@/lib/resend'
 
 /**
  * Envia e-mail de recuperação de senha (reset password) customizado
