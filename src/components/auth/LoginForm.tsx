@@ -152,6 +152,13 @@ export default function LoginForm({
       }
 
       if (isSignUp) {
+        // Validação: Nome completo é obrigatório no cadastro
+        if (!name || name.trim() === '') {
+          setError('O nome completo é obrigatório.')
+          setLoading(false)
+          return
+        }
+
         // CADASTRO: Verificar se email já existe
         if (checkData.exists) {
           if (checkData.hasProfile && checkData.perfil) {
