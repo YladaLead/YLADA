@@ -1,0 +1,105 @@
+================================================
+SCHEMA 1: recomendarLinkWellness
+================================================
+Cole APENAS este JSON no campo "Function" do OpenAI:
+
+{
+  "name": "recomendarLinkWellness",
+  "description": "Recomenda um Link Wellness (calculadora, quiz, diagnóstico, desafio ou oportunidade de negócio) baseado no contexto da conversa, tipo de lead, necessidade identificada ou palavras-chave mencionadas.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "tipo_lead": {
+        "type": "string",
+        "enum": ["frio", "morno", "quente"],
+        "description": "Tipo de lead: frio (nunca foi abordado), morno (já foi abordado), quente (demonstrou interesse claro)"
+      },
+      "necessidade": {
+        "type": "string",
+        "description": "Necessidade identificada na conversa (ex: 'energia', 'emagrecer', 'renda extra', 'intestino')"
+      },
+      "palavras_chave": {
+        "type": "string",
+        "description": "Palavras-chave mencionadas separadas por vírgula (ex: 'cansado,energia,metabolismo')"
+      },
+      "objetivo": {
+        "type": "string",
+        "enum": ["captacao", "diagnostico", "engajamento", "recrutamento"],
+        "description": "Objetivo do link: captacao (iniciar conversa), diagnostico (aprofundar), engajamento (manter interesse), recrutamento (oportunidade de negócio)"
+      }
+    },
+    "required": []
+  }
+}
+
+URL DE PRODUÇÃO: https://ylada.app/api/noel/recomendarLinkWellness
+URL DE DESENVOLVIMENTO: http://localhost:3000/api/noel/recomendarLinkWellness
+
+================================================
+SCHEMA 2: buscarTreino
+================================================
+Cole APENAS este JSON no campo "Function" do OpenAI:
+
+{
+  "name": "buscarTreino",
+  "description": "Busca um treino micro (1, 3 ou 5 minutos) baseado no tipo ou gatilho. Treinos são conteúdos rápidos para motivar, ensinar ou orientar distribuidores.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "tipo": {
+        "type": "string",
+        "enum": ["1min", "3min", "5min"],
+        "description": "Tipo de treino: 1min (impulso diário), 3min (técnico/comportamental), 5min (mindset/estratégia)"
+      },
+      "gatilho": {
+        "type": "string",
+        "description": "Gatilho/situação para sugerir treino (ex: 'desanimado', 'procrastinando', 'travado', 'sem vontade', 'precisa motivação')"
+      }
+    },
+    "required": []
+  }
+}
+
+URL DE PRODUÇÃO: https://ylada.app/api/noel/buscarTreino
+URL DE DESENVOLVIMENTO: http://localhost:3000/api/noel/buscarTreino
+
+================================================
+IMPORTANTE: NÃO PRECISA CONFIGURAR URL!
+================================================
+No nosso caso, o backend Next.js é que chama a URL automaticamente.
+
+A URL já está configurada no código: src/lib/noel-assistant-handler.ts
+
+O QUE FAZER:
+1. No OpenAI Assistant, vá em "Functions" ou "Tools"
+2. Clique em "Add Function" ou "Create Function"
+3. Cole APENAS o JSON do schema acima
+4. Salve
+
+NÃO PRECISA:
+- ❌ Configurar URL
+- ❌ Configurar Server URL
+- ❌ Configurar Endpoint URL
+
+O backend já faz isso automaticamente quando recebe a function_call!
+
+================================================
+EXEMPLO VISUAL
+================================================
+No OpenAI Assistant, você verá algo assim:
+
+┌─────────────────────────────────────┐
+│ Function Name:                      │
+│ [recomendarLinkWellness]           │
+├─────────────────────────────────────┤
+│ Description:                        │
+│ [Recomenda um Link Wellness...]    │
+├─────────────────────────────────────┤
+│ Parameters (Schema):                │
+│ [Cole o JSON aqui]                  │
+├─────────────────────────────────────┤
+│ Server URL:                         │
+│ [https://ylada.app/api/noel/       │
+│  recomendarLinkWellness]            │ ← COLE A URL AQUI
+└─────────────────────────────────────┘
+

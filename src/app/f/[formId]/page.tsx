@@ -33,7 +33,20 @@ export default function PreencherFormularioPage() {
 
         const data = await response.json()
         if (data.success && data.data.form) {
-          setFormulario(data.data.form)
+          const form = data.data.form
+          
+          // Se o formulário tem slug e user_slug, redirecionar para URL amigável
+          if (form.slug && form.user_slug) {
+            window.location.replace(`/pt/c/${form.user_slug}/formulario/${form.slug}`)
+            return
+          }
+          // Se tem short_code, redirecionar para /p/{code}
+          if (form.short_code) {
+            window.location.replace(`/p/${form.short_code}`)
+            return
+          }
+          
+          setFormulario(form)
           // Determinar área baseado no perfil do usuário ou form_type
           const userArea = data.data.form.user_area
           const formType = data.data.form.form_type

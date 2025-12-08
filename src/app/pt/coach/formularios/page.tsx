@@ -6,6 +6,11 @@ import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
+import dynamic from 'next/dynamic'
+import FormPreviewModal from '@/components/coach/FormPreviewModal'
+
+// Lazy load do QRCode
+const QRCode = dynamic(() => import('@/components/QRCode'), { ssr: false })
 
 export default function FormulariosCoach() {
   return (
@@ -25,10 +30,43 @@ function FormulariosCoachContent() {
   const [carregandoTemplates, setCarregandoTemplates] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
-  const [mostrarTemplates, setMostrarTemplates] = useState(true)
+  const [userSlug, setUserSlug] = useState<string | null>(null)
+  const [previewForm, setPreviewForm] = useState<any>(null)
+  const [previewLink, setPreviewLink] = useState<string | null>(null)
+  const [mostrarAvisoUserSlug, setMostrarAvisoUserSlug] = useState(false)
 
   useEffect(() => {
     if (!user) return
+
+    // Carregar user_slug do perfil
+    const carregarUserSlug = async () => {
+      try {
+        const response = await fetch('/api/coach/profile', {
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          console.log('👤 Perfil carregado:', {
+            hasProfile: !!data.profile,
+            userSlug: data.profile?.userSlug || data.profile?.user_slug,
+            profile: data.profile,
+            fullData: data
+          })
+          // Tentar ambos os formatos: userSlug (camelCase) e user_slug (snake_case)
+          const userSlugValue = data.profile?.userSlug || data.profile?.user_slug || null
+          if (userSlugValue && userSlugValue.trim() !== '') {
+            setUserSlug(userSlugValue)
+            setMostrarAvisoUserSlug(false)
+          } else {
+            // Se não tem user_slug, mostrar aviso
+            console.warn('⚠️ User slug não encontrado no perfil')
+            setMostrarAvisoUserSlug(true)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar user_slug:', error)
+      }
+    }
 
     const carregarFormularios = async () => {
       try {
@@ -38,20 +76,69 @@ function FormulariosCoachContent() {
           params.append('form_type', filtroTipo)
         }
 
-        const response = await fetch(`/api/coach/formularios?${params.toString()}`, {
+        const apiUrl = `/api/coach/formularios?${params.toString()}`
+        console.log('📡 Chamando API de formulários:', apiUrl)
+        
+        const response = await fetch(apiUrl, {
           credentials: 'include'
         })
 
+        console.log('📥 Resposta da API:', {
+          status: response.status,
+          ok: response.ok,
+          statusText: response.statusText
+        })
+
         if (!response.ok) {
+          const errorText = await response.text()
+          console.error('❌ Erro na resposta da API:', errorText)
           throw new Error('Erro ao carregar formulários')
         }
 
         const data = await response.json()
         
+        console.log('📦 Dados recebidos da API:', {
+          success: data.success,
+          total: data.data?.total,
+          formsCount: data.data?.forms?.length || 0,
+          debug: data.debug,
+          error: data.error
+        })
+        
         if (data.success) {
           const formsArray = data.data?.forms || []
-          setFormularios(formsArray)
+          // Debug: verificar slugs dos formulários
+          console.log('📋 Formulários carregados da API:', {
+            total: formsArray.length,
+            debug: data.debug,
+            forms: formsArray.map((f: any) => ({
+              id: f.id,
+              name: f.name,
+              slug: f.slug,
+              short_code: f.short_code,
+              hasSlug: !!f.slug,
+              hasShortCode: !!f.short_code,
+              // Verificar se as propriedades existem
+              keys: Object.keys(f)
+            }))
+          })
+          
+          // Garantir que todos os formulários tenham slug e short_code definidos
+          const formsComSlug = formsArray.map((f: any) => ({
+            ...f,
+            slug: f.slug || null,
+            short_code: f.short_code || null
+          }))
+          
+          console.log('📋 Formulários processados:', {
+            total: formsComSlug.length,
+            comSlug: formsComSlug.filter((f: any) => f.slug).length,
+            semSlug: formsComSlug.filter((f: any) => !f.slug).length
+          })
+          
+          setFormularios(formsComSlug)
         } else {
+          console.error('❌ Erro ao carregar formulários:', data.error)
           setErro(data.error || 'Erro ao carregar formulários')
         }
       } catch (error: any) {
@@ -69,10 +156,32 @@ function FormulariosCoachContent() {
           credentials: 'include'
         })
 
+        console.log('📡 Chamando API de templates:', '/api/coach/formularios?is_template=true')
+        console.log('📥 Resposta templates:', {
+          status: response.status,
+          ok: response.ok
+        })
+
         if (response.ok) {
           const data = await response.json()
+          console.log('📦 Dados de templates recebidos:', {
+            success: data.success,
+            total: data.data?.total,
+            formsCount: data.data?.forms?.length || 0
+          })
+          
           if (data.success) {
-            setTemplates(data.data?.forms || [])
+            const templatesArray = data.data?.forms || []
+            console.log('📋 Templates carregados:', {
+              total: templatesArray.length,
+              comSlug: templatesArray.filter((t: any) => t.slug).length,
+              exemplos: templatesArray.slice(0, 3).map((t: any) => ({
+                id: t.id,
+                name: t.name,
+                slug: t.slug
+              }))
+            })
+            setTemplates(templatesArray)
           }
         }
       } catch (error) {
@@ -82,8 +191,17 @@ function FormulariosCoachContent() {
       }
     }
 
-    carregarFormularios()
-    carregarTemplates()
+    // Carregar userSlug primeiro, depois formulários (para garantir que slugs sejam gerados)
+    const carregarTudo = async () => {
+      await carregarUserSlug()
+      // Aguardar um pouco para garantir que o userSlug seja processado
+      await new Promise(resolve => setTimeout(resolve, 100))
+      // Carregar formulários (que vai gerar e salvar slugs se necessário)
+      await carregarFormularios()
+      await carregarTemplates()
+    }
+    
+    carregarTudo()
   }, [user, filtroTipo])
 
   const getTipoLabel = (tipo: string) => {
@@ -127,6 +245,40 @@ function FormulariosCoachContent() {
       />
       
       <div className="flex-1 lg:ml-56">
+        {/* Aviso se não tiver user_slug configurado */}
+        {mostrarAvisoUserSlug && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 m-4 rounded-lg shadow-sm">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-yellow-800">
+                  Configure seu nome de URL
+                </h3>
+                <div className="mt-2 text-sm text-yellow-700">
+                  <p>
+                    Para gerar links amigáveis para seus formulários, você precisa configurar seu nome de URL nas configurações. Após configurar, todos os seus formulários terão links atualizados automaticamente.
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => router.push('/pt/coach/configuracao')}
+                    className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+                  >
+                    Ir para Configurações
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={() => setMostrarAvisoUserSlug(false)}
+                className="ml-auto text-yellow-600 hover:text-yellow-800"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
           <button
             onClick={() => setMobileMenuOpen(true)}
@@ -184,123 +336,286 @@ function FormulariosCoachContent() {
             </div>
           </div>
 
-          {/* Seção de Formulários Pré-montados */}
-          {mostrarTemplates && templates.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">📋 Formulários Pré-montados</h2>
-                  <p className="text-sm text-gray-600 mt-1">Formulários prontos para usar. Clique para editar e personalizar</p>
-                </div>
-                <button
-                  onClick={() => setMostrarTemplates(false)}
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  Ocultar
-                </button>
-              </div>
-              
-              {carregandoTemplates ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {templates.map((template) => (
-                    <div
-                      key={template.id}
-                      className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border-2 border-purple-200 hover:border-purple-300 transition-all cursor-pointer"
-                      onClick={() => router.push(`/pt/coach/formularios/novo?template=${template.id}`)}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
-                        <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded">Pronto</span>
-                      </div>
-                      {template.description && (
-                        <p className="text-sm text-gray-700 mb-4 line-clamp-2">{template.description}</p>
-                      )}
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
-                        <span className="px-2 py-1 bg-white rounded">{getTipoLabel(template.form_type)}</span>
-                        <span>{template.structure?.fields?.length || 0} campos</span>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/pt/coach/formularios/novo?template=${template.id}`)
-                        }}
-                        className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                      >
-                        Usar este formulário
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {!mostrarTemplates && templates.length > 0 && (
-            <div className="mb-6">
-              <button
-                onClick={() => setMostrarTemplates(true)}
-                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-              >
-                Mostrar formulários pré-montados ({templates.length})
-              </button>
-            </div>
-          )}
-
-          {/* Lista de Formulários do Usuário */}
+          {/* Lista Unificada de Formulários */}
           <div className="mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Meus Formulários</h2>
-            <p className="text-sm text-gray-600 mt-1">Formulários que você criou</p>
+            <h2 className="text-xl font-semibold text-gray-900">Formulários</h2>
+            <p className="text-sm text-gray-600 mt-1">Todos os formulários disponíveis</p>
           </div>
 
-          {formularios.length > 0 ? (
+          {/* Combinar templates e formulários do usuário */}
+          {formularios.length > 0 || templates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {formularios.map((form) => (
-                <div
-                  key={form.id}
-                  className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{form.name}</h3>
-                      {form.description && (
-                        <p className="text-sm text-gray-600 mb-3">{form.description}</p>
+              {/* Templates primeiro */}
+              {templates.map((template) => {
+                const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+                // Templates são editáveis diretamente - usar link do template
+                // Se tiver slug e user_slug, usar formato amigável, senão usar UUID
+                let linkCompleto = ''
+                let linkCurto = ''
+                
+                if (template.short_code) {
+                  linkCompleto = `${baseUrl}/p/${template.short_code}`
+                  linkCurto = linkCompleto
+                } else if (userSlug && template.slug) {
+                  linkCompleto = `${baseUrl}/pt/c/${userSlug}/formulario/${template.slug}`
+                  linkCurto = linkCompleto
+                } else {
+                  linkCompleto = `${baseUrl}/f/${template.id}`
+                  linkCurto = linkCompleto
+                }
+                
+                return (
+                  <div
+                    key={`template-${template.id}`}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all p-4"
+                  >
+                    {/* Título */}
+                    <h3 className="text-base font-semibold text-gray-900 mb-3 line-clamp-2">{template.name}</h3>
+                    
+                    {/* Botões de ação - Todos na mesma linha */}
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                      {/* Botão Editar */}
+                      <button
+                        onClick={() => {
+                          // Editar template diretamente (não criar cópia)
+                          router.push(`/pt/coach/formularios/${template.id}`)
+                        }}
+                        className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium"
+                        title="Editar formulário"
+                      >
+                        ✏️ Editar
+                      </button>
+
+                      {/* Botão Preview */}
+                      <button
+                        onClick={() => {
+                          // Sempre abrir o preview - o modal vai lidar com erros
+                          setPreviewForm(template)
+                          setPreviewLink(linkCompleto)
+                        }}
+                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-xs font-medium border border-gray-200"
+                        title="Ver preview"
+                      >
+                        👁️ Preview
+                      </button>
+
+                      {/* Botão Copiar Link - Destacado por ser mais usado */}
+                      <button
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(linkCompleto)
+                            alert('✅ Link copiado!')
+                          } catch (error) {
+                            console.error('Erro ao copiar link:', error)
+                            alert('⚠️ Erro ao copiar link.')
+                          }
+                        }}
+                        className="px-3 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg transition-colors text-xs font-medium border border-purple-300"
+                        title="Copiar link completo"
+                      >
+                        📋 Link
+                      </button>
+
+                      {/* Botão Copiar QR Code */}
+                      {linkCompleto && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkCompleto)}`
+                              const response = await fetch(qrUrl)
+                              const blob = await response.blob()
+                              await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                              ])
+                              alert('✅ QR Code copiado!')
+                            } catch (error) {
+                              console.error('Erro ao copiar QR code:', error)
+                              try {
+                                await navigator.clipboard.writeText(linkCompleto)
+                                alert('✅ Link copiado (QR code não suportado, mas link foi copiado)!')
+                              } catch (e) {
+                                alert('⚠️ Erro ao copiar. Tente salvar a imagem manualmente.')
+                              }
+                            }
+                          }}
+                          className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-xs font-medium border border-gray-200"
+                          title="Copiar QR Code"
+                        >
+                          📱 QR
+                        </button>
                       )}
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTipoColor(form.form_type)}`}>
-                        {getTipoLabel(form.form_type)}
-                      </span>
                     </div>
                   </div>
-                  
-                  <div className="text-xs text-gray-500 mb-4">
-                    {form.structure?.fields?.length || 0} {form.structure?.fields?.length === 1 ? 'campo' : 'campos'}
-                  </div>
+                )
+              })}
+              
+              {/* Formulários do usuário */}
+              {formularios.map((form) => {
+                const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+                // Prioridade: short_code > user_slug+slug > /f/{id}
+                let linkCompleto = ''
+                let linkCurto = ''
+                
+                // Debug: verificar dados do formulário
+                console.log('🔗 Gerando link para formulário:', {
+                  id: form.id,
+                  name: form.name,
+                  slug: form.slug,
+                  short_code: form.short_code,
+                  userSlug: userSlug,
+                  hasSlug: !!form.slug,
+                  hasShortCode: !!form.short_code,
+                  hasUserSlug: !!userSlug
+                })
+                
+                // Prioridade: short_code > user_slug+slug > /f/{id}
+                if (form.short_code) {
+                  linkCompleto = `${baseUrl}/p/${form.short_code}`
+                  linkCurto = `${baseUrl}/p/${form.short_code}`
+                  console.log('✅ Usando short_code:', linkCompleto)
+                } else if (userSlug && form.slug) {
+                  linkCompleto = `${baseUrl}/pt/c/${userSlug}/formulario/${form.slug}`
+                  linkCurto = linkCompleto
+                  console.log('✅ Usando user_slug + slug:', linkCompleto)
+                } else {
+                  // Fallback para UUID - será redirecionado automaticamente se tiver slug depois
+                  linkCompleto = `${baseUrl}/f/${form.id}`
+                  linkCurto = linkCompleto
+                  console.warn('⚠️ Formulário sem slug ou user_slug - usando UUID:', {
+                    formId: form.id,
+                    formName: form.name,
+                    hasSlug: !!form.slug,
+                    hasUserSlug: !!userSlug,
+                    link: linkCompleto
+                  })
+                }
+                
+                return (
+                  <div
+                    key={form.id}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all p-4"
+                  >
+                    {/* Título */}
+                    <h3 className="text-base font-semibold text-gray-900 mb-3 line-clamp-2">{form.name}</h3>
+                    
+                    {/* Botões de ação - Todos na mesma linha */}
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                      {/* Botão Editar */}
+                      <button
+                        onClick={() => router.push(`/pt/coach/formularios/${form.id}`)}
+                        className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium"
+                        title="Editar formulário"
+                      >
+                        ✏️ Editar
+                      </button>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => router.push(`/pt/coach/formularios/${form.id}`)}
-                      className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => router.push(`/pt/coach/formularios/${form.id}/respostas`)}
-                      className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                    >
-                      Respostas
-                    </button>
-                    <button
-                      onClick={() => router.push(`/pt/coach/formularios/${form.id}/enviar`)}
-                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                    >
-                      Enviar
-                    </button>
+                      {/* Botão Preview */}
+                      <button
+                        onClick={() => {
+                          // Sempre abrir o preview - o modal vai lidar com erros
+                          setPreviewForm(form)
+                          setPreviewLink(linkCompleto)
+                        }}
+                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-xs font-medium border border-gray-200"
+                        title="Ver preview"
+                      >
+                        👁️ Preview
+                      </button>
+
+                      {/* Botão Copiar Link - Destacado por ser mais usado */}
+                      <button
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(linkCompleto)
+                            alert('✅ Link copiado!')
+                          } catch (error) {
+                            console.error('Erro ao copiar link:', error)
+                            alert('⚠️ Erro ao copiar link.')
+                          }
+                        }}
+                        className="px-3 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg transition-colors text-xs font-medium border border-purple-300"
+                        title="Copiar link completo"
+                      >
+                        📋 Link
+                      </button>
+
+                      {/* Botão Copiar URL Curta ou Gerar */}
+                      {form.short_code ? (
+                        <button
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(linkCurto)
+                              alert('✅ URL curta copiada!')
+                            } catch (error) {
+                              console.error('Erro ao copiar:', error)
+                            }
+                          }}
+                          className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-xs font-medium border border-gray-200"
+                          title="Copiar URL curta"
+                        >
+                          🔗 Curta
+                        </button>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(`/api/coach/formularios/${form.id}/short-code`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({})
+                              })
+                              const data = await response.json()
+                              if (response.ok && data.success) {
+                                alert('✅ URL curta gerada! Recarregue a página para ver.')
+                                window.location.reload()
+                              } else {
+                                alert('⚠️ Erro ao gerar URL curta: ' + (data.error || 'Tente novamente'))
+                              }
+                            } catch (error) {
+                              console.error('Erro ao gerar URL curta:', error)
+                              alert('⚠️ Erro ao gerar URL curta.')
+                            }
+                          }}
+                          className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-xs font-medium border border-gray-200"
+                          title="Gerar URL curta"
+                        >
+                          ➕ Curta
+                        </button>
+                      )}
+
+                      {/* Botão Copiar QR Code */}
+                      {linkCompleto && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkCompleto)}`
+                              const response = await fetch(qrUrl)
+                              const blob = await response.blob()
+                              await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                              ])
+                              alert('✅ QR Code copiado!')
+                            } catch (error) {
+                              console.error('Erro ao copiar QR code:', error)
+                              try {
+                                await navigator.clipboard.writeText(linkCompleto)
+                                alert('✅ Link copiado (QR code não suportado, mas link foi copiado)!')
+                              } catch (e) {
+                                alert('⚠️ Erro ao copiar. Tente salvar a imagem manualmente.')
+                              }
+                            }
+                          }}
+                          className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-xs font-medium border border-gray-200"
+                          title="Copiar QR Code"
+                        >
+                          📱 QR
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
@@ -322,6 +637,19 @@ function FormulariosCoachContent() {
           )}
         </div>
       </div>
+
+      {/* Modal de Preview */}
+      {previewForm && previewLink && (
+        <FormPreviewModal
+          form={previewForm}
+          link={previewLink}
+          userSlug={userSlug}
+          onClose={() => {
+            setPreviewForm(null)
+            setPreviewLink(null)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -21,6 +21,16 @@ interface Tool {
   custom_whatsapp_message?: string
   show_whatsapp_button?: boolean // Mostrar botão WhatsApp pequeno
   template_slug: string
+  content?: {
+    leader_data_collection?: {
+      enabled?: boolean
+      fields?: {
+        name?: boolean
+        email?: boolean
+        phone?: boolean
+      }
+    }
+  }
   user_profiles?: {
     user_slug: string
   }
@@ -155,6 +165,9 @@ export default function FerramentaPersonalizadaCoachPage() {
 
   // Renderizar template específico com configurações
   const renderizarTemplate = () => {
+    // Extrair leader_data_collection do content se existir
+    const leaderDataCollection = tool.content?.leader_data_collection
+    
     // Passar configurações via props
     const config = {
       title: tool.title,
@@ -167,7 +180,24 @@ export default function FerramentaPersonalizadaCoachPage() {
       cta_button_text: tool.cta_button_text,
       custom_whatsapp_message: tool.custom_whatsapp_message,
       show_whatsapp_button: tool.show_whatsapp_button !== false, // Mostrar botão WhatsApp pequeno (padrão: true)
+      // ✅ Adicionar configuração de coleta de dados (mapear do formato do banco para o formato esperado pelo componente)
+      leader_data_collection: leaderDataCollection?.enabled ? {
+        coletar_dados: true,
+        campos_coleta: {
+          nome: leaderDataCollection.fields?.name || false,
+          email: leaderDataCollection.fields?.email || false,
+          telefone: leaderDataCollection.fields?.phone || false,
+        }
+      } : undefined,
     }
+    
+    // Debug: verificar se leader_data_collection está sendo passado
+    console.log('🔍 Coach Template - Config passado:', {
+      has_leader_data_collection: !!config.leader_data_collection,
+      coletar_dados: config.leader_data_collection?.coletar_dados,
+      campos_coleta: config.leader_data_collection?.campos_coleta,
+      original_content: tool.content?.leader_data_collection
+    })
 
     // ✅ Normalizar template_slug para garantir consistência
     const normalizedSlug = normalizeTemplateSlug(tool.template_slug)

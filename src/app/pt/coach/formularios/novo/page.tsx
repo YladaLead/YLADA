@@ -114,19 +114,59 @@ function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-2 p-2.5 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-purple-500 opacity-50' : ''}`}
+      className={`flex items-center gap-2 p-3 text-left border-2 rounded-lg transition-all group relative ${
+        isDragging 
+          ? 'border-purple-500 bg-purple-100 shadow-lg scale-95 opacity-75' 
+          : 'border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 hover:shadow-md'
+      }`}
+      title="Arraste para adicionar ou clique duas vezes"
     >
       <div
         {...attributes}
         {...listeners}
-        className="flex items-center gap-2 flex-1 min-w-0 w-full"
+        className="flex items-center gap-3 flex-1 min-w-0 w-full cursor-grab active:cursor-grabbing"
+        onDoubleClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          // Não fazer nada aqui - o duplo clique será tratado no container pai
+        }}
       >
-        <span className="text-lg flex-shrink-0">{fieldType.icon}</span>
+        <span className="text-xl flex-shrink-0">{fieldType.icon}</span>
         <div className="flex-1 min-w-0">
-          <span className="text-xs font-medium block">{fieldType.label}</span>
-          <p className="text-xs text-gray-500 truncate">{fieldType.description}</p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-900">{fieldType.label}</span>
+            {!isDragging && (
+              <span className="text-xs text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                👆 Arraste ou 2x clique
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-0.5">{fieldType.description}</p>
         </div>
+        {isDragging && (
+          <div className="text-purple-600 animate-pulse text-lg">✨</div>
+        )}
       </div>
+      {/* Botão de ação rápida */}
+      {!isDragging && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            // Disparar evento para o componente pai
+            const event = new CustomEvent('addFieldQuick', { 
+              detail: { fieldType: fieldType.type },
+              bubbles: true 
+            })
+            e.currentTarget.closest('div')?.dispatchEvent(event)
+          }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 z-10"
+          title="Adicionar rapidamente (ou clique duas vezes no card)"
+        >
+          ➕
+        </button>
+      )}
     </div>
   )
 }
@@ -140,10 +180,19 @@ function FormDropZone({ children }: { children: React.ReactNode }) {
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[400px] transition-colors ${
-        isOver ? 'bg-purple-50 border-purple-300' : 'bg-white'
-      } border-2 border-dashed border-gray-200 rounded-lg p-6`}
+      className={`min-h-[400px] transition-all duration-300 ${
+        isOver 
+          ? 'bg-purple-100 border-purple-500 border-4 shadow-2xl scale-[1.01] ring-4 ring-purple-200' 
+          : 'bg-white border-2 border-dashed border-gray-300'
+      } rounded-lg p-6 relative`}
     >
+      {isOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-purple-500 bg-opacity-20 rounded-lg z-10 pointer-events-none">
+          <div className="bg-purple-600 text-white px-8 py-4 rounded-xl shadow-2xl text-xl font-bold animate-bounce border-4 border-white">
+            ✨ SOLTE AQUI PARA ADICIONAR! ✨
+          </div>
+        </div>
+      )}
       {children}
     </div>
   )
@@ -451,21 +500,30 @@ function NovoFormularioCoachContent() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
 
-    // Se arrastou um componente para a área de drop
-    if (active.id.toString().startsWith('component-') && over?.id === 'form-drop-zone') {
-      const componentType = active.id.toString().replace('component-', '') as FieldType
-      adicionarCampo(componentType)
+    // Se arrastou um componente para a área de drop ou sobre qualquer campo existente
+    if (active.id.toString().startsWith('component-')) {
+      // Se soltou sobre a área de drop ou sobre um campo existente, adiciona o componente
+      if (over?.id === 'form-drop-zone' || (over?.id && !over.id.toString().startsWith('component-'))) {
+        const componentType = active.id.toString().replace('component-', '') as FieldType
+        adicionarCampo(componentType)
+        setActiveId(null)
+        return
+      }
+      // Se soltou em lugar nenhum, apenas limpa
       setActiveId(null)
       return
     }
 
     // Se reordenou campos existentes
-    if (active.id !== over?.id && !active.id.toString().startsWith('component-')) {
+    if (active.id !== over?.id && !active.id.toString().startsWith('component-') && over?.id) {
       setFields((items) => {
         const oldIndex = items.findIndex(item => item.id === active.id)
         const newIndex = items.findIndex(item => item.id === over?.id)
 
-        return arrayMove(items, oldIndex, newIndex)
+        if (oldIndex !== -1 && newIndex !== -1) {
+          return arrayMove(items, oldIndex, newIndex)
+        }
+        return items
       })
     }
 
@@ -542,6 +600,7 @@ function NovoFormularioCoachContent() {
 
     setSalvando(true)
     setErro(null)
+    setMensagemSucesso(null)
 
     try {
       const response = await fetch('/api/coach/formularios', {
@@ -559,22 +618,39 @@ function NovoFormularioCoachContent() {
             nameAlign: formData.nameAlign,
             descriptionAlign: formData.descriptionAlign
           },
-          generate_short_url: generateShortUrl,
-          custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
+          generate_short_url: false,
+          custom_short_code: null
         }),
       })
 
+      const responseData = await response.json()
+
       if (!response.ok) {
-        throw new Error('Erro ao salvar formulário')
+        throw new Error(responseData.error || 'Erro ao salvar formulário')
       }
 
-      setMensagemSucesso('Formulário criado com sucesso!')
+      // Sucesso - mostrar mensagem com link
+      const formId = responseData.data?.form?.id
+      const shortCode = responseData.data?.form?.short_code
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+      const linkGerado = shortCode 
+        ? `${baseUrl}/p/${shortCode}`
+        : `${baseUrl}/f/${formId}`
+
+      setMensagemSucesso(`✅ Formulário criado com sucesso! Link: ${linkGerado}`)
+      
+      // Copiar link automaticamente
+      if (linkGerado) {
+        navigator.clipboard.writeText(linkGerado)
+      }
+
+      // Redirecionar após 3 segundos
       setTimeout(() => {
         router.push('/pt/coach/formularios')
-      }, 2000)
-    } catch (error) {
+      }, 3000)
+    } catch (error: any) {
       console.error('Erro:', error)
-      setErro('Erro ao salvar formulário. Tente novamente.')
+      setErro(error.message || 'Erro ao salvar formulário. Tente novamente.')
     } finally {
       setSalvando(false)
     }
@@ -834,25 +910,38 @@ function NovoFormularioCoachContent() {
                   </div>
 
                   {fields.length === 0 ? (
-                      <div className="text-center py-12">
-                        <div className="text-purple-400 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                      <div className="text-center py-16 border-2 border-dashed border-purple-300 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100">
+                        <div className="text-purple-400 mb-6">
+                        <svg className="w-20 h-20 mx-auto animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                       </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">🎯 Solte os componentes aqui</h3>
-                      <p className="text-gray-600 mb-4 text-sm">
-                          Arraste da sidebar direita ou clique duas vezes
+                        <h3 className="text-xl font-bold text-gray-900 mb-3">🎯 Área de Drop</h3>
+                      <p className="text-gray-700 mb-6 text-base font-medium">
+                          <strong className="text-purple-600">Arraste</strong> componentes da barra lateral ou <strong className="text-purple-600">clique duas vezes</strong> para adicionar
                       </p>
-                        <div className="bg-white border border-purple-200 rounded-lg p-4 max-w-sm mx-auto shadow-sm">
-                          <p className="text-xs text-purple-800">
-                          💡 <strong>Sugestão:</strong> Comece com "Nome" e "Email" para identificar o cliente
+                        <div className="bg-white border-2 border-purple-300 rounded-lg p-5 max-w-md mx-auto shadow-lg">
+                          <p className="text-sm text-purple-900 font-semibold">
+                          💡 <strong>Dica:</strong> Comece com "Nome" e "Email" para identificar o cliente
                         </p>
                       </div>
+                      {activeId && activeId.toString().startsWith('component-') && (
+                        <div className="mt-6 bg-purple-600 text-white px-6 py-3 rounded-xl text-base font-bold animate-pulse shadow-lg border-4 border-white">
+                          ✨ SOLTE AQUI PARA ADICIONAR! ✨
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="bg-white rounded-lg p-6">
                       <form className="space-y-6">
+                        {/* Indicador visual quando arrastando sobre campos existentes */}
+                        {activeId && activeId.toString().startsWith('component-') && (
+                          <div className="mb-4 p-3 bg-purple-100 border-2 border-purple-400 border-dashed rounded-lg text-center">
+                            <p className="text-sm font-semibold text-purple-800">
+                              ✨ Arraste para qualquer lugar da lista ou solte aqui para adicionar no final
+                            </p>
+                          </div>
+                        )}
                         <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
                           {fields.map((field) => (
                             <DraggableFieldPreview 
@@ -863,6 +952,14 @@ function NovoFormularioCoachContent() {
                             />
                           ))}
                         </SortableContext>
+                        {/* Área de drop no final da lista */}
+                        {activeId && activeId.toString().startsWith('component-') && (
+                          <div className="mt-4 p-6 border-2 border-dashed border-purple-400 bg-purple-50 rounded-lg text-center">
+                            <p className="text-sm font-semibold text-purple-800">
+                              ✨ Solte aqui para adicionar no final da lista
+                            </p>
+                          </div>
+                        )}
                         <div className="pt-4 border-t border-gray-200">
                           <button
                             type="button"
@@ -910,13 +1007,16 @@ function NovoFormularioCoachContent() {
                   )}
 
                   {mensagemSucesso && (
-                    <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
-                      <div className="flex">
-                        <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="mt-4 bg-green-50 border-2 border-green-400 rounded-lg p-4 shadow-lg">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
-                        <div className="ml-3">
-                          <p className="text-sm text-green-800">{mensagemSucesso}</p>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-green-900 mb-2">{mensagemSucesso}</p>
+                          <p className="text-xs text-green-700">
+                            ✅ Link copiado automaticamente! Redirecionando em 3 segundos...
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -924,122 +1024,17 @@ function NovoFormularioCoachContent() {
                 </div>
               </div>
 
-              {/* Right Sidebar - URL Curta e Componentes */}
+              {/* Right Sidebar - Componentes */}
               <div className="w-80 bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col">
                 <form onSubmit={handleSubmit} className="flex flex-col h-full">
-                  {/* URL Curta */}
+                  {/* Informação sobre links */}
                   <div className="border-b border-gray-200 px-4 py-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <input
-                        type="checkbox"
-                        id="generateShortUrl"
-                        checked={generateShortUrl}
-                        onChange={(e) => {
-                          setGenerateShortUrl(e.target.checked)
-                          if (!e.target.checked) {
-                            setCustomShortCode('')
-                            setUsarCodigoPersonalizado(false)
-                            setShortCodeDisponivel(null)
-                          }
-                        }}
-                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                      />
-                      <label htmlFor="generateShortUrl" className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
-                        Gerar URL Curta
-                            </label>
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                      <p className="text-xs text-purple-800 font-medium mb-1">💡 Links e QR Code</p>
+                      <p className="text-xs text-purple-700">
+                        Após salvar, você poderá gerar URL curta e QR code diretamente na listagem de formulários.
+                      </p>
                     </div>
-                    {generateShortUrl && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <input
-                            type="checkbox"
-                            id="usarCodigoPersonalizado"
-                            checked={usarCodigoPersonalizado}
-                            onChange={(e) => {
-                              setUsarCodigoPersonalizado(e.target.checked)
-                              if (!e.target.checked) {
-                                setCustomShortCode('')
-                                setShortCodeDisponivel(null)
-                              }
-                            }}
-                            className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                          />
-                          <label htmlFor="usarCodigoPersonalizado" className="text-xs text-gray-600 cursor-pointer">
-                            Usar código personalizado
-                          </label>
-                          </div>
-                        {usarCodigoPersonalizado && (
-                          <div>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={customShortCode}
-                                onChange={async (e) => {
-                                  const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 10)
-                                  setCustomShortCode(value)
-                                  
-                                  if (value.length >= 3) {
-                                    setVerificandoShortCode(true)
-                                    try {
-                                      const response = await fetch(
-                                        `/api/coach/check-short-code?code=${encodeURIComponent(value)}&type=form`
-                                      )
-                                      const data = await response.json()
-                                      setShortCodeDisponivel(data.available)
-                                    } catch (error) {
-                                      console.error('Erro ao verificar código:', error)
-                                      setShortCodeDisponivel(false)
-                                    } finally {
-                                      setVerificandoShortCode(false)
-                                    }
-                                  } else {
-                                    setShortCodeDisponivel(null)
-                                  }
-                                }}
-                                placeholder="meu-codigo"
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
-                            />
-                          </div>
-                            {verificandoShortCode && (
-                              <p className="text-xs text-gray-500 mt-1">Verificando...</p>
-                            )}
-                            {!verificandoShortCode && shortCodeDisponivel === true && customShortCode.length >= 3 && (
-                              <p className="text-xs text-purple-600 mt-1">✅ Código disponível!</p>
-                            )}
-                            {!verificandoShortCode && shortCodeDisponivel === false && customShortCode.length >= 3 && (
-                              <p className="text-xs text-red-600 mt-1">❌ Este código já está em uso</p>
-                            )}
-                            {customShortCode.length > 0 && customShortCode.length < 3 && (
-                              <p className="text-xs text-yellow-600 mt-1">⚠️ Mínimo de 3 caracteres</p>
-                            )}
-                          </div>
-                        )}
-                        {usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? (
-                          <>
-                            <p className="text-xs text-gray-500 mb-3">
-                              URL: <span className="font-mono font-semibold text-purple-700">{typeof window !== 'undefined' ? window.location.origin : ''}/p/{customShortCode}</span>
-                            </p>
-                            {/* QR Code Preview */}
-                            <div className="mt-3 pt-3 border-t border-gray-200">
-                              <p className="text-xs text-gray-500 mb-2 text-center font-medium">QR Code:</p>
-                              <div className="flex justify-center">
-                                <QRCode 
-                                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}/p/${customShortCode}`} 
-                                  size={120} 
-                                />
-                        </div>
-                              <p className="text-xs text-gray-400 text-center mt-2">
-                                Escaneie para acessar o formulário
-                              </p>
-                            </div>
-                          </>
-                        ) : (
-                          <p className="text-xs text-gray-500">
-                            Uma URL curta será gerada automaticamente após salvar. O QR code estará disponível na página de envio do formulário.
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {/* Componentes */}
@@ -1048,17 +1043,43 @@ function NovoFormularioCoachContent() {
                       <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
                         🧩 Componentes
                       </h2>
-                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-2 mb-3">
-                        <p className="text-xs text-purple-800">
-                          💡 Arraste para o preview ou clique duas vezes
+                      <div className="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 rounded-lg p-4 mb-4 shadow-sm">
+                        <p className="text-sm text-purple-900 font-bold mb-2 flex items-center gap-2">
+                          💡 Como adicionar campos:
                         </p>
+                        <ul className="text-sm text-purple-800 space-y-2 ml-2">
+                          <li className="flex items-center gap-2">
+                            <span className="bg-purple-200 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</span>
+                            <strong>Arraste</strong> o componente para a área de preview (à esquerda)
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="bg-purple-200 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</span>
+                            <strong>Clique duas vezes</strong> no componente para adicionar rapidamente
+                          </li>
+                        </ul>
+                        <div className="mt-3 pt-3 border-t border-purple-300">
+                          <p className="text-xs text-purple-700 font-medium">
+                            ✨ <strong>Dica:</strong> A área de drop fica destacada quando você arrasta um componente!
+                          </p>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         {fieldTypes.map((fieldType) => (
                           <div 
                             key={fieldType.type} 
-                            onDoubleClick={() => adicionarCampo(fieldType.type)}
                             className="w-full"
+                            onDoubleClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              adicionarCampo(fieldType.type)
+                            }}
+                            onAddFieldQuick={(e: any) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              if (e.detail?.fieldType) {
+                                adicionarCampo(e.detail.fieldType)
+                              }
+                            }}
                         >
                             <DraggableComponent fieldType={fieldType} />
                       </div>
@@ -1153,7 +1174,7 @@ export function getFieldDescription(type: FieldType): string {
     date: 'Seletor de data com calendário visual - ao clicar, abre um calendário para escolher a data. Ideal para data de nascimento, início de programa, consultas, prazos',
     time: 'Seletor de hora com relógio visual - ao clicar, abre um seletor de hora. Ideal para horários de refeições, treinos, medicações, lembretes',
     email: 'Campo de e-mail com validação automática',
-    tel: 'Campo de telefone com formatação automática',
+    tel: 'Campo de telefone com DDI (código do país) e formatação automática',
     yesno: 'Pergunta simples Sim/Não - ideal para questões diretas como "Pratica exercícios regularmente?"',
     range: 'Escala deslizante (slider) para notas de 1-10, níveis de energia, dor, satisfação, etc',
     file: 'Upload de arquivo para fotos, documentos, exames médicos'

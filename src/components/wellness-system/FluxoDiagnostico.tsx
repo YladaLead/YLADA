@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { FluxoCliente, RespostaFluxo } from '@/types/wellness-system'
 import { getKitByTipo } from '@/lib/wellness-system/produtos'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
 
 interface FluxoDiagnosticoProps {
   fluxo: FluxoCliente
@@ -233,7 +234,23 @@ export default function FluxoDiagnostico({
                     whatsapp_number: whatsappNumber,
                     country_code: countryCode,
                     cta_button_text: fluxo.cta,
-                    custom_whatsapp_message: `Olá! Completei o diagnóstico "${fluxo.nome}" e gostaria de saber mais sobre o ${kit?.nome || 'kit recomendado'}.`,
+                    // Usar mensagem específica do fluxo se disponível, senão usar mensagem padrão baseada no nome
+                    custom_whatsapp_message: (() => {
+                      // Tentar obter mensagem específica pelo ID do fluxo
+                      const mensagemFerramenta = obterMensagemWhatsApp(fluxo.id)
+                      if (mensagemFerramenta) {
+                        return mensagemFerramenta.mensagem
+                      }
+                      // Fallback: mensagem baseada no nome do fluxo
+                      if (mostrarProdutos) {
+                        // Fluxo de vendas (cliente)
+                        return `Olá! Completei o diagnóstico "${fluxo.nome}" e gostaria de saber mais sobre o ${kit?.nome || 'kit recomendado'}.`
+                      } else {
+                        // Fluxo de recrutamento (negócio)
+                        return `Olá! Completei a avaliação "${fluxo.nome}" e queria saber mais sobre essa oportunidade.`
+                      }
+                    })(),
+                    template_slug: fluxo.id, // Passar ID do fluxo para identificar mensagem automática
                     show_whatsapp_button: true
                   }}
                 />

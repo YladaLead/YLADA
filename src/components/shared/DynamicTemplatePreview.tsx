@@ -31,6 +31,30 @@ interface DiagnosticEntry {
   diagnostico: DiagnosticoCompleto
 }
 
+// Estilos CSS para animação suave
+const pulseSubtleStyle = `
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.95;
+      transform: scale(1.01);
+    }
+  }
+`
+
+// Injetar estilos CSS para animação
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style')
+  styleSheet.textContent = pulseSubtleStyle
+  if (!document.head.querySelector('style[data-pulse-subtle]')) {
+    styleSheet.setAttribute('data-pulse-subtle', 'true')
+    document.head.appendChild(styleSheet)
+  }
+}
+
 const normalizeSlug = (value: string | undefined | null): string => {
   if (!value) return ''
   return value
@@ -56,18 +80,94 @@ const buildSlugCandidates = (template: Template): string[] => {
     const normalized = normalizeSlug(value)
     if (!normalized) return
     candidates.add(normalized)
+    
+    // Remover prefixos comuns
     if (normalized.startsWith('template-')) {
       candidates.add(normalized.replace(/^template-/, ''))
     }
+    if (normalized.startsWith('quiz-')) {
+      candidates.add(normalized.replace(/^quiz-/, ''))
+    }
+    if (normalized.startsWith('calc-')) {
+      candidates.add(normalized.replace(/^calc-/, ''))
+    }
+    if (normalized.startsWith('calculadora-')) {
+      candidates.add(normalized.replace(/^calculadora-/, ''))
+    }
+    
+    // Remover sufixos comuns (-nutri, -coach, etc)
+    candidates.add(normalized.replace(/-nutri$/, ''))
+    candidates.add(normalized.replace(/-coach$/, ''))
+    candidates.add(normalized.replace(/-wellness$/, ''))
+    
+    // Normalizar preposições
     candidates.add(normalized.replace(/-de-/g, '-'))
     candidates.add(normalized.replace(/-da-/g, '-'))
+    candidates.add(normalized.replace(/-do-/g, '-'))
+    candidates.add(normalized.replace(/-e-/g, '-'))
+    
+    // Variações específicas para quizzes de recrutamento
+    if (normalized.includes('ganhos') && normalized.includes('prosperidade')) {
+      candidates.add('quiz-ganhos')
+      candidates.add('quiz-ganhos-prosperidade')
+      candidates.add('ganhos-prosperidade')
+      candidates.add('ganhos-e-prosperidade')
+    }
+    if (normalized.includes('ganhos') && !normalized.includes('prosperidade')) {
+      candidates.add('quiz-ganhos')
+      candidates.add('quiz-ganhos-prosperidade')
+      candidates.add('ganhos-prosperidade')
+    }
+    if (normalized.includes('potencial') && normalized.includes('crescimento')) {
+      candidates.add('quiz-potencial')
+      candidates.add('quiz-potencial-crescimento')
+      candidates.add('potencial-crescimento')
+      candidates.add('potencial-e-crescimento')
+    }
+    if (normalized.includes('proposito') && normalized.includes('equilibrio')) {
+      candidates.add('quiz-proposito')
+      candidates.add('quiz-proposito-equilibrio')
+      candidates.add('proposito-equilibrio')
+      candidates.add('proposito-e-equilibrio')
+    }
+    
+    // Variações para fome emocional
+    if (normalized.includes('fome') && (normalized.includes('emocional') || normalized.includes('tipo'))) {
+      candidates.add('tipo-fome')
+      candidates.add('quiz-fome-emocional')
+      candidates.add('fome-emocional')
+      candidates.add('hunger-type')
+    }
   })
 
   return Array.from(candidates).filter(Boolean)
 }
 
-const slugMatches = (candidate: string, key: string) =>
-  candidate === key || candidate.includes(key) || key.includes(candidate)
+const slugMatches = (candidate: string, key: string) => {
+  if (!candidate || !key) return false
+  
+  // Match exato
+  if (candidate === key) return true
+  
+  // Match parcial (um contém o outro)
+  if (candidate.includes(key) || key.includes(candidate)) return true
+  
+  // Match por palavras-chave comuns
+  const candidateWords = candidate.split('-').filter(w => w.length > 2)
+  const keyWords = key.split('-').filter(w => w.length > 2)
+  
+  // Se tiverem pelo menos 2 palavras em comum, considera match
+  const commonWords = candidateWords.filter(w => keyWords.includes(w))
+  if (commonWords.length >= 2) return true
+  
+  // Match para casos especiais (ex: "ganhos-prosperidade" vs "quiz-ganhos")
+  if (candidate.includes('ganhos') && key.includes('ganhos')) return true
+  if (candidate.includes('potencial') && key.includes('potencial')) return true
+  if (candidate.includes('proposito') && key.includes('proposito')) return true
+  if (candidate.includes('fome') && key.includes('fome')) return true
+  
+  return false
+}
 
 const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
   'quiz-interativo': wellnessDiagnostics.quizInterativoDiagnosticos,
@@ -80,23 +180,55 @@ const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
   'intolerancia': wellnessDiagnostics.intoleranciaDiagnosticos,
   'perfil-metabolico': wellnessDiagnostics.perfilMetabolicoDiagnosticos,
   'avaliacao-inicial': wellnessDiagnostics.avaliacaoInicialDiagnosticos,
+  'template-avaliacao-inicial': wellnessDiagnostics.avaliacaoInicialDiagnosticos,
   'diagnostico-eletrolitos': wellnessDiagnostics.eletrolitosDiagnosticos,
   'diagnostico-sintomas-intestinais': wellnessDiagnostics.sintomasIntestinaisDiagnosticos,
   'pronto-emagrecer': wellnessDiagnostics.prontoEmagrecerDiagnosticos,
   'tipo-fome': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'quiz-fome-emocional': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'fome-emocional': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'hunger-type': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'avaliacao-fome-emocional': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'quiz-tipo-fome': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'tipo-de-fome': wellnessDiagnostics.tipoFomeDiagnosticos,
   'alimentacao-saudavel': wellnessDiagnostics.alimentacaoSaudavelDiagnosticos,
+  'quiz-alimentacao-saudavel': wellnessDiagnostics.alimentacaoSaudavelDiagnosticos,
   'sindrome-metabolica': wellnessDiagnostics.sindromeMetabolicaDiagnosticos,
   'retencao-liquidos': wellnessDiagnostics.retencaoLiquidosDiagnosticos,
   'conhece-seu-corpo': wellnessDiagnostics.conheceSeuCorpoDiagnosticos,
   'nutrido-vs-alimentado': wellnessDiagnostics.nutridoVsAlimentadoDiagnosticos,
   'alimentacao-rotina': wellnessDiagnostics.alimentacaoRotinaDiagnosticos,
+  'avaliacao-perfil-metabolico': wellnessDiagnostics.perfilMetabolicoDiagnosticos,
+  'avaliacao-sono-energia': wellnessDiagnostics.quizEnergeticoDiagnosticos, // Usar diagnóstico similar
+  'disciplinado-emocional': wellnessDiagnostics.tipoFomeDiagnosticos,
+  'quiz-disciplina-emocional': wellnessDiagnostics.tipoFomeDiagnosticos,
   'ganhos-prosperidade': wellnessDiagnostics.ganhosProsperidadeDiagnosticos,
+  'quiz-ganhos': wellnessDiagnostics.ganhosProsperidadeDiagnosticos,
+  'quiz-ganhos-prosperidade': wellnessDiagnostics.ganhosProsperidadeDiagnosticos,
+  'ganhos e prosperidade': wellnessDiagnostics.ganhosProsperidadeDiagnosticos,
+  'ganhos-e-prosperidade': wellnessDiagnostics.ganhosProsperidadeDiagnosticos,
+  'quiz-ganhos-e-prosperidade': wellnessDiagnostics.ganhosProsperidadeDiagnosticos,
   'potencial-crescimento': wellnessDiagnostics.potencialCrescimentoDiagnosticos,
+  'quiz-potencial': wellnessDiagnostics.potencialCrescimentoDiagnosticos,
+  'quiz-potencial-crescimento': wellnessDiagnostics.potencialCrescimentoDiagnosticos,
   'proposito-equilibrio': wellnessDiagnostics.propositoEquilibrioDiagnosticos,
+  'quiz-proposito': wellnessDiagnostics.propositoEquilibrioDiagnosticos,
+  'quiz-proposito-equilibrio': wellnessDiagnostics.propositoEquilibrioDiagnosticos,
   'calculadora-imc': wellnessDiagnostics.calculadoraImcDiagnosticos,
+  'calc-imc': wellnessDiagnostics.calculadoraImcDiagnosticos,
+  'imc': wellnessDiagnostics.calculadoraImcDiagnosticos,
   'calculadora-proteina': wellnessDiagnostics.calculadoraProteinaDiagnosticos,
+  'calc-proteina': wellnessDiagnostics.calculadoraProteinaDiagnosticos,
+  'proteina': wellnessDiagnostics.calculadoraProteinaDiagnosticos,
   'calculadora-agua': wellnessDiagnostics.calculadoraAguaDiagnosticos,
+  'calculadora-hidratacao': wellnessDiagnostics.calculadoraAguaDiagnosticos,
+  'calc-hidratacao': wellnessDiagnostics.calculadoraAguaDiagnosticos,
+  'calc-agua': wellnessDiagnostics.calculadoraAguaDiagnosticos,
+  'hidratacao': wellnessDiagnostics.calculadoraAguaDiagnosticos,
+  'agua': wellnessDiagnostics.calculadoraAguaDiagnosticos,
   'calculadora-calorias': wellnessDiagnostics.calculadoraCaloriasDiagnosticos,
+  'calc-calorias': wellnessDiagnostics.calculadoraCaloriasDiagnosticos,
+  'calorias': wellnessDiagnostics.calculadoraCaloriasDiagnosticos,
   'checklist-alimentar': wellnessDiagnostics.checklistAlimentarDiagnosticos,
   'checklist-detox': wellnessDiagnostics.checklistDetoxDiagnosticos,
   'mini-ebook': wellnessDiagnostics.miniEbookDiagnosticos,
@@ -108,7 +240,6 @@ const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
   'wellness-profile': wellnessDiagnostics.quizBemEstarDiagnosticos,
   'descubra-seu-perfil-de-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
   'descoberta-perfil-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
-  'quiz-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
   'template-diagnostico-parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos,
   'diagnostico-parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos,
   'parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos
@@ -523,6 +654,13 @@ export default function DynamicTemplatePreview({
   const nome = template.nome || template.name || 'Template'
   const descricao = (template as any).description || (template as any).descricao || ''
   const diagnosticsInfo = getDiagnosticsInfoForTemplate(template, profession)
+  
+  // Obter configuração de CTA do template
+  const ctaConfig = (template as any).cta_config || content.cta_config || {
+    mensagem: '💬 Quer saber mais?',
+    botao: 'Saiba Mais',
+    tipo: 'whatsapp'
+  }
   const fallbackDiagnosticsSlug =
     diagnosticsInfo.slug ||
     normalizeSlug(template.slug || template.id || template.nome || template.name || '')
@@ -600,6 +738,47 @@ export default function DynamicTemplatePreview({
         </div>
       )
     })
+  }
+
+  // Renderizar CTA após diagnósticos
+  const renderCTA = () => {
+    const mensagem = ctaConfig.mensagem || '💬 Quer saber mais?'
+    const botaoTexto = ctaConfig.botao || 'Saiba Mais'
+    
+    return (
+      <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
+        {/* Mensagem explicativa - SEMPRE PRIMEIRO */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <p className="text-gray-700 text-sm leading-relaxed">
+            <strong>📋 O que acontece na ferramenta real:</strong>
+            <br />
+            A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+            <br />
+            Em seguida, virá a seguinte mensagem:
+          </p>
+        </div>
+        
+        {/* CTA - SEMPRE SEGUNDO */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
+          <p className="text-gray-700 font-medium mb-4 text-center text-lg">
+            {mensagem}
+          </p>
+          <div className="flex justify-center">
+            <button
+              className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg"
+              style={{
+                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)',
+                animation: 'pulse-subtle 2s ease-in-out infinite'
+              }}
+            >
+              <span className="mr-2">✨</span>
+              {botaoTexto}
+              <span className="ml-2">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
   
   // Debug: Log do content para verificar estrutura
@@ -1348,6 +1527,7 @@ export default function DynamicTemplatePreview({
                   Use este quadro como referência para orientar a conversa e preparar o plano de acompanhamento correspondente a cada resultado.
                 </p>
               </div>
+              {renderCTA()}
               {renderDiagnosticsCards()}
             </div>
           )}
@@ -1369,9 +1549,12 @@ export default function DynamicTemplatePreview({
                   onClick={() => setEtapaAtual(i)}
                   className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                     etapaAtual === i
-                      ? 'bg-purple-600 text-white'
+                      ? 'text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
+                  style={etapaAtual === i ? {
+                    background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                  } : {}}
                   title={labels[i] || `Etapa ${i}`}
                 >
                   {labels[i] || `${i}`}
@@ -1382,7 +1565,10 @@ export default function DynamicTemplatePreview({
             <button
               onClick={handleNext}
               disabled={etapaAtual === totalEtapas}
-              className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center px-4 py-2 text-white rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              style={{
+                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+              }}
             >
               Próxima →
             </button>
@@ -1551,15 +1737,15 @@ export default function DynamicTemplatePreview({
           
           <button
             onClick={() => setEtapaAtual(1)}
-            className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-              isImc ? 'bg-blue-600 hover:bg-blue-700' : 
-              isProteina ? 'bg-orange-600 hover:bg-orange-700' : 
-              isHidratacao ? 'bg-cyan-600 hover:bg-cyan-700' :
-              isCalorias ? 'bg-orange-600 hover:bg-orange-700' :
-              'bg-purple-600 hover:bg-purple-700'
-            }`}
+            className="w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)',
+              animation: 'pulse-subtle 2s ease-in-out infinite'
+            }}
           >
+            <span className="mr-2">✨</span>
             Iniciar Cálculo
+            <span className="ml-2">→</span>
           </button>
         </div>
       )
@@ -1677,6 +1863,7 @@ export default function DynamicTemplatePreview({
                 Esta prévia mostra exatamente o que sua cliente verá como resultado final, conforme os dados que ela preencher.
               </p>
             </div>
+            {renderCTA()}
             <div className="space-y-4">
               {renderDiagnosticsCards()}
             </div>
@@ -1729,7 +1916,10 @@ export default function DynamicTemplatePreview({
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="h-2 rounded-full bg-purple-600"
+                className="h-2 rounded-full"
+                style={{
+                  background: 'linear-gradient(90deg, #34d399 0%, #10b981 100%)'
+                }}
                 style={{ width: `${(etapaAtual / totalItens) * 100}%` }}
               />
             </div>
@@ -1744,7 +1934,7 @@ export default function DynamicTemplatePreview({
               {itemAtual.options.map((op: any, index: number) => (
                 <label
                   key={index}
-                  className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                  className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:border-green-300 hover:bg-green-50 transition-colors"
                 >
                   <input
                     type="checkbox"
@@ -1769,7 +1959,10 @@ export default function DynamicTemplatePreview({
             </button>
             <button
               onClick={() => setEtapaAtual(etapaAtual + 1)}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              className="px-4 py-2 text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-medium"
+              style={{
+                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+              }}
             >
               {etapaAtual === totalItens ? 'Ver Resultado' : 'Próxima →'}
             </button>
@@ -1782,23 +1975,55 @@ export default function DynamicTemplatePreview({
     if (etapaAtual > totalItens) {
       return (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Resultado
-          </h3>
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <p className="text-gray-700">
-              Resultado baseado nas respostas fornecidas.
-            </p>
+          <div className="space-y-6">
+            <div className="text-center space-y-1">
+              <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis</h4>
+              <p className="text-sm text-gray-600">
+                Esta prévia mostra exatamente o que sua cliente receberá como diagnóstico final, baseado nas respostas que ela informar no formulário original.
+              </p>
+              <p className="text-xs text-gray-500">
+                Use este quadro como referência para orientar a conversa e preparar o plano de acompanhamento correspondente a cada resultado.
+              </p>
+            </div>
+            
+            {/* Seção Azul Explicativa */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
+              <p className="text-sm text-blue-700 mb-2">
+                A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+              </p>
+              <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
+            </div>
+            
+            {/* CTA */}
+            {renderCTA()}
+            
+            {/* Diagnósticos */}
+            {renderDiagnosticsCards()}
           </div>
-          <button
-            onClick={() => {
-              setEtapaAtual(0)
-              setRespostas({})
-            }}
-            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-          >
-            Reiniciar Preview
-          </button>
+          
+          <div className="flex gap-3 mt-8">
+            <button
+              onClick={() => {
+                setEtapaAtual(0)
+                setRespostas({})
+              }}
+              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+            >
+              Reiniciar Preview
+            </button>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-medium"
+                style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                }}
+              >
+                Fechar
+              </button>
+            )}
+          </div>
         </div>
       )
     }
@@ -1897,16 +2122,13 @@ export default function DynamicTemplatePreview({
           
           <button
             onClick={() => setEtapaAtual(1)}
-            className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-              isCardapioDetox ? 'bg-green-600 hover:bg-green-700' : 
-              isTabelaComparativa ? 'bg-indigo-600 hover:bg-indigo-700' : 
-              isTabelaSubstituicoes ? 'bg-purple-600 hover:bg-purple-700' :
-              isMiniEbook ? 'bg-blue-600 hover:bg-blue-700' :
-              isGuiaNutraceutico ? 'bg-amber-600 hover:bg-amber-700' :
-              isGuiaProteico ? 'bg-red-600 hover:bg-red-700' :
-              'bg-teal-600 hover:bg-teal-700'
-            }`}
+            className="w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #86efac 0%, #4ade80 50%, #22c55e 100%)',
+              animation: 'pulse-subtle 2s ease-in-out infinite'
+            }}
           >
+            <span className="mr-2">✨</span>
             Explorar Conteúdo
           </button>
         </div>
@@ -2000,13 +2222,11 @@ export default function DynamicTemplatePreview({
               onClick={() => setEtapaAtual(etapaAtual + 1)}
               className={`px-4 py-2 text-white rounded-lg hover:opacity-90 ${
                 isCardapioDetox ? 'bg-green-600 hover:bg-green-700' : 
-                isTabelaComparativa ? 'bg-indigo-600 hover:bg-indigo-700' : 
-                isTabelaSubstituicoes ? 'bg-purple-600 hover:bg-purple-700' :
-                isMiniEbook ? 'bg-blue-600 hover:bg-blue-700' :
-                isGuiaNutraceutico ? 'bg-amber-600 hover:bg-amber-700' :
-                isGuiaProteico ? 'bg-red-600 hover:bg-red-700' :
-                'bg-teal-600 hover:bg-teal-700'
+                'text-white transition-all duration-300 transform hover:scale-105 font-medium'
               }`}
+              style={{
+                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+              }}
             >
               {etapaAtual === totalSecoes ? 'Ver Resumo' : 'Próxima →'}
             </button>
@@ -2019,18 +2239,34 @@ export default function DynamicTemplatePreview({
     if (etapaAtual > totalSecoes) {
       return (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            📋 Resumo do Conteúdo
-          </h3>
-          <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
-            <p className="text-gray-700 mb-3">
-              Você explorou todas as seções deste conteúdo completo.
-            </p>
-            <p className="text-sm text-gray-600">
-              No template real, você terá acesso ao conteúdo completo para download e uso prático.
-            </p>
+          <div className="space-y-6">
+            <div className="text-center space-y-1">
+              <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis</h4>
+              <p className="text-sm text-gray-600">
+                Esta prévia mostra exatamente o que sua cliente receberá como diagnóstico final, baseado nas respostas que ela informar no formulário original.
+              </p>
+              <p className="text-xs text-gray-500">
+                Use este quadro como referência para orientar a conversa e preparar o plano de acompanhamento correspondente a cada resultado.
+              </p>
+            </div>
+            
+            {/* Seção Azul Explicativa */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
+              <p className="text-sm text-blue-700 mb-2">
+                A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+              </p>
+              <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
+            </div>
+            
+            {/* CTA */}
+            {renderCTA()}
+            
+            {/* Diagnósticos */}
+            {renderDiagnosticsCards()}
           </div>
-          <div className="flex gap-3 mt-4">
+          
+          <div className="flex gap-3 mt-8">
             <button
               onClick={() => {
                 setEtapaAtual(0)
@@ -2043,7 +2279,10 @@ export default function DynamicTemplatePreview({
             {onClose && (
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+                className="flex-1 px-4 py-2 text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-medium"
+                style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                }}
               >
                 Fechar
               </button>
@@ -2066,18 +2305,18 @@ export default function DynamicTemplatePreview({
       const intro = getIntroContent()
       const isGuiaHidratacao = slug.includes('guia-hidratacao') || slug.includes('guia hidratacao') || (slug.includes('guia') && slug.includes('hidratacao'))
       
-      let gradientClass = 'from-blue-50 to-cyan-50 border-2 border-blue-200'
-      let borderClass = 'border-blue-200'
+      let gradientClass = 'from-blue-50 to-cyan-50'
+      let borderClass = 'border-2 border-blue-200'
       let textColorClass = 'text-blue-600'
       
       if (isGuiaHidratacao) {
-        gradientClass = 'from-blue-50 to-cyan-50 border-2 border-blue-200'
-        borderClass = 'border-blue-200'
+        gradientClass = 'from-blue-50 to-cyan-50'
+        borderClass = 'border-2 border-blue-200'
         textColorClass = 'text-blue-600'
       }
       
       return (
-        <div className={`bg-gradient-to-r ${gradientClass} p-6 rounded-lg`}>
+        <div className={`bg-gradient-to-r ${gradientClass} p-6 rounded-lg ${borderClass}`}>
           <h4 className="text-xl font-bold text-gray-900 mb-2">{intro.titulo}</h4>
           {intro.descricao && (
             <p className="text-gray-700 mb-3">{intro.descricao}</p>
@@ -2161,7 +2400,10 @@ export default function DynamicTemplatePreview({
             </button>
             <button
               onClick={() => setEtapaAtual(etapaAtual + 1)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-medium"
+              style={{
+                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+              }}
             >
               {etapaAtual === totalSecoes && !temFormulario ? 'Ver Resultado' : 'Próxima →'}
             </button>
@@ -2180,7 +2422,11 @@ export default function DynamicTemplatePreview({
                 <h4 className="text-2xl font-bold text-gray-900 mb-2">📝 Formulário de Avaliação</h4>
                 <p className="text-gray-700">Preencha as informações para receber seu guia personalizado.</p>
               </div>
-              <span className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
+              <span className="text-white px-4 py-2 rounded-full text-sm font-semibold"
+                style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                }}
+              >
                 Etapa {totalSecoes + 1}
               </span>
             </div>
@@ -2256,9 +2502,15 @@ export default function DynamicTemplatePreview({
               <button
                 type="button"
                 onClick={() => setEtapaAtual(etapaAtual + 1)}
-                className="w-full mt-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
+                className="w-full mt-6 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl shadow-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)',
+                  animation: 'pulse-subtle 2s ease-in-out infinite'
+                }}
               >
-                Gerar Meu Guia →
+                <span className="mr-2">✨</span>
+                Gerar Meu Guia
+                <span className="ml-2">→</span>
               </button>
             </div>
           </div>
@@ -2271,6 +2523,7 @@ export default function DynamicTemplatePreview({
       return (
         <div className="space-y-6">
           <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Diagnósticos Possíveis</h4>
+          {renderCTA()}
           {renderDiagnosticsCards()}
           <div className="flex justify-between mt-6">
             <button
@@ -2285,7 +2538,10 @@ export default function DynamicTemplatePreview({
                 setRespostas({})
                 setFormData({})
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-6 py-2 text-white rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg font-medium"
+              style={{
+                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+              }}
             >
               Reiniciar Preview
             </button>

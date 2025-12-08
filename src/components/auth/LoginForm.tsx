@@ -27,9 +27,28 @@ export default function LoginForm({
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isSignUp, setIsSignUp] = useState(initialSignUpMode)
   const [name, setName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+
+  // Verificar parâmetros da URL para mensagens de sucesso
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('password_changed') === 'success') {
+        setSuccessMessage('Senha alterada com sucesso! Faça login com sua nova senha.')
+        // Limpar parâmetro da URL
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, '', newUrl)
+      } else if (params.get('password_reset') === 'success') {
+        setSuccessMessage('Senha redefinida com sucesso! Faça login com sua nova senha.')
+        // Limpar parâmetro da URL
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, '', newUrl)
+      }
+    }
+  }, [])
 
   // 🚀 CORREÇÃO: Verificar autenticação apenas UMA VEZ ao carregar (sem loop)
   useEffect(() => {
@@ -368,6 +387,12 @@ export default function LoginForm({
               </button>
             </div>
           </div>
+
+          {successMessage && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+              {successMessage}
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">

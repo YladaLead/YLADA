@@ -79,11 +79,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Limpar senha provisória após troca bem-sucedida
+    const { error: profileUpdateError } = await supabaseAdmin
+      .from('user_profiles')
+      .update({ temporary_password_expires_at: null })
+      .eq('user_id', user.id)
+
+    if (profileUpdateError) {
+      console.warn('⚠️ Erro ao limpar senha provisória (não crítico):', profileUpdateError)
+      // Não falhar a requisição se isso der erro, pois a senha já foi alterada
+    } else {
+      console.log(`✅ Senha provisória limpa para ${user.email}`)
+    }
+
     console.log(`✅ Senha atualizada com sucesso para ${user.email}`)
 
     return NextResponse.json({
       success: true,
-      message: 'Senha atualizada com sucesso'
+      message: 'Senha atualizada com sucesso',
+      requiresLogout: true // Flag para indicar que logout é necessário
     })
   } catch (error: any) {
     console.error('❌ Erro ao alterar senha:', error)

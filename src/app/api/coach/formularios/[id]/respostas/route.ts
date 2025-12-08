@@ -47,6 +47,10 @@ export async function GET(
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
 
+    // Buscar parâmetro para marcar como visualizada
+    const { searchParams } = new URL(request.url)
+    const markAsViewed = searchParams.get('mark_as_viewed') !== 'false' // Por padrão, marca como visualizada
+
     // Construir query
     let query = supabaseAdmin
       .from('form_responses')
@@ -57,6 +61,7 @@ export async function GET(
         responses,
         completed_at,
         created_at,
+        viewed,
         ip_address,
         user_agent,
         clients (
@@ -89,6 +94,17 @@ export async function GET(
         { error: 'Erro ao buscar respostas', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
         { status: 500 }
       )
+    }
+
+    // Marcar respostas como visualizadas se solicitado
+    if (markAsViewed && responses && responses.length > 0) {
+      const responseIds = responses.map((r: any) => r.id)
+      await supabaseAdmin
+        .from('form_responses')
+        .update({ viewed: true })
+        .eq('form_id', formId)
+        .eq('user_id', authenticatedUserId)
+        .in('id', responseIds)
     }
 
     // Buscar estatísticas

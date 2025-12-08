@@ -313,6 +313,9 @@ function NovaFerramentaWellnessContent() {
   // Sugerir dados ao selecionar template (apenas na primeira vez, não sobrescreve se usuário já editou)
   useEffect(() => {
     if (templateSelecionado) {
+      // Verificar se é Quiz Personalizado
+      const isQuizPersonalizado = templateSelecionado.slug === 'quiz-personalizado' || templateSelecionado.templateId === 'quiz-personalizado'
+      
       // Emoji: só sugere se campo estiver vazio E usuário ainda não editou manualmente
       if (!configuracao.emoji && !emojiEditadoManual) {
         setConfiguracao(prev => ({ ...prev, emoji: templateSelecionado.icon }))
@@ -320,11 +323,23 @@ function NovaFerramentaWellnessContent() {
       if (!configuracao.tituloProjeto) {
         // Sugerir título baseado no nome do template (com acentos)
         const tituloSugerido = templateSelecionado.nome
-        const slugSugerido = tratarUrl(tituloSugerido)
+        
+        // Para ferramentas padrão (não Quiz Personalizado), usar template_slug diretamente
+        // Para Quiz Personalizado, gerar slug a partir do título
+        const slugSugerido = isQuizPersonalizado 
+          ? tratarUrl(tituloSugerido)
+          : templateSelecionado.slug // Usar template_slug diretamente
+        
         setConfiguracao(prev => ({ 
           ...prev, 
           tituloProjeto: tituloSugerido,
           urlPersonalizada: slugSugerido 
+        }))
+      } else if (!isQuizPersonalizado) {
+        // Se não é Quiz Personalizado, sempre usar template_slug (não permitir customização)
+        setConfiguracao(prev => ({ 
+          ...prev, 
+          urlPersonalizada: templateSelecionado.slug 
         }))
       }
     }
@@ -334,6 +349,9 @@ function NovaFerramentaWellnessContent() {
   // Atualizar URL completa automaticamente e validar disponibilidade
   useEffect(() => {
     if (configuracao.urlPersonalizada && templateSelecionado) {
+      // Verificar se é Quiz Personalizado
+      const isQuizPersonalizado = templateSelecionado.slug === 'quiz-personalizado' || templateSelecionado.templateId === 'quiz-personalizado'
+      
       // Usar user_slug do perfil, ou fallback se não tiver
       const urlNome = userSlug || 'seu-usuario' // Fallback temporário até ter user_slug
       const baseUrl = getAppUrl().replace(/^https?:\/\//, '') // Remove protocolo para exibição
@@ -345,12 +363,14 @@ function NovaFerramentaWellnessContent() {
         urlCompleta: url
       }))
       
-      // Validar disponibilidade via API (debounce)
-      const timeoutId = setTimeout(() => {
-        validarUrl(slugTratado)
-      }, 500) // Aguarda 500ms após parar de digitar
+      // Validar disponibilidade via API (debounce) - apenas para Quiz Personalizado
+      if (isQuizPersonalizado) {
+        const timeoutId = setTimeout(() => {
+          validarUrl(configuracao.urlPersonalizada)
+        }, 500) // Aguarda 500ms após parar de digitar
 
-      return () => clearTimeout(timeoutId)
+        return () => clearTimeout(timeoutId)
+      }
     }
   }, [configuracao.urlPersonalizada, templateSelecionado, userSlug])
 
@@ -853,20 +873,34 @@ function NovaFerramentaWellnessContent() {
                             value={configuracao.tituloProjeto}
                             onChange={(e) => {
                               const tituloOriginal = e.target.value
-                              // Gerar slug automaticamente a partir do título
-                              const slugGerado = tratarUrl(tituloOriginal)
                               
-                              // Se foi normalizado, mostrar aviso
-                              if (tituloOriginal !== slugGerado && tituloOriginal.length > 0) {
-                                setSlugNormalizado(true)
-                                setTimeout(() => setSlugNormalizado(false), 3000) // Esconde após 3s
+                              // Verificar se é Quiz Personalizado
+                              const isQuizPersonalizado = templateSelecionado?.slug === 'quiz-personalizado' || templateSelecionado?.templateId === 'quiz-personalizado'
+                              
+                              // Para Quiz Personalizado: gerar slug a partir do título
+                              // Para outras ferramentas: manter template_slug fixo
+                              if (isQuizPersonalizado) {
+                                const slugGerado = tratarUrl(tituloOriginal)
+                                
+                                // Se foi normalizado, mostrar aviso
+                                if (tituloOriginal !== slugGerado && tituloOriginal.length > 0) {
+                                  setSlugNormalizado(true)
+                                  setTimeout(() => setSlugNormalizado(false), 3000) // Esconde após 3s
+                                }
+                                
+                                setConfiguracao({ 
+                                  ...configuracao, 
+                                  tituloProjeto: tituloOriginal, // Mantém título original com acentos
+                                  urlPersonalizada: slugGerado // Gera slug automaticamente
+                                })
+                              } else {
+                                // Para ferramentas padrão: apenas atualizar título, slug permanece fixo
+                                setConfiguracao({ 
+                                  ...configuracao, 
+                                  tituloProjeto: tituloOriginal
+                                  // urlPersonalizada não muda - sempre usa template_slug
+                                })
                               }
-                              
-                              setConfiguracao({ 
-                                ...configuracao, 
-                                tituloProjeto: tituloOriginal, // Mantém título original com acentos
-                                urlPersonalizada: slugGerado // Gera slug automaticamente
-                              })
                             }}
                             placeholder="Ex: Calculadora de Água"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -876,19 +910,31 @@ function NovaFerramentaWellnessContent() {
                           </p>
                           
                           {/* Mostrar preview do slug gerado */}
-                          {configuracao.urlPersonalizada && (
+                          {configuracao.urlPersonalizada && templateSelecionado && (
                             <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                              <p className="text-xs text-gray-600 mb-1">
-                                <strong>🔗 Slug para URL (gerado automaticamente):</strong>
-                              </p>
-                              <p className="text-sm font-mono text-gray-800 bg-white px-2 py-1 rounded border border-gray-300">
-                                {configuracao.urlPersonalizada}
-                              </p>
-                              {slugNormalizado && (
-                                <p className="text-xs text-blue-600 mt-2">
-                                  ℹ️ O slug foi normalizado automaticamente (acentos e espaços removidos para a URL)
-                                </p>
-                              )}
+                              {(() => {
+                                const isQuizPersonalizado = templateSelecionado.slug === 'quiz-personalizado' || templateSelecionado.templateId === 'quiz-personalizado'
+                                return (
+                                  <>
+                                    <p className="text-xs text-gray-600 mb-1">
+                                      <strong>🔗 Slug para URL {isQuizPersonalizado ? '(gerado automaticamente)' : '(padrão da ferramenta)'}:</strong>
+                                    </p>
+                                    <p className="text-sm font-mono text-gray-800 bg-white px-2 py-1 rounded border border-gray-300">
+                                      {configuracao.urlPersonalizada}
+                                    </p>
+                                    {!isQuizPersonalizado && (
+                                      <p className="text-xs text-blue-600 mt-2">
+                                        ℹ️ Este slug é padrão para esta ferramenta e não pode ser alterado. Cada ferramenta tem seu próprio slug único.
+                                      </p>
+                                    )}
+                                    {slugNormalizado && isQuizPersonalizado && (
+                                      <p className="text-xs text-blue-600 mt-2">
+                                        ℹ️ O slug foi normalizado automaticamente (acentos e espaços removidos para a URL)
+                                      </p>
+                                    )}
+                                  </>
+                                )
+                              })()}
                             </div>
                           )}
                           

@@ -32,9 +32,6 @@ function QRCode({ url, size = 200, className = '' }: QRCodeProps) {
         style={{ width: size, height: size }}
         onError={() => setError(true)}
       />
-      <p className="text-xs text-gray-500 mt-2 text-center max-w-[200px] break-all">
-        {url}
-      </p>
     </div>
   )
 }

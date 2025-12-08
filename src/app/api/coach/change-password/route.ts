@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
-// POST - Trocar senha do usuário Nutri
+// POST - Trocar senha do usuário Coach
 export async function POST(request: NextRequest) {
   try {
     const authResult = await requireApiAuth(request, ['coach', 'admin'])
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (signInError || !signInData.session) {
-      console.error('❌ Erro ao verificar senha atual Nutri:', signInError)
+      console.error('❌ Erro ao verificar senha atual Coach:', signInError)
       return NextResponse.json(
         { error: 'Senha atual incorreta' },
         { status: 401 }
@@ -72,21 +72,35 @@ export async function POST(request: NextRequest) {
     )
 
     if (updateError) {
-      console.error('❌ Erro ao atualizar senha Nutri:', updateError)
+      console.error('❌ Erro ao atualizar senha Coach:', updateError)
       return NextResponse.json(
         { error: 'Erro ao atualizar senha', details: updateError.message },
         { status: 500 }
       )
     }
 
-    console.log(`✅ Senha Nutri atualizada com sucesso para ${user.email}`)
+    // Limpar senha provisória após troca bem-sucedida
+    const { error: profileUpdateError } = await supabaseAdmin
+      .from('user_profiles')
+      .update({ temporary_password_expires_at: null })
+      .eq('user_id', user.id)
+
+    if (profileUpdateError) {
+      console.warn('⚠️ Erro ao limpar senha provisória (não crítico):', profileUpdateError)
+      // Não falhar a requisição se isso der erro, pois a senha já foi alterada
+    } else {
+      console.log(`✅ Senha provisória limpa para ${user.email}`)
+    }
+
+    console.log(`✅ Senha Coach atualizada com sucesso para ${user.email}`)
 
     return NextResponse.json({
       success: true,
-      message: 'Senha atualizada com sucesso'
+      message: 'Senha atualizada com sucesso',
+      requiresLogout: true // Flag para indicar que logout é necessário
     })
   } catch (error: any) {
-    console.error('❌ Erro ao alterar senha Nutri:', error)
+    console.error('❌ Erro ao alterar senha Coach:', error)
     return NextResponse.json(
       { error: error.message || 'Erro ao alterar senha' },
       { status: 500 }

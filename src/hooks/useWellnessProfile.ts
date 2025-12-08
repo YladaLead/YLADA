@@ -27,6 +27,12 @@ export function useWellnessProfile() {
       return
     }
 
+    let isMounted = true
+    const abortController = new AbortController()
+    const timeoutId = setTimeout(() => {
+      abortController.abort()
+    }, 10000) // 10 segundos de timeout
+
     const fetchProfile = async () => {
       try {
         setLoading(true)
@@ -34,14 +40,19 @@ export function useWellnessProfile() {
 
         const response = await fetch('/api/wellness/profile', {
           credentials: 'include',
-          cache: 'no-store'
+          cache: 'no-store',
+          signal: abortController.signal
         })
+
+        if (!isMounted) return
 
         if (!response.ok) {
           throw new Error('Erro ao carregar perfil')
         }
 
         const data = await response.json()
+        
+        if (!isMounted) return
         
         if (data.profile) {
           setProfile({
@@ -54,14 +65,29 @@ export function useWellnessProfile() {
           })
         }
       } catch (err: any) {
-        console.error('Erro ao buscar perfil Wellness:', err)
-        setError(err.message || 'Erro ao carregar perfil')
+        if (!isMounted) return
+        
+        // Ignorar erros de abort (timeout)
+        if (err.name === 'AbortError') {
+          console.warn('Timeout ao carregar perfil Wellness')
+        } else {
+          console.error('Erro ao buscar perfil Wellness:', err)
+          setError(err.message || 'Erro ao carregar perfil')
+        }
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     fetchProfile()
+
+    return () => {
+      isMounted = false
+      clearTimeout(timeoutId)
+      abortController.abort()
+    }
   }, [user])
 
   return { profile, loading, error }

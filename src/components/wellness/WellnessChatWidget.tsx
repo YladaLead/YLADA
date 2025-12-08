@@ -22,6 +22,22 @@ interface WellnessChatWidgetProps {
 
 export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: WellnessChatWidgetProps = {} as WellnessChatWidgetProps) {
   const [aberto, setAberto] = useState(defaultOpen)
+
+  // Reagir a mudanças no defaultOpen para abrir o chat quando solicitado
+  useEffect(() => {
+    if (defaultOpen) {
+      setAberto(true)
+    }
+  }, [defaultOpen])
+
+  // Forçar abertura quando defaultOpen mudar de false para true
+  const prevDefaultOpen = useRef(defaultOpen)
+  useEffect(() => {
+    if (!prevDefaultOpen.current && defaultOpen) {
+      setAberto(true)
+    }
+    prevDefaultOpen.current = defaultOpen
+  }, [defaultOpen])
   const [chatbotSelecionado, setChatbotSelecionado] = useState<string>(chatbotId || '')
   const [mostrarSelecaoInicial, setMostrarSelecaoInicial] = useState(!chatbotId) // Mostrar seleção se não tiver chatbot pré-definido
   const chatbotConfig = chatbotSelecionado ? getChatbotConfig(chatbotSelecionado) : null
@@ -192,10 +208,11 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
         </button>
       )}
 
-      {/* Chat Widget */}
+      {/* Chat Widget - Sempre flutuante, nunca sidebar */}
       {aberto && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col"
-          style={{ height: '600px', maxHeight: 'calc(100vh - 6rem)' }}>
+        <div 
+          className="fixed z-50 bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col md:bottom-6 md:right-6 bottom-0 right-0 left-0 md:left-auto top-0 md:top-auto w-full md:w-[420px] md:max-w-[calc(100vw-48px)] h-full md:h-[600px] md:max-h-[calc(100vh-48px)] rounded-none md:rounded-xl"
+        >
           {/* Header */}
           <div 
             className="text-white p-4 rounded-t-xl flex items-center justify-between"
@@ -232,18 +249,34 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
                 </div>
               )}
             </div>
-            <button
-              onClick={() => {
-                setAberto(false)
-                setMostrarOrientacao(null)
-                setMostrarSelecaoInicial(true)
-                setChatbotSelecionado('')
-                setMensagens([])
-              }}
-              className="text-white hover:text-gray-200 text-2xl"
-            >
-              ×
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Botão para voltar à Home */}
+              <button
+                onClick={() => {
+                  window.location.href = '/pt/wellness/home'
+                }}
+                className="text-white hover:text-gray-200 transition-colors p-1 rounded hover:bg-white/10"
+                title="Voltar à Home"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </button>
+              {/* Botão para fechar/minimizar */}
+              <button
+                onClick={() => {
+                  setAberto(false)
+                  setMostrarOrientacao(null)
+                  setMostrarSelecaoInicial(true)
+                  setChatbotSelecionado('')
+                  setMensagens([])
+                }}
+                className="text-white hover:text-gray-200 text-2xl"
+                title="Fechar chat"
+              >
+                ×
+              </button>
+            </div>
           </div>
 
           {/* Seleção de Chatbot */}

@@ -281,7 +281,7 @@ export const WELLNESS_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     id: 'relatorios',
     titulo: 'Estatísticas e Relatórios',
     descricao: 'Visualize estatísticas básicas das suas ferramentas no Dashboard',
-    caminho: '/pt/wellness/dashboard',
+    caminho: '/pt/wellness/home',
     passo_a_passo: [
       '1. Acesse o Dashboard',
       '2. Role até a seção de estatísticas',
@@ -456,7 +456,7 @@ export const WELLNESS_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     id: 'dashboard',
     titulo: 'Dashboard',
     descricao: 'Acesse o painel principal com visão geral e ações rápidas',
-    caminho: '/pt/wellness/dashboard',
+    caminho: '/pt/wellness/home',
     passo_a_passo: [
       '1. Após fazer login, você será direcionado ao Dashboard',
       '2. No Dashboard você verá:',

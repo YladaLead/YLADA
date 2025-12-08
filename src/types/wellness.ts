@@ -15,6 +15,7 @@ export interface ToolConfig {
   external_url?: string
   cta_button_text?: string
   custom_whatsapp_message?: string
+  template_slug?: string // Slug do template para identificar mensagem automática
   country_code?: string // Código do país (ex: 'US', 'BR', 'OTHER')
   show_whatsapp_button?: boolean // Mostrar botão WhatsApp pequeno ao lado do CTA principal
   leader_data_collection?: {

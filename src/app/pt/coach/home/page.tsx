@@ -49,6 +49,11 @@ function CoachHomeContent() {
   const [carregandoDados, setCarregandoDados] = useState(true)
   const [chatAberto, setChatAberto] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [novosFormularios, setNovosFormularios] = useState({
+    total: 0,
+    por_formulario: [] as Array<{ form_id: string; form_name: string; count: number }>
+  })
+  const [carregandoFormularios, setCarregandoFormularios] = useState(false)
 
   // Carregar perfil do usuário
   useEffect(() => {
@@ -90,6 +95,40 @@ function CoachHomeContent() {
 
     carregarPerfil()
   }, [user, userProfile])
+
+  // Carregar notificações de novos formulários
+  useEffect(() => {
+    if (!user) return
+
+    const carregarNovosFormularios = async () => {
+      try {
+        setCarregandoFormularios(true)
+        const response = await fetch('/api/coach/formularios/respostas/novas', {
+          credentials: 'include'
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            setNovosFormularios({
+              total: data.data.total || 0,
+              por_formulario: data.data.por_formulario || []
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar novos formulários:', error)
+      } finally {
+        setCarregandoFormularios(false)
+      }
+    }
+
+    carregarNovosFormularios()
+    
+    // Atualizar a cada 60 segundos
+    const interval = setInterval(carregarNovosFormularios, 60000)
+    return () => clearInterval(interval)
+  }, [user])
 
   // Carregar dados do dashboard
   useEffect(() => {
@@ -217,6 +256,34 @@ function CoachHomeContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
+          {/* Notificação de Novos Formulários */}
+          {novosFormularios.total > 0 && (
+            <div className="mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-4 sm:p-6 text-white shadow-lg animate-pulse">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl">🔔</div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold">
+                      Você tem {novosFormularios.total} novo{novosFormularios.total > 1 ? 's' : ''} formulário{novosFormularios.total > 1 ? 's' : ''} preenchido{novosFormularios.total > 1 ? 's' : ''}!
+                    </h3>
+                    {novosFormularios.por_formulario.length > 0 && (
+                      <p className="text-sm text-yellow-50 mt-1">
+                        {novosFormularios.por_formulario.slice(0, 3).map(f => `${f.form_name} (${f.count})`).join(', ')}
+                        {novosFormularios.por_formulario.length > 3 && '...'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <Link
+                  href="/pt/coach/formularios"
+                  className="px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-semibold text-sm sm:text-base whitespace-nowrap"
+                >
+                  Ver Formulários →
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Hero Section - Boas-vindas */}
           <div className="mb-8 bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 sm:p-8 text-white shadow-lg">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">

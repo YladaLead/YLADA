@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
@@ -10,7 +11,8 @@ import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { translateError } from '@/lib/error-messages'
 
 export default function WellnessConfiguracaoPage() {
-  const { user, userProfile } = useAuth()
+  const router = useRouter()
+  const { user, userProfile, signOut } = useAuth()
   const authenticatedFetch = useAuthenticatedFetch()
   const [perfil, setPerfil] = useState({
     nome: '',
@@ -24,6 +26,7 @@ export default function WellnessConfiguracaoPage() {
   const [slugDisponivel, setSlugDisponivel] = useState(true)
   const [slugValidando, setSlugValidando] = useState(false)
   const [slugNormalizado, setSlugNormalizado] = useState(false)
+  const [slugSugestoes, setSlugSugestoes] = useState<string[]>([])
   const [salvando, setSalvando] = useState(false)
   const [salvoComSucesso, setSalvoComSucesso] = useState(false)
   const [carregando, setCarregando] = useState(true)
@@ -40,14 +43,18 @@ export default function WellnessConfiguracaoPage() {
   const [subscription, setSubscription] = useState<any>(null)
   const [carregandoAssinatura, setCarregandoAssinatura] = useState(true)
 
-  // Função para tratar slug (lowercase, sem espaços/acentos, SEM hífens - apenas um nome unificado)
+  // Função para tratar slug (lowercase, sem espaços/acentos, COM hífens - formato nome-sobrenome)
   const tratarSlug = (texto: string): string => {
     return texto
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-      .replace(/[^a-z0-9]/g, '') // Remove TUDO que não é letra/número (incluindo hífens e espaços)
-      .substring(0, 30) // Limitar a 30 caracteres
+      .replace(/[^a-z0-9\s-]/g, '') // Remove tudo exceto letras, números, espaços e hífens
+      .trim() // Remove espaços no início e fim
+      .replace(/\s+/g, '-') // Substitui espaços por hífens
+      .replace(/-+/g, '-') // Remove hífens duplicados
+      .replace(/^-|-$/g, '') // Remove hífens no início e fim
+      .substring(0, 50) // Limitar a 50 caracteres (nome-sobrenome pode ser maior)
   }
 
   // Validar disponibilidade do slug
@@ -75,10 +82,27 @@ export default function WellnessConfiguracaoPage() {
       if (response.ok) {
         const data = await response.json()
         // Se não existe OU se existe mas é do próprio usuário, está disponível
-        setSlugDisponivel(!data.exists || data.isOwn)
+        const disponivel = !data.exists || data.isOwn
+        setSlugDisponivel(disponivel)
+        
+        // Se não está disponível, gerar sugestões
+        if (!disponivel && slugTratado) {
+          const sugestoes: string[] = []
+          // Adicionar números no final
+          for (let i = 1; i <= 3; i++) {
+            sugestoes.push(`${slugTratado}-${i}`)
+          }
+          // Adicionar ano atual
+          const ano = new Date().getFullYear().toString().slice(-2)
+          sugestoes.push(`${slugTratado}-${ano}`)
+          setSlugSugestoes(sugestoes)
+        } else {
+          setSlugSugestoes([])
+        }
       } else {
         // Se erro na API, assume disponível se tem pelo menos 3 caracteres
         setSlugDisponivel(slugTratado.length >= 3)
+        setSlugSugestoes([])
       }
     } catch (error) {
       setSlugDisponivel(false)
@@ -90,9 +114,21 @@ export default function WellnessConfiguracaoPage() {
   // Atualizar slug automaticamente ao mudar nome (apenas se slug estiver vazio)
   useEffect(() => {
     if (!perfil.userSlug && perfil.nome) {
-      const sugestao = tratarSlug(perfil.nome)
-      if (sugestao) {
-        setPerfil(prev => ({ ...prev, userSlug: sugestao }))
+      // Tentar extrair nome e sobrenome do nome completo
+      const partesNome = perfil.nome.trim().split(/\s+/)
+      if (partesNome.length >= 2) {
+        // Se tem nome e sobrenome, usar os dois primeiros
+        const nomeCompleto = `${partesNome[0]} ${partesNome[1]}`
+        const sugestao = tratarSlug(nomeCompleto)
+        if (sugestao) {
+          setPerfil(prev => ({ ...prev, userSlug: sugestao }))
+        }
+      } else {
+        // Se só tem um nome, usar ele mesmo
+        const sugestao = tratarSlug(perfil.nome)
+        if (sugestao) {
+          setPerfil(prev => ({ ...prev, userSlug: sugestao }))
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -393,7 +429,7 @@ export default function WellnessConfiguracaoPage() {
                       ? 'border-green-300 focus:ring-green-500' 
                       : 'border-red-300 focus:ring-red-500'
                   }`}
-                  placeholder="joaosilva"
+                  placeholder="joao-silva"
                 />
                 {slugValidando ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
@@ -403,6 +439,29 @@ export default function WellnessConfiguracaoPage() {
                   <span className="text-red-600 text-sm">✗ Indisponível</span>
                 ) : null}
               </div>
+              {/* Sugestões de slug alternativo */}
+              {slugSugestoes.length > 0 && (
+                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-xs text-yellow-800 mb-2 font-medium">
+                    ⚠️ Este slug já está em uso. Sugestões disponíveis:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {slugSugestoes.map((sugestao, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          setPerfil({...perfil, userSlug: sugestao})
+                          setSlugSugestoes([])
+                        }}
+                        className="px-3 py-1 text-xs bg-white border border-yellow-300 rounded hover:bg-yellow-100 text-yellow-800 font-medium"
+                      >
+                        {sugestao}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {slugNormalizado && (
                 <div className="mt-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-xs text-blue-800">
@@ -410,14 +469,43 @@ export default function WellnessConfiguracaoPage() {
                   </p>
                 </div>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Este slug será usado nas suas URLs: ylada.app/wellness/<strong>{perfil.userSlug || 'seuslug'}</strong>/[nome-ferramenta]
+              {/* Preview da URL */}
+              {perfil.userSlug && (
+                <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1 font-medium">Como vai aparecer sua URL:</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm text-gray-800 bg-white px-2 py-1 rounded border border-gray-300 flex-1">
+                      ylada.app/wellness/<strong className="text-green-600">{perfil.userSlug}</strong>/calculadora-agua
+                    </code>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        const url = `ylada.app/wellness/${perfil.userSlug}/calculadora-agua`
+                        navigator.clipboard.writeText(url)
+                        // Mostrar feedback
+                        const btn = e.currentTarget
+                        const originalText = btn.textContent
+                        btn.textContent = '✓ Copiado!'
+                        setTimeout(() => {
+                          btn.textContent = originalText
+                        }, 2000)
+                      }}
+                      className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded border border-gray-300"
+                      title="Copiar exemplo de URL"
+                    >
+                      📋
+                    </button>
+                  </div>
+                </div>
+              )}
+              <p className="text-xs text-gray-500 mt-2">
+                <strong>Formato:</strong> nome-sobrenome (ex: joao-silva, maria-santos)
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 • Será normalizado automaticamente enquanto você digita<br/>
-                • <strong>Apenas um nome único</strong> - sem hífens, sem espaços<br/>
-                • Apenas letras minúsculas e números (ex: joaosilva, aracy, maria123)<br/>
-                • Será usado para criar seus links personalizados
+                • <strong>Formato nome-sobrenome</strong> - use hífens para separar (ex: joao-silva)<br/>
+                • Apenas letras minúsculas, números e hífens<br/>
+                • Será usado para criar seus links personalizados automaticamente
               </p>
             </div>
             <button 
@@ -757,14 +845,19 @@ export default function WellnessConfiguracaoPage() {
                     throw new Error(data.error || 'Erro ao alterar senha')
                   }
 
+                  // Senha alterada com sucesso
                   setSucessoSenha(true)
                   setSenhaAtual('')
                   setNovaSenha('')
                   setConfirmarSenha('')
 
-                  setTimeout(() => {
-                    setSucessoSenha(false)
-                  }, 5000)
+                  // Mostrar mensagem e fazer logout após 2 segundos
+                  setTimeout(async () => {
+                    // Fazer logout para invalidar sessão antiga
+                    await signOut()
+                    // Redirecionar para login com mensagem de sucesso
+                    router.push('/pt/wellness/login?password_changed=success')
+                  }, 2000)
                 } catch (err: any) {
                   console.error('Erro ao alterar senha:', err)
                   setErroSenha(err.message || 'Erro ao alterar senha')

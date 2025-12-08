@@ -235,7 +235,7 @@ function BemVindoContent() {
         // Aguardar 3 segundos para garantir que a mensagem seja vista antes de redirecionar
         setTimeout(() => {
           console.log('🔄 Redirecionando para Home...')
-          router.push('/pt/wellness/dashboard')
+          router.push('/pt/wellness/home')
         }, 3000)
       } else {
         console.error('❌ Erro ao salvar perfil:', data)

@@ -172,6 +172,30 @@ export async function PUT(request: NextRequest) {
 
     // Verificar se user_slug já existe para outro usuário
     if (userSlug) {
+      // Validar formato: apenas letras minúsculas, números e hífens
+      const slugRegex = /^[a-z0-9]+(-[a-z0-9]+)*$/
+      if (!slugRegex.test(userSlug)) {
+        return NextResponse.json(
+          { error: 'O nome da URL deve conter apenas letras minúsculas, números e hífens. Formato: nome-sobrenome (ex: joao-silva)' },
+          { status: 400 }
+        )
+      }
+      
+      // Validar comprimento mínimo e máximo
+      if (userSlug.length < 3) {
+        return NextResponse.json(
+          { error: 'O nome da URL deve ter pelo menos 3 caracteres.' },
+          { status: 400 }
+        )
+      }
+      
+      if (userSlug.length > 50) {
+        return NextResponse.json(
+          { error: 'O nome da URL deve ter no máximo 50 caracteres.' },
+          { status: 400 }
+        )
+      }
+      
       // Lista de palavras reservadas que não podem ser usadas como user_slug
       const palavrasReservadas = ['portal', 'ferramenta', 'ferramentas', 'home', 'configuracao', 'configuracoes', 'perfil', 'admin', 'api', 'pt', 'c', 'coach', 'nutri', 'wellness', 'nutra']
       

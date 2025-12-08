@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
@@ -10,7 +11,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { translateError } from '@/lib/error-messages'
 
 function CoachConfiguracaoContent() {
-  const { user, userProfile } = useAuth()
+  const router = useRouter()
+  const { user, userProfile, signOut } = useAuth()
   const [perfil, setPerfil] = useState({
     nome: '',
     email: '',
@@ -621,7 +623,7 @@ function CoachConfiguracaoContent() {
 
                 try {
                   setSalvandoSenha(true)
-                  const response = await fetch('/api/c/change-password', {
+                  const response = await fetch('/api/coach/change-password', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
@@ -633,20 +635,32 @@ function CoachConfiguracaoContent() {
                     }),
                   })
 
-                  const data = await response.json()
-
                   if (!response.ok) {
-                    throw new Error(data.error || 'Erro ao alterar senha')
+                    const errorText = await response.text()
+                    let errorData
+                    try {
+                      errorData = JSON.parse(errorText)
+                    } catch {
+                      errorData = { error: errorText || 'Erro ao alterar senha' }
+                    }
+                    throw new Error(errorData.error || 'Erro ao alterar senha')
                   }
 
+                  const data = await response.json()
+
+                  // Senha alterada com sucesso
                   setSucessoSenha(true)
                   setSenhaAtual('')
                   setNovaSenha('')
                   setConfirmarSenha('')
 
-                  setTimeout(() => {
-                    setSucessoSenha(false)
-                  }, 5000)
+                  // Mostrar mensagem e fazer logout após 2 segundos
+                  setTimeout(async () => {
+                    // Fazer logout para invalidar sessão antiga
+                    await signOut()
+                    // Redirecionar para login com mensagem de sucesso
+                    router.push('/pt/coach/login?password_changed=success')
+                  }, 2000)
                 } catch (err: any) {
                   console.error('Erro ao alterar senha:', err)
                   setErroSenha(err.message || 'Erro ao alterar senha')

@@ -180,6 +180,15 @@ function AdminDashboardContent() {
       link: '/admin/support/agents',
       color: 'bg-pink-500',
       destaque: true
+    },
+    {
+      id: 'noel-learning',
+      title: 'NOEL - Sugestões de Aprendizado',
+      description: 'Gerenciar sugestões de aprendizado do NOEL (Wellness)',
+      icon: '🧠',
+      link: '/admin/wellness/learning-suggestions',
+      color: 'bg-emerald-500',
+      destaque: true
     }
   ]
 

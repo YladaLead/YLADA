@@ -210,10 +210,10 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Buscar perfil atual para garantir que não está mudando de área
+    // Buscar perfil atual para garantir que não está mudando de área e verificar user_slug
     const { data: currentProfile } = await supabaseAdmin
       .from('user_profiles')
-      .select('perfil, is_admin, is_support')
+      .select('perfil, is_admin, is_support, user_slug')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -235,6 +235,9 @@ export async function PUT(request: NextRequest) {
         )
       }
     }
+
+    // Verificar se é a primeira vez configurando user_slug (não tinha antes e agora tem)
+    const isFirstTimeSettingSlug = (!currentProfile?.user_slug || currentProfile.user_slug === null) && userSlug && userSlug.trim() !== ''
 
     // Atualizar user_profiles (apenas campos que existem)
     const profileData: any = {
@@ -535,6 +538,78 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Se é a primeira vez configurando user_slug, gerar slugs para todos os formulários
+    if (isFirstTimeSettingSlug && userSlug) {
+      try {
+        console.log('🔄 Gerando slugs para todos os formulários do usuário...')
+        
+        // Buscar todos os formulários do usuário sem slug
+        const { data: formsWithoutSlug } = await supabaseAdmin
+          .from('custom_forms')
+          .select('id, name, slug')
+          .eq('user_id', user.id)
+          .is('slug', null)
+        
+        if (formsWithoutSlug && formsWithoutSlug.length > 0) {
+          const normalizeSlug = (value: string) => {
+            return value
+              .trim()
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+              .replace(/[^a-z0-9-]/g, '-')
+              .replace(/-+/g, '-')
+              .replace(/^-+|-+$/g, '') || 'formulario'
+          }
+          
+          // Gerar slug para cada formulário
+          for (const form of formsWithoutSlug) {
+            let candidateSlug = normalizeSlug(form.name)
+            
+            // Verificar se já existe para este usuário
+            const { data: existing } = await supabaseAdmin
+              .from('custom_forms')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('slug', candidateSlug)
+              .neq('id', form.id)
+              .maybeSingle()
+            
+            // Se já existe, adicionar número
+            if (existing) {
+              for (let attempt = 2; attempt <= 50; attempt++) {
+                const candidate = `${candidateSlug}-${attempt}`
+                const { data: exists } = await supabaseAdmin
+                  .from('custom_forms')
+                  .select('id')
+                  .eq('user_id', user.id)
+                  .eq('slug', candidate)
+                  .maybeSingle()
+                
+                if (!exists) {
+                  candidateSlug = candidate
+                  break
+                }
+              }
+            }
+            
+            // Atualizar formulário com slug
+            await supabaseAdmin
+              .from('custom_forms')
+              .update({ slug: candidateSlug })
+              .eq('id', form.id)
+            
+            console.log(`✅ Slug gerado para formulário ${form.id}: ${candidateSlug}`)
+          }
+          
+          console.log(`✅ ${formsWithoutSlug.length} formulários atualizados com slugs`)
+        }
+      } catch (error) {
+        console.error('⚠️ Erro ao gerar slugs para formulários:', error)
+        // Não falhar o salvamento do perfil se houver erro ao gerar slugs
+      }
+    }
+
     // Log final de confirmação
     console.log('✅✅✅ PERFIL SALVO COM SUCESSO - CONFIRMAÇÃO FINAL:', {
       user_id: result.user_id,
@@ -542,7 +617,8 @@ export async function PUT(request: NextRequest) {
       nome_completo: result.nome_completo,
       whatsapp: result.whatsapp,
       updated_at: result.updated_at,
-      perfil: result.perfil
+      perfil: result.perfil,
+      user_slug: result.user_slug
     })
 
     return NextResponse.json({

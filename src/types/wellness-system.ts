@@ -1,254 +1,432 @@
-/**
- * WELLNESS SYSTEM - Tipos e Interfaces
- * 
- * Estrutura de dados completa para implementação do sistema
- * de recrutamento e vendas de bebidas funcionais
- */
+// =====================================================
+// WELLNESS SYSTEM - TIPOS TYPESCRIPT
+// =====================================================
 
-// ============================================
-// PRODUTOS
-// ============================================
+// =====================================================
+// PERFIL COMPLETO DO CONSULTOR
+// =====================================================
 
-export interface Produto {
+export type ObjetivoPrincipal =
+  | 'usar_recomendar'
+  | 'renda_extra'
+  | 'carteira'
+  | 'plano_presidente'
+  | 'fechado'
+  | 'funcional'
+  // Valores antigos (compatibilidade)
+  | 'vender_mais'
+  | 'construir_carteira'
+  | 'melhorar_rotina'
+  | 'voltar_ritmo'
+  | 'aprender_divulgar'
+
+export type TempoDisponivel =
+  | '5min'
+  | '15min'
+  | '30min'
+  | '1h'
+  | '1h_plus'
+  // Valores antigos (compatibilidade)
+  | '15_minutos'
+  | '30_minutos'
+  | '1_hora'
+  | 'mais_1_hora'
+
+export type ExperienciaHerbalife =
+  | 'nenhuma'
+  | 'ja_vendi'
+  | 'supervisor'
+  | 'get_plus'
+  // Valores antigos (compatibilidade)
+  | 'sim_regularmente'
+  | 'ja_vendi_tempo'
+  | 'nunca_vendi'
+
+export type CanalPrincipal =
+  | 'whatsapp'
+  | 'instagram'
+  | 'trafego_pago'
+  | 'presencial'
+
+export type PreparaBebidas =
+  | 'sim'
+  | 'nao'
+  | 'aprender'
+  | 'nunca'
+
+export type TrabalhaCom =
+  | 'funcional'
+  | 'fechado'
+  | 'ambos'
+
+export type AberturaRecrutar =
+  | 'sim'
+  | 'nao'
+  | 'aprender'
+
+export type PublicoPreferido =
+  | 'saude'
+  | 'estetica'
+  | 'fitness'
+  | 'maes'
+  | 'jovens'
+  | 'cansados'
+  | 'renda_extra'
+  | 'saudaveis'
+
+export type TomComunicacao =
+  | 'neutro'
+  | 'extrovertido'
+  | 'tecnico'
+  | 'simples'
+
+export type RitmoTrabalho =
+  | 'lento'
+  | 'medio'
+  | 'rapido'
+
+export interface EstoqueItem {
+  produto_id: string
+  produto_nome: string
+  quantidade: number
+  categoria: 'bebida_funcional' | 'produto_fechado' | 'kit'
+}
+
+export interface WellnessConsultantProfile {
   id: string
-  nome: string
-  peso: string // "100g", "60g", "102g", "51g"
-  pv: number
-  precoSugerido: number
-  custo50: number
-  doses: number
-  custoPorDose: number
+  user_id: string
+  
+  // Dados do Perfil do Consultor
+  nome?: string // Pode vir de user_profiles
+  idade?: number
+  cidade?: string
+  tempo_disponivel?: TempoDisponivel
+  experiencia_herbalife?: ExperienciaHerbalife
+  objetivo_principal?: ObjetivoPrincipal
+  canal_principal?: CanalPrincipal
+  canal_preferido?: string[] // Array (compatibilidade com versão antiga)
+  
+  // Dados Operacionais
+  prepara_bebidas?: PreparaBebidas
+  trabalha_com?: TrabalhaCom
+  estoque_atual?: EstoqueItem[] // JSONB
+  meta_pv?: number // 100-10000
+  meta_financeira?: number // 500-20000
+  
+  // Dados Sociais
+  contatos_whatsapp?: number
+  seguidores_instagram?: number
+  abertura_recrutar?: AberturaRecrutar
+  publico_preferido?: PublicoPreferido[] // Array
+  
+  // Preferências
+  tom?: TomComunicacao
+  ritmo?: RitmoTrabalho
+  lembretes?: boolean
+  
+  // Dados antigos (compatibilidade)
+  experiencia_vendas?: string
+  tem_lista_contatos?: string
+  
+  // Status
+  onboarding_completo?: boolean
+  onboarding_iniciado_at?: string
+  onboarding_completado_at?: string
+  
+  // Timestamps
+  created_at: string
+  updated_at: string
 }
 
-export type TipoKit = 'energia' | 'acelera' | 'ambos'
-
-export interface Kit {
-  id: string
-  tipo: TipoKit
-  nome: string
-  descricao: string
-  conteudo: string // "5 garrafinhas de NRG Energia"
-  uso: string[]
-  indicacao: string
-}
-
-// ============================================
-// FLUXOS DE CLIENTES
-// ============================================
-
-export interface Pergunta {
-  id: string
-  texto: string
-  tipo: 'escala' | 'sim_nao' | 'multipla_escolha' | 'texto'
-  opcoes?: string[] // Para múltipla escolha
-  escalaMin?: number // Para escala (padrão: 0)
-  escalaMax?: number // Para escala (padrão: 10)
-}
-
-export interface Diagnostico {
-  titulo: string
-  descricao: string
-  sintomas: string[] // Lista de sintomas relatados
-  beneficios: string[] // Lista de benefícios
-  mensagemPositiva: string
-}
-
-export interface FluxoCliente {
-  id: string
-  nome: string
-  objetivo: string
-  perguntas: Pergunta[]
-  diagnostico: Diagnostico
-  kitRecomendado: TipoKit
-  cta: string // Chamada para ação
-  tags: string[] // Para busca e filtros
-}
-
-// ============================================
-// FLUXOS DE RECRUTAMENTO
-// ============================================
-
-export type PerfilRecrutamento = 
-  | 'visionario-renda-funcional'
-  | 'mae-flex-premium'
-  | 'bem-estar-lucrativo'
-  | 'digital-renda-flexivel'
-  | 'consumidor-tendencia'
-  | 'transicao-profissional'
-  | 'resiliente-reativado'
-  | 'digital-alta-afinidade'
-  | 'empreendedor-expansao'
-  | 'emagrecimento-ativo'
-  | 'comunicador-imediato'
-  | 'recomeco-acao-imediata'
-  | 'consumidor-inteligente'
-  | 'empreendedor-moderno'
-
-export interface PerfilRecrutamentoData {
-  id: PerfilRecrutamento
-  nome: string
-  idealPara: string
-  caracteristicas: string[]
-  mensagemFinal: string
-}
-
-export interface GrupoInteresse {
-  id: string
-  nome: string
-  descricao: string
-  caracteristicas: string[]
-  estrategia: string
-}
-
-export interface ConclusaoRecrutamento {
-  id: string
-  titulo: string
-  mensagem: string
-  proximoPasso: string
-}
-
-// ============================================
-// LINKS DE ATRAÇÃO
-// ============================================
-
-export type TipoLinkAtracao = 
-  | 'bebida-ideal'
-  | 'teste-energia'
-  | 'avaliacao-detox'
-  | 'hidratacao-inteligente'
-  | 'objetivo'
-
-export interface LinkAtracao {
-  id: string
-  tipo: TipoLinkAtracao
-  nome: string
-  descricao: string
-  geraLead: boolean
-  classificacao: string
-  indicacaoAutomatica: string
-  chamadaApresentacao: string
-}
-
-// ============================================
-// APRESENTAÇÃO DE NEGÓCIO
-// ============================================
-
-export interface ApresentacaoNegocio {
-  id: string
-  titulo: string
-  estrutura: {
-    abertura: string
-    demonstracao: string[]
-    historia: string
-    oportunidade: string
-    planoSimples: {
-      ganho1: string
-      ganho2: string
-      ganho3: string
-    }
-    fechamento: string
-  }
-}
-
-// ============================================
+// =====================================================
 // SCRIPTS
-// ============================================
+// =====================================================
 
-export type TipoScript = 
-  | 'abertura'
-  | 'pos-link'
-  | 'pos-diagnostico'
-  | 'oferta'
-  | 'fechamento'
-  | 'objecoes'
-  | 'recuperacao'
+export type ScriptCategoria =
+  | 'tipo_pessoa'
+  | 'objetivo'
+  | 'etapa'
+  | 'acompanhamento'
+  | 'reativacao'
+  | 'recrutamento'
+  | 'interno'
+
+export type ScriptSubcategoria =
+  | 'pessoas_proximas'
   | 'indicacoes'
-  | 'pos-venda'
-  | 'recompra'
+  | 'instagram'
+  | 'mercado_frio'
+  | 'clientes_ativos'
+  | 'clientes_sumidos'
+  | 'leads_ferramentas'
+  | 'interessados_negocio'
+  | 'energia'
+  | 'metabolismo'
+  | 'retencao'
+  | 'foco'
+  | 'emagrecimento'
+  | 'rotina'
+  | 'abertura'
+  | 'curiosidade'
+  | 'diagnostico'
+  | 'proposta'
+  | 'fechamento'
+  | 'acompanhamento'
+  | 'conclusao'
+  | '7_dias'
+  | '14_dias'
+  | '30_dias'
+  | 'semente'
+  | 'pre_diagnostico'
+  | 'hom'
+  | 'pos_hom'
+  | 'respostas_base'
+  | 'apoio_emocional'
+  | 'orientacoes_tecnicas'
+  | 'correcao'
+  | 'direcionamentos'
+  | 'ativacao'
 
-export type FluxoId = 
-  | 'energia-matinal'
-  | 'energia-tarde'
-  | 'troca-cafe'
-  | 'anti-cansaco'
-  | 'rotina-puxada'
-  | 'foco-produtividade'
-  | 'motoristas'
-  | 'metabolismo-lento'
-  | 'sono-ruim'
-  | 'estresse-ansiedade'
-  | 'compulsao-doces'
-  | 'dores-inflamacao'
-  | 'baixa-imunidade'
-  | 'retencao-liquidos'
-  | 'cansaco-dia'
-  | 'falta-foco'
-  | 'fome-noturna'
-  | 'prisao-ventre'
-  | 'excesso-gases'
-  | 'mau-halito'
+export type ScriptVersao =
+  | 'curta'
+  | 'media'
+  | 'longa'
+  | 'gatilho'
+  | 'se_some'
+  | 'se_negativa'
+  | 'upgrade'
 
-export interface Script {
+export interface WellnessScript {
   id: string
-  tipo: TipoScript
-  titulo: string
+  categoria: ScriptCategoria
+  subcategoria?: string
+  nome: string
+  versao: ScriptVersao
   conteudo: string
-  contexto: string // Quando usar
-  variacoes?: string[] // Versões alternativas
-  fluxoId?: FluxoId // Script específico de um fluxo (opcional)
-  momento?: string // Ex: "2h depois", "24h depois", etc.
+  tags?: string[]
+  ordem: number
+  ativo: boolean
+  created_at: string
+  updated_at: string
 }
 
-// ============================================
-// KIT DE INÍCIO
-// ============================================
+// =====================================================
+// OBJEÇÕES
+// =====================================================
 
-export interface KitInicio {
-  checklist24h: string[]
-  scriptApresentacao: string
-  fluxosCaptacao: string[] // IDs dos fluxos
-  videosTreinamento: {
-    id: string
-    titulo: string
-    url: string
-    duracao: string
-  }[]
-  mensagensConvite: string[]
-  guiaLinksWellness: string
-  agendaResultados: {
-    dia: number
-    acao: string
-  }[]
+export type ObjeçãoCategoria =
+  | 'clientes'
+  | 'clientes_recorrentes'
+  | 'recrutamento'
+  | 'distribuidores'
+  | 'avancadas'
+
+export interface WellnessObjeção {
+  id: string
+  categoria: ObjeçãoCategoria
+  codigo: string // 'A.1', 'B.2', etc.
+  objeção: string
+  versao_curta?: string
+  versao_media?: string
+  versao_longa?: string
+  gatilho_retomada?: string
+  resposta_se_some?: string
+  resposta_se_negativa?: string
+  upgrade?: string
+  tags?: string[]
+  ordem: number
+  ativo: boolean
+  created_at: string
+  updated_at: string
 }
 
-// ============================================
-// RESPOSTAS E RESULTADOS
-// ============================================
+// =====================================================
+// CONFIGURAÇÕES NOEL
+// =====================================================
 
-export interface RespostaFluxo {
-  perguntaId: string
-  resposta: string | number
-  timestamp: Date
+export interface WellnessNoelConfig {
+  id: string
+  chave: string
+  valor: Record<string, any>
+  descricao?: string
+  updated_at: string
 }
 
-export interface ResultadoFluxo {
-  fluxoId: string
-  respostas: RespostaFluxo[]
-  perfilIdentificado: string
-  kitRecomendado: TipoKit
-  score: number // 0-100, baseado nas respostas
-  timestamp: Date
+// =====================================================
+// INTERAÇÕES
+// =====================================================
+
+export type TipoInteracao =
+  | 'pergunta'
+  | 'solicitacao_script'
+  | 'objeção'
+  | 'feedback'
+  | 'diagnostico'
+  | 'acompanhamento'
+
+export interface WellnessInteractionContext {
+  pessoa_tipo?: 'proximo' | 'indicacao' | 'instagram' | 'mercado_frio' | 'cliente_ativo' | 'cliente_sumido'
+  objetivo?: 'energia' | 'metabolismo' | 'retencao' | 'foco' | 'emagrecimento' | 'rotina'
+  etapa?: 'abertura' | 'curiosidade' | 'diagnostico' | 'proposta' | 'fechamento' | 'acompanhamento'
+  modo_operacao?: string
+  cliente_id?: string
+  prospect_id?: string
 }
 
-// ============================================
-// CONFIGURAÇÕES DO SISTEMA
-// ============================================
-
-export interface ConfiguracaoSistema {
-  mostrarProdutos: boolean // Se deve mostrar recomendações de kits
-  ctaPadrao: string
-  whatsappDistribuidor: string
-  mensagemFollowUp: string
-  modoIniciante: boolean
+export interface WellnessConsultantInteraction {
+  id: string
+  consultant_id: string
+  tipo_interacao: TipoInteracao
+  contexto?: WellnessInteractionContext
+  mensagem_usuario: string
+  resposta_noel: string
+  script_usado_id?: string
+  objeção_tratada_id?: string
+  satisfacao?: number // 1-5
+  created_at: string
 }
 
+// =====================================================
+// PERFIS DE CLIENTES
+// =====================================================
+
+export type TipoPessoa =
+  | 'proximo'
+  | 'indicacao'
+  | 'instagram'
+  | 'mercado_frio'
+  | 'cliente_ativo'
+  | 'cliente_sumido'
+
+export type ObjetivoCliente =
+  | 'energia'
+  | 'metabolismo'
+  | 'retencao'
+  | 'foco'
+  | 'emagrecimento'
+  | 'rotina'
+
+export type StatusCliente =
+  | 'lead'
+  | 'cliente_kit'
+  | 'cliente_recorrente'
+  | 'inativo'
+  | 'reativado'
+
+export interface WellnessClientProfile {
+  id: string
+  consultant_id: string
+  cliente_nome?: string
+  cliente_contato?: string
+  tipo_pessoa?: TipoPessoa
+  objetivo_principal?: ObjetivoCliente
+  status: StatusCliente
+  ultima_interacao?: string
+  proxima_acao?: string
+  historico: any[] // Array de interações
+  created_at: string
+  updated_at: string
+}
+
+// =====================================================
+// PROSPECTS DE RECRUTAMENTO
+// =====================================================
+
+export type OrigemProspect =
+  | 'cliente'
+  | 'indicacao'
+  | 'instagram'
+  | 'hom'
+  | 'mercado_frio'
+
+export type InteresseProspect =
+  | 'renda_extra'
+  | 'tempo_livre'
+  | 'bem_estar'
+  | 'proposito'
+  | 'crescimento'
+
+export type EtapaRecrutamento =
+  | 'semente'
+  | 'abertura'
+  | 'pre_diagnostico'
+  | 'hom'
+  | 'pos_hom'
+  | 'fechamento'
+
+export type StatusProspect =
+  | 'ativo'
+  | 'pausado'
+  | 'convertido'
+  | 'desistiu'
+
+export interface WellnessRecruitmentProspect {
+  id: string
+  consultant_id: string
+  prospect_nome?: string
+  prospect_contato?: string
+  origem?: OrigemProspect
+  interesse?: InteresseProspect
+  etapa: EtapaRecrutamento
+  status: StatusProspect
+  observacoes?: string
+  historico: any[]
+  created_at: string
+  updated_at: string
+}
+
+// =====================================================
+// MODOS DE OPERAÇÃO NOEL
+// =====================================================
+
+export type NoelOperationMode =
+  | 'venda'
+  | 'upsell'
+  | 'reativacao'
+  | 'recrutamento'
+  | 'acompanhamento'
+  | 'treinamento'
+  | 'suporte'
+  | 'diagnostico'
+  | 'personalizacao'
+  | 'emergencia'
+
+// =====================================================
+// REQUISIÇÕES E RESPOSTAS API
+// =====================================================
+
+export interface NoelRequest {
+  mensagem: string
+  contexto?: WellnessInteractionContext
+  modo_operacao?: NoelOperationMode
+  cliente_id?: string
+  prospect_id?: string
+}
+
+export interface NoelResponse {
+  resposta: string
+  script_sugerido?: WellnessScript
+  objeção_tratada?: WellnessObjeção
+  modo_operacao: NoelOperationMode
+  proxima_acao?: string
+  tags?: string[]
+}
+
+// =====================================================
+// FILTROS E BUSCAS
+// =====================================================
+
+export interface ScriptFilter {
+  categoria?: ScriptCategoria
+  subcategoria?: string
+  versao?: ScriptVersao
+  tags?: string[]
+  ativo?: boolean
+}
+
+export interface ObjeçãoFilter {
+  categoria?: ObjeçãoCategoria
+  codigo?: string
+  tags?: string[]
+  ativo?: boolean
+}

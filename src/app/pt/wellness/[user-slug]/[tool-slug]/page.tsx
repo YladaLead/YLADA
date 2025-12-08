@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
+import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
+import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
+import { FluxoCliente } from '@/types/wellness-system'
 
 interface Tool {
   id: string
@@ -22,9 +25,17 @@ interface Tool {
   template_slug: string
   user_profiles?: {
     user_slug: string
+    country_code?: string
   }
   users?: {
     name: string
+  }
+  is_fluxo?: boolean
+  fluxo_tipo?: 'recrutamento' | 'vendas'
+  content?: {
+    template_type?: string
+    fluxo?: FluxoCliente
+    tipo?: 'recrutamento' | 'vendas'
   }
 }
 
@@ -177,6 +188,36 @@ export default function FerramentaPersonalizadaPage() {
     // Passar configurações via props
     const countryCode = tool.user_profiles?.country_code || null
     
+    // Se for um fluxo, renderizar FluxoDiagnostico
+    if (tool.is_fluxo && tool.content?.fluxo) {
+      const fluxo = tool.content.fluxo
+      const tipo = tool.content.tipo || tool.fluxo_tipo || 'vendas'
+      
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Cabeçalho */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                {fluxo.nome}
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                {fluxo.objetivo}
+              </p>
+            </div>
+
+            {/* Componente de Diagnóstico */}
+            <FluxoDiagnostico
+              fluxo={fluxo}
+              whatsappNumber={tool.whatsapp_number || ''}
+              countryCode={tool.user_profiles?.country_code || 'BR'}
+              mostrarProdutos={tipo === 'vendas'}
+            />
+          </main>
+        </div>
+      )
+    }
+
     // Debug: verificar country_code antes de passar para o config
     console.log('🔍 Config sendo criado (Wellness):', {
       whatsapp_number: tool.whatsapp_number,
@@ -307,15 +348,58 @@ export default function FerramentaPersonalizadaPage() {
       case 'propósito e equilíbrio':
       case 'quiz-proposito':
         return <TemplatePurposeAndBalance config={config} />
-      case 'template-story-interativo':
-      case 'story-interativo':
-      case 'quiz-interativo':
-        return <TemplateStory config={config} />
+      // ⚠️ Template "quiz-interativo" removido conforme solicitado (foi descartado)
       // ⚠️ Template "Cardápio Detox" removido conforme solicitado
       case 'template-avaliacao-inicial':
       case 'avaliacao-inicial':
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
+      case 'quiz-energetico':
+      case 'quiz-energético':
+      case 'quiz-detox':
+      case 'quiz-bem-estar':
+        // Renderizar usando DynamicTemplatePreview para templates genéricos
+        if (tool.content && (tool.content.template_type === 'quiz' || tool.content.questions)) {
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+              <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <DynamicTemplatePreview
+                  template={{
+                    id: tool.id,
+                    nome: tool.title,
+                    name: tool.title,
+                    slug: tool.template_slug,
+                    type: 'quiz',
+                    content: tool.content,
+                    description: tool.description
+                  }}
+                  profession="wellness"
+                  onClose={() => router.push('/pt/wellness/links')}
+                />
+              </main>
+            </div>
+          )
+        }
+        // Fallback se não tiver content
+        return (
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+            <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 border-yellow-200">
+              <div className="mb-4">
+                <span className="text-yellow-600 text-5xl">⚠️</span>
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Template não encontrado</h2>
+              <p className="text-gray-600 mb-4">
+                O template "{tool.template_slug}" não está disponível no momento.
+              </p>
+              <button
+                onClick={() => router.push('/pt/wellness/links')}
+                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                Voltar para Meus Links
+              </button>
+            </div>
+          </div>
+        )
       default:
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

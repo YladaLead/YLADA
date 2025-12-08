@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { ToolConfig } from '@/types/wellness'
 import { useParams } from 'next/navigation'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
+import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
 
 interface WellnessCTAButtonProps {
   config?: ToolConfig
@@ -274,9 +275,25 @@ export default function WellnessCTAButton({
       link: `https://wa.me/${numeroLimpo}`
     })
     
-    const mensagem = config.custom_whatsapp_message
-      ? formatarMensagem(config.custom_whatsapp_message)
-      : 'Olá! Gostaria de saber mais sobre como posso melhorar minha saúde.'
+    // Obter mensagem: customizada > específica da ferramenta > padrão
+    let mensagem = ''
+    let botaoTexto = config.cta_button_text || 'Falar no WhatsApp'
+    
+    if (config.custom_whatsapp_message) {
+      // Mensagem customizada configurada pelo usuário tem prioridade
+      mensagem = formatarMensagem(config.custom_whatsapp_message)
+    } else {
+      // Tentar obter mensagem específica da ferramenta pelo slug
+      const mensagemFerramenta = obterMensagemWhatsApp(toolSlug || config.template_slug)
+      if (mensagemFerramenta) {
+        mensagem = formatarMensagem(mensagemFerramenta.mensagem)
+        botaoTexto = mensagemFerramenta.botaoTexto || botaoTexto
+      } else {
+        // Usar mensagem padrão
+        mensagem = formatarMensagem(mensagemPadraoWhatsApp.mensagem)
+        botaoTexto = mensagemPadraoWhatsApp.botaoTexto || botaoTexto
+      }
+    }
 
     // Mensagem simples para o botão WhatsApp pequeno
     const mensagemSimples = 'Olá! Gostaria de falar com você.'
@@ -378,7 +395,7 @@ export default function WellnessCTAButton({
                     : '#16a34a'
                 }}
               >
-                📱 {config.cta_button_text || 'Enviar Dados e Falar no WhatsApp'}
+                📱 {botaoTexto || 'Enviar Dados e Falar no WhatsApp'}
               </button>
             ) : (
               <a
@@ -393,7 +410,7 @@ export default function WellnessCTAButton({
                     : '#16a34a'
                 }}
               >
-                📱 {config.cta_button_text || 'Falar no WhatsApp'}
+                📱 {botaoTexto || 'Falar no WhatsApp'}
               </a>
             )}
             <a
@@ -532,14 +549,16 @@ export default function WellnessCTAButton({
                     rastrearConversao()
                   }
                 }}
-                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg animate-pulse-subtle"
                 style={{
                   background: config.custom_colors
                     ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                    : '#16a34a'
+                    : 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
                 }}
               >
+                <span className="mr-2">✨</span>
                 {config.cta_button_text || 'Enviar Dados e Saiba Mais'}
+                <span className="ml-2">→</span>
               </button>
             ) : (
               <a
@@ -547,14 +566,16 @@ export default function WellnessCTAButton({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={rastrearConversao}
-                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg animate-pulse-subtle"
                 style={{
                   background: config.custom_colors
                     ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                    : '#16a34a'
+                    : 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
                 }}
               >
+                <span className="mr-2">✨</span>
                 {config.cta_button_text || 'Saiba Mais'}
+                <span className="ml-2">→</span>
               </a>
             )}
             {numeroLimpo && config.show_whatsapp_button !== false && (

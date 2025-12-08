@@ -1,0 +1,184 @@
+/**
+ * Script para gerar embeddings para todos os itens da knowledge_wellness_items
+ * que ainda não têm embeddings
+ * 
+ * Execute: npx tsx scripts/gerar-embeddings-lousas.ts
+ */
+
+import { createClient } from '@supabase/supabase-js'
+import * as dotenv from 'dotenv'
+
+dotenv.config({ path: '.env.local' })
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Variáveis de ambiente SUPABASE não configuradas')
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+/**
+ * Gera embedding usando OpenAI
+ */
+async function generateEmbedding(text: string): Promise<number[]> {
+  const response = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'text-embedding-3-small',
+      input: text,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Erro ao gerar embedding: ${error}`)
+  }
+
+  const data = await response.json()
+  return data.data[0].embedding
+}
+
+/**
+ * Gera embeddings para todos os itens sem embedding
+ */
+async function gerarEmbeddings() {
+  console.log('🔍 Buscando itens sem embeddings...')
+
+  // Buscar itens ativos sem embeddings
+  const { data: items, error: itemsError } = await supabase
+    .from('knowledge_wellness_items')
+    .select('id, title, content')
+    .eq('is_active', true)
+    .not('id', 'in', 
+      supabase
+        .from('knowledge_wellness_embeddings')
+        .select('item_id')
+    )
+
+  if (itemsError) {
+    // Se a subquery não funcionar, fazer busca direta
+    const { data: allItems } = await supabase
+      .from('knowledge_wellness_items')
+      .select('id, title, content')
+      .eq('is_active', true)
+
+    const { data: existingEmbeddings } = await supabase
+      .from('knowledge_wellness_embeddings')
+      .select('item_id')
+
+    const existingIds = new Set(existingEmbeddings?.map(e => e.item_id) || [])
+    const itemsWithoutEmbeddings = allItems?.filter(item => !existingIds.has(item.id)) || []
+
+    console.log(`📊 Encontrados ${itemsWithoutEmbeddings.length} itens sem embeddings`)
+
+    let processados = 0
+    let erros = 0
+
+    for (const item of itemsWithoutEmbeddings) {
+      try {
+        console.log(`\n🔄 Processando: ${item.title.substring(0, 50)}...`)
+
+        // Gerar embedding do conteúdo
+        const embedding = await generateEmbedding(item.content)
+
+        // Salvar embedding
+        const { error: embedError } = await supabase
+          .from('knowledge_wellness_embeddings')
+          .upsert({
+            item_id: item.id,
+            embedding_vector: embedding,
+          }, {
+            onConflict: 'item_id',
+          })
+
+        if (embedError) {
+          console.error(`❌ Erro ao salvar embedding para ${item.id}:`, embedError)
+          erros++
+        } else {
+          processados++
+          console.log(`✅ Embedding gerado e salvo (${processados}/${itemsWithoutEmbeddings.length})`)
+        }
+
+        // Rate limiting: aguardar 100ms entre requisições
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+      } catch (error: any) {
+        console.error(`❌ Erro ao processar item ${item.id}:`, error.message)
+        erros++
+      }
+    }
+
+    console.log(`\n✅ Concluído!`)
+    console.log(`   - Processados: ${processados}`)
+    console.log(`   - Erros: ${erros}`)
+    console.log(`   - Total: ${itemsWithoutEmbeddings.length}`)
+
+  } else {
+    if (!items || items.length === 0) {
+      console.log('✅ Todos os itens já têm embeddings!')
+      return
+    }
+
+    console.log(`📊 Encontrados ${items.length} itens sem embeddings`)
+
+    let processados = 0
+    let erros = 0
+
+    for (const item of items) {
+      try {
+        console.log(`\n🔄 Processando: ${item.title.substring(0, 50)}...`)
+
+        // Gerar embedding do conteúdo
+        const embedding = await generateEmbedding(item.content)
+
+        // Salvar embedding
+        const { error: embedError } = await supabase
+          .from('knowledge_wellness_embeddings')
+          .upsert({
+            item_id: item.id,
+            embedding_vector: embedding,
+          }, {
+            onConflict: 'item_id',
+          })
+
+        if (embedError) {
+          console.error(`❌ Erro ao salvar embedding para ${item.id}:`, embedError)
+          erros++
+        } else {
+          processados++
+          console.log(`✅ Embedding gerado e salvo (${processados}/${items.length})`)
+        }
+
+        // Rate limiting: aguardar 100ms entre requisições
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+      } catch (error: any) {
+        console.error(`❌ Erro ao processar item ${item.id}:`, error.message)
+        erros++
+      }
+    }
+
+    console.log(`\n✅ Concluído!`)
+    console.log(`   - Processados: ${processados}`)
+    console.log(`   - Erros: ${erros}`)
+    console.log(`   - Total: ${items.length}`)
+  }
+}
+
+// Executar
+gerarEmbeddings()
+  .then(() => {
+    console.log('\n🎉 Script finalizado!')
+    process.exit(0)
+  })
+  .catch((error) => {
+    console.error('\n❌ Erro fatal:', error)
+    process.exit(1)
+  })
+

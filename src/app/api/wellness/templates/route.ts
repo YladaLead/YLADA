@@ -18,15 +18,49 @@ function formatTemplates(templates: any[]) {
                       template.type === 'quiz' ? 'Quiz' :
                       template.type === 'planilha' ? 'Planilha' : 'Calculadora'
 
+    // Mapeamento de ícones específicos por slug
+    const iconMap: Record<string, string> = {
+      'calc-hidratacao': '💧',
+      'calculadora-agua': '💧',
+      'agua': '💧',
+      'hidratacao': '💧',
+      'calc-imc': '📊',
+      'calculadora-imc': '📊',
+      'imc': '📊',
+      'calc-proteina': '🥩',
+      'calculadora-proteina': '🥩',
+      'proteina': '🥩',
+      'calc-calorias': '🔥',
+      'calculadora-calorias': '🔥',
+      'calorias': '🔥',
+      'quiz-ganhos': '💰',
+      'quiz-potencial': '📈',
+      'quiz-proposito': '🎯',
+      'quiz-bem-estar': '✨',
+      'quiz-interativo': '🎮',
+      'quiz-detox': '🌿',
+      'quiz-energetico': '⚡',
+      'guia-hidratacao': '💧',
+      'checklist-alimentar': '✅',
+      'checklist-detox': '🌿',
+      'desafio-7-dias': '🏃',
+      'desafio-21-dias': '🎯'
+    }
+    
+    // Usar ícone do banco se existir, senão usar mapeamento, senão usar fallback por tipo
+    const icon = template.icon || 
+                 iconMap[slug] || 
+                 (template.type === 'calculadora' ? '🧮' :
+                  template.type === 'quiz' ? '🎯' :
+                  template.type === 'planilha' ? '📊' : '📋')
+
     return {
       id: slug,
       nome: template.name,
       type: template.type, // IMPORTANTE: Incluir o type do banco
       categoria,
       objetivo: template.objective || 'Avaliar',
-      icon: template.type === 'calculadora' ? '🧮' :
-            template.type === 'quiz' ? '🎯' :
-            template.type === 'planilha' ? '📊' : '📊',
+      icon,
       descricao: template.description || template.title || '',
       slug,
       templateId: template.id,
@@ -47,43 +81,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar templates Wellness do banco
-    // Filtrar apenas profession='wellness' e language='pt' (português)
+    // Tratamento robusto de erros para não quebrar a página
     let templates: any[] = []
-    let error: any = null
 
     try {
+      // Buscar apenas colunas básicas que sempre existem
       const { data, error: err } = await supabaseAdmin
         .from('templates_nutrition')
-        .select('id, name, slug, type, specialization, objective, title, description, content, profession, is_active')
-        .eq('is_active', true) // Apenas ativos (mas incluímos is_active no select para debug)
-        .eq('profession', 'wellness') // Apenas templates Wellness
-        .eq('language', 'pt') // Apenas português
+        .select('id, name, slug, type, specialization, objective, title, description, content, is_active')
+        .eq('is_active', true)
         .order('type', { ascending: true })
         .order('name', { ascending: true })
       
-      if (err) throw err
-      templates = data || []
-    } catch (err: any) {
-      // Se profession não existir, buscar sem essa coluna
-      if (err.message?.includes('profession') || err.code === '42703') {
-        const { data: allTemplates, error: error2 } = await supabaseAdmin
-          .from('templates_nutrition')
-          .select('id, name, slug, type, specialization, objective, title, description, content')
-          .eq('is_active', true)
-          .eq('language', 'pt') // Apenas português
-          .order('type', { ascending: true })
-          .order('name', { ascending: true })
-        
-        if (error2) throw error2
-        templates = allTemplates || []
+      if (err) {
+        console.error('[API Wellness Templates] Erro na query:', err)
+        // Retornar array vazio em caso de erro, não quebrar a página
+        templates = []
       } else {
-        throw err
+        templates = data || []
       }
-    }
-
-    // Se profession existe, filtrar apenas wellness
-    if (templates.length > 0 && templates[0].profession !== undefined) {
-      templates = templates.filter(t => t.profession === 'wellness')
+    } catch (err: any) {
+      console.error('[API Wellness Templates] Erro ao buscar templates:', err)
+      // Retornar array vazio em caso de erro, não quebrar a página
+      templates = []
     }
 
     // Transformar para formato esperado pelo frontend

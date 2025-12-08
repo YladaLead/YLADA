@@ -44,6 +44,15 @@ export async function GET(request: NextRequest) {
       .eq('profession', 'coach')
       .eq('status', 'active')
       .single()
+    
+    // Debug: verificar se content e leader_data_collection estão presentes
+    if (data) {
+      console.log('🔍 API Coach - Content da ferramenta:', {
+        has_content: !!data.content,
+        leader_data_collection: data.content?.leader_data_collection,
+        content_keys: data.content ? Object.keys(data.content) : []
+      })
+    }
 
     if (error) {
       console.error('❌ Erro ao buscar ferramenta Coach por URL:', {
@@ -90,6 +99,15 @@ export async function GET(request: NextRequest) {
           .eq('profession', 'coach')
           .eq('status', 'active')
           .single()
+        
+        // Debug: verificar se content e leader_data_collection estão presentes (fallback)
+        if (toolData) {
+          console.log('🔍 API Coach - Content da ferramenta (fallback):', {
+            has_content: !!toolData.content,
+            leader_data_collection: toolData.content?.leader_data_collection,
+            content_keys: toolData.content ? Object.keys(toolData.content) : []
+          })
+        }
         
         if (toolError) {
           if (toolError.code === 'PGRST116') {

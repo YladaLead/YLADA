@@ -28,19 +28,30 @@ export async function POST(
     }
 
     // Verificar se o formulário existe e está ativo
+    // Templates também podem receber respostas
     const { data: form, error: formError } = await supabaseAdmin
       .from('custom_forms')
-      .select('id, user_id, is_active')
+      .select('id, user_id, is_active, is_template')
       .eq('id', formId)
       .eq('is_active', true)
       .single()
 
     if (formError || !form) {
+      console.error('❌ Erro ao buscar formulário:', {
+        formId,
+        error: formError?.message
+      })
       return NextResponse.json(
         { error: 'Formulário não encontrado ou não está mais disponível' },
         { status: 404 }
       )
     }
+
+    console.log('✅ Formulário encontrado para salvar resposta:', {
+      formId: form.id,
+      userId: form.user_id,
+      isTemplate: form.is_template
+    })
 
     // Capturar IP e User Agent
     const ip = request.headers.get('x-forwarded-for') || 
@@ -57,7 +68,8 @@ export async function POST(
         client_id: null, // Pode ser vinculado depois
         responses: responses,
         ip_address: ip,
-        user_agent: userAgent
+        user_agent: userAgent,
+        viewed: false // Nova resposta não visualizada
       })
       .select()
       .single()

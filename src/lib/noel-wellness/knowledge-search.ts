@@ -65,13 +65,14 @@ export async function searchKnowledgeBase(
 
     // Buscar por similaridade usando pgvector
     // Similaridade cosseno: 1 = idêntico, 0 = sem relação
+    // IMPORTANTE: Buscar em todas as categorias primeiro, depois filtrar por módulo se necessário
     const { data: embeddings, error } = await supabaseAdmin.rpc(
       'match_wellness_knowledge',
       {
         query_embedding: queryEmbedding,
-        match_category: module,
-        match_threshold: 0.5, // mínimo 50% de similaridade
-        match_count: limit,
+        match_category: null, // Buscar em TODAS as categorias primeiro (não restringir)
+        match_threshold: 0.4, // Reduzir threshold para 40% (mais permissivo)
+        match_count: limit * 2, // Buscar mais resultados para depois filtrar
       }
     )
 
@@ -124,14 +125,25 @@ export async function searchKnowledgeBase(
       }
     })
 
-    // Ordenar por similaridade (maior primeiro)
-    itemsWithScores.sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
+    // Ordenar por similaridade (maior primeiro), depois por prioridade
+    itemsWithScores.sort((a, b) => {
+      const simDiff = (b.similarity || 0) - (a.similarity || 0)
+      if (Math.abs(simDiff) > 0.05) return simDiff // Se diferença > 5%, ordenar por similaridade
+      return (b.priority || 5) - (a.priority || 5) // Senão, ordenar por prioridade
+    })
 
-    const bestMatch = itemsWithScores[0] || null
+    // Priorizar itens da categoria do módulo detectado, mas não excluir outros
+    const itemsFromModule = itemsWithScores.filter(item => item.category === module)
+    const itemsFromOtherModules = itemsWithScores.filter(item => item.category !== module)
+    
+    // Combinar: primeiro itens do módulo, depois outros (mas mantendo ordem por similaridade)
+    const reorderedItems = [...itemsFromModule, ...itemsFromOtherModules].slice(0, limit)
+
+    const bestMatch = reorderedItems[0] || null
     const similarityScore = bestMatch?.similarity || 0
 
     return {
-      items: itemsWithScores,
+      items: reorderedItems,
       bestMatch,
       similarityScore,
     }
