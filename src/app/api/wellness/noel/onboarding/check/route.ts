@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
     const { user } = authResult
 
-    // Buscar perfil
+    // Buscar perfil NOEL
     const { data: perfil, error: perfilError } = await supabaseAdmin
       .from('wellness_noel_profile')
       .select('*')
@@ -31,9 +31,29 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Buscar profile_type de user_profiles também
+    let profileType = null
+    try {
+      const { data: userProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('profile_type')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      
+      if (userProfile?.profile_type) {
+        profileType = userProfile.profile_type
+      } else if (perfil?.profile_type) {
+        profileType = perfil.profile_type
+      }
+    } catch (err) {
+      console.warn('⚠️ Erro ao buscar profile_type:', err)
+    }
+
     return NextResponse.json({
       hasProfile: !!perfil && !!perfil.onboarding_completo,
-      onboardingComplete: !!perfil?.onboarding_completo
+      onboardingComplete: !!perfil?.onboarding_completo,
+      profile: perfil || null,
+      profile_type: profileType
     })
 
   } catch (error: any) {

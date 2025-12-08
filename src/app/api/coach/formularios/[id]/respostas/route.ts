@@ -46,9 +46,7 @@ export async function GET(
     const clientId = searchParams.get('client_id')
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
-
     // Buscar parâmetro para marcar como visualizada
-    const { searchParams } = new URL(request.url)
     const markAsViewed = searchParams.get('mark_as_viewed') !== 'false' // Por padrão, marca como visualizada
 
     // Construir query

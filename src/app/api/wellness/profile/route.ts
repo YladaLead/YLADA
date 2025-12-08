@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
     try {
       console.log('🔍 GET /api/wellness/profile - Buscando perfil para user_id:', user.id)
       
-      // Tentar buscar todos os campos primeiro
+      // Tentar buscar todos os campos primeiro (incluindo profile_type)
       const { data: profileData, error: profileError } = await supabaseAdmin
         .from('user_profiles')
-        .select('nome_completo, email, whatsapp, bio, user_slug, country_code')
+        .select('nome_completo, email, whatsapp, bio, user_slug, country_code, profile_type')
         .eq('user_id', user.id)
         .single()
 
@@ -119,8 +119,10 @@ export async function GET(request: NextRequest) {
         whatsapp: profile?.whatsapp || '',
         countryCode: profile?.country_code || 'BR',
         bio: profile?.bio || '',
-        userSlug: profile?.user_slug || ''
-      }
+        userSlug: profile?.user_slug || '',
+        profile_type: profile?.profile_type || null
+      },
+      profile_type: profile?.profile_type || null // Incluir também no nível raiz para compatibilidade
     }
 
     console.log('📤 Retornando dados do perfil:', {

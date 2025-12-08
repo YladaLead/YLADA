@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
       objetivo_principal,
       canal_principal,
       canal_preferido, // Compatibilidade com versão antiga
+      profile_type, // Perfil do distribuidor (beverage/product/activator)
       
       // Dados Operacionais
       prepara_bebidas,
@@ -145,6 +146,7 @@ export async function POST(request: NextRequest) {
     if (tom) profileData.tom = tom
     if (ritmo) profileData.ritmo = ritmo
     if (lembretes !== undefined) profileData.lembretes = lembretes
+    // profile_type não é salvo em wellness_noel_profile, apenas em user_profiles (veja abaixo)
 
     // Compatibilidade com versão antiga
     if (canal_preferido && Array.isArray(canal_preferido)) {
@@ -278,6 +280,29 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Perfil salvo com sucesso:', data)
+
+    // Se profile_type foi fornecido, atualizar também em user_profiles
+    if (profile_type) {
+      try {
+        const { error: profileError } = await supabaseAdmin
+          .from('user_profiles')
+          .update({ 
+            profile_type: profile_type,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id)
+
+        if (profileError) {
+          console.warn('⚠️ Aviso: Não foi possível atualizar profile_type em user_profiles:', profileError)
+          // Não falhar o request se isso der erro, apenas logar
+        } else {
+          console.log('✅ profile_type atualizado em user_profiles:', profile_type)
+        }
+      } catch (err) {
+        console.warn('⚠️ Aviso: Erro ao atualizar profile_type em user_profiles:', err)
+        // Não falhar o request se isso der erro
+      }
+    }
 
     return NextResponse.json({
       success: true,

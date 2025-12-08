@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { requireApiAuth } from '@/lib/auth/api-auth'
+import { supabaseAdmin } from '@/lib/supabase'
+import { requireApiAuth } from '@/lib/api-auth'
 
 /**
  * GET /api/wellness/links
@@ -9,19 +9,18 @@ import { requireApiAuth } from '@/lib/auth/api-auth'
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request)
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
 
-    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     
     const categoria = searchParams.get('categoria')
     const objetivo = searchParams.get('objetivo')
     const ativo = searchParams.get('ativo') !== 'false'
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('wellness_links')
       .select('*')
       .eq('ativo', ativo)
