@@ -80,7 +80,7 @@ export async function createPreference(
     valorOriginal: request.amount,
     unitPrice: unitPrice,
     esperado: `R$ ${unitPrice.toFixed(2)}`,
-    validacao: unitPrice === 59.90 ? '✅ Correto para R$ 59,90' : '⚠️ Verificar'
+    validacao: unitPrice > 0 ? '✅ Valor válido' : '⚠️ Verificar'
   })
 
   // Validar URLs de retorno (obrigatórias para auto_return)
