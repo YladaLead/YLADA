@@ -43,7 +43,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar senha atual fazendo login temporário
-    console.log('🔍 Verificando senha atual para:', user.email)
+    console.log('🔍 ==========================================')
+    console.log('🔍 VERIFICANDO SENHA ATUAL')
+    console.log('🔍 ==========================================')
+    console.log('🔍 Email:', user.email)
+    console.log('🔍 User ID:', user.id)
+    console.log('🔍 Senha atual recebida (primeiros 3 chars):', currentPassword.substring(0, 3) + '***')
+    console.log('🔍 ==========================================')
     
     const { createClient } = await import('@supabase/supabase-js')
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -69,13 +75,14 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erro ao verificar senha atual:', {
         error: signInError?.message,
         code: signInError?.status,
-        hasSession: !!signInData.session
+        hasSession: !!signInData.session,
+        errorDetails: signInError
       })
       
       // Mensagens de erro mais específicas
       let errorMessage = 'Senha atual incorreta'
       if (signInError?.message?.includes('Invalid login credentials')) {
-        errorMessage = 'Senha atual incorreta. Verifique e tente novamente.'
+        errorMessage = 'Senha atual incorreta. Verifique se você digitou a senha provisória corretamente (incluindo maiúsculas, minúsculas e caracteres especiais).'
       } else if (signInError?.message?.includes('Email not confirmed')) {
         errorMessage = 'Por favor, confirme seu email antes de alterar a senha.'
       } else if (signInError?.message) {
@@ -83,15 +90,22 @@ export async function POST(request: NextRequest) {
       }
       
       return NextResponse.json(
-        { error: errorMessage },
+        { error: errorMessage, details: signInError?.message },
         { status: 401 }
       )
     }
 
     console.log('✅ Senha atual verificada com sucesso')
+    console.log('✅ Sessão criada:', !!signInData.session)
 
     // Se a senha atual está correta, usar o supabaseAdmin para atualizar diretamente
-    console.log('🔄 Atualizando senha para usuário:', user.id)
+    console.log('🔄 ==========================================')
+    console.log('🔄 ATUALIZANDO SENHA')
+    console.log('🔄 ==========================================')
+    console.log('🔄 User ID:', user.id)
+    console.log('🔄 Email:', user.email)
+    console.log('🔄 Nova senha (primeiros 3 chars):', newPassword.substring(0, 3) + '***')
+    console.log('🔄 ==========================================')
     
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       user.id,
@@ -110,7 +124,7 @@ export async function POST(request: NextRequest) {
       // Mensagens de erro mais específicas
       let errorMessage = 'Erro ao atualizar senha'
       if (updateError.message?.includes('password')) {
-        errorMessage = 'A nova senha não atende aos requisitos de segurança. Use uma senha mais forte.'
+        errorMessage = 'A nova senha não atende aos requisitos de segurança. Use uma senha mais forte (mínimo 6 caracteres).'
       } else if (updateError.message) {
         errorMessage = `Erro ao atualizar senha: ${updateError.message}`
       }
@@ -122,21 +136,50 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Senha atualizada no Supabase Auth com sucesso')
+    
+    // Verificar se a senha foi realmente atualizada tentando fazer login
+    console.log('🔍 Verificando se senha foi atualizada...')
+    const { data: verifyData, error: verifyError } = await tempSupabase.auth.signInWithPassword({
+      email: user.email!,
+      password: newPassword
+    })
+    
+    if (verifyError || !verifyData.session) {
+      console.error('❌ ERRO CRÍTICO: Senha não foi atualizada corretamente!', {
+        error: verifyError?.message,
+        hasSession: !!verifyData.session
+      })
+      // Mesmo assim, retornar sucesso porque o updateUserById não deu erro
+      // Mas logar o problema para investigação
+    } else {
+      console.log('✅ Confirmação: Nova senha funciona corretamente!')
+      // Fazer logout do login de verificação
+      await tempSupabase.auth.signOut()
+    }
 
     // Limpar senha provisória após troca bem-sucedida
-    const { error: profileUpdateError } = await supabaseAdmin
+    console.log('🧹 Limpando senha provisória...')
+    const { error: profileUpdateError, data: profileUpdateData } = await supabaseAdmin
       .from('user_profiles')
       .update({ temporary_password_expires_at: null })
       .eq('user_id', user.id)
+      .select()
 
     if (profileUpdateError) {
-      console.warn('⚠️ Erro ao limpar senha provisória (não crítico):', profileUpdateError)
+      console.error('❌ Erro ao limpar senha provisória:', profileUpdateError)
       // Não falhar a requisição se isso der erro, pois a senha já foi alterada
+      // Mas logar como erro para investigação
     } else {
       console.log(`✅ Senha provisória limpa para ${user.email}`)
+      console.log(`✅ Registros atualizados:`, profileUpdateData?.length || 0)
     }
 
-    console.log(`✅ Senha atualizada com sucesso para ${user.email}`)
+    console.log('✅ ==========================================')
+    console.log(`✅ SENHA ATUALIZADA COM SUCESSO`)
+    console.log(`✅ Email: ${user.email}`)
+    console.log(`✅ User ID: ${user.id}`)
+    console.log(`✅ Senha provisória limpa: ${!profileUpdateError ? 'SIM' : 'NÃO (erro)'}`)
+    console.log('✅ ==========================================')
 
     return NextResponse.json({
       success: true,

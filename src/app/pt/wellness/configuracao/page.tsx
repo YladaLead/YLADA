@@ -893,13 +893,24 @@ export default function WellnessConfiguracaoPage() {
                     // Mostrar mensagem e fazer logout após 2 segundos
                     setTimeout(async () => {
                       try {
+                        console.log('🔄 Fazendo logout após mudança de senha...')
+                        
                         // Fazer logout para invalidar sessão antiga
                         await signOut()
+                        
+                        console.log('✅ Logout realizado com sucesso')
+                        console.log('🔄 Redirecionando para login...')
+                        
+                        // Aguardar um pouco mais para garantir que logout completou
+                        await new Promise(resolve => setTimeout(resolve, 500))
+                        
                         // Redirecionar para login com mensagem de sucesso
                         router.push('/pt/wellness/login?password_changed=success')
                       } catch (logoutError) {
-                        console.error('Erro ao fazer logout:', logoutError)
+                        console.error('❌ Erro ao fazer logout:', logoutError)
                         // Mesmo se logout falhar, redirecionar
+                        // Mas avisar o usuário que precisa fazer logout manual
+                        alert('Senha alterada com sucesso! Por favor, faça logout e login novamente com sua nova senha.')
                         router.push('/pt/wellness/login?password_changed=success')
                       }
                     }, 2000)
