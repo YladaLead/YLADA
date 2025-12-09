@@ -641,7 +641,13 @@ export async function POST(request: NextRequest) {
           if (constraintName.includes('objetivo_principal')) {
             errorMessage = 'O valor selecionado para "Objetivo Principal" não é válido. Por favor, selecione uma opção da lista.'
           } else if (constraintName.includes('tempo_disponivel')) {
-            errorMessage = 'O valor selecionado para "Tempo Disponível" não é válido. Por favor, selecione uma opção da lista.'
+            errorMessage = 'O valor selecionado para "Tempo Disponível" não é válido. Por favor, selecione uma opção da lista (5min, 15min, 30min, 1h ou Mais de 1 hora).'
+          } else if (constraintName.includes('prepara_bebidas')) {
+            errorMessage = 'O valor selecionado para "Prepara Bebidas" não é válido. Por favor, selecione uma opção da lista (Sim, Não, Aprender ou Nunca).'
+          } else if (constraintName.includes('ritmo')) {
+            errorMessage = 'O valor selecionado para "Ritmo" não é válido. Por favor, selecione uma opção da lista (Lento, Médio ou Rápido).'
+          } else if (constraintName.includes('tom')) {
+            errorMessage = 'O valor selecionado para "Tom" não é válido. Por favor, selecione uma opção da lista (Neutro, Extrovertido, Técnico ou Simples).'
           } else {
             errorMessage = `O valor do campo "${fieldName}" não é válido. Por favor, verifique e tente novamente.`
           }

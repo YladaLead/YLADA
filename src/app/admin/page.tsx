@@ -189,6 +189,15 @@ function AdminDashboardContent() {
       link: '/admin/wellness/learning-suggestions',
       color: 'bg-emerald-500',
       destaque: true
+    },
+    {
+      id: 'biblioteca-upload',
+      title: 'Biblioteca Wellness - Upload',
+      description: 'Adicionar vídeos, PDFs e imagens à biblioteca',
+      icon: '📚',
+      link: '/admin/wellness/biblioteca/upload',
+      color: 'bg-teal-500',
+      destaque: true
     }
   ]
 

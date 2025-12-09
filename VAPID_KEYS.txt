@@ -1,0 +1,19 @@
+✅ CHAVES VAPID GERADAS COM SUCESSO!
+
+📋 Adicione estas variáveis ao seu .env.local:
+
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=BH7ISY_UZZPL8rl9EFwLLvorpN4I9tG56mLWXzp78vM5TlTpaM80Nl87-AymdtpyiMc-hENySBq6uyxQcuWaqiA
+VAPID_PRIVATE_KEY=oEmiV0J1J-osj4uAYyjI-k7mHp1PS9rCUFbPLdReUzc
+VAPID_SUBJECT=mailto:admin@ylada.com
+
+⚠️  IMPORTANTE:
+1. A chave pública (NEXT_PUBLIC_VAPID_PUBLIC_KEY) pode ser exposta no frontend
+2. A chave privada (VAPID_PRIVATE_KEY) deve ser mantida SECRETA - NÃO compartilhe!
+3. Configure essas mesmas variáveis no Vercel também (Settings → Environment Variables)
+
+📝 PRÓXIMOS PASSOS:
+
+1. Copie as 3 linhas acima e adicione ao arquivo .env.local na raiz do projeto
+2. Configure as mesmas variáveis no Vercel Dashboard
+3. Reinicie o servidor local (ou faça deploy na Vercel)
+4. O aviso de "Notificações push não configuradas" desaparecerá
