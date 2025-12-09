@@ -39,12 +39,12 @@ ON CONFLICT (id) DO NOTHING;
 --
 
 -- Remover políticas existentes (se houver)
-DROP POLICY IF EXISTS "Admins podem fazer upload" ON storage.objects;
+DROP POLICY IF EXISTS "Admins e Suporte podem fazer upload" ON storage.objects;
 DROP POLICY IF EXISTS "Wellness users podem ler" ON storage.objects;
 DROP POLICY IF EXISTS "Admins podem deletar" ON storage.objects;
 
--- Política: Permitir upload apenas para admins
-CREATE POLICY "Admins podem fazer upload"
+-- Política: Permitir upload para admins E suporte
+CREATE POLICY "Admins e Suporte podem fazer upload"
 ON storage.objects
 FOR INSERT
 TO authenticated
@@ -53,7 +53,7 @@ WITH CHECK (
   EXISTS (
     SELECT 1 FROM user_profiles
     WHERE user_id = auth.uid()
-    AND profile_type = 'admin'
+    AND (is_admin = true OR is_support = true)
   )
 );
 
@@ -67,11 +67,11 @@ USING (
   EXISTS (
     SELECT 1 FROM user_profiles
     WHERE user_id = auth.uid()
-    AND profile_type IN ('wellness', 'admin')
+    AND (profile_type IN ('wellness', 'admin') OR is_admin = true OR is_support = true)
   )
 );
 
--- Política: Permitir delete apenas para admins
+-- Política: Permitir delete apenas para admins (suporte não pode deletar)
 CREATE POLICY "Admins podem deletar"
 ON storage.objects
 FOR DELETE
@@ -81,6 +81,6 @@ USING (
   EXISTS (
     SELECT 1 FROM user_profiles
     WHERE user_id = auth.uid()
-    AND profile_type = 'admin'
+    AND is_admin = true
   )
 );
