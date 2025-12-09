@@ -561,8 +561,8 @@ export async function POST(request: NextRequest) {
         else if (typeof value === 'number' && !isNaN(value)) {
           cleanedProfileData[key] = value
         }
-        // Arrays: verificar se não está vazio
-        else if (Array.isArray(value) && value.length > 0) {
+        // Arrays: incluir mesmo se vazio (o banco pode ter default)
+        else if (Array.isArray(value)) {
           cleanedProfileData[key] = value
         }
         // Outros tipos: incluir se não for undefined/null
@@ -572,12 +572,23 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log('💾 Tentando salvar perfil:', JSON.stringify(cleanedProfileData, null, 2))
+    // Logs detalhados para debug
+    console.log('💾 ==========================================')
+    console.log('💾 SALVANDO PERFIL NOEL')
+    console.log('💾 ==========================================')
+    console.log('💾 User ID:', user.id)
     console.log('💾 Modo:', isEditing ? 'EDIÇÃO' : 'NOVO ONBOARDING')
-
+    console.log('💾 Dados recebidos (raw):', JSON.stringify(body, null, 2))
+    console.log('💾 Dados limpos (para salvar):', JSON.stringify(cleanedProfileData, null, 2))
+    
     // Validar que temos pelo menos algum dado para salvar (além de user_id e updated_at)
     const camposParaSalvar = Object.keys(cleanedProfileData).filter(key => key !== 'user_id' && key !== 'updated_at')
-    if (camposParaSalvar.length === 0) {
+    console.log('💾 Campos para salvar:', camposParaSalvar)
+    console.log('💾 ==========================================')
+    
+    // Na edição, permitir salvar mesmo com poucos campos (apenas updated_at é válido)
+    // Apenas para novos perfis, exigir pelo menos um campo
+    if (camposParaSalvar.length === 0 && !isEditing) {
       return NextResponse.json(
         { 
           error: 'Nenhum dado para salvar',
@@ -585,6 +596,13 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       )
+    }
+    
+    // Na edição, se não houver campos além de user_id/updated_at, apenas atualizar timestamp
+    // (não dar erro, mas também não fazer upsert desnecessário)
+    if (camposParaSalvar.length === 0 && isEditing) {
+      console.log('⚠️ Edição sem campos novos - apenas atualizando timestamp')
+      // Ainda assim, fazer o upsert para atualizar updated_at (pode ser útil para auditoria)
     }
 
     const { data, error } = await supabaseAdmin
@@ -608,9 +626,28 @@ export async function POST(request: NextRequest) {
       // Mensagem de erro mais amigável
       let errorMessage = 'Erro ao salvar perfil'
       if (error.code === '23505') {
-        errorMessage = 'Este perfil já existe. Tente atualizar a página.'
+        errorMessage = 'Este perfil já existe. Tente atualizar a página (F5).'
       } else if (error.code === '23503') {
         errorMessage = 'Erro de referência. Verifique se o usuário existe.'
+      } else if (error.message?.includes('check constraint')) {
+        // Extrair nome da constraint e campo
+        const constraintMatch = error.message.match(/constraint "([^"]+)"/)
+        const fieldMatch = error.message.match(/column "([^"]+)"/)
+        
+        if (constraintMatch && fieldMatch) {
+          const constraintName = constraintMatch[1]
+          const fieldName = fieldMatch[1]
+          
+          if (constraintName.includes('objetivo_principal')) {
+            errorMessage = 'O valor selecionado para "Objetivo Principal" não é válido. Por favor, selecione uma opção da lista.'
+          } else if (constraintName.includes('tempo_disponivel')) {
+            errorMessage = 'O valor selecionado para "Tempo Disponível" não é válido. Por favor, selecione uma opção da lista.'
+          } else {
+            errorMessage = `O valor do campo "${fieldName}" não é válido. Por favor, verifique e tente novamente.`
+          }
+        } else {
+          errorMessage = 'Um dos valores preenchidos não é válido. Por favor, verifique os campos e tente novamente.'
+        }
       } else if (error.message?.includes('column') || error.message?.includes('schema')) {
         errorMessage = 'Estamos atualizando o sistema. Por favor, atualize a página (F5) e tente novamente.'
       } else if (error.message) {
