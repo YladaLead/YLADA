@@ -39,7 +39,7 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return permission
 }
 
-// Registrar Service Worker
+// Registrar Service Worker e aguardar estar ativo
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
     console.warn('[Push Notifications] Service Worker não suportado')
@@ -47,13 +47,82 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   }
 
   try {
-    const registration = await navigator.serviceWorker.register('/sw.js', {
-      scope: '/'
-    })
+    // Verificar se já tem um service worker registrado
+    let registration = await navigator.serviceWorker.getRegistration('/')
     
-    console.log('[Push Notifications] Service Worker registrado:', registration)
+    // Se não tem, registrar novo
+    if (!registration) {
+      console.log('[Push Notifications] Registrando novo Service Worker...')
+      registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
+      })
+      console.log('[Push Notifications] Service Worker registrado:', registration)
+    } else {
+      console.log('[Push Notifications] Service Worker já estava registrado:', registration)
+    }
+    
+    // Aguardar o service worker estar ativo
+    if (registration.installing) {
+      console.log('[Push Notifications] Service Worker está instalando, aguardando...')
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout aguardando Service Worker instalar'))
+        }, 10000) // 10 segundos timeout
+        
+        registration!.installing!.addEventListener('statechange', function() {
+          console.log('[Push Notifications] Estado do SW:', this.state)
+          if (this.state === 'activated' || this.state === 'installed') {
+            clearTimeout(timeout)
+            console.log('[Push Notifications] Service Worker instalado/ativado!')
+            resolve()
+          }
+        })
+      })
+      
+      // Aguardar um pouco mais para garantir que está ativo
+      await new Promise(resolve => setTimeout(resolve, 500))
+    } else if (registration.waiting) {
+      console.log('[Push Notifications] Service Worker está esperando, ativando...')
+      // Se está waiting, pode precisar de skipWaiting
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' })
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout aguardando Service Worker ativar'))
+        }, 5000)
+        
+        const checkActive = setInterval(() => {
+          if (registration!.active) {
+            clearInterval(checkActive)
+            clearTimeout(timeout)
+            console.log('[Push Notifications] Service Worker ativado!')
+            resolve()
+          }
+        }, 100)
+      })
+    } else if (registration.active) {
+      console.log('[Push Notifications] Service Worker já está ativo!')
+    } else {
+      // Aguardar um pouco e verificar novamente
+      console.log('[Push Notifications] Aguardando Service Worker ficar ativo...')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (!registration.active) {
+        throw new Error('Service Worker não conseguiu ser ativado. Tente recarregar a página.')
+      }
+    }
+    
+    // Verificar se realmente está ativo antes de retornar
+    if (!registration.active) {
+      throw new Error('Service Worker não está ativo. Tente recarregar a página.')
+    }
+    
+    console.log('[Push Notifications] ✅ Service Worker pronto para uso!', {
+      scope: registration.scope,
+      active: !!registration.active,
+      installing: !!registration.installing,
+      waiting: !!registration.waiting
+    })
     return registration
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Push Notifications] Erro ao registrar Service Worker:', error)
     throw error
   }
@@ -81,6 +150,16 @@ export async function createPushSubscription(
   vapidPublicKey: string
 ): Promise<PushSubscription | null> {
   try {
+    // Verificar se o service worker está ativo
+    if (!registration.active) {
+      throw new Error('Service Worker não está ativo. Aguarde alguns segundos e tente novamente.')
+    }
+    
+    // Verificar se pushManager está disponível
+    if (!registration.pushManager) {
+      throw new Error('PushManager não está disponível. O Service Worker pode não estar totalmente ativo.')
+    }
+    
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
@@ -88,8 +167,14 @@ export async function createPushSubscription(
 
     console.log('[Push Notifications] Subscription criada:', subscription)
     return subscription
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Push Notifications] Erro ao criar subscription:', error)
+    
+    // Mensagem de erro mais amigável
+    if (error.message?.includes('active service worker')) {
+      throw new Error('Service Worker não está ativo. Por favor, recarregue a página e tente novamente.')
+    }
+    
     throw error
   }
 }

@@ -32,13 +32,36 @@ export default function PushNotificationManager({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const checkSupport = () => {
+    const checkSupport = async () => {
       const isSupported = isPushNotificationSupported()
       setSupported(isSupported)
       
       if (isSupported) {
         const currentPermission = getNotificationPermission()
         setPermission(currentPermission)
+        
+        // Verificar se já tem service worker registrado
+        if ('serviceWorker' in navigator) {
+          try {
+            const registration = await navigator.serviceWorker.getRegistration('/')
+            if (registration) {
+              console.log('[Push] Service Worker já registrado:', {
+                active: !!registration.active,
+                scope: registration.scope
+              })
+              
+              // Se já tem subscription, marcar como registrado
+              if (registration.active) {
+                const existingSub = await getExistingSubscription(registration)
+                if (existingSub) {
+                  setRegistered(true)
+                }
+              }
+            }
+          } catch (error) {
+            console.warn('[Push] Erro ao verificar Service Worker:', error)
+          }
+        }
       }
     }
 
@@ -77,10 +100,19 @@ export default function PushNotificationManager({
         return
       }
 
-      // 2. Registrar Service Worker
+      // 2. Registrar Service Worker e aguardar estar ativo
+      console.log('[Push] Registrando Service Worker...')
       const registration = await registerServiceWorker()
       if (!registration) {
-        throw new Error('Não foi possível registrar o Service Worker')
+        throw new Error('Não foi possível registrar o Service Worker. Verifique se está usando HTTPS ou localhost.')
+      }
+
+      // Aguardar um pouco extra para garantir que está totalmente ativo
+      if (registration.active) {
+        console.log('[Push] Service Worker está ativo!')
+      } else {
+        console.log('[Push] Aguardando Service Worker ficar ativo...')
+        await new Promise(resolve => setTimeout(resolve, 500))
       }
 
       // 3. Verificar se já tem subscription
@@ -88,21 +120,35 @@ export default function PushNotificationManager({
 
       // 4. Se não tem, criar nova
       if (!subscription) {
+        console.log('[Push] Criando nova subscription...')
         subscription = await createPushSubscription(registration, vapidPublicKey)
+      } else {
+        console.log('[Push] Subscription já existe!')
       }
 
       if (!subscription) {
-        throw new Error('Não foi possível criar subscription')
+        throw new Error('Não foi possível criar subscription. Tente recarregar a página.')
       }
 
       // 5. Salvar no servidor
+      console.log('[Push] Salvando subscription no servidor...')
       await saveSubscriptionToServer(subscription, user.id)
 
       setRegistered(true)
       console.log('✅ Notificações push ativadas com sucesso')
     } catch (err: any) {
       console.error('❌ Erro ao ativar notificações:', err)
-      setError(err.message || 'Erro ao ativar notificações. Tente novamente.')
+      
+      // Mensagens de erro mais específicas
+      let errorMessage = err.message || 'Erro ao ativar notificações. Tente novamente.'
+      
+      if (err.message?.includes('active service worker') || err.message?.includes('Service Worker não está ativo')) {
+        errorMessage = 'Service Worker não está ativo. Por favor, recarregue a página e tente novamente.'
+      } else if (err.message?.includes('HTTPS') || err.message?.includes('localhost')) {
+        errorMessage = 'Notificações push requerem HTTPS ou localhost. Verifique a conexão.'
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -136,17 +182,36 @@ export default function PushNotificationManager({
   return (
     <div className="space-y-2">
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-          {error}
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+          <p className="font-medium mb-1">⚠️ Erro ao ativar notificações</p>
+          <p className="mb-2">{error}</p>
+          {error.includes('recarregue a página') && (
+            <button
+              onClick={() => window.location.reload()}
+              className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+            >
+              Recarregar Página
+            </button>
+          )}
         </div>
       )}
       
       <button
         onClick={handleEnableNotifications}
         disabled={loading || !user}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center gap-2"
       >
-        {loading ? 'Ativando...' : '🔔 Ativar Notificações'}
+        {loading ? (
+          <>
+            <span className="animate-spin">⏳</span>
+            <span>Ativando...</span>
+          </>
+        ) : (
+          <>
+            <span>🔔</span>
+            <span>Ativar Notificações</span>
+          </>
+        )}
       </button>
       
       <p className="text-xs text-gray-500">

@@ -7,38 +7,67 @@ const STATIC_CACHE_URLS = [
   '/manifest.json'
 ]
 
+// Log inicial para debug
+console.log('[Service Worker] Script carregado!', self.registration?.scope || 'Não registrado ainda')
+
 // Instalar Service Worker
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Instalando...')
+  // Forçar ativação imediata
+  self.skipWaiting()
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Cache aberto')
-        return cache.addAll(STATIC_CACHE_URLS)
+        return cache.addAll(STATIC_CACHE_URLS).catch((error) => {
+          console.warn('[Service Worker] Alguns arquivos não foram cacheados:', error)
+          // Não falhar a instalação se cache falhar
+        })
+      })
+      .then(() => {
+        console.log('[Service Worker] Instalação concluída, ativando imediatamente...')
+        return self.skipWaiting()
       })
       .catch((error) => {
-        console.error('[Service Worker] Erro ao instalar cache:', error)
+        console.error('[Service Worker] Erro ao instalar:', error)
+        // Mesmo com erro, tentar ativar
+        return self.skipWaiting()
       })
   )
-  self.skipWaiting() // Ativar imediatamente
 })
 
 // Ativar Service Worker
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Ativando...')
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Removendo cache antigo:', cacheName)
-            return caches.delete(cacheName)
-          }
+    Promise.all([
+      // Limpar caches antigos
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('[Service Worker] Removendo cache antigo:', cacheName)
+              return caches.delete(cacheName)
+            }
+          })
+        )
+      }),
+      // Controlar todas as páginas imediatamente
+      self.clients.claim().then(() => {
+        console.log('[Service Worker] ✅ Service Worker ativado e controlando todas as páginas!')
+        // Notificar todas as páginas que o SW está ativo
+        return self.clients.matchAll().then((clients) => {
+          clients.forEach((client) => {
+            client.postMessage({
+              type: 'SW_ACTIVATED',
+              message: 'Service Worker está ativo e pronto!'
+            })
+          })
         })
-      )
-    })
+      })
+    ])
   )
-  return self.clients.claim() // Controlar todas as páginas imediatamente
 })
 
 // Receber notificações push

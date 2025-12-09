@@ -198,6 +198,15 @@ function AdminDashboardContent() {
       link: '/admin/wellness/biblioteca/upload',
       color: 'bg-teal-500',
       destaque: true
+    },
+    {
+      id: 'notificacoes-push',
+      title: 'Notificações Push',
+      description: 'Enviar notificações para usuários com links para materiais',
+      icon: '🔔',
+      link: '/admin/notificacoes-push',
+      color: 'bg-green-500',
+      destaque: true
     }
   ]
 
