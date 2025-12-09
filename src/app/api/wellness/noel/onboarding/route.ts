@@ -239,6 +239,36 @@ export async function POST(request: NextRequest) {
 
     const isEditing = existingProfile && existingProfile.onboarding_completo
 
+    // Valores válidos para objetivo_principal
+    const objetivosValidos = [
+      'usar_recomendar',
+      'renda_extra',
+      'carteira',
+      'plano_presidente',
+      'fechado',
+      'funcional',
+      // Valores antigos (compatibilidade)
+      'vender_mais',
+      'construir_carteira',
+      'melhorar_rotina',
+      'voltar_ritmo',
+      'aprender_divulgar'
+    ]
+
+    // Valores válidos para tempo_disponivel
+    const temposValidos = [
+      '5min',
+      '15min',
+      '30min',
+      '1h',
+      '1h_plus',
+      // Valores antigos (compatibilidade)
+      '15_minutos',
+      '30_minutos',
+      '1_hora',
+      'mais_1_hora'
+    ]
+
     // Validações: apenas para novos perfis (onboarding inicial)
     // Para edições, permitir atualizar campos individualmente
     if (!isEditing) {
@@ -253,6 +283,34 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
+
+      // Validar valor de objetivo_principal
+      if (objetivo_principal && !objetivosValidos.includes(objetivo_principal)) {
+        console.error('❌ Valor inválido de objetivo_principal:', objetivo_principal)
+        return NextResponse.json(
+          { 
+            error: 'Valor inválido para objetivo principal',
+            message: `O valor "${objetivo_principal}" não é válido. Valores permitidos: ${objetivosValidos.join(', ')}`,
+            received: objetivo_principal,
+            valid: objetivosValidos
+          },
+          { status: 400 }
+        )
+      }
+
+      // Validar valor de tempo_disponivel
+      if (tempo_disponivel && !temposValidos.includes(tempo_disponivel)) {
+        console.error('❌ Valor inválido de tempo_disponivel:', tempo_disponivel)
+        return NextResponse.json(
+          { 
+            error: 'Valor inválido para tempo disponível',
+            message: `O valor "${tempo_disponivel}" não é válido. Valores permitidos: ${temposValidos.join(', ')}`,
+            received: tempo_disponivel,
+            valid: temposValidos
+          },
+          { status: 400 }
+        )
+      }
     } else {
       // Edição: usar valores existentes se não fornecidos (mas não obrigar)
       // Permitir que o usuário edite apenas os campos que quiser
@@ -261,6 +319,33 @@ export async function POST(request: NextRequest) {
       }
       if (!tempo_disponivel && existingProfile?.tempo_disponivel) {
         tempo_disponivel = existingProfile.tempo_disponivel
+      }
+
+      // Validar valores fornecidos na edição (se houver)
+      if (objetivo_principal && !objetivosValidos.includes(objetivo_principal)) {
+        console.error('❌ Valor inválido de objetivo_principal na edição:', objetivo_principal)
+        return NextResponse.json(
+          { 
+            error: 'Valor inválido para objetivo principal',
+            message: `O valor "${objetivo_principal}" não é válido. Valores permitidos: ${objetivosValidos.join(', ')}`,
+            received: objetivo_principal,
+            valid: objetivosValidos
+          },
+          { status: 400 }
+        )
+      }
+
+      if (tempo_disponivel && !temposValidos.includes(tempo_disponivel)) {
+        console.error('❌ Valor inválido de tempo_disponivel na edição:', tempo_disponivel)
+        return NextResponse.json(
+          { 
+            error: 'Valor inválido para tempo disponível',
+            message: `O valor "${tempo_disponivel}" não é válido. Valores permitidos: ${temposValidos.join(', ')}`,
+            received: tempo_disponivel,
+            valid: temposValidos
+          },
+          { status: 400 }
+        )
       }
     }
 
@@ -283,6 +368,11 @@ export async function POST(request: NextRequest) {
 
     // Apenas atualizar campos que foram fornecidos (ou obrigatórios)
     if (objetivo_principal !== undefined && objetivo_principal !== null && objetivo_principal !== '') {
+      // Log para debug
+      console.log('📝 Salvando objetivo_principal:', objetivo_principal, 'Tipo:', typeof objetivo_principal)
+      console.log('📝 Valores válidos:', objetivosValidos)
+      console.log('📝 É válido?', objetivosValidos.includes(objetivo_principal))
+      
       profileData.objetivo_principal = objetivo_principal
     }
     if (tempo_disponivel !== undefined && tempo_disponivel !== null && tempo_disponivel !== '') {
