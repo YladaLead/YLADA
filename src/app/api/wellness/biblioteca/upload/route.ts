@@ -29,6 +29,11 @@ const MAPEAMENTO_CATEGORIA = {
     categoria_banco: 'treinamento',
     tags: ['videos', 'treinamento'],
     secao: 'videos'
+  },
+  divulgacao: {
+    categoria_banco: 'divulgacao',
+    tags: ['divulgacao', 'redes-sociais', 'posts', 'stories'],
+    secao: 'divulgacao'
   }
 } as const
 

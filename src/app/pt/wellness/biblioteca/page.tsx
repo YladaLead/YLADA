@@ -54,6 +54,14 @@ const secoes: SecaoBiblioteca[] = [
     icone: '🎥',
     cor: 'red',
     link: '/pt/wellness/biblioteca/videos'
+  },
+  {
+    id: 'divulgacao',
+    titulo: 'Materiais para Divulgação',
+    descricao: 'Imagens, posts, stories e materiais prontos para compartilhar nas redes sociais',
+    icone: '📱',
+    cor: 'pink',
+    link: '/pt/wellness/biblioteca/divulgacao'
   }
 ]
 
@@ -63,7 +71,8 @@ const getCorClasses = (cor: string) => {
     purple: 'bg-purple-50 border-purple-200 hover:bg-purple-100',
     green: 'bg-green-50 border-green-200 hover:bg-green-100',
     orange: 'bg-orange-50 border-orange-200 hover:bg-orange-100',
-    red: 'bg-red-50 border-red-200 hover:bg-red-100'
+    red: 'bg-red-50 border-red-200 hover:bg-red-100',
+    pink: 'bg-pink-50 border-pink-200 hover:bg-pink-100'
   }
   return cores[cor] || 'bg-gray-50 border-gray-200 hover:bg-gray-100'
 }

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
-type CategoriaSelecionada = 'materiais' | 'cartilhas' | 'produtos' | 'scripts' | 'videos'
+type CategoriaSelecionada = 'materiais' | 'cartilhas' | 'produtos' | 'scripts' | 'videos' | 'divulgacao'
 
 interface Categoria {
   id: CategoriaSelecionada
@@ -49,6 +49,13 @@ const categorias: Categoria[] = [
     descricao: 'Vídeos sobre preparo, vendas, convites e apresentações',
     icone: '🎥',
     cor: 'red'
+  },
+  {
+    id: 'divulgacao',
+    label: 'Materiais para Divulgação',
+    descricao: 'Imagens, posts, stories e materiais prontos para compartilhar nas redes sociais',
+    icone: '📱',
+    cor: 'pink'
   }
 ]
 
@@ -58,7 +65,8 @@ const getCorClasses = (cor: string) => {
     green: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100',
     purple: 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100',
     orange: 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100',
-    red: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
+    red: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100',
+    pink: 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100'
   }
   return cores[cor] || 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
 }
