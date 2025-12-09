@@ -19,37 +19,26 @@ export default function NoelOnboardingCompleto({
   const [error, setError] = useState<string | null>(null)
   
   const [data, setData] = useState<Partial<WellnessConsultantProfile>>({
-    // Dados do Perfil
-    idade: initialData?.idade,
-    cidade: initialData?.cidade || '',
-    tempo_disponivel: initialData?.tempo_disponivel,
-    experiencia_herbalife: initialData?.experiencia_herbalife,
-    objetivo_principal: initialData?.objetivo_principal,
-    canal_principal: initialData?.canal_principal,
-    
-    // Dados Operacionais
-    prepara_bebidas: initialData?.prepara_bebidas,
-    trabalha_com: initialData?.trabalha_com,
-    estoque_atual: initialData?.estoque_atual || [],
-    meta_pv: initialData?.meta_pv,
+    // Novos campos estratégicos
+    tipo_trabalho: initialData?.tipo_trabalho,
+    foco_trabalho: initialData?.foco_trabalho,
+    ganhos_prioritarios: initialData?.ganhos_prioritarios,
+    nivel_herbalife: initialData?.nivel_herbalife,
+    carga_horaria_diaria: initialData?.carga_horaria_diaria,
+    dias_por_semana: initialData?.dias_por_semana,
     meta_financeira: initialData?.meta_financeira,
+    meta_3_meses: initialData?.meta_3_meses,
+    meta_1_ano: initialData?.meta_1_ano,
+    observacoes_adicionais: initialData?.observacoes_adicionais,
     
-    // Dados Sociais
-    contatos_whatsapp: initialData?.contatos_whatsapp,
-    seguidores_instagram: initialData?.seguidores_instagram,
-    abertura_recrutar: initialData?.abertura_recrutar,
-    publico_preferido: initialData?.publico_preferido || [],
-    
-    // Preferências
-    tom: initialData?.tom,
-    ritmo: initialData?.ritmo,
-    lembretes: initialData?.lembretes !== undefined ? initialData.lembretes : true,
+    // Campos antigos (compatibilidade)
+    cidade: initialData?.cidade || '',
+    idade: initialData?.idade,
   })
 
-  const totalSections = 5
+  const totalSections = 3
 
   const handleNext = async () => {
-    // Validar seção atual
     if (!validateSection(section)) {
       return
     }
@@ -58,7 +47,6 @@ export default function NoelOnboardingCompleto({
       setSection(section + 1)
       setError(null)
     } else {
-      // Finalizar
       await handleSave()
     }
   }
@@ -72,35 +60,28 @@ export default function NoelOnboardingCompleto({
 
   const validateSection = (sec: number): boolean => {
     switch (sec) {
-      case 1: // Perfil
-        if (!data.objetivo_principal || !data.tempo_disponivel || !data.experiencia_herbalife) {
-          setError('Por favor, preencha todos os campos obrigatórios.')
+      case 1: // Perguntas 1-4 (OBRIGATÓRIAS)
+        if (!data.tipo_trabalho || !data.foco_trabalho || !data.ganhos_prioritarios || !data.nivel_herbalife) {
+          setError('Por favor, responda todas as perguntas obrigatórias da seção 1.')
           return false
         }
         break
-      case 2: // Operacional
-        if (!data.prepara_bebidas || !data.trabalha_com) {
-          setError('Por favor, preencha todos os campos obrigatórios.')
+      case 2: // Perguntas 5-7 (OBRIGATÓRIAS)
+        if (!data.carga_horaria_diaria || !data.dias_por_semana || !data.meta_financeira) {
+          setError('Por favor, responda todas as perguntas obrigatórias da seção 2.')
           return false
         }
         break
-      case 3: // Social
-        // Campos opcionais, mas validar se preenchidos
-        break
-      case 4: // Preferências
-        if (!data.tom || !data.ritmo) {
-          setError('Por favor, preencha todos os campos obrigatórios.')
-          return false
-        }
+      case 3: // Perguntas 8-9 (opcionais mas recomendadas)
+        // Metas temporais são opcionais, mas recomendadas
         break
     }
     return true
   }
 
   const handleSave = async () => {
-    // Proteção: evitar múltiplos salvamentos simultâneos
     if (saving) {
-      console.warn('⚠️ Salvamento já em andamento, ignorando novo clique')
+      console.warn('⚠️ Salvamento já em andamento')
       return
     }
 
@@ -111,57 +92,31 @@ export default function NoelOnboardingCompleto({
       console.log('💾 Dados que serão salvos:', JSON.stringify(data, null, 2))
       
       // Validar campos obrigatórios antes de salvar
-      if (!data.objetivo_principal || !data.tempo_disponivel) {
-        throw new Error('Por favor, preencha o objetivo principal e o tempo disponível.')
+      if (!data.tipo_trabalho || !data.foco_trabalho || !data.ganhos_prioritarios || !data.nivel_herbalife || !data.carga_horaria_diaria || !data.dias_por_semana || !data.meta_financeira) {
+        setError('Por favor, preencha todos os campos obrigatórios (seções 1 e 2).')
+        setSection(1) // Voltar para primeira seção
+        return
       }
       
-      // Criar AbortController para timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos timeout
+      await onComplete(data)
+      console.log('✅ Perfil salvo com sucesso')
       
-      try {
-        await onComplete(data)
-        // Se chegou aqui, salvou com sucesso
-        console.log('✅ Perfil salvo com sucesso')
-        clearTimeout(timeoutId)
-        
-        // Fechar modal após sucesso (se onClose estiver disponível)
-        if (onClose) {
-          setTimeout(() => {
-            onClose()
-          }, 500) // Pequeno delay para mostrar feedback visual
-        }
-      } catch (fetchError: any) {
-        clearTimeout(timeoutId)
-        
-        if (fetchError.name === 'AbortError') {
-          throw new Error('O salvamento demorou muito. Verifique sua conexão e tente novamente.')
-        }
-        throw fetchError
+      if (onClose) {
+        setTimeout(() => {
+          onClose()
+        }, 500)
       }
     } catch (err: any) {
       console.error('❌ Erro ao salvar:', err)
-      const errorMessage = err.message || 'Erro ao salvar. Tente novamente.'
-      setError(errorMessage)
+      setError(err.message || 'Erro ao salvar. Tente novamente.')
     } finally {
-      // SEMPRE garantir que setSaving(false) seja chamado
       setSaving(false)
     }
-  }
-
-  const togglePublico = (publico: string) => {
-    setData(prev => ({
-      ...prev,
-      publico_preferido: prev.publico_preferido?.includes(publico)
-        ? prev.publico_preferido.filter(p => p !== publico)
-        : [...(prev.publico_preferido || []), publico]
-    }))
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
-        {/* Botão de Fechar */}
         {onClose && (
           <button
             onClick={onClose}
@@ -175,16 +130,15 @@ export default function NoelOnboardingCompleto({
         )}
         
         <div className="p-8">
-          {/* Header */}
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              🎯 Configure seu Perfil Completo
+              🎯 Perfil Estratégico do Distribuidor
             </h2>
             <p className="text-gray-600">
-              Vamos personalizar sua experiência com o NOEL
+              Configure seu perfil para o NOEL personalizar sua experiência
             </p>
             <div className="mt-4 flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((s) => (
+              {[1, 2, 3].map((s) => (
                 <div
                   key={s}
                   className={`h-2 rounded-full transition-all ${
@@ -194,131 +148,151 @@ export default function NoelOnboardingCompleto({
               ))}
             </div>
             <div className="mt-2 text-sm text-gray-500">
-              {section === 1 && 'Perfil do Consultor'}
-              {section === 2 && 'Dados Operacionais'}
-              {section === 3 && 'Dados Sociais'}
-              {section === 4 && 'Preferências'}
-              {section === 5 && 'Revisão'}
+              {section === 1 && 'Perguntas Essenciais (1-4)'}
+              {section === 2 && 'Tempo e Metas (5-7)'}
+              {section === 3 && 'Metas Temporais (8-9)'}
             </div>
           </div>
 
-          {/* SEÇÃO 1: DADOS DO PERFIL DO CONSULTOR */}
+          {/* SEÇÃO 1: PERGUNTAS 1-4 */}
           {section === 1 && (
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900">
-                1. Dados do Perfil
-              </h3>
-
-              {/* Idade (opcional) */}
+              {/* Pergunta 1: Como pretende trabalhar */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Idade (opcional)
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  1️⃣ Como você pretende trabalhar? <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  min="18"
-                  max="100"
-                  value={data.idade || ''}
-                  onChange={(e) => setData(prev => ({ ...prev, idade: e.target.value ? parseInt(e.target.value) : undefined }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Ex: 28"
-                />
-              </div>
-
-              {/* Cidade */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cidade
-                </label>
-                <input
-                  type="text"
-                  value={data.cidade || ''}
-                  onChange={(e) => setData(prev => ({ ...prev, cidade: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Ex: São Paulo"
-                />
-              </div>
-
-              {/* Objetivo Principal */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Objetivo Principal <span className="text-red-500">*</span>
-                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Define o fluxo principal que o NOEL vai ativar
+                </p>
                 <div className="space-y-2">
                   {[
-                    { value: 'usar_recomendar', label: 'Usar e Recomendar', icon: '💚' },
-                    { value: 'renda_extra', label: 'Renda Extra', icon: '💰' },
-                    { value: 'carteira', label: 'Construir Carteira', icon: '👥' },
-                    { value: 'plano_presidente', label: 'Plano Presidente', icon: '👑' },
-                    { value: 'fechado', label: 'Produtos Fechados', icon: '📦' },
-                    { value: 'funcional', label: 'Bebidas Funcionais', icon: '🥤' }
+                    { value: 'bebidas_funcionais', label: 'Servindo bebidas funcionais', icon: '🥤', desc: 'Trabalho local/presencial, alta conversão rápida' },
+                    { value: 'produtos_fechados', label: 'Vendendo produtos fechados', icon: '📦', desc: 'Foco em valor maior por venda, menos volume' },
+                    { value: 'cliente_que_indica', label: 'Cliente que indica', icon: '👥', desc: 'Cliente afiliado que recomenda e ganha' }
                   ].map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, objetivo_principal: option.value as any }))}
-                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.objetivo_principal === option.value
+                      onClick={() => setData(prev => ({ ...prev, tipo_trabalho: option.value as any }))}
+                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                        data.tipo_trabalho === option.value
                           ? 'border-green-600 bg-green-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <span className="font-medium text-gray-900">{option.label}</span>
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{option.icon}</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{option.label}</p>
+                          <p className="text-xs text-gray-600 mt-1">{option.desc}</p>
+                        </div>
+                        {data.tipo_trabalho === option.value && (
+                          <span className="text-green-600 text-xl">✓</span>
+                        )}
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Tempo Disponível */}
+              {/* Pergunta 2: Foco de trabalho */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tempo Disponível por Dia <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  2️⃣ Qual é o seu foco de trabalho? <span className="text-red-500">*</span>
                 </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Pode escolher um ou os dois
+                </p>
                 <div className="space-y-2">
                   {[
-                    { value: '5min', label: '5 minutos', icon: '⏱️' },
-                    { value: '15min', label: '15 minutos', icon: '⏰' },
-                    { value: '30min', label: '30 minutos', icon: '🕐' },
-                    { value: '1h', label: '1 hora', icon: '🕑' },
-                    { value: '1h_plus', label: 'Mais de 1 hora', icon: '🕒' }
+                    { value: 'renda_extra', label: 'Renda extra', icon: '💰', desc: 'Metas mais simples, sem pressão' },
+                    { value: 'plano_carreira', label: 'Plano de carreira Herbalife', icon: '👑', desc: 'Alta ambição, estrutura pesada' },
+                    { value: 'ambos', label: 'Os dois', icon: '🚀', desc: 'Resultado rápido + crescimento futuro' }
                   ].map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, tempo_disponivel: option.value as any }))}
-                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.tempo_disponivel === option.value
+                      onClick={() => setData(prev => ({ ...prev, foco_trabalho: option.value as any }))}
+                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                        data.foco_trabalho === option.value
                           ? 'border-green-600 bg-green-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <span className="font-medium text-gray-900">{option.label}</span>
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{option.icon}</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{option.label}</p>
+                          <p className="text-xs text-gray-600 mt-1">{option.desc}</p>
+                        </div>
+                        {data.foco_trabalho === option.value && (
+                          <span className="text-green-600 text-xl">✓</span>
+                        )}
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Experiência Herbalife */}
+              {/* Pergunta 3: Ganhos prioritários */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Experiência com Herbalife <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  3️⃣ Quais ganhos você quer priorizar? <span className="text-red-500">*</span>
                 </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Também pode ser um ou ambos
+                </p>
                 <div className="space-y-2">
                   {[
-                    { value: 'nenhuma', label: 'Nenhuma', icon: '🆕' },
-                    { value: 'ja_vendi', label: 'Já vendi', icon: '✅' },
+                    { value: 'vendas', label: 'Ganhos com vendas', icon: '💵', desc: 'Metas de kits, bebidas e produtos' },
+                    { value: 'equipe', label: 'Ganhos em comissões de equipe', icon: '👥', desc: 'Royalties/desenvolvimento, duplicação' },
+                    { value: 'ambos', label: 'Os dois', icon: '🎯', desc: 'Modelo híbrido, 50% vendas / 50% equipe' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setData(prev => ({ ...prev, ganhos_prioritarios: option.value as any }))}
+                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                        data.ganhos_prioritarios === option.value
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{option.icon}</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{option.label}</p>
+                          <p className="text-xs text-gray-600 mt-1">{option.desc}</p>
+                        </div>
+                        {data.ganhos_prioritarios === option.value && (
+                          <span className="text-green-600 text-xl">✓</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pergunta 4: Nível Herbalife */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  4️⃣ Qual é o seu nível atual na Herbalife? <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Hierarquia oficial Herbalife
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { value: 'novo_distribuidor', label: 'Novo Distribuidor', icon: '🆕' },
                     { value: 'supervisor', label: 'Supervisor', icon: '⭐' },
-                    { value: 'get_plus', label: 'GET+', icon: '👑' }
+                    { value: 'equipe_mundial', label: 'Equipe Mundial', icon: '🌍' },
+                    { value: 'equipe_expansao_global', label: 'Equipe de Expansão Global (GET)', icon: '🚀' },
+                    { value: 'equipe_milionarios', label: 'Equipe de Milionários', icon: '💎' },
+                    { value: 'equipe_presidentes', label: 'Equipe de Presidentes', icon: '👑' }
                   ].map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, experiencia_herbalife: option.value as any }))}
+                      onClick={() => setData(prev => ({ ...prev, nivel_herbalife: option.value as any }))}
                       className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.experiencia_herbalife === option.value
+                        data.nivel_herbalife === option.value
                           ? 'border-green-600 bg-green-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
@@ -326,241 +300,7 @@ export default function NoelOnboardingCompleto({
                       <div className="flex items-center gap-3">
                         <span className="text-xl">{option.icon}</span>
                         <span className="font-medium text-gray-900">{option.label}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Canal Principal */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Canal Principal
-                </label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
-                    { value: 'instagram', label: 'Instagram', icon: '📸' },
-                    { value: 'trafego_pago', label: 'Tráfego Pago', icon: '📊' },
-                    { value: 'presencial', label: 'Presencial', icon: '🚶' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, canal_principal: option.value as any }))}
-                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.canal_principal === option.value
-                          ? 'border-green-600 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <span className="font-medium text-gray-900">{option.label}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* SEÇÃO 2: DADOS OPERACIONAIS */}
-          {section === 2 && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900">
-                2. Dados Operacionais
-              </h3>
-
-              {/* Prepara Bebidas */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Você prepara bebidas funcionais? <span className="text-red-500">*</span>
-                </label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'sim', label: 'Sim', icon: '✅' },
-                    { value: 'nao', label: 'Não', icon: '❌' },
-                    { value: 'aprender', label: 'Quero aprender', icon: '📚' },
-                    { value: 'nunca', label: 'Nunca', icon: '🚫' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, prepara_bebidas: option.value as any }))}
-                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.prepara_bebidas === option.value
-                          ? 'border-green-600 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <span className="font-medium text-gray-900">{option.label}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Trabalha Com */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Você trabalha com: <span className="text-red-500">*</span>
-                </label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'funcional', label: 'Bebidas Funcionais', icon: '🥤' },
-                    { value: 'fechado', label: 'Produtos Fechados', icon: '📦' },
-                    { value: 'ambos', label: 'Ambos', icon: '🔄' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, trabalha_com: option.value as any }))}
-                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.trabalha_com === option.value
-                          ? 'border-green-600 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <span className="font-medium text-gray-900">{option.label}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Meta PV */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta de PV Mensal (100-50000)
-                </label>
-                <input
-                  type="number"
-                  min="100"
-                  max="50000"
-                  step="50"
-                  value={data.meta_pv || ''}
-                  onChange={(e) => setData(prev => ({ ...prev, meta_pv: e.target.value ? parseInt(e.target.value) : undefined }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Ex: 500"
-                />
-              </div>
-
-              {/* Meta Financeira */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta Financeira Mensal (R$ 500-200.000)
-                </label>
-                <input
-                  type="number"
-                  min="500"
-                  max="200000"
-                  step="100"
-                  value={data.meta_financeira || ''}
-                  onChange={(e) => setData(prev => ({ ...prev, meta_financeira: e.target.value ? parseFloat(e.target.value) : undefined }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Ex: 2000"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* SEÇÃO 3: DADOS SOCIAIS */}
-          {section === 3 && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900">
-                3. Dados Sociais
-              </h3>
-
-              {/* Contatos WhatsApp */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quantos contatos você tem no WhatsApp?
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={data.contatos_whatsapp || ''}
-                  onChange={(e) => setData(prev => ({ ...prev, contatos_whatsapp: e.target.value ? parseInt(e.target.value) : undefined }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Ex: 150"
-                />
-              </div>
-
-              {/* Seguidores Instagram */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quantos seguidores você tem no Instagram?
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={data.seguidores_instagram || ''}
-                  onChange={(e) => setData(prev => ({ ...prev, seguidores_instagram: e.target.value ? parseInt(e.target.value) : undefined }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Ex: 500"
-                />
-              </div>
-
-              {/* Abertura Recrutar */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Você tem abertura para recrutar?
-                </label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'sim', label: 'Sim', icon: '✅' },
-                    { value: 'nao', label: 'Não', icon: '❌' },
-                    { value: 'aprender', label: 'Quero aprender', icon: '📚' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, abertura_recrutar: option.value as any }))}
-                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.abertura_recrutar === option.value
-                          ? 'border-green-600 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <span className="font-medium text-gray-900">{option.label}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Público Preferido */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Público Preferido (pode selecionar vários)
-                </label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'saude', label: 'Saúde', icon: '💚' },
-                    { value: 'estetica', label: 'Estética', icon: '✨' },
-                    { value: 'fitness', label: 'Fitness', icon: '💪' },
-                    { value: 'maes', label: 'Mães', icon: '👩' },
-                    { value: 'jovens', label: 'Jovens', icon: '👶' },
-                    { value: 'cansados', label: 'Cansados', icon: '😴' },
-                    { value: 'renda_extra', label: 'Renda Extra', icon: '💰' },
-                    { value: 'saudaveis', label: 'Saudáveis', icon: '🌟' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => togglePublico(option.value)}
-                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.publico_preferido?.includes(option.value)
-                          ? 'border-green-600 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{option.icon}</span>
-                        <span className="font-medium text-gray-900">{option.label}</span>
-                        {data.publico_preferido?.includes(option.value) && (
+                        {data.nivel_herbalife === option.value && (
                           <span className="ml-auto text-green-600">✓</span>
                         )}
                       </div>
@@ -571,30 +311,29 @@ export default function NoelOnboardingCompleto({
             </div>
           )}
 
-          {/* SEÇÃO 4: PREFERÊNCIAS */}
-          {section === 4 && (
+          {/* SEÇÃO 2: PERGUNTAS 5-7 */}
+          {section === 2 && (
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900">
-                4. Preferências
-              </h3>
-
-              {/* Tom */}
+              {/* Pergunta 5: Carga horária */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tom de Comunicação <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  5️⃣ Qual sua carga horária de dedicação diária? <span className="text-red-500">*</span>
                 </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  O NOEL usa isso para estruturar rotinas e adequar metas realistas
+                </p>
                 <div className="space-y-2">
                   {[
-                    { value: 'neutro', label: 'Neutro', icon: '😐' },
-                    { value: 'extrovertido', label: 'Extrovertido', icon: '😄' },
-                    { value: 'tecnico', label: 'Técnico', icon: '🔬' },
-                    { value: 'simples', label: 'Simples', icon: '💬' }
+                    { value: '1_hora', label: '1 hora por dia', icon: '⏰' },
+                    { value: '1_a_2_horas', label: '1 a 2 horas por dia', icon: '⏱️' },
+                    { value: '2_a_4_horas', label: '2 a 4 horas por dia', icon: '🕐' },
+                    { value: 'mais_4_horas', label: 'Mais de 4 horas por dia', icon: '🕑' }
                   ].map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, tom: option.value as any }))}
+                      onClick={() => setData(prev => ({ ...prev, carga_horaria_diaria: option.value as any }))}
                       className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.tom === option.value
+                        data.carga_horaria_diaria === option.value
                           ? 'border-green-600 bg-green-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
@@ -602,28 +341,35 @@ export default function NoelOnboardingCompleto({
                       <div className="flex items-center gap-3">
                         <span className="text-xl">{option.icon}</span>
                         <span className="font-medium text-gray-900">{option.label}</span>
+                        {data.carga_horaria_diaria === option.value && (
+                          <span className="ml-auto text-green-600">✓</span>
+                        )}
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Ritmo */}
+              {/* Pergunta 6: Dias por semana */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ritmo de Trabalho <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  6️⃣ Quantos dias por semana você consegue trabalhar? <span className="text-red-500">*</span>
                 </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Determina volume semanal, cadência de vendas e convites
+                </p>
                 <div className="space-y-2">
                   {[
-                    { value: 'lento', label: 'Lento', icon: '🐢' },
-                    { value: 'medio', label: 'Médio', icon: '🚶' },
-                    { value: 'rapido', label: 'Rápido', icon: '🏃' }
+                    { value: '1_a_2_dias', label: '1–2 dias por semana', icon: '📅' },
+                    { value: '3_a_4_dias', label: '3–4 dias por semana', icon: '📆' },
+                    { value: '5_a_6_dias', label: '5–6 dias por semana', icon: '🗓️' },
+                    { value: 'todos_dias', label: 'Todos os dias', icon: '🔥' }
                   ].map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => setData(prev => ({ ...prev, ritmo: option.value as any }))}
+                      onClick={() => setData(prev => ({ ...prev, dias_por_semana: option.value as any }))}
                       className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                        data.ritmo === option.value
+                        data.dias_por_semana === option.value
                           ? 'border-green-600 bg-green-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
@@ -631,91 +377,192 @@ export default function NoelOnboardingCompleto({
                       <div className="flex items-center gap-3">
                         <span className="text-xl">{option.icon}</span>
                         <span className="font-medium text-gray-900">{option.label}</span>
+                        {data.dias_por_semana === option.value && (
+                          <span className="ml-auto text-green-600">✓</span>
+                        )}
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Lembretes */}
+              {/* Pergunta 7: Meta financeira mensal */}
               <div>
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  7️⃣ Quanto você quer ganhar por mês? <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Fundamental para cálculo automático de metas
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { value: 500, label: 'Até R$ 500/mês', icon: '💵' },
+                    { value: 1500, label: 'R$ 500 a R$ 1.500/mês', icon: '💰' },
+                    { value: 3000, label: 'R$ 1.500 a R$ 3.000/mês', icon: '💸' },
+                    { value: 7000, label: 'R$ 3.000 a R$ 7.000/mês', icon: '💳' },
+                    { value: 15000, label: 'R$ 7.000 a R$ 15.000/mês', icon: '🏆' },
+                    { value: 20000, label: 'Mais de R$ 15.000/mês', icon: '👑' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setData(prev => ({ ...prev, meta_financeira: option.value }))}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                        data.meta_financeira === option.value
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{option.icon}</span>
+                        <span className="font-medium text-gray-900">{option.label}</span>
+                        {data.meta_financeira === option.value && (
+                          <span className="ml-auto text-green-600">✓</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ou especifique outro valor:
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={data.lembretes || false}
-                    onChange={(e) => setData(prev => ({ ...prev, lembretes: e.target.checked }))}
-                    className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    type="number"
+                    min="500"
+                    step="100"
+                    value={data.meta_financeira && ![500, 1500, 3000, 7000, 15000, 20000].includes(data.meta_financeira) ? data.meta_financeira : ''}
+                    onChange={(e) => setData(prev => ({ ...prev, meta_financeira: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Ex: 2500"
                   />
-                  <span className="text-sm font-medium text-gray-700">
-                    Desejo receber lembretes do sistema
-                  </span>
-                </label>
+                </div>
               </div>
             </div>
           )}
 
-          {/* SEÇÃO 5: REVISÃO */}
-          {section === 5 && (
+          {/* SEÇÃO 3: PERGUNTAS 8-9 */}
+          {section === 3 && (
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900">
-                5. Revisão Final
-              </h3>
-              <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                <div>
-                  <strong className="text-gray-700">Objetivo:</strong>{' '}
-                  <span className="text-gray-900">
-                    {data.objetivo_principal === 'usar_recomendar' && 'Usar e Recomendar'}
-                    {data.objetivo_principal === 'renda_extra' && 'Renda Extra'}
-                    {data.objetivo_principal === 'carteira' && 'Construir Carteira'}
-                    {data.objetivo_principal === 'plano_presidente' && 'Plano Presidente'}
-                    {data.objetivo_principal === 'fechado' && 'Produtos Fechados'}
-                    {data.objetivo_principal === 'funcional' && 'Bebidas Funcionais'}
-                  </span>
+              {/* Pergunta 8: Meta 3 meses */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  8️⃣ Qual sua meta para os próximos 3 meses?
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Plano tático imediato (opcional mas recomendado)
+                </p>
+                <div className="space-y-2 mb-4">
+                  {[
+                    { value: 'ganhar_vendas', label: 'Ganhar X em vendas', icon: '💵' },
+                    { value: 'montar_equipe', label: 'Montar uma equipe de X pessoas', icon: '👥' },
+                    { value: 'subir_supervisor', label: 'Subir para Supervisor', icon: '⭐' },
+                    { value: 'subir_mundial', label: 'Subir para Equipe Mundial', icon: '🌍' },
+                    { value: 'estabelecer_rotina', label: 'Estabelecer rotina diária e duplicável', icon: '🔄' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setData(prev => ({ ...prev, meta_3_meses: option.value }))}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                        data.meta_3_meses === option.value
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{option.icon}</span>
+                        <span className="font-medium text-gray-900">{option.label}</span>
+                        {data.meta_3_meses === option.value && (
+                          <span className="ml-auto text-green-600">✓</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <div>
-                  <strong className="text-gray-700">Tempo Disponível:</strong>{' '}
-                  <span className="text-gray-900">{data.tempo_disponivel}</span>
+                <textarea
+                  value={data.meta_3_meses && !['ganhar_vendas', 'montar_equipe', 'subir_supervisor', 'subir_mundial', 'estabelecer_rotina'].includes(data.meta_3_meses) ? data.meta_3_meses : ''}
+                  onChange={(e) => setData(prev => ({ ...prev, meta_3_meses: e.target.value }))}
+                  placeholder="Ou escreva sua meta personalizada..."
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Pergunta 9: Meta 1 ano */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  9️⃣ Qual sua meta para 1 ano?
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Plano estratégico — ligado ao Plano Presidente (opcional mas recomendado)
+                </p>
+                <div className="space-y-2 mb-4">
+                  {[
+                    { value: 'viver_negocio', label: 'Viver do negócio Herbalife', icon: '🏠' },
+                    { value: 'subir_nivel', label: 'Subir para Supervisor / Mundial / GET / Milionários / Presidentes', icon: '📈' },
+                    { value: 'crescer_equipe', label: 'Crescer a equipe para X pessoas', icon: '👥' },
+                    { value: 'atingir_renda', label: 'Atingir renda mensal de X', icon: '💰' },
+                    { value: 'base_duplicacao', label: 'Construir uma base sólida de duplicação', icon: '🔄' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setData(prev => ({ ...prev, meta_1_ano: option.value }))}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                        data.meta_1_ano === option.value
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{option.icon}</span>
+                        <span className="font-medium text-gray-900">{option.label}</span>
+                        {data.meta_1_ano === option.value && (
+                          <span className="ml-auto text-green-600">✓</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <div>
-                  <strong className="text-gray-700">Prepara Bebidas:</strong>{' '}
-                  <span className="text-gray-900">{data.prepara_bebidas}</span>
-                </div>
-                <div>
-                  <strong className="text-gray-700">Trabalha Com:</strong>{' '}
-                  <span className="text-gray-900">{data.trabalha_com}</span>
-                </div>
-                {data.meta_pv && (
-                  <div>
-                    <strong className="text-gray-700">Meta PV:</strong>{' '}
-                    <span className="text-gray-900">{data.meta_pv}</span>
-                  </div>
-                )}
-                {data.meta_financeira && (
-                  <div>
-                    <strong className="text-gray-700">Meta Financeira:</strong>{' '}
-                    <span className="text-gray-900">R$ {data.meta_financeira.toLocaleString('pt-BR')}</span>
-                  </div>
-                )}
-                <div>
-                  <strong className="text-gray-700">Tom:</strong>{' '}
-                  <span className="text-gray-900">{data.tom}</span>
-                </div>
-                <div>
-                  <strong className="text-gray-700">Ritmo:</strong>{' '}
-                  <span className="text-gray-900">{data.ritmo}</span>
-                </div>
+                <textarea
+                  value={data.meta_1_ano && !['viver_negocio', 'subir_nivel', 'crescer_equipe', 'atingir_renda', 'base_duplicacao'].includes(data.meta_1_ano) ? data.meta_1_ano : ''}
+                  onChange={(e) => setData(prev => ({ ...prev, meta_1_ano: e.target.value }))}
+                  placeholder="Ou escreva sua meta personalizada..."
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Campo de Observações Adicionais */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  💬 Observações Adicionais (opcional)
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Alguma informação importante que o NOEL deve saber sobre você?
+                </p>
+                <textarea
+                  value={data.observacoes_adicionais || ''}
+                  onChange={(e) => {
+                    const value = e.target.value.substring(0, 500)
+                    setData(prev => ({ ...prev, observacoes_adicionais: value }))
+                  }}
+                  placeholder="Ex: Trabalho apenas à noite, tenho limitações físicas, prefiro abordagem mais suave..."
+                  rows={4}
+                  maxLength={500}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {(data.observacoes_adicionais || '').length}/500 caracteres
+                </p>
               </div>
             </div>
           )}
 
-          {/* Mensagem de Erro */}
           {error && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-800">{error}</p>
             </div>
           )}
 
-          {/* Footer */}
           <div className="mt-8 flex justify-between">
             <button
               onClick={handleBack}
@@ -748,5 +595,3 @@ export default function NoelOnboardingCompleto({
     </div>
   )
 }
-
-

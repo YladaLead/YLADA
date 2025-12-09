@@ -157,10 +157,21 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Verificar se tem perfil estratégico completo (novos campos)
+    const temPerfilEstrategicoCompleto = data && 
+      data.tipo_trabalho && 
+      data.foco_trabalho && 
+      data.ganhos_prioritarios && 
+      data.nivel_herbalife && 
+      data.carga_horaria_diaria && 
+      data.dias_por_semana && 
+      data.meta_financeira
+
     return NextResponse.json({
       hasProfile: !!data,
-      onboardingComplete: data?.onboarding_completo || false,
+      onboardingComplete: temPerfilEstrategicoCompleto || false, // Priorizar novos campos
       profile: data || null,
+      needsUpdate: !!data && !temPerfilEstrategicoCompleto, // Indica se precisa atualizar para novos campos
     })
   } catch (error: any) {
     console.error('❌ Erro no onboarding check:', error)
@@ -226,6 +237,19 @@ export async function POST(request: NextRequest) {
       // Situações Particulares
       situacoes_particulares,
       
+      // =====================================================
+      // NOVOS CAMPOS ESTRATÉGICOS (Versão 2.0)
+      // =====================================================
+      tipo_trabalho,
+      foco_trabalho,
+      ganhos_prioritarios,
+      nivel_herbalife,
+      carga_horaria_diaria,
+      dias_por_semana,
+      meta_3_meses,
+      meta_1_ano,
+      observacoes_adicionais,
+      
       // Dados antigos (compatibilidade)
       tem_lista_contatos,
     } = body
@@ -272,13 +296,14 @@ export async function POST(request: NextRequest) {
     // Validações: apenas para novos perfis (onboarding inicial)
     // Para edições, permitir atualizar campos individualmente
     if (!isEditing) {
-      // Novo onboarding: campos obrigatórios
-      if (!objetivo_principal || !tempo_disponivel) {
+      // Novo onboarding: CAMPOS ESTRATÉGICOS SÃO OBRIGATÓRIOS (versão 2.0)
+      // Priorizar novos campos estratégicos
+      if (!tipo_trabalho || !foco_trabalho || !ganhos_prioritarios || !nivel_herbalife || !carga_horaria_diaria || !dias_por_semana || !meta_financeira) {
         return NextResponse.json(
           { 
             error: 'Campos obrigatórios faltando',
-            required: ['objetivo_principal', 'tempo_disponivel'],
-            message: 'Por favor, preencha o objetivo principal e o tempo disponível.'
+            required: ['tipo_trabalho', 'foco_trabalho', 'ganhos_prioritarios', 'nivel_herbalife', 'carga_horaria_diaria', 'dias_por_semana', 'meta_financeira'],
+            message: 'Por favor, preencha todos os campos obrigatórios do perfil estratégico.'
           },
           { status: 400 }
         )
@@ -379,14 +404,26 @@ export async function POST(request: NextRequest) {
       profileData.tempo_disponivel = tempo_disponivel
     }
 
-    // Se for novo onboarding, marcar como completo
-    if (!isEditing) {
+    // Verificar se tem todos os campos estratégicos obrigatórios
+    const temCamposEstrategicosCompletos = 
+      tipo_trabalho && 
+      foco_trabalho && 
+      ganhos_prioritarios && 
+      nivel_herbalife && 
+      carga_horaria_diaria && 
+      dias_por_semana && 
+      meta_financeira
+
+    // Marcar como completo APENAS se tiver todos os novos campos estratégicos
+    if (!isEditing && temCamposEstrategicosCompletos) {
       profileData.onboarding_completo = true
       profileData.onboarding_completado_at = new Date().toISOString()
-    } else {
-      // Em edição, manter o status existente (não sobrescrever se já estiver completo)
-      // Não precisamos incluir onboarding_completo se já estiver true
-      // O upsert vai manter o valor existente se não incluirmos
+    } else if (isEditing && temCamposEstrategicosCompletos) {
+      // Se está editando e agora tem todos os campos, marcar como completo
+      profileData.onboarding_completo = true
+      if (!existingProfile?.onboarding_completado_at) {
+        profileData.onboarding_completado_at = new Date().toISOString()
+      }
     }
 
     // Adicionar campos opcionais se fornecidos (não enviar undefined/null)
@@ -432,6 +469,39 @@ export async function POST(request: NextRequest) {
       // Limitar a 500 caracteres
       profileData.situacoes_particulares = situacoes_particulares.trim().substring(0, 500)
     }
+    
+    // =====================================================
+    // NOVOS CAMPOS ESTRATÉGICOS (Versão 2.0)
+    // =====================================================
+    if (tipo_trabalho !== undefined && tipo_trabalho !== null && tipo_trabalho !== '') {
+      profileData.tipo_trabalho = tipo_trabalho
+    }
+    if (foco_trabalho !== undefined && foco_trabalho !== null && foco_trabalho !== '') {
+      profileData.foco_trabalho = foco_trabalho
+    }
+    if (ganhos_prioritarios !== undefined && ganhos_prioritarios !== null && ganhos_prioritarios !== '') {
+      profileData.ganhos_prioritarios = ganhos_prioritarios
+    }
+    if (nivel_herbalife !== undefined && nivel_herbalife !== null && nivel_herbalife !== '') {
+      profileData.nivel_herbalife = nivel_herbalife
+    }
+    if (carga_horaria_diaria !== undefined && carga_horaria_diaria !== null && carga_horaria_diaria !== '') {
+      profileData.carga_horaria_diaria = carga_horaria_diaria
+    }
+    if (dias_por_semana !== undefined && dias_por_semana !== null && dias_por_semana !== '') {
+      profileData.dias_por_semana = dias_por_semana
+    }
+    if (meta_3_meses !== undefined && meta_3_meses !== null && meta_3_meses.trim() !== '') {
+      profileData.meta_3_meses = meta_3_meses.trim()
+    }
+    if (meta_1_ano !== undefined && meta_1_ano !== null && meta_1_ano.trim() !== '') {
+      profileData.meta_1_ano = meta_1_ano.trim()
+    }
+    if (observacoes_adicionais !== undefined && observacoes_adicionais !== null && observacoes_adicionais.trim() !== '') {
+      // Limitar a 500 caracteres
+      profileData.observacoes_adicionais = observacoes_adicionais.trim().substring(0, 500)
+    }
+    
     // profile_type não é salvo em wellness_noel_profile, apenas em user_profiles (veja abaixo)
 
     // Compatibilidade com versão antiga

@@ -49,11 +49,22 @@ export async function GET(request: NextRequest) {
       console.warn('⚠️ Erro ao buscar profile_type:', err)
     }
 
+    // Verificar se tem perfil estratégico completo (novos campos obrigatórios)
+    const temPerfilEstrategicoCompleto = perfil && 
+      perfil.tipo_trabalho && 
+      perfil.foco_trabalho && 
+      perfil.ganhos_prioritarios && 
+      perfil.nivel_herbalife && 
+      perfil.carga_horaria_diaria && 
+      perfil.dias_por_semana && 
+      perfil.meta_financeira
+
     return NextResponse.json({
       hasProfile: !!perfil && !!perfil.onboarding_completo,
-      onboardingComplete: !!perfil?.onboarding_completo,
+      onboardingComplete: temPerfilEstrategicoCompleto || false, // Priorizar novos campos
       profile: perfil || null,
-      profile_type: profileType
+      profile_type: profileType,
+      needsUpdate: !!perfil && !temPerfilEstrategicoCompleto, // Indica se precisa atualizar para novos campos
     })
 
   } catch (error: any) {

@@ -33,6 +33,7 @@ import { generateHOMContext, isHOMRelated } from '@/lib/noel-wellness/hom-integr
 import { detectMaliciousIntent } from '@/lib/noel-wellness/security-detector'
 import { checkRateLimit } from '@/lib/noel-wellness/rate-limiter'
 import { logSecurityFromFlags } from '@/lib/noel-wellness/security-logger'
+import { calcularMetasAutomaticas, formatarMetasParaNoel } from '@/lib/noel-wellness/goals-calculator'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -121,7 +122,8 @@ async function generateAIResponse(
   module: NoelModule,
   knowledgeContext: string | null,
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [],
-  consultantContext?: string
+  consultantContext?: string,
+  userId?: string
 ): Promise<{ response: string; tokensUsed: number; modelUsed: string }> {
   // Determinar modelo baseado no módulo
   // Usando ChatGPT 4.1 (gpt-4-turbo ou gpt-4.1 conforme disponível)
@@ -131,8 +133,11 @@ async function generateAIResponse(
   // Se tiver gpt-4.1 disponível, pode usar também
   const model = useGPT4 ? (process.env.OPENAI_MODEL || 'gpt-4-turbo') : (process.env.OPENAI_MODEL || 'gpt-4-turbo')
   
-  // Construir system prompt baseado no módulo (com contexto do consultor)
-  const systemPrompt = buildSystemPrompt(module, knowledgeContext, consultantContext)
+  // Construir contexto do perfil estratégico
+  const strategicProfileContext = userId ? await buildStrategicProfileContext(userId) : undefined
+  
+  // Construir system prompt baseado no módulo (com contexto do consultor e perfil estratégico)
+  const systemPrompt = buildSystemPrompt(module, knowledgeContext, consultantContext, strategicProfileContext)
   
   // Construir mensagens
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -209,9 +214,189 @@ function detectInstitutionalQuery(message: string): boolean {
 }
 
 /**
+ * Constrói contexto do perfil estratégico do distribuidor
+ */
+async function buildStrategicProfileContext(userId: string): Promise<string> {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('wellness_noel_profile')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (!profile) {
+      return ''
+    }
+
+    // Verificar se tem novos campos estratégicos (prioridade)
+    const temPerfilNovo = profile.tipo_trabalho && profile.foco_trabalho && profile.ganhos_prioritarios && profile.nivel_herbalife
+    
+    // Se não tem perfil novo, retornar vazio (usuário precisa fazer onboarding novo)
+    if (!temPerfilNovo) {
+      return ''
+    }
+
+    let context = '\n================================================\n'
+    context += '🟦 PERFIL ESTRATÉGICO DO DISTRIBUIDOR (VERSÃO 2.0)\n'
+    context += '================================================\n\n'
+
+    // 1. Tipo de Trabalho (PRIORIDADE: usar novo campo)
+    if (profile.tipo_trabalho) {
+      context += `1️⃣ COMO PRETENDE TRABALHAR: ${profile.tipo_trabalho}\n`
+      if (profile.tipo_trabalho === 'bebidas_funcionais') {
+        context += '   → Distribuidor de alta conversão rápida\n'
+        context += '   → Trabalho local/presencial\n'
+        context += '   → Foco em rotina de atendimento, margem de lucro e volume\n'
+        context += '   → ENTREGAR: Fluxo de Bebidas, estratégia kits R$39,90, metas diárias, scripts de upsell\n'
+      } else if (profile.tipo_trabalho === 'produtos_fechados') {
+        context += '   → Distribuidor com foco em valor maior por venda\n'
+        context += '   → Menos volume, mais lucro unitário\n'
+        context += '   → ENTREGAR: Scripts de vendas de produtos fechados, estratégia de follow-up, ciclo de recompra\n'
+      } else if (profile.tipo_trabalho === 'cliente_que_indica') {
+        context += '   → Perfil leve, porta de entrada\n'
+        context += '   → Foco em duplicação simples\n'
+        context += '   → ENTREGAR: Script de indicação, link de convite, como ganhar R$100-300 só indicando\n'
+      }
+      context += '\n'
+    }
+
+    // 2. Foco de Trabalho
+    if (profile.foco_trabalho) {
+      context += `2️⃣ FOCO DE TRABALHO: ${profile.foco_trabalho}\n`
+      if (profile.foco_trabalho === 'renda_extra') {
+        context += '   → Metas mais simples, sem pressão\n'
+        context += '   → ENTREGAR: Plano de R$500-1500/mês, fluxo básico bebidas + kits, tarefas semanais simples\n'
+      } else if (profile.foco_trabalho === 'plano_carreira') {
+        context += '   → Alta ambição, estrutura pesada\n'
+        context += '   → ENTREGAR: Acesso ao Plano Presidente, treinamento de carreira, scripts de recrutamento, diário 2-5-10 completo\n'
+      } else if (profile.foco_trabalho === 'ambos') {
+        context += '   → Resultado rápido + crescimento futuro\n'
+        context += '   → ENTREGAR: Mistura dos dois planos, metas táticas (3 meses) + estratégicas (1 ano)\n'
+      }
+      context += '\n'
+    }
+
+    // 3. Ganhos Prioritários
+    if (profile.ganhos_prioritarios) {
+      context += `3️⃣ GANHOS PRIORITÁRIOS: ${profile.ganhos_prioritarios}\n`
+      if (profile.ganhos_prioritarios === 'vendas') {
+        context += '   → ENTREGAR: Metas diárias e semanais de vendas, scripts de conversão, cardápios e pacotes, estratégia de recorrência\n'
+      } else if (profile.ganhos_prioritarios === 'equipe') {
+        context += '   → ENTREGAR: Scripts de convite e apresentação, mini-pitch do negócio, plano de duplicação, como convidar diariamente (2-5-10)\n'
+      } else if (profile.ganhos_prioritarios === 'ambos') {
+        context += '   → ENTREGAR: Modelo híbrido, 50% vendas / 50% equipe, dashboard de metas combinadas\n'
+      }
+      context += '\n'
+    }
+
+    // 4. Nível Herbalife
+    if (profile.nivel_herbalife) {
+      context += `4️⃣ NÍVEL ATUAL NA HERBALIFE: ${profile.nivel_herbalife}\n`
+      const nivelMap: Record<string, string> = {
+        'novo_distribuidor': '→ Linguagem simples, treinos básicos, foco 100% em vendas rápidas',
+        'supervisor': '→ Ensinar duplicação, explorar lucro maior, ensinar upgrade da equipe',
+        'equipe_mundial': '→ Treinos de liderança, scripts de acompanhamento de equipe, métricas mensais',
+        'equipe_expansao_global': '→ Ação estratégica, recrutamento forte, construção acelerada',
+        'equipe_milionarios': '→ Foco em gestão de rede, metas macro, planejamento anual',
+        'equipe_presidentes': '→ Linguagem totalmente estratégica, plano de expansão, treinos comportamentais de liderança'
+      }
+      context += `   ${nivelMap[profile.nivel_herbalife] || ''}\n\n`
+    }
+
+    // 5. Carga Horária (PRIORIDADE: usar novo campo)
+    if (profile.carga_horaria_diaria) {
+      context += `5️⃣ CARGA HORÁRIA DIÁRIA: ${profile.carga_horaria_diaria}\n`
+      const cargaMap: Record<string, string> = {
+        '1_hora': '→ Metas leves, fluxos curtos, rotina mínima para crescer',
+        '1_a_2_horas': '→ Aumentar metas, introduzir duplicação simples',
+        '2_a_4_horas': '→ Ativar Plano Acelerado, scripts completos, recrutamento estruturado',
+        'mais_4_horas': '→ Liberar Plano Presidente completo, ações diárias intensivas'
+      }
+      context += `   ${cargaMap[profile.carga_horaria_diaria] || ''}\n\n`
+    } else if (profile.tempo_disponivel) {
+      // Fallback para campo antigo (compatibilidade temporária)
+      context += `5️⃣ TEMPO DISPONÍVEL (campo antigo): ${profile.tempo_disponivel}\n`
+      context += '   → ⚠️ ATENÇÃO: Este perfil precisa ser atualizado para usar os novos campos estratégicos\n\n'
+    }
+
+    // 6. Dias por Semana (PRIORIDADE: usar novo campo)
+    if (profile.dias_por_semana) {
+      context += `6️⃣ DIAS POR SEMANA: ${profile.dias_por_semana}\n`
+      context += '   → Quanto mais dias: maior a meta, maior a velocidade, mais forte o fluxo 2-5-10\n\n'
+    } else {
+      // Se não tem, assumir padrão conservador
+      context += `6️⃣ DIAS POR SEMANA: não informado (assumindo padrão: 3-4 dias)\n\n`
+    }
+
+    // 7. Meta Financeira (PRIORIDADE: usar novo campo)
+    if (profile.meta_financeira) {
+      context += `7️⃣ META FINANCEIRA MENSAL: R$ ${profile.meta_financeira.toLocaleString('pt-BR')}\n`
+      context += '   → Converter automaticamente em: quantidade de bebidas, kits, produtos fechados, convites semanais, tamanho da equipe necessária\n\n'
+    } else {
+      context += `7️⃣ META FINANCEIRA: não informada\n`
+      context += '   → ⚠️ ATENÇÃO: Meta financeira é fundamental para calcular metas de vendas e equipe\n\n'
+    }
+
+    // 8. Meta 3 Meses
+    if (profile.meta_3_meses) {
+      context += `8️⃣ META PARA 3 MESES: ${profile.meta_3_meses}\n`
+      context += '   → Transformar em: plano tático semanal, metas segmentadas, gráfico de progresso, checkpoints\n\n'
+    }
+
+    // 9. Meta 1 Ano
+    if (profile.meta_1_ano) {
+      context += `9️⃣ META PARA 1 ANO: ${profile.meta_1_ano}\n`
+      context += '   → Transformar em: trilha de carreira personalizada, metas de equipe, metas mensais, plano do Plano Presidente\n\n'
+    }
+
+    // Observações Adicionais
+    if (profile.observacoes_adicionais) {
+      context += `💬 OBSERVAÇÕES ADICIONAIS:\n${profile.observacoes_adicionais}\n\n`
+      context += '   → IMPORTANTE: Use essas informações para personalizar ainda mais suas orientações\n'
+      context += '   → Considere limitações, preferências e situações especiais mencionadas\n\n'
+    }
+
+    // 10. Calcular e incluir metas automáticas
+    try {
+      const metas = calcularMetasAutomaticas(profile)
+      context += '\n================================================\n'
+      context += '📊 METAS AUTOMÁTICAS CALCULADAS\n'
+      context += '================================================\n'
+      context += formatarMetasParaNoel(metas)
+      context += '\n'
+      context += '💡 Use essas metas como base para:\n'
+      context += '- Definir tarefas diárias e semanais\n'
+      context += '- Acompanhar progresso\n'
+      context += '- Ajustar estratégias conforme resultados\n'
+      context += '================================================\n'
+    } catch (error) {
+      console.warn('⚠️ Erro ao calcular metas automáticas:', error)
+    }
+
+    context += '\n================================================\n'
+    context += '🧠 INSTRUÇÕES DE USO DO PERFIL\n'
+    context += '================================================\n'
+    context += 'Use este perfil para:\n'
+    context += '- Ajustar linguagem conforme nível Herbalife\n'
+    context += '- Personalizar metas conforme carga horária e dias\n'
+    context += '- Criar planos táticos (3 meses) e estratégicos (1 ano)\n'
+    context += '- Entregar conteúdo adequado ao tipo de trabalho\n'
+    context += '- Focar em vendas OU equipe conforme ganhos prioritários\n'
+    context += '- SEMPRE considerar as metas automáticas calculadas acima\n'
+    context += '- Transformar metas em tarefas diárias concretas\n'
+    context += '================================================\n'
+
+    return context
+  } catch (error) {
+    console.error('❌ Erro ao construir contexto do perfil:', error)
+    return ''
+  }
+}
+
+/**
  * Constrói o system prompt baseado no módulo
  */
-function buildSystemPrompt(module: NoelModule, knowledgeContext: string | null, consultantContext?: string): string {
+function buildSystemPrompt(module: NoelModule, knowledgeContext: string | null, consultantContext?: string, strategicProfileContext?: string): string {
   // Base do prompt com Lousa 7 integrada + Segurança
   const lousa7Base = NOEL_SYSTEM_PROMPT_WITH_SECURITY
   
@@ -389,7 +574,8 @@ Quando detectar estas situações, chame a função correspondente:
 1. Ação imediata → 2. Cliente → 3. Venda → 4. Ferramentas
 
 ${knowledgeContext ? `\nContexto da Base de Conhecimento:\n${knowledgeContext}\n\nUse este contexto como base, mas personalize e expanda conforme necessário.` : ''}
-${consultantContext ? `\n\nContexto do Consultor (use para personalizar):\n${consultantContext}\n\nAdapte sua resposta considerando o estágio da carreira, desafios identificados e histórico do consultor.` : ''}`
+${consultantContext ? `\n\nContexto do Consultor (use para personalizar):\n${consultantContext}\n\nAdapte sua resposta considerando o estágio da carreira, desafios identificados e histórico do consultor.` : ''}
+${strategicProfileContext ? `\n\n${strategicProfileContext}` : ''}`
 
   // Sempre retorna o prompt base como MENTOR, mas adapta o foco baseado no módulo detectado
   let focusInstructions = ''
@@ -1212,7 +1398,8 @@ export async function POST(request: NextRequest) {
           module,
           fullContext,
           conversationHistory,
-          personalizedContext
+          personalizedContext,
+          user.id
         )
         response = aiResult.response
         source = 'hybrid'
@@ -1268,7 +1455,8 @@ export async function POST(request: NextRequest) {
           module,
           fullContext,
           conversationHistory,
-          personalizedContext
+          personalizedContext,
+          user.id
         )
         response = aiResult.response
         source = 'hybrid' // Mudar para hybrid mesmo com baixa similaridade se encontrou conteúdo
@@ -1289,7 +1477,8 @@ export async function POST(request: NextRequest) {
           module,
           fullContext,
           conversationHistory,
-          personalizedContext
+          personalizedContext,
+          user.id
         )
         response = aiResult.response
         source = 'ia_generated'

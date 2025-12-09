@@ -232,7 +232,8 @@ function WellnessHomeContent() {
           })
           if (response.ok) {
             const data = await response.json()
-            if (!data.hasProfile) {
+            // Mostrar onboarding se não tiver perfil OU se precisa atualizar para novos campos
+            if (!data.hasProfile || !data.onboardingComplete || data.needsUpdate) {
               setShowOnboarding(true)
             } else {
               setOnboardingComplete(true)

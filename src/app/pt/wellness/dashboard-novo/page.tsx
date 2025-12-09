@@ -111,16 +111,17 @@ function WellnessDashboardNovoContent() {
         
         if (response.ok) {
           const data = await response.json()
-          if (!data.onboardingComplete) {
+          // Mostrar onboarding se não estiver completo OU se precisa atualizar para novos campos
+          if (!data.onboardingComplete || data.needsUpdate) {
             setShowOnboarding(true)
           } else {
             setOnboardingComplete(true)
-            // Carregar objetivo do perfil
+            // Carregar objetivo do perfil (usar novos campos se disponíveis)
             if (data.profile) {
               setUserObjective({
-                objetivo_principal: data.profile.objetivo_principal,
-                tempo_disponivel: data.profile.tempo_disponivel,
-                experiencia: data.profile.experiencia_vendas,
+                objetivo_principal: data.profile.tipo_trabalho || data.profile.objetivo_principal,
+                tempo_disponivel: data.profile.carga_horaria_diaria || data.profile.tempo_disponivel,
+                experiencia: data.profile.nivel_herbalife || data.profile.experiencia_vendas,
                 canal_preferido: Array.isArray(data.profile.canal_preferido) 
                   ? data.profile.canal_preferido[0] 
                   : data.profile.canal_preferido || 'whatsapp'

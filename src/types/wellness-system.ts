@@ -85,6 +85,45 @@ export type RitmoTrabalho =
   | 'medio'
   | 'rapido'
 
+// =====================================================
+// NOVOS TIPOS - PERFIL ESTRATÉGICO (Versão 2.0)
+// =====================================================
+
+export type TipoTrabalho =
+  | 'bebidas_funcionais'
+  | 'produtos_fechados'
+  | 'cliente_que_indica'
+
+export type FocoTrabalho =
+  | 'renda_extra'
+  | 'plano_carreira'
+  | 'ambos'
+
+export type GanhosPrioritarios =
+  | 'vendas'
+  | 'equipe'
+  | 'ambos'
+
+export type NivelHerbalife =
+  | 'novo_distribuidor'
+  | 'supervisor'
+  | 'equipe_mundial'
+  | 'equipe_expansao_global'
+  | 'equipe_milionarios'
+  | 'equipe_presidentes'
+
+export type CargaHorariaDiaria =
+  | '1_hora'
+  | '1_a_2_horas'
+  | '2_a_4_horas'
+  | 'mais_4_horas'
+
+export type DiasPorSemana =
+  | '1_a_2_dias'
+  | '3_a_4_dias'
+  | '5_a_6_dias'
+  | 'todos_dias'
+
 export interface EstoqueItem {
   produto_id: string
   produto_nome: string
@@ -126,6 +165,37 @@ export interface WellnessConsultantProfile {
   
   // Situações Particulares
   situacoes_particulares?: string // Situações pessoais importantes para o NOEL (máx 500 caracteres)
+  
+  // =====================================================
+  // NOVOS CAMPOS ESTRATÉGICOS (Versão 2.0)
+  // =====================================================
+  
+  // 1. Tipo de Trabalho
+  tipo_trabalho?: TipoTrabalho // Como pretende trabalhar
+  
+  // 2. Foco de Trabalho
+  foco_trabalho?: FocoTrabalho // Renda extra, carreira ou ambos
+  
+  // 3. Ganhos Prioritários
+  ganhos_prioritarios?: GanhosPrioritarios // Vendas, equipe ou ambos
+  
+  // 4. Nível Herbalife
+  nivel_herbalife?: NivelHerbalife // Hierarquia oficial Herbalife
+  
+  // 5. Carga Horária Diária
+  carga_horaria_diaria?: CargaHorariaDiaria // Tempo disponível por dia
+  
+  // 6. Dias por Semana
+  dias_por_semana?: DiasPorSemana // Quantos dias por semana trabalha
+  
+  // 7. Meta 3 Meses
+  meta_3_meses?: string // Plano tático imediato
+  
+  // 8. Meta 1 Ano
+  meta_1_ano?: string // Plano estratégico (ligado ao Plano Presidente)
+  
+  // 9. Observações Adicionais
+  observacoes_adicionais?: string // Informações extras importantes para o NOEL (máx 500 caracteres)
   
   // Dados antigos (compatibilidade)
   experiencia_vendas?: string
