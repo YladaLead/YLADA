@@ -3,20 +3,16 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 // Mapeamento de categoria selecionada → categoria do banco e seção
+// Categorias idênticas à Biblioteca Oficial da Ariel
 const MAPEAMENTO_CATEGORIA = {
-  recrutamento: {
-    categoria_banco: 'treinamento',
-    tags: ['recrutamento', 'treinamento'],
-    secao: 'videos' // ou 'cartilhas' dependendo do tipo
-  },
-  vendas: {
+  materiais: {
     categoria_banco: 'apresentacao',
-    tags: ['vendas', 'apresentacao'],
-    secao: 'materiais' // ou 'videos' dependendo do tipo
+    tags: ['apresentacao', 'materiais'],
+    secao: 'materiais'
   },
-  treinamento: {
+  cartilhas: {
     categoria_banco: 'treinamento',
-    tags: ['treinamento'],
+    tags: ['treinamento', 'cartilhas'],
     secao: 'cartilhas'
   },
   produtos: {
@@ -29,10 +25,10 @@ const MAPEAMENTO_CATEGORIA = {
     tags: ['scripts'],
     secao: 'scripts'
   },
-  apresentacoes: {
-    categoria_banco: 'apresentacao',
-    tags: ['apresentacao'],
-    secao: 'materiais'
+  videos: {
+    categoria_banco: 'treinamento',
+    tags: ['videos', 'treinamento'],
+    secao: 'videos'
   }
 } as const
 
@@ -93,17 +89,21 @@ export async function POST(request: NextRequest) {
       tipo = 'documento'
     }
 
-    // Ajustar seção baseado no tipo
+    // Ajustar seção baseado no tipo e categoria
     const mapeamento = MAPEAMENTO_CATEGORIA[categoriaSelecionada]
     let secaoFinal = mapeamento.secao
     
-    // Se for vídeo e categoria é recrutamento/vendas, vai para videos
-    if (tipo === 'video' && ['recrutamento', 'vendas'].includes(categoriaSelecionada)) {
+    // Ajustes específicos baseados no tipo de arquivo:
+    // - Vídeos sempre vão para seção 'videos'
+    if (tipo === 'video') {
       secaoFinal = 'videos'
     }
-    // Se for PDF e categoria é recrutamento, pode ir para cartilhas
-    if (tipo === 'pdf' && categoriaSelecionada === 'recrutamento') {
+    // - PDFs em cartilhas vão para 'cartilhas', outros PDFs para 'materiais'
+    else if (tipo === 'pdf' && categoriaSelecionada === 'cartilhas') {
       secaoFinal = 'cartilhas'
+    }
+    else if (tipo === 'pdf' && categoriaSelecionada === 'materiais') {
+      secaoFinal = 'materiais'
     }
 
     // Gerar código único

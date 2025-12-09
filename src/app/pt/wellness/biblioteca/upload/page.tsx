@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
-type CategoriaSelecionada = 'recrutamento' | 'vendas' | 'treinamento' | 'produtos' | 'scripts' | 'apresentacoes'
+type CategoriaSelecionada = 'materiais' | 'cartilhas' | 'produtos' | 'scripts' | 'videos'
 
 interface Categoria {
   id: CategoriaSelecionada
@@ -16,59 +16,51 @@ interface Categoria {
 
 const categorias: Categoria[] = [
   {
-    id: 'recrutamento',
-    label: 'Recrutamento',
-    descricao: 'Vídeos e materiais para recrutar novos distribuidores',
-    icone: '👥',
+    id: 'materiais',
+    label: 'Materiais de Apresentação',
+    descricao: 'PDFs, apresentações e materiais oficiais para usar nas suas conversas',
+    icone: '📄',
     cor: 'blue'
   },
   {
-    id: 'vendas',
-    label: 'Vendas',
-    descricao: 'Materiais para apresentações e fechamento de vendas',
-    icone: '💰',
-    cor: 'green'
-  },
-  {
-    id: 'treinamento',
-    label: 'Treinamento',
-    descricao: 'Cartilhas e guias de treinamento',
-    icone: '📚',
+    id: 'cartilhas',
+    label: 'Cartilhas de Treinamento',
+    descricao: 'Guias completos para novos distribuidores, vendas, apresentações e mais',
+    icone: '📖',
     cor: 'purple'
   },
   {
     id: 'produtos',
     label: 'Produtos & Bebidas',
-    descricao: 'Materiais sobre produtos e preparo de bebidas',
+    descricao: 'Guias dos produtos, modo de preparo e informações técnicas',
     icone: '🥤',
-    cor: 'emerald'
+    cor: 'green'
   },
   {
     id: 'scripts',
-    label: 'Scripts',
-    descricao: 'Scripts prontos para diferentes situações',
+    label: 'Scripts Oficiais',
+    descricao: 'Scripts prontos para usar em diferentes situações',
     icone: '💬',
     cor: 'orange'
   },
   {
-    id: 'apresentacoes',
-    label: 'Apresentações',
-    descricao: 'Materiais de apresentação e pitch',
-    icone: '📊',
+    id: 'videos',
+    label: 'Vídeos de Treinamento',
+    descricao: 'Vídeos sobre preparo, vendas, convites e apresentações',
+    icone: '🎥',
     cor: 'red'
   }
 ]
 
 const getCorClasses = (cor: string) => {
   const cores: Record<string, string> = {
-    blue: 'bg-blue-50 border-blue-300 text-blue-700',
-    green: 'bg-green-50 border-green-300 text-green-700',
-    purple: 'bg-purple-50 border-purple-300 text-purple-700',
-    emerald: 'bg-emerald-50 border-emerald-300 text-emerald-700',
-    orange: 'bg-orange-50 border-orange-300 text-orange-700',
-    red: 'bg-red-50 border-red-300 text-red-700'
+    blue: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100',
+    green: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100',
+    purple: 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100',
+    orange: 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100',
+    red: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
   }
-  return cores[cor] || 'bg-gray-50 border-gray-300 text-gray-700'
+  return cores[cor] || 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
 }
 
 export default function UploadBibliotecaPage() {
@@ -235,10 +227,10 @@ export default function UploadBibliotecaPage() {
               Esta área é exclusiva para a equipe de suporte. Se você precisa fazer upload de materiais, entre em contato com o administrador.
             </p>
             <button
-              onClick={() => router.push('/pt/wellness/home')}
+              onClick={() => router.push('/pt/wellness/biblioteca')}
               className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
             >
-              Voltar para Home
+              Voltar para Biblioteca
             </button>
           </div>
         </div>
@@ -248,20 +240,20 @@ export default function UploadBibliotecaPage() {
   // Conteúdo principal (apenas se autorizado)
   return (
       <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
             <button
-              onClick={() => router.push('/pt/wellness/home')}
+              onClick={() => router.push('/pt/wellness/biblioteca')}
               className="text-gray-600 hover:text-gray-900 mb-4 flex items-center gap-2"
             >
-              ← Voltar para Home
+              ← Voltar para Biblioteca
             </button>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-              📚 Adicionar Material à Biblioteca
+              📚 Biblioteca Oficial
             </h1>
             <p className="text-lg text-gray-600">
-              Faça upload de vídeos, PDFs e imagens para a biblioteca Wellness
+              Materiais fixos, scripts, cartilhas e apresentações organizados e prontos para uso
             </p>
           </div>
 
@@ -320,7 +312,7 @@ export default function UploadBibliotecaPage() {
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Categoria <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categorias.map((cat) => (
                   <button
                     key={cat.id}
@@ -328,21 +320,25 @@ export default function UploadBibliotecaPage() {
                       setCategoria(cat.id)
                       setErro(null)
                     }}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    className={`rounded-xl p-6 border-2 shadow-sm transition-all text-left group ${
                       categoria === cat.id
                         ? `${getCorClasses(cat.cor)} border-2`
                         : 'border-gray-200 hover:border-gray-300 bg-white'
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">{cat.icone}</span>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{cat.label}</p>
-                        <p className="text-xs text-gray-600 mt-1">{cat.descricao}</p>
+                    <div className="flex items-start gap-4">
+                      <div className={`text-5xl flex-shrink-0 ${categoria === cat.id ? 'scale-110' : 'group-hover:scale-110'} transition-transform`}>
+                        {cat.icone}
                       </div>
-                      {categoria === cat.id && (
-                        <span className="text-green-600">✓</span>
-                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-lg font-bold text-gray-900">{cat.label}</h3>
+                          {categoria === cat.id && (
+                            <span className="text-green-600 text-xl">✓</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600">{cat.descricao}</p>
+                      </div>
                     </div>
                   </button>
                 ))}
@@ -416,7 +412,7 @@ export default function UploadBibliotecaPage() {
                 )}
               </button>
               <button
-                onClick={() => router.push('/pt/wellness/home')}
+                onClick={() => router.push('/pt/wellness/biblioteca')}
                 className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Cancelar

@@ -21,7 +21,6 @@
     "@stripe/stripe-js": "^7.9.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
-    "@tailwindcss/postcss": "^4.1.14",
     "@types/qrcode": "^1.5.6",
     "clsx": "^2.1.1",
     "jszip": "^3.10.1",
