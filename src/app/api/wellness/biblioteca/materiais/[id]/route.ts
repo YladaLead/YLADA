@@ -108,10 +108,10 @@ export async function DELETE(
     }
     const { user, profile } = authResult
 
-    // Apenas admin pode deletar (suporte não pode deletar)
-    if (!profile.is_admin) {
+    // Suporte ou admin pode deletar
+    if (!profile.is_support && !profile.is_admin) {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas administradores podem deletar materiais.' },
+        { error: 'Acesso negado. Apenas equipe de suporte e administradores podem deletar materiais.' },
         { status: 403 }
       )
     }
