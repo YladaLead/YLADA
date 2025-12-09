@@ -455,6 +455,20 @@ export default function UploadBibliotecaPage() {
               <strong>💡 Dica:</strong> O material será automaticamente organizado na seção correta da biblioteca baseado na categoria selecionada.
             </p>
           </div>
+
+          {/* Link para Gerenciar */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <button
+              onClick={() => router.push('/pt/wellness/biblioteca/gerenciar')}
+              className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <span>📋</span>
+              <span>Gerenciar Todos os Materiais</span>
+            </button>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              Ver, editar ou deletar materiais já adicionados
+            </p>
+          </div>
         </div>
       </div>
   )

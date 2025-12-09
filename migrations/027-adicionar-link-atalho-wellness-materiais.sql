@@ -21,8 +21,23 @@ DECLARE
   contador INTEGER := 0;
   slug_final TEXT;
 BEGIN
-  -- Normalizar título: minúsculas, remover acentos, substituir espaços por hífens
-  slug := lower(unaccent(titulo_input));
+  -- Normalizar título: minúsculas, substituir espaços por hífens
+  -- Remover acentos manualmente (substituições comuns)
+  slug := lower(titulo_input);
+  -- Substituir acentos comuns
+  slug := replace(slug, 'á', 'a');
+  slug := replace(slug, 'à', 'a');
+  slug := replace(slug, 'ã', 'a');
+  slug := replace(slug, 'â', 'a');
+  slug := replace(slug, 'é', 'e');
+  slug := replace(slug, 'ê', 'e');
+  slug := replace(slug, 'í', 'i');
+  slug := replace(slug, 'ó', 'o');
+  slug := replace(slug, 'ô', 'o');
+  slug := replace(slug, 'õ', 'o');
+  slug := replace(slug, 'ú', 'u');
+  slug := replace(slug, 'ç', 'c');
+  -- Remover caracteres especiais e substituir por hífen
   slug := regexp_replace(slug, '[^a-z0-9]+', '-', 'g');
   slug := regexp_replace(slug, '^-+|-+$', '', 'g');
   slug := substring(slug from 1 for 50); -- Limitar a 50 caracteres
