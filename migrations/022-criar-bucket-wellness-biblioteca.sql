@@ -25,48 +25,78 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- Política: Permitir upload apenas para admins
-CREATE POLICY IF NOT EXISTS "Admins podem fazer upload"
-ON storage.objects
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  bucket_id = 'wellness-biblioteca' AND
-  EXISTS (
-    SELECT 1 FROM user_profiles
-    WHERE user_id = auth.uid()
-    AND profile_type = 'admin'
-  )
-);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE schemaname = 'storage' 
+    AND tablename = 'objects' 
+    AND policyname = 'Admins podem fazer upload'
+  ) THEN
+    CREATE POLICY "Admins podem fazer upload"
+    ON storage.objects
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (
+      bucket_id = 'wellness-biblioteca' AND
+      EXISTS (
+        SELECT 1 FROM user_profiles
+        WHERE user_id = auth.uid()
+        AND profile_type = 'admin'
+      )
+    );
+  END IF;
+END $$;
 
 -- Política: Permitir leitura para usuários wellness autenticados
-CREATE POLICY IF NOT EXISTS "Wellness users podem ler"
-ON storage.objects
-FOR SELECT
-TO authenticated
-USING (
-  bucket_id = 'wellness-biblioteca' AND
-  (
-    EXISTS (
-      SELECT 1 FROM user_profiles
-      WHERE user_id = auth.uid()
-      AND profile_type IN ('wellness', 'admin')
-    )
-  )
-);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE schemaname = 'storage' 
+    AND tablename = 'objects' 
+    AND policyname = 'Wellness users podem ler'
+  ) THEN
+    CREATE POLICY "Wellness users podem ler"
+    ON storage.objects
+    FOR SELECT
+    TO authenticated
+    USING (
+      bucket_id = 'wellness-biblioteca' AND
+      (
+        EXISTS (
+          SELECT 1 FROM user_profiles
+          WHERE user_id = auth.uid()
+          AND profile_type IN ('wellness', 'admin')
+        )
+      )
+    );
+  END IF;
+END $$;
 
 -- Política: Permitir delete apenas para admins
-CREATE POLICY IF NOT EXISTS "Admins podem deletar"
-ON storage.objects
-FOR DELETE
-TO authenticated
-USING (
-  bucket_id = 'wellness-biblioteca' AND
-  EXISTS (
-    SELECT 1 FROM user_profiles
-    WHERE user_id = auth.uid()
-    AND profile_type = 'admin'
-  )
-);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE schemaname = 'storage' 
+    AND tablename = 'objects' 
+    AND policyname = 'Admins podem deletar'
+  ) THEN
+    CREATE POLICY "Admins podem deletar"
+    ON storage.objects
+    FOR DELETE
+    TO authenticated
+    USING (
+      bucket_id = 'wellness-biblioteca' AND
+      EXISTS (
+        SELECT 1 FROM user_profiles
+        WHERE user_id = auth.uid()
+        AND profile_type = 'admin'
+      )
+    );
+  END IF;
+END $$;
 
 -- Comentários
 COMMENT ON POLICY "Admins podem fazer upload" ON storage.objects IS 'Permite que apenas admins façam upload de materiais na biblioteca';
