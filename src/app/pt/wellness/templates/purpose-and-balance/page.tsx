@@ -6,8 +6,8 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { propositoEquilibrioDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
   id: number
@@ -166,7 +166,7 @@ export default function QuizPropositoEquilibrio({ config }: TemplateBaseProps) {
       diagnosticoId = 'bomPotencial'
     }
 
-    const diagnostico = getDiagnostico('proposito-equilibrio', 'wellness', diagnosticoId)
+    const diagnostico = propositoEquilibrioDiagnosticos.wellness[diagnosticoId as keyof typeof propositoEquilibrioDiagnosticos.wellness]
 
     setResultado({
       score: pontuacaoTotal,

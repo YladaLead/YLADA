@@ -124,7 +124,41 @@ export default function QuizPerfilNutricionalPreview({ etapa, onEtapaChange }: Q
         {/* Tela de Resultados - Etapa 6 */}
         {etapa === 6 && (
           <div className="space-y-6">
-            <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">📊 Resultados Possíveis do Quiz</h4>
+            <div className="text-center space-y-1 mb-6">
+              <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis do Quiz</h4>
+              <p className="text-sm text-gray-600">
+                Esta prévia mostra exatamente o que sua cliente receberá como diagnóstico final, baseado nas respostas que ela informar no formulário original.
+              </p>
+            </div>
+
+            {/* Seção Azul Explicativa - Para o Dono */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
+              <p className="text-sm text-blue-700 mb-2">
+                A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+              </p>
+              <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
+            </div>
+
+            {/* CTA Simulado */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 mb-6">
+              <p className="text-gray-700 font-medium mb-4 text-center text-lg">
+                💬 Quer saber mais?
+              </p>
+              <div className="flex justify-center">
+                <button
+                  className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg"
+                  style={{
+                    background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)',
+                  }}
+                  disabled
+                >
+                  <span className="mr-2">✨</span>
+                  Saiba Mais
+                  <span className="ml-2">→</span>
+                </button>
+              </div>
+            </div>
             
             {/* Resultado 1: Absorção Baixa */}
             <div className="bg-red-50 rounded-lg p-6 border-2 border-red-200">

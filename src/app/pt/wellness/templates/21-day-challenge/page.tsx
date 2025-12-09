@@ -6,8 +6,8 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { desafio21DiasDiagnosticos } from '@/lib/diagnostics'
 
 interface Semana {
   numero: number
@@ -227,7 +227,7 @@ export default function Desafio21Dias({ config }: TemplateBaseProps) {
       ]
     }
 
-    const diagnosticoCompleto = getDiagnostico('template-desafio-21dias', 'wellness', diagnosticoId)
+    const diagnosticoCompleto = desafio21DiasDiagnosticos.wellness[diagnosticoId as keyof typeof desafio21DiasDiagnosticos.wellness]
     setDiagnostico(diagnosticoCompleto)
 
     setResultado({

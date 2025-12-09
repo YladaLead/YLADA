@@ -6,8 +6,8 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { perfilMetabolicoDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
   id: number
@@ -22,7 +22,7 @@ interface Resultado {
   descricao: string
   cor: string
   recomendacoes: string[]
-  diagnostico: DiagnosticoCompleto | null
+  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
 }
 
 export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps) {
@@ -166,7 +166,7 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
       diagnosticoId = 'metabolismoRapido'
     }
 
-    const diagnostico = getDiagnostico('avaliacao-perfil-metabolico', 'wellness', diagnosticoId)
+    const diagnostico = perfilMetabolicoDiagnosticos.wellness[diagnosticoId as keyof typeof perfilMetabolicoDiagnosticos.wellness]
 
     setResultado({
       score: pontuacaoTotal,

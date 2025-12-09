@@ -6,8 +6,8 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { prontoEmagrecerDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
   id: number
@@ -22,7 +22,7 @@ interface Resultado {
   descricao: string
   cor: string
   recomendacoes: string[]
-  diagnostico: DiagnosticoCompleto | null
+  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
 }
 
 export default function ProntoEmagrecer({ config }: TemplateBaseProps) {
@@ -166,7 +166,7 @@ export default function ProntoEmagrecer({ config }: TemplateBaseProps) {
       diagnosticoId = 'precisaMaisInformacoesEmagrecer'
     }
 
-    const diagnostico = getDiagnostico('pronto-emagrecer', 'wellness', diagnosticoId)
+    const diagnostico = prontoEmagrecerDiagnosticos.wellness[diagnosticoId as keyof typeof prontoEmagrecerDiagnosticos.wellness]
 
     setResultado({
       score: pontuacaoTotal,

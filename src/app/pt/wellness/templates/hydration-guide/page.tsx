@@ -6,14 +6,24 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { guiaHidratacaoDiagnosticos } from '@/lib/diagnostics'
 
 interface Resultado {
   nivelHidratacao: string
   necessidadeAgua: number
   estrategias: string[]
   cronograma: Array<{ horario: string; quantidade: string; motivo: string }>
+}
+
+interface DiagnosticoCompleto {
+  diagnostico?: string
+  causaRaiz?: string
+  acaoImediata?: string
+  plano7Dias?: string
+  suplementacao?: string
+  alimentacao?: string
+  proximoPasso?: string
 }
 
 export default function GuiaHidratacao({ config }: TemplateBaseProps) {
@@ -141,7 +151,7 @@ export default function GuiaHidratacao({ config }: TemplateBaseProps) {
       ]
     }
 
-    const diagnosticoCompleto = getDiagnostico('guia-hidratacao', 'wellness', nivelHidratacao)
+    const diagnosticoCompleto = guiaHidratacaoDiagnosticos.wellness[nivelHidratacao as keyof typeof guiaHidratacaoDiagnosticos.wellness] as DiagnosticoCompleto
     setDiagnostico(diagnosticoCompleto)
 
     setResultado({

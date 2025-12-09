@@ -7,7 +7,7 @@ import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
+import { quizBemEstarDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
   id: number
@@ -22,7 +22,7 @@ interface Resultado {
   descricao: string
   cor: string
   recomendacoes: string[]
-  diagnostico: DiagnosticoCompleto | null
+  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
 }
 
 export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
@@ -162,7 +162,7 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
       diagnosticoId = 'bemEstarBaixo'
     }
 
-    const diagnostico = getDiagnostico('quiz-bem-estar', 'nutri', diagnosticoId)
+    const diagnostico = quizBemEstarDiagnosticos.wellness[diagnosticoId as keyof typeof quizBemEstarDiagnosticos.wellness]
 
     setResultado({ score, perfil, descricao, cor, recomendacoes, diagnostico })
     setEtapa('resultado')

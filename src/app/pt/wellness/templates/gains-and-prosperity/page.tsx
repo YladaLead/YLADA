@@ -6,8 +6,8 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { ganhosProsperidadeDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
   id: number
@@ -22,7 +22,7 @@ interface Resultado {
   descricao: string
   cor: string
   recomendacoes: string[]
-  diagnostico: DiagnosticoCompleto | null
+  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
 }
 
 export default function QuizGanhosProsperidade({ config }: TemplateBaseProps) {
@@ -166,7 +166,7 @@ export default function QuizGanhosProsperidade({ config }: TemplateBaseProps) {
       diagnosticoId = 'bomPotencial'
     }
 
-    const diagnostico = getDiagnostico('ganhos-prosperidade', 'wellness', diagnosticoId)
+    const diagnostico = ganhosProsperidadeDiagnosticos.wellness[diagnosticoId as keyof typeof ganhosProsperidadeDiagnosticos.wellness]
 
     setResultado({
       score: pontuacaoTotal,

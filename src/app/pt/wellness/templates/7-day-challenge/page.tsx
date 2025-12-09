@@ -6,8 +6,8 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { desafio7DiasDiagnosticos } from '@/lib/diagnostics'
 
 interface Resultado {
   nivelDesafio: string
@@ -47,7 +47,7 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
     disponibilidade: ''
   })
   const [resultado, setResultado] = useState<Resultado | null>(null)
-  const [diagnostico, setDiagnostico] = useState<DiagnosticoCompleto | null>(null)
+  const [diagnostico, setDiagnostico] = useState<any>(null)
 
   const iniciarDesafio = () => {
     setEtapa('formulario')
@@ -138,7 +138,7 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
       ]
     }
 
-    const diagnosticoCompleto = getDiagnostico('template-desafio-7dias', 'wellness', diagnosticoId)
+    const diagnosticoCompleto = desafio7DiasDiagnosticos.wellness[diagnosticoId as keyof typeof desafio7DiasDiagnosticos.wellness]
     setDiagnostico(diagnosticoCompleto)
 
     setResultado({

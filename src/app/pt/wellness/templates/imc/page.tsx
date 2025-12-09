@@ -163,7 +163,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
           return (
             <WellnessLanding
               config={config}
-              defaultEmoji="📊"
+              defaultEmoji="⚖️"
               defaultTitle="Calculadora de IMC"
               defaultDescription={
                 <>

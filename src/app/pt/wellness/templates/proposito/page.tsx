@@ -7,6 +7,7 @@ import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { propositoEquilibrioDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
   id: number
@@ -21,6 +22,7 @@ interface Resultado {
   descricao: string
   cor: string
   recomendacoes: string[]
+  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
 }
 
 export default function QuizProposito({ config }: TemplateBaseProps) {
@@ -112,10 +114,13 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
     let cor = ''
     let recomendacoes: string[] = []
 
+    // Obter diagnóstico completo baseado no score
+    let resultadoId = ''
     if (score >= 9) {
       perfil = 'Alinhamento Total'
       descricao = 'Você vive com propósito e equilíbrio! Seu dia a dia está alinhado com seus sonhos.'
       cor = 'green'
+      resultadoId = 'altoPotencial'
       recomendacoes = [
         'Manter práticas de alinhamento diário',
         'Compartilhar sua sabedoria com outros',
@@ -126,6 +131,7 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
       perfil = 'Bem Alinhado'
       descricao = 'Você está no caminho certo! Com ajustes estratégicos, pode alcançar alinhamento total.'
       cor = 'blue'
+      resultadoId = 'potencialModerado'
       recomendacoes = [
         'Definir propósito de forma mais clara',
         'Criar rotina de equilibro semanal',
@@ -136,6 +142,7 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
       perfil = 'Necessita Realinhamento'
       descricao = 'Seu dia a dia não está totalmente alinhado com seu propósito. É hora de realinhar!'
       cor = 'orange'
+      resultadoId = 'potencialModerado'
       recomendacoes = [
         'Urgente: Refletir sobre propósito de vida',
         'Definir valores pessoais',
@@ -146,6 +153,7 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
       perfil = 'Desalinhamento Crítico'
       descricao = 'Você está perdido e seu dia a dia não reflete seus sonhos. É hora de mudança urgente!'
       cor = 'red'
+      resultadoId = 'bomPotencial'
       recomendacoes = [
         'URGENTE: Descobrir seu propósito',
         'Definir valores fundamentais',
@@ -154,7 +162,10 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
       ]
     }
 
-    setResultado({ score, perfil, descricao, cor, recomendacoes })
+    // Buscar diagnóstico completo
+    const diagnostico = propositoEquilibrioDiagnosticos.wellness?.[resultadoId as keyof typeof propositoEquilibrioDiagnosticos.wellness]
+
+    setResultado({ score, perfil, descricao, cor, recomendacoes, diagnostico })
     setEtapa('resultado')
   }
 
@@ -254,7 +265,7 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
                 <p className="text-sm text-gray-600 mt-2">Score: {resultado.score}/12</p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="bg-gray-50 rounded-xl p-6 mb-6">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                   <span className="text-2xl mr-2">💡</span>
                   Caminho para o Alinhamento
@@ -268,6 +279,49 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
                   ))}
                 </ul>
               </div>
+
+              {/* Diagnóstico Completo */}
+              {resultado.diagnostico && (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border-2 border-purple-200">
+                    <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
+                      <span className="text-2xl mr-2">📋</span>
+                      Diagnóstico Completo
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.diagnostico}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.causaRaiz}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.acaoImediata}</p>
+                      </div>
+                      {resultado.diagnostico.plano7Dias && (
+                        <div className="bg-white rounded-lg p-4">
+                          <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.plano7Dias}</p>
+                        </div>
+                      )}
+                      {resultado.diagnostico.suplementacao && (
+                        <div className="bg-white rounded-lg p-4">
+                          <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.suplementacao}</p>
+                        </div>
+                      )}
+                      {resultado.diagnostico.alimentacao && (
+                        <div className="bg-white rounded-lg p-4">
+                          <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.alimentacao}</p>
+                        </div>
+                      )}
+                      {resultado.diagnostico.proximoPasso && (
+                        <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg p-4 border-l-4 border-purple-500">
+                          <p className="text-gray-900 font-semibold whitespace-pre-line">{resultado.diagnostico.proximoPasso}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <WellnessCTAButton

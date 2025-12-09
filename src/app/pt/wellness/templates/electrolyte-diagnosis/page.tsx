@@ -6,8 +6,8 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
-import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { eletrolitosDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
   id: number
@@ -22,7 +22,7 @@ interface Resultado {
   descricao: string
   cor: string
   recomendacoes: string[]
-  diagnostico: DiagnosticoCompleto | null
+  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
 }
 
 export default function DiagnosticoEletrolitos({ config }: TemplateBaseProps) {
@@ -166,7 +166,7 @@ export default function DiagnosticoEletrolitos({ config }: TemplateBaseProps) {
       diagnosticoId = 'equilibrioAdequado'
     }
 
-    const diagnostico = getDiagnostico('diagnostico-eletrolitos', 'wellness', diagnosticoId)
+    const diagnostico = eletrolitosDiagnosticos.wellness[diagnosticoId as keyof typeof eletrolitosDiagnosticos.wellness]
 
     setResultado({
       score: pontuacaoTotal,
