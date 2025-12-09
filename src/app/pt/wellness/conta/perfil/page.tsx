@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
+import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto'
 import { useAuth } from '@/contexts/AuthContext'
 import { WellnessConsultantProfile } from '@/types/wellness-system'
 
@@ -22,6 +23,7 @@ export default function ContaPerfilPage() {
   })
 
   const [profileType, setProfileType] = useState<'beverage_distributor' | 'product_distributor' | 'wellness_activator' | null>(null)
+  const [showOnboardingEditor, setShowOnboardingEditor] = useState(false)
 
   // Carregar perfil ao montar
   useEffect(() => {
@@ -39,6 +41,10 @@ export default function ContaPerfilPage() {
 
       if (noelData.profile) {
         setProfile(noelData.profile)
+        // Se tiver perfil estratégico completo, mostrar editor completo
+        if (noelData.profile.tipo_trabalho && noelData.profile.foco_trabalho) {
+          setShowOnboardingEditor(true)
+        }
       }
 
       // O profile_type pode vir do endpoint de check ou de user_profiles
@@ -103,6 +109,36 @@ export default function ContaPerfilPage() {
       if (profile.situacoes_particulares !== undefined && profile.situacoes_particulares !== null) {
         dataToSave.situacoes_particulares = profile.situacoes_particulares.trim()
       }
+      
+      // Novos campos estratégicos
+      if (profile.tipo_trabalho) {
+        dataToSave.tipo_trabalho = profile.tipo_trabalho
+      }
+      if (profile.foco_trabalho) {
+        dataToSave.foco_trabalho = profile.foco_trabalho
+      }
+      if (profile.ganhos_prioritarios) {
+        dataToSave.ganhos_prioritarios = profile.ganhos_prioritarios
+      }
+      if (profile.nivel_herbalife) {
+        dataToSave.nivel_herbalife = profile.nivel_herbalife
+      }
+      if (profile.carga_horaria_diaria) {
+        dataToSave.carga_horaria_diaria = profile.carga_horaria_diaria
+      }
+      if (profile.dias_por_semana) {
+        dataToSave.dias_por_semana = profile.dias_por_semana
+      }
+      if (profile.meta_3_meses) {
+        dataToSave.meta_3_meses = profile.meta_3_meses
+      }
+      if (profile.meta_1_ano) {
+        dataToSave.meta_1_ano = profile.meta_1_ano
+      }
+      if (profile.observacoes_adicionais) {
+        dataToSave.observacoes_adicionais = profile.observacoes_adicionais
+      }
+      
       if (profileType) {
         dataToSave.profile_type = profileType
       }
@@ -244,6 +280,83 @@ export default function ContaPerfilPage() {
                 </div>
               )}
 
+              {/* EDITOR COMPLETO DE PERFIL ESTRATÉGICO */}
+              {showOnboardingEditor ? (
+                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                  <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">📋 Perfil Estratégico Completo</h2>
+                    <p className="text-sm text-gray-600">
+                      Edite todas as informações do seu perfil estratégico. As metas serão recalculadas automaticamente.
+                    </p>
+                  </div>
+                  
+                  <NoelOnboardingCompleto
+                    initialData={profile}
+                    onComplete={async (data) => {
+                      try {
+                        setSaving(true)
+                        setError(null)
+                        setSuccess(false)
+                        
+                        const response = await fetch('/api/wellness/noel/onboarding', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(data),
+                        })
+                        
+                        const responseData = await response.json()
+                        
+                        if (!response.ok) {
+                          throw new Error(responseData.error || 'Erro ao salvar perfil')
+                        }
+                        
+                        setProfile(data)
+                        setSuccess(true)
+                        setTimeout(() => setSuccess(false), 5000)
+                      } catch (err: any) {
+                        setError(err.message || 'Erro ao salvar perfil')
+                        setTimeout(() => setError(null), 8000)
+                      } finally {
+                        setSaving(false)
+                      }
+                    }}
+                    onClose={() => setShowOnboardingEditor(false)}
+                  />
+                  
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <button
+                      onClick={() => setShowOnboardingEditor(false)}
+                      className="text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      ← Voltar para edição simplificada
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-xl">💡</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-blue-900 mb-1">
+                          Perfil Estratégico Completo Disponível
+                        </p>
+                        <p className="text-xs text-blue-700 mb-3">
+                          Você pode editar todos os campos estratégicos (tipo de trabalho, foco, ganhos, carga horária, etc.) para recalcular suas metas automaticamente.
+                        </p>
+                        <button
+                          onClick={() => setShowOnboardingEditor(true)}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                          Editar Perfil Estratégico Completo →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {!showOnboardingEditor && (
               <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm space-y-8">
                 
                 {/* PERFIL DO DISTRIBUIDOR */}
@@ -535,6 +648,7 @@ export default function ContaPerfilPage() {
                 </div>
 
               </div>
+              )}
             </div>
           </div>
         </ConditionalWellnessSidebar>

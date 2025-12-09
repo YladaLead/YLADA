@@ -70,8 +70,9 @@ function WellnessHomeContent() {
   const [nivelEngajamento, setNivelEngajamento] = useState('iniciante')
   const [loading, setLoading] = useState(true)
   const [noelProfile, setNoelProfile] = useState<any>(null)
+  const [metasCalculadas, setMetasCalculadas] = useState<any>(null)
 
-  // Carregar perfil NOEL para verificar situações particulares
+  // Carregar perfil NOEL e calcular metas
   useEffect(() => {
     const loadNoelProfile = async () => {
       try {
@@ -82,6 +83,17 @@ function WellnessHomeContent() {
           const data = await response.json()
           if (data.profile) {
             setNoelProfile(data.profile)
+            
+            // Calcular metas se tiver perfil estratégico completo
+            if (data.profile.tipo_trabalho && data.profile.meta_financeira) {
+              try {
+                const { calcularMetasAutomaticas } = await import('@/lib/noel-wellness/goals-calculator')
+                const metas = calcularMetasAutomaticas(data.profile)
+                setMetasCalculadas(metas)
+              } catch (e) {
+                console.error('Erro ao calcular metas:', e)
+              }
+            }
           }
         }
       } catch (e) {
@@ -394,6 +406,75 @@ function WellnessHomeContent() {
               <span className="text-green-600 ml-2 text-sm">Ver relatório completo →</span>
             </div>
           </button>
+        )}
+
+        {/* BLOCO 3.1 — Metas Automáticas do NOEL */}
+        {metasCalculadas && (
+          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-5 sm:p-6 border border-purple-200 shadow-sm mb-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎯</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Suas Metas Automáticas</h3>
+                  <p className="text-xs text-gray-600">Calculadas pelo NOEL baseado no seu perfil</p>
+                </div>
+              </div>
+              <button
+                onClick={() => router.push('/pt/wellness/conta/perfil')}
+                className="text-xs text-purple-600 hover:text-purple-700 font-medium"
+              >
+                Editar perfil →
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              {metasCalculadas.bebidas_dia > 0 && (
+                <div className="bg-white rounded-lg p-3 border border-purple-100">
+                  <p className="text-xs text-gray-500 mb-1">🥤 Bebidas/dia</p>
+                  <p className="text-xl font-bold text-purple-600">{metasCalculadas.bebidas_dia}</p>
+                </div>
+              )}
+              {metasCalculadas.kits_semana > 0 && (
+                <div className="bg-white rounded-lg p-3 border border-purple-100">
+                  <p className="text-xs text-gray-500 mb-1">📦 Kits/semana</p>
+                  <p className="text-xl font-bold text-purple-600">{metasCalculadas.kits_semana}</p>
+                </div>
+              )}
+              {metasCalculadas.convites_semana > 0 && (
+                <div className="bg-white rounded-lg p-3 border border-purple-100">
+                  <p className="text-xs text-gray-500 mb-1">👥 Convites/semana</p>
+                  <p className="text-xl font-bold text-purple-600">{metasCalculadas.convites_semana}</p>
+                </div>
+              )}
+              {metasCalculadas.produtos_fechados_semana > 0 && (
+                <div className="bg-white rounded-lg p-3 border border-purple-100">
+                  <p className="text-xs text-gray-500 mb-1">📦 Produtos/semana</p>
+                  <p className="text-xl font-bold text-purple-600">{metasCalculadas.produtos_fechados_semana}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white rounded-lg p-3 border border-purple-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">💰 Meta Financeira Mensal</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    R$ {metasCalculadas.meta_financeira_mensal.toLocaleString('pt-BR')}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 mb-1">📋 Plano</p>
+                  <p className="text-sm font-semibold text-purple-600">{metasCalculadas.plano_nome}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-purple-200">
+              <p className="text-xs text-gray-600 text-center">
+                💡 Essas metas são ajustadas automaticamente conforme seu perfil estratégico
+              </p>
+            </div>
+          </div>
         )}
 
         {/* BLOCO 4 — Acompanhamento do Mês (KPIs rápidos - 4 cards em linha) */}
