@@ -319,19 +319,25 @@ export default function UploadBibliotecaPage() {
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Categoria <span className="text-red-500">*</span>
+                {!categoria && (
+                  <span className="ml-2 text-xs text-yellow-600 font-normal">
+                    (Selecione uma categoria para continuar)
+                  </span>
+                )}
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categorias.map((cat) => (
                   <button
                     key={cat.id}
+                    type="button"
                     onClick={() => {
                       setCategoria(cat.id)
                       setErro(null)
                     }}
-                    className={`rounded-xl p-6 border-2 shadow-sm transition-all text-left group ${
+                    className={`rounded-xl p-6 border-2 shadow-sm transition-all text-left group cursor-pointer ${
                       categoria === cat.id
-                        ? `${getCorClasses(cat.cor)} border-2`
-                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        ? `${getCorClasses(cat.cor)} border-2 ring-2 ring-offset-2`
+                        : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-start gap-4">
@@ -399,24 +405,39 @@ export default function UploadBibliotecaPage() {
               </div>
             )}
 
+            {/* Mensagem de validação */}
+            {(!arquivo || !categoria) && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
+                <p className="font-medium mb-1">⚠️ Campos obrigatórios:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  {!arquivo && <li>Selecione um arquivo</li>}
+                  {!categoria && <li>Selecione uma categoria</li>}
+                </ul>
+              </div>
+            )}
+
             {/* Botão Upload */}
             <div className="flex gap-3">
               <button
                 onClick={handleUpload}
                 disabled={uploading || !arquivo || !categoria}
-                className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+                className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
                   uploading || !arquivo || !categoria
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg'
                 }`}
+                title={!arquivo ? 'Selecione um arquivo' : !categoria ? 'Selecione uma categoria' : 'Adicionar à biblioteca'}
               >
                 {uploading ? (
-                  <span className="flex items-center justify-center gap-2">
+                  <>
                     <span className="animate-spin">⏳</span>
-                    Enviando...
-                  </span>
+                    <span>Enviando...</span>
+                  </>
                 ) : (
-                  '✅ Adicionar à Biblioteca'
+                  <>
+                    <span>✅</span>
+                    <span>Adicionar à Biblioteca</span>
+                  </>
                 )}
               </button>
               <button
