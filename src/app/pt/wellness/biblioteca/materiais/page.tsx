@@ -225,22 +225,14 @@ function BibliotecaMateriaisContent() {
                   <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700 capitalize mb-4">
                     {material.categoria}
                   </span>
-                  <div className="flex gap-2">
-                    <a
-                      href={material.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors text-center"
-                    >
-                      Abrir →
-                    </a>
-                    <button
-                      onClick={() => router.push(`/pt/wellness/noel?buscar=${encodeURIComponent(material.titulo)}`)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      👤 NOEL
-                    </button>
-                  </div>
+                  <a
+                    href={material.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full block px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors text-center"
+                  >
+                    Abrir →
+                  </a>
                 </div>
               </div>
             ))}
