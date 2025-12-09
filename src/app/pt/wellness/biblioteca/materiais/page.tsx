@@ -77,6 +77,41 @@ function BibliotecaMateriaisContent() {
     return icons[tipo] || '📄'
   }
 
+  const handleDownload = async (material: Material) => {
+    try {
+      const response = await fetch(material.url)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      
+      // Extrair extensão do arquivo ou usar baseado no tipo
+      const extension = material.url.split('.').pop()?.split('?')[0] || 
+        (material.tipo === 'pdf' ? 'pdf' : 
+         material.tipo === 'video' ? 'mp4' : 
+         material.tipo === 'imagem' ? 'jpg' : 'file')
+      
+      a.download = `${material.titulo}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Erro ao baixar arquivo:', error)
+      // Fallback: abrir em nova aba
+      window.open(material.url, '_blank')
+    }
+  }
+
+  const podeBaixar = (tipo: string) => {
+    return ['imagem', 'video', 'pdf', 'documento'].includes(tipo)
+  }
+
+  const getBotaoTexto = (tipo: string) => {
+    if (tipo === 'video') return 'Assistir'
+    return 'Abrir'
+  }
+
   const renderPreview = (material: Material) => {
     // Para imagens: mostrar preview
     if (material.tipo === 'imagem') {
@@ -225,14 +260,27 @@ function BibliotecaMateriaisContent() {
                   <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700 capitalize mb-4">
                     {material.categoria}
                   </span>
-                  <a
-                    href={material.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full block px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors text-center"
-                  >
-                    Abrir →
-                  </a>
+                  <div className={`flex gap-2 ${podeBaixar(material.tipo) ? '' : 'flex-col'}`}>
+                    <a
+                      href={material.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors text-center ${
+                        podeBaixar(material.tipo) ? 'flex-1' : 'w-full'
+                      }`}
+                    >
+                      {getBotaoTexto(material.tipo)} →
+                    </a>
+                    {podeBaixar(material.tipo) && (
+                      <button
+                        onClick={() => handleDownload(material)}
+                        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-1"
+                        title="Baixar arquivo"
+                      >
+                        ⬇️ Baixar
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
