@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 type CategoriaSelecionada = 'recrutamento' | 'vendas' | 'treinamento' | 'produtos' | 'scripts' | 'apresentacoes'
 
@@ -74,7 +73,7 @@ const getCorClasses = (cor: string) => {
 
 export default function UploadBibliotecaPage() {
   const router = useRouter()
-  const { user, userProfile } = useAuth()
+  const { user, userProfile, loading, isAuthenticated } = useAuth()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [arquivo, setArquivo] = useState<File | null>(null)
   const [categoria, setCategoria] = useState<CategoriaSelecionada | null>(null)
@@ -83,9 +82,33 @@ export default function UploadBibliotecaPage() {
   const [uploading, setUploading] = useState(false)
   const [sucesso, setSucesso] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [checkingAuth, setCheckingAuth] = useState(true)
 
-  // Verificar se é suporte ou admin
-  const isAuthorized = userProfile?.is_support || userProfile?.is_admin
+  // Verificação simplificada de autorização
+  useEffect(() => {
+    // Timeout de segurança: após 2 segundos, parar de verificar
+    const timeout = setTimeout(() => {
+      setCheckingAuth(false)
+    }, 2000)
+
+    // Se não está mais carregando, parar verificação
+    if (!loading) {
+      setCheckingAuth(false)
+      clearTimeout(timeout)
+    }
+
+    return () => clearTimeout(timeout)
+  }, [loading])
+
+  // Redirecionar se não autenticado (após timeout)
+  useEffect(() => {
+    if (!checkingAuth && !loading && (!isAuthenticated || !user)) {
+      router.push('/pt/wellness/login')
+    }
+  }, [checkingAuth, loading, isAuthenticated, user, router])
+
+  // Verificar se é suporte ou admin (apenas após perfil carregar)
+  const isAuthorized = !loading && !checkingAuth && userProfile && (userProfile.is_support || userProfile.is_admin)
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -187,10 +210,21 @@ export default function UploadBibliotecaPage() {
     return '📎'
   }
 
-  // Se não for suporte ou admin, mostrar mensagem de acesso negado
+  // Loading state simplificado
+  if (loading || checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Verificar autorização
   if (!isAuthorized) {
     return (
-      <ProtectedRoute>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center">
             <div className="text-6xl mb-4">🔒</div>
@@ -208,12 +242,11 @@ export default function UploadBibliotecaPage() {
             </button>
           </div>
         </div>
-      </ProtectedRoute>
     )
   }
 
+  // Conteúdo principal (apenas se autorizado)
   return (
-    <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -399,6 +432,5 @@ export default function UploadBibliotecaPage() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
   )
 }
