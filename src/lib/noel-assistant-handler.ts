@@ -141,6 +141,16 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
         }
         break
 
+      case 'getMaterialInfo':
+        url = `${baseUrl}/api/noel/getMaterialInfo`
+        body = {
+          busca: arguments_.busca || arguments_.nome || arguments_.titulo || null,
+          link_atalho: arguments_.link_atalho || null,
+          tipo: arguments_.tipo || null,
+          categoria: arguments_.categoria || null
+        }
+        break
+
       default:
         throw new Error(`Function desconhecida: ${functionName}`)
     }

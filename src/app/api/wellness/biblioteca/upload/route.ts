@@ -158,12 +158,37 @@ export async function POST(request: NextRequest) {
       .from('wellness-biblioteca')
       .getPublicUrl(uploadData.path)
 
+    // Gerar link de atalho baseado no título
+    const tituloFinal = titulo || file.name.replace(/\.[^/.]+$/, '')
+    const linkAtalho = tituloFinal
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^a-z0-9]+/g, '-') // Substitui não-alfanuméricos por hífen
+      .replace(/^-+|-+$/g, '') // Remove hífens no início/fim
+      .substring(0, 50) || 'material'
+
+    // Verificar se link_atalho já existe e adicionar sufixo se necessário
+    let linkAtalhoFinal = linkAtalho
+    let contador = 0
+    while (true) {
+      const { data: existing } = await supabaseAdmin
+        .from('wellness_materiais')
+        .select('id')
+        .eq('link_atalho', linkAtalhoFinal)
+        .maybeSingle()
+      
+      if (!existing) break
+      contador++
+      linkAtalhoFinal = `${linkAtalho}-${contador}`
+    }
+
     // Criar registro no banco
     const { data: material, error: dbError } = await supabaseAdmin
       .from('wellness_materiais')
       .insert({
         codigo,
-        titulo: titulo || file.name.replace(/\.[^/.]+$/, ''),
+        titulo: tituloFinal,
         descricao: descricao || null,
         tipo,
         categoria: mapeamento.categoria_banco,
@@ -171,6 +196,7 @@ export async function POST(request: NextRequest) {
         arquivo_path: uploadData.path,
         tamanho_bytes: file.size,
         tags: mapeamento.tags,
+        link_atalho: linkAtalhoFinal,
         ativo: true,
         ordem: 0
       })
@@ -193,12 +219,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+    const linkAtalhoCompleto = `${baseUrl}/m/${linkAtalhoFinal}`
+
     console.log('✅ Material adicionado com sucesso:', {
       codigo,
       titulo: material.titulo,
       tipo,
       categoria: material.categoria,
       secao: secaoFinal,
+      link_atalho: linkAtalhoFinal,
+      link_completo: linkAtalhoCompleto,
       uploaded_by: user.email,
       is_support: profile.is_support
     })
@@ -207,7 +238,9 @@ export async function POST(request: NextRequest) {
       success: true,
       material: {
         ...material,
-        secao: secaoFinal
+        secao: secaoFinal,
+        link_atalho: linkAtalhoFinal,
+        link_atalho_completo: linkAtalhoCompleto
       }
     })
   } catch (error: any) {

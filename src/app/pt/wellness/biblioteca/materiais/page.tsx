@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
@@ -76,6 +77,69 @@ function BibliotecaMateriaisContent() {
     return icons[tipo] || '📄'
   }
 
+  const renderPreview = (material: Material) => {
+    // Para imagens: mostrar preview
+    if (material.tipo === 'imagem') {
+      return (
+        <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden mb-4">
+          <Image
+            src={material.url}
+            alt={material.titulo}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={(e) => {
+              // Fallback para ícone se imagem não carregar
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              const parent = target.parentElement
+              if (parent) {
+                parent.innerHTML = `<div class="w-full h-48 flex items-center justify-center"><span class="text-6xl">${getTipoIcon(material.tipo)}</span></div>`
+              }
+            }}
+          />
+        </div>
+      )
+    }
+    
+    // Para vídeos: mostrar preview com primeiro frame
+    if (material.tipo === 'video') {
+      return (
+        <div className="relative w-full h-48 bg-gray-900 rounded-lg overflow-hidden mb-4 group">
+          <video
+            src={material.url}
+            className="w-full h-full object-cover"
+            preload="metadata"
+            muted
+            playsInline
+            onMouseEnter={(e) => {
+              const video = e.currentTarget
+              video.currentTime = 1 // Mostrar frame 1 segundo
+              video.play().catch(() => {}) // Tentar play no hover
+            }}
+            onMouseLeave={(e) => {
+              const video = e.currentTarget
+              video.pause()
+              video.currentTime = 0
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 group-hover:bg-opacity-10 transition-all">
+            <div className="bg-white bg-opacity-90 rounded-full p-3 group-hover:scale-110 transition-transform">
+              <span className="text-2xl">▶️</span>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
+    // Para outros tipos: mostrar ícone grande
+    return (
+      <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+        <span className="text-6xl">{getTipoIcon(material.tipo)}</span>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -147,35 +211,36 @@ function BibliotecaMateriaisContent() {
             {materiais.map((material) => (
               <div
                 key={material.id}
-                className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all"
+                className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all"
               >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="text-4xl flex-shrink-0">{getTipoIcon(material.tipo)}</div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">{material.titulo}</h3>
-                    {material.descricao && (
-                      <p className="text-sm text-gray-600 mb-2">{material.descricao}</p>
-                    )}
-                    <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700 capitalize">
-                      {material.categoria}
-                    </span>
+                {/* Preview/Thumbnail */}
+                {renderPreview(material)}
+                
+                {/* Conteúdo */}
+                <div className="p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-2">{material.titulo}</h3>
+                  {material.descricao && (
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{material.descricao}</p>
+                  )}
+                  <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700 capitalize mb-4">
+                    {material.categoria}
+                  </span>
+                  <div className="flex gap-2">
+                    <a
+                      href={material.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors text-center"
+                    >
+                      Abrir →
+                    </a>
+                    <button
+                      onClick={() => router.push(`/pt/wellness/noel?buscar=${encodeURIComponent(material.titulo)}`)}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      👤 NOEL
+                    </button>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <a
-                    href={material.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors text-center"
-                  >
-                    Abrir →
-                  </a>
-                  <button
-                    onClick={() => router.push(`/pt/wellness/noel?buscar=${encodeURIComponent(material.titulo)}`)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-                  >
-                    👤 NOEL
-                  </button>
                 </div>
               </div>
             ))}
