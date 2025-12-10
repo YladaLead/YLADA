@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
         area: userProfile?.perfil || 'wellness',
         titulo: tituloFinal,
         conteudo: conteudo.trim(),
-        categoria: categoriaFinal
+        categoria: categoriaFinal,
         tags: tags || [],
         imagens: imagens || [],
         video_url: video_url || null,
