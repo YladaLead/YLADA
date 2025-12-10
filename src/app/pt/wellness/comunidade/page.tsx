@@ -35,11 +35,26 @@ export default function ComunidadePage() {
   const [recordingTime, setRecordingTime] = useState(0)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [showReactions, setShowReactions] = useState<string | null>(null)
+  const [showWhoReacted, setShowWhoReacted] = useState<string | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const emojiReactions = [
+    { tipo: 'curtir', emoji: '❤️', label: 'Curtir' },
+    { tipo: 'amei', emoji: '😍', label: 'Amei' },
+    { tipo: 'util', emoji: '👍', label: 'Útil' },
+    { tipo: 'engracado', emoji: '😂', label: 'Engraçado' },
+    { tipo: 'fogo', emoji: '🔥', label: 'Fogo' },
+    { tipo: 'incrivel', emoji: '🤩', label: 'Incrível' },
+    { tipo: 'parabens', emoji: '🎉', label: 'Parabéns' },
+    { tipo: 'apoio', emoji: '💪', label: 'Apoio' },
+    { tipo: 'duvida', emoji: '🤔', label: 'Dúvida' },
+    { tipo: 'surpreso', emoji: '😮', label: 'Surpreso' }
+  ]
 
   useEffect(() => {
     carregarMensagens()
@@ -207,15 +222,86 @@ export default function ComunidadePage() {
     }
   }
 
+  const iniciarGravacao = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      })
+      
+      const chunks: Blob[] = []
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data)
+        }
+      }
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' })
+        setAudioBlob(blob)
+        const url = URL.createObjectURL(blob)
+        setAudioUrl(url)
+        stream.getTracks().forEach(track => track.stop())
+      }
+      
+      mediaRecorder.start()
+      mediaRecorderRef.current = mediaRecorder
+      setRecording(true)
+      setRecordingTime(0)
+      
+      // Atualizar tempo de gravação
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+    } catch (error) {
+      console.error('Erro ao iniciar gravação:', error)
+      alert('Erro ao acessar o microfone. Verifique as permissões.')
+    }
+  }
+
+  const pararGravacao = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop()
+      setRecording(false)
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current)
+        recordingIntervalRef.current = null
+      }
+    }
+  }
+
+  const cancelarGravacao = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop()
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop())
+    }
+    setRecording(false)
+    setAudioBlob(null)
+    setAudioUrl(null)
+    setRecordingTime(0)
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current)
+      recordingIntervalRef.current = null
+    }
+  }
+
+  const formatarTempo = (segundos: number) => {
+    const mins = Math.floor(segundos / 60)
+    const secs = segundos % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     const validFiles = files.filter(file => {
       const isImage = file.type.startsWith('image/')
       const isVideo = file.type.startsWith('video/')
+      const isAudio = file.type.startsWith('audio/')
       const maxSize = isVideo ? 10 * 1024 * 1024 : 5 * 1024 * 1024
       
-      if (!isImage && !isVideo) {
-        alert('Apenas imagens e vídeos são permitidos')
+      if (!isImage && !isVideo && !isAudio) {
+        alert('Apenas imagens, vídeos e áudios são permitidos')
         return false
       }
       
