@@ -14,6 +14,7 @@ export default function WellnessCheckoutPage() {
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
   const [email, setEmail] = useState('')
+  const [planFromUrl, setPlanFromUrl] = useState<boolean>(false)
   
   // IMPORTANTE: Esta página NÃO requer autenticação
   // Permitir visualizar sempre, mesmo sem login
@@ -54,6 +55,10 @@ export default function WellnessCheckoutPage() {
       
       if (plan === 'annual') {
         setPlanType('annual')
+        setPlanFromUrl(true)
+      } else if (plan === 'monthly') {
+        setPlanType('monthly')
+        setPlanFromUrl(true)
       }
       
       if (canceledParam === 'true') {
@@ -235,52 +240,82 @@ export default function WellnessCheckoutPage() {
             </div>
           )}
 
-          {/* Seleção de Plano */}
-          <div className="mb-8">
-            <div className="grid sm:grid-cols-2 gap-4">
-              {/* Plano Mensal */}
-              <button
-                onClick={() => setPlanType('monthly')}
-                className={`p-6 rounded-lg border-2 transition-all ${
-                  planType === 'monthly'
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 hover:border-green-300 bg-white'
-                }`}
-              >
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Mensal
-                  </h3>
-                  <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 97,00
+          {/* Seleção de Plano - Só mostra se não veio da URL */}
+          {!planFromUrl && (
+            <div className="mb-8">
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Plano Mensal */}
+                <button
+                  onClick={() => setPlanType('monthly')}
+                  className={`p-6 rounded-lg border-2 transition-all ${
+                    planType === 'monthly'
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-green-300 bg-white'
+                  }`}
+                >
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Mensal
+                    </h3>
+                    <div className="text-3xl font-bold text-green-600 mb-1">
+                      R$ 97,00
+                    </div>
+                    <div className="text-sm text-gray-600">/mês</div>
                   </div>
-                  <div className="text-sm text-gray-600">/mês</div>
-                </div>
-              </button>
+                </button>
 
-              {/* Plano Anual - Sempre com fundo verde */}
-              <button
-                onClick={() => setPlanType('annual')}
-                className="p-6 rounded-lg border-2 border-green-500 bg-green-50 transition-all relative hover:bg-green-100"
-              >
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  RECOMENDADO
-                </div>
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Anual
-                  </h3>
-                  <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 59,90
+                {/* Plano Anual - Sempre com fundo verde */}
+                <button
+                  onClick={() => setPlanType('annual')}
+                  className="p-6 rounded-lg border-2 border-green-500 bg-green-50 transition-all relative hover:bg-green-100"
+                >
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    RECOMENDADO
                   </div>
-                  <div className="text-sm text-gray-600">/mês</div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 718,80/ano (12x de R$ 59,90)
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Anual
+                    </h3>
+                    <div className="text-3xl font-bold text-green-600 mb-1">
+                      R$ 59,90
+                    </div>
+                    <div className="text-sm text-gray-600">/mês</div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      Total: R$ 718,80/ano (12x de R$ 59,90)
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Mostrar plano selecionado quando veio da URL */}
+          {planFromUrl && (
+            <div className="mb-8">
+              <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {planType === 'annual' ? 'Plano Anual' : 'Plano Mensal'}
+                  </h3>
+                  {planType === 'annual' ? (
+                    <>
+                      <div className="text-4xl font-bold text-green-600 mb-2">
+                        12x de R$ 59,90
+                      </div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Total: R$ 718,80/ano
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-4xl font-bold text-green-600 mb-2">
+                      R$ 97,00
+                    </div>
+                  )}
+                  <div className="text-sm text-gray-600">/mês</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Campo de E-mail (se não estiver logado ou ainda carregando) */}
           {(!user || authLoading) && (
