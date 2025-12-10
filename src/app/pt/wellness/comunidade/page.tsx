@@ -39,6 +39,7 @@ export default function ComunidadePage() {
   const [showReactions, setShowReactions] = useState<string | null>(null)
   const [showWhoLiked, setShowWhoLiked] = useState<string | null>(null)
   const [tablesMissing, setTablesMissing] = useState(false)
+  const [errorDetails, setErrorDetails] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -92,6 +93,7 @@ export default function ComunidadePage() {
         // Verificar se é erro de tabelas não encontradas
         if (data.error && (data.error.includes('migração') || data.error.includes('Tabelas da comunidade'))) {
           setTablesMissing(true)
+          setErrorDetails(data.details || data.error)
           // Parar o polling
           if (intervalRef.current) {
             clearInterval(intervalRef.current)
@@ -128,10 +130,14 @@ export default function ComunidadePage() {
         const errorData = await response.json().catch(() => ({}))
         if (errorData.error && (errorData.error.includes('migração') || errorData.error.includes('Tabelas da comunidade'))) {
           setTablesMissing(true)
+          setErrorDetails(errorData.details || errorData.error)
           if (intervalRef.current) {
             clearInterval(intervalRef.current)
             intervalRef.current = null
           }
+        } else {
+          // Se não for erro de tabelas, mostrar o erro real
+          setErrorDetails(errorData.error || errorData.details || 'Erro desconhecido')
         }
       }
     } catch (error: any) {
@@ -315,7 +321,13 @@ export default function ComunidadePage() {
                     <p className="text-gray-600 mb-4">
                       Execute a migração SQL primeiro para usar o chat.
                     </p>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left max-w-2xl mx-auto">
+                    {errorDetails && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-left max-w-2xl mx-auto">
+                        <p className="text-sm font-medium text-red-800 mb-1">Erro detectado:</p>
+                        <p className="text-sm text-red-700">{errorDetails}</p>
+                      </div>
+                    )}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left max-w-2xl mx-auto mb-4">
                       <p className="text-sm font-medium text-yellow-800 mb-2">
                         📋 Instruções:
                       </p>
@@ -326,6 +338,17 @@ export default function ComunidadePage() {
                         <li>Recarregue esta página</li>
                       </ol>
                     </div>
+                    <button
+                      onClick={() => {
+                        setTablesMissing(false)
+                        setErrorDetails(null)
+                        setLoading(true)
+                        carregarPosts()
+                      }}
+                      className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                    >
+                      🔄 Tentar novamente
+                    </button>
                   </div>
                 ) : loading ? (
                   <div className="text-center py-12">
