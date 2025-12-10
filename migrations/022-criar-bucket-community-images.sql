@@ -17,6 +17,7 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Política: Qualquer usuário autenticado pode fazer upload
+DROP POLICY IF EXISTS "Usuários autenticados podem fazer upload" ON storage.objects;
 CREATE POLICY "Usuários autenticados podem fazer upload"
 ON storage.objects FOR INSERT
 TO authenticated
@@ -26,12 +27,14 @@ WITH CHECK (
 );
 
 -- 3. Política: Qualquer usuário pode ver imagens (público)
+DROP POLICY IF EXISTS "Imagens são públicas" ON storage.objects;
 CREATE POLICY "Imagens são públicas"
 ON storage.objects FOR SELECT
 TO public
 USING (bucket_id = 'community-images');
 
 -- 4. Política: Usuários podem deletar apenas suas próprias imagens
+DROP POLICY IF EXISTS "Usuários podem deletar suas próprias imagens" ON storage.objects;
 CREATE POLICY "Usuários podem deletar suas próprias imagens"
 ON storage.objects FOR DELETE
 TO authenticated

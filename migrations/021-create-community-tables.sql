@@ -289,83 +289,102 @@ ALTER TABLE community_notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_reports ENABLE ROW LEVEL SECURITY;
 
 -- Políticas para Posts
+DROP POLICY IF EXISTS "Usuários autenticados podem ver posts públicos" ON community_posts;
 CREATE POLICY "Usuários autenticados podem ver posts públicos"
   ON community_posts FOR SELECT
   USING (auth.role() = 'authenticated' AND status = 'publico');
 
+DROP POLICY IF EXISTS "Usuários podem criar posts" ON community_posts;
 CREATE POLICY "Usuários podem criar posts"
   ON community_posts FOR INSERT
   WITH CHECK (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Usuários podem editar seus próprios posts" ON community_posts;
 CREATE POLICY "Usuários podem editar seus próprios posts"
   ON community_posts FOR UPDATE
   USING (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Usuários podem deletar seus próprios posts" ON community_posts;
 CREATE POLICY "Usuários podem deletar seus próprios posts"
   ON community_posts FOR DELETE
   USING (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
 -- Políticas para Comentários
+DROP POLICY IF EXISTS "Usuários autenticados podem ver comentários públicos" ON community_comments;
 CREATE POLICY "Usuários autenticados podem ver comentários públicos"
   ON community_comments FOR SELECT
   USING (auth.role() = 'authenticated' AND status = 'publico');
 
+DROP POLICY IF EXISTS "Usuários podem criar comentários" ON community_comments;
 CREATE POLICY "Usuários podem criar comentários"
   ON community_comments FOR INSERT
   WITH CHECK (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Usuários podem editar seus próprios comentários" ON community_comments;
 CREATE POLICY "Usuários podem editar seus próprios comentários"
   ON community_comments FOR UPDATE
   USING (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Usuários podem deletar seus próprios comentários" ON community_comments;
 CREATE POLICY "Usuários podem deletar seus próprios comentários"
   ON community_comments FOR DELETE
   USING (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
 -- Políticas para Reações
+DROP POLICY IF EXISTS "Usuários autenticados podem ver reações" ON community_reactions;
 CREATE POLICY "Usuários autenticados podem ver reações"
   ON community_reactions FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Usuários podem criar reações" ON community_reactions;
 CREATE POLICY "Usuários podem criar reações"
   ON community_reactions FOR INSERT
   WITH CHECK (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Usuários podem deletar suas próprias reações" ON community_reactions;
 CREATE POLICY "Usuários podem deletar suas próprias reações"
   ON community_reactions FOR DELETE
   USING (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
 -- Políticas para Seguir
+DROP POLICY IF EXISTS "Usuários autenticados podem ver follows" ON community_follows;
 CREATE POLICY "Usuários autenticados podem ver follows"
   ON community_follows FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Usuários podem seguir outros" ON community_follows;
 CREATE POLICY "Usuários podem seguir outros"
   ON community_follows FOR INSERT
   WITH CHECK (auth.role() = 'authenticated' AND auth.uid() = follower_id);
 
+DROP POLICY IF EXISTS "Usuários podem deixar de seguir" ON community_follows;
 CREATE POLICY "Usuários podem deixar de seguir"
   ON community_follows FOR DELETE
   USING (auth.role() = 'authenticated' AND auth.uid() = follower_id);
 
 -- Políticas para Notificações
+DROP POLICY IF EXISTS "Usuários podem ver suas próprias notificações" ON community_notifications;
 CREATE POLICY "Usuários podem ver suas próprias notificações"
   ON community_notifications FOR SELECT
   USING (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Sistema pode criar notificações" ON community_notifications;
 CREATE POLICY "Sistema pode criar notificações"
   ON community_notifications FOR INSERT
   WITH CHECK (true); -- Permitir criação via service role
 
+DROP POLICY IF EXISTS "Usuários podem atualizar suas notificações" ON community_notifications;
 CREATE POLICY "Usuários podem atualizar suas notificações"
   ON community_notifications FOR UPDATE
   USING (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
 -- Políticas para Denúncias
+DROP POLICY IF EXISTS "Usuários podem criar denúncias" ON community_reports;
 CREATE POLICY "Usuários podem criar denúncias"
   ON community_reports FOR INSERT
   WITH CHECK (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins podem ver todas as denúncias" ON community_reports;
 CREATE POLICY "Admins podem ver todas as denúncias"
   ON community_reports FOR SELECT
   USING (
