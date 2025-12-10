@@ -29,16 +29,21 @@ DROP POLICY IF EXISTS "Usuários podem deletar suas próprias reações" ON comm
 
 -- Remover políticas de community_follows
 DROP POLICY IF EXISTS "Usuários podem ver quem segue" ON community_follows;
+DROP POLICY IF EXISTS "Usuários autenticados podem ver follows" ON community_follows;
 DROP POLICY IF EXISTS "Usuários podem seguir outros" ON community_follows;
 DROP POLICY IF EXISTS "Usuários podem deixar de seguir" ON community_follows;
 
 -- Remover políticas de community_notifications
 DROP POLICY IF EXISTS "Usuários podem ver suas notificações" ON community_notifications;
+DROP POLICY IF EXISTS "Usuários podem ver suas próprias notificações" ON community_notifications;
 DROP POLICY IF EXISTS "Usuários podem marcar notificações como lidas" ON community_notifications;
+DROP POLICY IF EXISTS "Usuários podem atualizar suas notificações" ON community_notifications;
+DROP POLICY IF EXISTS "Sistema pode criar notificações" ON community_notifications;
 
 -- Remover políticas de community_reports
 DROP POLICY IF EXISTS "Usuários podem criar denúncias" ON community_reports;
 DROP POLICY IF EXISTS "Admins podem ver denúncias" ON community_reports;
+DROP POLICY IF EXISTS "Admins podem ver todas as denúncias" ON community_reports;
 
 -- =====================================================
 -- 2. GARANTIR QUE RLS ESTÁ HABILITADO
@@ -59,20 +64,13 @@ ALTER TABLE community_reports ENABLE ROW LEVEL SECURITY;
 -- POLÍTICAS PARA COMMUNITY_POSTS
 -- =====================================================
 
--- Ver posts públicos
+-- Ver posts públicos (QUALQUER usuário autenticado pode ver posts públicos)
 CREATE POLICY "Usuários autenticados podem ver posts públicos"
   ON community_posts FOR SELECT
   USING (
     status = 'publico' 
     AND deleted_at IS NULL
-    AND (
-      auth.uid() = user_id 
-      OR EXISTS (
-        SELECT 1 FROM user_profiles 
-        WHERE user_id = auth.uid() 
-        AND (is_admin = true OR is_support = true)
-      )
-    )
+    AND auth.role() = 'authenticated'
   );
 
 -- Criar posts
@@ -165,6 +163,11 @@ CREATE POLICY "Usuários podem deixar de seguir"
 CREATE POLICY "Usuários podem ver suas notificações"
   ON community_notifications FOR SELECT
   USING (auth.uid() = user_id);
+
+-- Sistema pode criar notificações (para triggers/functions)
+CREATE POLICY "Sistema pode criar notificações"
+  ON community_notifications FOR INSERT
+  WITH CHECK (true);
 
 -- Marcar como lida
 CREATE POLICY "Usuários podem marcar notificações como lidas"
