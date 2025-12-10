@@ -39,7 +39,7 @@ export async function POST(
       .select('id')
       .eq('user_id', user.id)
       .eq('post_id', postId)
-      .single()
+      .maybeSingle()
     
     if (existingReaction) {
       // Descurtir

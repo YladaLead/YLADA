@@ -150,22 +150,28 @@ export async function POST(request: NextRequest) {
       tipo = 'texto'
     } = body
     
-    // Validação
-    if (!titulo || !conteudo || !categoria) {
+    // Validação - conteúdo é obrigatório, título e categoria são opcionais
+    if (!conteudo || !conteudo.trim()) {
       return NextResponse.json(
-        { error: 'Título, conteúdo e categoria são obrigatórios' },
+        { error: 'Conteúdo é obrigatório' },
         { status: 400 }
       )
     }
     
+    // Se não tiver categoria, usar 'chat' (modo chat simples)
+    const categoriaFinal = categoria || 'chat'
+    
     // Validar categoria
-    const categoriasValidas = ['duvidas', 'dicas', 'casos-sucesso', 'networking', 'anuncios']
-    if (!categoriasValidas.includes(categoria)) {
+    const categoriasValidas = ['duvidas', 'dicas', 'casos-sucesso', 'networking', 'anuncios', 'chat']
+    if (categoriaFinal && !categoriasValidas.includes(categoriaFinal)) {
       return NextResponse.json(
         { error: 'Categoria inválida' },
         { status: 400 }
       )
     }
+    
+    // Se não tiver título, usar primeiras palavras do conteúdo como título
+    const tituloFinal = titulo?.trim() || conteudo.trim().substring(0, 100).split('\n')[0] || 'Mensagem'
     
     // Criar post
     const { data: post, error } = await supabase
@@ -173,14 +179,14 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         area: userProfile?.perfil || 'wellness',
-        titulo: titulo.trim(),
+        titulo: tituloFinal,
         conteudo: conteudo.trim(),
-        categoria,
+        categoria: categoriaFinal
         tags: tags || [],
         imagens: imagens || [],
         video_url: video_url || null,
         link_url: link_url || null,
-        tipo
+        tipo: tipo || 'texto'
       })
       .select(`
         *,

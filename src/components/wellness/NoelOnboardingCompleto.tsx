@@ -593,7 +593,6 @@ export default function NoelOnboardingCompleto({
           </div>
         </div>
       </div>
-    </div>
   )
 
   if (inline) {
