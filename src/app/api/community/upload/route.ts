@@ -13,7 +13,16 @@ export async function POST(request: NextRequest) {
     
     const { user } = authResult
     
-    const formData = await request.formData()
+    let formData
+    try {
+      formData = await request.formData()
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Erro ao processar formulário. Certifique-se de enviar um arquivo.' },
+        { status: 400 }
+      )
+    }
+    
     const file = formData.get('file') as File
     
     if (!file) {

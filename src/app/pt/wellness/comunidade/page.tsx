@@ -88,28 +88,40 @@ export default function ComunidadePage() {
       })
 
       if (response.ok) {
-        const data = await response.json()
-        const posts = data.posts || []
-        
-        // Buscar reações para cada mensagem
-        const postsComReacoes = await Promise.all(
-          posts.map(async (post: Message) => {
-            try {
-              const reactionsResponse = await fetch(`/api/community/posts/${post.id}/react`, {
-                credentials: 'include'
-              })
-              if (reactionsResponse.ok) {
-                const reactionsData = await reactionsResponse.json()
-                return { ...post, reactions: reactionsData.reactions }
+        try {
+          const data = await response.json()
+          const posts = data.posts || []
+          
+          // Buscar reações para cada mensagem
+          const postsComReacoes = await Promise.all(
+            posts.map(async (post: Message) => {
+              try {
+                const reactionsResponse = await fetch(`/api/community/posts/${post.id}/react`, {
+                  credentials: 'include'
+                })
+                if (reactionsResponse.ok) {
+                  try {
+                    const reactionsData = await reactionsResponse.json()
+                    return { ...post, reactions: reactionsData.reactions }
+                  } catch (e) {
+                    // Ignorar erros de parsing de reações
+                  }
+                }
+              } catch (error) {
+                // Ignorar erros de reações
               }
-            } catch (error) {
-              // Ignorar erros de reações
-            }
-            return post
-          })
-        )
-        
-        setMessages(postsComReacoes)
+              return post
+            })
+          )
+          
+          setMessages(postsComReacoes)
+        } catch (parseError) {
+          console.error('Erro ao parsear resposta:', parseError)
+          // Continuar com array vazio em caso de erro
+          setMessages([])
+        }
+      } else {
+        console.error('Erro ao carregar mensagens:', response.status, response.statusText)
       }
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error)
@@ -129,8 +141,15 @@ export default function ComunidadePage() {
     })
     
     if (!response.ok) {
-      const data = await response.json()
-      throw new Error(data.error || 'Erro ao fazer upload')
+      let errorMessage = 'Erro ao fazer upload'
+      try {
+        const data = await response.json()
+        errorMessage = data.error || errorMessage
+      } catch (e) {
+        // Se não for JSON, usar o status text
+        errorMessage = response.statusText || errorMessage
+      }
+      throw new Error(errorMessage)
     }
     
     const data = await response.json()
@@ -211,8 +230,15 @@ export default function ComunidadePage() {
         setRecordingTime(0)
         await carregarMensagens()
       } else {
-        const data = await response.json()
-        alert(data.error || 'Erro ao enviar mensagem')
+        let errorMessage = 'Erro ao enviar mensagem'
+        try {
+          const data = await response.json()
+          errorMessage = data.error || errorMessage
+        } catch (e) {
+          // Se não for JSON, usar o status text
+          errorMessage = response.statusText || errorMessage
+        }
+        alert(errorMessage)
       }
     } catch (error) {
       console.error('Erro ao enviar:', error)

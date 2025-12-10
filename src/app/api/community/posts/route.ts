@@ -96,7 +96,16 @@ export async function POST(request: NextRequest) {
     const { user, userProfile } = authResult
     const supabase = await createServerSupabaseClient()
     
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Corpo da requisição inválido. Esperado JSON.' },
+        { status: 400 }
+      )
+    }
+    
     const { conteudo, imagens, video_url, audio_url } = body
     
     if (!conteudo || !conteudo.trim()) {
