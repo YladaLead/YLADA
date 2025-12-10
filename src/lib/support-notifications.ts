@@ -6,6 +6,14 @@
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from './resend'
 import { supabaseAdmin } from './supabase'
 
+// Importar web-push dinamicamente
+let webpush: any = null
+try {
+  webpush = require('web-push')
+} catch (e) {
+  console.warn('[Support Notifications] web-push não instalado')
+}
+
 export interface TicketNotificationData {
   ticketId: string
   area: string
@@ -264,7 +272,105 @@ export async function notifyAgentsNewTicket(data: TicketNotificationData): Promi
 }
 
 /**
- * Envia notificação quando ticket recebe nova mensagem (se atendente não está online)
+ * Envia push notification para usuário quando há nova mensagem no ticket
+ */
+async function sendPushNotificationForNewMessage(
+  userId: string,
+  ticketId: string,
+  area: string,
+  message: string,
+  senderName: string
+): Promise<boolean> {
+  try {
+    // Verificar se web-push está disponível
+    if (!webpush) {
+      return false // web-push não instalado
+    }
+
+    // Validar VAPID keys
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
+    const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@ylada.com'
+
+    if (!vapidPublicKey || !vapidPrivateKey) {
+      return false // VAPID keys não configuradas
+    }
+
+    // Configurar web-push
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey)
+
+    // Buscar subscriptions do usuário
+    const { data: subscriptions } = await supabaseAdmin
+      ?.from('push_subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('ativo', true)
+
+    if (!subscriptions || subscriptions.length === 0) {
+      return false // Usuário não tem subscriptions
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
+                   process.env.NEXT_PUBLIC_APP_URL || 
+                   'https://www.ylada.com'
+
+    // Preparar payload
+    const messagePreview = message.length > 100 ? message.substring(0, 100) + '...' : message
+    const payload = JSON.stringify({
+      title: `💬 Nova mensagem de ${senderName}`,
+      body: messagePreview,
+      icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+      badge: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+      tag: `ticket-${ticketId}`,
+      data: {
+        url: `${baseUrl}/pt/${area}/suporte/tickets/${ticketId}`,
+        ticketId,
+        area
+      },
+      requireInteraction: false
+    })
+
+    // Enviar para cada subscription
+    const results = await Promise.allSettled(
+      subscriptions.map(async (sub: any) => {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: {
+                p256dh: sub.keys.p256dh,
+                auth: sub.keys.auth
+              }
+            },
+            payload
+          )
+          return { success: true }
+        } catch (error: any) {
+          console.error('[Support Notifications] Erro ao enviar push:', error)
+          // Se subscription inválida, remover do banco
+          if (error.statusCode === 410 || error.statusCode === 404) {
+            await supabaseAdmin
+              ?.from('push_subscriptions')
+              .delete()
+              .eq('id', sub.id)
+          }
+          return { success: false, error: error.message }
+        }
+      })
+    )
+
+    const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length
+    console.log(`[Support Notifications] Push notifications enviadas: ${successful}/${subscriptions.length}`)
+    
+    return successful > 0
+  } catch (error) {
+    console.error('[Support Notifications] Erro ao enviar push notification:', error)
+    return false
+  }
+}
+
+/**
+ * Envia notificação quando ticket recebe nova mensagem (email + push)
  */
 export async function notifyAgentNewMessage(
   ticketId: string,
@@ -272,52 +378,80 @@ export async function notifyAgentNewMessage(
   message: string,
   agentId: string
 ): Promise<boolean> {
-  if (!isResendConfigured() || !resend) {
-    return false
-  }
+  let emailSent = false
+  let pushSent = false
 
-  try {
-    // Buscar email do atendente
-    const { data: userData } = await supabaseAdmin?.auth.admin.getUserById(agentId)
-    if (!userData?.user?.email) {
-      return false
+  // Enviar email
+  if (isResendConfigured() && resend) {
+    try {
+      // Buscar email do atendente
+      const { data: userData } = await supabaseAdmin?.auth.admin.getUserById(agentId)
+      if (userData?.user?.email) {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
+                       process.env.NEXT_PUBLIC_APP_URL || 
+                       'https://www.ylada.com'
+
+        await resend.emails.send({
+          from: `${FROM_NAME} <${FROM_EMAIL}>`,
+          to: userData.user.email,
+          subject: `💬 Nova mensagem no ticket ${ticketId.substring(0, 8)}...`,
+          html: `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+              </head>
+              <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px;">
+                  <h1 style="color: #2563eb;">💬 Nova Mensagem no Ticket</h1>
+                  <p>Você recebeu uma nova mensagem no ticket <strong>${ticketId.substring(0, 8)}...</strong></p>
+                  <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                    <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+                  </div>
+                  <a href="${baseUrl}/pt/${area}/suporte/tickets/${ticketId}" 
+                     style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">
+                    Ver Ticket
+                  </a>
+                </div>
+              </body>
+            </html>
+          `,
+        })
+        emailSent = true
+      }
+    } catch (error) {
+      console.error('[Support Notifications] Erro ao enviar email de nova mensagem:', error)
     }
-
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
-                   process.env.NEXT_PUBLIC_APP_URL || 
-                   'https://www.ylada.com'
-
-    await resend.emails.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
-      to: userData.user.email,
-      subject: `💬 Nova mensagem no ticket ${ticketId.substring(0, 8)}...`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-          </head>
-          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px;">
-              <h1 style="color: #2563eb;">💬 Nova Mensagem no Ticket</h1>
-              <p>Você recebeu uma nova mensagem no ticket <strong>${ticketId.substring(0, 8)}...</strong></p>
-              <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; margin: 20px 0;">
-                <p style="margin: 0; white-space: pre-wrap;">${message}</p>
-              </div>
-              <a href="${baseUrl}/pt/${area}/suporte/tickets/${ticketId}" 
-                 style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">
-                Ver Ticket
-              </a>
-            </div>
-          </body>
-        </html>
-      `,
-    })
-
-    return true
-  } catch (error) {
-    console.error('[Support Notifications] Erro ao enviar notificação de nova mensagem:', error)
-    return false
   }
+
+  // Enviar push notification
+  pushSent = await sendPushNotificationForNewMessage(
+    agentId,
+    ticketId,
+    area,
+    message,
+    'Usuário'
+  )
+
+  return emailSent || pushSent
+}
+
+/**
+ * Envia notificação push quando usuário recebe nova mensagem de atendente
+ */
+export async function notifyUserNewMessage(
+  ticketId: string,
+  area: string,
+  message: string,
+  userId: string,
+  senderName: string
+): Promise<boolean> {
+  return await sendPushNotificationForNewMessage(
+    userId,
+    ticketId,
+    area,
+    message,
+    senderName
+  )
 }
 

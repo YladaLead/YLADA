@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { notifyAgentNewMessage, notifyUserNewMessage } from '@/lib/support-notifications'
 
 // POST - Enviar mensagem (atendente ou usuário)
 export async function POST(request: NextRequest) {
@@ -113,6 +114,54 @@ export async function POST(request: NextRequest) {
       .from('support_tickets')
       .update(updateData)
       .eq('id', ticket_id)
+
+    // Enviar notificações (não bloqueia resposta)
+    if (isAgent) {
+      // Atendente enviou mensagem - notificar usuário
+      notifyUserNewMessage(
+        ticket_id,
+        ticket.area,
+        message.trim(),
+        ticket.user_id,
+        senderName
+      ).catch(error => {
+        console.error('[Support Messages] Erro ao enviar notificação para usuário:', error)
+      })
+    } else {
+      // Usuário enviou mensagem - notificar atendente (se tiver)
+      if (ticket.agent_id) {
+        notifyAgentNewMessage(
+          ticket_id,
+          ticket.area,
+          message.trim(),
+          ticket.agent_id
+        ).catch(error => {
+          console.error('[Support Messages] Erro ao enviar notificação para atendente:', error)
+        })
+      } else {
+        // Se não tem atendente atribuído, notificar todos os atendentes online
+        // (isso já é feito quando ticket é criado, mas pode ter novos atendentes online)
+        const { data: onlineAgents } = await supabaseAdmin
+          .from('support_agents')
+          .select('user_id')
+          .eq('area', ticket.area)
+          .eq('status', 'online')
+
+        if (onlineAgents && onlineAgents.length > 0) {
+          // Notificar primeiro atendente online (ou todos, dependendo da lógica)
+          for (const agent of onlineAgents.slice(0, 1)) { // Notificar apenas o primeiro para evitar spam
+            notifyAgentNewMessage(
+              ticket_id,
+              ticket.area,
+              message.trim(),
+              agent.user_id
+            ).catch(error => {
+              console.error('[Support Messages] Erro ao enviar notificação para atendente:', error)
+            })
+          }
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,
