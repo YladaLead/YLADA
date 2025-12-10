@@ -24,7 +24,7 @@ export async function GET(
       .from('community_comments')
       .select(`
         *,
-        user:user_profiles!community_comments_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email,
@@ -154,7 +154,7 @@ export async function POST(
       })
       .select(`
         *,
-        user:user_profiles!community_comments_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email,

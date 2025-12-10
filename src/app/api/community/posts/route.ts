@@ -23,11 +23,12 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'recent' // 'recent', 'popular', 'trending'
     
     // Construir query base
+    // Usar join manual ao invés de foreign key reference (mais confiável)
     let query = supabase
       .from('community_posts')
       .select(`
         *,
-        user:user_profiles!community_posts_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email,
@@ -231,7 +232,7 @@ export async function POST(request: NextRequest) {
       })
       .select(`
         *,
-        user:user_profiles!community_posts_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email,

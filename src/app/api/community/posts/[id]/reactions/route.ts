@@ -24,7 +24,7 @@ export async function GET(
         id,
         tipo,
         created_at,
-        user:user_profiles!community_reactions_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email

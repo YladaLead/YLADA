@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       .from('community_posts')
       .select(`
         *,
-        user:user_profiles!community_posts_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email,

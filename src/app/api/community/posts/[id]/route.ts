@@ -23,7 +23,7 @@ export async function GET(
       .from('community_posts')
       .select(`
         *,
-        user:user_profiles!community_posts_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email,
@@ -135,7 +135,7 @@ export async function PUT(
       .eq('id', postId)
       .select(`
         *,
-        user:user_profiles!community_posts_user_id_fkey(
+        user:user_profiles!inner(
           id,
           nome_completo,
           email,
