@@ -143,18 +143,18 @@ export default function CookieConsentBanner() {
               <div className="flex items-center gap-2 mb-2">
                 <Cookie className="w-5 h-5 text-blue-600" />
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Utilizamos Cookies
+                  Cookies
                 </h3>
               </div>
               <p className="text-sm text-gray-600">
-                Utilizamos cookies para melhorar sua experiência, analisar o tráfego do site e 
-                personalizar conteúdo. Ao continuar navegando, você concorda com nossa{' '}
+                Usamos cookies para deixar tudo funcionando melhor para você. Tudo tranquilo! 
+                Se quiser saber mais, veja nossa{' '}
                 <Link 
                   href="/pt/politica-de-cookies" 
                   className="text-blue-600 hover:underline"
                   target="_blank"
                 >
-                  Política de Cookies
+                  política de cookies
                 </Link>
                 .
               </p>
