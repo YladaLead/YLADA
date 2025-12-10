@@ -31,10 +31,14 @@ export async function GET(request: NextRequest) {
     
     if (testError) {
       console.error('❌ Erro ao testar tabela community_posts:', testError)
-      const errorMsg = testError.message?.toLowerCase() || ''
+      console.error('❌ Erro completo:', JSON.stringify(testError, null, 2))
+      
+      const errorMsg = (testError.message || '').toLowerCase()
       const errorCode = testError.code || ''
       
-      if (errorMsg.includes('does not exist') || errorMsg.includes('relation') || errorCode === '42P01' || errorCode === 'PGRST116') {
+      // Só retornar "tabela não existe" se for realmente esse erro
+      if (errorCode === '42P01' || errorCode === 'PGRST116' || 
+          (errorMsg.includes('does not exist') && errorMsg.includes('relation'))) {
         return NextResponse.json(
           { 
             error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
@@ -45,13 +49,14 @@ export async function GET(request: NextRequest) {
         )
       }
       
-      // Se não for erro de tabela, retornar erro genérico
+      // Para qualquer outro erro, retornar o erro real
       return NextResponse.json(
         { 
           error: 'Erro ao acessar tabela community_posts',
           details: testError.message || 'Erro desconhecido',
           code: testError.code,
           hint: testError.hint,
+          fullError: process.env.NODE_ENV === 'development' ? JSON.stringify(testError, null, 2) : undefined,
           posts: [] 
         },
         { status: 500 }
