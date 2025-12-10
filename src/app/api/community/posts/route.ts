@@ -59,11 +59,12 @@ export async function GET(request: NextRequest) {
     }
     
     // Se chegou aqui, a tabela existe. Fazer query completa
+    // Tentar com join primeiro, se falhar, fazer sem join e buscar user depois
     let query = supabase
       .from('community_posts')
       .select(`
         *,
-        user:user_profiles!inner(
+        user:user_profiles(
           id,
           nome_completo,
           email,
@@ -104,7 +105,80 @@ export async function GET(request: NextRequest) {
     const to = from + limit - 1
     query = query.range(from, to)
     
-    const { data: posts, error } = await query
+    let { data: posts, error } = await query
+    
+    // Se erro for relacionado ao join com user_profiles, tentar sem join
+    if (error && (error.message?.includes('user_profiles') || error.message?.includes('foreign key') || error.code === 'PGRST202')) {
+      console.warn('⚠️ Erro no join com user_profiles, tentando sem join:', error.message)
+      
+      // Tentar query sem join
+      const simpleQuery = supabase
+        .from('community_posts')
+        .select('*')
+        .eq('area', area)
+        .eq('status', 'publico')
+        .is('deleted_at', null)
+      
+      // Aplicar ordenação
+      if (sort === 'popular') {
+        simpleQuery.order('curtidas_count', { ascending: false })
+      } else if (sort === 'trending') {
+        simpleQuery
+          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+          .order('curtidas_count', { ascending: false })
+          .order('comentarios_count', { ascending: false })
+      } else {
+        simpleQuery
+          .order('pinned', { ascending: false })
+          .order('created_at', { ascending: false })
+      }
+      
+      // Aplicar filtros
+      if (categoria) {
+        simpleQuery.eq('categoria', categoria)
+      }
+      
+      if (tag) {
+        simpleQuery.contains('tags', [tag])
+      }
+      
+      // Paginação
+      const from = (page - 1) * limit
+      const to = from + limit - 1
+      simpleQuery.range(from, to)
+      
+      const { data: simplePosts, error: simpleError } = await simpleQuery
+      
+      if (simpleError) {
+        error = simpleError
+        posts = null
+      } else {
+        // Buscar user_profiles manualmente para cada post
+        if (simplePosts && simplePosts.length > 0) {
+          const userIds = [...new Set(simplePosts.map((p: any) => p.user_id))]
+          const { data: profiles } = await supabase
+            .from('user_profiles')
+            .select('user_id, id, nome_completo, email, perfil')
+            .in('user_id', userIds)
+          
+          const profilesMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || [])
+          
+          posts = simplePosts.map((post: any) => ({
+            ...post,
+            user: profilesMap.get(post.user_id) || {
+              id: post.user_id,
+              nome_completo: 'Usuário',
+              email: '',
+              perfil: ''
+            }
+          }))
+          error = null
+        } else {
+          posts = []
+          error = null
+        }
+      }
+    }
     
     if (error) {
       console.error('❌ Erro ao buscar posts:', error)
@@ -135,20 +209,6 @@ export async function GET(request: NextRequest) {
             error: 'Erro de permissão. Execute migrations/023-limpar-e-recriar-politicas-comunidade.sql',
             details: error.message || 'Políticas RLS podem estar conflitando com versão antiga',
             posts: []
-          },
-          { status: 500 }
-        )
-      }
-      
-      // Verificar se é erro de foreign key (user_profiles)
-      if (errorMsg.includes('foreign key') || errorMsg.includes('user_profiles') || errorCode === '23503') {
-        return NextResponse.json(
-          { 
-            error: 'Erro ao buscar dados do usuário. Verifique se a tabela user_profiles existe.',
-            details: error.message || 'Erro de foreign key',
-            code: error.code,
-            hint: error.hint,
-            posts: [] 
           },
           { status: 500 }
         )
