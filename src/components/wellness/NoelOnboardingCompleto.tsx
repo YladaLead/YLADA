@@ -7,12 +7,14 @@ interface NoelOnboardingCompletoProps {
   onComplete: (data: Partial<WellnessConsultantProfile>) => void
   initialData?: Partial<WellnessConsultantProfile>
   onClose?: () => void
+  inline?: boolean // Se true, renderiza inline sem modal
 }
 
 export default function NoelOnboardingCompleto({ 
   onComplete, 
   initialData,
-  onClose
+  onClose,
+  inline = false
 }: NoelOnboardingCompletoProps) {
   const [section, setSection] = useState(1)
   const [saving, setSaving] = useState(false)
@@ -114,22 +116,21 @@ export default function NoelOnboardingCompleto({
     }
   }
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
-            aria-label="Fechar"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-        
-        <div className="p-8">
+  const content = (
+    <div className={inline ? 'w-full' : 'bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative'}>
+      {onClose && !inline && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          aria-label="Fechar"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+      
+      <div className={inline ? 'space-y-6' : 'p-8'}>
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               🎯 Perfil Estratégico do Distribuidor
@@ -592,6 +593,16 @@ export default function NoelOnboardingCompleto({
           </div>
         </div>
       </div>
+    </div>
+  )
+
+  if (inline) {
+    return content
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      {content}
     </div>
   )
 }

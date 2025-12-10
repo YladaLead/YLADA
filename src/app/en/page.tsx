@@ -288,11 +288,13 @@ export default function HomePage() {
               YLADA — Your Leading Advanced Data Assistant
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-4 text-sm text-gray-500">
-              <Link href="#" className="hover:text-gray-700">About</Link>
+              <Link href="/pt/politica-de-privacidade" className="hover:text-gray-700">Privacy Policy</Link>
               <span>•</span>
-              <Link href="#" className="hover:text-gray-700">Terms</Link>
+              <Link href="/pt/termos-de-uso" className="hover:text-gray-700">Terms of Use</Link>
               <span>•</span>
-              <Link href="#" className="hover:text-gray-700">Policy</Link>
+              <Link href="/pt/politica-de-cookies" className="hover:text-gray-700">Cookies</Link>
+              <span>•</span>
+              <Link href="/pt/politica-de-reembolso" className="hover:text-gray-700">Refund</Link>
               <span>•</span>
               <span className="text-gray-400">Languages: EN / ES / PT</span>
             </div>

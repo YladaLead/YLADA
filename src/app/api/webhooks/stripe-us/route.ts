@@ -4,6 +4,61 @@ import { supabaseAdmin } from '@/lib/supabase'
 import Stripe from 'stripe'
 
 /**
+ * Cancela assinaturas mensais ativas quando uma assinatura anual é criada
+ */
+async function cancelMonthlySubscriptions(
+  userId: string,
+  area: string
+): Promise<void> {
+  try {
+    // Buscar todas as assinaturas mensais ativas do mesmo usuário e área
+    const { data: monthlySubscriptions, error: fetchError } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id, stripe_subscription_id, plan_type')
+      .eq('user_id', userId)
+      .eq('area', area)
+      .eq('plan_type', 'monthly')
+      .eq('status', 'active')
+      .gt('current_period_end', new Date().toISOString())
+
+    if (fetchError) {
+      console.error('❌ Erro ao buscar assinaturas mensais:', fetchError)
+      return
+    }
+
+    if (!monthlySubscriptions || monthlySubscriptions.length === 0) {
+      console.log('ℹ️ Nenhuma assinatura mensal ativa encontrada para cancelar')
+      return
+    }
+
+    console.log(`🔄 Cancelando ${monthlySubscriptions.length} assinatura(s) mensal(is) ativa(s)...`)
+
+    // Cancelar todas as assinaturas mensais encontradas
+    for (const subscription of monthlySubscriptions) {
+      const { error: cancelError } = await supabaseAdmin
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          canceled_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', subscription.id)
+
+      if (cancelError) {
+        console.error(`❌ Erro ao cancelar assinatura mensal ${subscription.id}:`, cancelError)
+      } else {
+        console.log(`✅ Assinatura mensal cancelada: ${subscription.id} (${subscription.stripe_subscription_id})`)
+      }
+    }
+
+    console.log(`✅ Todas as assinaturas mensais foram canceladas para usuário ${userId} na área ${area}`)
+  } catch (error: any) {
+    console.error('❌ Erro ao cancelar assinaturas mensais:', error)
+    // Não lançar erro para não interromper o fluxo principal
+  }
+}
+
+/**
  * POST /api/webhooks/stripe-us
  * Webhook para processar eventos do Stripe US
  */
@@ -159,6 +214,11 @@ async function handleOneTimePayment(
   const expiresAt = new Date()
   expiresAt.setMonth(expiresAt.getMonth() + 12)
 
+  // 🚨 CANCELAR ASSINATURAS MENSAIS quando assinatura anual é criada
+  if (planType === 'annual') {
+    await cancelMonthlySubscriptions(userId, area)
+  }
+
   // Criar "assinatura" no banco (mas é pagamento único)
   const { data: subscription, error } = await supabaseAdmin
     .from('subscriptions')
@@ -247,6 +307,22 @@ async function handleSubscriptionUpdated(
   }
 
   const status = statusMap[subscription.status] || 'incomplete'
+
+  // 🚨 CANCELAR ASSINATURAS MENSAIS quando assinatura anual é criada
+  // Verificar se é uma nova assinatura (created) ou se está sendo atualizada para anual
+  if (planType === 'annual' && status === 'active') {
+    // Verificar se já existe uma subscription com este stripe_subscription_id
+    const { data: existing } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id, plan_type')
+      .eq('stripe_subscription_id', subscription.id)
+      .maybeSingle()
+
+    // Se não existe ou se está mudando de mensal para anual, cancelar mensais
+    if (!existing || existing.plan_type !== 'annual') {
+      await cancelMonthlySubscriptions(userId, area)
+    }
+  }
 
   // Upsert subscription no banco
   const { error } = await supabaseAdmin

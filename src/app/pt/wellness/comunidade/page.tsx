@@ -72,9 +72,20 @@ export default function ComunidadePage() {
       }
 
       const data = await response.json()
-      setPosts(data.posts || [])
-    } catch (error) {
+      
+      // Verificar se há erro de migração
+      if (data.error && data.error.includes('migração')) {
+        console.warn('⚠️ Migração não executada:', data.error)
+        setPosts([])
+      } else {
+        setPosts(data.posts || [])
+      }
+    } catch (error: any) {
       console.error('Erro ao carregar posts:', error)
+      // Se for erro de tabela não encontrada, não mostrar erro (tabela ainda não existe)
+      if (error.message?.includes('migração') || error.message?.includes('does not exist')) {
+        setPosts([])
+      }
     } finally {
       setLoading(false)
     }
@@ -97,9 +108,20 @@ export default function ComunidadePage() {
       }
 
       const data = await response.json()
-      setPosts(data.posts || [])
-    } catch (error) {
+      
+      // Verificar se há erro de migração
+      if (data.error && data.error.includes('migração')) {
+        console.warn('⚠️ Migração não executada:', data.error)
+        setPosts([])
+      } else {
+        setPosts(data.posts || [])
+      }
+    } catch (error: any) {
       console.error('Erro ao buscar posts:', error)
+      // Se for erro de tabela não encontrada, não mostrar erro (tabela ainda não existe)
+      if (error.message?.includes('migração') || error.message?.includes('does not exist')) {
+        setPosts([])
+      }
     } finally {
       setLoading(false)
     }

@@ -56,14 +56,22 @@ export default function NovoPostPage() {
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Erro ao criar post')
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Erro ao criar post. Verifique se preencheu todos os campos obrigatórios.')
       }
 
       const data = await response.json()
       router.push(`/pt/wellness/comunidade/${data.post.id}`)
     } catch (err: any) {
-      setError(err.message || 'Erro ao criar post. Tente novamente.')
+      console.error('Erro ao criar post:', err)
+      const errorMessage = err.message || 'Erro ao criar post. Tente novamente.'
+      
+      // Verificar se é erro de migração não executada
+      if (errorMessage.includes('migração') || errorMessage.includes('Tabelas da comunidade')) {
+        setError('⚠️ As tabelas da comunidade ainda não foram criadas. Execute a migração SQL no Supabase primeiro: migrations/021-create-community-tables.sql')
+      } else {
+        setError(errorMessage)
+      }
     } finally {
       setLoading(false)
     }
@@ -172,6 +180,12 @@ export default function NovoPostPage() {
                       
                       for (const file of files) {
                         try {
+                          // Validar tamanho (5MB)
+                          if (file.size > 5 * 1024 * 1024) {
+                            setError(`Imagem "${file.name}" é muito grande. Máximo: 5MB`)
+                            continue
+                          }
+                          
                           const uploadFormData = new FormData()
                           uploadFormData.append('file', file)
                           
@@ -184,9 +198,13 @@ export default function NovoPostPage() {
                           if (uploadResponse.ok) {
                             const uploadData = await uploadResponse.json()
                             uploadedUrls.push(uploadData.url)
+                          } else {
+                            const errorData = await uploadResponse.json()
+                            setError(`Erro ao fazer upload de "${file.name}": ${errorData.error || 'Erro desconhecido'}`)
                           }
-                        } catch (err) {
+                        } catch (err: any) {
                           console.error('Erro ao fazer upload:', err)
+                          setError(`Erro ao fazer upload de "${file.name}": ${err.message || 'Erro desconhecido'}`)
                         }
                       }
                       

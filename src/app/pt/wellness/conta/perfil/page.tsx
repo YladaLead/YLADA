@@ -23,7 +23,7 @@ export default function ContaPerfilPage() {
   })
 
   const [profileType, setProfileType] = useState<'beverage_distributor' | 'product_distributor' | 'wellness_activator' | null>(null)
-  const [showOnboardingEditor, setShowOnboardingEditor] = useState(false)
+  const [showOnboardingEditor, setShowOnboardingEditor] = useState(true) // Sempre mostrar o editor completo por padrão
 
   // Carregar perfil ao montar
   useEffect(() => {
@@ -41,10 +41,8 @@ export default function ContaPerfilPage() {
 
       if (noelData.profile) {
         setProfile(noelData.profile)
-        // Se tiver perfil estratégico completo, mostrar editor completo
-        if (noelData.profile.tipo_trabalho && noelData.profile.foco_trabalho) {
-          setShowOnboardingEditor(true)
-        }
+        // Sempre mostrar editor completo (mesmo formulário do onboarding inicial)
+        setShowOnboardingEditor(true)
       }
 
       // O profile_type pode vir do endpoint de check ou de user_profiles
@@ -280,375 +278,53 @@ export default function ContaPerfilPage() {
                 </div>
               )}
 
-              {/* EDITOR COMPLETO DE PERFIL ESTRATÉGICO */}
-              {showOnboardingEditor ? (
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">📋 Perfil Estratégico Completo</h2>
-                    <p className="text-sm text-gray-600">
-                      Edite todas as informações do seu perfil estratégico. As metas serão recalculadas automaticamente.
-                    </p>
-                  </div>
-                  
-                  <NoelOnboardingCompleto
-                    initialData={profile}
-                    onComplete={async (data) => {
-                      try {
-                        setSaving(true)
-                        setError(null)
-                        setSuccess(false)
-                        
-                        const response = await fetch('/api/wellness/noel/onboarding', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify(data),
-                        })
-                        
-                        const responseData = await response.json()
-                        
-                        if (!response.ok) {
-                          throw new Error(responseData.error || 'Erro ao salvar perfil')
-                        }
-                        
-                        setProfile(data)
-                        setSuccess(true)
-                        setTimeout(() => setSuccess(false), 5000)
-                      } catch (err: any) {
-                        setError(err.message || 'Erro ao salvar perfil')
-                        setTimeout(() => setError(null), 8000)
-                      } finally {
-                        setSaving(false)
-                      }
-                    }}
-                    onClose={() => setShowOnboardingEditor(false)}
-                  />
-                  
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <button
-                      onClick={() => setShowOnboardingEditor(false)}
-                      className="text-sm text-gray-600 hover:text-gray-800"
-                    >
-                      ← Voltar para edição simplificada
-                    </button>
-                  </div>
+              {/* EDITOR COMPLETO DE PERFIL ESTRATÉGICO - MESMO FORMULÁRIO DO ONBOARDING INICIAL */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">📋 Perfil Estratégico do Distribuidor</h2>
+                  <p className="text-sm text-gray-600">
+                    Edite suas informações para personalizar as recomendações do NOEL. Este é o mesmo formulário do onboarding inicial.
+                  </p>
                 </div>
-              ) : (
-                <>
-                  <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <span className="text-xl">💡</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-blue-900 mb-1">
-                          Perfil Estratégico Completo Disponível
-                        </p>
-                        <p className="text-xs text-blue-700 mb-3">
-                          Você pode editar todos os campos estratégicos (tipo de trabalho, foco, ganhos, carga horária, etc.) para recalcular suas metas automaticamente.
-                        </p>
-                        <button
-                          onClick={() => setShowOnboardingEditor(true)}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                        >
-                          Editar Perfil Estratégico Completo →
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {!showOnboardingEditor && (
-              <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm space-y-8">
                 
-                {/* PERFIL DO DISTRIBUIDOR */}
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Perfil do Distribuidor</h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Como você trabalha? Isso ajuda o NOEL a personalizar as respostas.
-                  </p>
-                  <div className="space-y-2">
-                    {[
-                      { 
-                        value: 'beverage_distributor', 
-                        label: 'Bebidas Funcionais', 
-                        icon: '🥤',
-                        desc: 'Vende Energia, Acelera, Turbo Detox, kits R$39,90/49,90'
-                      },
-                      { 
-                        value: 'product_distributor', 
-                        label: 'Produtos Fechados', 
-                        icon: '📦',
-                        desc: 'Vende shake, chá, aloe ou produtos fechados'
-                      },
-                      { 
-                        value: 'wellness_activator', 
-                        label: 'Programa + Acompanhamento', 
-                        icon: '🏋️',
-                        desc: 'Vende programa completo, Portal Fit, transformação 30-60-90 dias'
+                <NoelOnboardingCompleto
+                  inline={true}
+                  initialData={profile}
+                  onComplete={async (data) => {
+                    try {
+                      setSaving(true)
+                      setError(null)
+                      setSuccess(false)
+                      
+                      const response = await fetch('/api/wellness/noel/onboarding', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                      })
+                      
+                      const responseData = await response.json()
+                      
+                      if (!response.ok) {
+                        throw new Error(responseData.error || 'Erro ao salvar perfil')
                       }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setProfileType(option.value as any)}
-                        className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                          profileType === option.value
-                            ? 'border-green-600 bg-green-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="text-2xl">{option.icon}</span>
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">{option.label}</div>
-                            <div className="text-sm text-gray-600 mt-1">{option.desc}</div>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* OBJETIVO PRINCIPAL */}
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Objetivo Principal</h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Qual é seu foco principal no Wellness?
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { value: 'usar_recomendar', label: 'Usar e Recomendar', icon: '💚' },
-                      { value: 'renda_extra', label: 'Renda Extra', icon: '💰' },
-                      { value: 'carteira', label: 'Construir Carteira', icon: '👥' },
-                      { value: 'plano_presidente', label: 'Plano Presidente', icon: '👑' },
-                      { value: 'fechado', label: 'Produtos Fechados', icon: '📦' },
-                      { value: 'funcional', label: 'Bebidas Funcionais', icon: '🥤' }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setProfile(prev => ({ ...prev, objetivo_principal: option.value as any }))}
-                        className={`p-3 rounded-lg border-2 text-left transition-all ${
-                          profile.objetivo_principal === option.value
-                            ? 'border-green-600 bg-green-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{option.icon}</span>
-                          <span className="font-medium text-gray-900 text-sm">{option.label}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* TEMPO DISPONÍVEL (HORÁRIO DE TRABALHO) */}
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Tempo Disponível por Dia</h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Quanto tempo você tem disponível para trabalhar no negócio?
-                  </p>
-                  <div className="space-y-2">
-                    {[
-                      { value: '5min', label: '5 minutos', icon: '⏱️' },
-                      { value: '15min', label: '15 minutos', icon: '⏰' },
-                      { value: '30min', label: '30 minutos', icon: '🕐' },
-                      { value: '1h', label: '1 hora', icon: '🕑' },
-                      { value: '1h_plus', label: 'Mais de 1 hora', icon: '🕒' }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setProfile(prev => ({ ...prev, tempo_disponivel: option.value as any }))}
-                        className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                          profile.tempo_disponivel === option.value
-                            ? 'border-green-600 bg-green-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">{option.icon}</span>
-                          <span className="font-medium text-gray-900">{option.label}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* METAS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Meta PV */}
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Meta de PV Mensal</h2>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Seu comprometimento com a meta de PV (100 - 50.000)
-                    </p>
-                    <input
-                      type="number"
-                      min="100"
-                      max="50000"
-                      value={profile.meta_pv || ''}
-                      onChange={(e) => setProfile(prev => ({ 
-                        ...prev, 
-                        meta_pv: e.target.value ? parseInt(e.target.value) : undefined 
-                      }))}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Ex: 500"
-                    />
-                    {profile.meta_pv && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        Meta atual: {profile.meta_pv.toLocaleString('pt-BR')} PV
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Meta Financeira */}
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Meta Financeira Mensal</h2>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Seu comprometimento com a meta financeira (R$ 500 - R$ 200.000)
-                    </p>
-                    <div className="relative">
-                      <span className="absolute left-3 top-3 text-gray-500">R$</span>
-                      <input
-                        type="number"
-                        min="500"
-                        max="200000"
-                        value={profile.meta_financeira || ''}
-                        onChange={(e) => setProfile(prev => ({ 
-                          ...prev, 
-                          meta_financeira: e.target.value ? parseFloat(e.target.value) : undefined 
-                        }))}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Ex: 2000"
-                      />
-                    </div>
-                    {profile.meta_financeira && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        Meta atual: R$ {profile.meta_financeira.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* EXPERIÊNCIA E CANAL (Opcional) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Experiência Herbalife */}
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Experiência com Herbalife</h2>
-                    <div className="space-y-2">
-                      {[
-                        { value: 'nenhuma', label: 'Nenhuma', icon: '🆕' },
-                        { value: 'ja_vendi', label: 'Já vendi', icon: '✅' },
-                        { value: 'supervisor', label: 'Supervisor', icon: '⭐' },
-                        { value: 'get_plus', label: 'GET+', icon: '👑' }
-                      ].map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => setProfile(prev => ({ ...prev, experiencia_herbalife: option.value as any }))}
-                          className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                            profile.experiencia_herbalife === option.value
-                              ? 'border-green-600 bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-xl">{option.icon}</span>
-                            <span className="font-medium text-gray-900">{option.label}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Canal Principal */}
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Canal Principal</h2>
-                    <div className="space-y-2">
-                      {[
-                        { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
-                        { value: 'instagram', label: 'Instagram', icon: '📸' },
-                        { value: 'trafego_pago', label: 'Tráfego Pago', icon: '📊' },
-                        { value: 'presencial', label: 'Presencial', icon: '🚶' }
-                      ].map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => setProfile(prev => ({ ...prev, canal_principal: option.value as any }))}
-                          className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                            profile.canal_principal === option.value
-                              ? 'border-green-600 bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-xl">{option.icon}</span>
-                            <span className="font-medium text-gray-900">{option.label}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* SITUAÇÕES PARTICULARES */}
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">📝 Situações Particulares</h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Descreva situações pessoais importantes que podem ajudar o NOEL a ser um melhor orientador para você.
-                  </p>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <p className="text-xs text-blue-800 leading-relaxed">
-                      <strong>💡 O que descrever:</strong> Mudanças na sua vida (cidade, emprego, rotina), desafios pessoais que afetam o negócio, objetivos específicos, limitações de tempo ou recursos, situações familiares relevantes, ou qualquer contexto que ajude o NOEL a entender melhor sua realidade e oferecer orientações mais personalizadas.
-                    </p>
-                  </div>
-                  <textarea
-                    value={profile.situacoes_particulares || ''}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      if (value.length <= 500) {
-                        setProfile(prev => ({ ...prev, situacoes_particulares: value }))
-                      }
-                    }}
-                    rows={5}
-                    maxLength={500}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                    placeholder="Ex: Acabei de me mudar para uma nova cidade e estou começando do zero. Tenho disponibilidade apenas à noite após o trabalho..."
-                  />
-                  <div className="flex justify-between items-center mt-2">
-                    <p className="text-xs text-gray-500">
-                      Seja objetivo e descreva apenas o essencial
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {(profile.situacoes_particulares || '').length}/500 caracteres
-                    </p>
-                  </div>
-                </div>
-
-                {/* BOTÃO SALVAR */}
-                <div className="pt-6 border-t border-gray-200">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {saving ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          <span>Salvando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>💾</span>
-                          <span>Salvar Alterações</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2 text-center">
-                    Você pode salvar apenas os campos que desejar alterar
-                  </p>
-                </div>
-
+                      
+                      setProfile(data)
+                      setSuccess(true)
+                      setTimeout(() => setSuccess(false), 5000)
+                      
+                      // Recarregar perfil para garantir sincronização
+                      await loadProfile()
+                    } catch (err: any) {
+                      setError(err.message || 'Erro ao salvar perfil')
+                      setTimeout(() => setError(null), 8000)
+                    } finally {
+                      setSaving(false)
+                    }
+                  }}
+                  // Não passar onClose para não mostrar botão de fechar (é a página de perfil)
+                />
               </div>
-              )}
+
             </div>
           </div>
         </ConditionalWellnessSidebar>

@@ -70,9 +70,13 @@ export async function POST(request: NextRequest) {
     
     if (uploadError) {
       // Se o bucket não existir, retornar erro informativo
-      if (uploadError.message.includes('Bucket not found')) {
+      if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('does not exist')) {
+        console.error('❌ Bucket não encontrado:', bucketName)
         return NextResponse.json(
-          { error: 'Bucket de storage não configurado. Contate o suporte.' },
+          { 
+            error: 'Bucket de storage não configurado. O bucket "community-images" precisa ser criado no Supabase Storage primeiro.',
+            details: 'Execute a migração 022-criar-bucket-community-images.sql e crie o bucket manualmente no Dashboard do Supabase.'
+          },
           { status: 500 }
         )
       }
@@ -81,7 +85,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: `Erro ao fazer upload: ${uploadError.message}`,
-          details: uploadError
+          details: uploadError.message
         },
         { status: 500 }
       )

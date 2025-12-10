@@ -72,8 +72,21 @@ export async function GET(request: NextRequest) {
     
     if (error) {
       console.error('❌ Erro ao buscar posts:', error)
+      
+      // Verificar se é erro de tabela não encontrada
+      if (error.message?.includes('does not exist') || error.message?.includes('relation') || error.code === '42P01') {
+        return NextResponse.json(
+          { 
+            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
+            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor',
+            posts: []
+          },
+          { status: 500 }
+        )
+      }
+      
       return NextResponse.json(
-        { error: 'Erro ao buscar posts', details: error.message },
+        { error: 'Erro ao buscar posts', details: error.message, posts: [] },
         { status: 500 }
       )
     }
@@ -182,6 +195,18 @@ export async function POST(request: NextRequest) {
     
     if (error) {
       console.error('❌ Erro ao criar post:', error)
+      
+      // Verificar se é erro de tabela não encontrada
+      if (error.message?.includes('does not exist') || error.message?.includes('relation') || error.code === '42P01') {
+        return NextResponse.json(
+          { 
+            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
+            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor'
+          },
+          { status: 500 }
+        )
+      }
+      
       return NextResponse.json(
         { error: 'Erro ao criar post', details: error.message },
         { status: 500 }
