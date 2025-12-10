@@ -38,6 +38,7 @@ export default function ComunidadePage() {
   const [replyingTo, setReplyingTo] = useState<Post | null>(null)
   const [showReactions, setShowReactions] = useState<string | null>(null)
   const [showWhoLiked, setShowWhoLiked] = useState<string | null>(null)
+  const [tablesMissing, setTablesMissing] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -70,6 +71,11 @@ export default function ComunidadePage() {
   }, [posts])
 
   const carregarPosts = async () => {
+    // Se as tabelas não existem, não tentar carregar
+    if (tablesMissing) {
+      return
+    }
+
     try {
       const params = new URLSearchParams()
       params.append('categoria', 'chat')
@@ -82,25 +88,62 @@ export default function ComunidadePage() {
 
       if (response.ok) {
         const data = await response.json()
-        if (data.posts) {
-          // Buscar reações para cada post
+        
+        // Verificar se é erro de tabelas não encontradas
+        if (data.error && (data.error.includes('migração') || data.error.includes('Tabelas da comunidade'))) {
+          setTablesMissing(true)
+          // Parar o polling
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = null
+          }
+          setPosts([])
+          return
+        }
+        
+        if (data.posts && data.posts.length > 0) {
+          // Buscar reações apenas se houver posts
           const postsComReacoes = await Promise.all(
             data.posts.map(async (post: Post) => {
-              const reactionsResponse = await fetch(`/api/community/posts/${post.id}/reactions`, {
-                credentials: 'include'
-              })
-              if (reactionsResponse.ok) {
-                const reactionsData = await reactionsResponse.json()
-                return { ...post, reactions: reactionsData.reactions }
+              try {
+                const reactionsResponse = await fetch(`/api/community/posts/${post.id}/reactions`, {
+                  credentials: 'include'
+                })
+                if (reactionsResponse.ok) {
+                  const reactionsData = await reactionsResponse.json()
+                  return { ...post, reactions: reactionsData.reactions }
+                }
+              } catch (reactionError) {
+                // Ignorar erros de reações silenciosamente
               }
               return post
             })
           )
           setPosts(postsComReacoes)
+        } else {
+          setPosts([])
+        }
+      } else {
+        // Se a resposta não foi OK, verificar se é erro de tabelas
+        const errorData = await response.json().catch(() => ({}))
+        if (errorData.error && (errorData.error.includes('migração') || errorData.error.includes('Tabelas da comunidade'))) {
+          setTablesMissing(true)
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = null
+          }
         }
       }
-    } catch (error) {
-      console.error('Erro ao carregar posts:', error)
+    } catch (error: any) {
+      // Verificar se é erro de tabelas não encontradas
+      if (error.message?.includes('does not exist') || error.message?.includes('relation')) {
+        setTablesMissing(true)
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current)
+          intervalRef.current = null
+        }
+      }
+      // Não logar erros no console para não poluir
     } finally {
       setLoading(false)
     }
@@ -263,7 +306,28 @@ export default function ComunidadePage() {
 
               {/* Área de Mensagens */}
               <div className="flex-1 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-sm mb-4 p-4 space-y-4">
-                {loading ? (
+                {tablesMissing ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">⚠️</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Tabelas da comunidade não foram criadas
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Execute a migração SQL primeiro para usar o chat.
+                    </p>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left max-w-2xl mx-auto">
+                      <p className="text-sm font-medium text-yellow-800 mb-2">
+                        📋 Instruções:
+                      </p>
+                      <ol className="text-sm text-yellow-700 space-y-1 list-decimal list-inside">
+                        <li>Abra o Supabase SQL Editor</li>
+                        <li>Execute: <code className="bg-yellow-100 px-2 py-1 rounded">migrations/021-create-community-tables.sql</code></li>
+                        <li>Execute: <code className="bg-yellow-100 px-2 py-1 rounded">migrations/022-criar-bucket-community-images.sql</code></li>
+                        <li>Recarregue esta página</li>
+                      </ol>
+                    </div>
+                  </div>
+                ) : loading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
                     <p className="text-gray-600">Carregando mensagens...</p>

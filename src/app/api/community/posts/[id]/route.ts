@@ -15,7 +15,7 @@ export async function GET(
     if (authResult instanceof NextResponse) return authResult
     
     const { user } = authResult
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const postId = params.id
     
     // Buscar post
@@ -84,7 +84,7 @@ export async function PUT(
     if (authResult instanceof NextResponse) return authResult
     
     const { user } = authResult
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const postId = params.id
     
     // Verificar se post existe e pertence ao usuário
@@ -178,7 +178,7 @@ export async function DELETE(
     if (authResult instanceof NextResponse) return authResult
     
     const { user, userProfile } = authResult
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const postId = params.id
     
     // Verificar se post existe
