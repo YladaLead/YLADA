@@ -14,27 +14,6 @@ export async function GET(request: NextRequest) {
     const { user, userProfile } = authResult
     const supabase = await createServerSupabaseClient()
     
-    // Teste simples para verificar se a tabela existe
-    const { error: testError } = await supabase
-      .from('community_posts')
-      .select('id')
-      .limit(1)
-    
-    if (testError) {
-      // Verificar se é erro de tabela não encontrada
-      if (testError.code === '42P01' || 
-          testError.message?.toLowerCase().includes('relation') && testError.message?.toLowerCase().includes('does not exist')) {
-        return NextResponse.json(
-          { 
-            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
-            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor',
-            posts: []
-          },
-          { status: 500 }
-        )
-      }
-    }
-    
     const { searchParams } = new URL(request.url)
     const area = searchParams.get('area') || userProfile?.perfil || 'wellness'
     const categoria = searchParams.get('categoria')
@@ -98,13 +77,11 @@ export async function GET(request: NextRequest) {
       console.error('❌ Detalhes:', error.details)
       console.error('❌ Hint:', error.hint)
       
-      // Verificar se é erro de tabela não encontrada (código específico do PostgreSQL)
-      const isTableNotFound = 
-        error.code === '42P01' || // relation does not exist
-        error.message?.toLowerCase().includes('relation') && error.message?.toLowerCase().includes('does not exist') ||
-        error.message?.toLowerCase().includes('table') && error.message?.toLowerCase().includes('does not exist')
+      // Verificar se é erro de tabela não encontrada
+      const errorMsg = error.message?.toLowerCase() || ''
+      const errorCode = error.code || ''
       
-      if (isTableNotFound) {
+      if (errorMsg.includes('does not exist') || errorMsg.includes('relation') || errorCode === '42P01' || errorCode === 'PGRST116') {
         return NextResponse.json(
           { 
             error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
@@ -116,7 +93,7 @@ export async function GET(request: NextRequest) {
       }
       
       // Verificar se é erro de permissão/RLS
-      if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('row-level security')) {
+      if (errorCode === '42501' || errorMsg.includes('permission denied') || errorMsg.includes('row-level security') || errorMsg.includes('policy')) {
         return NextResponse.json(
           { 
             error: 'Erro de permissão. Execute migrations/023-limpar-e-recriar-politicas-comunidade.sql',
@@ -127,23 +104,32 @@ export async function GET(request: NextRequest) {
         )
       }
       
-      // Se não for erro de tabela não encontrada, retornar posts vazios (pode ser que não há posts ainda)
-      // Mas logar o erro para debug
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('⚠️ Erro ao buscar posts (mas não é erro de tabela):', error.message)
+      // Verificar se é erro de foreign key (user_profiles)
+      if (errorMsg.includes('foreign key') || errorMsg.includes('user_profiles') || errorCode === '23503') {
+        return NextResponse.json(
+          { 
+            error: 'Erro ao buscar dados do usuário. Verifique se a tabela user_profiles existe.',
+            details: error.message || 'Erro de foreign key',
+            code: error.code,
+            hint: error.hint,
+            posts: [] 
+          },
+          { status: 500 }
+        )
       }
       
-      // Retornar posts vazios ao invés de erro, para não bloquear a interface
-      return NextResponse.json({
-        success: true,
-        posts: [],
-        pagination: {
-          page,
-          limit,
-          total: 0
+      // Retornar erro genérico com todos os detalhes
+      return NextResponse.json(
+        { 
+          error: 'Erro ao buscar posts', 
+          details: error.message || 'Erro desconhecido',
+          code: error.code,
+          hint: error.hint,
+          fullError: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined,
+          posts: [] 
         },
-        warning: process.env.NODE_ENV === 'development' ? error.message : undefined
-      })
+        { status: 500 }
+      )
     }
     
     // Buscar reações do usuário para cada post
