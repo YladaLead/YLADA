@@ -1,11 +1,80 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+}
+
+/**
+ * Converte texto com links em elementos React com links clicáveis
+ * Detecta: markdown [texto](url) e menções a "plano anual/mensal"
+ */
+function renderMessageWithLinks(content: string) {
+  const parts: (string | JSX.Element)[] = []
+  let keyCounter = 0
+
+  // Processar texto em partes, substituindo links
+  let processedText = content
+
+  // 1. Substituir markdown links [texto](url) por placeholder
+  const markdownLinks: Array<{ text: string; url: string }> = []
+  processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    const placeholder = `__MD_LINK_${markdownLinks.length}__`
+    markdownLinks.push({ text, url })
+    return placeholder
+  })
+
+  // 2. Substituir menções a "plano anual" ou "plano mensal" por placeholder
+  const planLinks: Array<{ text: string; url: string }> = []
+  processedText = processedText.replace(/\b(plano anual|plano mensal)\b/gi, (match) => {
+    const isAnnual = match.toLowerCase().includes('anual')
+    const url = isAnnual ? '/pt/wellness/checkout?plan=annual' : '/pt/wellness/checkout?plan=monthly'
+    const placeholder = `__PLAN_LINK_${planLinks.length}__`
+    planLinks.push({ text: match, url })
+    return placeholder
+  })
+
+  // 3. Dividir texto por placeholders e criar elementos
+  const segments = processedText.split(/(__MD_LINK_\d+__|__PLAN_LINK_\d+__)/)
+
+  segments.forEach((segment) => {
+    if (segment.startsWith('__MD_LINK_')) {
+      const index = parseInt(segment.match(/\d+/)![0])
+      const link = markdownLinks[index]
+      const isAbsoluteUrl = link.url.startsWith('http')
+      parts.push(
+        <Link
+          key={`link-md-${keyCounter++}`}
+          href={link.url}
+          className="text-blue-600 hover:text-blue-800 underline font-medium"
+          target={isAbsoluteUrl ? '_blank' : undefined}
+          rel={isAbsoluteUrl ? 'noopener noreferrer' : undefined}
+        >
+          {link.text}
+        </Link>
+      )
+    } else if (segment.startsWith('__PLAN_LINK_')) {
+      const index = parseInt(segment.match(/\d+/)![0])
+      const link = planLinks[index]
+      parts.push(
+        <Link
+          key={`link-plan-${keyCounter++}`}
+          href={link.url}
+          className="text-blue-600 hover:text-blue-800 underline font-medium"
+        >
+          {link.text}
+        </Link>
+      )
+    } else if (segment) {
+      parts.push(segment)
+    }
+  })
+
+  return parts.length > 0 ? parts : content
 }
 
 export default function SalesSupportChat() {
@@ -136,7 +205,7 @@ export default function SalesSupportChat() {
           <div className="bg-green-600 text-white p-4 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-lg">🤖</span>
+                <span className="text-lg">🙋🏻‍♂️</span>
               </div>
               <div>
                 <h3 className="font-semibold">NOEL Suporte</h3>
@@ -168,7 +237,12 @@ export default function SalesSupportChat() {
                       : 'bg-white text-gray-900 border border-gray-200'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">
+                    {message.role === 'assistant' 
+                      ? renderMessageWithLinks(message.content)
+                      : message.content
+                    }
+                  </p>
                 </div>
               </div>
             ))}
