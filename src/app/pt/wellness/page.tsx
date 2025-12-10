@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LanguageSelector from '../../../components/LanguageSelector'
+import SalesSupportChat from '@/components/wellness/SalesSupportChat'
 
 export default function WellnessPage() {
   const [currentUrl, setCurrentUrl] = useState('https://ylada.app/pt/wellness')
@@ -578,6 +579,9 @@ export default function WellnessPage() {
           </div>
         </div>
       </footer>
+
+      {/* Chat de Suporte */}
+      <SalesSupportChat />
     </div>
   )
 }
