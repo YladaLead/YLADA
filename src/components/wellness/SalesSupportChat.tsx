@@ -19,6 +19,8 @@ export default function SalesSupportChat() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+  const [showSupportButton, setShowSupportButton] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -61,6 +63,7 @@ export default function SalesSupportChat() {
             role: m.role,
             content: m.content,
           })),
+          userEmail: userEmail.trim() || undefined,
         }),
       })
 
@@ -73,6 +76,11 @@ export default function SalesSupportChat() {
           timestamp: new Date(),
         }
         setMessages(prev => [...prev, assistantMessage])
+
+        // Se NOEL não soube responder, mostrar botão de contato
+        if (data.unanswered && data.supportContact) {
+          setShowSupportButton(true)
+        }
       } else {
         throw new Error(data.error || 'Erro ao obter resposta')
       }
@@ -177,6 +185,51 @@ export default function SalesSupportChat() {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Botão de Contato com Suporte (quando NOEL não soube responder) */}
+          {showSupportButton && (
+            <div className="px-4 pt-4 border-t border-gray-200 bg-yellow-50">
+              <div className="bg-white rounded-lg p-4 border-2 border-yellow-300">
+                <p className="text-sm font-semibold text-gray-900 mb-2">
+                  💬 Precisa de mais ajuda?
+                </p>
+                <p className="text-xs text-gray-600 mb-3">
+                  Entre em contato diretamente com nosso suporte:
+                </p>
+                <div className="flex flex-col gap-2">
+                  <a
+                    href={`mailto:ylada.app@gmail.com?subject=Suporte Wellness System&body=Olá, preciso de ajuda com:`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold"
+                  >
+                    📧 Enviar Email
+                  </a>
+                  <a
+                    href="https://wa.me/5519996049800?text=Olá,%20preciso%20de%20ajuda%20com%20o%20Wellness%20System"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-semibold"
+                  >
+                    💬 WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Campo de Email (opcional) */}
+          {!userEmail && messages.length === 1 && (
+            <div className="px-4 pt-2 border-t border-gray-200 bg-gray-50">
+              <input
+                type="email"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                placeholder="Seu email (opcional, para melhor atendimento)"
+                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              />
+            </div>
+          )}
 
           {/* Input */}
           <div className="p-4 border-t border-gray-200 bg-white">
