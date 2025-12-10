@@ -13,6 +13,7 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   'calculadora-agua': 'calc-hidratacao',
   'calculadora-hidratacao': 'calc-hidratacao',
   'hidratacao': 'calc-hidratacao',
+  'agua': 'calc-hidratacao', // ✅ Adicionado mapeamento para slug 'agua'
   'calc-hidratacao': 'calc-hidratacao',
   
   // Calculadora IMC

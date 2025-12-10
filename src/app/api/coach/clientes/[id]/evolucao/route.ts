@@ -180,35 +180,48 @@ export async function POST(
       photos_urls
     } = body
 
-    // Validações
-    if (!weight || weight <= 0) {
-      return NextResponse.json(
-        { error: 'Peso é obrigatório e deve ser maior que zero' },
-        { status: 400 }
-      )
+    // Validações - peso não é mais obrigatório, mas se fornecido deve ser válido
+    if (weight !== null && weight !== undefined) {
+      const weightValue = typeof weight === 'string' ? parseFloat(weight.replace(',', '.')) : parseFloat(weight)
+      if (isNaN(weightValue) || weightValue <= 0) {
+        return NextResponse.json(
+          { error: 'Peso deve ser um número maior que zero' },
+          { status: 400 }
+        )
+      }
     }
 
-    // Buscar altura do cliente se não fornecida
+    // Processar altura - converter de cm para m se necessário
     let clientHeight = height
-    if (!clientHeight) {
-      // Tentar buscar altura da última avaliação ou do cliente
-      // Por enquanto, vamos apenas usar a altura fornecida ou null
-      // TODO: Buscar altura da tabela assessments se disponível
+    if (clientHeight) {
+      const heightValue = typeof clientHeight === 'string' ? parseFloat(clientHeight.replace(',', '.')) : parseFloat(clientHeight)
+      // Se altura > 3, provavelmente está em cm, converter para m
+      if (heightValue > 3) {
+        clientHeight = heightValue / 100
+        console.log(`⚠️ Altura convertida de ${heightValue}cm para ${clientHeight}m`)
+      } else {
+        clientHeight = heightValue
+      }
     }
 
     // Calcular IMC se weight e height disponíveis
     let calculatedBMI: number | null = null
     if (weight && clientHeight && clientHeight > 0) {
-      calculatedBMI = parseFloat((weight / (clientHeight * clientHeight)).toFixed(2))
+      const weightValue = typeof weight === 'string' ? parseFloat(weight.replace(',', '.')) : parseFloat(weight)
+      calculatedBMI = parseFloat((weightValue / (clientHeight * clientHeight)).toFixed(2))
     }
 
     // Preparar dados para inserção
+    const weightValue = weight !== null && weight !== undefined 
+      ? (typeof weight === 'string' ? parseFloat(weight.replace(',', '.')) : parseFloat(weight))
+      : null
+
     const evolutionData: any = {
       client_id: clientId,
       user_id: authenticatedUserId,
       measurement_date: measurement_date || new Date().toISOString(),
-      weight: parseFloat(weight),
-      height: clientHeight ? parseFloat(clientHeight) : null,
+      weight: weightValue,
+      height: clientHeight || null,
       bmi: calculatedBMI,
       neck_circumference: neck_circumference ? parseFloat(neck_circumference) : null,
       chest_circumference: chest_circumference ? parseFloat(chest_circumference) : null,
@@ -240,9 +253,20 @@ export async function POST(
       .single()
 
     if (error) {
-      console.error('Erro ao criar evolução:', error)
+      console.error('❌ Erro ao criar evolução:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        data: evolutionData
+      })
       return NextResponse.json(
-        { error: 'Erro ao criar evolução', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
+        { 
+          error: 'Erro ao criar evolução', 
+          technical: process.env.NODE_ENV === 'development' ? error.message : undefined,
+          code: error.code,
+          details: process.env.NODE_ENV === 'development' ? error.details : undefined
+        },
         { status: 500 }
       )
     }

@@ -55,7 +55,7 @@ export default function CoachSidebar({ isMobileOpen = false, onMobileClose }: Co
         { title: 'Meus Links', icon: '🔗', href: '/pt/coach/ferramentas' },
         { title: 'Quizzes', icon: '🎯', href: '/pt/coach/quizzes' },
         { title: 'Templates', icon: '🎨', href: '/pt/coach/ferramentas/templates' },
-        { title: 'Leads', icon: '📈', href: '/pt/coach/leads' },
+        { title: 'Leads', icon: '📈', href: '/pt/c/leads' },
       ]
     },
     {
@@ -64,7 +64,7 @@ export default function CoachSidebar({ isMobileOpen = false, onMobileClose }: Co
       color: 'green',
       items: [
         { title: 'Meus Clientes', icon: '👤', href: '/pt/coach/clientes' },
-        { title: 'Kanban de Clientes', icon: '🗂️', href: '/pt/coach/clientes/kanban' },
+        { title: 'Kanban de Clientes', icon: '🗂️', href: '/pt/c/clientes/kanban' },
         { title: 'Agenda', icon: '📅', href: '/pt/coach/agenda' },
         { title: 'Acompanhamento', icon: '📊', href: '/pt/coach/acompanhamento' },
         { title: 'Relatórios de Gestão', icon: '📈', href: '/pt/coach/relatorios-gestao' },
@@ -73,7 +73,7 @@ export default function CoachSidebar({ isMobileOpen = false, onMobileClose }: Co
     {
       title: 'Formulários',
       icon: '🧩',
-      href: '/pt/coach/formularios',
+      href: '/pt/c/formularios',
       color: 'purple'
     },
     {

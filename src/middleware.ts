@@ -40,18 +40,52 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Redirecionar rotas antigas da área Coach para novas rotas com /c/
-  // /pt/coach/ferramentas/* -> /pt/coach/c/ferramentas/*
-  if (pathname.startsWith('/pt/coach/ferramentas/')) {
+  // Redirecionar rotas antigas da área Coach para novas rotas com /c/ (sem "coach" na URL)
+  // /pt/coach/formularios/* -> /pt/c/formularios/*
+  if (pathname.startsWith('/pt/coach/formularios')) {
     const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/ferramentas/', '/pt/coach/c/ferramentas/')
+    url.pathname = pathname.replace('/pt/coach/formularios', '/pt/c/formularios')
     return NextResponse.redirect(url)
   }
 
-  // /pt/coach/portals/* -> /pt/coach/c/portals/*
+  // /pt/coach/clientes/* -> /pt/c/clientes/*
+  if (pathname.startsWith('/pt/coach/clientes')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace('/pt/coach/clientes', '/pt/c/clientes')
+    return NextResponse.redirect(url)
+  }
+
+  // /pt/coach/leads/* -> /pt/c/leads/*
+  if (pathname.startsWith('/pt/coach/leads')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace('/pt/coach/leads', '/pt/c/leads')
+    return NextResponse.redirect(url)
+  }
+
+  // /pt/coach/ferramentas/* -> /pt/c/ferramentas/*
+  if (pathname.startsWith('/pt/coach/ferramentas/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace('/pt/coach/ferramentas/', '/pt/c/ferramentas/')
+    return NextResponse.redirect(url)
+  }
+
+  // /pt/coach/portals/* -> /pt/c/portals/*
   if (pathname.startsWith('/pt/coach/portals/')) {
     const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/portals/', '/pt/coach/c/portals/')
+    url.pathname = pathname.replace('/pt/coach/portals/', '/pt/c/portals/')
+    return NextResponse.redirect(url)
+  }
+
+  // Redirecionar outras rotas /pt/coach/* para /pt/c/* (exceto as já tratadas acima)
+  if (pathname.startsWith('/pt/coach/') && 
+      !pathname.startsWith('/pt/coach/c/') && 
+      !pathname.startsWith('/pt/coach/formularios') &&
+      !pathname.startsWith('/pt/coach/clientes') &&
+      !pathname.startsWith('/pt/coach/leads') &&
+      !pathname.startsWith('/pt/coach/ferramentas/') &&
+      !pathname.startsWith('/pt/coach/portals/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace('/pt/coach/', '/pt/c/')
     return NextResponse.redirect(url)
   }
   

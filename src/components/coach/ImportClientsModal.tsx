@@ -431,22 +431,21 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
       throw new Error('Nenhum dado válido encontrado no texto colado')
     }
 
-    // Detectar separador (tab, múltiplos espaços, ou vírgula)
+    // Detectar separador (tab, ponto e vírgula, vírgula, ou múltiplos espaços)
     const firstLine = lines[0]
     let useMultipleSpaces = false
     let separator = '\t' // Tab é o padrão quando copia do Excel
     
-    // Verificar se tem tabs
-    if (!firstLine.includes('\t')) {
-      // Verificar se tem múltiplos espaços consecutivos
-      if (firstLine.match(/\s{2,}/)) {
-        useMultipleSpaces = true
-        separator = '\t' // Não usado quando useMultipleSpaces é true
-      } else if (firstLine.includes(',')) {
-        separator = ','
-      } else {
-        separator = '\t' // Usar tab como padrão
-      }
+    // Verificar separadores na ordem de preferência
+    if (firstLine.includes('\t')) {
+      separator = '\t'
+    } else if (firstLine.includes(';')) {
+      separator = ';' // Ponto e vírgula comum em Excel brasileiro
+    } else if (firstLine.includes(',')) {
+      separator = ','
+    } else if (firstLine.match(/\s{2,}/)) {
+      useMultipleSpaces = true
+      separator = '\t' // Não usado quando useMultipleSpaces é true
     }
 
     // Processar linhas
@@ -460,7 +459,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
     })
 
     // Encontrar número máximo de colunas
-    const maxCols = Math.max(...processedLines.map(line => line.length))
+    const maxCols = Math.max(...processedLines.map(line => line.length), 1)
 
     // Normalizar todas as linhas para ter o mesmo número de colunas
     const normalizedLines = processedLines.map(line => {
@@ -474,30 +473,42 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
     // Primeira linha são os cabeçalhos
     const headers = normalizedLines[0] || []
     
+    // Limpar cabeçalhos vazios do final
+    while (headers.length > 0 && (!headers[headers.length - 1] || headers[headers.length - 1].trim() === '')) {
+      headers.pop()
+    }
+    
     // Se os cabeçalhos estão vazios ou são genéricos, tentar detectar
-    if (headers.every(h => !h || h.trim() === '')) {
+    if (headers.length === 0 || headers.every(h => !h || h.trim() === '')) {
       // Usar nomes genéricos
       for (let i = 0; i < maxCols; i++) {
-        headers[i] = `Coluna ${i + 1}`
+        if (i < headers.length) {
+          headers[i] = headers[i] || `Coluna ${i + 1}`
+        } else {
+          headers.push(`Coluna ${i + 1}`)
+        }
       }
     }
 
-    // Resto são os dados
+    // Resto são os dados (se houver)
     const rows = normalizedLines.slice(1).filter(row => 
       row.some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')
     )
 
+    // Se não há dados, criar uma linha vazia para permitir mapeamento apenas dos cabeçalhos
+    const finalRows = rows.length > 0 ? rows : [Array(headers.length).fill('')]
+
     return [{
       headers,
-      rows,
-      fileName: 'Dados Colados',
-      totalRows: rows.length
+      rows: finalRows,
+      fileName: 'Cabeçalhos Colados',
+      totalRows: rows.length || 0
     }]
   }
 
   const handlePasteData = async () => {
     if (!pastedText || pastedText.trim().length === 0) {
-      setError('Por favor, cole os dados antes de continuar')
+      setError('Por favor, cole os cabeçalhos antes de continuar')
       return
     }
 
@@ -551,7 +562,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
       
       setPastedText('')
     } catch (err: any) {
-      setError(err.message || 'Erro ao processar dados colados')
+      setError(err.message || 'Erro ao processar cabeçalhos colados')
     }
   }
 
@@ -574,7 +585,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
       formData.append('file', file)
       
       // Usar API de OCR para imagens, API de parse para Excel/CSV
-      const apiEndpoint = isImage ? '/api/coach/import/ocr' : '/api/coach/import/parse'
+      const apiEndpoint = isImage ? '/api/c/import/ocr' : '/api/c/import/parse'
       
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -810,7 +821,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
         })
       }, 200)
       
-      const response = await fetch('/api/coach/import/process', {
+      const response = await fetch('/api/c/import/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -998,52 +1009,61 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
                         </label>
                         <button
                           onClick={() => {
-                            const prompt = `Preciso converter uma planilha de clientes para o formato padrão do sistema YLADA. 
+                            const headersText = pastedText.trim() || '[Cole aqui os cabeçalhos da sua planilha atual]'
+                            const prompt = `Preciso converter uma planilha de clientes para o formato padrão do sistema YLADA Coach.
 
-FORMATO DE ENTRADA: [Cole aqui os cabeçalhos da sua planilha atual]
+FORMATO DE ENTRADA (cabeçalhos da minha planilha):
+${headersText}
 
 FORMATO DE SAÍDA (template padrão YLADA):
 Nome Completo | Data de Nascimento | Gênero | CPF | Email | Telefone | Instagram | Rua | Número | Complemento | Bairro | Cidade | Estado | CEP | Status | Objetivo da Cliente | Data da Primeira Avaliação | Peso (kg) | Altura (m) | IMC | Circunferência do Pescoço (cm) | Circunferência do Tórax (cm) | Circunferência da Cintura (cm) | Circunferência do Quadril (cm) | Circunferência do Braço (cm) | Circunferência da Coxa (cm) | Dobra Cutânea Tríceps (mm) | Dobra Cutânea Bíceps (mm) | Dobra Cutânea Subescapular (mm) | Dobra Cutânea Ilíaca (mm) | Dobra Cutânea Abdominal (mm) | Dobra Cutânea Coxa (mm) | Gordura Corporal (%) | Massa Muscular (kg) | Massa Óssea (kg) | Água Corporal (%) | Gordura Visceral | Observações da Avaliação
 
 INSTRUÇÕES:
 1. Analise os cabeçalhos da minha planilha e identifique correspondências com o template padrão
-2. Mapeie os campos equivalentes (ex: "Nome" → "Nome Completo", "Data Nasc" → "Data de Nascimento")
+2. Mapeie os campos equivalentes (ex: "Nome" → "Nome Completo", "Data Nasc" → "Data de Nascimento", "Tel" → "Telefone")
 3. Para campos que não existem na minha planilha, deixe vazio
 4. Mantenha a ordem exata das colunas do template padrão
-5. Retorne apenas os dados convertidos, sem explicações adicionais
-6. Use formato Excel/CSV (separado por tabulação ou vírgula)
+5. Retorne apenas os dados convertidos em formato Excel/CSV (separado por tabulação ou ponto e vírgula)
+6. Se eu enviar apenas os cabeçalhos, me retorne os cabeçalhos convertidos. Se enviar dados também, converta tudo.
 
 Por favor, converta os dados da minha planilha para este formato padrão.`
                             navigator.clipboard.writeText(prompt)
-                            alert('Prompt copiado! Cole no ChatGPT e adicione seus dados.')
+                            alert(pastedText.trim() 
+                              ? '✅ Prompt copiado com seus cabeçalhos! Cole no ChatGPT e ele já terá os cabeçalhos para converter.' 
+                              : '⚠️ Cole os cabeçalhos primeiro no campo acima, depois copie o prompt novamente.')
                           }}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
                         >
-                          📋 Copiar Prompt
+                          📋 Copiar Prompt {pastedText.trim() ? '(com cabeçalhos)' : ''}
                         </button>
                       </div>
                       <div className="bg-gray-50 rounded p-3 border border-gray-200">
                         <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono overflow-x-auto">
-{`Preciso converter uma planilha de clientes para o formato padrão do sistema YLADA.
+{`Preciso converter uma planilha de clientes para o formato padrão do sistema YLADA Coach.
 
-FORMATO DE ENTRADA: [Cole aqui os cabeçalhos da sua planilha atual]
+FORMATO DE ENTRADA (cabeçalhos da minha planilha):
+[Cole aqui os cabeçalhos da sua planilha atual]
 
 FORMATO DE SAÍDA (template padrão YLADA):
 Nome Completo | Data de Nascimento | Gênero | CPF | Email | Telefone | Instagram | Rua | Número | Complemento | Bairro | Cidade | Estado | CEP | Status | Objetivo da Cliente | Data da Primeira Avaliação | Peso (kg) | Altura (m) | IMC | Circunferência do Pescoço (cm) | Circunferência do Tórax (cm) | Circunferência da Cintura (cm) | Circunferência do Quadril (cm) | Circunferência do Braço (cm) | Circunferência da Coxa (cm) | Dobra Cutânea Tríceps (mm) | Dobra Cutânea Bíceps (mm) | Dobra Cutânea Subescapular (mm) | Dobra Cutânea Ilíaca (mm) | Dobra Cutânea Abdominal (mm) | Dobra Cutânea Coxa (mm) | Gordura Corporal (%) | Massa Muscular (kg) | Massa Óssea (kg) | Água Corporal (%) | Gordura Visceral | Observações da Avaliação
 
 INSTRUÇÕES:
 1. Analise os cabeçalhos da minha planilha e identifique correspondências
-2. Mapeie os campos equivalentes (ex: "Nome" → "Nome Completo")
+2. Mapeie os campos equivalentes (ex: "Nome" → "Nome Completo", "Data Nasc" → "Data de Nascimento")
 3. Para campos inexistentes, deixe vazio
 4. Mantenha a ordem exata das colunas do template padrão
-5. Retorne apenas os dados convertidos em formato Excel/CSV`}
+5. Retorne apenas os dados convertidos em formato Excel/CSV (separado por tabulação ou ponto e vírgula)
+6. Se eu enviar apenas os cabeçalhos, me retorne os cabeçalhos convertidos`}
                         </pre>
                       </div>
                     </div>
 
                     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                       <p className="text-sm text-gray-700">
-                        <strong>💡 Dica:</strong> Copie o prompt acima, cole no ChatGPT junto com os dados da sua planilha, e o ChatGPT fará a conversão automaticamente para o formato padrão!
+                        <strong>💡 Dica:</strong> Copie o prompt acima, cole no ChatGPT junto com os cabeçalhos da sua planilha (ou toda a planilha), e o ChatGPT fará a conversão automaticamente para o formato padrão!
+                      </p>
+                      <p className="text-xs text-gray-600 mt-2">
+                        <strong>Passo a passo:</strong> 1) Cole os cabeçalhos no campo abaixo → 2) Clique em "Copiar Prompt" → 3) Cole no ChatGPT → 4) ChatGPT retorna planilha convertida → 5) Importe aqui!
                       </p>
                     </div>
                   </div>
@@ -1053,10 +1073,10 @@ INSTRUÇÕES:
               {/* Opção de Upload (apenas para template padrão) */}
               <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-                  📤 Importar Planilha no Template Padrão
+                  📤 Importar Planilha
                 </h4>
                 <p className="text-sm text-gray-600 mb-4 text-center">
-                  Após preencher o template padrão (ou converter com ChatGPT), faça o upload aqui:
+                  Faça o upload da sua planilha (Excel ou CSV). O sistema processa automaticamente!
                 </p>
               <div
                 {...getRootProps()}
@@ -1075,6 +1095,41 @@ INSTRUÇÕES:
                       ou clique para selecionar (Excel, CSV)
                 </p>
                   </div>
+              </div>
+
+              {/* Opção alternativa: Colar apenas cabeçalhos (para ChatGPT) */}
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mt-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span>🤖</span>
+                  Alternativa: Colar Cabeçalhos para ChatGPT
+                </h4>
+                <p className="text-sm text-gray-700 mb-4">
+                  Se o sistema não conseguir processar seu Excel automaticamente, você pode colar apenas os cabeçalhos aqui e usar o ChatGPT para converter:
+                </p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Cole aqui apenas a primeira linha (cabeçalhos) da sua planilha:
+                    </label>
+                    <textarea
+                      value={pastedText}
+                      onChange={(e) => setPastedText(e.target.value)}
+                      placeholder="Exemplo: Nome; Data Nasc; Telefone; Endereço; Peso; Altura; ..."
+                      className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                      rows={3}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Dica: No Excel, selecione apenas a primeira linha e copie (Ctrl+C). Cole aqui e depois use o ChatGPT para converter.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handlePasteData}
+                    disabled={!pastedText || pastedText.trim().length === 0}
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    📋 Processar Cabeçalhos
+                  </button>
+                </div>
               </div>
             </div>
           )}

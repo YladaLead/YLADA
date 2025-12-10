@@ -197,9 +197,20 @@ export async function POST(
       .single()
 
     if (error) {
-      console.error('Erro ao criar registro emocional/comportamental:', error)
+      console.error('❌ Erro ao criar registro emocional/comportamental:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        data: recordData
+      })
       return NextResponse.json(
-        { error: 'Erro ao criar registro', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
+        { 
+          error: 'Erro ao criar registro', 
+          technical: process.env.NODE_ENV === 'development' ? error.message : undefined,
+          code: error.code,
+          details: process.env.NODE_ENV === 'development' ? error.details : undefined
+        },
         { status: 500 }
       )
     }

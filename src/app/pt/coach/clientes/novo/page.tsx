@@ -70,7 +70,7 @@ function NovoClienteNutriContent() {
     setSalvando(true)
 
     try {
-      const response = await fetch('/api/coach/clientes', {
+      const response = await fetch('/api/c/clientes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -10,6 +10,7 @@ import {
   type DiagnosticosPorFerramenta
 } from '@/lib/diagnosticos-nutri'
 import { diagnosticosCoach, getDiagnostico as getDiagnosticoCoach } from '@/lib/diagnosticos-coach'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 
 interface Template {
   id: string
@@ -24,6 +25,7 @@ interface DynamicTemplatePreviewProps {
   template: Template
   profession: 'wellness' | 'nutri' | 'coach'
   onClose?: () => void
+  isPreview?: boolean // true = preview para dono (com explicações), false = link copiado para cliente (sem explicações)
 }
 
 interface DiagnosticEntry {
@@ -607,7 +609,18 @@ const buildEntriesFromMap = (
 
   if (!availableResults) return []
 
-  // Usar a função getDiagnostico correta baseada na profissão
+  // Para wellness, usar os diagnósticos diretamente do map
+  if (profession === 'wellness') {
+    return Object.keys(availableResults)
+      .map((resultadoId) => {
+        const diagnostico = availableResults[resultadoId]
+        if (!diagnostico) return null
+        return { resultadoId, diagnostico }
+      })
+      .filter(Boolean) as DiagnosticEntry[]
+  }
+
+  // Para coach e nutri, usar a função getDiagnostico
   const getDiagnostico = profession === 'coach' ? getDiagnosticoCoach : getDiagnosticoNutri
 
   return Object.keys(availableResults)
@@ -642,7 +655,8 @@ const getDiagnosticsInfoForTemplate = (
 export default function DynamicTemplatePreview({ 
   template, 
   profession,
-  onClose 
+  onClose,
+  isPreview = true // Por padrão é preview (para dono)
 }: DynamicTemplatePreviewProps) {
   // Padrão para Previews: Etapa 0 = Apresentação, Etapa 1+ = Perguntas (igual Quiz Bem-Estar)
   const [etapaAtual, setEtapaAtual] = useState(0)
@@ -747,34 +761,52 @@ export default function DynamicTemplatePreview({
     
     return (
       <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
-        {/* Mensagem explicativa - SEMPRE PRIMEIRO */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <p className="text-gray-700 text-sm leading-relaxed">
-            <strong>📋 O que acontece na ferramenta real:</strong>
-            <br />
-            A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
-            <br />
-            Em seguida, virá a seguinte mensagem:
-          </p>
-        </div>
+        {/* Mensagem explicativa - APENAS NO PREVIEW (para o dono) */}
+        {isPreview && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-gray-700 text-sm leading-relaxed">
+              <strong>📋 O que acontece na ferramenta real:</strong>
+              <br />
+              A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+              <br />
+              Em seguida, virá a seguinte mensagem:
+            </p>
+          </div>
+        )}
         
-        {/* CTA - SEMPRE SEGUNDO */}
+        {/* CTA - SEMPRE VISÍVEL (tanto no preview quanto no link copiado) */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
           <p className="text-gray-700 font-medium mb-4 text-center text-lg">
             {mensagem}
           </p>
           <div className="flex justify-center">
-            <button
-              className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg"
-              style={{
-                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)',
-                animation: 'pulse-subtle 2s ease-in-out infinite'
-              }}
-            >
-              <span className="mr-2">✨</span>
-              {botaoTexto}
-              <span className="ml-2">→</span>
-            </button>
+            {isPreview ? (
+              // No preview, botão desabilitado (simulado)
+              <button
+                className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)',
+                  animation: 'pulse-subtle 2s ease-in-out infinite'
+                }}
+                disabled
+              >
+                <span className="mr-2">✨</span>
+                {botaoTexto}
+                <span className="ml-2">→</span>
+              </button>
+            ) : (
+              // No link copiado, usar WellnessCTAButton real
+              <WellnessCTAButton
+                config={{
+                  cta_type: 'whatsapp',
+                  whatsapp_number: (template as any).whatsapp_number,
+                  country_code: (template as any).country_code,
+                  cta_button_text: botaoTexto,
+                  custom_whatsapp_message: mensagem,
+                  template_slug: template.slug
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -794,6 +826,101 @@ export default function DynamicTemplatePreview({
     etapaAtual,
     profession
   })
+
+  // Função para obter conteúdo de introdução (compartilhada entre QUIZ e GUIA)
+  const getIntroContent = () => {
+    const slug = (template.slug || template.id || '').toLowerCase()
+    if (slug.includes('quiz-interativo') || slug.includes('interativo')) {
+      return {
+        titulo: '🔍 Descubra Seu Tipo de Metabolismo em 60 Segundos',
+        descricao: 'Entenda por que seu corpo reage de um jeito único à alimentação, energia e suplementos — e descubra o melhor caminho para ter mais resultados.',
+        mensagem: '🚀 Leva menos de 1 minuto e pode mudar a forma como você cuida do seu corpo.',
+        beneficios: [
+          'Seu tipo de metabolismo específico',
+          'Como seu corpo reage à alimentação e suplementos',
+          'Estratégias personalizadas para otimizar sua energia',
+          'O melhor caminho para ter mais resultados'
+        ]
+      }
+    }
+    if (slug.includes('quiz-bem-estar') || slug.includes('bem-estar')) {
+      return {
+        titulo: '🧘‍♀️ Qual é seu perfil predominante?',
+        descricao: 'Estético, Equilibrado ou Saúde/Performance — descubra em 1 minuto.',
+        mensagem: '🚀 Uma avaliação que pode transformar sua relação com o bem-estar.',
+        beneficios: [
+          'Seu perfil predominante (Estético, Equilibrado ou Saúde/Performance)',
+          'Áreas de bem-estar para otimizar',
+          'Como criar rotina de autocuidado',
+          'Estratégias para atingir bem-estar integral'
+        ]
+      }
+    }
+    if (slug.includes('quiz-perfil-nutricional') || slug.includes('perfil-nutricional') || slug.includes('perfil nutricional')) {
+      return {
+        titulo: '🥗 Descubra seu Perfil de Absorção Nutricional',
+        descricao: 'Identifique como seu corpo absorve nutrientes e receba orientações personalizadas para otimizar sua nutrição.',
+        mensagem: '🚀 Uma avaliação que pode transformar sua relação com a alimentação.',
+        beneficios: [
+          'Como seu corpo absorve nutrientes',
+          'Deficiências nutricionais que podem estar afetando sua saúde',
+          'Oportunidades de otimização na alimentação',
+          'Recomendações personalizadas para melhorar sua nutrição'
+        ]
+      }
+    }
+    if (slug.includes('quiz-detox') || (slug.includes('detox') && slug.includes('quiz'))) {
+      return {
+        titulo: '🧽 Seu Corpo Está Pedindo Detox?',
+        descricao: 'Identifique sinais de sobrecarga tóxica e receba orientações personalizadas para um processo de desintoxicação seguro e eficaz.',
+        mensagem: '🚀 Uma avaliação que pode transformar sua saúde e energia.',
+        beneficios: [
+          'Sinais de sobrecarga tóxica no seu corpo',
+          'Nível de toxicidade (baixa, moderada ou alta)',
+          'Estratégias personalizadas para desintoxicação',
+          'Produtos e suplementos que podem ajudar'
+        ]
+      }
+    }
+    if (slug.includes('quiz-energetico') || slug.includes('quiz-energético') || slug.includes('energetico') || slug.includes('energético')) {
+      return {
+        titulo: '⚡ Como Está Sua Energia?',
+        descricao: 'Identifique seu nível de energia e receba orientações personalizadas para aumentar sua vitalidade e disposição.',
+        mensagem: '🚀 Uma avaliação que pode transformar sua energia diária.',
+        beneficios: [
+          'Seu nível atual de energia',
+          'Fatores que podem estar afetando sua energia',
+          'Estratégias para aumentar vitalidade',
+          'Produtos e suplementos que podem ajudar'
+        ]
+      }
+    }
+    if (slug.includes('guia-hidratacao') || slug.includes('guia hidratacao') || slug.includes('guia-hidratacao') || (slug.includes('guia') && slug.includes('hidratacao'))) {
+      return {
+        titulo: '💧 Guia Completo de Hidratação',
+        descricao: 'Aprenda tudo sobre hidratação e como manter seu corpo sempre hidratado.',
+        mensagem: '🚀 Um guia completo para otimizar sua hidratação.',
+        beneficios: [
+          'Como calcular sua necessidade de água',
+          'Sinais de desidratação',
+          'Estratégias para manter-se hidratado',
+          'Produtos que podem ajudar na hidratação'
+        ]
+      }
+    }
+    // Fallback padrão
+    return {
+      titulo: nome,
+      descricao: descricao || 'Descubra informações personalizadas sobre seu perfil.',
+      mensagem: '🚀 Uma avaliação personalizada para você.',
+      beneficios: [
+        'Informações personalizadas',
+        'Recomendações específicas',
+        'Estratégias de otimização',
+        'Produtos adequados ao seu perfil'
+      ]
+    }
+  }
 
   // Renderizar QUIZ
   // Verificar se questions é array (formato completo) ou número (formato básico)
@@ -920,420 +1047,8 @@ export default function DynamicTemplatePreview({
       return `🎯 Preview do Quiz - "${nome}"`
     }
 
-    // Texto da introdução (etapa 0) baseado no slug
-    const getIntroContent = () => {
-      const slug = (template.slug || template.id || '').toLowerCase()
-      if (slug.includes('quiz-interativo') || slug.includes('interativo')) {
-        return {
-          titulo: '🔍 Descubra Seu Tipo de Metabolismo em 60 Segundos',
-          descricao: 'Entenda por que seu corpo reage de um jeito único à alimentação, energia e suplementos — e descubra o melhor caminho para ter mais resultados.',
-          mensagem: '🚀 Leva menos de 1 minuto e pode mudar a forma como você cuida do seu corpo.',
-          beneficios: [
-            'Seu tipo de metabolismo específico',
-            'Como seu corpo reage à alimentação e suplementos',
-            'Estratégias personalizadas para otimizar sua energia',
-            'O melhor caminho para ter mais resultados'
-          ]
-        }
-      }
-      if (slug.includes('quiz-bem-estar') || slug.includes('bem-estar')) {
-        return {
-          titulo: '🧘‍♀️ Qual é seu perfil predominante?',
-          descricao: 'Estético, Equilibrado ou Saúde/Performance — descubra em 1 minuto.',
-          mensagem: '🚀 Uma avaliação que pode transformar sua relação com o bem-estar.',
-          beneficios: [
-            'Seu perfil predominante (Estético, Equilibrado ou Saúde/Performance)',
-            'Áreas de bem-estar para otimizar',
-            'Como criar rotina de autocuidado',
-            'Estratégias para atingir bem-estar integral'
-          ]
-        }
-      }
-      if (slug.includes('quiz-perfil-nutricional') || slug.includes('perfil-nutricional') || slug.includes('perfil nutricional')) {
-        return {
-          titulo: '🥗 Descubra seu Perfil de Absorção Nutricional',
-          descricao: 'Identifique como seu corpo absorve nutrientes e receba orientações personalizadas para otimizar sua nutrição.',
-          mensagem: '🚀 Uma avaliação que pode transformar sua relação com a alimentação.',
-          beneficios: [
-            'Como seu corpo absorve nutrientes',
-            'Deficiências nutricionais que podem estar afetando sua saúde',
-            'Oportunidades de otimização na alimentação',
-            'Recomendações personalizadas para melhorar sua nutrição'
-          ]
-        }
-      }
-      if (slug.includes('quiz-detox') || (slug.includes('detox') && slug.includes('quiz'))) {
-        return {
-          titulo: '🧽 Seu Corpo Está Pedindo Detox?',
-          descricao: 'Identifique sinais de sobrecarga tóxica e receba orientações personalizadas para um processo de desintoxicação seguro e eficaz.',
-          mensagem: '🚀 Uma avaliação que pode transformar sua saúde e energia.',
-          beneficios: [
-            'Sinais de sobrecarga tóxica no seu organismo',
-            'Como toxinas podem estar afetando sua energia e saúde',
-            'Orientações para um processo de detox eficaz',
-            'Estratégias para aumentar sua vitalidade'
-          ]
-        }
-      }
-      if (slug.includes('quiz-energetico') || slug.includes('quiz-energético') || slug.includes('energetico') || slug.includes('energético')) {
-        return {
-          titulo: '⚡ Como Está Sua Energia?',
-          descricao: 'Identifique seu nível de energia e receba orientações personalizadas para aumentar sua vitalidade e disposição.',
-          mensagem: '🚀 Uma avaliação que pode transformar sua energia diária.',
-          beneficios: [
-            'Seu nível atual de energia e vitalidade',
-            'Fatores que podem estar afetando sua disposição',
-            'Como aumentar sua energia de forma natural',
-            'Estratégias para manter energia constante ao longo do dia'
-          ]
-        }
-      }
-      if (slug.includes('quiz-emocional') || slug.includes('avaliacao-emocional') || slug.includes('avaliação-emocional') || (slug.includes('emocional') && slug.includes('avaliacao'))) {
-        return {
-          titulo: '💖 Avaliação de Forma Emocional',
-          descricao: 'Descubra como suas emoções influenciam sua jornada de transformação e receba orientações personalizadas para potencializar seu bem-estar.',
-          mensagem: '🚀 Uma avaliação personalizada que pode transformar sua relação com o bem-estar e autoestima.',
-          beneficios: [
-            'Seu nível de autoestima e confiança',
-            'Sua motivação para transformação',
-            'Como você lida com desafios',
-            'Seu perfil emocional completo'
-          ]
-        }
-      }
-      if (slug.includes('quiz-intolerancia') || slug.includes('quiz-intolerância') || slug.includes('intolerancia') || slug.includes('intolerância')) {
-        return {
-          titulo: '🔍 Avaliação de Intolerância Alimentar',
-          descricao: 'Descubra se você tem intolerâncias ou sensibilidades alimentares',
-          mensagem: '🚀 Uma avaliação personalizada para identificar alimentos que podem estar afetando seu bem-estar.',
-          beneficios: [
-            'Possíveis intolerâncias alimentares',
-            'Alimentos que causam desconforto',
-            'Estratégias personalizadas para seu perfil',
-            'Produtos adequados ao seu organismo'
-          ]
-        }
-      }
-      if (slug.includes('quiz-perfil-metabolico') || slug.includes('quiz-perfil-metabólico') || slug.includes('perfil-metabolico') || slug.includes('perfil-metabólico') || (slug.includes('metabolico') && slug.includes('perfil')) || (slug.includes('metabólico') && slug.includes('perfil'))) {
-        return {
-          titulo: '⚡ Avaliação do Perfil Metabólico',
-          descricao: 'Descubra seu perfil metabólico e como otimizá-lo',
-          mensagem: '🚀 Uma avaliação personalizada para entender seu metabolismo e criar estratégias eficazes.',
-          beneficios: [
-            'Seu perfil metabólico completo',
-            'Como acelerar seu metabolismo',
-            'Estratégias personalizadas',
-            'Produtos otimizados para seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-eletrolito') || slug.includes('quiz-eletrólito') || slug.includes('eletrolito') || slug.includes('eletrólito') || slug.includes('eletrolitos') || slug.includes('eletrólitos')) {
-        return {
-          titulo: '⚡ Diagnóstico de Eletrólitos',
-          descricao: 'Descubra seu equilíbrio eletrolítico e como otimizá-lo',
-          mensagem: '🚀 Uma avaliação personalizada para identificar desequilíbrios e criar estratégias eficazes.',
-          beneficios: [
-            'Possíveis desequilíbrios eletrolíticos',
-            'Como melhorar seu equilíbrio',
-            'Estratégias personalizadas',
-            'Produtos adequados ao seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-sintomas-intestinais') || slug.includes('sintomas-intestinais') || (slug.includes('sintoma') && slug.includes('intestina'))) {
-        return {
-          titulo: '🌿 Diagnóstico de Sintomas Intestinais',
-          descricao: 'Descubra sua saúde intestinal e como otimizá-la',
-          mensagem: '🚀 Uma avaliação personalizada para identificar problemas e criar estratégias eficazes.',
-          beneficios: [
-            'Possíveis problemas intestinais',
-            'Como melhorar sua saúde digestiva',
-            'Estratégias personalizadas',
-            'Produtos adequados ao seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-avaliacao-inicial') || slug.includes('avaliacao-inicial') || slug.includes('avaliação-inicial')) {
-        return {
-          titulo: '🌟 Avaliação Inicial',
-          descricao: 'Descubra como podemos ajudar na sua transformação',
-          mensagem: '🚀 Uma avaliação rápida para entender seu perfil e criar um plano personalizado.',
-          beneficios: [
-            'Seu perfil e necessidades',
-            'Como podemos te ajudar',
-            'Estratégias personalizadas',
-            'Produtos adequados ao seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-pronto-emagrecer') || slug.includes('pronto-emagrecer') || (slug.includes('pronto') && slug.includes('emagrecer'))) {
-        return {
-          titulo: '🎯 Pronto para Emagrecer com Saúde',
-          descricao: 'Descubra se você está pronto para começar sua jornada de emagrecimento',
-          mensagem: '🚀 Uma avaliação rápida para entender seu perfil e criar um plano personalizado.',
-          beneficios: [
-            'Sua prontidão para emagrecer',
-            'Como podemos te ajudar',
-            'Estratégias personalizadas',
-            'Produtos adequados ao seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-tipo-fome') || slug.includes('tipo-fome') || (slug.includes('tipo') && slug.includes('fome'))) {
-        return {
-          titulo: '🍽️ Qual é o seu Tipo de Fome?',
-          descricao: 'Descubra seu padrão de fome e como controlá-lo',
-          mensagem: '🚀 Uma avaliação personalizada para entender se sua fome é física ou emocional.',
-          beneficios: [
-            'Seu tipo de fome',
-            'Se é fome física ou emocional',
-            'Estratégias personalizadas',
-            'Produtos adequados ao seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-alimentacao-saudavel') || slug.includes('alimentacao-saudavel') || slug.includes('alimentação-saudável')) {
-        return {
-          titulo: '🥗 Quiz: Alimentação Saudável',
-          descricao: 'Descubra como está sua alimentação e como melhorá-la',
-          mensagem: '🚀 Uma avaliação personalizada para entender seus hábitos alimentares.',
-          beneficios: [
-            'Pontos de melhoria na alimentação',
-            'Como criar hábitos mais saudáveis',
-            'Recomendações personalizadas',
-            'Produtos adequados ao seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-sindrome-metabolica') || slug.includes('sindrome-metabolica') || slug.includes('síndrome-metabólica') || (slug.includes('sindrome') && slug.includes('metabolica'))) {
-        return {
-          titulo: '⚠️ Risco de Síndrome Metabólica',
-          descricao: 'Descubra seu risco e como preveni-lo',
-          mensagem: '🚀 Uma avaliação personalizada para identificar riscos metabólicos.',
-          beneficios: [
-            'Seu risco de síndrome metabólica',
-            'Como prevenir complicações',
-            'Recomendações personalizadas',
-            'Produtos preventivos adequados'
-          ]
-        }
-      }
-      if (slug.includes('quiz-retencao-liquidos') || slug.includes('retencao-liquidos') || slug.includes('retenção-líquidos') || (slug.includes('retencao') && slug.includes('liquido'))) {
-        return {
-          titulo: '💧 Teste de Retenção de Líquidos',
-          descricao: 'Descubra seu nível de retenção e como reduzir',
-          mensagem: '🚀 Uma avaliação personalizada para identificar retenção de líquidos.',
-          beneficios: [
-            'Seu nível de retenção de líquidos',
-            'Como reduzir inchaço e desconforto',
-            'Recomendações personalizadas',
-            'Produtos específicos adequados'
-          ]
-        }
-      }
-      if (slug.includes('quiz-conhece-seu-corpo') || slug.includes('conhece-seu-corpo') || slug.includes('você conhece') || (slug.includes('conhece') && slug.includes('corpo'))) {
-        return {
-          titulo: '🧠 Você Conhece o Seu Corpo?',
-          descricao: 'Descubra seu nível de autoconhecimento corporal',
-          mensagem: '🚀 Uma avaliação personalizada para entender seu autoconhecimento.',
-          beneficios: [
-            'Seu nível de conhecimento sobre seu corpo',
-            'Como conhecer melhor seus sinais',
-            'Recomendações personalizadas',
-            'Produtos e estratégias adequadas'
-          ]
-        }
-      }
-      if (slug.includes('quiz-nutrido-vs-alimentado') || slug.includes('nutrido-vs-alimentado') || slug.includes('nutrido-alimentado') || (slug.includes('nutrido') && slug.includes('alimentado'))) {
-        return {
-          titulo: '🍎 Você está Nutrido ou Apenas Alimentado?',
-          descricao: 'Descubra se você está realmente nutrido',
-          mensagem: '🚀 Uma avaliação personalizada para entender nutrição adequada.',
-          beneficios: [
-            'Se você está nutrido ou apenas alimentado',
-            'Como transformar alimentação em nutrição',
-            'Recomendações personalizadas',
-            'Produtos adequados ao seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('quiz-alimentacao-rotina') || slug.includes('alimentacao-rotina') || slug.includes('alimentação-rotina') || (slug.includes('alimentacao') && slug.includes('rotina'))) {
-        return {
-          titulo: '⏰ Você está se Alimentando Conforme sua Rotina?',
-          descricao: 'Descubra se sua alimentação está adequada à sua rotina',
-          mensagem: '🚀 Uma avaliação personalizada para entender adequação alimentar.',
-          beneficios: [
-            'Se sua alimentação está adequada à rotina',
-            'Como adequar alimentação ao seu estilo de vida',
-            'Recomendações personalizadas',
-            'Produtos adaptados à rotina'
-          ]
-        }
-      }
-      if (slug.includes('quiz-ganhos-prosperidade') || slug.includes('ganhos-prosperidade') || slug.includes('ganhos e prosperidade') || (slug.includes('ganhos') && slug.includes('prosperidade'))) {
-        return {
-          titulo: '💰 Quiz: Ganhos e Prosperidade',
-          descricao: 'Descubra seu potencial para ganhos e prosperidade',
-          mensagem: '🚀 Uma avaliação personalizada para entender suas oportunidades de crescimento.',
-          beneficios: [
-            'Seu potencial para ganhos',
-            'Oportunidades de crescimento financeiro',
-            'Insights personalizados',
-            'Caminhos para prosperidade'
-          ]
-        }
-      }
-      if (slug.includes('quiz-potencial-crescimento') || slug.includes('potencial-crescimento') || slug.includes('potencial e crescimento') || (slug.includes('potencial') && slug.includes('crescimento'))) {
-        return {
-          titulo: '🌱 Quiz: Potencial e Crescimento',
-          descricao: 'Descubra seu potencial de crescimento',
-          mensagem: '🚀 Uma avaliação personalizada para entender suas oportunidades de desenvolvimento.',
-          beneficios: [
-            'Seu potencial de crescimento',
-            'Oportunidades de desenvolvimento',
-            'Insights personalizados',
-            'Caminhos para alcançar seu máximo'
-          ]
-        }
-      }
-      if (slug.includes('quiz-proposito-equilibrio') || slug.includes('proposito-equilibrio') || slug.includes('propósito-equilíbrio') || slug.includes('proposito e equilibrio') || slug.includes('propósito e equilíbrio') || (slug.includes('proposito') && slug.includes('equilibrio'))) {
-        return {
-          titulo: '🎯 Quiz: Propósito e Equilíbrio',
-          descricao: 'Descubra se seu dia a dia está alinhado com seus sonhos',
-          mensagem: '🚀 Uma avaliação personalizada para entender seu alinhamento com propósito.',
-          beneficios: [
-            'Seu alinhamento com propósito',
-            'Oportunidades de equilíbrio',
-            'Insights personalizados',
-            'Caminhos para viver seu propósito'
-          ]
-        }
-      }
-      if (slug.includes('checklist-alimentar') || slug.includes('checklist alimentar') || (slug.includes('checklist') && slug.includes('alimentar'))) {
-        return {
-          titulo: '🍽️ Avalie Seus Hábitos Alimentares',
-          descricao: 'Descubra como está sua alimentação e receba orientações personalizadas para melhorar seus hábitos alimentares baseadas em sua rotina atual.',
-          mensagem: '💪 Uma avaliação que pode transformar sua relação com a comida.',
-          beneficios: [
-            'Como está sua alimentação atual',
-            'Hábitos que podem ser melhorados',
-            'Orientações personalizadas',
-            'Estratégias para transformação'
-          ]
-        }
-      }
-      if (slug.includes('checklist-detox') || slug.includes('checklist detox') || (slug.includes('checklist') && slug.includes('detox'))) {
-        return {
-          titulo: '🧪 Checklist Detox',
-          descricao: 'Identifique sinais de sobrecarga tóxica e receba orientações para um processo de detox eficaz.',
-          mensagem: '🚀 Uma avaliação que pode transformar sua vitalidade e energia.',
-          beneficios: [
-            'Sinais de sobrecarga tóxica no seu organismo',
-            'Como toxinas podem estar afetando sua energia e saúde',
-            'Orientações para um processo de detox eficaz',
-            'Estratégias para aumentar sua vitalidade'
-          ]
-        }
-      }
-      if (slug.includes('guia-hidratacao') || slug.includes('guia hidratacao') || slug.includes('guia-hidratacao') || (slug.includes('guia') && slug.includes('hidratacao'))) {
-        return {
-          titulo: '💧 Guia Completo de Hidratação',
-          descricao: 'Aprenda tudo sobre hidratação e como otimizar seu consumo de água para saúde e performance.',
-          mensagem: '🚀 Um guia completo que pode transformar sua relação com a hidratação.',
-          beneficios: [
-            'Por que hidratação é fundamental',
-            'Como calcular sua necessidade diária',
-            'Estratégias práticas para manter-se hidratado',
-            'Otimização para performance'
-          ]
-        }
-      }
-      if (slug.includes('calculadora-imc') || slug.includes('calculadora imc') || (slug.includes('calculadora') && slug.includes('imc'))) {
-        return {
-          titulo: '📊 Calcule seu Índice de Massa Corporal',
-          descricao: 'Descubra seu IMC e receba interpretação personalizada com orientações para alcançar seu objetivo de forma saudável.',
-          mensagem: '🚀 Uma calculadora precisa que pode transformar sua relação com o peso e saúde.',
-          beneficios: [
-            'Seu IMC atual e interpretação personalizada',
-            'Categoria de peso (Baixo, Normal, Sobrepeso ou Obesidade)',
-            'Orientações específicas para seu perfil',
-            'Plano personalizado para alcançar seu objetivo'
-          ]
-        }
-      }
-      if (slug.includes('calculadora-proteina') || slug.includes('calculadora-proteína') || slug.includes('calculadora proteina') || slug.includes('calculadora proteína') || (slug.includes('calculadora') && (slug.includes('proteina') || slug.includes('proteína')))) {
-        return {
-          titulo: '🥩 Calcule sua Necessidade Proteica Diária',
-          descricao: 'Descubra quantas gramas de proteína você precisa por dia baseado no seu peso, atividade física e objetivo.',
-          mensagem: '🚀 Uma calculadora personalizada que pode otimizar seus resultados.',
-          beneficios: [
-            'Sua necessidade proteica diária personalizada',
-            'Distribuição ideal ao longo do dia',
-            'Fontes de proteína adequadas ao seu perfil',
-            'Estratégias para alcançar sua meta proteica'
-          ]
-        }
-      }
-      if (slug.includes('calculadora-hidratacao') || slug.includes('calculadora-hidratação') || slug.includes('calculadora hidratacao') || slug.includes('calculadora hidratação') || slug.includes('calculadora-agua') || slug.includes('calculadora-água') || slug.includes('calculadora agua') || slug.includes('calculadora água') || (slug.includes('calculadora') && (slug.includes('hidratacao') || slug.includes('hidratação') || slug.includes('agua') || slug.includes('água')))) {
-        return {
-          titulo: '💧 Calcule sua Necessidade de Hidratação Diária',
-          descricao: 'Descubra quantos litros de água você precisa por dia baseado no seu peso, atividade física e condições climáticas.',
-          mensagem: '🚀 Uma calculadora precisa que pode otimizar sua hidratação e performance.',
-          beneficios: [
-            'Sua necessidade hídrica diária personalizada',
-            'Distribuição ideal ao longo do dia',
-            'Estratégias para manter-se hidratado',
-            'Otimização para performance e bem-estar'
-          ]
-        }
-      }
-      if (slug.includes('calculadora-caloria') || slug.includes('calculadora-calorias') || slug.includes('calculadora caloria') || slug.includes('calculadora calorias') || (slug.includes('calculadora') && (slug.includes('caloria') || slug.includes('calorias')))) {
-        return {
-          titulo: '🔥 Calcule suas Necessidades Calóricas Diárias',
-          descricao: 'Descubra quantas calorias você precisa por dia baseado no seu peso, altura, idade, atividade física e objetivo.',
-          mensagem: '🚀 Uma calculadora personalizada que pode transformar seus resultados.',
-          beneficios: [
-            'Suas necessidades calóricas diárias personalizadas',
-            'Distribuição ideal de macronutrientes',
-            'Estratégias para alcançar seu objetivo (perder, manter ou ganhar peso)',
-            'Plano personalizado baseado no seu perfil'
-          ]
-        }
-      }
-      if (slug.includes('desafio-7-dias') || slug.includes('desafio-7') || (slug.includes('desafio') && slug.includes('7'))) {
-        return {
-          titulo: '🚀 Desafio 7 Dias',
-          descricao: 'Um desafio de 7 dias para transformar seus hábitos e ver resultados rápidos.',
-          mensagem: '🚀 Uma jornada de 7 dias que pode transformar seus hábitos e resultados.',
-          beneficios: [
-            'Resultados rápidos e visíveis',
-            'Plano estruturado para 7 dias',
-            'Hábitos que você pode manter',
-            'Transformação real em pouco tempo'
-          ]
-        }
-      }
-      if (slug.includes('desafio-21-dias') || slug.includes('desafio-21') || (slug.includes('desafio') && slug.includes('21'))) {
-        return {
-          titulo: '🌱 Desafio 21 Dias',
-          descricao: 'Um desafio completo de 21 dias para transformação profunda e duradoura.',
-          mensagem: '🚀 Uma jornada de 21 dias que pode transformar sua vida completamente.',
-          beneficios: [
-            'Transformação profunda e duradoura',
-            'Plano estruturado para 21 dias',
-            'Hábitos que se tornam parte da sua vida',
-            'Resultados que você mantém para sempre'
-          ]
-        }
-      }
-      // Fallback genérico
-      return {
-        titulo: descricao ? descricao.split('.')[0] : nome,
-        descricao: descricao || '',
-        mensagem: '🚀 Uma avaliação que pode transformar sua relação com o bem-estar.',
-        beneficios: undefined
-      }
-    }
+    // getIntroContent já está definido no escopo mais amplo (linha ~830)
+    // Não precisa redefinir aqui - a função já está disponível
 
     return (
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -1520,12 +1235,17 @@ export default function DynamicTemplatePreview({
             <div className="space-y-6">
               <div className="text-center space-y-1">
                 <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis do Quiz</h4>
-                <p className="text-sm text-gray-600">
-                  Esta prévia mostra exatamente o que sua cliente receberá como diagnóstico final, baseado nas respostas que ela informar no formulário original.
-                </p>
-                <p className="text-xs text-gray-500">
-                  Use este quadro como referência para orientar a conversa e preparar o plano de acompanhamento correspondente a cada resultado.
-                </p>
+                {/* Explicação apenas no preview (para o dono) */}
+                {isPreview && (
+                  <>
+                    <p className="text-sm text-gray-600">
+                      Esta prévia mostra exatamente o que sua cliente receberá como diagnóstico final, baseado nas respostas que ela informar no formulário original.
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Use este quadro como referência para orientar a conversa e preparar o plano de acompanhamento correspondente a cada resultado.
+                    </p>
+                  </>
+                )}
               </div>
               {renderCTA()}
               {renderDiagnosticsCards()}
@@ -1918,9 +1638,9 @@ export default function DynamicTemplatePreview({
               <div
                 className="h-2 rounded-full"
                 style={{
-                  background: 'linear-gradient(90deg, #34d399 0%, #10b981 100%)'
+                  background: 'linear-gradient(90deg, #34d399 0%, #10b981 100%)',
+                  width: `${(etapaAtual / totalItens) * 100}%`
                 }}
-                style={{ width: `${(etapaAtual / totalItens) * 100}%` }}
               />
             </div>
           </div>
@@ -1986,14 +1706,16 @@ export default function DynamicTemplatePreview({
               </p>
             </div>
             
-            {/* Seção Azul Explicativa */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
-              <p className="text-sm text-blue-700 mb-2">
-                A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
-              </p>
-              <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
-            </div>
+            {/* Seção Azul Explicativa - APENAS NO PREVIEW (para o dono) */}
+            {isPreview && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
+                <p className="text-sm text-blue-700 mb-2">
+                  A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+                </p>
+                <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
+              </div>
+            )}
             
             {/* CTA */}
             {renderCTA()}
@@ -2250,14 +1972,16 @@ export default function DynamicTemplatePreview({
               </p>
             </div>
             
-            {/* Seção Azul Explicativa */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
-              <p className="text-sm text-blue-700 mb-2">
-                A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
-              </p>
-              <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
-            </div>
+            {/* Seção Azul Explicativa - APENAS NO PREVIEW (para o dono) */}
+            {isPreview && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
+                <p className="text-sm text-blue-700 mb-2">
+                  A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+                </p>
+                <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
+              </div>
+            )}
             
             {/* CTA */}
             {renderCTA()}
@@ -2347,29 +2071,36 @@ export default function DynamicTemplatePreview({
     // Seções de conteúdo (1 a totalSecoes)
     if (etapaAtual >= 1 && etapaAtual <= totalSecoes) {
       const secaoAtual = secoes[etapaAtual - 1]
-      const bgColor = {
+      const colorKey: 'blue' | 'cyan' | 'sky' = (secaoAtual?.color === 'blue' || secaoAtual?.color === 'cyan' || secaoAtual?.color === 'sky') 
+        ? secaoAtual.color 
+        : 'blue'
+      const bgColorMap: Record<'blue' | 'cyan' | 'sky', string> = {
         blue: 'bg-blue-50',
         cyan: 'bg-cyan-50',
         sky: 'bg-sky-50'
-      }[secaoAtual.color] || 'bg-gray-50'
+      }
+      const bgColor = bgColorMap[colorKey] || 'bg-gray-50'
       
-      const textColor = {
+      const textColorMap: Record<'blue' | 'cyan' | 'sky', string> = {
         blue: 'text-blue-900',
         cyan: 'text-cyan-900',
         sky: 'text-sky-900'
-      }[secaoAtual.color] || 'text-gray-900'
+      }
+      const textColor = textColorMap[colorKey] || 'text-gray-900'
       
-      const borderColor = {
+      const borderColorMap: Record<'blue' | 'cyan' | 'sky', string> = {
         blue: 'border-blue-200',
         cyan: 'border-cyan-200',
         sky: 'border-sky-200'
-      }[secaoAtual.color] || 'border-gray-200'
+      }
+      const borderColor = borderColorMap[colorKey] || 'border-gray-200'
       
-      const badgeColor = {
+      const badgeColorMap: Record<'blue' | 'cyan' | 'sky', string> = {
         blue: 'bg-blue-600',
         cyan: 'bg-cyan-600',
         sky: 'bg-sky-600'
-      }[secaoAtual.color] || 'bg-gray-600'
+      }
+      const badgeColor = badgeColorMap[colorKey] || 'bg-gray-600'
       
       return (
         <div className={`${bgColor} p-6 rounded-lg border-2 ${borderColor}`}>

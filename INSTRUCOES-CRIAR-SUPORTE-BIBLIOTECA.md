@@ -9,7 +9,7 @@ Este guia explica como criar um usuário de suporte com acesso à área de **Bib
 Criar um usuário que possa:
 - ✅ Fazer **upload** de materiais na biblioteca wellness
 - ✅ **Ler** materiais da biblioteca wellness
-- ❌ **Não pode deletar** (apenas admins podem deletar)
+- ✅ **Deletar** materiais da biblioteca wellness (Migração 029)
 
 ---
 
@@ -120,8 +120,8 @@ Com `is_support = true`, o usuário pode:
 
 ✅ **Fazer upload** de materiais na biblioteca wellness  
 ✅ **Ler/visualizar** materiais da biblioteca wellness  
+✅ **Deletar** materiais da biblioteca wellness (Migração 029)  
 ✅ **Acessar** a área de wellness  
-❌ **Não pode deletar** materiais (apenas admins podem deletar)  
 ❌ **Não é admin** (não tem acesso a área administrativa)
 
 ---

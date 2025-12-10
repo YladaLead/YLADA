@@ -255,7 +255,7 @@ function RespostasFormularioContent() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Link
-                  href="/pt/coach/formularios"
+                  href="/pt/c/formularios"
                   className="text-purple-600 hover:text-purple-700 text-sm font-medium"
                 >
                   ← Voltar para Formulários

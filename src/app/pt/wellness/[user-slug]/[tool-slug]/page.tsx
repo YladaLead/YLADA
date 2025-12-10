@@ -247,6 +247,7 @@ export default function FerramentaPersonalizadaPage() {
       case 'calc-proteina':
         return <TemplateProteina config={config} />
       case 'calc-hidratacao':
+      case 'agua': // ✅ Adicionado case direto para slug 'agua'
         return <TemplateHidratacao config={config} />
       case 'calc-calorias':
         return <TemplateCalorias config={config} />
@@ -359,6 +360,7 @@ export default function FerramentaPersonalizadaPage() {
       case 'quiz-detox':
       case 'quiz-bem-estar':
         // Renderizar usando DynamicTemplatePreview para templates genéricos
+        // isPreview=false porque é link copiado (para cliente), não preview (para dono)
         if (tool.content && (tool.content.template_type === 'quiz' || tool.content.questions)) {
           return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -371,10 +373,13 @@ export default function FerramentaPersonalizadaPage() {
                     slug: tool.template_slug,
                     type: 'quiz',
                     content: tool.content,
-                    description: tool.description
+                    description: tool.description,
+                    whatsapp_number: tool.whatsapp_number,
+                    country_code: tool.user_profiles?.country_code
                   }}
                   profession="wellness"
                   onClose={() => router.push('/pt/wellness/links')}
+                  isPreview={false} // ✅ Link copiado para cliente - SEM explicações para dono
                 />
               </main>
             </div>

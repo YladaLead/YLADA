@@ -2,6 +2,65 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**
+ * Extrai dados do cliente das respostas do formulário
+ */
+function extractClientDataFromResponses(responses: any, structure: any): {
+  name?: string
+  email?: string
+  phone?: string
+} {
+  const result: { name?: string; email?: string; phone?: string } = {}
+
+  if (!responses || !structure?.fields) {
+    return result
+  }
+
+  // Mapear campos comuns
+  const nameFields = ['nome', 'nome_completo', 'name', 'nome completo', 'nomecompleto']
+  const emailFields = ['email', 'e-mail', 'email_address', 'e_mail']
+  const phoneFields = ['telefone', 'phone', 'celular', 'whatsapp', 'telefone_celular', 'cel']
+
+  // Buscar por ID do campo (mais preciso)
+  structure.fields.forEach((field: any) => {
+    const fieldId = field.id
+    const fieldLabel = (field.label || '').toLowerCase()
+    const fieldType = field.type
+    const value = responses[fieldId]
+
+    if (!value) return
+
+    // Nome
+    if (!result.name && (
+      nameFields.some(nf => fieldId.toLowerCase().includes(nf)) ||
+      nameFields.some(nf => fieldLabel.includes(nf)) ||
+      (fieldType === 'text' && fieldLabel.includes('nome'))
+    )) {
+      result.name = String(value).trim()
+    }
+
+    // Email
+    if (!result.email && (
+      emailFields.some(ef => fieldId.toLowerCase().includes(ef)) ||
+      emailFields.some(ef => fieldLabel.includes(ef)) ||
+      fieldType === 'email'
+    )) {
+      result.email = String(value).trim().toLowerCase()
+    }
+
+    // Telefone
+    if (!result.phone && (
+      phoneFields.some(pf => fieldId.toLowerCase().includes(pf)) ||
+      phoneFields.some(pf => fieldLabel.includes(pf)) ||
+      fieldType === 'tel'
+    )) {
+      result.phone = String(value).trim()
+    }
+  })
+
+  return result
+}
+
+/**
  * POST - Salvar respostas do formulário (público, sem autenticação)
  */
 export async function POST(
@@ -59,13 +118,111 @@ export async function POST(
                '127.0.0.1'
     const userAgent = request.headers.get('user-agent') || ''
 
+    // 🔄 INTEGRAÇÃO AUTOMÁTICA: Extrair dados e criar LEAD (não cliente diretamente)
+    let leadId: string | null = null
+    let leadCreated = false
+
+    try {
+      // Buscar estrutura do formulário para mapear campos
+      const { data: formWithStructure } = await supabaseAdmin
+        .from('custom_forms')
+        .select('structure')
+        .eq('id', formId)
+        .single()
+
+      // Extrair dados do formulário (nome, email, telefone)
+      const extractedData = extractClientDataFromResponses(responses, formWithStructure?.structure)
+
+      if (extractedData.name || extractedData.email || extractedData.phone) {
+        // Verificar se lead já existe (por email ou telefone)
+        let existingLead = null
+
+        if (extractedData.email) {
+          const { data: leadByEmail } = await supabaseAdmin
+            .from('coach_leads')
+            .select('id')
+            .eq('user_id', form.user_id)
+            .eq('email', extractedData.email.toLowerCase().trim())
+            .maybeSingle()
+          
+          if (leadByEmail) {
+            existingLead = leadByEmail
+          }
+        }
+
+        if (!existingLead && extractedData.phone) {
+          const phoneClean = extractedData.phone.replace(/\D/g, '')
+          const { data: leadByPhone } = await supabaseAdmin
+            .from('coach_leads')
+            .select('id')
+            .eq('user_id', form.user_id)
+            .eq('phone', phoneClean)
+            .maybeSingle()
+          
+          if (leadByPhone) {
+            existingLead = leadByPhone
+          }
+        }
+
+        if (existingLead) {
+          // Lead já existe - vincular resposta
+          leadId = existingLead.id
+          console.log('✅ Lead existente encontrado, vinculando resposta:', leadId)
+        } else if (extractedData.name) {
+          // Criar novo LEAD (não cliente)
+          const leadData: any = {
+            user_id: form.user_id,
+            name: extractedData.name.trim(),
+            source: 'formulario',
+            form_id: formId // Vincular ao formulário que gerou o lead
+          }
+
+          if (extractedData.email) {
+            leadData.email = extractedData.email.toLowerCase().trim()
+          }
+
+          if (extractedData.phone) {
+            const phoneClean = extractedData.phone.replace(/\D/g, '')
+            leadData.phone = phoneClean
+          }
+
+          // Adicionar dados adicionais das respostas do formulário
+          leadData.additional_data = {
+            form_id: formId,
+            form_responses: responses,
+            extracted_at: new Date().toISOString()
+          }
+
+          const { data: newLead, error: leadError } = await supabaseAdmin
+            .from('coach_leads')
+            .insert(leadData)
+            .select()
+            .single()
+
+          if (leadError) {
+            console.error('⚠️ Erro ao criar lead automaticamente:', leadError)
+            // Continuar mesmo se falhar - salvar resposta sem lead
+          } else {
+            leadId = newLead.id
+            leadCreated = true
+            console.log('✅ Lead criado automaticamente:', leadId)
+          }
+        }
+      }
+    } catch (integrationError) {
+      console.error('⚠️ Erro na integração automática lead-formulário:', integrationError)
+      // Continuar mesmo se falhar - salvar resposta sem lead
+    }
+
     // Salvar resposta
+    // Nota: client_id será preenchido quando o lead for convertido em cliente
+    // O lead_id será armazenado no additional_data do lead para referência
     const { data: newResponse, error } = await supabaseAdmin
       .from('form_responses')
       .insert({
         form_id: formId,
         user_id: form.user_id, // user_id do criador do formulário
-        client_id: null, // Pode ser vinculado depois
+        client_id: null, // Será preenchido quando lead for convertido em cliente
         responses: responses,
         ip_address: ip,
         user_agent: userAgent,
@@ -84,7 +241,11 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      data: { response: newResponse }
+      data: { 
+        response: newResponse,
+        lead_id: leadId,
+        lead_created: leadCreated
+      }
     }, { status: 201 })
 
   } catch (error: any) {

@@ -261,6 +261,75 @@ export async function POST(
       }
     }
 
+    // 🔄 Vincular respostas de formulários ao cliente criado
+    try {
+      // Se o lead tem form_id, buscar respostas desse formulário que ainda não estão vinculadas
+      if (lead.form_id) {
+        // Buscar respostas do formulário que correspondem ao lead (mesmo email/telefone)
+        // e que ainda não estão vinculadas a um cliente
+        let responsesToLink: any[] = []
+
+        // Buscar por email se disponível
+        if (lead.email) {
+          const { data: responsesByEmail } = await supabaseAdmin
+            .from('form_responses')
+            .select('id, responses')
+            .eq('form_id', lead.form_id)
+            .eq('user_id', authenticatedUserId)
+            .is('client_id', null)
+            .limit(50)
+
+          if (responsesByEmail) {
+            // Filtrar respostas que têm o mesmo email nas respostas
+            const matchingByEmail = responsesByEmail.filter((r: any) => {
+              const responses = r.responses || {}
+              const responseValues = Object.values(responses).map(v => String(v).toLowerCase())
+              return responseValues.some(v => v.includes(lead.email.toLowerCase()))
+            })
+            responsesToLink.push(...matchingByEmail)
+          }
+        }
+
+        // Buscar por telefone se disponível
+        if (lead.phone && responsesToLink.length === 0) {
+          const phoneClean = lead.phone.replace(/\D/g, '')
+          const { data: responsesByPhone } = await supabaseAdmin
+            .from('form_responses')
+            .select('id, responses')
+            .eq('form_id', lead.form_id)
+            .eq('user_id', authenticatedUserId)
+            .is('client_id', null)
+            .limit(50)
+
+          if (responsesByPhone) {
+            // Filtrar respostas que têm o mesmo telefone nas respostas
+            const matchingByPhone = responsesByPhone.filter((r: any) => {
+              const responses = r.responses || {}
+              const responseValues = Object.values(responses).map(v => String(v).replace(/\D/g, ''))
+              return responseValues.some(v => v.includes(phoneClean))
+            })
+            responsesToLink.push(...matchingByPhone)
+          }
+        }
+
+        // Remover duplicatas
+        const uniqueResponseIds = [...new Set(responsesToLink.map(r => r.id))]
+
+        if (uniqueResponseIds.length > 0) {
+          // Vincular respostas ao cliente
+          await supabaseAdmin
+            .from('form_responses')
+            .update({ client_id: newClient.id })
+            .in('id', uniqueResponseIds)
+          
+          console.log(`✅ ${uniqueResponseIds.length} resposta(s) de formulário vinculada(s) ao cliente`)
+        }
+      }
+    } catch (linkError) {
+      console.warn('⚠️ Aviso: Não foi possível vincular respostas de formulário:', linkError)
+      // Não falhar a conversão se houver erro ao vincular respostas
+    }
+
     return NextResponse.json({
       success: true,
       data: {

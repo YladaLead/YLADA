@@ -646,7 +646,7 @@ function NovoFormularioCoachContent() {
 
       // Redirecionar após 3 segundos
       setTimeout(() => {
-        router.push('/pt/coach/formularios')
+        router.push('/pt/c/formularios')
       }, 3000)
     } catch (error: any) {
       console.error('Erro:', error)

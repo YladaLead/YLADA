@@ -53,7 +53,7 @@ function ClientesCoachContent() {
         params.append('order_by', 'created_at')
         params.append('order', 'desc')
 
-        const response = await fetch(`/api/coach/clientes?${params.toString()}`, {
+        const response = await fetch(`/api/c/clientes?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -158,7 +158,7 @@ function ClientesCoachContent() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/pt/coach/clientes/kanban"
+                href="/pt/c/clientes/kanban"
                 className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
               >
                 <span>🗂️</span>

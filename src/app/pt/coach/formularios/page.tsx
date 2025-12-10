@@ -38,12 +38,19 @@ function FormulariosCoachContent() {
   useEffect(() => {
     if (!user) return
 
-    // Carregar user_slug do perfil
+    // Carregar user_slug do perfil com timeout e tratamento de erros
     const carregarUserSlug = async () => {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos de timeout
+      
       try {
-        const response = await fetch('/api/coach/profile', {
-          credentials: 'include'
+        const response = await fetch('/api/c/profile', {
+          credentials: 'include',
+          signal: controller.signal
         })
+        
+        clearTimeout(timeoutId)
+        
         if (response.ok) {
           const data = await response.json()
           console.log('👤 Perfil carregado:', {
@@ -62,26 +69,45 @@ function FormulariosCoachContent() {
             console.warn('⚠️ User slug não encontrado no perfil')
             setMostrarAvisoUserSlug(true)
           }
+        } else {
+          console.error('❌ Erro ao carregar perfil:', response.status, response.statusText)
+          // Não bloquear a página se o perfil falhar
+          setMostrarAvisoUserSlug(true)
         }
-      } catch (error) {
-        console.error('Erro ao carregar user_slug:', error)
+      } catch (error: any) {
+        clearTimeout(timeoutId)
+        if (error.name === 'AbortError') {
+          console.error('⏱️ Timeout ao carregar perfil (10s)')
+          setErro('Tempo de carregamento excedido. Tente recarregar a página.')
+        } else {
+          console.error('❌ Erro ao carregar user_slug:', error)
+        }
+        // Não bloquear a página se o perfil falhar
+        setMostrarAvisoUserSlug(true)
       }
     }
 
     const carregarFormularios = async () => {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 segundos de timeout
+      
       try {
         setCarregando(true)
+        setErro(null)
         const params = new URLSearchParams()
         if (filtroTipo !== 'todos') {
           params.append('form_type', filtroTipo)
         }
 
-        const apiUrl = `/api/coach/formularios?${params.toString()}`
+        const apiUrl = `/api/c/formularios?${params.toString()}`
         console.log('📡 Chamando API de formulários:', apiUrl)
         
         const response = await fetch(apiUrl, {
-          credentials: 'include'
+          credentials: 'include',
+          signal: controller.signal
         })
+        
+        clearTimeout(timeoutId)
 
         console.log('📥 Resposta da API:', {
           status: response.status,
@@ -92,7 +118,14 @@ function FormulariosCoachContent() {
         if (!response.ok) {
           const errorText = await response.text()
           console.error('❌ Erro na resposta da API:', errorText)
-          throw new Error('Erro ao carregar formulários')
+          let errorMessage = 'Erro ao carregar formulários'
+          try {
+            const errorData = JSON.parse(errorText)
+            errorMessage = errorData.error || errorMessage
+          } catch {
+            // Se não conseguir parsear, usar mensagem padrão
+          }
+          throw new Error(errorMessage)
         }
 
         const data = await response.json()
@@ -142,19 +175,30 @@ function FormulariosCoachContent() {
           setErro(data.error || 'Erro ao carregar formulários')
         }
       } catch (error: any) {
+        clearTimeout(timeoutId)
         console.error('Erro ao carregar formulários:', error)
-        setErro(error.message || 'Erro ao carregar formulários')
+        if (error.name === 'AbortError') {
+          setErro('Tempo de carregamento excedido. Tente recarregar a página.')
+        } else {
+          setErro(error.message || 'Erro ao carregar formulários. Tente recarregar a página.')
+        }
       } finally {
         setCarregando(false)
       }
     }
 
     const carregarTemplates = async () => {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 segundos de timeout
+      
       try {
         setCarregandoTemplates(true)
-        const response = await fetch('/api/coach/formularios?is_template=true', {
-          credentials: 'include'
+        const response = await fetch('/api/c/formularios?is_template=true', {
+          credentials: 'include',
+          signal: controller.signal
         })
+        
+        clearTimeout(timeoutId)
 
         console.log('📡 Chamando API de templates:', '/api/coach/formularios?is_template=true')
         console.log('📥 Resposta templates:', {
@@ -184,8 +228,12 @@ function FormulariosCoachContent() {
             setTemplates(templatesArray)
           }
         }
-      } catch (error) {
-        console.error('Erro ao carregar templates:', error)
+      } catch (error: any) {
+        clearTimeout(timeoutId)
+        if (error.name !== 'AbortError') {
+          console.error('Erro ao carregar templates:', error)
+        }
+        // Não mostrar erro para templates, apenas logar
       } finally {
         setCarregandoTemplates(false)
       }
@@ -263,7 +311,7 @@ function FormulariosCoachContent() {
                 </div>
                 <div className="mt-4">
                   <button
-                    onClick={() => router.push('/pt/coach/configuracao')}
+                    onClick={() => router.push('/pt/c/configuracao')}
                     className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
                   >
                     Ir para Configurações
@@ -300,7 +348,7 @@ function FormulariosCoachContent() {
               <p className="text-gray-600 mt-1">Crie e gerencie seus formulários de anamnese e avaliação</p>
             </div>
             <Link
-              href="/pt/coach/formularios/novo"
+              href="/pt/c/formularios/novo"
               className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
             >
               <span>➕</span>
@@ -378,7 +426,7 @@ function FormulariosCoachContent() {
                       <button
                         onClick={() => {
                           // Editar template diretamente (não criar cópia)
-                          router.push(`/pt/coach/formularios/${template.id}`)
+                          router.push(`/pt/c/formularios/${template.id}`)
                         }}
                         className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium"
                         title="Editar formulário"
@@ -502,7 +550,7 @@ function FormulariosCoachContent() {
                     <div className="flex items-center justify-center gap-2 flex-wrap">
                       {/* Botão Editar */}
                       <button
-                        onClick={() => router.push(`/pt/coach/formularios/${form.id}`)}
+                        onClick={() => router.push(`/pt/c/formularios/${form.id}`)}
                         className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium"
                         title="Editar formulário"
                       >
@@ -556,15 +604,15 @@ function FormulariosCoachContent() {
                           🔗 Curta
                         </button>
                       ) : (
-                        <button
-                          onClick={async () => {
-                            try {
-                              const response = await fetch(`/api/coach/formularios/${form.id}/short-code`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                credentials: 'include',
-                                body: JSON.stringify({})
-                              })
+                      <button
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(`/api/c/formularios/${form.id}/short-code`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              credentials: 'include',
+                              body: JSON.stringify({})
+                            })
                               const data = await response.json()
                               if (response.ok && data.success) {
                                 alert('✅ URL curta gerada! Recarregue a página para ver.')
@@ -627,7 +675,7 @@ function FormulariosCoachContent() {
                   : 'Comece criando seu primeiro formulário personalizado'}
               </p>
               <Link
-                href="/pt/coach/formularios/novo"
+                href="/pt/c/formularios/novo"
                 className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
                 <span>➕</span>

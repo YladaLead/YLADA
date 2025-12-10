@@ -59,7 +59,7 @@ function EditarFormularioCoachContent() {
       } catch (error: any) {
         console.error('Erro ao carregar formulário:', error)
         setMensagemErro('Erro ao carregar formulário. Redirecionando...')
-        setTimeout(() => router.push('/pt/coach/formularios'), 2000)
+        setTimeout(() => router.push('/pt/c/formularios'), 2000)
       } finally {
         setCarregando(false)
       }
@@ -226,7 +226,7 @@ function EditarFormularioWrapper({
       if (data.success) {
         setMensagemSucesso('Formulário atualizado com sucesso!')
         setTimeout(() => {
-          router.push('/pt/coach/formularios')
+          router.push('/pt/c/formularios')
         }, 1500)
       }
     } catch (error: any) {
@@ -257,7 +257,7 @@ function EditarFormularioWrapper({
         setMensagemSucesso('Formulário excluído com sucesso!')
         setMostrarConfirmacaoExclusao(false)
         setTimeout(() => {
-          router.push('/pt/coach/formularios')
+          router.push('/pt/c/formularios')
         }, 1500)
       }
     } catch (error: any) {
@@ -381,7 +381,7 @@ function EditarFormularioWrapper({
           {/* Header */}
           <div className="mb-6">
             <button
-              onClick={() => router.push('/pt/coach/formularios')}
+              onClick={() => router.push('/pt/c/formularios')}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -674,7 +674,7 @@ function EditarFormularioWrapper({
             <div className="flex justify-end gap-4">
               <button
                 type="button"
-                onClick={() => router.push('/pt/coach/formularios')}
+                onClick={() => router.push('/pt/c/formularios')}
                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
               >
                 Cancelar

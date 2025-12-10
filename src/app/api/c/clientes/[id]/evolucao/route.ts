@@ -1,0 +1,3 @@
+// Re-exportar /api/coach/clientes/[id]/evolucao para /api/c/clientes/[id]/evolucao (alias)
+export { GET, POST } from '../../../../coach/clientes/[id]/evolucao/route'
+

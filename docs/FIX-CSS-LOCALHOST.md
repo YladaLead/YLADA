@@ -51,3 +51,4 @@ Se ainda não funcionar após limpar cache, pode ser necessário:
 ---
 
 **Status:** ✅ Configuração corrigida e commitada
+

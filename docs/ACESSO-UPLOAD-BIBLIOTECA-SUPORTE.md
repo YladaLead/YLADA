@@ -22,7 +22,7 @@ Foi criado um sistema de acesso restrito para upload de materiais na biblioteca 
 ### 3. **Políticas de Storage Atualizadas**
 - ✅ Upload: Admins **E** Suporte podem fazer upload
 - ✅ Leitura: Wellness users, Admins e Suporte podem ler
-- ✅ Delete: Apenas Admins podem deletar (suporte não pode)
+- ✅ Delete: Admins **E** Suporte podem deletar (Migração 029)
 
 ---
 
@@ -55,7 +55,7 @@ https://ylada.app/pt/wellness/biblioteca/upload
 
 3. **Storage Policies**:
    - Upload: `is_admin = true OR is_support = true`
-   - Delete: Apenas `is_admin = true` (suporte não pode deletar)
+   - Delete: `is_admin = true OR is_support = true` (Migração 029)
 
 ---
 
@@ -101,9 +101,9 @@ WHERE email = 'email@exemplo.com';
 
 - ✅ Suporte pode **fazer upload** de materiais
 - ✅ Suporte pode **ler** materiais
-- ❌ Suporte **NÃO pode deletar** materiais (apenas admins)
+- ✅ Suporte **pode deletar** materiais (Migração 029)
 - ❌ Suporte **NÃO tem acesso** à área `/admin/`
-- ✅ Admin continua tendo acesso total (incluindo upload)
+- ✅ Admin continua tendo acesso total (incluindo upload e delete)
 
 ---
 
