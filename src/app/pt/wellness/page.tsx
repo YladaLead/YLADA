@@ -86,7 +86,7 @@ export default function WellnessPage() {
                 */}
                 <iframe
                   className="w-full h-full"
-                  src="https://www.youtube.com/embed/YOUTUBE_VIDEO_ID"
+                  src="https://www.youtube.com/embed/Qg0ZQeX2Hrg"
                   title="Wellness System - Como Funciona na Prática"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
