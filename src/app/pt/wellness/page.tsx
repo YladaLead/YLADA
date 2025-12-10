@@ -13,6 +13,60 @@ export default function WellnessPage() {
     if (typeof window !== 'undefined') {
       setCurrentUrl(window.location.href)
     }
+
+    // Configurar YouTube Player API para resetar vídeo quando terminar
+    if (typeof window !== 'undefined' && !(window as any).YT) {
+      const tag = document.createElement('script')
+      tag.src = 'https://www.youtube.com/iframe_api'
+      const firstScriptTag = document.getElementsByTagName('script')[0]
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
+    }
+
+    let ytPlayer: any = null
+
+    // Função para inicializar o player quando a API estiver pronta
+    const initPlayer = () => {
+      if ((window as any).YT && (window as any).YT.Player) {
+        const iframe = document.getElementById('wellness-video-player')
+        if (iframe && !ytPlayer) {
+          ytPlayer = new (window as any).YT.Player('wellness-video-player', {
+            events: {
+              onStateChange: (event: any) => {
+                // Quando o vídeo terminar (state = 0 = ENDED)
+                if (event.data === (window as any).YT.PlayerState.ENDED) {
+                  // Resetar para o início e pausar
+                  setTimeout(() => {
+                    ytPlayer.seekTo(0, true)
+                    ytPlayer.pauseVideo()
+                  }, 500)
+                }
+              },
+            },
+          })
+        }
+      }
+    }
+
+    // Se a API já estiver carregada
+    if ((window as any).YT && (window as any).YT.Player) {
+      setTimeout(initPlayer, 1000)
+    } else {
+      // Aguardar a API carregar
+      ;(window as any).onYouTubeIframeAPIReady = () => {
+        setTimeout(initPlayer, 500)
+      }
+    }
+
+    return () => {
+      // Cleanup
+      if (ytPlayer) {
+        try {
+          ytPlayer.destroy()
+        } catch (e) {
+          // Ignorar erros de cleanup
+        }
+      }
+    }
   }, [])
   return (
     <div className="min-h-screen bg-white">
@@ -86,11 +140,12 @@ export default function WellnessPage() {
                 */}
                 <iframe
                   className="w-full h-full"
-                  src="https://www.youtube.com/embed/Qg0ZQeX2Hrg"
+                  src="https://www.youtube.com/embed/Qg0ZQeX2Hrg?rel=0&modestbranding=1&controls=1&enablejsapi=1&origin=https://ylada.app"
                   title="Wellness System - Como Funciona na Prática"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  id="wellness-video-player"
                 ></iframe>
                 
                 {/* 
