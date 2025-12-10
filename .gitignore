@@ -107,3 +107,9 @@ jspm_packages/
 .vscode-test
 # Arquivo privado com chaves Stripe
 MINHAS-CHAVES-STRIPE-PRIVADO.txt
+
+# Vídeos grandes (usar YouTube ou CDN externo)
+public/videos/*.mp4
+public/videos/*.mov
+public/videos/*.MOV
+!public/videos/README.md
