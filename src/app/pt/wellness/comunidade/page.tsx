@@ -134,26 +134,34 @@ export default function ComunidadePage() {
     const formData = new FormData()
     formData.append('file', file)
     
-    const response = await fetch('/api/community/upload', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData
-    })
-    
-    if (!response.ok) {
-      let errorMessage = 'Erro ao fazer upload'
-      try {
-        const data = await response.json()
-        errorMessage = data.error || errorMessage
-      } catch (e) {
-        // Se não for JSON, usar o status text
-        errorMessage = response.statusText || errorMessage
+    try {
+      const response = await fetch('/api/community/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      })
+      
+      if (!response.ok) {
+        let errorMessage = 'Erro ao fazer upload'
+        try {
+          const data = await response.json()
+          errorMessage = data.error || data.details || errorMessage
+        } catch (e) {
+          // Se não for JSON, usar o status text
+          errorMessage = response.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
       }
-      throw new Error(errorMessage)
+      
+      const data = await response.json()
+      if (!data.url) {
+        throw new Error('URL não retornada pelo servidor')
+      }
+      return data.url
+    } catch (error: any) {
+      console.error('❌ Erro detalhado no upload:', error)
+      throw error
     }
-    
-    const data = await response.json()
-    return data.url
   }
 
   const enviarMensagem = async (e: React.FormEvent) => {
@@ -171,10 +179,19 @@ export default function ComunidadePage() {
       if (audioBlob) {
         setUploading(true)
         try {
+          // Verificar tamanho do áudio antes de fazer upload
+          if (audioBlob.size > 5 * 1024 * 1024) {
+            alert('Áudio muito grande. Máximo: 5MB. Por favor, grave um áudio mais curto.')
+            setUploading(false)
+            setSending(false)
+            return
+          }
+          
           const audioFile = new File([audioBlob], 'audio.webm', { type: 'audio/webm' })
           audio_url = await fazerUpload(audioFile)
         } catch (uploadError: any) {
-          alert(uploadError.message || 'Erro ao fazer upload do áudio')
+          console.error('❌ Erro no upload de áudio:', uploadError)
+          alert(`Erro ao fazer upload do áudio: ${uploadError.message || 'Erro desconhecido'}\n\nVerifique:\n- Sua conexão com a internet\n- Se o áudio não está muito grande (máx: 5MB)\n- Tente gravar novamente`)
           setUploading(false)
           setSending(false)
           return

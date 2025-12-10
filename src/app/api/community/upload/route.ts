@@ -56,7 +56,15 @@ export async function POST(request: NextRequest) {
     // Gerar nome único
     const timestamp = Date.now()
     const random = Math.random().toString(36).substring(2, 9)
-    const extensao = file.name.split('.').pop()?.toLowerCase() || 'file'
+    // Para áudio, garantir extensão correta baseada no tipo MIME
+    let extensao = file.name.split('.').pop()?.toLowerCase() || 'file'
+    if (isAudio) {
+      if (file.type.includes('webm')) extensao = 'webm'
+      else if (file.type.includes('mp3')) extensao = 'mp3'
+      else if (file.type.includes('wav')) extensao = 'wav'
+      else if (file.type.includes('ogg')) extensao = 'ogg'
+      else extensao = 'webm' // padrão para áudio
+    }
     const nomeArquivo = `community/${user.id}/${timestamp}-${random}.${extensao}`
     
     // Converter para Buffer
