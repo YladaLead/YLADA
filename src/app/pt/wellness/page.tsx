@@ -456,14 +456,11 @@ export default function WellnessPage() {
                 </div>
                 <div className="text-4xl mb-4 text-center mt-4">🔥</div>
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Anual</h3>
-                <p className="text-gray-600 text-center mb-6">12x de R$ 59,90</p>
-                <div className="text-center mb-6">
-                  <p className="text-sm text-gray-500 mb-2">Parcelado pelo vendedor</p>
-                </div>
+                <p className="text-3xl font-bold text-green-600 text-center mb-6">12x de R$ 59,90</p>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    Mais completo
+                    Acesso completo
                   </li>
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
@@ -471,15 +468,7 @@ export default function WellnessPage() {
                   </li>
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    Prioridade no NOEL
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Acesso a bônus exclusivos
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Melhor opção para quem quer crescer
+                    A melhor opção pra quem quer crescer
                   </li>
                 </ul>
                 <Link
@@ -494,10 +483,7 @@ export default function WellnessPage() {
               <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-gray-200 hover:border-green-500 transition-all">
                 <div className="text-4xl mb-4 text-center">🌿</div>
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Mensal</h3>
-                <p className="text-gray-600 text-center mb-6">R$ 97,00</p>
-                <div className="text-center mb-6">
-                  <p className="text-sm text-gray-500 mb-2">Não recorrente</p>
-                </div>
+                <p className="text-3xl font-bold text-green-600 text-center mb-6">R$ 97,00</p>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
