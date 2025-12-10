@@ -64,6 +64,57 @@ export default function WellnessPage() {
           </div>
         </section>
 
+        {/* 🎥 Vídeo Explicativo */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-white">
+          <div className="container mx-auto px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                  🎥 Veja Como Funciona na Prática
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Entenda como o Wellness System pode transformar sua rotina
+                </p>
+              </div>
+              
+              <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video">
+                {/* 
+                  OPÇÃO 1: YouTube (RECOMENDADO)
+                  - Faça upload do vídeo no YouTube
+                  - Copie o ID do vídeo (ex: dQw4w9WgXcQ)
+                  - Substitua YOUTUBE_VIDEO_ID abaixo
+                */}
+                <iframe
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/YOUTUBE_VIDEO_ID"
+                  title="Wellness System - Como Funciona na Prática"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+                
+                {/* 
+                  OPÇÃO 2: Vídeo direto (se hospedar em CDN externo)
+                  Descomente e ajuste a URL do seu CDN:
+                  
+                <video
+                  className="w-full h-full object-cover"
+                  controls
+                  autoPlay={false}
+                  playsInline
+                  preload="metadata"
+                >
+                  <source src="https://seu-cdn.com/videos/wellness-explicativo.mp4" type="video/mp4" />
+                  <p className="text-center text-gray-600 p-8">
+                    Seu navegador não suporta a reprodução de vídeo.
+                  </p>
+                </video>
+                */}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ⭐ Por que tantas pessoas travam */}
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-6 lg:px-8">
