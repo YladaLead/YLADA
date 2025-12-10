@@ -14,6 +14,27 @@ export async function GET(request: NextRequest) {
     const { user, userProfile } = authResult
     const supabase = await createServerSupabaseClient()
     
+    // Teste simples para verificar se a tabela existe
+    const { error: testError } = await supabase
+      .from('community_posts')
+      .select('id')
+      .limit(1)
+    
+    if (testError) {
+      // Verificar se é erro de tabela não encontrada
+      if (testError.code === '42P01' || 
+          testError.message?.toLowerCase().includes('relation') && testError.message?.toLowerCase().includes('does not exist')) {
+        return NextResponse.json(
+          { 
+            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
+            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor',
+            posts: []
+          },
+          { status: 500 }
+        )
+      }
+    }
+    
     const { searchParams } = new URL(request.url)
     const area = searchParams.get('area') || userProfile?.perfil || 'wellness'
     const categoria = searchParams.get('categoria')
