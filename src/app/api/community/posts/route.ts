@@ -228,8 +228,25 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
   } catch (error: any) {
     console.error('❌ Erro no POST /api/community/posts:', error)
+    console.error('❌ Stack:', error.stack)
+    
+    // Verificar se é erro de tabela não encontrada
+    if (error.message?.includes('does not exist') || error.message?.includes('relation') || error.code === '42P01') {
+      return NextResponse.json(
+        { 
+          error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
+          details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor'
+        },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Erro ao processar requisição', details: error.message },
+      { 
+        error: 'Erro ao processar requisição', 
+        details: error.message || 'Erro desconhecido',
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }

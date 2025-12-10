@@ -132,11 +132,15 @@ export default function ComunidadePage() {
         await carregarPosts()
       } else {
         const data = await response.json()
-        alert(data.error || 'Erro ao enviar mensagem')
+        console.error('❌ Erro na resposta:', data)
+        const errorMsg = data.details 
+          ? `${data.error}\n\n${data.details}` 
+          : data.error || 'Erro ao enviar mensagem'
+        alert(errorMsg)
       }
-    } catch (error) {
-      console.error('Erro ao enviar:', error)
-      alert('Erro ao enviar mensagem')
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar:', error)
+      alert(`Erro ao enviar mensagem: ${error.message || 'Erro desconhecido'}`)
     } finally {
       setSending(false)
     }
