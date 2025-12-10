@@ -491,10 +491,6 @@ export default function WellnessPage() {
                   </li>
                   <li className="flex items-center">
                     <span className="text-green-600 mr-2">✓</span>
-                    Renovação mensal
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
                     Ideal para quem quer experimentar
                   </li>
                 </ul>
