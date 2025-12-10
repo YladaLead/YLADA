@@ -72,6 +72,10 @@ export async function GET(request: NextRequest) {
     
     if (error) {
       console.error('❌ Erro ao buscar posts:', error)
+      console.error('❌ Código do erro:', error.code)
+      console.error('❌ Mensagem completa:', error.message)
+      console.error('❌ Detalhes:', error.details)
+      console.error('❌ Hint:', error.hint)
       
       // Verificar se é erro de tabela não encontrada
       if (error.message?.includes('does not exist') || error.message?.includes('relation') || error.code === '42P01') {
@@ -85,8 +89,26 @@ export async function GET(request: NextRequest) {
         )
       }
       
+      // Verificar se é erro de permissão/RLS
+      if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('row-level security')) {
+        return NextResponse.json(
+          { 
+            error: 'Erro de permissão. Execute migrations/023-limpar-e-recriar-politicas-comunidade.sql',
+            details: error.message || 'Políticas RLS podem estar conflitando com versão antiga',
+            posts: []
+          },
+          { status: 500 }
+        )
+      }
+      
       return NextResponse.json(
-        { error: 'Erro ao buscar posts', details: error.message, posts: [] },
+        { 
+          error: 'Erro ao buscar posts', 
+          details: error.message || 'Erro desconhecido',
+          code: error.code,
+          hint: error.hint,
+          posts: [] 
+        },
         { status: 500 }
       )
     }
