@@ -13,6 +13,7 @@ interface Message {
   imagens?: string[]
   video_url?: string
   tipo?: string
+  reactions?: Record<string, any[]>
   user: {
     id: string
     nome_completo: string
@@ -60,7 +61,27 @@ export default function ComunidadePage() {
 
       if (response.ok) {
         const data = await response.json()
-        setMessages(data.posts || [])
+        const posts = data.posts || []
+        
+        // Buscar reações para cada mensagem
+        const postsComReacoes = await Promise.all(
+          posts.map(async (post: Message) => {
+            try {
+              const reactionsResponse = await fetch(`/api/community/posts/${post.id}/react`, {
+                credentials: 'include'
+              })
+              if (reactionsResponse.ok) {
+                const reactionsData = await reactionsResponse.json()
+                return { ...post, reactions: reactionsData.reactions }
+              }
+            } catch (error) {
+              // Ignorar erros de reações
+            }
+            return post
+          })
+        )
+        
+        setMessages(postsComReacoes)
       }
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error)
@@ -193,6 +214,43 @@ export default function ComunidadePage() {
     })
   }
 
+  const reagir = async (postId: string, tipo: string) => {
+    try {
+      const response = await fetch(`/api/community/posts/${postId}/react`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ tipo })
+      })
+
+      if (response.ok) {
+        await carregarMensagens()
+      }
+    } catch (error) {
+      console.error('Erro ao reagir:', error)
+    }
+  }
+
+  const verQuemReagiu = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/community/posts/${postId}/react`, {
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMessages(messages.map(m => 
+          m.id === postId ? { ...m, reactions: data.reactions } : m
+        ))
+        setShowWhoReacted(postId)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar reações:', error)
+    }
+  }
+
   const formatarData = (data: string) => {
     const date = new Date(data)
     const agora = new Date()
@@ -296,8 +354,78 @@ export default function ComunidadePage() {
                               </div>
                             )}
                             
-                            {/* Botão Compartilhar */}
-                            <div className="mt-2 flex items-center space-x-2">
+                            {/* Reações e Ações */}
+                            <div className="mt-2 flex items-center space-x-4 text-sm">
+                              {/* Mostrar reações existentes */}
+                              {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                                <div className="flex items-center space-x-1">
+                                  {Object.entries(msg.reactions).map(([tipo, reactions]: [string, any]) => {
+                                    const reactionEmoji = emojiReactions.find(r => r.tipo === tipo)
+                                    const userReacted = reactions.some((r: any) => r.user?.user_id === user?.id)
+                                    
+                                    return (
+                                      <button
+                                        key={tipo}
+                                        onClick={() => reagir(msg.id, tipo)}
+                                        className={`px-2 py-1 rounded-full text-xs flex items-center space-x-1 ${
+                                          userReacted ? 'bg-green-100 border border-green-300' : 'bg-gray-100 hover:bg-gray-200'
+                                        }`}
+                                        title={`${reactionEmoji?.label || tipo}: ${reactions.length}`}
+                                      >
+                                        <span>{reactionEmoji?.emoji || '👍'}</span>
+                                        <span>{reactions.length}</span>
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                              
+                              {/* Botão de reagir */}
+                              <button
+                                onClick={() => setShowReactions(showReactions === msg.id ? null : msg.id)}
+                                className="px-2 py-1 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-full transition-colors text-sm"
+                                title="Adicionar reação"
+                              >
+                                😊
+                              </button>
+
+                              {/* Menu de Reações */}
+                              {showReactions === msg.id && (
+                                <div className="absolute bg-white border border-gray-200 rounded-lg shadow-lg p-3 flex flex-wrap gap-2 z-20">
+                                  {emojiReactions.map((reaction) => {
+                                    const userReacted = msg.reactions?.[reaction.tipo]?.some(
+                                      (r: any) => r.user?.user_id === user?.id
+                                    )
+                                    return (
+                                      <button
+                                        key={reaction.tipo}
+                                        onClick={() => {
+                                          reagir(msg.id, reaction.tipo)
+                                          setShowReactions(null)
+                                        }}
+                                        className={`text-2xl hover:scale-125 transition-transform p-2 rounded-lg ${
+                                          userReacted ? 'bg-green-50' : 'hover:bg-gray-50'
+                                        }`}
+                                        title={reaction.label}
+                                      >
+                                        {reaction.emoji}
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                              )}
+
+                              {/* Ver quem reagiu */}
+                              {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                                <button
+                                  onClick={() => verQuemReagiu(msg.id)}
+                                  className="text-sm text-gray-600 hover:text-green-600 transition-colors"
+                                >
+                                  👥 Ver quem reagiu
+                                </button>
+                              )}
+
+                              {/* Compartilhar */}
                               <button
                                 onClick={() => {
                                   const url = `${window.location.origin}/pt/wellness/comunidade/${msg.id}`
@@ -315,6 +443,40 @@ export default function ComunidadePage() {
                                 📤 Compartilhar
                               </button>
                             </div>
+
+                            {/* Modal: Quem reagiu */}
+                            {showWhoReacted === msg.id && msg.reactions && (
+                              <div className="mt-3 bg-white border border-gray-200 rounded-lg p-4 shadow-lg z-10">
+                                <div className="flex items-center justify-between mb-3">
+                                  <h4 className="font-semibold">Quem reagiu:</h4>
+                                  <button
+                                    onClick={() => setShowWhoReacted(null)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                                <div className="space-y-3 max-h-60 overflow-y-auto">
+                                  {Object.entries(msg.reactions).map(([tipo, reactions]: [string, any]) => {
+                                    const reactionEmoji = emojiReactions.find(r => r.tipo === tipo)
+                                    return (
+                                      <div key={tipo} className="border-b border-gray-100 pb-2 last:border-0">
+                                        <p className="text-sm font-medium text-gray-700 mb-2">
+                                          {reactionEmoji?.emoji} {reactionEmoji?.label} ({reactions.length})
+                                        </p>
+                                        <div className="space-y-1">
+                                          {reactions.map((reaction: any) => (
+                                            <p key={reaction.id} className="text-sm text-gray-600">
+                                              {reaction.user?.nome_completo || reaction.user?.email}
+                                            </p>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
