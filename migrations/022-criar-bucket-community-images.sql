@@ -11,10 +11,44 @@ VALUES (
   'community-images',
   'community-images',
   true, -- Público para permitir acesso às imagens
-  5242880, -- 5MB limite
-  ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  10485760, -- 10MB limite (para vídeos)
+  ARRAY[
+    'image/jpeg', 
+    'image/jpg', 
+    'image/png', 
+    'image/gif', 
+    'image/webp',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'video/x-msvideo',
+    'audio/webm',
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/ogg',
+    'audio/x-m4a'
+  ]
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  file_size_limit = 10485760,
+  allowed_mime_types = ARRAY[
+    'image/jpeg', 
+    'image/jpg', 
+    'image/png', 
+    'image/gif', 
+    'image/webp',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'video/x-msvideo',
+    'audio/webm',
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/ogg',
+    'audio/x-m4a'
+  ];
 
 -- 2. Política: Qualquer usuário autenticado pode fazer upload
 DROP POLICY IF EXISTS "Usuários autenticados podem fazer upload" ON storage.objects;
