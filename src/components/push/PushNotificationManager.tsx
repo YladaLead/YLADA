@@ -32,7 +32,14 @@ export default function PushNotificationManager({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
+    let mounted = true
+
     const checkSupport = async () => {
+      // Aguardar um pouco para evitar race conditions em PWA
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      if (!mounted) return
+
       const isSupported = isPushNotificationSupported()
       setSupported(isSupported)
       
@@ -53,7 +60,7 @@ export default function PushNotificationManager({
               // Se já tem subscription, marcar como registrado
               if (registration.active) {
                 const existingSub = await getExistingSubscription(registration)
-                if (existingSub) {
+                if (existingSub && mounted) {
                   setRegistered(true)
                 }
               }
@@ -66,6 +73,10 @@ export default function PushNotificationManager({
     }
 
     checkSupport()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   // Registrar automaticamente se solicitado

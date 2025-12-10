@@ -142,21 +142,31 @@ export function useAuth() {
     let mounted = true
     let loadingTimeout: NodeJS.Timeout | null = null
 
+    // Verificar se está em modo PWA (standalone)
+    const isPWA = typeof window !== 'undefined' && (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true ||
+      document.referrer.includes('android-app://')
+    )
+
     const loadAuthData = async () => {
       if (!mounted) return
       
-      console.log('🔄 useAuth: Iniciando carregamento...')
+      console.log('🔄 useAuth: Iniciando carregamento...', { isPWA })
       
       try {
         // Buscar sessão uma única vez (sem retries excessivos)
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession()
+        // Em PWA, dar um pouco mais de tempo para cookies serem lidos
+        const sessionPromise = supabase.auth.getSession()
+        const { data: { session: currentSession }, error } = await sessionPromise
         
         if (!mounted) return
         
         if (currentSession) {
           console.log('✅ useAuth: Sessão encontrada', {
             userId: currentSession.user?.id,
-            email: currentSession.user?.email
+            email: currentSession.user?.email,
+            isPWA
           })
           
           setSession(currentSession)
@@ -181,7 +191,7 @@ export function useAuth() {
               setUserProfile(null)
             })
         } else {
-          console.log('⚠️ useAuth: Nenhuma sessão encontrada')
+          console.log('⚠️ useAuth: Nenhuma sessão encontrada', { isPWA })
           setSession(null)
           setUser(null)
           setUserProfile(null)
@@ -197,8 +207,9 @@ export function useAuth() {
       }
     }
 
-    // Timeout de segurança reduzido: 1.5 segundos (mais rápido para mobile)
+    // Timeout de segurança: mais curto para PWA (1s) e normal para web (1.5s)
     // Não acionar se já temos uma sessão válida (mesmo que o perfil ainda esteja carregando)
+    const timeoutDuration = isPWA ? 1000 : 1500
     loadingTimeout = setTimeout(() => {
       if (!mounted) return
       // Verificar se ainda está em loading e não temos sessão
@@ -206,23 +217,36 @@ export function useAuth() {
         if (!mounted) return
         // Se não temos sessão após timeout, marcar como não autenticado
         if (!currentSession) {
-          console.warn('⚠️ useAuth: Timeout de carregamento sem sessão, marcando como não autenticado')
+          console.warn('⚠️ useAuth: Timeout de carregamento sem sessão, marcando como não autenticado', { isPWA })
           setLoading(false)
         }
         // Se temos sessão, não fazer nada (já foi marcado como false no loadAuthData)
       })
-    }, 1500) // Reduzido de 3000ms para 1500ms para melhor UX em mobile
+    }, timeoutDuration)
 
     loadAuthData()
 
     // Ouvir mudanças na autenticação - isso é CRÍTICO para detectar sessão após redirecionamento
     let lastSessionId: string | null = null
     let profileLoading = false
+    let lastAuthEventTime = 0
+    const AUTH_EVENT_DEBOUNCE = 1000 // 1 segundo entre eventos
     
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return
+      
+      // Debounce: evitar processar eventos muito próximos (especialmente quando app volta do background)
+      const now = Date.now()
+      const timeSinceLastEvent = now - lastAuthEventTime
+      
+      // Se o evento é SIGNED_OUT, sempre processar
+      if (event !== 'SIGNED_OUT' && timeSinceLastEvent < AUTH_EVENT_DEBOUNCE) {
+        console.log('⚠️ useAuth: Ignorando evento muito próximo do anterior:', event, `(${timeSinceLastEvent}ms)`)
+        return
+      }
+      lastAuthEventTime = now
       
       // Evitar processar a mesma sessão múltiplas vezes
       const currentSessionId = session?.user?.id || null
@@ -296,12 +320,77 @@ export function useAuth() {
       console.log('✅ useAuth: Loading marcado como false após auth change')
     })
 
+    // Adicionar listener para quando app volta do background
+    // IMPORTANTE: Não reinicializar tudo, apenas verificar sessão se necessário
+    let checkingSessionRef = false
+    const handleVisibilityChange = () => {
+      if (!mounted) return
+      
+      if (document.visibilityState === 'visible') {
+        // App voltou ao foreground
+        // Usar ref para evitar múltiplas verificações simultâneas
+        if (checkingSessionRef) {
+          console.log('🔄 useAuth: Já está verificando sessão após voltar do background')
+          return
+        }
+        
+        console.log('🔄 useAuth: App voltou ao foreground, verificando sessão...')
+        checkingSessionRef = true
+        
+        // Aguardar um pouco antes de verificar (evita race conditions)
+        setTimeout(async () => {
+          if (!mounted) {
+            checkingSessionRef = false
+            return
+          }
+          
+          try {
+            const { data: { session: currentSession } } = await supabase.auth.getSession()
+            if (!mounted) {
+              checkingSessionRef = false
+              return
+            }
+            
+            if (currentSession) {
+              console.log('✅ useAuth: Sessão encontrada após voltar do background')
+              setSession(currentSession)
+              setUser(currentSession.user ?? null)
+              setLoading(false)
+              
+              // Buscar perfil em background
+              if (currentSession.user) {
+                fetchUserProfile(currentSession.user.id, true)
+                  .then(profile => {
+                    if (mounted) setUserProfile(profile)
+                    checkingSessionRef = false
+                  })
+                  .catch(() => {
+                    if (mounted) setUserProfile(null)
+                    checkingSessionRef = false
+                  })
+              } else {
+                checkingSessionRef = false
+              }
+            } else {
+              checkingSessionRef = false
+            }
+          } catch (err) {
+            console.warn('⚠️ useAuth: Erro ao verificar sessão após voltar do background:', err)
+            checkingSessionRef = false
+          }
+        }, 500) // Aguardar 500ms antes de verificar
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
       mounted = false
       if (loadingTimeout) {
         clearTimeout(loadingTimeout)
       }
       subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

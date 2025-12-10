@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProviderWrapper } from '@/components/providers/AuthProviderWrapper'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner'
+import PWAInitializer from '@/components/pwa/PWAInitializer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -78,6 +79,7 @@ export default function RootLayout({
         <meta httpEquiv="Expires" content="0" />
       </head>
       <body className={inter.className}>
+        <PWAInitializer />
         <AuthProviderWrapper>
           {children}
           <CookieConsentBanner />

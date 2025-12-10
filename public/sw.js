@@ -13,6 +13,13 @@ console.log('[Service Worker] Script carregado!', self.registration?.scope || 'N
 // Instalar Service Worker
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Instalando...')
+  
+  // Se já está instalado, não fazer nada (evita loops)
+  if (self.registration.active) {
+    console.log('[Service Worker] Já está instalado e ativo, pulando instalação')
+    return
+  }
+  
   // Forçar ativação imediata
   self.skipWaiting()
   
@@ -20,9 +27,11 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Cache aberto')
+        // Não bloquear instalação se cache falhar
         return cache.addAll(STATIC_CACHE_URLS).catch((error) => {
           console.warn('[Service Worker] Alguns arquivos não foram cacheados:', error)
           // Não falhar a instalação se cache falhar
+          return Promise.resolve()
         })
       })
       .then(() => {
@@ -40,6 +49,7 @@ self.addEventListener('install', (event) => {
 // Ativar Service Worker
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Ativando...')
+  
   event.waitUntil(
     Promise.all([
       // Limpar caches antigos
@@ -53,20 +63,33 @@ self.addEventListener('activate', (event) => {
           })
         )
       }),
-      // Controlar todas as páginas imediatamente
+      // Controlar todas as páginas imediatamente (mas não forçar se já está controlando)
       self.clients.claim().then(() => {
         console.log('[Service Worker] ✅ Service Worker ativado e controlando todas as páginas!')
-        // Notificar todas as páginas que o SW está ativo
+        // Notificar todas as páginas que o SW está ativo (apenas uma vez)
         return self.clients.matchAll().then((clients) => {
           clients.forEach((client) => {
-            client.postMessage({
-              type: 'SW_ACTIVATED',
-              message: 'Service Worker está ativo e pronto!'
-            })
+            try {
+              client.postMessage({
+                type: 'SW_ACTIVATED',
+                message: 'Service Worker está ativo e pronto!'
+              })
+            } catch (e) {
+              // Ignorar erros ao enviar mensagem (pode ser que o cliente já tenha fechado)
+              console.warn('[Service Worker] Erro ao enviar mensagem para cliente:', e)
+            }
           })
         })
+      }).catch((error) => {
+        // Não falhar ativação se claim falhar
+        console.warn('[Service Worker] Erro ao fazer claim, mas continuando:', error)
+        return Promise.resolve()
       })
-    ])
+    ]).catch((error) => {
+      // Não falhar ativação completamente
+      console.error('[Service Worker] Erro durante ativação:', error)
+      return Promise.resolve()
+    })
   )
 })
 

@@ -39,6 +39,21 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return permission
 }
 
+// Cache global para evitar múltiplos registros simultâneos
+let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null
+let isRegistering = false
+
+// Verificar se está em modo PWA (standalone)
+export function isPWAInstalled(): boolean {
+  if (typeof window === 'undefined') return false
+  
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true ||
+    document.referrer.includes('android-app://')
+  )
+}
+
 // Registrar Service Worker e aguardar estar ativo
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
@@ -46,86 +61,130 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return null
   }
 
-  try {
-    // Verificar se já tem um service worker registrado
-    let registration = await navigator.serviceWorker.getRegistration('/')
-    
-    // Se não tem, registrar novo
-    if (!registration) {
-      console.log('[Push Notifications] Registrando novo Service Worker...')
-      registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      })
-      console.log('[Push Notifications] Service Worker registrado:', registration)
-    } else {
-      console.log('[Push Notifications] Service Worker já estava registrado:', registration)
-    }
-    
-    // Aguardar o service worker estar ativo
-    if (registration.installing) {
-      console.log('[Push Notifications] Service Worker está instalando, aguardando...')
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Timeout aguardando Service Worker instalar'))
-        }, 10000) // 10 segundos timeout
-        
-        registration!.installing!.addEventListener('statechange', function() {
-          console.log('[Push Notifications] Estado do SW:', this.state)
-          if (this.state === 'activated' || this.state === 'installed') {
-            clearTimeout(timeout)
-            console.log('[Push Notifications] Service Worker instalado/ativado!')
-            resolve()
-          }
-        })
-      })
-      
-      // Aguardar um pouco mais para garantir que está ativo
-      await new Promise(resolve => setTimeout(resolve, 500))
-    } else if (registration.waiting) {
-      console.log('[Push Notifications] Service Worker está esperando, ativando...')
-      // Se está waiting, pode precisar de skipWaiting
-      registration.waiting.postMessage({ type: 'SKIP_WAITING' })
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Timeout aguardando Service Worker ativar'))
-        }, 5000)
-        
-        const checkActive = setInterval(() => {
-          if (registration!.active) {
-            clearInterval(checkActive)
-            clearTimeout(timeout)
-            console.log('[Push Notifications] Service Worker ativado!')
-            resolve()
-          }
-        }, 100)
-      })
-    } else if (registration.active) {
-      console.log('[Push Notifications] Service Worker já está ativo!')
-    } else {
-      // Aguardar um pouco e verificar novamente
-      console.log('[Push Notifications] Aguardando Service Worker ficar ativo...')
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      if (!registration.active) {
-        throw new Error('Service Worker não conseguiu ser ativado. Tente recarregar a página.')
-      }
-    }
-    
-    // Verificar se realmente está ativo antes de retornar
-    if (!registration.active) {
-      throw new Error('Service Worker não está ativo. Tente recarregar a página.')
-    }
-    
-    console.log('[Push Notifications] ✅ Service Worker pronto para uso!', {
-      scope: registration.scope,
-      active: !!registration.active,
-      installing: !!registration.installing,
-      waiting: !!registration.waiting
-    })
-    return registration
-  } catch (error: any) {
-    console.error('[Push Notifications] Erro ao registrar Service Worker:', error)
-    throw error
+  // Se já está registrando, retornar a promise existente
+  if (registrationPromise && isRegistering) {
+    console.log('[Push Notifications] Registro já em andamento, aguardando...')
+    return registrationPromise
   }
+
+  isRegistering = true
+  registrationPromise = (async () => {
+    try {
+      // Verificar se já tem um service worker registrado e ativo
+      let registration = await navigator.serviceWorker.getRegistration('/')
+      
+      // Se já tem um service worker ativo, retornar imediatamente (evita loops)
+      if (registration?.active) {
+        console.log('[Push Notifications] ✅ Service Worker já está ativo, retornando imediatamente')
+        isRegistering = false
+        return registration
+      }
+      
+      // Se não tem, registrar novo
+      if (!registration) {
+        console.log('[Push Notifications] Registrando novo Service Worker...')
+        registration = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/',
+          updateViaCache: 'none' // Evitar cache desatualizado
+        })
+        console.log('[Push Notifications] Service Worker registrado:', registration)
+      } else {
+        console.log('[Push Notifications] Service Worker já estava registrado, mas não está ativo')
+      }
+      
+      // Aguardar o service worker estar ativo (com timeout mais curto para PWA)
+      const isPWA = isPWAInstalled()
+      const timeout = isPWA ? 3000 : 10000 // 3s para PWA, 10s para web normal
+      
+      if (registration.installing) {
+        console.log('[Push Notifications] Service Worker está instalando, aguardando...')
+        await new Promise<void>((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Timeout aguardando Service Worker instalar'))
+          }, timeout)
+          
+          registration!.installing!.addEventListener('statechange', function() {
+            console.log('[Push Notifications] Estado do SW:', this.state)
+            if (this.state === 'activated' || this.state === 'installed') {
+              clearTimeout(timeoutId)
+              console.log('[Push Notifications] Service Worker instalado/ativado!')
+              resolve()
+            }
+          })
+        })
+        
+        // Aguardar um pouco mais para garantir que está ativo
+        await new Promise(resolve => setTimeout(resolve, 300))
+      } else if (registration.waiting) {
+        console.log('[Push Notifications] Service Worker está esperando, ativando...')
+        // Se está waiting, pode precisar de skipWaiting
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' })
+        await new Promise<void>((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Timeout aguardando Service Worker ativar'))
+          }, timeout)
+          
+          const checkActive = setInterval(() => {
+            if (registration!.active) {
+              clearInterval(checkActive)
+              clearTimeout(timeoutId)
+              console.log('[Push Notifications] Service Worker ativado!')
+              resolve()
+            }
+          }, 100)
+        })
+      } else if (registration.active) {
+        console.log('[Push Notifications] Service Worker já está ativo!')
+      } else {
+        // Aguardar um pouco e verificar novamente (menos tempo para PWA)
+        const waitTime = isPWA ? 500 : 1000
+        console.log('[Push Notifications] Aguardando Service Worker ficar ativo...')
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+        if (!registration.active) {
+          // Em PWA, não lançar erro, apenas retornar null
+          if (isPWA) {
+            console.warn('[Push Notifications] Service Worker não está ativo em PWA, mas continuando...')
+            isRegistering = false
+            return registration
+          }
+          throw new Error('Service Worker não conseguiu ser ativado. Tente recarregar a página.')
+        }
+      }
+      
+      // Verificar se realmente está ativo antes de retornar (mais tolerante em PWA)
+      if (!registration.active) {
+        if (isPWA) {
+          console.warn('[Push Notifications] Service Worker não está ativo em PWA, mas retornando mesmo assim')
+          isRegistering = false
+          return registration
+        }
+        throw new Error('Service Worker não está ativo. Tente recarregar a página.')
+      }
+      
+      console.log('[Push Notifications] ✅ Service Worker pronto para uso!', {
+        scope: registration.scope,
+        active: !!registration.active,
+        installing: !!registration.installing,
+        waiting: !!registration.waiting,
+        isPWA
+      })
+      isRegistering = false
+      return registration
+    } catch (error: any) {
+      isRegistering = false
+      console.error('[Push Notifications] Erro ao registrar Service Worker:', error)
+      
+      // Em PWA, não lançar erro crítico, apenas logar
+      if (isPWAInstalled()) {
+        console.warn('[Push Notifications] Erro em PWA, mas continuando execução...')
+        return null
+      }
+      
+      throw error
+    }
+  })()
+
+  return registrationPromise
 }
 
 // Converter VAPID public key para formato Uint8Array
