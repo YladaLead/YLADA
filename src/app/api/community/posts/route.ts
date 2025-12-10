@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Query simples: buscar posts da área, ordenados por data
     const { data: posts, error } = await supabase
       .from('community_posts')
-      .select('id, conteudo, created_at, user_id, imagens, video_url, tipo')
+      .select('id, conteudo, created_at, user_id, imagens, video_url, audio_url, tipo')
       .eq('area', area)
       .eq('status', 'publico')
       .is('deleted_at', null)
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createServerSupabaseClient()
     
     const body = await request.json()
-    const { conteudo, imagens, video_url } = body
+    const { conteudo, imagens, video_url, audio_url } = body
     
     if (!conteudo || !conteudo.trim()) {
       return NextResponse.json(
@@ -108,7 +108,8 @@ export async function POST(request: NextRequest) {
     
     // Determinar tipo baseado no conteúdo
     let tipo = 'texto'
-    if (video_url) tipo = 'video'
+    if (audio_url) tipo = 'audio'
+    else if (video_url) tipo = 'video'
     else if (imagens && imagens.length > 0) tipo = 'imagem'
     
     // Criar post simples
@@ -122,7 +123,8 @@ export async function POST(request: NextRequest) {
         categoria: 'chat',
         tipo: tipo,
         imagens: imagens || [],
-        video_url: video_url || null
+        video_url: video_url || null,
+        audio_url: audio_url || null
       })
       .select()
       .single()

@@ -26,15 +26,16 @@ export async function POST(request: NextRequest) {
     // Validar tipo
     const isImage = file.type.startsWith('image/')
     const isVideo = file.type.startsWith('video/')
+    const isAudio = file.type.startsWith('audio/')
     
-    if (!isImage && !isVideo) {
+    if (!isImage && !isVideo && !isAudio) {
       return NextResponse.json(
-        { error: 'Apenas imagens e vídeos são permitidos' },
+        { error: 'Apenas imagens, vídeos e áudios são permitidos' },
         { status: 400 }
       )
     }
     
-    // Validar tamanho (10MB para vídeo, 5MB para imagem)
+    // Validar tamanho (10MB para vídeo, 5MB para imagem, 5MB para áudio)
     const maxSize = isVideo ? 10 * 1024 * 1024 : 5 * 1024 * 1024
     if (file.size > maxSize) {
       return NextResponse.json(
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       url: urlData.publicUrl,
-      tipo: isVideo ? 'video' : 'imagem'
+      tipo: isVideo ? 'video' : isAudio ? 'audio' : 'imagem'
     })
   } catch (error: any) {
     console.error('❌ Erro no POST /api/community/upload:', error)

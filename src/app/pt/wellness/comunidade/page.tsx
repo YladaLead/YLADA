@@ -12,6 +12,7 @@ interface Message {
   created_at: string
   imagens?: string[]
   video_url?: string
+  audio_url?: string
   tipo?: string
   reactions?: Record<string, any[]>
   user: {
@@ -30,6 +31,12 @@ export default function ComunidadePage() {
   const [uploading, setUploading] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
+  const [recording, setRecording] = useState(false)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -45,6 +52,12 @@ export default function ComunidadePage() {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
+      }
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current)
+      }
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop())
       }
     }
   }, [])
@@ -111,13 +124,30 @@ export default function ComunidadePage() {
 
   const enviarMensagem = async (e: React.FormEvent) => {
     e.preventDefault()
-    if ((!message.trim() && uploadedUrls.length === 0) || sending || uploading) return
+    if ((!message.trim() && uploadedUrls.length === 0 && !audioUrl) || sending || uploading) return
 
     setSending(true)
     try {
       // Fazer upload dos arquivos se houver
       let imagens: string[] = []
       let video_url: string | null = null
+      let audio_url: string | null = null
+      
+      // Upload de áudio gravado
+      if (audioBlob) {
+        setUploading(true)
+        try {
+          const audioFile = new File([audioBlob], 'audio.webm', { type: 'audio/webm' })
+          audio_url = await fazerUpload(audioFile)
+        } catch (uploadError: any) {
+          alert(uploadError.message || 'Erro ao fazer upload do áudio')
+          setUploading(false)
+          setSending(false)
+          return
+        } finally {
+          setUploading(false)
+        }
+      }
       
       if (selectedFiles.length > 0) {
         setUploading(true)
@@ -150,9 +180,10 @@ export default function ComunidadePage() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          conteudo: message.trim() || (video_url ? 'Vídeo compartilhado' : 'Imagem compartilhada'),
+          conteudo: message.trim() || (audio_url ? 'Áudio compartilhado' : video_url ? 'Vídeo compartilhado' : 'Imagem compartilhada'),
           imagens: imagens.length > 0 ? imagens : undefined,
-          video_url: video_url || undefined
+          video_url: video_url || undefined,
+          audio_url: audio_url || undefined
         })
       })
 
@@ -160,6 +191,9 @@ export default function ComunidadePage() {
         setMessage('')
         setSelectedFiles([])
         setUploadedUrls([])
+        setAudioBlob(null)
+        setAudioUrl(null)
+        setRecordingTime(0)
         await carregarMensagens()
       } else {
         const data = await response.json()
@@ -354,6 +388,19 @@ export default function ComunidadePage() {
                               </div>
                             )}
                             
+                            {/* Áudio */}
+                            {msg.audio_url && (
+                              <div className="mt-2">
+                                <audio
+                                  src={msg.audio_url}
+                                  controls
+                                  className="w-full max-w-md"
+                                >
+                                  Seu navegador não suporta áudio.
+                                </audio>
+                              </div>
+                            )}
+                            
                             {/* Reações e Ações */}
                             <div className="mt-2 flex items-center space-x-4 text-sm">
                               {/* Mostrar reações existentes */}
@@ -488,6 +535,29 @@ export default function ComunidadePage() {
 
               {/* Caixa de Mensagem */}
               <form onSubmit={enviarMensagem} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                {/* Preview de áudio gravado */}
+                {audioUrl && !recording && (
+                  <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">🎤</span>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Áudio gravado</p>
+                          <p className="text-xs text-gray-600">{formatarTempo(recordingTime)}</p>
+                        </div>
+                        <audio src={audioUrl} controls className="flex-1 max-w-xs" />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={cancelarGravacao}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        ✕ Remover
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Preview de arquivos selecionados */}
                 {selectedFiles.length > 0 && (
                   <div className="mb-3 flex flex-wrap gap-2">
@@ -499,6 +569,10 @@ export default function ComunidadePage() {
                             alt={file.name}
                             className="w-20 h-20 object-cover rounded-lg"
                           />
+                        ) : file.type.startsWith('audio/') ? (
+                          <div className="w-20 h-20 bg-purple-200 rounded-lg flex items-center justify-center">
+                            <span className="text-2xl">🎵</span>
+                          </div>
                         ) : (
                           <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
                             <span className="text-2xl">🎥</span>
@@ -535,29 +609,66 @@ export default function ComunidadePage() {
                       <p className="text-xs text-gray-500">
                         💡 Dica: Use @nome para mencionar alguém
                       </p>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*,video/*"
-                        multiple
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="text-sm text-gray-600 hover:text-green-600 transition-colors"
-                      >
-                        📎 Anexar imagem/vídeo
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        {/* Botão de gravar áudio */}
+                        {!recording ? (
+                          <button
+                            type="button"
+                            onClick={iniciarGravacao}
+                            disabled={uploading || sending}
+                            className="text-sm text-gray-600 hover:text-green-600 transition-colors disabled:opacity-50"
+                            title="Gravar áudio"
+                          >
+                            🎤 Gravar áudio
+                          </button>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 px-3 py-1 bg-red-100 rounded-full">
+                              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                              <span className="text-sm text-red-700 font-medium">
+                                {formatarTempo(recordingTime)}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={pararGravacao}
+                              className="text-sm text-red-600 hover:text-red-700 transition-colors"
+                            >
+                              ⏹️ Parar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelarGravacao}
+                              className="text-sm text-gray-600 hover:text-gray-700 transition-colors"
+                            >
+                              ✕ Cancelar
+                            </button>
+                          </div>
+                        )}
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*,video/*,audio/*"
+                          multiple
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="text-sm text-gray-600 hover:text-green-600 transition-colors"
+                        >
+                          📎 Anexar arquivo
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <button
                     type="submit"
-                    disabled={(!message.trim() && selectedFiles.length === 0) || sending || uploading}
+                    disabled={(!message.trim() && selectedFiles.length === 0 && !audioUrl) || sending || uploading || recording}
                     className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {uploading ? '⏳' : sending ? '⏳' : '📤'}
+                    {uploading ? '⏳' : sending ? '⏳' : recording ? '🎤' : '📤'}
                   </button>
                 </div>
               </form>
