@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
+import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
 
 const supabase = createClient()
 
@@ -23,6 +24,7 @@ export default function LoginForm({
   initialSignUpMode = false
 }: LoginFormProps) {
   const router = useRouter()
+  const { getLastVisitedPage } = useLastVisitedPage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -78,10 +80,14 @@ export default function LoginForm({
             return
           }
 
-          console.log('✅ Já autenticado, redirecionando para:', redirectPath)
+          // 🚀 NOVO: Verificar última página visitada antes de redirecionar
+          const lastPage = getLastVisitedPage()
+          const finalRedirectPath = lastPage && !lastPage.includes('/login') ? lastPage : redirectPath
+          
+          console.log('✅ Já autenticado, redirecionando para:', finalRedirectPath, lastPage ? '(última página visitada)' : '(padrão)')
           hasRedirected = true
           // Usar replace para evitar adicionar ao histórico
-          router.replace(redirectPath)
+          router.replace(finalRedirectPath)
         }
       } catch (err) {
         console.error('Erro ao verificar autenticação:', err)
@@ -229,19 +235,23 @@ export default function LoginForm({
               console.warn('Aviso: Não foi possível verificar autorizações pendentes:', e)
             }
             
+            // 🚀 NOVO: Verificar última página visitada antes de redirecionar
+            const lastPage = getLastVisitedPage()
+            const finalRedirectPath = lastPage && !lastPage.includes('/login') ? lastPage : redirectPath
+            
             // Aguardar um pouco para garantir que a sessão foi persistida
-            console.log('🔄 Redirecionando após cadastro para:', redirectPath)
+            console.log('🔄 Redirecionando após cadastro para:', finalRedirectPath, lastPage ? '(última página visitada)' : '(padrão)')
             
             // Verificar se já está na página de destino para evitar loop
             const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-            if (currentPath === redirectPath || currentPath.startsWith(redirectPath + '/')) {
+            if (currentPath === finalRedirectPath || currentPath.startsWith(finalRedirectPath + '/')) {
               console.log('✅ Já está na página de destino, não redirecionar')
               setLoading(false)
               return
             }
             
             setTimeout(() => {
-              router.replace(redirectPath) // Usar replace ao invés de push
+              router.replace(finalRedirectPath) // Usar replace ao invés de push
             }, 300) // Aumentado para 300ms para garantir persistência da sessão
           }
         } else {
@@ -315,13 +325,17 @@ export default function LoginForm({
           console.warn('⚠️ Não foi possível verificar expiração da senha provisória:', checkError)
         }
 
+        // 🚀 NOVO: Verificar última página visitada antes de redirecionar
+        const lastPage = getLastVisitedPage()
+        const finalRedirectPath = lastPage && !lastPage.includes('/login') ? lastPage : redirectPath
+        
         // 🚀 CORREÇÃO: Redirecionar imediatamente após login bem-sucedido
         // Aguardar um pouco para garantir que a sessão foi persistida
-        console.log('🔄 Redirecionando após login para:', redirectPath)
+        console.log('🔄 Redirecionando após login para:', finalRedirectPath, lastPage ? '(última página visitada)' : '(padrão)')
         
         // Verificar se já está na página de destino para evitar loop
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-        if (currentPath === redirectPath || currentPath.startsWith(redirectPath + '/')) {
+        if (currentPath === finalRedirectPath || currentPath.startsWith(finalRedirectPath + '/')) {
           console.log('✅ Já está na página de destino, não redirecionar')
           setLoading(false)
           return
@@ -329,7 +343,7 @@ export default function LoginForm({
         
         // Usar setTimeout para garantir que o estado foi atualizado e sessão persistida
         setTimeout(() => {
-          router.replace(redirectPath) // Usar replace para não adicionar ao histórico
+          router.replace(finalRedirectPath) // Usar replace para não adicionar ao histórico
         }, 200) // Aumentado para 200ms para garantir persistência da sessão
 
         return

@@ -197,7 +197,7 @@ export function useAuth() {
       }
     }
 
-    // Timeout de segurança: apenas se não houver sessão após 3 segundos
+    // Timeout de segurança reduzido: 1.5 segundos (mais rápido para mobile)
     // Não acionar se já temos uma sessão válida (mesmo que o perfil ainda esteja carregando)
     loadingTimeout = setTimeout(() => {
       if (!mounted) return
@@ -211,7 +211,7 @@ export function useAuth() {
         }
         // Se temos sessão, não fazer nada (já foi marcado como false no loadAuthData)
       })
-    }, 3000)
+    }, 1500) // Reduzido de 3000ms para 1500ms para melhor UX em mobile
 
     loadAuthData()
 

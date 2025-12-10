@@ -32,7 +32,7 @@ export default function ProtectedRoute({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(true)
 
-  // Timeout único de 2 segundos (ao invés de múltiplos)
+  // Timeout reduzido para 1.5 segundos (melhor UX em mobile)
   useEffect(() => {
     mountedRef.current = true
     
@@ -45,7 +45,7 @@ export default function ProtectedRoute({
         if (mountedRef.current) {
           setHasTimedOut(true)
         }
-      }, 2000)
+      }, 1500) // Reduzido de 2000ms para 1500ms
     } else {
       setHasTimedOut(false)
     }
