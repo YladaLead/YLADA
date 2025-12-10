@@ -23,7 +23,42 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'recent' // 'recent', 'popular', 'trending'
     
     // Construir query base
-    // Usar join manual ao invés de foreign key reference (mais confiável)
+    // Primeiro, testar se a tabela existe com query simples
+    const { data: testData, error: testError } = await supabase
+      .from('community_posts')
+      .select('id')
+      .limit(1)
+    
+    if (testError) {
+      console.error('❌ Erro ao testar tabela community_posts:', testError)
+      const errorMsg = testError.message?.toLowerCase() || ''
+      const errorCode = testError.code || ''
+      
+      if (errorMsg.includes('does not exist') || errorMsg.includes('relation') || errorCode === '42P01' || errorCode === 'PGRST116') {
+        return NextResponse.json(
+          { 
+            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
+            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor',
+            posts: []
+          },
+          { status: 500 }
+        )
+      }
+      
+      // Se não for erro de tabela, retornar erro genérico
+      return NextResponse.json(
+        { 
+          error: 'Erro ao acessar tabela community_posts',
+          details: testError.message || 'Erro desconhecido',
+          code: testError.code,
+          hint: testError.hint,
+          posts: [] 
+        },
+        { status: 500 }
+      )
+    }
+    
+    // Se chegou aqui, a tabela existe. Fazer query completa
     let query = supabase
       .from('community_posts')
       .select(`
