@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-client'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { requireApiAuth } from '@/lib/api-auth'
 
 /**
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (authResult instanceof NextResponse) return authResult
     
     const { user, userProfile } = authResult
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     
     const { searchParams } = new URL(request.url)
     const area = searchParams.get('area') || userProfile?.perfil || 'wellness'
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     if (authResult instanceof NextResponse) return authResult
     
     const { user, userProfile } = authResult
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     
     const body = await request.json()
     const {

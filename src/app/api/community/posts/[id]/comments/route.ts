@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-client'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { notifyPostAuthorOnComment } from '@/lib/community-notifications'
 
@@ -16,7 +16,7 @@ export async function GET(
     if (authResult instanceof NextResponse) return authResult
     
     const { user } = authResult
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const postId = params.id
     
     // Buscar comentários
@@ -105,7 +105,7 @@ export async function POST(
     if (authResult instanceof NextResponse) return authResult
     
     const { user } = authResult
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const postId = params.id
     
     const body = await request.json()

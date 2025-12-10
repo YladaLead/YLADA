@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-client'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { requireApiAuth } from '@/lib/api-auth'
 
 /**
@@ -14,7 +14,7 @@ export async function GET(
     const authResult = await requireApiAuth(request)
     if (authResult instanceof NextResponse) return authResult
     
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const postId = params.id
     
     // Buscar todas as reações do post
