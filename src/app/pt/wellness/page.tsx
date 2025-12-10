@@ -140,7 +140,7 @@ export default function WellnessPage() {
                 */}
                 <iframe
                   className="w-full h-full"
-                  src="https://www.youtube.com/embed/Qg0ZQeX2Hrg?rel=0&modestbranding=1&controls=1&enablejsapi=1&origin=https://ylada.app"
+                  src="https://www.youtube.com/embed/p7koYETLIlw?rel=0&modestbranding=1&controls=1&enablejsapi=1&origin=https://ylada.app"
                   title="Wellness System - Como Funciona na Prática"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

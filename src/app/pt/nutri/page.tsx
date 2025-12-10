@@ -38,45 +38,56 @@ export default function NutriLandingPage() {
 
       <main>
         {/* SEÇÃO 1 – HERO */}
-        <section className="bg-[#0B57FF] text-white py-16 sm:py-24">
-          <div className="container mx-auto px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center mb-12">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight text-white">
-                A Plataforma Completa para Nutricionistas que Querem Crescer como Nutri-Empresárias.
-              </h1>
-              <p className="text-xl sm:text-2xl mb-8 text-white/90 leading-relaxed">
-                Captação. Gestão. Estratégia. Formação. Tudo em um só lugar.
-              </p>
-            </div>
+        <section className="bg-[#0B57FF] text-white pt-4 sm:pt-6 lg:pt-8 pb-8 sm:pb-12 lg:pb-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Layout híbrido: duas colunas no desktop, vertical no mobile - vídeo visível imediatamente */}
+            <div className="max-w-7xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start lg:items-center">
+                {/* Coluna 1: Título e Subtítulo (esquerda no desktop, abaixo do vídeo no mobile) */}
+                <div className="text-center lg:text-left order-2 lg:order-1">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black mb-3 sm:mb-4 leading-tight text-white">
+                    A Plataforma Completa para Nutricionistas que Querem Crescer como Nutri-Empresárias.
+                  </h1>
+                  <p className="text-base sm:text-lg lg:text-xl text-white/90 leading-relaxed mb-4 lg:mb-6">
+                    Captação. Gestão. Estratégia. Formação. Tudo em um só lugar.
+                  </p>
+                  
+                  {/* CTA visível também ao lado do vídeo no desktop */}
+                  <div className="lg:hidden mb-4">
+                    <Link
+                      href="/pt/nutri/checkout"
+                      className="inline-block bg-white text-[#0B57FF] px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-bold hover:bg-gray-100 transition-colors shadow-xl"
+                    >
+                      Quero entrar para o YLADA Nutri agora
+                    </Link>
+                  </div>
+                </div>
 
-            {/* COMPONENTE DO VÍDEO – HERO */}
-            <div className="max-w-4xl mx-auto mt-12">
-              <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-                <div className="aspect-video bg-gray-900">
-                  {/* Vídeo mantido conforme solicitado */}
-                  <video 
-                    className="w-full h-full object-cover"
-                    controls
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    poster="/videos/nutri-hero-poster.jpg"
-                  >
-                    <source src="/videos/nutri-hero.mp4" type="video/mp4" />
-                    <source src="/videos/nutri-hero.webm" type="video/webm" />
-                    Seu navegador não suporta vídeo HTML5.
-                  </video>
+                {/* Coluna 2: Vídeo (direita no desktop, primeiro no mobile - VISÍVEL IMEDIATAMENTE) */}
+                <div className="order-1 lg:order-2 w-full">
+                  <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+                    <div className="aspect-video bg-gray-900 relative">
+                      {/* Vídeo do YouTube - formato otimizado */}
+                      <iframe
+                        className="absolute top-0 left-0 w-full h-full"
+                        src="https://www.youtube.com/embed/p7koYETLIlw?autoplay=1&mute=1&loop=1&playlist=p7koYETLIlw&controls=1&rel=0&modestbranding=1"
+                        title="YLADA Nutri - Vídeo de Vendas"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        loading="eager"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              {/* Texto abaixo do vídeo */}
-              <p className="text-lg mt-6 text-white/80 text-center max-w-3xl mx-auto">
+              {/* Texto abaixo (após o grid) */}
+              <p className="text-base sm:text-lg mt-6 sm:mt-8 text-white/80 text-center max-w-3xl mx-auto mb-6 sm:mb-8">
                 A sua profissão evoluiu. O mercado mudou. A Nutri moderna não pode depender de indicação, sorte ou tentativa e erro. Ela precisa de estrutura, captação, gestão e estratégia empresarial.
               </p>
               
-              {/* CTA */}
-              <div className="text-center mt-8">
+              {/* CTA principal (visível no desktop, duplicado no mobile acima) */}
+              <div className="text-center hidden lg:block">
                 <Link
                   href="/pt/nutri/checkout"
                   className="inline-block bg-white text-[#0B57FF] px-10 py-5 rounded-lg text-xl font-bold hover:bg-gray-100 transition-colors shadow-xl"
