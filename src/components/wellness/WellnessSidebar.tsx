@@ -90,6 +90,12 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       color: 'blue'
     },
     {
+      title: 'Comunidade',
+      icon: '🏘️',
+      href: '/pt/wellness/comunidade',
+      color: 'green'
+    },
+    {
       title: 'Treinos & Plano',
       icon: '🎯',
       color: 'purple',
