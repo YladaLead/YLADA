@@ -1,11 +1,12 @@
 /**
- * NOEL Sales Support - API para Suporte na Página de Vendas
+ * NOEL Vendedor - API para Vendas e Suporte Leve
  * 
  * Endpoint: POST /api/wellness/noel/sales-support
  * 
- * Versão limitada do NOEL apenas para suporte técnico e vendas
- * - NÃO é mentor
- * - Apenas ajuda com: acesso, pagamento, problemas técnicos
+ * NOEL Vendedor baseado na Lousa Oficial v1.0
+ * - 3 modos automáticos: Vendedor, Suporte Leve, Comercial Curto
+ * - Estrutura de resposta obrigatória (4 etapas)
+ * - Base de conhecimento (FAQs + Scripts + CTAs)
  * - Não requer autenticação (público)
  * - Arquiva perguntas não respondidas para aprendizado
  * - Notifica admin quando não sabe responder
@@ -15,43 +16,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { supabaseAdmin } from '@/lib/supabase'
 import { notifyAdminNoelUnanswered } from '@/lib/noel-sales-support-notifications'
+import { detectMode, type NoelVendedorMode } from '@/lib/noel-vendedor/mode-detector'
+import { buildNoelVendedorSystemPrompt } from '@/lib/noel-vendedor/system-prompt'
+import { SUPPORT_CONTACTS } from '@/lib/noel-vendedor/constants'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
-
-const SUPPORT_EMAIL = 'ylada.app@gmail.com'
-const SUPPORT_WHATSAPP = 'https://wa.me/5519996049800'
-
-const SALES_SUPPORT_SYSTEM_PROMPT = `
-Você é NOEL, assistente de suporte do Wellness System YLADA.
-
-IMPORTANTE: Você está em MODO SUPORTE/VENDAS - NÃO é mentor.
-
-Sua função é APENAS:
-- Ajudar com problemas de acesso ao sistema
-- Esclarecer dúvidas sobre planos e pagamentos
-- Orientar sobre como fazer o pagamento
-- Resolver problemas técnicos de login/acesso
-- Explicar como acessar após o pagamento
-
-VOCÊ NÃO DEVE:
-- Dar mentoria sobre vendas ou negócios
-- Sugerir estratégias de marketing
-- Falar sobre scripts ou fluxos de vendas
-- Dar conselhos sobre como vender ou recrutar
-- Discutir métodos de crescimento de equipe
-
-Se alguém perguntar sobre mentoria, vendas ou estratégias, responda:
-"Para questões sobre mentoria e estratégias de negócio, você precisa estar logado no sistema. Após fazer seu pagamento e acessar o Wellness System, o NOEL Mentor estará disponível para te ajudar com essas questões."
-
-QUANDO NÃO SOUBER RESPONDER:
-Se você não souber responder uma pergunta ou não tiver certeza, SEMPRE inclua no final da sua resposta:
-"Se ainda tiver dúvidas, entre em contato com nosso suporte: ${SUPPORT_EMAIL} ou WhatsApp: ${SUPPORT_WHATSAPP}"
-
-Mantenha respostas curtas, diretas e focadas apenas em suporte técnico e vendas.
-Seja amigável, mas profissional.
-`
 
 /**
  * Detecta se o NOEL não soube responder adequadamente
@@ -95,12 +66,13 @@ interface SalesSupportRequest {
   message: string
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
   userEmail?: string
+  source?: 'page' | 'whatsapp' | 'chat'
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: SalesSupportRequest = await request.json()
-    const { message, conversationHistory = [], userEmail } = body
+    const { message, conversationHistory = [], userEmail, source = 'page' } = body
 
     if (!message || message.trim().length === 0) {
       return NextResponse.json(
@@ -117,11 +89,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Detectar modo automaticamente
+    const detectedMode = detectMode({
+      message,
+      messageLength: message.length,
+      source,
+      conversationHistory,
+    })
+
+    console.log(`[NOEL Vendedor] Modo detectado: ${detectedMode}`)
+
+    // Construir system prompt baseado no modo detectado
+    const systemPrompt = buildNoelVendedorSystemPrompt({
+      mode: detectedMode,
+      includeFewShots: true,
+      fewShotsLimit: 3,
+    })
+
     // Construir histórico de conversa
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       {
         role: 'system',
-        content: SALES_SUPPORT_SYSTEM_PROMPT,
+        content: systemPrompt,
       },
       ...conversationHistory.slice(-10).map(msg => ({
         role: msg.role,
@@ -138,7 +127,10 @@ export async function POST(request: NextRequest) {
       model: 'gpt-4o-mini',
       messages,
       temperature: 0.7,
-      max_tokens: 500, // Limitar resposta para manter foco
+      max_tokens: 300, // Reduzido para respostas mais curtas (conforme Lousa)
+      top_p: 0.9,
+      frequency_penalty: 0.3, // Evitar repetição
+      presence_penalty: 0.3, // Incentivar criatividade controlada
     })
 
     const response = completion.choices[0]?.message?.content || 'Desculpe, não consegui processar sua mensagem. Por favor, tente novamente.'
@@ -155,8 +147,8 @@ export async function POST(request: NextRequest) {
           user_email: userEmail || null,
           user_message: message.substring(0, 5000), // Limitar tamanho
           noel_response: response.substring(0, 10000), // Limitar tamanho
-          module: 'sales-support',
-          source: 'sales-support',
+          module: `noel-vendedor-${detectedMode}`,
+          source: 'noel-vendedor',
           needs_learning: unanswered,
           unanswered: unanswered,
           conversation_history: conversationHistory.length > 0 ? conversationHistory : null,
@@ -197,11 +189,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       response,
-      mode: 'sales-support',
+      mode: detectedMode,
+      modeLabel: detectedMode === 'vendedor' ? 'Vendedor' : detectedMode === 'suporte-leve' ? 'Suporte Leve' : 'Comercial Curto',
       unanswered: unanswered,
       supportContact: {
-        email: SUPPORT_EMAIL,
-        whatsapp: SUPPORT_WHATSAPP,
+        email: SUPPORT_CONTACTS.email,
+        whatsapp: SUPPORT_CONTACTS.whatsapp,
       },
     })
   } catch (error: any) {
