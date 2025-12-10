@@ -64,8 +64,8 @@ function getPrice(
     
     const prices: Record<string, Record<string, number>> = {
       wellness: {
-        monthly: 59.90, // R$ 59,90/mês
-        annual: 574.80, // R$ 574,80 (12x de R$ 47,90) - Parcelado Vendedor (sem juros para cliente)
+        monthly: 97.00, // R$ 97,00/mês (não recorrente)
+        annual: 718.80, // R$ 718,80 (12x de R$ 59,90) - Parcelado pelo vendedor
       },
       nutri: {
         monthly: 97.00,

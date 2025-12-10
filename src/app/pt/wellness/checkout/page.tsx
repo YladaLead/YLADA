@@ -179,19 +179,19 @@ export default function WellnessCheckoutPage() {
 
   const planDetails = {
     monthly: {
-      price: 59.90,
-      priceFormatted: 'R$ 59,90',
+      price: 97.00,
+      priceFormatted: 'R$ 97,00',
       period: 'mês',
       description: 'Plano Mensal',
     },
     annual: {
-      price: 574.80, // Valor total (12x de R$ 47,90) - Atual até 9/12
-      priceFormatted: 'R$ 574,80',
+      price: 718.80, // Valor total (12x de R$ 59,90)
+      priceFormatted: 'R$ 718,80',
       period: 'ano',
       description: 'Plano Anual',
-      monthlyEquivalent: 47.90, // 12x de R$ 47,90 (sem juros para cliente)
-      totalParcelado: 574.80, // Total parcelado
-      savings: 144.00, // (59.90 * 12) - 574.80 = 718.80 - 574.80 = 144.00
+      monthlyEquivalent: 59.90, // 12x de R$ 59,90 (parcelado pelo vendedor)
+      totalParcelado: 718.80, // Total parcelado
+      savings: 445.20, // (97.00 * 12) - 718.80 = 1164.00 - 718.80 = 445.20
     },
   }
 
@@ -217,65 +217,7 @@ export default function WellnessCheckoutPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Banner Promocional NOEL - NOVO SISTEMA INTELIGENTE */}
-        <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-green-700 rounded-xl shadow-xl p-6 mb-8 text-white">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="text-4xl">🤖</span>
-            <h2 className="text-2xl sm:text-3xl font-bold">NOEL - Sistema Inteligente</h2>
-          </div>
-          <p className="text-center text-lg sm:text-xl mb-4 text-green-50">
-            Agora não é só uma ferramenta. É um <strong>sistema completo de mentoria inteligente</strong> que guia você passo a passo na construção do seu negócio Herbalife.
-          </p>
-        </div>
-
-        {/* Seção: O que mudou com NOEL */}
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-8">
-          <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
-            <span>✨</span>
-            <span>O que você ganha com o NOEL:</span>
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
-              <div className="text-2xl mb-2">🧠</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Mentoria Inteligente</h4>
-              <p className="text-sm text-gray-700">
-                Orientação personalizada 24/7 baseada no seu perfil, objetivos e situação atual do negócio.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
-              <div className="text-2xl mb-2">📊</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Acompanhamento de Metas</h4>
-              <p className="text-sm text-gray-700">
-                Acompanhe PV, recrutamento, royalties e construção de equipe com orientações específicas.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
-              <div className="text-2xl mb-2">🔄</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Fluxos e Scripts</h4>
-              <p className="text-sm text-gray-700">
-                Acesso a todos os fluxos de vendas, recrutamento e acompanhamento com scripts prontos.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
-              <div className="text-2xl mb-2">🎯</div>
-              <h4 className="font-semibold text-gray-900 mb-2">Ação Diária 2-5-10</h4>
-              <p className="text-sm text-gray-700">
-                Receba ações práticas diárias para manter consistência e construir seu negócio.
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="bg-white rounded-xl shadow-lg p-8">
-          {/* Título */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Finalizar Assinatura
-            </h1>
-            <p className="text-gray-600">
-              Escolha seu plano e complete o pagamento
-            </p>
-          </div>
 
           {/* Alerta de cancelamento */}
           {canceled && (
@@ -295,9 +237,6 @@ export default function WellnessCheckoutPage() {
 
           {/* Seleção de Plano */}
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Escolha seu plano
-            </h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {/* Plano Mensal */}
               <button
@@ -305,7 +244,7 @@ export default function WellnessCheckoutPage() {
                 className={`p-6 rounded-lg border-2 transition-all ${
                   planType === 'monthly'
                     ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 hover:border-green-300'
+                    : 'border-gray-200 hover:border-green-300 bg-white'
                 }`}
               >
                 <div className="text-center">
@@ -313,90 +252,33 @@ export default function WellnessCheckoutPage() {
                     Mensal
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 59,90
+                    R$ 97,00
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                 </div>
               </button>
 
-              {/* Plano Anual */}
+              {/* Plano Anual - Sempre com fundo verde */}
               <button
                 onClick={() => setPlanType('annual')}
-                className={`p-6 rounded-lg border-2 transition-all relative ${
-                  planType === 'annual'
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 hover:border-green-300'
-                }`}
+                className="p-6 rounded-lg border-2 border-green-500 bg-green-50 transition-all relative hover:bg-green-100"
               >
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
-                  ECONOMIA DE 21%
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  RECOMENDADO
                 </div>
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
                     Anual
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 47,90
+                    R$ 59,90
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                   <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 574,80/ano (12x sem juros)
+                    Total: R$ 718,80/ano (12x de R$ 59,90)
                   </div>
                 </div>
               </button>
-            </div>
-          </div>
-
-          {/* Resumo */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Resumo da Assinatura
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Plano:</span>
-                <span className="font-medium text-gray-900">
-                  {currentPlan.description}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Valor:</span>
-                <span className="font-bold text-green-600 text-lg">
-                  {planType === 'annual' 
-                    ? `R$ 47,90/mês (12x sem juros)`
-                    : `${currentPlan.priceFormatted}/mês`
-                  }
-                </span>
-              </div>
-              {planType === 'annual' && (
-                <div className="text-xs text-gray-500">
-                  Total: R$ {(currentPlan as any).totalParcelado?.toFixed(2) || '574,80'}
-                </div>
-              )}
-              {planType === 'annual' && (
-                <div className="flex justify-between text-green-600">
-                  <span>Economia:</span>
-                  <span className="font-medium">
-                    R$ {currentPlan.savings}
-                  </span>
-                </div>
-              )}
-              <div className="border-t border-gray-200 pt-3 mt-3">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-900">Total:</span>
-                  <span className="font-bold text-gray-900 text-xl">
-                    {planType === 'annual' 
-                      ? `R$ ${currentPlan.priceFormatted}`
-                      : currentPlan.priceFormatted
-                    }
-                  </span>
-                </div>
-                {planType === 'annual' && (
-                  <div className="text-xs text-gray-500 mt-1 text-right">
-                    12x de R$ {currentPlan.monthlyEquivalent?.toFixed(2)} sem juros
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
@@ -438,7 +320,7 @@ export default function WellnessCheckoutPage() {
                     💳 Parcelamento Disponível
                   </h3>
                   <p className="text-sm text-blue-800">
-                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12x de R$ 47,90 sem juros</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
+                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12x de R$ 59,90</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
                   </p>
                 </div>
               </div>
