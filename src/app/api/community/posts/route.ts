@@ -4,265 +4,81 @@ import { requireApiAuth } from '@/lib/api-auth'
 
 /**
  * GET /api/community/posts
- * Listar posts da comunidade
+ * Listar mensagens do chat
  */
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireApiAuth(request)
     if (authResult instanceof NextResponse) return authResult
     
-    const { user, userProfile } = authResult
+    const { userProfile } = authResult
     const supabase = await createServerSupabaseClient()
     
     const { searchParams } = new URL(request.url)
     const area = searchParams.get('area') || userProfile?.perfil || 'wellness'
-    const categoria = searchParams.get('categoria')
-    const tag = searchParams.get('tag')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const sort = searchParams.get('sort') || 'recent' // 'recent', 'popular', 'trending'
     
-    // Construir query base
-    // Primeiro, testar se a tabela existe com query simples
-    const { data: testData, error: testError } = await supabase
+    // Query simples: buscar posts da área, ordenados por data
+    const { data: posts, error } = await supabase
       .from('community_posts')
-      .select('id')
-      .limit(1)
-    
-    if (testError) {
-      console.error('❌ Erro ao testar tabela community_posts:', testError)
-      console.error('❌ Erro completo:', JSON.stringify(testError, null, 2))
-      
-      const errorMsg = (testError.message || '').toLowerCase()
-      const errorCode = testError.code || ''
-      
-      // Só retornar "tabela não existe" se for realmente esse erro
-      if (errorCode === '42P01' || errorCode === 'PGRST116' || 
-          (errorMsg.includes('does not exist') && errorMsg.includes('relation'))) {
-        return NextResponse.json(
-          { 
-            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
-            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor',
-            posts: []
-          },
-          { status: 500 }
-        )
-      }
-      
-      // Para qualquer outro erro, retornar o erro real
-      return NextResponse.json(
-        { 
-          error: 'Erro ao acessar tabela community_posts',
-          details: testError.message || 'Erro desconhecido',
-          code: testError.code,
-          hint: testError.hint,
-          fullError: process.env.NODE_ENV === 'development' ? JSON.stringify(testError, null, 2) : undefined,
-          posts: [] 
-        },
-        { status: 500 }
-      )
-    }
-    
-    // Se chegou aqui, a tabela existe. Fazer query completa
-    // Tentar com join primeiro, se falhar, fazer sem join e buscar user depois
-    let query = supabase
-      .from('community_posts')
-      .select(`
-        *,
-        user:user_profiles(
-          id,
-          nome_completo,
-          email,
-          perfil
-        )
-      `)
+      .select('*')
       .eq('area', area)
       .eq('status', 'publico')
       .is('deleted_at', null)
-    
-    // Ordenação
-    if (sort === 'popular') {
-      query = query.order('curtidas_count', { ascending: false })
-    } else if (sort === 'trending') {
-      // Trending = curtidas + comentários nas últimas 24h
-      query = query
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order('curtidas_count', { ascending: false })
-        .order('comentarios_count', { ascending: false })
-    } else {
-      // Recent (padrão)
-      query = query
-        .order('pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-    }
-    
-    // Filtros
-    if (categoria) {
-      query = query.eq('categoria', categoria)
-    }
-    
-    if (tag) {
-      query = query.contains('tags', [tag])
-    }
-    
-    // Paginação
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-    query = query.range(from, to)
-    
-    let { data: posts, error } = await query
-    
-    // Se erro for relacionado ao join com user_profiles, tentar sem join
-    if (error && (error.message?.includes('user_profiles') || error.message?.includes('foreign key') || error.code === 'PGRST202')) {
-      console.warn('⚠️ Erro no join com user_profiles, tentando sem join:', error.message)
-      
-      // Tentar query sem join
-      const simpleQuery = supabase
-        .from('community_posts')
-        .select('*')
-        .eq('area', area)
-        .eq('status', 'publico')
-        .is('deleted_at', null)
-      
-      // Aplicar ordenação
-      if (sort === 'popular') {
-        simpleQuery.order('curtidas_count', { ascending: false })
-      } else if (sort === 'trending') {
-        simpleQuery
-          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-          .order('curtidas_count', { ascending: false })
-          .order('comentarios_count', { ascending: false })
-      } else {
-        simpleQuery
-          .order('pinned', { ascending: false })
-          .order('created_at', { ascending: false })
-      }
-      
-      // Aplicar filtros
-      if (categoria) {
-        simpleQuery.eq('categoria', categoria)
-      }
-      
-      if (tag) {
-        simpleQuery.contains('tags', [tag])
-      }
-      
-      // Paginação
-      const from = (page - 1) * limit
-      const to = from + limit - 1
-      simpleQuery.range(from, to)
-      
-      const { data: simplePosts, error: simpleError } = await simpleQuery
-      
-      if (simpleError) {
-        error = simpleError
-        posts = null
-      } else {
-        // Buscar user_profiles manualmente para cada post
-        if (simplePosts && simplePosts.length > 0) {
-          const userIds = [...new Set(simplePosts.map((p: any) => p.user_id))]
-          const { data: profiles } = await supabase
-            .from('user_profiles')
-            .select('user_id, id, nome_completo, email, perfil')
-            .in('user_id', userIds)
-          
-          const profilesMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || [])
-          
-          posts = simplePosts.map((post: any) => ({
-            ...post,
-            user: profilesMap.get(post.user_id) || {
-              id: post.user_id,
-              nome_completo: 'Usuário',
-              email: '',
-              perfil: ''
-            }
-          }))
-          error = null
-        } else {
-          posts = []
-          error = null
-        }
-      }
-    }
+      .order('created_at', { ascending: false })
+      .limit(50)
     
     if (error) {
       console.error('❌ Erro ao buscar posts:', error)
-      console.error('❌ Código do erro:', error.code)
-      console.error('❌ Mensagem completa:', error.message)
-      console.error('❌ Detalhes:', error.details)
-      console.error('❌ Hint:', error.hint)
-      
-      // Verificar se é erro de tabela não encontrada
-      const errorMsg = error.message?.toLowerCase() || ''
-      const errorCode = error.code || ''
-      
-      if (errorMsg.includes('does not exist') || errorMsg.includes('relation') || errorCode === '42P01' || errorCode === 'PGRST116') {
-        return NextResponse.json(
-          { 
-            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
-            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor',
-            posts: []
-          },
-          { status: 500 }
-        )
-      }
-      
-      // Verificar se é erro de permissão/RLS
-      if (errorCode === '42501' || errorMsg.includes('permission denied') || errorMsg.includes('row-level security') || errorMsg.includes('policy')) {
-        return NextResponse.json(
-          { 
-            error: 'Erro de permissão. Execute migrations/023-limpar-e-recriar-politicas-comunidade.sql',
-            details: error.message || 'Políticas RLS podem estar conflitando com versão antiga',
-            posts: []
-          },
-          { status: 500 }
-        )
-      }
-      
-      // Retornar erro genérico com todos os detalhes
       return NextResponse.json(
         { 
-          error: 'Erro ao buscar posts', 
-          details: error.message || 'Erro desconhecido',
+          error: 'Erro ao buscar mensagens',
+          details: error.message,
           code: error.code,
-          hint: error.hint,
-          fullError: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined,
-          posts: [] 
+          posts: []
         },
         { status: 500 }
       )
     }
     
-    // Buscar reações do usuário para cada post
+    // Buscar dados dos usuários separadamente (mais confiável)
     if (posts && posts.length > 0) {
-      const postIds = posts.map(p => p.id)
-      const { data: userReactions } = await supabase
-        .from('community_reactions')
-        .select('post_id')
-        .eq('user_id', user.id)
-        .in('post_id', postIds)
+      const userIds = [...new Set(posts.map((p: any) => p.user_id))]
+      const { data: profiles } = await supabase
+        .from('user_profiles')
+        .select('user_id, nome_completo, email, perfil')
+        .in('user_id', userIds)
       
-      const reactedPostIds = new Set(userReactions?.map(r => r.post_id) || [])
+      const profilesMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || [])
       
-      // Adicionar flag se usuário curtiu
-      posts.forEach((post: any) => {
-        post.user_curtiu = reactedPostIds.has(post.id)
+      // Combinar posts com perfis
+      const postsComPerfis = posts.map((post: any) => ({
+        ...post,
+        user: profilesMap.get(post.user_id) || {
+          id: post.user_id,
+          nome_completo: 'Usuário',
+          email: '',
+          perfil: ''
+        }
+      }))
+      
+      return NextResponse.json({
+        success: true,
+        posts: postsComPerfis
       })
     }
     
     return NextResponse.json({
       success: true,
-      posts: posts || [],
-      pagination: {
-        page,
-        limit,
-        total: posts?.length || 0
-      }
+      posts: []
     })
   } catch (error: any) {
     console.error('❌ Erro no GET /api/community/posts:', error)
     return NextResponse.json(
-      { error: 'Erro ao processar requisição', details: error.message },
+      { 
+        error: 'Erro ao processar requisição',
+        details: error.message,
+        posts: []
+      },
       { status: 500 }
     )
   }
@@ -270,7 +86,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/community/posts
- * Criar novo post
+ * Criar nova mensagem no chat
  */
 export async function POST(request: NextRequest) {
   try {
@@ -281,113 +97,66 @@ export async function POST(request: NextRequest) {
     const supabase = await createServerSupabaseClient()
     
     const body = await request.json()
-    const {
-      titulo,
-      conteudo,
-      categoria,
-      tags,
-      imagens,
-      video_url,
-      link_url,
-      tipo = 'texto'
-    } = body
+    const { conteudo } = body
     
-    // Validação - conteúdo é obrigatório, título e categoria são opcionais
     if (!conteudo || !conteudo.trim()) {
       return NextResponse.json(
-        { error: 'Conteúdo é obrigatório' },
+        { error: 'Mensagem não pode estar vazia' },
         { status: 400 }
       )
     }
     
-    // Se não tiver categoria, usar 'chat' (modo chat simples)
-    const categoriaFinal = categoria || 'chat'
-    
-    // Validar categoria
-    const categoriasValidas = ['duvidas', 'dicas', 'casos-sucesso', 'networking', 'anuncios', 'chat']
-    if (categoriaFinal && !categoriasValidas.includes(categoriaFinal)) {
-      return NextResponse.json(
-        { error: 'Categoria inválida' },
-        { status: 400 }
-      )
-    }
-    
-    // Se não tiver título, usar primeiras palavras do conteúdo como título
-    const tituloFinal = titulo?.trim() || conteudo.trim().substring(0, 100).split('\n')[0] || 'Mensagem'
-    
-    // Criar post
+    // Criar post simples
     const { data: post, error } = await supabase
       .from('community_posts')
       .insert({
         user_id: user.id,
         area: userProfile?.perfil || 'wellness',
-        titulo: tituloFinal,
+        titulo: conteudo.trim().substring(0, 100) || 'Mensagem',
         conteudo: conteudo.trim(),
-        categoria: categoriaFinal,
-        tags: tags || [],
-        imagens: imagens || [],
-        video_url: video_url || null,
-        link_url: link_url || null,
-        tipo: tipo || 'texto'
+        categoria: 'chat',
+        tipo: 'texto'
       })
-      .select(`
-        *,
-        user:user_profiles!inner(
-          id,
-          nome_completo,
-          email,
-          perfil
-        )
-      `)
+      .select()
       .single()
     
     if (error) {
       console.error('❌ Erro ao criar post:', error)
-      
-      // Verificar se é erro de tabela não encontrada
-      if (error.message?.includes('does not exist') || error.message?.includes('relation') || error.code === '42P01') {
-        return NextResponse.json(
-          { 
-            error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
-            details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor'
-          },
-          { status: 500 }
-        )
-      }
-      
-      return NextResponse.json(
-        { error: 'Erro ao criar post', details: error.message },
-        { status: 500 }
-      )
-    }
-    
-    // TODO: Criar notificações para seguidores (assíncrono)
-    // TODO: Enviar push notifications
-    
-    return NextResponse.json({
-      success: true,
-      post
-    }, { status: 201 })
-  } catch (error: any) {
-    console.error('❌ Erro no POST /api/community/posts:', error)
-    console.error('❌ Stack:', error.stack)
-    
-    // Verificar se é erro de tabela não encontrada
-    if (error.message?.includes('does not exist') || error.message?.includes('relation') || error.code === '42P01') {
       return NextResponse.json(
         { 
-          error: 'Tabelas da comunidade não foram criadas. Execute a migração SQL primeiro.',
-          details: 'Execute migrations/021-create-community-tables.sql no Supabase SQL Editor'
+          error: 'Erro ao enviar mensagem',
+          details: error.message,
+          code: error.code
         },
         { status: 500 }
       )
     }
     
+    // Buscar perfil do usuário
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('user_id, nome_completo, email, perfil')
+      .eq('user_id', user.id)
+      .single()
+    
+    return NextResponse.json({
+      success: true,
+      post: {
+        ...post,
+        user: profile || {
+          id: user.id,
+          nome_completo: 'Usuário',
+          email: user.email || '',
+          perfil: userProfile?.perfil || 'wellness'
+        }
+      }
+    }, { status: 201 })
+  } catch (error: any) {
+    console.error('❌ Erro no POST /api/community/posts:', error)
     return NextResponse.json(
       { 
-        error: 'Erro ao processar requisição', 
-        details: error.message || 'Erro desconhecido',
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        error: 'Erro ao processar requisição',
+        details: error.message
       },
       { status: 500 }
     )
