@@ -658,8 +658,9 @@ export default function DynamicTemplatePreview({
   onClose,
   isPreview = true // Por padrão é preview (para dono)
 }: DynamicTemplatePreviewProps) {
-  // Padrão para Previews: Etapa 0 = Apresentação, Etapa 1+ = Perguntas (igual Quiz Bem-Estar)
-  const [etapaAtual, setEtapaAtual] = useState(0)
+  // Se for preview (dono): Etapa 0 = Apresentação, Etapa 1+ = Perguntas
+  // Se for cliente: Começa direto na Etapa 1 (primeira pergunta)
+  const [etapaAtual, setEtapaAtual] = useState(isPreview ? 0 : 1)
   const [respostas, setRespostas] = useState<Record<number, any>>({})
   const [formData, setFormData] = useState<Record<string, any>>({})
 
@@ -679,6 +680,35 @@ export default function DynamicTemplatePreview({
     diagnosticsInfo.slug ||
     normalizeSlug(template.slug || template.id || template.nome || template.name || '')
 
+  // Calcular diagnóstico baseado nas respostas do cliente
+  const calcularDiagnosticoCliente = (totalPerguntas: number) => {
+    if (isPreview || !questionsArray || questionsArray.length === 0) return null
+    
+    // Contar respostas por tipo (lógica simples: maioria das respostas determina o diagnóstico)
+    // Para perfil-intestino: respostas 'a' ou 'b' = equilibrado, 'c' ou 'd' = sensível, 'e' = disbiose
+    const respostasArray = Object.values(respostas).filter(r => r !== null && r !== undefined)
+    if (respostasArray.length < totalPerguntas) return null
+    
+    // Lógica específica para perfil-intestino
+    if (fallbackDiagnosticsSlug.includes('perfil-intestino')) {
+      const respostasBaixas = respostasArray.filter((r: any) => r === 'a' || r === 'b').length
+      const respostasMedias = respostasArray.filter((r: any) => r === 'c').length
+      const respostasAltas = respostasArray.filter((r: any) => r === 'd' || r === 'e').length
+      
+      // Determinar diagnóstico baseado na maioria
+      if (respostasBaixas >= respostasMedias && respostasBaixas >= respostasAltas) {
+        return 'intestinoEquilibrado'
+      } else if (respostasAltas > respostasMedias) {
+        return 'disbioseIntestinal'
+      } else {
+        return 'intestinoSensivel'
+      }
+    }
+    
+    // Lógica genérica: usar primeiro diagnóstico disponível
+    return diagnosticsInfo.entries[0]?.resultadoId || null
+  }
+
   const renderDiagnosticsCards = () => {
     if (!diagnosticsInfo.entries.length) {
       return (
@@ -695,21 +725,47 @@ export default function DynamicTemplatePreview({
       )
     }
 
-    if (!diagnosticsInfo.entries.length) {
-      return (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-yellow-800 font-semibold">
-            ⚠️ Diagnósticos não encontrados para este template ainda.
-          </p>
-          {fallbackDiagnosticsSlug && (
-            <p className="text-sm text-yellow-700 mt-2">
-              Slug analisado: <strong>{fallbackDiagnosticsSlug}</strong>
+    // Se for cliente (isPreview=false), mostrar apenas o diagnóstico correspondente às respostas
+    if (!isPreview && questionsArray) {
+      const diagnosticoId = calcularDiagnosticoCliente(questionsArray.length)
+      if (!diagnosticoId) {
+        return (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-yellow-800 font-semibold">
+              ⚠️ Complete todas as perguntas para ver seu diagnóstico.
             </p>
-          )}
+          </div>
+        )
+      }
+      
+      const entry = diagnosticsInfo.entries.find(e => e.resultadoId === diagnosticoId) || diagnosticsInfo.entries[0]
+      const colors = resultColorPalette[0]
+      
+      return (
+        <div
+          key={`${fallbackDiagnosticsSlug || entry.resultadoId}-${entry.resultadoId}`}
+          className={`rounded-lg p-6 border-2 ${colors.border} ${colors.bg}`}
+        >
+          <div className="mb-4">
+            <h5 className={`text-lg font-bold ${colors.text}`}>
+              {formatResultadoLabel(entry.resultadoId)}
+            </h5>
+          </div>
+          <div className="bg-white rounded-lg p-4 space-y-2">
+            <p className="font-semibold text-gray-900">{entry.diagnostico.diagnostico}</p>
+            <p className="text-gray-700">{entry.diagnostico.causaRaiz}</p>
+            <p className="text-gray-700">{entry.diagnostico.acaoImediata}</p>
+            {entry.diagnostico.proximoPasso && (
+              <p className="text-gray-700 font-semibold bg-purple-50 p-3 rounded-lg mt-2">
+                {entry.diagnostico.proximoPasso}
+              </p>
+            )}
+          </div>
         </div>
       )
     }
 
+    // Se for preview (dono), mostrar todos os diagnósticos possíveis
     return diagnosticsInfo.entries.map((entry, index) => {
       const colors = resultColorPalette[index % resultColorPalette.length]
       return (
@@ -931,7 +987,7 @@ export default function DynamicTemplatePreview({
   if (templateType === 'quiz' && questionsArray && questionsArray.length > 0) {
     const perguntas = questionsArray
     const totalPerguntas = perguntas.length
-    const totalEtapas = totalPerguntas + 1 // 0=landing, 1-N=perguntas, N+1=resultados
+    const totalEtapas = totalPerguntas + 1 // 0=landing (apenas preview), 1-N=perguntas, N+1=resultados
 
     // Cores para perguntas (ciclo de 5 cores igual Quiz Bem-Estar)
     const cores = [
@@ -1209,16 +1265,25 @@ export default function DynamicTemplatePreview({
                   <div className="grid sm:grid-cols-2 gap-2">
                     {perguntaAtual.options && perguntaAtual.options.map((op: any, idx: number) => {
                       const opcaoLabel = op.label || op
+                      const opcaoId = op.id || op.value || idx
+                      const respostaAtual = respostas[etapaAtual]
+                      const isSelected = respostaAtual === opcaoId
+                      
                       return (
                         <label
                           key={idx}
-                          className={`flex items-center p-3 bg-white rounded-lg border ${corAtual.border} cursor-pointer hover:opacity-60 transition-colors`}
+                          className={`flex items-center p-3 bg-white rounded-lg border ${isSelected ? corAtual.border + ' border-2' : corAtual.border} cursor-pointer hover:opacity-80 transition-colors ${isSelected ? 'bg-opacity-20 ' + corAtual.bg : ''}`}
                         >
                           <input 
                             type="radio" 
                             name={`pergunta-${etapaAtual}`} 
+                            value={opcaoId}
+                            checked={isSelected}
+                            onChange={(e) => {
+                              setRespostas({ ...respostas, [etapaAtual]: e.target.value })
+                            }}
                             className="mr-3 w-4 h-4 text-purple-600 focus:ring-purple-500 focus:ring-2" 
-                            disabled 
+                            disabled={isPreview === false && false} // Sempre habilitado para cliente
                           />
                           <span className="text-gray-700">{opcaoLabel}</span>
                         </label>
@@ -1234,10 +1299,9 @@ export default function DynamicTemplatePreview({
           {etapaAtual > totalPerguntas && (
             <div className="space-y-6">
               <div className="text-center space-y-1">
-                <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis do Quiz</h4>
-                {/* Explicação apenas no preview (para o dono) */}
-                {isPreview && (
+                {isPreview ? (
                   <>
+                    <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis do Quiz</h4>
                     <p className="text-sm text-gray-600">
                       Esta prévia mostra exatamente o que sua cliente receberá como diagnóstico final, baseado nas respostas que ela informar no formulário original.
                     </p>
@@ -1245,6 +1309,8 @@ export default function DynamicTemplatePreview({
                       Use este quadro como referência para orientar a conversa e preparar o plano de acompanhamento correspondente a cada resultado.
                     </p>
                   </>
+                ) : (
+                  <h4 className="text-xl font-bold text-gray-900">📊 Seu Resultado</h4>
                 )}
               </div>
               {renderCTA()}
@@ -1252,47 +1318,73 @@ export default function DynamicTemplatePreview({
             </div>
           )}
 
-          {/* Navegação com Setinhas e Botões Numerados (igual Quiz Bem-Estar) */}
-          <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
-            <button
-              onClick={handlePrevious}
-              disabled={etapaAtual === 0}
-              className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ← Anterior
-            </button>
-            
-            <div className="flex space-x-2">
-              {Array.from({ length: totalEtapas + 1 }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setEtapaAtual(i)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    etapaAtual === i
-                      ? 'text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                  style={etapaAtual === i ? {
-                    background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
-                  } : {}}
-                  title={labels[i] || `Etapa ${i}`}
-                >
-                  {labels[i] || `${i}`}
-                </button>
-              ))}
-            </div>
+          {/* Navegação */}
+          {isPreview ? (
+            // PREVIEW: Navegação completa com botões numerados (para o dono)
+            <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+              <button
+                onClick={handlePrevious}
+                disabled={etapaAtual === 0}
+                className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Anterior
+              </button>
+              
+              <div className="flex space-x-2">
+                {Array.from({ length: totalEtapas + 1 }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setEtapaAtual(i)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      etapaAtual === i
+                        ? 'text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                    style={etapaAtual === i ? {
+                      background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                    } : {}}
+                    title={labels[i] || `Etapa ${i}`}
+                  >
+                    {labels[i] || `${i}`}
+                  </button>
+                ))}
+              </div>
 
-            <button
-              onClick={handleNext}
-              disabled={etapaAtual === totalEtapas}
-              className="flex items-center px-4 py-2 text-white rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              style={{
-                background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
-              }}
-            >
-              Próxima →
-            </button>
-          </div>
+              <button
+                onClick={handleNext}
+                disabled={etapaAtual === totalEtapas}
+                className="flex items-center px-4 py-2 text-white rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                }}
+              >
+                Próxima →
+              </button>
+            </div>
+          ) : (
+            // CLIENTE: Apenas botão "Próximo" (sem navegação lateral)
+            <div className="flex justify-center mt-6 pt-6 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  // Verificar se tem resposta antes de avançar
+                  if (etapaAtual >= 1 && etapaAtual <= totalPerguntas) {
+                    if (!respostas[etapaAtual]) {
+                      // Não avançar se não tiver resposta
+                      return
+                    }
+                  }
+                  handleNext()
+                }}
+                disabled={etapaAtual === totalEtapas || (etapaAtual >= 1 && etapaAtual <= totalPerguntas && !respostas[etapaAtual])}
+                className="flex items-center px-6 py-3 text-white rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                }}
+              >
+                {etapaAtual >= 1 && etapaAtual < totalPerguntas ? 'Próxima →' : etapaAtual === totalPerguntas ? 'Ver Resultado' : 'Próxima →'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     )
