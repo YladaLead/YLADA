@@ -194,22 +194,43 @@ export async function POST(request: NextRequest) {
       descricao: passo.descricao || ''
     }))
 
-    return NextResponse.json({
-      success: true,
-      data: {
+      const responseData = {
+        success: true,
+        data: {
+          codigo: fluxo.codigo,
+          titulo: fluxo.titulo,
+          descricao: fluxo.descricao || '',
+          categoria: fluxo.categoria || 'vender',
+          link: link,
+          script_principal: scriptPrincipal,
+          quando_usar: quandoUsar,
+          total_passos: passos?.length || 0,
+          passos: passosCompletos,
+          // Informação adicional para o NOEL
+          nota_link: 'Este fluxo está disponível na biblioteca do sistema. O conteúdo completo está incluído nesta resposta para você apresentar diretamente ao usuário.'
+        }
+      }
+      
+      const responseJson = JSON.stringify(responseData)
+      const responseSize = responseJson.length
+      
+      console.log('✅ [getFluxoInfo] Resposta gerada:', {
         codigo: fluxo.codigo,
         titulo: fluxo.titulo,
-        descricao: fluxo.descricao || '',
-        categoria: fluxo.categoria || 'vender',
-        link: link,
-        script_principal: scriptPrincipal,
-        quando_usar: quandoUsar,
         total_passos: passos?.length || 0,
-        passos: passosCompletos,
-        // Informação adicional para o NOEL
-        nota_link: 'Este fluxo está disponível na biblioteca do sistema. O conteúdo completo está incluído nesta resposta para você apresentar diretamente ao usuário.'
+        tamanho_resposta: responseSize,
+        tamanho_passos: JSON.stringify(passosCompletos).length,
+        aviso: responseSize > 50000 ? '⚠️ Resposta muito grande (>50KB)' : '✅ Tamanho OK'
+      })
+      
+      // Se a resposta for muito grande, limitar passos
+      if (responseSize > 50000) {
+        console.warn('⚠️ [getFluxoInfo] Resposta muito grande, limitando passos...')
+        responseData.data.passos = passosCompletos.slice(0, 5) // Limitar a 5 primeiros passos
+        responseData.data.nota_link = 'Este fluxo tem muitos passos. Acesse o link para ver todos os passos completos.'
       }
-    })
+      
+      return NextResponse.json(responseData)
   } catch (error: any) {
     console.error('❌ Erro ao buscar fluxo:', error)
     return NextResponse.json(
