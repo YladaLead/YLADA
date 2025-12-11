@@ -751,6 +751,7 @@ export default function DynamicTemplatePreview({
               {formatResultadoLabel(entry.resultadoId)}
             </h5>
           </div>
+          {/* ✅ NÃO mostrar description/objetivo do template para cliente - apenas diagnóstico */}
           <div className="bg-white rounded-lg p-4 space-y-2">
             <p className="font-semibold text-gray-900">{entry.diagnostico.diagnostico}</p>
             <p className="text-gray-700">{entry.diagnostico.causaRaiz}</p>
@@ -1313,8 +1314,9 @@ export default function DynamicTemplatePreview({
                   <h4 className="text-xl font-bold text-gray-900">📊 Seu Resultado</h4>
                 )}
               </div>
-              {renderCTA()}
+              {/* ✅ NÃO mostrar description/objetivo do template para cliente - apenas diagnóstico puro */}
               {renderDiagnosticsCards()}
+              {renderCTA()}
             </div>
           )}
 
