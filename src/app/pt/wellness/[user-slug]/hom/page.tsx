@@ -228,10 +228,10 @@ Assisti o vídeo e tenho dúvidas.`
           
           <div className="relative z-10 text-center">
             {/* Título */}
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
-              🍹 Oportunidade: Bebidas Funcionais
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
+              🍹 <span className="whitespace-nowrap">Oportunidade: Bebidas</span> Funcionais
             </h1>
-            <p className="text-amber-100 text-lg md:text-xl font-medium">
+            <p className="text-amber-100 text-base sm:text-lg md:text-xl font-medium">
               Uma oportunidade de negócio que está transformando vidas
             </p>
           </div>
