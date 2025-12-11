@@ -8,9 +8,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { buildWellnessToolUrl } from '@/lib/url-utils'
+import { validateNoelFunctionAuth } from '@/lib/noel-functions-auth'
 
 export async function POST(request: NextRequest) {
   try {
+    // Validar autenticação
+    const authError = validateNoelFunctionAuth(request)
+    if (authError) {
+      return authError
+    }
+
     const body = await request.json()
     const { quiz_slug, user_id } = body
 

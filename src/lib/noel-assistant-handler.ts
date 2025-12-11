@@ -173,7 +173,12 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
-      throw new Error(errorData.error || `Erro ao executar ${functionName}`)
+      console.error(`❌ [executeNoelFunction] Erro HTTP ${response.status} para ${functionName}:`, errorData)
+      
+      // Criar erro com mais informações
+      const error = new Error(errorData.error || errorData.message || `Erro ao executar ${functionName}`)
+      ;(error as any).response = { data: errorData, status: response.status }
+      throw error
     }
 
     const data = await response.json()
@@ -385,6 +390,7 @@ export async function processMessageWithAssistant(
           }
 
           console.log(`🔧 Executando function: ${functionName}`, functionArgs)
+          console.log(`🔧 Function arguments recebidos:`, JSON.stringify(functionArgs, null, 2))
 
           try {
             // Executar function localmente (chama /api/noel/[function])
@@ -398,6 +404,7 @@ export async function processMessageWithAssistant(
             })
 
             console.log(`✅ Function ${functionName} executada com sucesso`)
+            console.log(`✅ Resultado:`, JSON.stringify(result, null, 2).substring(0, 500))
 
             return {
               tool_call_id: toolCall.id,
@@ -405,9 +412,22 @@ export async function processMessageWithAssistant(
             }
           } catch (error: any) {
             console.error(`❌ Erro ao executar ${functionName}:`, error)
+            console.error(`❌ Erro completo:`, JSON.stringify(error, null, 2))
+            
+            // Retornar erro estruturado para o Assistants API processar
+            // Incluir mensagem mais detalhada se disponível
+            const errorMessage = error.message || 'Erro desconhecido'
+            const errorResponse = error.response?.data || {}
+            
             return {
               tool_call_id: toolCall.id,
-              output: JSON.stringify({ success: false, error: error.message || 'Erro desconhecido' }),
+              output: JSON.stringify({ 
+                success: false, 
+                error: errorMessage,
+                details: errorResponse,
+                function: functionName,
+                message: errorResponse.message || `Não foi possível buscar ${functionName}. ${errorMessage}. Tente especificar melhor o que você precisa.`
+              }),
             }
           }
         })
@@ -467,7 +487,19 @@ export async function processMessageWithAssistant(
     }
     
     const lastError = (runStatus as any).last_error
-    const errorMsg = lastError?.message || `Run falhou com status: ${runStatus.status}`
+    let errorMsg = lastError?.message || `Run falhou com status: ${runStatus.status}`
+    
+    // Melhorar mensagem de erro para casos comuns
+    if (runStatus.status === 'failed' && lastError) {
+      if (lastError.code === 'rate_limit_exceeded') {
+        errorMsg = 'Limite de requisições atingido. Aguarde alguns minutos.'
+      } else if (lastError.code === 'invalid_request_error') {
+        errorMsg = 'Erro na requisição. Tente reformular sua pergunta.'
+      } else if (lastError.message?.includes('timeout')) {
+        errorMsg = 'A requisição demorou muito. Tente novamente.'
+      }
+    }
+    
     console.error('❌ [NOEL Handler] Run falhou:', {
       status: runStatus.status,
       error: lastError,

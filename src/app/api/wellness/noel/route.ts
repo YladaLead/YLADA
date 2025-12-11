@@ -553,12 +553,12 @@ Regras Gerais:
 - Seja direto, objetivo e útil.
 - Você é simplesmente "NOEL" - um amigo e mentor que ajuda com tudo relacionado ao Wellness.
 
-🎯 FOCO TEMÁTICO OBRIGATÓRIO - MULTIMÍDIA, CRESCIMENTO E SUCESSO:
-- Mantenha foco exclusivo em: Multimídia (conteúdo, comunicação, materiais), Crescimento (desenvolvimento pessoal/profissional/negócio), Sucesso (resultados, metas, estratégias).
-- Se o assunto PODE estar relacionado ao projeto: CONECTE inteligentemente ao foco (multimídia/crescimento/sucesso).
-- Se o assunto NÃO está relacionado: REDIRECIONE ATIVAMENTE (não apenas responda, mas guie a conversa de volta ao foco com alternativa concreta).
-- NUNCA bloqueie assuntos que possam estar relacionados ao projeto - sempre conecte ao foco.
-- SEMPRE redirecione ativamente temas sem conexão (política, religião, saúde médica, finanças pessoais complexas).
+🎯 FOCO TEMÁTICO - MULTIMÍDIA, CRESCIMENTO E SUCESSO:
+- Seu foco principal é ajudar com: Multimídia (conteúdo, comunicação, materiais), Crescimento (desenvolvimento pessoal/profissional/negócio), Sucesso (resultados, metas, estratégias), Wellness System (vendas, recrutamento, scripts, fluxos, estratégias).
+- PRIORIZE DIÁLOGO NATURAL: Dialogue de forma natural e acolhedora. Responda perguntas diretamente quando fizerem sentido. Use scripts quando forem a melhor solução, mas não force.
+- Se o assunto PODE estar relacionado ao projeto: Pode conectar ao foco de forma natural (não forçada).
+- Se o assunto NÃO está relacionado: Redirecione de forma suave apenas quando realmente necessário (política, religião, saúde médica não relacionada, finanças pessoais complexas não relacionadas).
+- Lembre-se: Seu papel é DIALOGAR e DIRECIONAR de forma natural. Priorize o diálogo acolhedor e o direcionamento prático.
 
 ================================================
 🔧 FUNCTIONS DISPONÍVEIS - USE SEMPRE QUE NECESSÁRIO
@@ -878,11 +878,34 @@ export async function POST(request: NextRequest) {
         
         const { processMessageWithAssistant } = await import('@/lib/noel-assistant-handler')
         
-        const assistantResult = await processMessageWithAssistant(
-          contextMessage,
-          user.id,
-          threadId
-        )
+        let assistantResult
+        try {
+          assistantResult = await processMessageWithAssistant(
+            contextMessage,
+            user.id,
+            threadId
+          )
+        } catch (functionError: any) {
+          // Se erro for relacionado a function, tentar continuar sem a function
+          console.warn('⚠️ [NOEL] Erro ao processar function, continuando sem function:', functionError.message)
+          
+          // Se for erro de function específica, tentar processar novamente sem function
+          if (functionError.message?.includes('function') || functionError.message?.includes('Function')) {
+            // Tentar processar mensagem novamente (o Assistants API pode tentar sem function)
+            try {
+              assistantResult = await processMessageWithAssistant(
+                contextMessage,
+                user.id,
+                threadId
+              )
+            } catch (retryError: any) {
+              // Se ainda falhar, lançar erro original
+              throw functionError
+            }
+          } else {
+            throw functionError
+          }
+        }
 
         console.log('✅ [NOEL] ==========================================')
         console.log('✅ [NOEL] ASSISTANTS API RETORNOU RESPOSTA')

@@ -8,20 +8,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { buildWellnessToolUrl } from '@/lib/url-utils'
+import { validateNoelFunctionAuth } from '@/lib/noel-functions-auth'
 
 export async function POST(request: NextRequest) {
   try {
+    // Validar autenticação
+    const authError = validateNoelFunctionAuth(request)
+    if (authError) {
+      return authError
+    }
+
     const body = await request.json()
     const { ferramenta_slug, user_id } = body
 
+    console.log('🔍 [getFerramentaInfo] Parâmetros recebidos:', { ferramenta_slug, user_id })
+
     if (!ferramenta_slug) {
+      console.warn('⚠️ [getFerramentaInfo] ferramenta_slug faltando')
       return NextResponse.json(
-        { success: false, error: 'ferramenta_slug é obrigatório' },
+        { 
+          success: false, 
+          error: 'ferramenta_slug é obrigatório',
+          message: 'Por favor, especifique qual ferramenta você precisa. Exemplos: "calculadora-agua", "calculadora-proteina", "calc-hidratacao"'
+        },
         { status: 400 }
       )
     }
 
     // Primeiro tentar buscar template base
+    console.log('🔍 [getFerramentaInfo] Buscando template com slug:', ferramenta_slug)
     const { data: templateBase, error: templateError } = await supabaseAdmin
       .from('templates_nutrition')
       .select('*')
@@ -29,7 +44,20 @@ export async function POST(request: NextRequest) {
       .eq('is_active', true)
       .maybeSingle()
 
+    if (templateError) {
+      console.error('❌ [getFerramentaInfo] Erro ao buscar template:', templateError)
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Erro ao buscar ferramenta no banco de dados',
+          details: templateError.message
+        },
+        { status: 500 }
+      )
+    }
+
     if (templateBase && !templateError) {
+      console.log('✅ [getFerramentaInfo] Template encontrado:', templateBase.name)
       // Template base encontrado
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
       
@@ -39,13 +67,19 @@ export async function POST(request: NextRequest) {
       
       if (user_id) {
         // Buscar user_slug
-        const { data: profile } = await supabaseAdmin
+        console.log('🔍 [getFerramentaInfo] Buscando user_slug para user_id:', user_id)
+        const { data: profile, error: profileError } = await supabaseAdmin
           .from('user_profiles')
           .select('user_slug')
           .eq('user_id', user_id)
           .maybeSingle()
         
+        if (profileError) {
+          console.warn('⚠️ [getFerramentaInfo] Erro ao buscar profile (continuando sem user_slug):', profileError.message)
+        }
+        
         if (profile?.user_slug) {
+          console.log('✅ [getFerramentaInfo] user_slug encontrado:', profile.user_slug)
           // Tentar buscar ferramenta personalizada
           const { data: ferramentaPersonalizada } = await supabaseAdmin
             .from('user_templates')
@@ -74,11 +108,31 @@ export async function POST(request: NextRequest) {
       
       // Se não tiver link ainda, usar template base genérico
       if (!link) {
-        link = `${baseUrl}/pt/wellness/ferramenta/${templateBase.slug}`
+        console.log('⚠️ [getFerramentaInfo] Usando link genérico (sem user_slug)')
+        // Tentar usar link genérico da ferramenta (se existir no banco)
+        // Caso contrário, usar link do template base
+        const { data: ferramentaGenerica } = await supabaseAdmin
+          .from('wellness_ferramentas')
+          .select('id, slug')
+          .eq('template_slug', ferramenta_slug)
+          .eq('status', 'active')
+          .maybeSingle()
+        
+        if (ferramentaGenerica?.id) {
+          link = `${baseUrl}/pt/wellness/ferramenta/${ferramentaGenerica.id}`
+          console.log('✅ [getFerramentaInfo] Link genérico encontrado via wellness_ferramentas:', link)
+        } else {
+          // Fallback: usar link do template (pode não funcionar se não houver rota)
+          link = `${baseUrl}/pt/wellness/ferramenta/${templateBase.slug}`
+          console.log('⚠️ [getFerramentaInfo] Usando link do template (pode não existir):', link)
+        }
+        
         scriptApresentacao = templateBase.whatsapp_message || 
                              templateBase.description || 
                              `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
       }
+      
+      console.log('✅ [getFerramentaInfo] Link gerado:', link)
 
       // Determinar quando usar baseado no tipo
       const quandoUsar = templateBase.type === 'calculadora' 
@@ -102,8 +156,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Se não encontrou template base, retornar erro
+    console.warn('⚠️ [getFerramentaInfo] Template não encontrado com slug:', ferramenta_slug)
     return NextResponse.json(
-      { success: false, error: 'Ferramenta não encontrada' },
+      { 
+        success: false, 
+        error: 'Ferramenta não encontrada',
+        message: `Não foi possível encontrar uma ferramenta com o slug "${ferramenta_slug}". Verifique se o slug está correto.`
+      },
       { status: 404 }
     )
   } catch (error: any) {
