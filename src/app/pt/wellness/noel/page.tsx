@@ -21,15 +21,179 @@ interface Mensagem {
   }
 }
 
+// Chaves do localStorage
+const STORAGE_KEYS = {
+  MENSAGENS: 'noel_conversas',
+  THREAD_ID: 'noel_threadId',
+  MODULO_ATIVO: 'noel_moduloAtivo',
+}
+
+// Interface para serialização das mensagens
+interface MensagemSerializada {
+  id: string
+  texto: string
+  tipo: 'usuario' | 'noel'
+  timestamp: string // ISO string
+  metadata?: {
+    module?: 'mentor' | 'suporte' | 'tecnico'
+    source?: 'knowledge_base' | 'ia_generated' | 'hybrid'
+    similarityScore?: number
+    tokensUsed?: number
+    modelUsed?: string
+  }
+}
+
 export default function NoelChatPage() {
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
   const [perguntaAtual, setPerguntaAtual] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [moduloAtivo, setModuloAtivo] = useState<'mentor' | 'suporte' | 'tecnico' | null>(null)
   const [threadId, setThreadId] = useState<string | null>(null) // Thread ID do Assistants API
+  const [copiadoId, setCopiadoId] = useState<string | null>(null) // ID da mensagem copiada (para feedback visual)
   const authenticatedFetch = useAuthenticatedFetch()
   const mensagensEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const carregadoRef = useRef(false) // Flag para evitar carregar múltiplas vezes
+
+  // Funções para gerenciar localStorage
+  const salvarMensagens = (msgs: Mensagem[]) => {
+    if (typeof window === 'undefined') return
+    
+    try {
+      const serializadas: MensagemSerializada[] = msgs.map(msg => ({
+        ...msg,
+        timestamp: msg.timestamp.toISOString()
+      }))
+      localStorage.setItem(STORAGE_KEYS.MENSAGENS, JSON.stringify(serializadas))
+    } catch (error) {
+      console.error('❌ Erro ao salvar mensagens no localStorage:', error)
+    }
+  }
+
+  const carregarMensagens = (): Mensagem[] => {
+    if (typeof window === 'undefined') return []
+    
+    try {
+      const salvas = localStorage.getItem(STORAGE_KEYS.MENSAGENS)
+      if (!salvas) return []
+      
+      const serializadas: MensagemSerializada[] = JSON.parse(salvas)
+      return serializadas.map(msg => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
+      }))
+    } catch (error) {
+      console.error('❌ Erro ao carregar mensagens do localStorage:', error)
+      return []
+    }
+  }
+
+  const salvarThreadId = (id: string | null) => {
+    if (typeof window === 'undefined') return
+    
+    try {
+      if (id) {
+        localStorage.setItem(STORAGE_KEYS.THREAD_ID, id)
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.THREAD_ID)
+      }
+    } catch (error) {
+      console.error('❌ Erro ao salvar threadId no localStorage:', error)
+    }
+  }
+
+  const carregarThreadId = (): string | null => {
+    if (typeof window === 'undefined') return null
+    
+    try {
+      return localStorage.getItem(STORAGE_KEYS.THREAD_ID)
+    } catch (error) {
+      console.error('❌ Erro ao carregar threadId do localStorage:', error)
+      return null
+    }
+  }
+
+  const salvarModuloAtivo = (modulo: 'mentor' | 'suporte' | 'tecnico' | null) => {
+    if (typeof window === 'undefined') return
+    
+    try {
+      if (modulo) {
+        localStorage.setItem(STORAGE_KEYS.MODULO_ATIVO, modulo)
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.MODULO_ATIVO)
+      }
+    } catch (error) {
+      console.error('❌ Erro ao salvar módulo ativo no localStorage:', error)
+    }
+  }
+
+  const carregarModuloAtivo = (): 'mentor' | 'suporte' | 'tecnico' | null => {
+    if (typeof window === 'undefined') return null
+    
+    try {
+      const modulo = localStorage.getItem(STORAGE_KEYS.MODULO_ATIVO)
+      if (modulo === 'mentor' || modulo === 'suporte' || modulo === 'tecnico') {
+        return modulo
+      }
+      return null
+    } catch (error) {
+      console.error('❌ Erro ao carregar módulo ativo do localStorage:', error)
+      return null
+    }
+  }
+
+  // Carregar histórico ao montar o componente
+  useEffect(() => {
+    if (carregadoRef.current) return
+    carregadoRef.current = true
+
+    const mensagensSalvas = carregarMensagens()
+    const threadIdSalvo = carregarThreadId()
+    const moduloSalvo = carregarModuloAtivo()
+
+    if (mensagensSalvas.length > 0) {
+      setMensagens(mensagensSalvas)
+      console.log('✅ Histórico carregado:', mensagensSalvas.length, 'mensagens')
+    } else {
+      // Mensagem inicial de boas-vindas apenas se não houver histórico
+      setMensagens([{
+        id: '1',
+        texto: `Olá! Bem-vindo! 👋\n\nEu sou o **NOEL**, seu assistente da área Wellness.\n\n**Como posso te ajudar hoje?**\n\n💡 Posso ajudar com:\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`,
+        tipo: 'noel',
+        timestamp: new Date()
+      }])
+    }
+
+    if (threadIdSalvo) {
+      setThreadId(threadIdSalvo)
+      console.log('✅ Thread ID carregado:', threadIdSalvo)
+    }
+
+    if (moduloSalvo) {
+      setModuloAtivo(moduloSalvo)
+    }
+  }, [])
+
+  // Salvar mensagens sempre que mudarem
+  useEffect(() => {
+    if (carregadoRef.current && mensagens.length > 0) {
+      salvarMensagens(mensagens)
+    }
+  }, [mensagens])
+
+  // Salvar threadId sempre que mudar
+  useEffect(() => {
+    if (carregadoRef.current) {
+      salvarThreadId(threadId)
+    }
+  }, [threadId])
+
+  // Salvar módulo ativo sempre que mudar
+  useEffect(() => {
+    if (carregadoRef.current) {
+      salvarModuloAtivo(moduloAtivo)
+    }
+  }, [moduloAtivo])
 
   // Scroll automático para última mensagem
   useEffect(() => {
@@ -39,18 +203,6 @@ export default function NoelChatPage() {
   // Focar no input quando carregar
   useEffect(() => {
     inputRef.current?.focus()
-  }, [])
-
-  // Mensagem inicial de boas-vindas
-  useEffect(() => {
-    if (mensagens.length === 0) {
-      setMensagens([{
-        id: '1',
-        texto: `Olá! Bem-vindo! 👋\n\nEu sou o **NOEL**, seu assistente da área Wellness.\n\n**Como posso te ajudar hoje?**\n\n💡 Posso ajudar com:\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`,
-        tipo: 'noel',
-        timestamp: new Date()
-      }])
-    }
   }, [])
 
   const enviarMensagem = async () => {
@@ -115,11 +267,13 @@ export default function NoelChatPage() {
       // Guardar threadId se retornado (para manter conversa no Assistants API)
       if (data.threadId) {
         setThreadId(data.threadId)
+        salvarThreadId(data.threadId)
         console.log('🧵 Thread ID salvo:', data.threadId)
       }
 
       // Atualizar módulo ativo
       setModuloAtivo(data.module)
+      salvarModuloAtivo(data.module)
 
       // Log de functions executadas (para debug)
       if (data.functionCalls && data.functionCalls.length > 0) {
@@ -183,14 +337,88 @@ export default function NoelChatPage() {
   }
 
   const limparConversa = () => {
-    setMensagens([{
+    const mensagemInicial: Mensagem = {
       id: '1',
       texto: `Olá! Bem-vindo! 👋\n\nEu sou o **NOEL**, seu assistente da área Wellness.\n\n**Como posso te ajudar hoje?**\n\n💡 Posso ajudar com:\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`,
       tipo: 'noel',
       timestamp: new Date()
-    }])
+    }
+    
+    setMensagens([mensagemInicial])
     setModuloAtivo(null)
-    setThreadId(null) // Limpar thread ao limpar conversa (cria novo thread na próxima mensagem)
+    setThreadId(null)
+    
+    // Limpar localStorage
+    salvarMensagens([mensagemInicial])
+    salvarThreadId(null)
+    salvarModuloAtivo(null)
+  }
+
+  // Função para copiar mensagem individual
+  const copiarMensagem = async (mensagem: Mensagem) => {
+    try {
+      await navigator.clipboard.writeText(mensagem.texto)
+      setCopiadoId(mensagem.id)
+      setTimeout(() => setCopiadoId(null), 2000) // Reset após 2 segundos
+    } catch (error) {
+      console.error('❌ Erro ao copiar mensagem:', error)
+      // Fallback para navegadores antigos
+      const textArea = document.createElement('textarea')
+      textArea.value = mensagem.texto
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      setCopiadoId(mensagem.id)
+      setTimeout(() => setCopiadoId(null), 2000)
+    }
+  }
+
+  // Função para copiar toda a conversa
+  const copiarTodaConversa = async () => {
+    try {
+      const conversaCompleta = mensagens
+        .map(msg => {
+          const autor = msg.tipo === 'usuario' ? 'Você' : 'NOEL'
+          const data = msg.timestamp.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+          return `[${data}] ${autor}:\n${msg.texto}`
+        })
+        .join('\n\n---\n\n')
+      
+      await navigator.clipboard.writeText(conversaCompleta)
+      setCopiadoId('toda-conversa')
+      setTimeout(() => setCopiadoId(null), 2000)
+    } catch (error) {
+      console.error('❌ Erro ao copiar conversa:', error)
+      // Fallback
+      const textArea = document.createElement('textarea')
+      const conversaCompleta = mensagens
+        .map(msg => {
+          const autor = msg.tipo === 'usuario' ? 'Você' : 'NOEL'
+          const data = msg.timestamp.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+          return `[${data}] ${autor}:\n${msg.texto}`
+        })
+        .join('\n\n---\n\n')
+      textArea.value = conversaCompleta
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      setCopiadoId('toda-conversa')
+      setTimeout(() => setCopiadoId(null), 2000)
+    }
   }
 
   // Função para limpar respostas: remover títulos numerados e títulos de seção
@@ -278,12 +506,23 @@ export default function NoelChatPage() {
                   Seu amigo e mentor - estratégias, técnicas e suporte
                 </p>
               </div>
-              <button
-                onClick={limparConversa}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                🔄 Limpar Conversa
-              </button>
+              <div className="flex items-center gap-2">
+                {mensagens.length > 1 && (
+                  <button
+                    onClick={copiarTodaConversa}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                    title="Copiar toda a conversa"
+                  >
+                    {copiadoId === 'toda-conversa' ? '✅ Copiado!' : '📋 Copiar Conversa'}
+                  </button>
+                )}
+                <button
+                  onClick={limparConversa}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  🔄 Limpar Conversa
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -312,23 +551,41 @@ export default function NoelChatPage() {
                   className={`flex ${msg.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className="max-w-3xl w-full">
-                    <div
-                      className={`rounded-lg p-4 ${
-                        msg.tipo === 'usuario'
-                          ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md ml-auto'
-                          : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
-                      }`}
-                    >
-                      {msg.tipo === 'noel' ? (
-                        <FormatarMensagem texto={msg.texto} />
-                      ) : (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.texto}</p>
-                      )}
+                    <div className="relative group">
+                      <div
+                        className={`rounded-lg p-4 ${
+                          msg.tipo === 'usuario'
+                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md ml-auto'
+                            : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
+                        }`}
+                      >
+                        {msg.tipo === 'noel' ? (
+                          <FormatarMensagem texto={msg.texto} />
+                        ) : (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.texto}</p>
+                        )}
 
-                      {/* Metadata removido - deixar limpo conforme solicitado */}
+                        {/* Metadata removido - deixar limpo conforme solicitado */}
+                      </div>
+                      {/* Botão de copiar - aparece no hover */}
+                      <button
+                        onClick={() => copiarMensagem(msg)}
+                        className={`absolute top-2 right-2 p-1.5 rounded-md transition-all opacity-0 group-hover:opacity-100 ${
+                          msg.tipo === 'usuario'
+                            ? 'bg-white/20 hover:bg-white/30 text-white'
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                        }`}
+                        title="Copiar mensagem"
+                      >
+                        {copiadoId === msg.id ? (
+                          <span className="text-xs">✅</span>
+                        ) : (
+                          <span className="text-xs">📋</span>
+                        )}
+                      </button>
                     </div>
-                    <div className={`text-xs text-gray-500 mt-1 ${msg.tipo === 'usuario' ? 'text-right' : 'text-left'}`}>
-                      {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    <div className={`text-xs text-gray-500 mt-1 flex items-center gap-2 ${msg.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}>
+                      <span>{msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   </div>
                 </div>
