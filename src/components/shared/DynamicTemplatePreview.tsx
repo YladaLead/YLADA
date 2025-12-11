@@ -1315,6 +1315,13 @@ export default function DynamicTemplatePreview({
                 )}
               </div>
               {/* ✅ NÃO mostrar description/objetivo do template para cliente - apenas diagnóstico puro */}
+              {/* ✅ GARANTIR: Nenhum texto explicativo interno deve aparecer aqui */}
+              {!isPreview && (
+                <div className="hidden">
+                  {/* Garantir que descrição/objetivo do template NÃO sejam renderizados para cliente */}
+                  {descricao && descricao.toLowerCase().includes('identificar pessoas') && console.warn('⚠️ Texto explicativo detectado na descrição, mas não será renderizado para cliente')}
+                </div>
+              )}
               {renderDiagnosticsCards()}
               {renderCTA()}
             </div>
