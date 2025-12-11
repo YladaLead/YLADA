@@ -9,11 +9,11 @@ import { getApresentacaoNegocio } from '@/lib/wellness-system/apresentacao-negoc
 
 /**
  * URL da imagem da HOM (Bebidas Funcionais)
- * Esta imagem deve estar armazenada em um bucket público do Supabase ou na pasta public
+ * Esta imagem deve estar armazenada na pasta public/images/og/wellness/
  * Pode ser configurada via variável de ambiente NEXT_PUBLIC_HOM_IMAGE_URL
  */
 export const HOM_IMAGE_URL = process.env.NEXT_PUBLIC_HOM_IMAGE_URL || 
-  'https://ylada.app/images/hom/bebidas-funcionais.jpg'
+  'https://ylada.app/images/og/wellness/hom-bebidas-funcionais.png'
 
 export interface HOMInfo {
   apresentacoes: Array<{

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { getCountryByCode } from '@/components/CountrySelector'
 
@@ -20,10 +20,71 @@ export default function HOMPage() {
   
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const playerRef = useRef<any>(null)
 
   useEffect(() => {
     carregarPerfil()
   }, [userSlug])
+
+  // Configurar YouTube Player API para resetar vídeo quando terminar
+  useEffect(() => {
+    if (typeof window === 'undefined' || !videoId) return
+
+    // Carregar YouTube IFrame API se ainda não estiver carregada
+    if (!(window as any).YT) {
+      const tag = document.createElement('script')
+      tag.src = 'https://www.youtube.com/iframe_api'
+      const firstScriptTag = document.getElementsByTagName('script')[0]
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
+    }
+
+    // Função para inicializar o player quando a API estiver pronta
+    const initPlayer = () => {
+      if ((window as any).YT && (window as any).YT.Player) {
+        const iframe = document.getElementById('hom-video-player')
+        if (iframe && !playerRef.current) {
+          playerRef.current = new (window as any).YT.Player('hom-video-player', {
+            events: {
+              onStateChange: (event: any) => {
+                // Quando o vídeo terminar (state = 0 = ENDED)
+                if (event.data === (window as any).YT.PlayerState.ENDED) {
+                  // Resetar para o início e pausar
+                  setTimeout(() => {
+                    if (playerRef.current) {
+                      playerRef.current.seekTo(0, true)
+                      playerRef.current.pauseVideo()
+                    }
+                  }, 500)
+                }
+              },
+            },
+          })
+        }
+      }
+    }
+
+    // Se a API já estiver carregada
+    if ((window as any).YT && (window as any).YT.Player) {
+      setTimeout(initPlayer, 1000)
+    } else {
+      // Aguardar a API carregar
+      ;(window as any).onYouTubeIframeAPIReady = () => {
+        setTimeout(initPlayer, 500)
+      }
+    }
+
+    return () => {
+      // Cleanup
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy()
+        } catch (e) {
+          console.error('Erro ao destruir player:', e)
+        }
+        playerRef.current = null
+      }
+    }
+  }, [videoId])
 
   const carregarPerfil = async () => {
     try {
@@ -182,9 +243,10 @@ export default function HOMPage() {
           <div className="aspect-video w-full rounded-lg overflow-hidden bg-gray-900 shadow-lg">
             {videoId ? (
               <iframe
+                id="hom-video-player"
                 width="100%"
                 height="100%"
-                src={`https://www.youtube.com/embed/${videoId}`}
+                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : 'https://ylada.app'}`}
                 title="Apresentação Bebidas Funcionais"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

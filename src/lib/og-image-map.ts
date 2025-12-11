@@ -74,6 +74,9 @@ const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'system': 'default.jpg',
   'wellness-system': 'default.jpg',
   
+  // HOM (Herbalife Opportunity Meeting)
+  'hom': 'hom-bebidas-funcionais.png', // Imagem específica da HOM (PNG para melhor qualidade)
+  
   // Fallback padrão
   'default': 'default.jpg',
 }
