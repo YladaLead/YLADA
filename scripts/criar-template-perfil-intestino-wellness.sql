@@ -19,7 +19,6 @@ INSERT INTO templates_nutrition (
   profession,
   is_active,
   slug,
-  icon,
   content
 ) VALUES (
   'Qual é seu perfil de intestino?',
@@ -31,7 +30,6 @@ INSERT INTO templates_nutrition (
   'wellness',
   true,
   'perfil-intestino', -- ✅ Slug correto e padrão
-  '💩',
   '{
     "template_type": "quiz",
     "profession": "wellness",
