@@ -355,13 +355,18 @@ export default function FerramentaPersonalizadaPage() {
       case 'avaliacao-inicial':
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
-      case 'quiz-energetico':
-      case 'quiz-energético':
-      case 'quiz-detox':
-      case 'quiz-bem-estar':
-        // Renderizar usando DynamicTemplatePreview para templates genéricos
-        // isPreview=false porque é link copiado (para cliente), não preview (para dono)
-        if (tool.content && (tool.content.template_type === 'quiz' || tool.content.questions)) {
+      default:
+        // ✅ PADRÃO GENÉRICO: Verificar se o template tem content com questions
+        // Se tiver, usar DynamicTemplatePreview automaticamente para TODOS os templates
+        // Isso funciona para: perfil-intestino, quiz-energetico, quiz-detox, quiz-bem-estar, etc.
+        const hasContent = tool.content && (
+          tool.content.template_type === 'quiz' || 
+          tool.content.questions || 
+          (Array.isArray(tool.content.questions) && tool.content.questions.length > 0) ||
+          (tool.content.items && Array.isArray(tool.content.items))
+        )
+        
+        if (hasContent) {
           return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
               <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -371,41 +376,22 @@ export default function FerramentaPersonalizadaPage() {
                     nome: tool.title,
                     name: tool.title,
                     slug: tool.template_slug,
-                    type: 'quiz',
+                    type: tool.content?.template_type || 'quiz',
                     content: tool.content,
                     description: tool.description,
                     whatsapp_number: tool.whatsapp_number,
                     country_code: tool.user_profiles?.country_code
                   }}
                   profession="wellness"
-                  onClose={() => router.push('/pt/wellness/links')}
+                  onClose={() => router.push('/pt/wellness/ferramentas')}
                   isPreview={false} // ✅ Link copiado para cliente - SEM explicações para dono
                 />
               </main>
             </div>
           )
         }
-        // Fallback se não tiver content
-        return (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-            <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 border-yellow-200">
-              <div className="mb-4">
-                <span className="text-yellow-600 text-5xl">⚠️</span>
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Template não encontrado</h2>
-              <p className="text-gray-600 mb-4">
-                O template "{tool.template_slug}" não está disponível no momento.
-              </p>
-              <button
-                onClick={() => router.push('/pt/wellness/links')}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-              >
-                Voltar para Meus Links
-              </button>
-            </div>
-          </div>
-        )
-      default:
+        
+        // Fallback: Template não encontrado ou sem content
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 border-yellow-200">
@@ -417,7 +403,7 @@ export default function FerramentaPersonalizadaPage() {
                 O template "{tool.template_slug}" não está disponível no momento.
               </p>
               <p className="text-sm text-gray-500 mb-6">
-                Entre em contato com o suporte se este problema persistir.
+                {!tool.content ? 'Este template não possui conteúdo configurado.' : 'Entre em contato com o suporte se este problema persistir.'}
               </p>
               <button
                 onClick={() => router.push('/pt/wellness/ferramentas')}
