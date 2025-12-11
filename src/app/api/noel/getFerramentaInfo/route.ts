@@ -97,8 +97,15 @@ export async function POST(request: NextRequest) {
             
             if (ferramentaPersonalizada && ferramentaPersonalizada.slug) {
               try {
+                // IMPORTANTE: Usar o slug da ferramenta (não o template_slug)
+                // A rota /pt/wellness/[user-slug]/[tool-slug] busca pelo campo 'slug' da user_templates
                 link = buildWellnessToolUrl(profile.user_slug, ferramentaPersonalizada.slug)
-                console.log('✅ [getFerramentaInfo] Link gerado com ferramenta personalizada:', link)
+                console.log('✅ [getFerramentaInfo] Link gerado com ferramenta personalizada:', {
+                  user_slug: profile.user_slug,
+                  tool_slug: ferramentaPersonalizada.slug,
+                  template_slug: ferramentaPersonalizada.template_slug,
+                  link
+                })
                 scriptApresentacao = ferramentaPersonalizada.custom_whatsapp_message || 
                                      ferramentaPersonalizada.description || 
                                      templateBase.whatsapp_message || 
@@ -108,16 +115,78 @@ export async function POST(request: NextRequest) {
                 // Continuar sem link personalizado
               }
             } else {
-              // Usar template base com user_slug
-              try {
-                link = buildWellnessToolUrl(profile.user_slug, ferramenta_slug)
-                console.log('✅ [getFerramentaInfo] Link gerado com template base:', link)
-                scriptApresentacao = templateBase.whatsapp_message || 
-                                     templateBase.description || 
-                                     `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
-              } catch (urlError: any) {
-                console.error('❌ [getFerramentaInfo] Erro ao gerar link com template base:', urlError)
-                // Continuar sem link, será gerado no fallback
+              // Não encontrou ferramenta personalizada, tentar buscar pelo slug diretamente
+              // Pode ser que a ferramenta tenha slug diferente do template_slug
+              console.log('⚠️ [getFerramentaInfo] Ferramenta personalizada não encontrada, tentando buscar pelo slug diretamente...')
+              
+              const { data: ferramentaPorSlug, error: slugError } = await supabaseAdmin
+                .from('user_templates')
+                .select('slug, template_slug')
+                .eq('user_id', user_id)
+                .eq('slug', ferramenta_slug)
+                .eq('profession', 'wellness')
+                .eq('status', 'active')
+                .maybeSingle()
+              
+              if (ferramentaPorSlug && ferramentaPorSlug.slug) {
+                // Encontrou pelo slug direto
+                try {
+                  link = buildWellnessToolUrl(profile.user_slug, ferramentaPorSlug.slug)
+                  console.log('✅ [getFerramentaInfo] Link gerado buscando pelo slug direto:', {
+                    user_slug: profile.user_slug,
+                    tool_slug: ferramentaPorSlug.slug,
+                    link
+                  })
+                  scriptApresentacao = templateBase.whatsapp_message || 
+                                       templateBase.description || 
+                                       `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
+                } catch (urlError: any) {
+                  console.error('❌ [getFerramentaInfo] Erro ao gerar link com slug direto:', urlError)
+                }
+              } else {
+                // Tentar buscar todas as ferramentas do usuário com esse template_slug para ver qual slug real tem
+                const { data: todasFerramentas } = await supabaseAdmin
+                  .from('user_templates')
+                  .select('slug, template_slug, title')
+                  .eq('user_id', user_id)
+                  .eq('template_slug', ferramenta_slug)
+                  .eq('profession', 'wellness')
+                  .eq('status', 'active')
+                  .limit(1)
+                
+                if (todasFerramentas && todasFerramentas.length > 0) {
+                  const ferramentaEncontrada = todasFerramentas[0]
+                  try {
+                    link = buildWellnessToolUrl(profile.user_slug, ferramentaEncontrada.slug)
+                    console.log('✅ [getFerramentaInfo] Link gerado buscando todas ferramentas:', {
+                      user_slug: profile.user_slug,
+                      tool_slug: ferramentaEncontrada.slug,
+                      template_slug: ferramentaEncontrada.template_slug,
+                      link
+                    })
+                    scriptApresentacao = templateBase.whatsapp_message || 
+                                         templateBase.description || 
+                                         `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
+                  } catch (urlError: any) {
+                    console.error('❌ [getFerramentaInfo] Erro ao gerar link:', urlError)
+                  }
+                } else {
+                  // Última tentativa: usar o ferramenta_slug diretamente (pode não funcionar)
+                  try {
+                    link = buildWellnessToolUrl(profile.user_slug, ferramenta_slug)
+                    console.log('⚠️ [getFerramentaInfo] Link gerado com ferramenta_slug (pode não existir):', {
+                      user_slug: profile.user_slug,
+                      tool_slug: ferramenta_slug,
+                      link,
+                      aviso: 'Ferramenta pode não existir com este slug'
+                    })
+                    scriptApresentacao = templateBase.whatsapp_message || 
+                                         templateBase.description || 
+                                         `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
+                  } catch (urlError: any) {
+                    console.error('❌ [getFerramentaInfo] Erro ao gerar link com ferramenta_slug:', urlError)
+                  }
+                }
               }
             }
           } catch (error: any) {
