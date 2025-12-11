@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
@@ -46,6 +47,7 @@ function LinksUnificadosPageContent() {
   const [previewAberto, setPreviewAberto] = useState<string | null>(null)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
   const [qrCopiado, setQrCopiado] = useState<string | null>(null)
+  const [homMensagemCopiada, setHomMensagemCopiada] = useState(false)
 
   const baseUrl = getAppUrl()
 
@@ -499,6 +501,57 @@ function LinksUnificadosPageContent() {
     setPreviewAberto(item.id)
   }
 
+  // Funções para HOM Gravada
+  const linkYouTubeHOM = 'https://youtu.be/Uva_4zHdcqQ'
+  
+  // Gerar link próprio da HOM (como as ferramentas)
+  const gerarLinkHOM = (): string | null => {
+    if (!profile?.userSlug) {
+      return null
+    }
+    return buildWellnessToolUrl(profile.userSlug, 'hom')
+  }
+
+  const copiarMensagemCompletaHOM = async () => {
+    const linkHOM = gerarLinkHOM()
+    if (!linkHOM) {
+      alert('⚠️ Configure seu user_slug no perfil para gerar o link da HOM.')
+      return
+    }
+
+    const mensagem = `🍹 *OPORTUNIDADE: BEBIDAS FUNCIONAIS* 🍹
+
+Olha que oportunidade incrível com bebidas funcionais! 🚀
+
+É sobre o mercado de *bebidas funcionais* - um mercado que está crescendo muito e oferece grandes oportunidades.
+
+✨ *Por que essa oportunidade é especial:*
+✅ Pessoas querem mais energia
+✅ Busca por saúde + praticidade  
+✅ Produtos de alta rotatividade
+✅ Margens atrativas para iniciantes
+✅ Simples de vender e de consumir
+
+🎥 Assista ao vídeo da apresentação:
+${linkYouTubeHOM}
+
+🎬 Ou acesse a apresentação completa:
+${linkHOM}
+
+São apenas alguns minutos e pode mudar sua perspectiva sobre renda e oportunidades! 🚀
+
+Você vai adorar! 😊`
+
+    try {
+      await navigator.clipboard.writeText(mensagem)
+      setHomMensagemCopiada(true)
+      setTimeout(() => setHomMensagemCopiada(false), 2000)
+    } catch (error) {
+      console.error('Erro ao copiar mensagem:', error)
+      alert('⚠️ Erro ao copiar mensagem. Tente novamente.')
+    }
+  }
+
   if (loadingProfile || carregandoTemplates) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -597,28 +650,173 @@ function LinksUnificadosPageContent() {
           </div>
         </div>
 
-        {/* Card HOM - Apresentações */}
-        <div className="max-w-7xl mx-auto mb-8">
-          <Link
-            href="/pt/wellness/system/recrutar/enviar-link"
-            className="block bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 text-white"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="text-5xl">📅</div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">HOM - Apresentações de Negócio</h3>
-                  <p className="text-blue-100 text-sm">
-                    Segunda-feira às 20h • Quarta-feira às 9h
-                  </p>
-                  <p className="text-blue-50 text-xs mt-1">
-                    Links do Zoom e apresentação online
+        {/* Links HOM - Como os quizzes, com botões funcionais */}
+        <div className="max-w-7xl mx-auto mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* HOM - Apresentações Agendadas (Ao Vivo) */}
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-4xl">📅</div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    HOM ao vivo
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Recrutamento
                   </p>
                 </div>
               </div>
-              <div className="text-3xl">→</div>
+              <p className="text-sm text-gray-600 mb-4">
+                Segunda-feira às 20h • Quarta-feira às 9h
+              </p>
+              
+              {/* Três Botões Lado a Lado */}
+              <div className="flex gap-2">
+                {/* Botão Preview */}
+                <button
+                  onClick={() => abrirPreview({
+                    id: 'hom-agendadas',
+                    nome: 'HOM ao vivo',
+                    tipo: 'fluxo-recrutamento' as const,
+                    categoria: 'Recrutamento',
+                    link: '/pt/wellness/system/recrutar/enviar-link',
+                    descricao: 'Segunda-feira às 20h • Quarta-feira às 9h',
+                    icon: '📅',
+                    metadata: { tipo: 'hom-agendadas' }
+                  })}
+                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                >
+                  👁️ Preview
+                </button>
+                
+                {/* Botão Copiar Link */}
+                <button
+                  onClick={(e) => {
+                    copiarLink('/pt/wellness/system/recrutar/enviar-link', 'hom-agendadas', e)
+                  }}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    linkCopiado === 'hom-agendadas'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  {linkCopiado === 'hom-agendadas' ? '✓ Copiado!' : '📋 Copiar Link'}
+                </button>
+                
+                {/* Botão Copiar QR Code */}
+                <button
+                  onClick={(e) => {
+                    copiarQRCode('/pt/wellness/system/recrutar/enviar-link', 'hom-agendadas', e)
+                  }}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    qrCopiado === 'hom-agendadas'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  }`}
+                >
+                  {qrCopiado === 'hom-agendadas' ? '✓ Copiado!' : '📱 Copiar QR'}
+                </button>
+              </div>
+              
+              {/* Link */}
+              <p className="text-xs text-gray-400 mt-2 truncate" title="/pt/wellness/system/recrutar/enviar-link">
+                /pt/wellness/system/recrutar/enviar-link
+              </p>
             </div>
-          </Link>
+
+            {/* HOM - Apresentação Gravada */}
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-4xl">🎥</div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    Link da HOM gravada
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Recrutamento
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Oportunidade: Bebidas Funcionais
+              </p>
+              
+              {/* Três Botões Lado a Lado */}
+              <div className="flex gap-2">
+                {/* Botão Preview */}
+                <button
+                  onClick={() => {
+                    const linkHOM = gerarLinkHOM()
+                    if (linkHOM) {
+                      abrirPreview({
+                        id: 'hom-gravada',
+                        nome: 'Link da HOM gravada',
+                        tipo: 'fluxo-recrutamento' as const,
+                        categoria: 'Recrutamento',
+                        link: linkHOM,
+                        descricao: 'Oportunidade: Bebidas Funcionais',
+                        icon: '🎥',
+                        metadata: { tipo: 'hom-gravada', linkHOM }
+                      })
+                    } else {
+                      alert('⚠️ Configure seu user_slug no perfil para gerar o link da HOM.')
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                >
+                  👁️ Preview
+                </button>
+                
+                {/* Botão Copiar Link (copia mensagem completa) */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    copiarMensagemCompletaHOM()
+                  }}
+                  disabled={!gerarLinkHOM()}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    !gerarLinkHOM()
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : homMensagemCopiada
+                      ? 'bg-green-600 text-white'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  {homMensagemCopiada ? '✓ Copiado!' : '📋 Copiar Link'}
+                </button>
+                
+                {/* Botão Copiar QR Code */}
+                <button
+                  onClick={(e) => {
+                    const linkHOM = gerarLinkHOM()
+                    if (linkHOM) {
+                      copiarQRCode(linkHOM, 'hom-gravada', e)
+                    } else {
+                      alert('⚠️ Configure seu user_slug no perfil para gerar o link da HOM.')
+                    }
+                  }}
+                  disabled={!gerarLinkHOM()}
+                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    !gerarLinkHOM()
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : qrCopiado === 'hom-gravada'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  }`}
+                >
+                  {qrCopiado === 'hom-gravada' ? '✓ Copiado!' : '📱 Copiar QR'}
+                </button>
+              </div>
+              
+              {/* Link */}
+              {gerarLinkHOM() && (
+                <p className="text-xs text-gray-400 mt-2 truncate" title={gerarLinkHOM() || ''}>
+                  {gerarLinkHOM()?.replace(/^https?:\/\//, '')}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Grid de Itens */}
@@ -717,9 +915,40 @@ function LinksUnificadosPageContent() {
           </div>
         )}
 
+
         {/* Modal de Preview */}
         {previewAberto && (() => {
-          const item = itensUnificados.find(i => i.id === previewAberto)
+          // Buscar primeiro em itensUnificados
+          let item = itensUnificados.find(i => i.id === previewAberto)
+          
+          // Se não encontrou, pode ser um item HOM (que não está em itensUnificados)
+          if (!item && (previewAberto === 'hom-agendadas' || previewAberto === 'hom-gravada')) {
+            if (previewAberto === 'hom-agendadas') {
+              item = {
+                id: 'hom-agendadas',
+                nome: 'HOM ao vivo',
+                tipo: 'fluxo-recrutamento' as const,
+                categoria: 'Recrutamento',
+                link: '/pt/wellness/system/recrutar/enviar-link',
+                descricao: 'Segunda-feira às 20h • Quarta-feira às 9h',
+                icon: '📅',
+                metadata: { tipo: 'hom-agendadas' }
+              }
+            } else if (previewAberto === 'hom-gravada') {
+              const linkHOM = gerarLinkHOM()
+              item = {
+                id: 'hom-gravada',
+                nome: 'Link da HOM gravada',
+                tipo: 'fluxo-recrutamento' as const,
+                categoria: 'Recrutamento',
+                link: linkHOM || '',
+                descricao: 'Oportunidade: Bebidas Funcionais',
+                icon: '🎥',
+                metadata: { tipo: 'hom-gravada', linkHOM }
+              }
+            }
+          }
+          
           if (!item) return null
 
           return (
@@ -867,6 +1096,62 @@ function LinksUnificadosPageContent() {
                         />
                       )
                     })()
+                  ) : item.metadata?.tipo === 'hom-agendadas' ? (
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">📅 HOM ao vivo</h3>
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-blue-800 font-semibold mb-2">Horários das Apresentações:</p>
+                          <ul className="text-blue-700 space-y-2 text-sm">
+                            <li>• Segunda-feira às 20h</li>
+                            <li>• Quarta-feira às 9h</li>
+                          </ul>
+                        </div>
+                        <p className="text-gray-700 text-sm">
+                          Links do Zoom e apresentação online disponíveis na página completa.
+                        </p>
+                        <div className="flex gap-3 mt-4">
+                          <Link
+                            href="/pt/wellness/system/recrutar/enviar-link"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                          >
+                            Abrir Página Completa →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ) : item.metadata?.tipo === 'hom-gravada' ? (
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">🎥 Link da HOM gravada</h3>
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                          <p className="text-orange-800 font-semibold mb-2">Oportunidade: Bebidas Funcionais</p>
+                          <p className="text-orange-700 text-sm mb-3">
+                            Um mercado em crescimento que oferece grandes oportunidades! Pessoas buscam mais energia, saúde e praticidade.
+                          </p>
+                          <ul className="text-orange-700 space-y-1 text-xs">
+                            <li>• Produtos de alta rotatividade</li>
+                            <li>• Margens atrativas para iniciantes</li>
+                            <li>• Simples de vender e consumir</li>
+                          </ul>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                          A apresentação completa inclui vídeo e botões de ação (Quero tirar dúvida, Gostei quero começar).
+                        </p>
+                        <div className="flex gap-3 mt-4">
+                          {item.metadata?.linkHOM && (
+                            <a
+                              href={item.metadata.linkHOM}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700"
+                            >
+                              Abrir Página Completa →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   ) : item.metadata?.fluxo ? (
                     <div>
                       <FluxoDiagnostico

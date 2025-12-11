@@ -75,6 +75,13 @@ export default function LoginForm({
         if (mounted && session?.user && !hasRedirected) {
           // Verificar se já está na página de destino para evitar loop
           const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+          
+          // Não redirecionar se já estiver na página de login
+          if (currentPath.includes('/login')) {
+            console.log('✅ Já está na página de login, não redirecionar')
+            return
+          }
+          
           if (currentPath === redirectPath || currentPath.startsWith(redirectPath + '/')) {
             console.log('✅ Já está na página de destino, não redirecionar')
             return
@@ -82,9 +89,15 @@ export default function LoginForm({
 
           // 🚀 NOVO: Verificar última página visitada antes de redirecionar
           const lastPage = getLastVisitedPage()
-          const finalRedirectPath = lastPage && !lastPage.includes('/login') ? lastPage : redirectPath
+          // Validar que a última página é uma rota válida (deve começar com /pt/ ou /en/ ou /es/)
+          const isValidRoute = lastPage && 
+            lastPage.startsWith('/') && 
+            (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
+            !lastPage.includes('/login') &&
+            lastPage.length > 3 // Garantir que não é apenas "/pt" ou "/e"
+          const finalRedirectPath = isValidRoute ? lastPage : redirectPath
           
-          console.log('✅ Já autenticado, redirecionando para:', finalRedirectPath, lastPage ? '(última página visitada)' : '(padrão)')
+          console.log('✅ Já autenticado, redirecionando para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : '(padrão)')
           hasRedirected = true
           // Usar replace para evitar adicionar ao histórico
           router.replace(finalRedirectPath)
@@ -237,10 +250,16 @@ export default function LoginForm({
             
             // 🚀 NOVO: Verificar última página visitada antes de redirecionar
             const lastPage = getLastVisitedPage()
-            const finalRedirectPath = lastPage && !lastPage.includes('/login') ? lastPage : redirectPath
+            // Validar que a última página é uma rota válida (deve começar com /pt/ ou /en/ ou /es/)
+            const isValidRoute = lastPage && 
+              lastPage.startsWith('/') && 
+              (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
+              !lastPage.includes('/login') &&
+              lastPage.length > 3 // Garantir que não é apenas "/pt" ou "/e"
+            const finalRedirectPath = isValidRoute ? lastPage : redirectPath
             
             // Aguardar um pouco para garantir que a sessão foi persistida
-            console.log('🔄 Redirecionando após cadastro para:', finalRedirectPath, lastPage ? '(última página visitada)' : '(padrão)')
+            console.log('🔄 Redirecionando após cadastro para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : '(padrão)')
             
             // Verificar se já está na página de destino para evitar loop
             const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
@@ -327,11 +346,17 @@ export default function LoginForm({
 
         // 🚀 NOVO: Verificar última página visitada antes de redirecionar
         const lastPage = getLastVisitedPage()
-        const finalRedirectPath = lastPage && !lastPage.includes('/login') ? lastPage : redirectPath
+        // Validar que a última página é uma rota válida (deve começar com /pt/ ou /en/ ou /es/)
+        const isValidRoute = lastPage && 
+          lastPage.startsWith('/') && 
+          (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
+          !lastPage.includes('/login') &&
+          lastPage.length > 3 // Garantir que não é apenas "/pt" ou "/e"
+        const finalRedirectPath = isValidRoute ? lastPage : redirectPath
         
         // 🚀 CORREÇÃO: Redirecionar imediatamente após login bem-sucedido
         // Aguardar um pouco para garantir que a sessão foi persistida
-        console.log('🔄 Redirecionando após login para:', finalRedirectPath, lastPage ? '(última página visitada)' : '(padrão)')
+        console.log('🔄 Redirecionando após login para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : '(padrão)')
         
         // Verificar se já está na página de destino para evitar loop
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''

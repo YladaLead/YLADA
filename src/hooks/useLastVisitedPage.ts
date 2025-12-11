@@ -23,6 +23,17 @@ export function useLastVisitedPage() {
       return
     }
 
+    // Validar que é uma rota válida antes de salvar
+    const isValidRoute = pathname && 
+      pathname.startsWith('/') && 
+      (pathname.startsWith('/pt/') || pathname.startsWith('/en/') || pathname.startsWith('/es/')) &&
+      pathname.length > 3 // Garantir que não é apenas "/pt" ou "/e"
+    
+    if (!isValidRoute) {
+      console.warn('⚠️ Rota inválida ignorada:', pathname)
+      return
+    }
+
     // Salvar página e timestamp
     try {
       localStorage.setItem(LAST_VISITED_KEY, pathname)
@@ -46,6 +57,21 @@ export function useLastVisitedPage() {
           const age = Date.now() - parseInt(timestamp, 10)
           const maxAge = 7 * 24 * 60 * 60 * 1000 // 7 dias
           if (age > maxAge) {
+            localStorage.removeItem(LAST_VISITED_KEY)
+            localStorage.removeItem(LAST_VISITED_TIMESTAMP_KEY)
+            return null
+          }
+        }
+        
+        // Validar que a rota salva ainda é válida
+        if (lastPage) {
+          const isValidRoute = lastPage.startsWith('/') && 
+            (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
+            lastPage.length > 3
+          
+          if (!isValidRoute) {
+            // Limpar rota inválida do localStorage
+            console.warn('⚠️ Rota inválida encontrada no localStorage, removendo:', lastPage)
             localStorage.removeItem(LAST_VISITED_KEY)
             localStorage.removeItem(LAST_VISITED_TIMESTAMP_KEY)
             return null
