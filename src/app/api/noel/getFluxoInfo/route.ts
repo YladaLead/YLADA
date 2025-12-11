@@ -156,31 +156,43 @@ export async function POST(request: NextRequest) {
     // Gerar link do fluxo
     const baseUrl = getAppUrl()
     
-    // Mapear categoria para rota válida (vender ou recrutar)
-    // As rotas disponíveis são: /pt/wellness/system/vender/fluxos/[id] e /pt/wellness/system/recrutar/fluxos/[id]
-    let categoriaRota = 'vender' // padrão
-    if (fluxo.categoria === 'recrutamento' || fluxo.categoria === 'apresentacao') {
-      categoriaRota = 'recrutar'
-    } else if (fluxo.categoria === 'vendas' || fluxo.categoria === 'acompanhamento' || fluxo.categoria === 'acao-diaria') {
-      categoriaRota = 'vender'
-    }
+    // IMPORTANTE: A rota /pt/wellness/system/vender/fluxos/[id] usa getFluxoById que busca em array estático
+    // Os fluxos do banco não estão nesse array, então não podemos usar essa rota diretamente
+    // Solução: Retornar link para a biblioteca onde o usuário pode encontrar o fluxo
+    // OU retornar null e deixar o NOEL apresentar o conteúdo diretamente
     
-    // Usar ID do fluxo (UUID) ao invés de código, pois a rota espera ID
-    const link = `${baseUrl}/pt/wellness/system/${categoriaRota}/fluxos/${fluxo.id}`
+    // Por enquanto, vamos retornar link para a biblioteca de fluxos
+    // O NOEL pode apresentar o conteúdo completo do fluxo na resposta
+    let link = `${baseUrl}/pt/wellness/system/vender/fluxos`
+    
+    // Se a categoria for recrutamento, usar rota de recrutamento
+    if (fluxo.categoria === 'recrutamento' || fluxo.categoria === 'apresentacao') {
+      link = `${baseUrl}/pt/wellness/system/recrutar/fluxos`
+    }
     
     console.log('🔗 [getFluxoInfo] Link gerado:', {
       categoria_original: fluxo.categoria,
-      categoria_rota: categoriaRota,
       fluxo_id: fluxo.id,
       fluxo_codigo: fluxo.codigo,
-      link
+      link,
+      nota: 'Link direciona para lista de fluxos (fluxos do banco serão apresentados pelo NOEL diretamente)'
     })
 
     // Determinar quando usar baseado na categoria
+    const categoria = fluxo.categoria || 'vender'
     const quandoUsar = fluxo.descricao || 
-      (categoria === 'vender' ? 'Use para acompanhar clientes após venda ou reativar clientes inativos.' :
-       categoria === 'recrutar' ? 'Use para apresentar oportunidade de negócio e recrutar novos distribuidores.' :
+      (categoria === 'vender' || categoria === 'vendas' || categoria === 'acompanhamento' || categoria === 'acao-diaria'
+        ? 'Use para acompanhar clientes após venda ou reativar clientes inativos.' :
+       categoria === 'recrutar' || categoria === 'recrutamento' || categoria === 'apresentacao'
+        ? 'Use para apresentar oportunidade de negócio e recrutar novos distribuidores.' :
        'Use quando precisar de um guia passo a passo para uma situação específica.')
+
+    // Montar informações completas dos passos para o NOEL apresentar
+    const passosCompletos = (passos || []).map((passo, index) => ({
+      numero: passo.numero || index + 1,
+      titulo: passo.titulo || '',
+      descricao: passo.descricao || ''
+    }))
 
     return NextResponse.json({
       success: true,
@@ -192,7 +204,10 @@ export async function POST(request: NextRequest) {
         link: link,
         script_principal: scriptPrincipal,
         quando_usar: quandoUsar,
-        total_passos: passos?.length || 0
+        total_passos: passos?.length || 0,
+        passos: passosCompletos,
+        // Informação adicional para o NOEL
+        nota_link: 'Este fluxo está disponível na biblioteca do sistema. O conteúdo completo está incluído nesta resposta para você apresentar diretamente ao usuário.'
       }
     })
   } catch (error: any) {

@@ -80,28 +80,49 @@ export async function POST(request: NextRequest) {
         
         if (profile?.user_slug) {
           console.log('✅ [getFerramentaInfo] user_slug encontrado:', profile.user_slug)
-          // Tentar buscar ferramenta personalizada
-          const { data: ferramentaPersonalizada } = await supabaseAdmin
-            .from('user_templates')
-            .select('*')
-            .eq('user_id', user_id)
-            .eq('template_slug', ferramenta_slug)
-            .eq('profession', 'wellness')
-            .eq('status', 'active')
-            .maybeSingle()
-          
-          if (ferramentaPersonalizada) {
-            link = buildWellnessToolUrl(profile.user_slug, ferramentaPersonalizada.slug)
-            scriptApresentacao = ferramentaPersonalizada.custom_whatsapp_message || 
-                                 ferramentaPersonalizada.description || 
-                                 templateBase.whatsapp_message || 
-                                 `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
-          } else {
-            // Usar template base com user_slug
-            link = buildWellnessToolUrl(profile.user_slug, ferramenta_slug)
-            scriptApresentacao = templateBase.whatsapp_message || 
-                                 templateBase.description || 
-                                 `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
+          try {
+            // Tentar buscar ferramenta personalizada
+            const { data: ferramentaPersonalizada, error: ferramentaError } = await supabaseAdmin
+              .from('user_templates')
+              .select('*')
+              .eq('user_id', user_id)
+              .eq('template_slug', ferramenta_slug)
+              .eq('profession', 'wellness')
+              .eq('status', 'active')
+              .maybeSingle()
+            
+            if (ferramentaError) {
+              console.warn('⚠️ [getFerramentaInfo] Erro ao buscar ferramenta personalizada:', ferramentaError.message)
+            }
+            
+            if (ferramentaPersonalizada && ferramentaPersonalizada.slug) {
+              try {
+                link = buildWellnessToolUrl(profile.user_slug, ferramentaPersonalizada.slug)
+                console.log('✅ [getFerramentaInfo] Link gerado com ferramenta personalizada:', link)
+                scriptApresentacao = ferramentaPersonalizada.custom_whatsapp_message || 
+                                     ferramentaPersonalizada.description || 
+                                     templateBase.whatsapp_message || 
+                                     `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
+              } catch (urlError: any) {
+                console.error('❌ [getFerramentaInfo] Erro ao gerar link personalizado:', urlError)
+                // Continuar sem link personalizado
+              }
+            } else {
+              // Usar template base com user_slug
+              try {
+                link = buildWellnessToolUrl(profile.user_slug, ferramenta_slug)
+                console.log('✅ [getFerramentaInfo] Link gerado com template base:', link)
+                scriptApresentacao = templateBase.whatsapp_message || 
+                                     templateBase.description || 
+                                     `Tenho uma ${templateBase.name} que pode te ajudar! Quer testar?`
+              } catch (urlError: any) {
+                console.error('❌ [getFerramentaInfo] Erro ao gerar link com template base:', urlError)
+                // Continuar sem link, será gerado no fallback
+              }
+            }
+          } catch (error: any) {
+            console.error('❌ [getFerramentaInfo] Erro ao processar user_slug:', error)
+            // Continuar sem link personalizado
           }
         }
       }
