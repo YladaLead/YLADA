@@ -24,6 +24,19 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 [getFerramentaInfo] Parâmetros recebidos:', { ferramenta_slug, user_id })
 
+    // Validar parâmetros
+    if (!ferramenta_slug || typeof ferramenta_slug !== 'string') {
+      console.warn('⚠️ [getFerramentaInfo] ferramenta_slug inválido:', ferramenta_slug)
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'ferramenta_slug é obrigatório e deve ser uma string',
+          message: 'Por favor, especifique qual ferramenta você precisa. Exemplos: "calculadora-agua", "calculadora-proteina", "calc-hidratacao"'
+        },
+        { status: 400 }
+      )
+    }
+
     if (!ferramenta_slug) {
       console.warn('⚠️ [getFerramentaInfo] ferramenta_slug faltando')
       return NextResponse.json(
@@ -83,7 +96,13 @@ export async function POST(request: NextRequest) {
           console.log('✅ [getFerramentaInfo] user_slug encontrado:', profile.user_slug)
           try {
             // Normalizar o template_slug para buscar todas as variações
-            const templateSlugNormalizado = normalizeTemplateSlug(ferramenta_slug, 'wellness')
+            let templateSlugNormalizado = ''
+            try {
+              templateSlugNormalizado = normalizeTemplateSlug(ferramenta_slug, 'wellness')
+            } catch (normalizeError: any) {
+              console.warn('⚠️ [getFerramentaInfo] Erro ao normalizar slug, usando original:', normalizeError)
+              templateSlugNormalizado = ferramenta_slug
+            }
             console.log('🔍 [getFerramentaInfo] Buscando ferramentas com template_slug normalizado:', {
               ferramenta_slug_original: ferramenta_slug,
               template_slug_normalizado: templateSlugNormalizado
@@ -154,13 +173,24 @@ export async function POST(request: NextRequest) {
             
             // Filtrar apenas ferramentas que correspondem ao template buscado
             const ferramentasRelacionadas = todosResultados.filter(ferramenta => {
-              const templateMatch = ferramenta.template_slug === ferramenta_slug || 
-                                   ferramenta.template_slug === templateSlugNormalizado ||
-                                   normalizeTemplateSlug(ferramenta.template_slug, 'wellness') === templateSlugNormalizado
-              const slugMatch = ferramenta.slug === ferramenta_slug || 
-                               ferramenta.slug === templateSlugNormalizado ||
-                               normalizeTemplateSlug(ferramenta.slug, 'wellness') === templateSlugNormalizado
-              return templateMatch || slugMatch
+              if (!ferramenta || !ferramenta.slug) return false
+              
+              try {
+                const templateMatch = ferramenta.template_slug === ferramenta_slug || 
+                                     ferramenta.template_slug === templateSlugNormalizado ||
+                                     (ferramenta.template_slug && normalizeTemplateSlug(ferramenta.template_slug, 'wellness') === templateSlugNormalizado)
+                const slugMatch = ferramenta.slug === ferramenta_slug || 
+                                 ferramenta.slug === templateSlugNormalizado ||
+                                 (ferramenta.slug && normalizeTemplateSlug(ferramenta.slug, 'wellness') === templateSlugNormalizado)
+                return templateMatch || slugMatch
+              } catch (error) {
+                console.warn('⚠️ [getFerramentaInfo] Erro ao filtrar ferramenta:', error)
+                // Em caso de erro, incluir se pelo menos o slug ou template_slug corresponder diretamente
+                return ferramenta.slug === ferramenta_slug || 
+                       ferramenta.slug === templateSlugNormalizado ||
+                       ferramenta.template_slug === ferramenta_slug ||
+                       ferramenta.template_slug === templateSlugNormalizado
+              }
             })
             
             ferramentasRelacionadas.forEach(ferramenta => {
