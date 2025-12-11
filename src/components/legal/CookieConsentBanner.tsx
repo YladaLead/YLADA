@@ -40,6 +40,10 @@ export default function CookieConsentBanner() {
       }, 2000)
       return () => clearTimeout(timer)
     } else {
+      // Já tem consentimento - garantir que o banner NÃO apareça
+      setShowBanner(false)
+      setShowSettings(false)
+      
       // Carregar preferências salvas se existirem
       if (savedPreferences) {
         try {
@@ -125,6 +129,14 @@ export default function CookieConsentBanner() {
   // Não renderizar até estar montado no cliente
   if (!mounted) {
     return null
+  }
+
+  // Verificação adicional: se já tem consentimento salvo, não mostrar nada
+  if (typeof window !== 'undefined') {
+    const consent = localStorage.getItem(COOKIE_CONSENT_KEY)
+    if (consent && !showSettings) {
+      return null
+    }
   }
 
   if (!showBanner && !showSettings) {
