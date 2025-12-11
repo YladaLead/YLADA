@@ -90,10 +90,18 @@ export async function POST(request: NextRequest) {
             })
             
             // Buscar TODAS as ferramentas do usuário relacionadas a este template
+            // IMPORTANTE: Buscar por TODAS as variações possíveis para garantir que encontramos a ferramenta
             // Isso cobre casos onde o usuário tem múltiplas ferramentas (agua, calculadora-de-agua, water, etc)
+            
+            console.log('🔍 [getFerramentaInfo] Buscando TODAS as ferramentas relacionadas:', {
+              ferramenta_slug_original: ferramenta_slug,
+              template_slug_normalizado: templateSlugNormalizado,
+              user_id
+            })
+            
             // Fazer múltiplas queries e combinar resultados para garantir que encontramos todas
-            const [result1, result2, result3, result4] = await Promise.all([
-              // Buscar por template_slug original
+            const [result1, result2, result3, result4, result5] = await Promise.all([
+              // 1. Buscar por template_slug original (ex: "calculadora-agua")
               supabaseAdmin
                 .from('user_templates')
                 .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
@@ -101,7 +109,7 @@ export async function POST(request: NextRequest) {
                 .eq('profession', 'wellness')
                 .eq('status', 'active')
                 .eq('template_slug', ferramenta_slug),
-              // Buscar por template_slug normalizado
+              // 2. Buscar por template_slug normalizado (ex: "calc-hidratacao")
               supabaseAdmin
                 .from('user_templates')
                 .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
@@ -109,7 +117,7 @@ export async function POST(request: NextRequest) {
                 .eq('profession', 'wellness')
                 .eq('status', 'active')
                 .eq('template_slug', templateSlugNormalizado),
-              // Buscar por slug original
+              // 3. Buscar por slug original (ex: "calculadora-agua")
               supabaseAdmin
                 .from('user_templates')
                 .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
@@ -117,14 +125,21 @@ export async function POST(request: NextRequest) {
                 .eq('profession', 'wellness')
                 .eq('status', 'active')
                 .eq('slug', ferramenta_slug),
-              // Buscar por slug normalizado
+              // 4. Buscar por slug normalizado (ex: "calc-hidratacao")
               supabaseAdmin
                 .from('user_templates')
                 .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
                 .eq('user_id', user_id)
                 .eq('profession', 'wellness')
                 .eq('status', 'active')
-                .eq('slug', templateSlugNormalizado)
+                .eq('slug', templateSlugNormalizado),
+              // 5. Buscar TODAS as ferramentas do usuário (fallback - para garantir que não perdemos nenhuma)
+              supabaseAdmin
+                .from('user_templates')
+                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
+                .eq('user_id', user_id)
+                .eq('profession', 'wellness')
+                .eq('status', 'active')
             ])
             
             // Combinar todos os resultados e remover duplicatas
@@ -133,10 +148,22 @@ export async function POST(request: NextRequest) {
               ...(result1.data || []),
               ...(result2.data || []),
               ...(result3.data || []),
-              ...(result4.data || [])
+              ...(result4.data || []),
+              ...(result5.data || []) // Todas as ferramentas (para filtro manual depois)
             ]
             
-            todosResultados.forEach(ferramenta => {
+            // Filtrar apenas ferramentas que correspondem ao template buscado
+            const ferramentasRelacionadas = todosResultados.filter(ferramenta => {
+              const templateMatch = ferramenta.template_slug === ferramenta_slug || 
+                                   ferramenta.template_slug === templateSlugNormalizado ||
+                                   normalizeTemplateSlug(ferramenta.template_slug, 'wellness') === templateSlugNormalizado
+              const slugMatch = ferramenta.slug === ferramenta_slug || 
+                               ferramenta.slug === templateSlugNormalizado ||
+                               normalizeTemplateSlug(ferramenta.slug, 'wellness') === templateSlugNormalizado
+              return templateMatch || slugMatch
+            })
+            
+            ferramentasRelacionadas.forEach(ferramenta => {
               // Usar slug como chave única para evitar duplicatas
               if (!todasFerramentasUnicas.has(ferramenta.slug)) {
                 todasFerramentasUnicas.set(ferramenta.slug, ferramenta)
@@ -144,7 +171,16 @@ export async function POST(request: NextRequest) {
             })
             
             const todasFerramentas = Array.from(todasFerramentasUnicas.values())
-            const ferramentasError = result1.error || result2.error || result3.error || result4.error
+            const ferramentasError = result1.error || result2.error || result3.error || result4.error || result5.error
+            
+            console.log('📊 [getFerramentaInfo] Resultado da busca:', {
+              total_encontradas: todasFerramentas.length,
+              ferramentas: todasFerramentas.map(f => ({
+                slug: f.slug,
+                template_slug: f.template_slug,
+                title: f.title
+              }))
+            })
             
             if (ferramentasError) {
               console.warn('⚠️ [getFerramentaInfo] Erro ao buscar ferramentas:', ferramentasError.message)
@@ -179,16 +215,22 @@ export async function POST(request: NextRequest) {
             
             if (ferramentaEscolhida && ferramentaEscolhida.slug) {
               try {
-                // IMPORTANTE: Usar o slug da ferramenta (não o template_slug)
+                // ✅ CRÍTICO: SEMPRE usar o slug da ferramenta (NUNCA usar template_slug no link)
                 // A rota /pt/wellness/[user-slug]/[tool-slug] busca pelo campo 'slug' da user_templates
-                link = buildWellnessToolUrl(profile.user_slug, ferramentaEscolhida.slug)
+                // Exemplo: se ferramenta tem slug='agua' e template_slug='calc-hidratacao'
+                //          link correto: /pt/wellness/andre/agua
+                //          link ERRADO: /pt/wellness/andre/calc-hidratacao
+                const toolSlugParaLink = ferramentaEscolhida.slug // ✅ SEMPRE usar o slug da ferramenta
+                link = buildWellnessToolUrl(profile.user_slug, toolSlugParaLink)
                 console.log('✅ [getFerramentaInfo] Link gerado com ferramenta escolhida:', {
                   user_slug: profile.user_slug,
-                  tool_slug: ferramentaEscolhida.slug,
+                  tool_slug_usado: toolSlugParaLink, // ✅ Slug usado no link
+                  tool_slug_ferramenta: ferramentaEscolhida.slug,
                   template_slug: ferramentaEscolhida.template_slug,
                   title: ferramentaEscolhida.title,
                   total_encontradas: todasFerramentas?.length || 0,
-                  link
+                  link_gerado: link,
+                  aviso: 'Link usa tool_slug, NÃO template_slug'
                 })
                 scriptApresentacao = ferramentaEscolhida.custom_whatsapp_message || 
                                      ferramentaEscolhida.description || 
