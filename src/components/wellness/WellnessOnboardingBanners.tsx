@@ -1,12 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
 interface WellnessOnboardingBannersProps {
   profile?: any
+}
+
+interface BannerPreferences {
+  dismissedProfileBanner: boolean
+  dismissedPWABanner: boolean
+  dismissedNotificationsBanner: boolean
 }
 
 export default function WellnessOnboardingBanners({ profile }: WellnessOnboardingBannersProps) {
@@ -17,17 +23,99 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
   const [showPushBanner, setShowPushBanner] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default')
+  const [preferences, setPreferences] = useState<BannerPreferences>({
+    dismissedProfileBanner: false,
+    dismissedPWABanner: false,
+    dismissedNotificationsBanner: false
+  })
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false)
 
-  // Verificar se situações particulares estão preenchidas
+  // Carregar preferências salvas
   useEffect(() => {
-    if (profile && !profile.situacoes_particulares) {
-      setShowSituacoesBanner(true)
+    if (!user) return
+
+    const loadPreferences = async () => {
+      try {
+        const response = await fetch('/api/wellness/banner-preferences', {
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.preferences) {
+            setPreferences(data.preferences)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar preferências de banners:', error)
+      } finally {
+        setPreferencesLoaded(true)
+      }
     }
-  }, [profile])
+
+    loadPreferences()
+  }, [user])
+
+  // Salvar preferência quando banner é fechado
+  const savePreference = useCallback(async (bannerType: 'profile' | 'pwa' | 'notifications') => {
+    if (!user) return
+
+    const preferenceKey = 
+      bannerType === 'profile' ? 'dismissedProfileBanner' :
+      bannerType === 'pwa' ? 'dismissedPWABanner' :
+      'dismissedNotificationsBanner'
+
+    try {
+      await fetch('/api/wellness/banner-preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          [preferenceKey]: true
+        })
+      })
+      
+      // Atualizar estado local
+      setPreferences(prev => ({
+        ...prev,
+        [preferenceKey]: true
+      }))
+    } catch (error) {
+      console.error('Erro ao salvar preferência:', error)
+    }
+  }, [user])
+
+  // Verificar se situações particulares estão preenchidas E se perfil está completo
+  useEffect(() => {
+    if (!preferencesLoaded) return
+    
+    // Verificar se o perfil NOEL está completo (onboarding_completo)
+    const isProfileComplete = profile?.onboarding_completo === true
+    
+    // Se o perfil estiver completo, marcar banner como dismissed automaticamente
+    if (isProfileComplete && !preferences.dismissedProfileBanner) {
+      // Marcar como dismissed automaticamente quando perfil está completo
+      savePreference('profile')
+      setShowSituacoesBanner(false)
+      return
+    }
+    
+    // Só mostrar banner se:
+    // 1. Perfil NÃO está completo
+    // 2. E não tem situacoes_particulares (ou está vazio)
+    // 3. E não foi fechado anteriormente
+    const hasSituacoes = profile?.situacoes_particulares && 
+                         profile.situacoes_particulares.trim().length > 0
+    
+    if (profile && !isProfileComplete && !hasSituacoes && !preferences.dismissedProfileBanner) {
+      setShowSituacoesBanner(true)
+    } else {
+      setShowSituacoesBanner(false)
+    }
+  }, [profile, preferences.dismissedProfileBanner, preferencesLoaded, savePreference])
 
   // Verificar se PWA está instalado
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined' || !preferencesLoaded) return
 
     // Verificar se está em modo standalone (PWA instalado)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
@@ -36,30 +124,43 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
 
     setIsInstalled(isStandalone)
 
-    // Se não está instalado, mostrar banner após alguns segundos
-    if (!isStandalone) {
+    // Só mostrar banner se:
+    // 1. Não está instalado
+    // 2. E não foi fechado anteriormente
+    if (!isStandalone && !preferences.dismissedPWABanner) {
       const timer = setTimeout(() => {
         setShowPWABanner(true)
       }, 3000) // Mostrar após 3 segundos
       return () => clearTimeout(timer)
+    } else {
+      setShowPWABanner(false)
     }
-  }, [])
+  }, [preferences.dismissedPWABanner, preferencesLoaded])
 
   // Verificar permissão de notificações
   useEffect(() => {
-    if (typeof window === 'undefined' || !('Notification' in window)) return
+    if (typeof window === 'undefined' || !('Notification' in window) || !preferencesLoaded) return
 
     const permission = Notification.permission
     setNotificationPermission(permission)
 
-    // Se não tem permissão, mostrar banner
-    if (permission === 'default') {
+    // Só mostrar banner se:
+    // 1. Permissão é 'default' (ainda não foi perguntado)
+    // 2. E não foi fechado anteriormente
+    // 3. E não foi negado (se foi negado, não mostrar mais - já foi desativado pelo usuário)
+    if (permission === 'denied' || preferences.dismissedNotificationsBanner) {
+      // Se foi negado ou fechado, não mostrar mais
+      setShowPushBanner(false)
+    } else if (permission === 'default' && !preferences.dismissedNotificationsBanner) {
+      // Só mostrar se ainda não foi perguntado e não foi fechado
       const timer = setTimeout(() => {
         setShowPushBanner(true)
       }, 5000) // Mostrar após 5 segundos (depois do PWA)
       return () => clearTimeout(timer)
+    } else {
+      setShowPushBanner(false)
     }
-  }, [])
+  }, [preferences.dismissedNotificationsBanner, preferencesLoaded])
 
   // Não mostrar se não tem usuário
   if (!user) return null
@@ -86,12 +187,18 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
                 <Link
                   href="/pt/wellness/conta/perfil"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors text-center"
-                  onClick={() => setShowSituacoesBanner(false)}
+                  onClick={() => {
+                    setShowSituacoesBanner(false)
+                    savePreference('profile')
+                  }}
                 >
                   Preencher Agora →
                 </Link>
                 <button
-                  onClick={() => setShowSituacoesBanner(false)}
+                  onClick={() => {
+                    setShowSituacoesBanner(false)
+                    savePreference('profile')
+                  }}
                   className="bg-white hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors border border-gray-300"
                 >
                   Lembrar depois
@@ -99,7 +206,10 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
               </div>
             </div>
             <button
-              onClick={() => setShowSituacoesBanner(false)}
+              onClick={() => {
+                setShowSituacoesBanner(false)
+                savePreference('profile')
+              }}
               className="flex-shrink-0 text-gray-400 hover:text-gray-600 text-xl"
               aria-label="Fechar"
             >
@@ -143,13 +253,19 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
 
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
-                  onClick={() => setShowPWABanner(false)}
+                  onClick={() => {
+                    setShowPWABanner(false)
+                    savePreference('pwa')
+                  }}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
                 >
                   Entendi, obrigado!
                 </button>
                 <button
-                  onClick={() => setShowPWABanner(false)}
+                  onClick={() => {
+                    setShowPWABanner(false)
+                    savePreference('pwa')
+                  }}
                   className="bg-white hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors border border-gray-300"
                 >
                   Lembrar depois
@@ -157,7 +273,10 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
               </div>
             </div>
             <button
-              onClick={() => setShowPWABanner(false)}
+              onClick={() => {
+                setShowPWABanner(false)
+                savePreference('pwa')
+              }}
               className="flex-shrink-0 text-gray-400 hover:text-gray-600 text-xl"
               aria-label="Fechar"
             >
@@ -187,12 +306,18 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
                 <Link
                   href="/pt/wellness/configuracao"
                   className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors text-center"
-                  onClick={() => setShowPushBanner(false)}
+                  onClick={() => {
+                    setShowPushBanner(false)
+                    savePreference('notifications')
+                  }}
                 >
                   Ativar Notificações →
                 </Link>
                 <button
-                  onClick={() => setShowPushBanner(false)}
+                  onClick={() => {
+                    setShowPushBanner(false)
+                    savePreference('notifications')
+                  }}
                   className="bg-white hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors border border-gray-300"
                 >
                   Lembrar depois
@@ -200,7 +325,10 @@ export default function WellnessOnboardingBanners({ profile }: WellnessOnboardin
               </div>
             </div>
             <button
-              onClick={() => setShowPushBanner(false)}
+              onClick={() => {
+                setShowPushBanner(false)
+                savePreference('notifications')
+              }}
               className="flex-shrink-0 text-gray-400 hover:text-gray-600 text-xl"
               aria-label="Fechar"
             >

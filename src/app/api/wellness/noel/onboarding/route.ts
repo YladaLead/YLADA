@@ -743,6 +743,42 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Perfil salvo com sucesso:', data)
 
+    // Se o perfil foi marcado como completo, marcar banner como dismissed automaticamente
+    if (data?.onboarding_completo === true) {
+      try {
+        // Buscar settings existente
+        const { data: existingSettings } = await supabaseAdmin
+          .from('noel_user_settings')
+          .select('preferences')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        const currentPreferences = existingSettings?.preferences || {}
+
+        // Atualizar preferências para marcar banner como dismissed
+        const updatedPreferences = {
+          ...currentPreferences,
+          dismissedProfileBanner: true,
+        }
+
+        // Upsert (criar ou atualizar)
+        await supabaseAdmin
+          .from('noel_user_settings')
+          .upsert({
+            user_id: user.id,
+            preferences: updatedPreferences,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
+          })
+
+        console.log('✅ Banner de perfil marcado como dismissed automaticamente')
+      } catch (bannerError) {
+        console.warn('⚠️ Aviso: Erro ao marcar banner como dismissed (não crítico):', bannerError)
+        // Não falhar o request se isso der erro, apenas logar
+      }
+    }
+
     // Se profile_type foi fornecido, atualizar também em user_profiles
     if (profile_type) {
       try {
