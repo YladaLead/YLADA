@@ -83,3 +83,4 @@ Todos os 25 arquivos de preview têm:
 **Status:** 25/25 previews corretos ✅ | 16/26 templates corretos ⚠️
 
 
+

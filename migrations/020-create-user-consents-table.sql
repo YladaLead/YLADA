@@ -84,3 +84,4 @@ COMMENT ON COLUMN user_consents.granted IS 'Se o consentimento foi concedido (tr
 COMMENT ON COLUMN user_consents.ip_address IS 'IP do usuário no momento do consentimento (para auditoria)';
 COMMENT ON COLUMN user_consents.user_agent IS 'User agent do navegador (para auditoria)';
 
+

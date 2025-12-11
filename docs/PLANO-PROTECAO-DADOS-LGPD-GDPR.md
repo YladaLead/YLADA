@@ -456,3 +456,4 @@ CREATE TABLE IF NOT EXISTS data_access_logs (
 **Última atualização:** 2024-12-XX
 **Responsável:** [Nome do DPO/Responsável]
 
+
