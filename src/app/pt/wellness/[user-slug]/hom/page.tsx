@@ -157,12 +157,13 @@ export default function HOMPage() {
       profile
     })
     
-    const mensagem = encodeURIComponent(
-      `Olá! 👋\n\nGostei da oportunidade quero minha licença quero começar fazendo a licença`
-    )
+    const mensagem = `Olá! 👋
+
+Gostei da oportunidade e quero minha licença! Quero começar fazendo a licença.`
     
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${mensagem}`
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensagem)}`
     console.log('🔗 Abrindo WhatsApp:', whatsappUrl)
+    console.log('📝 Mensagem que será enviada:', mensagem)
     window.open(whatsappUrl, '_blank')
   }
 
@@ -196,12 +197,13 @@ export default function HOMPage() {
       profile
     })
     
-    const mensagem = encodeURIComponent(
-      `Olá! 👋\n\nAssisti o vídeo tem dúvidas`
-    )
+    const mensagem = `Olá! 👋
+
+Assisti o vídeo e tenho dúvidas.`
     
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${mensagem}`
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensagem)}`
     console.log('🔗 Abrindo WhatsApp:', whatsappUrl)
+    console.log('📝 Mensagem que será enviada:', mensagem)
     window.open(whatsappUrl, '_blank')
   }
 
