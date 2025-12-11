@@ -891,50 +891,38 @@ export async function POST(request: NextRequest) {
           console.error('❌ [NOEL] Erro completo:', JSON.stringify(functionError, null, 2))
           console.error('❌ [NOEL] Stack:', functionError.stack)
           
-          // Se for erro de function específica, tentar processar novamente sem function
-          if (functionError.message?.includes('function') || 
-              functionError.message?.includes('Function') ||
-              functionError.message?.includes('getFerramentaInfo') ||
-              functionError.message?.includes('getFluxoInfo')) {
-            console.warn('⚠️ [NOEL] Erro relacionado a function, tentando continuar...')
-            // Tentar processar mensagem novamente (o Assistants API pode tentar sem function)
-            try {
-              assistantResult = await processMessageWithAssistant(
-                contextMessage,
-                user.id,
-                threadId
-              )
-              console.log('✅ [NOEL] Retry bem-sucedido após erro de function')
-            } catch (retryError: any) {
-              console.error('❌ [NOEL] Retry também falhou:', retryError)
-              // Se ainda falhar, retornar resposta genérica ao invés de lançar erro
-              return NextResponse.json({
-                response: `Desculpe, tive um problema técnico ao buscar essa informação. Mas posso te ajudar de outra forma! 
-
-Para a calculadora de água, você pode acessar diretamente pelo sistema Wellness na seção de ferramentas, ou me dizer qual informação específica você precisa que eu te ajudo a formular uma mensagem para seu cliente.
-
-Como prefere prosseguir?`,
-                module: intention.module,
-                source: 'assistant_api',
-                threadId: threadId || 'new',
-                modelUsed: 'gpt-4.1-assistant',
-                error: true,
-                errorMessage: 'Erro ao processar function, mas resposta alternativa fornecida'
-              })
+          // SEMPRE tentar retry, independente do tipo de erro
+          console.warn('⚠️ [NOEL] Tentando retry após erro...')
+          try {
+            assistantResult = await processMessageWithAssistant(
+              contextMessage,
+              user.id,
+              threadId
+            )
+            console.log('✅ [NOEL] Retry bem-sucedido após erro')
+          } catch (retryError: any) {
+            console.error('❌ [NOEL] Retry também falhou:', retryError)
+            console.error('❌ [NOEL] Retry error message:', retryError.message)
+            
+            // Retornar resposta útil baseada na mensagem original
+            let helpfulResponse = `Desculpe, tive um problema técnico ao processar sua mensagem. Mas posso te ajudar!`
+            
+            if (message.toLowerCase().includes('perfil') || message.toLowerCase().includes('meu perfil')) {
+              helpfulResponse = `Desculpe, tive um problema técnico ao buscar seu perfil. Mas posso te ajudar de outras formas! Você pode:\n\n- Acessar seu perfil diretamente no sistema Wellness\n- Me fazer outra pergunta e eu tento ajudar\n- Recarregar a página e tentar novamente\n\nO que você precisa agora?`
+            } else if (message.toLowerCase().includes('script') || message.toLowerCase().includes('vender')) {
+              helpfulResponse = `Desculpe, tive um problema técnico ao buscar scripts. Mas posso te ajudar! Você pode:\n\n- Acessar a biblioteca do sistema Wellness para encontrar scripts prontos\n- Me fazer outra pergunta e eu tento ajudar de outra forma\n- Recarregar a página e tentar novamente\n\nO que você precisa agora?`
+            } else {
+              helpfulResponse = `Desculpe, tive um problema técnico ao processar sua mensagem. Tente novamente em alguns instantes ou reformule sua pergunta.\n\nSe o problema persistir, você pode acessar diretamente a biblioteca do sistema Wellness para encontrar o que precisa.`
             }
-          } else {
-            // Para outros erros, também retornar resposta alternativa
-            console.error('❌ [NOEL] Erro não relacionado a function, retornando resposta alternativa')
+            
             return NextResponse.json({
-              response: `Desculpe, tive um problema técnico ao processar sua mensagem. Tente novamente em alguns instantes ou reformule sua pergunta.
-
-Se o problema persistir, você pode acessar diretamente a biblioteca do sistema Wellness para encontrar o que precisa.`,
+              response: helpfulResponse,
               module: intention.module,
               source: 'assistant_api',
               threadId: threadId || 'new',
               modelUsed: 'gpt-4.1-assistant',
               error: true,
-              errorMessage: functionError.message || 'Erro desconhecido'
+              errorMessage: retryError.message || functionError.message || 'Erro ao processar mensagem'
             })
           }
         }
