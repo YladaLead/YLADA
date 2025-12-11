@@ -887,10 +887,16 @@ export async function POST(request: NextRequest) {
           )
         } catch (functionError: any) {
           // Se erro for relacionado a function, tentar continuar sem a function
-          console.warn('⚠️ [NOEL] Erro ao processar function, continuando sem function:', functionError.message)
+          console.error('❌ [NOEL] Erro ao processar mensagem:', functionError)
+          console.error('❌ [NOEL] Erro completo:', JSON.stringify(functionError, null, 2))
+          console.error('❌ [NOEL] Stack:', functionError.stack)
           
           // Se for erro de function específica, tentar processar novamente sem function
-          if (functionError.message?.includes('function') || functionError.message?.includes('Function')) {
+          if (functionError.message?.includes('function') || 
+              functionError.message?.includes('Function') ||
+              functionError.message?.includes('getFerramentaInfo') ||
+              functionError.message?.includes('getFluxoInfo')) {
+            console.warn('⚠️ [NOEL] Erro relacionado a function, tentando continuar...')
             // Tentar processar mensagem novamente (o Assistants API pode tentar sem function)
             try {
               assistantResult = await processMessageWithAssistant(
@@ -898,12 +904,38 @@ export async function POST(request: NextRequest) {
                 user.id,
                 threadId
               )
+              console.log('✅ [NOEL] Retry bem-sucedido após erro de function')
             } catch (retryError: any) {
-              // Se ainda falhar, lançar erro original
-              throw functionError
+              console.error('❌ [NOEL] Retry também falhou:', retryError)
+              // Se ainda falhar, retornar resposta genérica ao invés de lançar erro
+              return NextResponse.json({
+                response: `Desculpe, tive um problema técnico ao buscar essa informação. Mas posso te ajudar de outra forma! 
+
+Para a calculadora de água, você pode acessar diretamente pelo sistema Wellness na seção de ferramentas, ou me dizer qual informação específica você precisa que eu te ajudo a formular uma mensagem para seu cliente.
+
+Como prefere prosseguir?`,
+                module: intention.module,
+                source: 'assistant_api',
+                threadId: threadId || 'new',
+                modelUsed: 'gpt-4.1-assistant',
+                error: true,
+                errorMessage: 'Erro ao processar function, mas resposta alternativa fornecida'
+              })
             }
           } else {
-            throw functionError
+            // Para outros erros, também retornar resposta alternativa
+            console.error('❌ [NOEL] Erro não relacionado a function, retornando resposta alternativa')
+            return NextResponse.json({
+              response: `Desculpe, tive um problema técnico ao processar sua mensagem. Tente novamente em alguns instantes ou reformule sua pergunta.
+
+Se o problema persistir, você pode acessar diretamente a biblioteca do sistema Wellness para encontrar o que precisa.`,
+              module: intention.module,
+              source: 'assistant_api',
+              threadId: threadId || 'new',
+              modelUsed: 'gpt-4.1-assistant',
+              error: true,
+              errorMessage: functionError.message || 'Erro desconhecido'
+            })
           }
         }
 
@@ -1707,14 +1739,28 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result)
   } catch (error: any) {
-    console.error('❌ Erro no NOEL:', error)
-    return NextResponse.json(
-      {
-        error: 'Erro ao processar mensagem',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
-    )
+    console.error('❌ [NOEL] Erro geral no endpoint:', error)
+    console.error('❌ [NOEL] Stack completo:', error.stack)
+    console.error('❌ [NOEL] Erro detalhado:', JSON.stringify(error, null, 2))
+    
+    // Tentar retornar resposta útil mesmo em caso de erro
+    // Ao invés de retornar erro 500, retornar resposta alternativa
+    return NextResponse.json({
+      response: `Desculpe, tive um problema técnico ao processar sua mensagem. 
+
+Mas posso te ajudar! Você pode:
+- Acessar a biblioteca do sistema Wellness para encontrar fluxos e scripts
+- Me fazer outra pergunta e eu tento ajudar de outra forma
+- Recarregar a página e tentar novamente
+
+O que você precisa agora?`,
+      module: 'mentor',
+      source: 'assistant_api',
+      threadId: 'error',
+      modelUsed: 'gpt-4.1-assistant',
+      error: true,
+      errorMessage: process.env.NODE_ENV === 'development' ? error.message : 'Erro ao processar mensagem'
+    })
   }
 }
 
