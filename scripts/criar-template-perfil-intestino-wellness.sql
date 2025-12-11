@@ -149,15 +149,7 @@ INSERT INTO templates_nutrition (
       }
     ]
   }'::jsonb
-)
-ON CONFLICT (slug, profession) 
-DO UPDATE SET
-  name = EXCLUDED.name,
-  title = EXCLUDED.title,
-  description = EXCLUDED.description,
-  content = EXCLUDED.content,
-  is_active = true,
-  updated_at = NOW();
+);
 
 -- Verificar se foi criado corretamente
 SELECT 
