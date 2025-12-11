@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { getFullOGImageUrl } from '@/lib/og-image-map'
+import { getOGMessages } from '@/lib/og-messages-map'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.app'
 
@@ -8,15 +9,19 @@ export async function generateMetadata({ params }: { params: Promise<{ 'user-slu
   const userSlug = resolvedParams['user-slug']
   
   const pageUrl = `${baseUrl}/pt/wellness/${userSlug}/hom`
+  
+  // Obter mensagens OG específicas da HOM (igual às outras ferramentas)
+  const ogMessages = getOGMessages('hom')
+  
   // Usar imagem OG específica da HOM (PNG para melhor qualidade)
   const imageUrl = getFullOGImageUrl('hom', baseUrl, 'wellness')
 
   return {
-    title: '🍹 Oportunidade: Bebidas Funcionais - HOM Gravada',
-    description: 'Uma oportunidade de negócio que está transformando vidas. Assista à apresentação completa sobre o mercado de bebidas funcionais e descubra como começar.',
+    title: `${ogMessages.title} - WELLNESS`,
+    description: ogMessages.description,
     openGraph: {
-      title: '🍹 Oportunidade: Bebidas Funcionais',
-      description: 'Uma oportunidade de negócio que está transformando vidas. Assista à apresentação completa sobre o mercado de bebidas funcionais.',
+      title: `${ogMessages.title} - WELLNESS`,
+      description: ogMessages.description,
       url: pageUrl,
       siteName: 'WELLNESS - Your Leading Data System',
       type: 'website',
@@ -26,15 +31,15 @@ export async function generateMetadata({ params }: { params: Promise<{ 'user-slu
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: 'Oportunidade: Bebidas Funcionais - HOM Gravada',
+          alt: ogMessages.title,
           type: 'image/png',
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: '🍹 Oportunidade: Bebidas Funcionais',
-      description: 'Uma oportunidade de negócio que está transformando vidas. Assista à apresentação completa.',
+      title: `${ogMessages.title} - WELLNESS`,
+      description: ogMessages.description,
       images: [imageUrl],
     },
   }

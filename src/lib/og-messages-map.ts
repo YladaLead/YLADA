@@ -181,6 +181,12 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     title: 'Portal completo de bem-estar',
     description: 'Acesse um portal completo com ferramentas personalizadas para seu bem-estar'
   },
+  
+  // HOM (Herbalife Opportunity Meeting)
+  'hom': {
+    title: '🍹 Oportunidade: Bebidas Funcionais',
+    description: 'Uma oportunidade de negócio que está transformando vidas. Assista à apresentação completa sobre o mercado de bebidas funcionais e descubra como começar. Pessoas querem mais energia, buscam saúde + praticidade. Produtos de alta rotatividade com margens atrativas para iniciantes. Simples de vender e de consumir.'
+  },
 }
 
 /**
