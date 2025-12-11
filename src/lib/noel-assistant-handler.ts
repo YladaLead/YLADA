@@ -403,12 +403,17 @@ export async function processMessageWithAssistant(
               result,
             })
 
-            console.log(`✅ Function ${functionName} executada com sucesso`)
-            console.log(`✅ Resultado:`, JSON.stringify(result, null, 2).substring(0, 500))
+            console.log(`✅ [NOEL Handler] Function ${functionName} executada com sucesso`)
+            console.log(`✅ [NOEL Handler] Resultado:`, JSON.stringify(result, null, 2).substring(0, 500))
+            
+            const successOutput = { success: true, data: result }
+            const outputJson = JSON.stringify(successOutput)
+            
+            console.log(`✅ [NOEL Handler] Output JSON (${outputJson.length} chars):`, outputJson.substring(0, 200))
 
             return {
               tool_call_id: toolCall.id,
-              output: JSON.stringify({ success: true, data: result }),
+              output: outputJson,
             }
           } catch (error: any) {
             console.error(`❌ Erro ao executar ${functionName}:`, error)
@@ -419,15 +424,19 @@ export async function processMessageWithAssistant(
             const errorMessage = error.message || 'Erro desconhecido'
             const errorResponse = error.response?.data || {}
             
+            const errorOutput = {
+              success: false, 
+              error: errorMessage,
+              details: errorResponse,
+              function: functionName,
+              message: errorResponse.message || `Não foi possível buscar ${functionName}. ${errorMessage}. Tente especificar melhor o que você precisa.`
+            }
+            
+            console.error(`❌ [NOEL Handler] Erro ao executar ${functionName}, retornando erro estruturado:`, JSON.stringify(errorOutput, null, 2))
+            
             return {
               tool_call_id: toolCall.id,
-              output: JSON.stringify({ 
-                success: false, 
-                error: errorMessage,
-                details: errorResponse,
-                function: functionName,
-                message: errorResponse.message || `Não foi possível buscar ${functionName}. ${errorMessage}. Tente especificar melhor o que você precisa.`
-              }),
+              output: JSON.stringify(errorOutput),
             }
           }
         })
