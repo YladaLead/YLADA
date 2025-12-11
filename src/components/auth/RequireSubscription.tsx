@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
+import { getCachedSubscription, setCachedSubscription } from '@/lib/subscription-cache'
 
 interface RequireSubscriptionProps {
   children: React.ReactNode
@@ -111,9 +112,21 @@ export default function RequireSubscription({
           return
         }
 
-        // Verificar assinatura via API (com timeout reduzido para 3s)
+        // 🚀 OTIMIZAÇÃO: Verificar cache ANTES de chamar API
+        const cached = getCachedSubscription(user?.id || '', area)
+        if (cached) {
+          if (!isMounted) return
+          console.log('✅ RequireSubscription: Usando cache de assinatura (idade:', Math.round((Date.now() - cached.timestamp) / 1000), 's)')
+          setHasSubscription(cached.hasSubscription)
+          setCanBypass(cached.canBypass)
+          setCheckingSubscription(false)
+          setShowLoading(false)
+          return
+        }
+
+        // Cache não encontrado ou expirado, verificar via API (com timeout reduzido para 1.5s)
         controller = new AbortController()
-        const timeoutId = setTimeout(() => controller?.abort(), 3000)
+        const timeoutId = setTimeout(() => controller?.abort(), 1500)
         
         // Obter access token para enviar no header (fallback quando cookies falharem)
         let accessToken: string | null = null
@@ -157,8 +170,16 @@ export default function RequireSubscription({
           const data = await response.json()
           if (!isMounted) return
           
-          setHasSubscription(data.hasActiveSubscription || data.bypassed)
-          setCanBypass(data.bypassed || false)
+          const hasActive = data.hasActiveSubscription || data.bypassed
+          const canBypassValue = data.bypassed || false
+          
+          // 🚀 OTIMIZAÇÃO: Salvar no cache para próximas verificações
+          if (user?.id) {
+            setCachedSubscription(user.id, area, hasActive, canBypassValue)
+          }
+          
+          setHasSubscription(hasActive)
+          setCanBypass(canBypassValue)
 
           // Se tem assinatura, buscar detalhes (em background, não bloqueia)
           if (data.hasActiveSubscription) {
@@ -222,17 +243,17 @@ export default function RequireSubscription({
   }, [user, userProfile, authLoading, area, profileCheckTimeout])
 
   // Hook 3: Timeout para verificação de assinatura
-  // 🚀 OTIMIZAÇÃO: Reduzido de 3s para 2s (suficiente com as otimizações do useAuth)
+  // 🚀 OTIMIZAÇÃO: Reduzido de 2s para 1s (com cache, verificação é muito mais rápida)
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
     
     if (checkingSubscription) {
       timer = setTimeout(() => {
-        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 2s, permitindo acesso temporário')
+        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 1s, permitindo acesso temporário')
         setShowLoading(false)
         setCheckingSubscription(false)
         setHasSubscription(true)
-      }, 2000) // Reduzido de 3s para 2s
+      }, 1000) // Reduzido de 2s para 1s (com cache, raramente será necessário)
     } else {
       setShowLoading(false)
     }

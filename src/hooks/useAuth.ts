@@ -162,20 +162,41 @@ export function useAuth() {
         
         if (!mounted) return
         
-        if (currentSession) {
+        // 🚀 FASE 2: Fallback para localStorage se cookies falharem
+        let sessionToUse = currentSession
+        if (!sessionToUse && typeof window !== 'undefined') {
+          try {
+            // Tentar recuperar do localStorage (Supabase armazena lá também)
+            const storedSession = localStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`)
+            if (storedSession) {
+              console.log('🔄 useAuth: Tentando recuperar sessão do localStorage (fallback)')
+              // O Supabase gerencia isso automaticamente, mas podemos forçar refresh
+              const { data: { session: refreshedSession } } = await supabase.auth.refreshSession()
+              if (refreshedSession) {
+                sessionToUse = refreshedSession
+                console.log('✅ useAuth: Sessão recuperada do localStorage')
+              }
+            }
+          } catch (fallbackErr) {
+            console.warn('⚠️ useAuth: Fallback para localStorage falhou:', fallbackErr)
+          }
+        }
+        
+        if (sessionToUse) {
           console.log('✅ useAuth: Sessão encontrada', {
-            userId: currentSession.user?.id,
-            email: currentSession.user?.email,
-            isPWA
+            userId: sessionToUse.user?.id,
+            email: sessionToUse.user?.email,
+            isPWA,
+            source: currentSession ? 'cookies' : 'localStorage'
           })
           
-          setSession(currentSession)
-          setUser(currentSession.user ?? null)
+          setSession(sessionToUse)
+          setUser(sessionToUse.user ?? null)
           // Se temos sessão, marcar loading como false imediatamente (perfil pode carregar depois)
           setLoading(false)
 
           // Buscar perfil em background (não bloqueia)
-          fetchUserProfile(currentSession.user.id, true)
+          fetchUserProfile(sessionToUse.user.id, true)
             .then(profile => {
               if (!mounted) return
               if (profile) {
@@ -191,7 +212,7 @@ export function useAuth() {
               setUserProfile(null)
             })
         } else {
-          console.log('⚠️ useAuth: Nenhuma sessão encontrada', { isPWA })
+          console.log('⚠️ useAuth: Nenhuma sessão encontrada', { isPWA, error })
           setSession(null)
           setUser(null)
           setUserProfile(null)
@@ -397,12 +418,21 @@ export function useAuth() {
   const signOut = async () => {
     // 🚀 OTIMIZAÇÃO: Limpar cache ao fazer sign out
     if (typeof window !== 'undefined') {
+      // Limpar cache de perfil
       const keys = Object.keys(sessionStorage)
       keys.forEach(key => {
         if (key.startsWith('user_profile_')) {
           sessionStorage.removeItem(key)
         }
       })
+      
+      // Limpar cache de assinatura
+      try {
+        const { clearAllSubscriptionCaches } = await import('@/lib/subscription-cache')
+        clearAllSubscriptionCaches()
+      } catch (error) {
+        console.warn('⚠️ Erro ao limpar cache de assinatura:', error)
+      }
     }
     
     await supabase.auth.signOut()

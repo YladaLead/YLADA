@@ -52,76 +52,9 @@ export default function LoginForm({
     }
   }, [])
 
-  // 🚀 CORREÇÃO: Verificar autenticação apenas UMA VEZ ao carregar (sem loop)
-  // IMPORTANTE: Só verificar se NÃO estiver em processo de login/cadastro
-  useEffect(() => {
-    // Se estiver carregando (processando login/cadastro), não verificar
-    if (loading) {
-      return
-    }
-
-    let mounted = true
-    let checkTimeout: NodeJS.Timeout | null = null
-    let hasRedirected = false
-
-    const checkAuth = async () => {
-      // Evitar múltiplos redirecionamentos
-      if (hasRedirected || !mounted) {
-        return
-      }
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (mounted && session?.user && !hasRedirected) {
-          // Verificar se já está na página de destino para evitar loop
-          const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-          
-          // Não redirecionar se já estiver na página de login
-          if (currentPath.includes('/login')) {
-            console.log('✅ Já está na página de login, não redirecionar')
-            return
-          }
-          
-          if (currentPath === redirectPath || currentPath.startsWith(redirectPath + '/')) {
-            console.log('✅ Já está na página de destino, não redirecionar')
-            return
-          }
-
-          // 🚀 NOVO: Verificar última página visitada antes de redirecionar
-          const lastPage = getLastVisitedPage()
-          // Validar que a última página é uma rota válida (deve começar com /pt/ ou /en/ ou /es/)
-          const isValidRoute = lastPage && 
-            lastPage.startsWith('/') && 
-            (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
-            !lastPage.includes('/login') &&
-            lastPage.length > 3 // Garantir que não é apenas "/pt" ou "/e"
-          const finalRedirectPath = isValidRoute ? lastPage : redirectPath
-          
-          console.log('✅ Já autenticado, redirecionando para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : '(padrão)')
-          hasRedirected = true
-          // Usar replace para evitar adicionar ao histórico
-          router.replace(finalRedirectPath)
-        }
-      } catch (err) {
-        console.error('Erro ao verificar autenticação:', err)
-      }
-    }
-
-    // Aguardar um pouco para garantir que cookies foram carregados
-    checkTimeout = setTimeout(() => {
-      if (mounted && !loading && !hasRedirected) {
-        checkAuth()
-      }
-    }, 300) // Aumentado para 300ms para dar mais tempo aos cookies
-
-    return () => {
-      mounted = false
-      hasRedirected = true // Marcar como redirecionado ao desmontar
-      if (checkTimeout) {
-        clearTimeout(checkTimeout)
-      }
-    }
-  }, [redirectPath, router, loading]) // Adicionar loading como dependência
+  // 🚀 FASE 2: Removido redirecionamento - AutoRedirect cuida disso
+  // Este componente apenas mostra o formulário de login
+  // AutoRedirect vai redirecionar automaticamente se usuário já estiver autenticado
 
   // Atualizar valor dos inputs
   const handleInputChange = (setter: (value: string) => void) => {

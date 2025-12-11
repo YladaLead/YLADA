@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface ProtectedRouteProps {
@@ -13,26 +12,24 @@ interface ProtectedRouteProps {
 }
 
 /**
- * VERSÃO OTIMIZADA - Sem loops infinitos
- * - Timeout único de 2s
- * - Menos re-renders
- * - Verificação simplificada
+ * VERSÃO OTIMIZADA FASE 2 - Apenas verificação de permissão
+ * - NÃO redireciona (AutoRedirect cuida disso)
+ * - Apenas verifica se usuário tem permissão
+ * - Timeout reduzido para melhor UX
  */
 export default function ProtectedRoute({ 
   children, 
   perfil,
-  redirectTo,
+  redirectTo, // Mantido para compatibilidade, mas não usado
   allowAdmin = false,
   allowSupport = true // Por padrão, suporte pode acessar todas as áreas
 }: ProtectedRouteProps) {
   const { user, userProfile, loading, isAuthenticated } = useAuth()
-  const router = useRouter()
   const [hasTimedOut, setHasTimedOut] = useState(false)
-  const [hasRedirected, setHasRedirected] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(true)
 
-  // Timeout reduzido para 1.5 segundos (melhor UX em mobile)
+  // Timeout reduzido para 1 segundo (melhor UX com cache)
   useEffect(() => {
     mountedRef.current = true
     
@@ -45,7 +42,7 @@ export default function ProtectedRoute({
         if (mountedRef.current) {
           setHasTimedOut(true)
         }
-      }, 1500) // Reduzido de 2000ms para 1500ms
+      }, 1000) // Reduzido de 1500ms para 1000ms (com cache, carrega mais rápido)
     } else {
       setHasTimedOut(false)
     }
@@ -58,25 +55,8 @@ export default function ProtectedRoute({
     }
   }, [loading])
 
-  // Redirecionamento (apenas uma vez, evita loops)
-  useEffect(() => {
-    if (hasRedirected || loading || hasTimedOut) {
-      return
-    }
-
-    if (!isAuthenticated || !user) {
-      const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-      
-      if (currentPath.includes('/login')) {
-        return
-      }
-
-      const redirectPath = redirectTo || (perfil === 'admin' ? '/admin/login' : `/pt/${perfil || 'nutri'}/login`)
-      
-      setHasRedirected(true)
-      router.replace(redirectPath)
-    }
-  }, [isAuthenticated, user, loading, hasTimedOut, hasRedirected, perfil, redirectTo, router])
+  // 🚀 FASE 2: Removido redirecionamento - AutoRedirect cuida disso
+  // Este componente apenas verifica permissão, não redireciona
 
   // Loading state simplificado
   if (loading && !hasTimedOut) {
@@ -90,19 +70,21 @@ export default function ProtectedRoute({
     )
   }
 
-  // Se não está autenticado
+  // Se não está autenticado, não renderizar nada (AutoRedirect vai redirecionar)
   if (!isAuthenticated || !user) {
-    if (hasRedirected) {
-      return null
-    }
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecionando...</p>
+    // Mostrar loading apenas se ainda está carregando
+    if (loading && !hasTimedOut) {
+      return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
+    // Se não está carregando e não está autenticado, AutoRedirect vai cuidar
+    return null
   }
 
   // Verificar perfil se especificado

@@ -41,6 +41,18 @@ function WellnessPagamentoSucessoContent() {
         tipo: sessionId ? 'Stripe (session_id)' : 'Mercado Pago (payment_id)'
       })
 
+      // 🚀 OTIMIZAÇÃO: Invalidar cache de assinatura imediatamente após pagamento
+      // Isso garante que o usuário veja o acesso imediatamente após checkout
+      if (user?.id) {
+        try {
+          const { invalidateSubscriptionCache } = await import('@/lib/subscription-cache')
+          invalidateSubscriptionCache(user.id, 'wellness')
+          console.log('✅ Cache de assinatura invalidado após pagamento')
+        } catch (error) {
+          console.warn('⚠️ Erro ao invalidar cache:', error)
+        }
+      }
+
       // Aguardar alguns segundos para o webhook processar
       setTimeout(() => {
         setLoading(false)
@@ -48,7 +60,7 @@ function WellnessPagamentoSucessoContent() {
     }
 
     verifySession()
-  }, [paymentIdentifier, gateway, status])
+  }, [paymentIdentifier, gateway, status, user?.id])
 
   if (loading) {
     return (

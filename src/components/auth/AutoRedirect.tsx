@@ -94,7 +94,7 @@ export default function AutoRedirect() {
         
         redirectTimeoutRef.current = setTimeout(() => {
           router.replace(homePath)
-        }, 300)
+        }, 100) // Reduzido de 300ms para 100ms (redirecionamento mais rápido)
         
         return
       }
