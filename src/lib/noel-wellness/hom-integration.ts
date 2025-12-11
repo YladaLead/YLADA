@@ -1,10 +1,19 @@
 /**
- * NOEL WELLNESS - Integração HOM (Hora do Mentor)
+ * NOEL WELLNESS - Integração HOM (Herbalife Opportunity Meeting)
  * 
  * Fornece informações sobre apresentações de negócio para o NOEL
+ * Inclui: HOM ao vivo e HOM Gravada (Link da Apresentação)
  */
 
 import { getApresentacaoNegocio } from '@/lib/wellness-system/apresentacao-negocio'
+
+/**
+ * URL da imagem da HOM (Bebidas Funcionais)
+ * Esta imagem deve estar armazenada em um bucket público do Supabase ou na pasta public
+ * Pode ser configurada via variável de ambiente NEXT_PUBLIC_HOM_IMAGE_URL
+ */
+export const HOM_IMAGE_URL = process.env.NEXT_PUBLIC_HOM_IMAGE_URL || 
+  'https://ylada.app/images/hom/bebidas-funcionais.jpg'
 
 export interface HOMInfo {
   apresentacoes: Array<{
@@ -128,7 +137,71 @@ Quando mencionar HOM, sempre incentive o consultor a:
 3. **Participar para ganhar conhecimento**: "Cada vez que você participa do HOM, você aprende algo novo. Cada apresentação reforça conceitos, mostra novas formas de abordagem e te dá mais confiança para apresentar o projeto. Participe sempre que puder!"
 4. **Entender melhor a cada participação**: "O conhecimento se constrói com repetição. Cada HOM que você assiste, você entende melhor como funciona o plano, como apresentar, como responder objeções. É como uma faculdade de negócio - quanto mais você participa, mais você aprende."
 
-Sempre termine mencionando HOM com um estímulo positivo e prático para ação.`
+Sempre termine mencionando HOM com um estímulo positivo e prático para ação.
+
+================================================
+🎬 HOM GRAVADA - Link da Apresentação (PRIORIDADE ALTA)
+================================================
+
+A HOM Gravada é uma ferramenta ESSENCIAL de recrutamento. É uma página personalizada do consultor com a apresentação completa de negócio.
+
+**O QUE É:**
+- Link personalizado de cada consultor: https://www.ylada.com/pt/wellness/[user-slug]/hom
+- Página com vídeo da apresentação (YouTube) e informações sobre a oportunidade
+- Ambiente profissional onde a pessoa assiste no próprio tempo
+- Cada consultor tem seu próprio link exclusivo
+
+**ONDE ENCONTRAR:**
+- Menu lateral → "Meus Links" → Card "Link da HOM gravada"
+- Três botões disponíveis:
+  * 👁️ Preview: ver como fica para quem recebe
+  * 📋 Copiar Link: copia mensagem completa formatada para WhatsApp
+  * 📱 Copiar QR: copia QR code para compartilhar
+
+**COMO USAR:**
+1. Vá em "Meus Links" → "Link da HOM gravada"
+2. Clique em "📋 Copiar Link"
+3. Cole no WhatsApp da pessoa
+4. A mensagem já vem formatada com texto persuasivo e o link
+
+**COMO EXPLICAR PARA O CONSULTOR:**
+Quando o consultor perguntar sobre HOM Gravada, explique:
+- O que é e onde encontrar (em "Meus Links")
+- Como usar o botão "Copiar Link"
+- Como enviar via WhatsApp
+- O que a pessoa vai ver quando acessar
+
+**ACOMPANHAMENTO:**
+- 24-48h após enviar: verificar se assistiu
+- Se clicou em "Gostei quero começar" → ALTA PRIORIDADE, responder imediatamente
+- Se clicou em "Quero tirar dúvida" → responder em até 2h
+- Se não respondeu → follow-up em 3-5 dias
+
+**VERIFICAÇÃO DE VISUALIZAÇÃO:**
+- Se clicou nos botões → assistiu
+- Se respondeu sobre apresentação → assistiu
+- Se não respondeu em 48h → pode não ter assistido
+
+**PEDIDO DE INDICAÇÃO:**
+Sempre que a pessoa não se interessar, pedir indicação:
+"Tudo bem! Obrigado por ter assistido. Você conhece alguém que possa se interessar? Se conhecer, me indica? Isso me ajuda muito!"
+
+**ESTRATÉGIA DE RECRUTAMENTO:**
+- Meta: 5-10 envios por dia
+- Rotina: enviar pela manhã, acompanhar à tarde
+- Sempre pedir indicação quando não interessar
+- Registrar no sistema quem enviou e quando
+
+**QUANDO O CONSULTOR PERGUNTAR SOBRE HOM GRAVADA:**
+- Explique o que é e onde encontrar
+- Ensine como usar o botão "Copiar Link"
+- Oriente sobre acompanhamento (24-48h)
+- Ensine como verificar se assistiu
+- Ensine como pedir indicação
+- Dê scripts prontos para usar
+
+**IMPORTANTE:**
+A HOM Gravada é a ferramenta principal de recrutamento. O consultor deve usar todos os dias. Quanto mais pessoas apresentar, mais chances de recrutar.`
 }
 
 /**
@@ -145,6 +218,16 @@ export function isHOMRelated(message: string): boolean {
     'apresentar negócio',
     'convidar para conhecer',
     'link de apresentação',
+    'hom gravada',
+    'link da hom',
+    'hom gravada',
+    'meus links',
+    'copiar link',
+    'onde encontrar hom',
+    'como usar hom',
+    'acompanhamento hom',
+    'verificar se assistiu',
+    'pedir indicação',
     'zoom',
     'segunda-feira',
     'quarta-feira',

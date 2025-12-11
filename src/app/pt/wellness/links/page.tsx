@@ -13,6 +13,7 @@ import { getAppUrl, buildWellnessToolUrl } from '@/lib/url-utils'
 import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
+import { HOM_IMAGE_URL } from '@/lib/noel-wellness/hom-integration'
 
 // Lazy load dos previews
 const DynamicTemplatePreview = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { ssr: false })
@@ -519,6 +520,11 @@ function LinksUnificadosPageContent() {
       return
     }
 
+    const baseUrl = getAppUrl()
+    const imagemUrl = HOM_IMAGE_URL.startsWith('http') 
+      ? HOM_IMAGE_URL 
+      : `${baseUrl}${HOM_IMAGE_URL}`
+
     const mensagem = `🍹 *OPORTUNIDADE: BEBIDAS FUNCIONAIS* 🍹
 
 Olha que oportunidade incrível com bebidas funcionais! 🚀
@@ -532,10 +538,8 @@ Olha que oportunidade incrível com bebidas funcionais! 🚀
 ✅ Margens atrativas para iniciantes
 ✅ Simples de vender e de consumir
 
-🎥 Assista ao vídeo da apresentação:
-${linkYouTubeHOM}
+${imagemUrl}
 
-🎬 Ou acesse a apresentação completa:
 ${linkHOM}
 
 São apenas alguns minutos e pode mudar sua perspectiva sobre renda e oportunidades! 🚀
