@@ -43,6 +43,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('🔍 [getUserProfile] Buscando perfil para user_id:', user_id)
+    
     // Buscar perfil do usuário
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('noel_users_profile')
@@ -50,10 +52,20 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user_id)
       .single()
 
+    console.log('📊 [getUserProfile] Resultado:', {
+      encontrado: !!profile,
+      error: profileError?.message,
+      errorCode: profileError?.code
+    })
+
     if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = não encontrado
-      console.error('❌ Erro ao buscar perfil:', profileError)
+      console.error('❌ [getUserProfile] Erro ao buscar perfil:', profileError)
       return NextResponse.json(
-        { success: false, error: 'Erro ao buscar perfil do consultor' },
+        { 
+          success: false, 
+          error: 'Erro ao buscar perfil do consultor',
+          message: 'Não foi possível buscar seu perfil no momento. Tente novamente em alguns instantes.'
+        },
         { status: 500 }
       )
     }
@@ -99,14 +111,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Retornar perfil encontrado
+    console.log('✅ [getUserProfile] Perfil encontrado, retornando dados')
     return NextResponse.json({
       success: true,
       data: profile,
     })
   } catch (error: any) {
-    console.error('❌ Erro em getUserProfile:', error)
+    console.error('❌ [getUserProfile] Erro geral:', error)
+    console.error('❌ [getUserProfile] Stack:', error?.stack)
     return NextResponse.json(
-      { success: false, error: 'Erro interno do servidor' },
+      { 
+        success: false, 
+        error: 'Erro interno do servidor',
+        message: 'Desculpe, tive um problema técnico ao buscar seu perfil. Tente novamente em alguns instantes.'
+      },
       { status: 500 }
     )
   }
