@@ -342,9 +342,17 @@ export async function POST(request: NextRequest) {
       { status: 404 }
     )
   } catch (error: any) {
-    console.error('❌ Erro ao buscar ferramenta:', error)
+    console.error('❌ [getFerramentaInfo] Erro geral:', error)
+    console.error('❌ [getFerramentaInfo] Stack:', error?.stack)
+    console.error('❌ [getFerramentaInfo] Erro completo:', JSON.stringify(error, null, 2))
+    
     return NextResponse.json(
-      { success: false, error: error.message || 'Erro ao buscar ferramenta' },
+      { 
+        success: false, 
+        error: 'Erro ao buscar ferramenta',
+        message: 'Desculpe, tive um problema técnico ao buscar essa ferramenta. Tente novamente em alguns instantes.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     )
   }
