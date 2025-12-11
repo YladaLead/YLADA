@@ -41,7 +41,12 @@ export async function POST(request: NextRequest) {
     // Mapear códigos esperados para códigos reais no banco
     const codigoMap: Record<string, string> = {
       'reativacao': 'fluxo-retencao-cliente',
+      'reativar': 'fluxo-retencao-cliente',
+      'reativar cliente': 'fluxo-retencao-cliente',
+      'cliente sumiu': 'fluxo-retencao-cliente',
+      'cliente que sumiu': 'fluxo-retencao-cliente',
       'retencao': 'fluxo-retencao-cliente',
+      'retenção': 'fluxo-retencao-cliente',
       'pos-venda': 'fluxo-onboarding-cliente', // Aproximação - pode precisar ajuste
       'pós-venda': 'fluxo-onboarding-cliente',
       'convite-leve': 'fluxo-convite-leve',
@@ -53,10 +58,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Se o código recebido está no mapa, usar o código real
-    if (fluxo_codigo && codigoMap[fluxo_codigo.toLowerCase()]) {
-      const codigoReal = codigoMap[fluxo_codigo.toLowerCase()]
-      console.log(`🔄 [getFluxoInfo] Mapeando "${fluxo_codigo}" → "${codigoReal}"`)
-      fluxo_codigo = codigoReal
+    // Também tentar buscar por palavras-chave na string
+    if (fluxo_codigo) {
+      const codigoLower = fluxo_codigo.toLowerCase().trim()
+      
+      // Tentar match exato primeiro
+      if (codigoMap[codigoLower]) {
+        const codigoReal = codigoMap[codigoLower]
+        console.log(`🔄 [getFluxoInfo] Mapeando "${fluxo_codigo}" → "${codigoReal}"`)
+        fluxo_codigo = codigoReal
+      } else {
+        // Tentar buscar por palavras-chave na string
+        for (const [key, value] of Object.entries(codigoMap)) {
+          if (codigoLower.includes(key) || key.includes(codigoLower)) {
+            console.log(`🔄 [getFluxoInfo] Mapeando por palavra-chave "${fluxo_codigo}" (contém "${key}") → "${value}"`)
+            fluxo_codigo = value
+            break
+          }
+        }
+      }
     }
 
     // Buscar fluxo
@@ -232,9 +252,17 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json(responseData)
   } catch (error: any) {
-    console.error('❌ Erro ao buscar fluxo:', error)
+    console.error('❌ [getFluxoInfo] Erro geral:', error)
+    console.error('❌ [getFluxoInfo] Stack:', error?.stack)
+    console.error('❌ [getFluxoInfo] Erro completo:', JSON.stringify(error, null, 2))
+    
     return NextResponse.json(
-      { success: false, error: error.message || 'Erro ao buscar fluxo' },
+      { 
+        success: false, 
+        error: 'Erro ao buscar fluxo',
+        message: 'Desculpe, tive um problema técnico ao buscar esse fluxo. Tente novamente em alguns instantes.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     )
   }
