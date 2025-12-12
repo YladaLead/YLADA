@@ -4,6 +4,9 @@ import { getFullOGImageUrl } from '@/lib/og-image-map'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
 
+// URL absoluta da imagem sem logo para WhatsApp
+const ogImageUrl = `${baseUrl}/images/wellness-hero-sem-logo.png`
+
 export const metadata: Metadata = {
   manifest: '/manifest-wellness.json',
   icons: {
@@ -21,11 +24,11 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     images: [
       {
-        url: getFullOGImageUrl('default', baseUrl, 'wellness'),
+        url: ogImageUrl,
         width: 1200,
         height: 630,
-        alt: 'WELLNESS - Your Leading Data System',
-        type: 'image/jpeg',
+        alt: 'WELLNESS - Transforme seu trabalho de bem-estar em conexões reais',
+        type: 'image/png',
       },
     ],
   },
@@ -33,7 +36,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'WELLNESS - Transforme seu trabalho de bem-estar em conexões reais',
     description: 'O YLADA Wellness é o assistente digital que te ajuda a gerar novos contatos e fortalecer suas conexões.',
-    images: [getFullOGImageUrl('default', baseUrl, 'wellness')],
+    images: [ogImageUrl],
   },
 }
 
