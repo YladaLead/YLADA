@@ -28,6 +28,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
+  // Redirecionar /pt/w para /pt/wellness (atalho)
+  if (pathname === '/pt/w' || pathname === '/pt/w/') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/pt/wellness'
+    return NextResponse.redirect(url)
+  }
+
   // Redirecionar rotas legadas de admin-diagnósticos
   if (
     pathname === '/admin-diagnostic' ||
