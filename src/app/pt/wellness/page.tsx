@@ -154,7 +154,7 @@ export default function WellnessPage() {
                   href="/pt/wellness/checkout?plan=annual"
                   className="inline-block w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-base sm:text-lg text-center"
                 >
-                  👉 Quero trabalhar com mais leveza
+                  👉 Quero meus links inteligentes
                 </Link>
               </div>
             </div>
@@ -251,6 +251,19 @@ export default function WellnessPage() {
                   <p className="text-lg font-semibold text-gray-900">
                     👉 O link conecta.
                   </p>
+                </div>
+              </div>
+
+              {/* Imagem Decorativa - Dentro da Seção de Links */}
+              <div className="my-8 sm:my-12 flex justify-center">
+                <div className="w-full max-w-md opacity-60 hover:opacity-80 transition-opacity duration-300">
+                  <Image
+                    src="/images/wellness-hero-com-logo.png"
+                    alt="Pessoas conversando sobre Bem Estar de forma simples e leve"
+                    width={600}
+                    height={337}
+                    className="w-full h-auto rounded-xl shadow-lg"
+                  />
                 </div>
               </div>
 
