@@ -137,8 +137,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       })
       
       // Construir URL base para fallback
-      // Usar imagem específica para WhatsApp (SEM logo) mesmo no fallback
-      const inferredImage = `${baseUrl}/images/wellness-hero-sem-logo.png`
+      // Usar imagem específica para WhatsApp (COM logo) mesmo no fallback
+      const inferredImage = `${baseUrl}/images/wellness-hero-com-logo.png`
       const inferredSlug = normalizeTemplateSlug(toolSlug)
       const inferredMessages = getOGMessages(inferredSlug)
       
@@ -191,9 +191,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       toolId: tool.id
     })
     
-    // Usar imagem específica para WhatsApp (SEM logo do Wellness)
+    // Usar imagem específica para WhatsApp (COM logo do Wellness)
     // URL absoluta da imagem para compartilhamento no WhatsApp
-    const ogImageUrl = `${baseUrl}/images/wellness-hero-sem-logo.png`
+    const ogImageUrl = `${baseUrl}/images/wellness-hero-com-logo.png`
     
     // Debug: log para verificar imagem OG
     console.log('[OG Metadata] Image URL:', {
@@ -276,7 +276,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'website',
         locale: 'pt_BR',
         images: [{
-          url: `${fallbackBaseUrl}/images/wellness-hero-sem-logo.png`,
+          url: `${fallbackBaseUrl}/images/wellness-hero-com-logo.png`,
           width: 1200,
           height: 630,
           type: 'image/png',
