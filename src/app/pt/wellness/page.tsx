@@ -92,10 +92,27 @@ export default function WellnessPage() {
         {/* 🟣 HERO (Abertura) */}
         <section className="bg-gradient-to-br from-purple-50 via-green-50 to-emerald-50 py-12 sm:py-16 lg:py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                Falar com mais pessoas sobre Bem Estar pode ser simples, leve e natural.
+            <div className="text-center max-w-4xl mx-auto">
+              {/* Imagem Hero */}
+              <div className="mb-6 sm:mb-8">
+                <Image
+                  src="/images/wellness-hero.png"
+                  alt="Pessoas conversando sobre Bem Estar de forma simples e leve"
+                  width={1200}
+                  height={675}
+                  className="w-full h-auto rounded-xl shadow-lg mx-auto"
+                  priority
+                />
+              </div>
+
+              {/* Título Principal */}
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
+                Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve.
               </h1>
+              
+              <p className="text-xl sm:text-2xl text-gray-700 mb-6 sm:mb-8 font-medium">
+                Com inteligência artificial integrada.
+              </p>
               
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 sm:p-6 mb-6 sm:mb-8 border border-gray-200 shadow-lg">
                 <p className="text-base sm:text-lg text-gray-700 mb-3 sm:mb-4 leading-relaxed">
