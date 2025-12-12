@@ -431,3 +431,5 @@ COMMIT;
 -- Execute via API: POST /api/admin/wellness/knowledge/generate-embeddings
 -- Ou use o script: scripts/gerar-embeddings-lousas.ts
 -- ============================================
+
+

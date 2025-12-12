@@ -85,3 +85,5 @@ COMMENT ON COLUMN user_consents.ip_address IS 'IP do usuário no momento do cons
 COMMENT ON COLUMN user_consents.user_agent IS 'User agent do navegador (para auditoria)';
 
 
+
+

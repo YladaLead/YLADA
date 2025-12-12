@@ -53,3 +53,5 @@ SELECT
 FROM templates_nutrition
 WHERE slug = 'perfil-intestino'
   AND profession = 'wellness';
+
+

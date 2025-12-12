@@ -1,0 +1,35 @@
+{
+  "getFluxoInfo": {
+    "name": "getFluxoInfo",
+    "description": "Busca informações completas de um fluxo (processo passo a passo) do Sistema Wellness. Retorna título, descrição, scripts, link direto e quando usar.\n\nIMPORTANTE - Mapeamento de palavras-chave para códigos reais:\n- Se o usuário mencionar \"reativar\", \"cliente que sumiu\", \"reativação\", \"retenção\" → use fluxo_codigo: \"fluxo-retencao-cliente\"\n- Se o usuário mencionar \"pós-venda\", \"após venda\", \"onboarding\", \"acompanhamento\" → use fluxo_codigo: \"fluxo-onboarding-cliente\"\n- Se o usuário mencionar \"convite\", \"convidar\", \"oportunidade\" → use fluxo_codigo: \"fluxo-convite-leve\"\n- Se o usuário mencionar \"2-5-10\", \"rotina\", \"método 2-5-10\" → use fluxo_codigo: \"fluxo-2-5-10\"\n- Se o usuário mencionar \"recrutamento\", \"recrutar\" → use fluxo_codigo: \"fluxo-recrutamento-inicial\"\n- Se o usuário mencionar \"venda\", \"energia\" → use fluxo_codigo: \"fluxo-venda-energia\"\n\nCódigos disponíveis: fluxo-2-5-10, fluxo-convite-leve, fluxo-onboarding-cliente, fluxo-recrutamento-inicial, fluxo-retencao-cliente, fluxo-venda-energia\n\nNUNCA chame esta function sem fluxo_codigo. Sempre identifique qual fluxo o usuário precisa baseado nas palavras-chave da mensagem e use o código real correspondente.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "fluxo_codigo": {
+          "type": "string",
+          "description": "Código do fluxo. OBRIGATÓRIO. Use um dos códigos reais disponíveis baseado na mensagem do usuário:\n\nCódigos disponíveis:\n- \"fluxo-retencao-cliente\" (para reativar/reter clientes)\n- \"fluxo-onboarding-cliente\" (para pós-venda/onboarding)\n- \"fluxo-convite-leve\" (para convites de negócio)\n- \"fluxo-2-5-10\" (para rotina diária)\n- \"fluxo-recrutamento-inicial\" (para recrutamento)\n- \"fluxo-venda-energia\" (para vendas de energia)\n\nMapeamento de palavras-chave:\n- \"reativar\"/\"retenção\" → \"fluxo-retencao-cliente\"\n- \"pós-venda\"/\"onboarding\" → \"fluxo-onboarding-cliente\"\n- \"convite\" → \"fluxo-convite-leve\"\n- \"2-5-10\"/\"rotina\" → \"fluxo-2-5-10\"\n- \"recrutamento\" → \"fluxo-recrutamento-inicial\"\n- \"venda\"/\"energia\" → \"fluxo-venda-energia\""
+        },
+        "fluxo_id": {
+          "type": "string",
+          "description": "ID UUID do fluxo (alternativa ao código, use apenas se souber o ID exato)"
+        }
+      },
+      "required": ["fluxo_codigo"]
+    }
+  },
+  "getFerramentaInfo": {
+    "name": "getFerramentaInfo",
+    "description": "Busca informações de ferramentas e calculadoras do Sistema Wellness. Retorna título, descrição, link personalizado, script e quando usar.\n\nIMPORTANTE - Mapeamento obrigatório de palavras-chave:\n- Se o usuário mencionar \"calculadora de água\", \"água\", \"hidratação\", \"calcular água\" → use ferramenta_slug: \"calculadora-agua\"\n- Se o usuário mencionar \"calculadora de proteína\", \"proteína\" → use ferramenta_slug: \"calculadora-proteina\"\n- Se o usuário mencionar \"calculadora de hidratação\", \"calc hidratação\" → use ferramenta_slug: \"calc-hidratacao\"\n\nSempre converta a descrição do usuário para o slug correspondente (ex: \"calculadora de água\" → \"calculadora-agua\").",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ferramenta_slug": {
+          "type": "string",
+          "description": "Slug da ferramenta. OBRIGATÓRIO. Identifique baseado na mensagem do usuário usando este mapeamento:\n- \"calculadora de água\" / \"água\" / \"hidratação\" → \"calculadora-agua\"\n- \"calculadora de proteína\" / \"proteína\" → \"calculadora-proteina\"\n- \"calculadora de hidratação\" / \"calc hidratação\" → \"calc-hidratacao\"\n\nSempre converta a descrição natural do usuário para o slug correspondente."
+        }
+      },
+      "required": ["ferramenta_slug"]
+    }
+  }
+}
+

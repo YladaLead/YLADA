@@ -249,3 +249,5 @@ export function invalidateSubscriptionCache(
   clearCachedSubscription(userId, area)
   console.log('🔄 subscription-cache: Cache invalidado para', area, '(assinatura mudou)')
 }
+
+

@@ -26,7 +26,7 @@ function resolveAppBaseUrl() {
     return 'http://localhost:3000'
   }
 
-  return 'https://ylada.com'
+  return 'https://www.ylada.com'
 }
 
 async function fetchToolFromSupabase(userSlug: string, toolSlug: string) {

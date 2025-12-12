@@ -129,3 +129,5 @@ A sessão já está configurada para persistir:
 - O componente **não interfere** com ProtectedRoute
 - O componente **apenas redireciona** usuários logados que estão em `/login`
 - Páginas de vendas (`/system/vender`, `/system/recrutar`) sempre permitem acesso
+
+
