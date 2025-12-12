@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { getCachedSubscription, setCachedSubscription } from '@/lib/subscription-cache'
+import { getAccessRule, getCheckoutPath, getHomePath, getAreaFromPath } from '@/lib/access-rules'
 
 interface RequireSubscriptionProps {
   children: React.ReactNode
@@ -25,12 +26,14 @@ export default function RequireSubscription({
 }: RequireSubscriptionProps) {
   const { user, userProfile, loading: authLoading } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
   const [checkingSubscription, setCheckingSubscription] = useState(true)
   const [hasSubscription, setHasSubscription] = useState(false)
   const [canBypass, setCanBypass] = useState(false)
   const [subscriptionData, setSubscriptionData] = useState<any>(null)
   const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
   const [showLoading, setShowLoading] = useState(true)
+  const [hasRedirected, setHasRedirected] = useState(false)
   // Hooks para SubscriptionExpiryBanner - sempre inicializados para manter ordem consistente
   const [daysUntilExpiry, setDaysUntilExpiry] = useState<number | null>(null)
   
@@ -303,12 +306,14 @@ export default function RequireSubscription({
   // Se não está autenticado, redirecionar para login
   // IMPORTANTE: Só redirecionar se não estiver já na página de login (evitar loop)
   if (!user && !authLoading) {
-    const loginPath = redirectTo || `/pt/${area}/login`
+    const accessRule = pathname ? getAccessRule(pathname) : null
+    const loginPath = redirectTo || accessRule?.redirectIfNotAuth || `/pt/${area}/login`
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
     
     // Evitar loop: não redirecionar se já está na página de login
-    if (!currentPath.includes('/login')) {
+    if (!currentPath.includes('/login') && !hasRedirected) {
       console.log('🔄 RequireSubscription: Usuário não autenticado, redirecionando para:', loginPath)
+      setHasRedirected(true)
       router.replace(loginPath) // Usar replace ao invés de push
     }
     return null
@@ -376,8 +381,61 @@ export default function RequireSubscription({
     )
   }
 
-  // Se não tem assinatura, mostrar página de upgrade
-  return <UpgradeRequiredPage area={area} />
+  // Se não tem assinatura, redirecionar para checkout ou home
+  // NOVA LÓGICA: Redirecionar automaticamente ao invés de mostrar página de upgrade
+  useEffect(() => {
+    if (!hasSubscription && !canBypass && !checkingSubscription && !authLoading && user && !hasRedirected) {
+      const accessRule = pathname ? getAccessRule(pathname) : null
+      const detectedArea = getAreaFromPath(pathname || '') || area
+      
+      // Decidir para onde redirecionar:
+      // 1. Se tem redirectIfNoSubscription na regra, usar isso
+      // 2. Se não, redirecionar para checkout (melhor para conversão)
+      const redirectPath = accessRule?.redirectIfNoSubscription || getCheckoutPath(detectedArea)
+      
+      console.log('🔄 RequireSubscription: Usuário sem assinatura, redirecionando para:', redirectPath)
+      setHasRedirected(true)
+      
+      // Pequeno delay para evitar múltiplos redirecionamentos
+      const timer = setTimeout(() => {
+        router.replace(redirectPath)
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [hasSubscription, canBypass, checkingSubscription, authLoading, user, hasRedirected, pathname, area, router])
+  
+  // Se não tem assinatura, mostrar loading enquanto redireciona
+  if (!hasSubscription && !canBypass && user && !checkingSubscription && !authLoading) {
+    // Se já redirecionou, não renderizar nada
+    if (hasRedirected) {
+      return null
+    }
+    
+    // Enquanto prepara redirecionamento, mostrar loading
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecionando...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Fallback: mostrar página de upgrade (caso o redirecionamento falhe ou não tenha usuário)
+  if (!hasSubscription && !canBypass && !user) {
+    return <UpgradeRequiredPage area={area} />
+  }
+  
+  // Se chegou aqui e não tem assinatura, algo deu errado - mostrar página de upgrade
+  if (!hasSubscription && !canBypass) {
+    return <UpgradeRequiredPage area={area} />
+  }
+  
+  // Este return nunca deve ser alcançado se a lógica acima estiver correta
+  // Mas é necessário para TypeScript
+  return null
 }
 
 /**
