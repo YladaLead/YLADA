@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
 import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
@@ -417,5 +418,38 @@ export default function FerramentaPersonalizadaPage() {
     }
   }
 
-  return renderizarTemplate()
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Seção Hero com Imagem e Texto */}
+      <section className="bg-gradient-to-br from-purple-50 via-green-50 to-emerald-50 py-8 sm:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Imagem Hero */}
+            <div className="mb-6 sm:mb-8">
+              <Image
+                src="/images/wellness-hero.png"
+                alt="Pessoas conversando sobre Bem Estar de forma simples e leve"
+                width={1200}
+                height={675}
+                className="w-full h-auto rounded-xl shadow-lg mx-auto"
+                priority
+              />
+            </div>
+
+            {/* Título Principal */}
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
+              Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve.
+            </h1>
+            
+            <p className="text-lg sm:text-xl text-gray-700 mb-6 sm:mb-8 font-medium">
+              Com inteligência artificial integrada.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Template da Ferramenta */}
+      {renderizarTemplate()}
+    </div>
+  )
 }
