@@ -4,8 +4,8 @@ import { getFullOGImageUrl } from '@/lib/og-image-map'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
 
-// URL absoluta da imagem COM logo para WhatsApp
-const ogImageUrl = `${baseUrl}/images/wellness-hero-com-logo.png`
+// URL absoluta da imagem COM logo para WhatsApp (versão otimizada para OG)
+const ogImageUrl = `${baseUrl}/images/wellness-hero-com-logo-og.png`
 
 export const metadata: Metadata = {
   manifest: '/manifest-wellness.json',
