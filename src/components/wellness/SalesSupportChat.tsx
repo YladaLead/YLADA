@@ -20,7 +20,15 @@ function renderMessageWithLinks(content: string) {
   // Processar texto em partes, substituindo links
   let processedText = content
 
-  // 1. Substituir markdown links [texto](url) por placeholder
+  // 1. Substituir URLs completas (http:// ou https://) por placeholder
+  const urlLinks: Array<{ text: string; url: string }> = []
+  processedText = processedText.replace(/(https?:\/\/[^\s]+)/g, (match, url) => {
+    const placeholder = `__URL_LINK_${urlLinks.length}__`
+    urlLinks.push({ text: url, url })
+    return placeholder
+  })
+
+  // 2. Substituir markdown links [texto](url) por placeholder
   const markdownLinks: Array<{ text: string; url: string }> = []
   processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
     const placeholder = `__MD_LINK_${markdownLinks.length}__`
@@ -28,7 +36,7 @@ function renderMessageWithLinks(content: string) {
     return placeholder
   })
 
-  // 2. Substituir menções a "plano anual" ou "plano mensal" por placeholder
+  // 3. Substituir menções a "plano anual" ou "plano mensal" por placeholder
   const planLinks: Array<{ text: string; url: string }> = []
   processedText = processedText.replace(/\b(plano anual|plano mensal)\b/gi, (match) => {
     const isAnnual = match.toLowerCase().includes('anual')
@@ -38,11 +46,26 @@ function renderMessageWithLinks(content: string) {
     return placeholder
   })
 
-  // 3. Dividir texto por placeholders e criar elementos
-  const segments = processedText.split(/(__MD_LINK_\d+__|__PLAN_LINK_\d+__)/)
+  // 4. Dividir texto por placeholders e criar elementos
+  const segments = processedText.split(/(__URL_LINK_\d+__|__MD_LINK_\d+__|__PLAN_LINK_\d+__)/)
 
   segments.forEach((segment) => {
-    if (segment.startsWith('__MD_LINK_')) {
+    if (segment.startsWith('__URL_LINK_')) {
+      const index = parseInt(segment.match(/\d+/)![0])
+      const link = urlLinks[index]
+      const isAbsoluteUrl = link.url.startsWith('http')
+      parts.push(
+        <Link
+          key={`link-url-${keyCounter++}`}
+          href={link.url}
+          className="text-blue-600 hover:text-blue-800 underline font-medium"
+          target={isAbsoluteUrl ? '_blank' : undefined}
+          rel={isAbsoluteUrl ? 'noopener noreferrer' : undefined}
+        >
+          {link.text}
+        </Link>
+      )
+    } else if (segment.startsWith('__MD_LINK_')) {
       const index = parseInt(segment.match(/\d+/)![0])
       const link = markdownLinks[index]
       const isAbsoluteUrl = link.url.startsWith('http')
