@@ -1,23 +1,11 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import RequireSubscription from '@/components/auth/RequireSubscription'
 
 function VenderPageContent() {
-  const router = useRouter()
-
-  const subitens = [
-    { id: 'fluxos-cliente', titulo: 'Fluxos de Cliente (20 fluxos)', rota: '/pt/wellness/system/vender/fluxos' },
-    { id: 'scripts-venda', titulo: 'Scripts de Venda', rota: '/pt/wellness/system/vender/scripts' },
-    { id: 'scripts-fechamento', titulo: 'Scripts de Fechamento', rota: '/pt/wellness/system/vender/fechamento' },
-    { id: 'scripts-objecoes', titulo: 'Scripts de Objeções (clientes)', rota: '/pt/wellness/system/vender/objecoes' },
-    { id: 'follow-up', titulo: 'Follow-up automático', rota: '/pt/wellness/system/vender/follow-up' },
-    { id: 'links-kits', titulo: 'Links de Venda do Kit Energia / Kit Acelera', rota: '/pt/wellness/system/vender/links-kits' },
-    { id: 'produto-fechado', titulo: 'Produto Fechado / Cliente Premium', rota: '/pt/wellness/system/vender/produto-fechado' }
-  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -42,43 +30,18 @@ function VenderPageContent() {
           </Link>
         </div>
 
-        {/* Cabeçalho */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-4">
-            <span className="text-4xl">💚</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            VENDER BEBIDAS FUNCIONAIS
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Ferramentas e recursos para vender bebidas funcionais e converter clientes
-          </p>
-        </div>
-
-        {/* Lista de Subitens */}
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {subitens.map((subitem) => (
-              <Link
-                key={subitem.id}
-                href={subitem.rota}
-                className="block p-6 bg-white rounded-xl border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition-all duration-200 group shadow-sm hover:shadow-md"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-base font-medium text-gray-800 group-hover:text-green-700 flex-1">
-                    {subitem.titulo}
-                  </span>
-                  <svg
-                    className="w-5 h-5 text-gray-400 group-hover:text-green-600 transform group-hover:translate-x-1 transition-all flex-shrink-0 ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </Link>
-            ))}
+        {/* Vídeo do YouTube - Elemento Principal */}
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-xl shadow-2xl p-4 sm:p-6 lg:p-8">
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 w-full h-full rounded-lg"
+                src="https://www.youtube.com/embed/74pBmNZ7x0o"
+                title="Vídeo de Vendas"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           </div>
         </div>
       </main>

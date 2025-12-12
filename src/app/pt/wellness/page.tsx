@@ -90,361 +90,293 @@ export default function WellnessPage() {
 
       <main>
         {/* 🟣 HERO (Abertura) */}
-        <section className="bg-gradient-to-br from-purple-50 via-green-50 to-emerald-50 py-16 sm:py-20 lg:py-24">
-          <div className="container mx-auto px-6 lg:px-8">
-            <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Seu trabalho com bem-estar fica muito mais simples, organizado e produtivo a partir de hoje.
+        <section className="bg-gradient-to-br from-purple-50 via-green-50 to-emerald-50 py-12 sm:py-16 lg:py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+                Falar com mais pessoas sobre Bem Estar pode ser simples, leve e natural.
               </h1>
               
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 mb-8 border border-gray-200 shadow-lg">
-                <p className="text-lg sm:text-xl text-gray-700 mb-4 leading-relaxed">
-                  Se você sente que às vezes fica perdido, sem saber o que fazer no dia, sem ritmo, sem clareza…
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 sm:p-6 mb-6 sm:mb-8 border border-gray-200 shadow-lg">
+                <p className="text-base sm:text-lg text-gray-700 mb-3 sm:mb-4 leading-relaxed">
+                  <strong className="font-bold">Com os links inteligentes e o NOEL, você não carrega tudo sozinho.</strong>
                 </p>
-                <p className="text-lg sm:text-xl text-gray-700 mb-4 leading-relaxed">
-                  Se sente que poderia crescer mais, mas falta direção…
+                <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 leading-relaxed">
+                  As conversas fluem melhor, e os resultados começam a aparecer.
                 </p>
-                <p className="text-lg sm:text-xl text-gray-700 mb-4 leading-relaxed">
-                  Ou se já tentou várias vezes e acabou travando no meio do caminho…
-                </p>
-                <p className="text-xl sm:text-2xl font-bold text-green-600 mt-6">
-                  👉 O Wellness System foi criado exatamente para resolver isso.
-                </p>
-                <p className="text-lg sm:text-xl font-semibold text-gray-900 mt-4">
-                  E com o Mentor NOEL, você nunca mais vai trabalhar sozinho ou sem saber o que fazer.
-                </p>
+                
+                <ul className="text-left space-y-2 sm:space-y-3 text-gray-700 text-sm sm:text-base">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1 flex-shrink-0">✔</span>
+                    <span>Menos travas para conversar</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1 flex-shrink-0">✔</span>
+                    <span>Mais facilidade para explicar</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1 flex-shrink-0">✔</span>
+                    <span>Mais constância e resultados no dia a dia</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
         </section>
 
         {/* 🎥 Vídeo Explicativo */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white">
-          <div className="container mx-auto px-6 lg:px-8">
+        <section className="py-12 sm:py-16 lg:py-20 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                  🎥 Veja Como Funciona na Prática
+              <div className="text-center mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+                  🎥 Veja como isso funciona na prática
                 </h2>
-                <p className="text-lg text-gray-600">
-                  Entenda como o Wellness System pode transformar sua rotina
+                <p className="text-base sm:text-lg text-gray-600 px-2">
+                  Entenda como o Wellness, com links inteligentes e o NOEL, pode trazer mais leveza, organização e confiança para o seu dia a dia. Sem pressão, sem complicação.
                 </p>
               </div>
               
-              <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video">
-                {/* 
-                  OPÇÃO 1: YouTube (RECOMENDADO)
-                  - Faça upload do vídeo no YouTube
-                  - Copie o ID do vídeo (ex: dQw4w9WgXcQ)
-                  - Substitua YOUTUBE_VIDEO_ID abaixo
-                */}
+              <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video mx-2 sm:mx-0 mb-6 sm:mb-8">
                 <iframe
                   className="w-full h-full"
-                  src="https://www.youtube.com/embed/p7koYETLIlw?rel=0&modestbranding=1&controls=1&enablejsapi=1&origin=https://ylada.app"
-                  title="Wellness System - Como Funciona na Prática"
+                  src="https://www.youtube.com/embed/74pBmNZ7x0o?rel=0&modestbranding=1&controls=1&enablejsapi=1&origin=https://ylada.app"
+                  title="Wellness - Como Funciona na Prática"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   id="wellness-video-player"
                 ></iframe>
-                
-                {/* 
-                  OPÇÃO 2: Vídeo direto (se hospedar em CDN externo)
-                  Descomente e ajuste a URL do seu CDN:
-                  
-                <video
-                  className="w-full h-full object-cover"
-                  controls
-                  autoPlay={false}
-                  playsInline
-                  preload="metadata"
+              </div>
+
+              <div className="text-center">
+                <Link
+                  href="/pt/wellness/checkout?plan=annual"
+                  className="inline-block w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-base sm:text-lg text-center"
                 >
-                  <source src="https://seu-cdn.com/videos/wellness-explicativo.mp4" type="video/mp4" />
-                  <p className="text-center text-gray-600 p-8">
-                    Seu navegador não suporta a reprodução de vídeo.
-                  </p>
-                </video>
-                */}
+                  👉 Quero trabalhar com mais leveza
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ⭐ Por que tantas pessoas travam */}
+        {/* Menos peso. Mais clareza. */}
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
-                ⭐ Por que tantas pessoas travam quando trabalham com wellness?
+                Menos peso. Mais clareza.
               </h2>
               
-              <p className="text-lg text-gray-700 text-center mb-8 leading-relaxed">
-                Porque é normal enfrentar:
+              <p className="text-lg text-gray-700 text-center mb-6 leading-relaxed">
+                Com Wellness, você não precisa:
               </p>
 
               <div className="grid sm:grid-cols-2 gap-4 mb-8">
                 <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Falta de clareza sobre o que fazer todo dia</p>
+                  <p className="text-gray-700">❌ improvisar conversas</p>
                 </div>
                 <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Dúvidas sobre como convidar pessoas</p>
+                  <p className="text-gray-700">❌ decorar falas</p>
                 </div>
                 <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Insegurança para falar com clientes</p>
+                  <p className="text-gray-700">❌ explicar tudo sozinho</p>
                 </div>
                 <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Medo de fazer apresentação</p>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Falta de ritmo</p>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Procrastinação</p>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Desorganização</p>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-700">❌ Falta de método</p>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4 border border-red-200 sm:col-span-2">
-                  <p className="text-gray-700">❌ Não saber treinar um novo integrante</p>
+                  <p className="text-gray-700">❌ carregar tudo nas costas</p>
                 </div>
               </div>
 
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 text-center">
                 <p className="text-lg text-gray-700 mb-2">
-                  E quando você trabalha sozinho, tudo fica ainda mais difícil.
-                </p>
-                <p className="text-xl font-bold text-green-600">
-                  👉 O Wellness System existe para eliminar todas essas dificuldades.
-                </p>
-                <p className="text-lg text-gray-900 mt-4 font-semibold">
-                  Aqui você não precisa adivinhar nada.
-                </p>
-                <p className="text-lg text-gray-900 font-semibold">
-                  Aqui você sabe exatamente como avançar.
+                  Você passa a contar com Links Inteligentes e com o NOEL, que te orienta em cada passo.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 🔥 O que o Wellness System faz por você */}
+        {/* 🔗 Links Inteligentes */}
         <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
-                🔥 O que o Wellness System faz por você:
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
+                🔗 Links Inteligentes: você envia. Eles abrem conversas.
               </h2>
 
-              {/* Benefício 1 */}
               <div className="bg-white rounded-xl p-8 mb-8 shadow-lg border border-gray-200">
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl">1️⃣</span>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      Mostra exatamente o que você deve fazer todos os dias
-                    </h3>
-                    <p className="text-lg text-gray-700 mb-4">
-                      Com o método 2•5•10™, você tem um plano diário simples e claro:
-                    </p>
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      <div className="bg-green-50 rounded-lg p-4 border border-green-200 text-center">
-                        <p className="text-2xl font-bold text-green-600 mb-2">✔ 2</p>
-                        <p className="text-gray-700">ações rápidas</p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4 border border-green-200 text-center">
-                        <p className="text-2xl font-bold text-green-600 mb-2">✔ 5</p>
-                        <p className="text-gray-700">mensagens estratégicas</p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4 border border-green-200 text-center">
-                        <p className="text-2xl font-bold text-green-600 mb-2">✔ 10</p>
-                        <p className="text-gray-700">minutos de progresso real</p>
-                      </div>
-                    </div>
-                    <p className="text-lg font-semibold text-gray-900 mt-4">
-                      Você nunca mais vai acordar "sem rumo".
-                    </p>
-                  </div>
+                <p className="text-lg text-gray-700 mb-6 font-semibold">
+                  Na prática, a plataforma Wellness funciona assim:
+                </p>
+                <p className="text-lg text-gray-700 mb-6">
+                  Você usa Links Inteligentes, criados para facilitar o contato com mais pessoas, sem peso e sem abordagem forçada.
+                </p>
+                <p className="text-lg text-gray-700 mb-4 font-semibold">
+                  Esses links ajudam você a:
+                </p>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700"><strong>Abrir conversas</strong> de <strong>forma natural</strong>, sem parecer convite direto</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700"><strong>Gerar interesse</strong> e <strong>curiosidade</strong>, porque entregam valor logo de início</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700"><strong>Se propagar facilmente</strong>, sendo compartilhados, indicados e reenviados</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700"><strong>Falar com mais pessoas ao mesmo tempo</strong>, sem repetir explicações</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700"><strong>Agregar valor antes da venda</strong>, o que aumenta a abertura e a confiança</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700"><strong>Facilitar indicações</strong>, porque a própria pessoa se sente confortável em compartilhar</span>
+                  </li>
+                </ul>
+                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                  <p className="text-lg font-semibold text-gray-900 mb-2">
+                    👉 O link não pressiona.
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900 mb-2">
+                    👉 O link não convence.
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    👉 O link conecta.
+                  </p>
                 </div>
               </div>
 
-              {/* Benefício 2 */}
-              <div className="bg-white rounded-xl p-8 mb-8 shadow-lg border border-gray-200">
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl">2️⃣</span>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      Dá clareza total para trabalhar sem medo, confusão ou travas
-                    </h3>
-                    <p className="text-lg text-gray-700 mb-4">Você recebe:</p>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Scripts prontos</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Conversas completas</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como convidar</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como fazer apresentação</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como fazer follow-up</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como vender bebidas funcionais</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como direcionar kits</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como orientar novos integrantes</p>
-                      </div>
-                    </div>
-                    <p className="text-lg text-gray-700 mt-4 italic">
-                      Tudo de forma simples, humana e prática.
-                    </p>
-                  </div>
-                </div>
+              {/* Conteúdo adicional */}
+              <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg border border-gray-200">
+                <p className="text-base sm:text-lg font-bold text-gray-900 mb-2">
+                  👉 Você não precisa empurrar nada.
+                </p>
+                <p className="text-base sm:text-lg font-bold text-gray-900 mb-4">
+                  👉 Você só compartilha algo que faz sentido.
+                </p>
+                <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
+                  Quando o conteúdo agrega valor, as pessoas se interessam, se aproximam e a conversa acontece.
+                </p>
+                <p className="text-base sm:text-lg text-gray-700 mb-3">
+                  Isso traz:
+                </p>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-gray-900 mt-1">•</span>
+                    <span className="text-base sm:text-lg">mais leveza</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-gray-900 mt-1">•</span>
+                    <span className="text-base sm:text-lg">mais naturalidade</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-gray-900 mt-1">•</span>
+                    <span className="text-base sm:text-lg">mais alcance</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-gray-900 mt-1">•</span>
+                    <span className="text-base sm:text-lg">mais resultados, sem desgaste</span>
+                  </li>
+                </ul>
               </div>
+            </div>
+          </div>
+        </section>
 
-              {/* Benefício 3 - NOEL */}
-              <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-xl p-8 mb-8 shadow-lg border-2 border-green-200">
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl">3️⃣</span>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      O NOEL — seu mentor que explica, orienta e te ajuda em tempo real
-                    </h3>
-                    <p className="text-lg text-gray-700 mb-4">
-                      O NOEL é como um mentor inteligente disponível 24 horas por dia.
-                    </p>
-                    <p className="text-lg font-semibold text-gray-900 mb-4">
-                      Ele te ajuda quando você:
-                    </p>
-                    <div className="grid sm:grid-cols-2 gap-3 mb-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Não sabe o que responder</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Não sabe como convidar</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Quer treinar alguém</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Está travado</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Perdeu o foco</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Não sabe como criar ritmo</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Quer melhorar suas vendas</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-blue-600 text-xl">💡</span>
-                        <p className="text-gray-700">Quer estruturar sua rotina</p>
-                      </div>
-                    </div>
-                    <p className="text-lg font-semibold text-gray-900 mt-4">
-                      É como ter um líder experiente o tempo todo ao seu lado.
-                    </p>
+        {/* 🤖 NOEL */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-white">
+          <div className="container mx-auto px-6 lg:px-8">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
+                🤖 NOEL: orientação quando você precisa
+              </h2>
+
+              <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-xl p-8 shadow-lg border-2 border-green-200">
+                <p className="text-lg text-gray-700 mb-6">
+                  O NOEL é a inteligência do Wellness.
+                </p>
+                <p className="text-lg font-semibold text-gray-900 mb-4">
+                  Ele está ali para te ajudar quando você:
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 text-xl">•</span>
+                    <p className="text-gray-700">não sabe o que responder</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 text-xl">•</span>
+                    <p className="text-gray-700">não sabe como convidar</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 text-xl">•</span>
+                    <p className="text-gray-700">está travado</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 text-xl">•</span>
+                    <p className="text-gray-700">perdeu o foco</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 text-xl">•</span>
+                    <p className="text-gray-700">quer organizar melhor o dia</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 text-xl">•</span>
+                    <p className="text-gray-700">quer se comunicar com mais segurança</p>
                   </div>
                 </div>
+                <p className="text-lg text-gray-700 italic">
+                  É como ter alguém experiente te orientando, sem julgamento e sem cobrança.
+                </p>
               </div>
+            </div>
+          </div>
+        </section>
 
-              {/* Benefício 4 */}
-              <div className="bg-white rounded-xl p-8 mb-8 shadow-lg border border-gray-200">
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl">4️⃣</span>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      Tira o peso e a bagunça da sua rotina
-                    </h3>
-                    <p className="text-lg text-gray-700 mb-4">Você aprende:</p>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como se organizar</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como agir todo dia</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como criar consistência</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como acompanhar clientes</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como treinar equipe</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como melhorar sua comunicação</p>
-                      </div>
-                      <div className="flex items-center gap-2 sm:col-span-2">
-                        <span className="text-green-600 text-xl">✔</span>
-                        <p className="text-gray-700">Como manter ritmo mesmo em dias difíceis</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* Tudo flui melhor */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
+          <div className="container mx-auto px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
+                Tudo flui melhor quando você tem apoio
+              </h2>
 
-              {/* Benefício 5 */}
-              <div className="bg-white rounded-xl p-8 mb-8 shadow-lg border border-gray-200">
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl">5️⃣</span>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      Ajuda você a crescer com naturalidade
-                    </h3>
-                    <p className="text-lg text-gray-700 mb-4">
-                      Sem pressão.
-                    </p>
-                    <p className="text-lg text-gray-700 mb-4">
-                      Sem complicação.
-                    </p>
-                    <p className="text-lg text-gray-700 mb-4">
-                      Sem métodos mirabolantes.
-                    </p>
-                    <div className="bg-green-50 rounded-lg p-4 border border-green-200 mt-4">
-                      <p className="text-lg font-semibold text-gray-900">
-                        A filosofia YLADA é simples:
-                      </p>
-                      <p className="text-xl font-bold text-green-600 mt-2">
-                        O que é simples, funciona. E o que funciona, duplica.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+                <p className="text-lg text-gray-700 mb-6">
+                  Com o Noel e a plataforma Wellness, você percebe que:
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700">o trabalho fica mais organizado</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700">as conversas ficam mais leves</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700">a confiança aumenta</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700">o dia rende mais</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">•</span>
+                    <span className="text-gray-700">a cabeça fica mais tranquila</span>
+                  </li>
+                </ul>
+                <p className="text-lg font-semibold text-gray-900 mt-6">
+                  Você para de adivinhar e começa a agir com mais clareza.
+                </p>
               </div>
             </div>
           </div>
@@ -458,34 +390,34 @@ export default function WellnessPage() {
                 {/* Para quem é */}
                 <div className="bg-green-50 rounded-xl p-8 border-2 border-green-200">
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-                    📈 Para quem é o Wellness System?
+                    Para quem a Plataforma Wellness é ideal?
                   </h2>
                   
                   <p className="text-lg font-semibold text-gray-900 mb-4">Para quem trabalha com:</p>
                   <ul className="space-y-2 mb-6 text-gray-700">
                     <li className="flex items-center gap-2">
                       <span className="text-green-600">•</span>
-                      Bebidas funcionais
+                      bem-estar
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-green-600">•</span>
-                      Bem-estar
+                      relacionamento com pessoas
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-green-600">•</span>
-                      Produtos de saúde
+                      rotina com clientes
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-green-600">•</span>
-                      Rotina com clientes
+                      acompanhamento
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-green-600">•</span>
-                      Processo de acompanhamento
+                      desenvolvimento de equipe
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-green-600">•</span>
-                      Desenvolvimento de equipe
+                      multinível
                     </li>
                   </ul>
 
@@ -493,27 +425,23 @@ export default function WellnessPage() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-green-600 text-xl">✔</span>
-                      <p className="text-gray-700">Ter clareza</p>
+                      <p className="text-gray-700">mais clareza</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-green-600 text-xl">✔</span>
-                      <p className="text-gray-700">Ganhar confiança</p>
+                      <p className="text-gray-700">mais leveza</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-green-600 text-xl">✔</span>
-                      <p className="text-gray-700">Aumentar vendas</p>
+                      <p className="text-gray-700">mais organização</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-green-600 text-xl">✔</span>
-                      <p className="text-gray-700">Trabalhar melhor</p>
+                      <p className="text-gray-700">mais confiança</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-green-600 text-xl">✔</span>
-                      <p className="text-gray-700">Crescer com consistência</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-600 text-xl">✔</span>
-                      <p className="text-gray-700">Construir resultados de verdade</p>
+                      <p className="text-gray-700">crescer sem pressão</p>
                     </div>
                   </div>
                 </div>
@@ -521,25 +449,25 @@ export default function WellnessPage() {
                 {/* Para quem NÃO é */}
                 <div className="bg-red-50 rounded-xl p-8 border-2 border-red-200">
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-                    🟢 Para quem NÃO é:
+                    Para quem não é:
                   </h2>
                   
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <span className="text-red-600 text-xl">❌</span>
-                      <p className="text-gray-700">Quem complica o simples</p>
+                      <p className="text-gray-700">quem não aplica</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-red-600 text-xl">❌</span>
-                      <p className="text-gray-700">Quem não aplica nada</p>
+                      <p className="text-gray-700">quem procura fórmula mágica</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-red-600 text-xl">❌</span>
-                      <p className="text-gray-700">Quem desiste rápido</p>
+                      <p className="text-gray-700">quem não quer se organizar</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-red-600 text-xl">❌</span>
-                      <p className="text-gray-700">Quem quer resultado sem método</p>
+                      <p className="text-gray-700">quem desiste fácil</p>
                     </div>
                   </div>
                 </div>
@@ -552,7 +480,7 @@ export default function WellnessPage() {
         <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
-              🚀 Escolha seu Plano e Comece Agora
+              Comece agora
             </h2>
             
             <div className="max-w-5xl mx-auto grid sm:grid-cols-2 gap-8">
@@ -562,27 +490,35 @@ export default function WellnessPage() {
                   RECOMENDADO
                 </div>
                 <div className="text-4xl mb-4 text-center mt-4">🔥</div>
-                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Anual</h3>
+                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Plano Anual — Recomendado</h3>
                 <p className="text-3xl font-bold text-green-600 text-center mb-6">12x de R$ 59,90</p>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Acesso completo
+                    <span className="text-green-600 mr-2">✔</span>
+                    acesso completo
                   </li>
                   <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Mais econômico
+                    <span className="text-green-600 mr-2">✔</span>
+                    links inteligentes
                   </li>
                   <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    A melhor opção pra quem quer crescer
+                    <span className="text-green-600 mr-2">✔</span>
+                    inteligência NOEL
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-600 mr-2">✔</span>
+                    uso da plataforma Wellness
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-600 mr-2">✔</span>
+                    melhor custo-benefício
                   </li>
                 </ul>
                 <Link
                   href="/pt/wellness/checkout?plan=annual"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  💚 Quero o Plano Anual
+                  👉 💚 Quero começar com o Plano Anual
                 </Link>
               </div>
               
@@ -593,19 +529,31 @@ export default function WellnessPage() {
                 <p className="text-3xl font-bold text-green-600 text-center mb-6">R$ 97,00</p>
                 <ul className="space-y-3 mb-6 text-sm text-gray-600">
                   <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Acesso completo
+                    <span className="text-green-600 mr-2">✔</span>
+                    acesso completo
                   </li>
                   <li className="flex items-center">
-                    <span className="text-green-600 mr-2">✓</span>
-                    Ideal para quem quer experimentar
+                    <span className="text-green-600 mr-2">✔</span>
+                    links inteligentes
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-600 mr-2">✔</span>
+                    inteligência NOEL
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-600 mr-2">✔</span>
+                    uso da plataforma Wellness
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-600 mr-2">✔</span>
+                    ideal para sentir na prática
                   </li>
                 </ul>
                 <Link
                   href="/pt/wellness/checkout?plan=monthly"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  💚 Quero o Mensal
+                  👉 💚 Quero começar com o Plano Mensal
                 </Link>
               </div>
             </div>
@@ -618,7 +566,7 @@ export default function WellnessPage() {
             <div className="max-w-3xl mx-auto text-center">
               <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-8 border-2 border-green-200">
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                  🛡 Garantia de 7 Dias Sem Risco
+                  🛡 Garantia de 7 dias
                 </h2>
                 <p className="text-xl text-gray-700 leading-relaxed">
                   Se não fizer sentido para você,
@@ -639,16 +587,27 @@ export default function WellnessPage() {
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-                Você não precisa mais tentar adivinhar o caminho.
+                Você não precisa complicar.
               </h2>
-              <p className="text-xl text-green-50 mb-8 leading-relaxed">
-                O Wellness System te mostra exatamente como crescer – todos os dias.
+              <p className="text-xl text-green-50 mb-6 leading-relaxed">
+                O Wellness existe para deixar seu trabalho:
               </p>
+              <ul className="text-lg text-green-50 mb-8 space-y-2">
+                <li>• mais leve</li>
+                <li>• mais claro</li>
+                <li>• mais organizado</li>
+                <li>• mais natural</li>
+              </ul>
+              <div className="mb-8 text-green-50">
+                <p className="text-lg mb-2">🔗 Com links que ajudam</p>
+                <p className="text-lg mb-2">🤖 Com uma inteligência que orienta</p>
+                <p className="text-lg">💚 Com apoio no dia a dia</p>
+              </div>
               <Link
                 href="/pt/wellness/checkout?plan=annual"
                 className="inline-flex items-center px-10 py-5 bg-white text-green-600 text-xl font-bold rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
               >
-                🚀 Quero Começar Agora
+                👉 Quero começar agora
               </Link>
             </div>
           </div>
