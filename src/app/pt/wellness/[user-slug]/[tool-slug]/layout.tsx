@@ -137,10 +137,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       })
       
       // Construir URL base para fallback
-      // Tentar inferir template_slug do tool-slug para usar imagem correta mesmo se ferramenta não for encontrada
-      // Isso ajuda quando o Facebook faz cache antes da ferramenta ser criada
+      // Usar imagem específica para WhatsApp mesmo no fallback
+      const inferredImage = `${baseUrl}/images/wellness-og-whatsapp.png`
       const inferredSlug = normalizeTemplateSlug(toolSlug)
-      const inferredImage = getFullOGImageUrl(inferredSlug, baseUrl, area)
       const inferredMessages = getOGMessages(inferredSlug)
       
       console.log('[OG Metadata] 🔍 Using inferred metadata (fallback):', {
@@ -192,14 +191,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       toolId: tool.id
     })
     
-    // Obter imagem OG com baseUrl correto e área Wellness
-    const ogImageUrl = getFullOGImageUrl(normalizedSlug, baseUrl, area)
+    // Usar imagem específica para WhatsApp (banner com pessoas e texto)
+    // URL absoluta da imagem para compartilhamento no WhatsApp
+    const ogImageUrl = `${baseUrl}/images/wellness-og-whatsapp.png`
     
     // Debug: log para verificar imagem OG
     console.log('[OG Metadata] Image URL:', {
       normalizedSlug,
       ogImageUrl,
-      imagePath: getOGImageUrl(normalizedSlug, area)
+      usingWhatsAppImage: true
     })
     
     // Obter mensagens estimulantes baseadas no tipo de ferramenta
@@ -245,7 +245,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: 'image/jpeg',
+            type: 'image/png',
           },
         ],
         locale: 'pt_BR',
@@ -276,10 +276,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'website',
         locale: 'pt_BR',
         images: [{
-          url: getFullOGImageUrl('default', fallbackBaseUrl, area),
+          url: `${fallbackBaseUrl}/images/wellness-og-whatsapp.png`,
           width: 1200,
           height: 630,
-          type: 'image/jpeg',
+          type: 'image/png',
         }],
       },
     }
