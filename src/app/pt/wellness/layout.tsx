@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { getFullOGImageUrl } from '@/lib/og-image-map'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.com'
 
 // URL absoluta da imagem COM logo para WhatsApp
 const ogImageUrl = `${baseUrl}/images/wellness-hero-com-logo.png`
