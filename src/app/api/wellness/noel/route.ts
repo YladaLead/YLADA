@@ -19,7 +19,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { classifyIntention, type NoelModule } from '@/lib/noel-wellness/classifier'
 import { detectUserProfile, getProfileClarificationMessage, type ProfileType } from '@/lib/noel-wellness/profile-detector'
-import { searchKnowledgeBase, generateEmbedding, saveItemEmbedding } from '@/lib/noel-wellness/knowledge-search'
+import { searchKnowledgeBase, generateEmbedding, saveItemEmbedding, processAutoLearning } from '@/lib/noel-wellness/knowledge-search'
 import { 
   analyzeQuery, 
   getConsultantProfile, 
@@ -1490,16 +1490,53 @@ export async function POST(request: NextRequest) {
     // 4. Detectar se é pergunta institucional/técnica (não usar scripts)
     const isInstitutionalQuery = detectInstitutionalQuery(message)
     
-    // 5. Buscar na base de conhecimento (mas ignorar se for pergunta institucional)
+    // 5. PROCESSAR AUTO-LEARNING: Verificar sugestões antes de buscar na base
+    let autoLearnedItem: KnowledgeItem | null = null
+    if (!isInstitutionalQuery) {
+      try {
+        autoLearnedItem = await processAutoLearning(message, module)
+        if (autoLearnedItem) {
+          console.log(`🤖 [Auto-Learning] Usando sugestão aprendida automaticamente (similaridade: ${((autoLearnedItem.similarity || 0) * 100).toFixed(1)}%)`)
+        }
+      } catch (autoLearnError) {
+        console.warn('⚠️ Erro ao processar auto-learning (não crítico):', autoLearnError)
+      }
+    }
+    
+    // 6. Buscar na base de conhecimento (mas ignorar se for pergunta institucional)
     let knowledgeResult: SearchResult
     let bestMatch: KnowledgeItem | null = null
     let similarityScore = 0
     
     if (!isInstitutionalQuery) {
-      // Só buscar na base se NÃO for pergunta institucional
-      knowledgeResult = await searchKnowledgeBase(message, module)
-      bestMatch = knowledgeResult.bestMatch
-      similarityScore = knowledgeResult.similarityScore
+      // Se encontrou item do auto-learning com alta similaridade, priorizar ele
+      if (autoLearnedItem && (autoLearnedItem.similarity || 0) >= 0.7) {
+        bestMatch = autoLearnedItem
+        similarityScore = autoLearnedItem.similarity || 0.7
+        knowledgeResult = {
+          items: [autoLearnedItem],
+          bestMatch: autoLearnedItem,
+          similarityScore: similarityScore,
+        }
+        console.log('✅ NOEL - Usando item do auto-learning (prioridade sobre busca na base)')
+      } else {
+        // Só buscar na base se NÃO encontrou no auto-learning
+        knowledgeResult = await searchKnowledgeBase(message, module)
+        bestMatch = knowledgeResult.bestMatch
+        similarityScore = knowledgeResult.similarityScore
+        
+        // Se não encontrou na base mas tem auto-learning, usar ele
+        if (!bestMatch && autoLearnedItem) {
+          bestMatch = autoLearnedItem
+          similarityScore = autoLearnedItem.similarity || 0.6
+          knowledgeResult = {
+            items: [autoLearnedItem],
+            bestMatch: autoLearnedItem,
+            similarityScore: similarityScore,
+          }
+          console.log('✅ NOEL - Usando item do auto-learning (não encontrado na base)')
+        }
+      }
     } else {
       // Pergunta institucional → não buscar scripts
       knowledgeResult = { items: [], bestMatch: null, similarityScore: 0 }
@@ -1517,7 +1554,7 @@ export async function POST(request: NextRequest) {
       ? `\n\n🚨 CONTEXTO HOM (PRIORIDADE MÁXIMA - PALAVRA MATRIZ):\n${generateHOMContext(process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')}\n\n⚠️ REGRA CRÍTICA: HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio). É a palavra matriz do recrutamento e duplicação. NUNCA use "Hora do Mentor" ou qualquer outra definição. SEMPRE use as informações acima.`
       : ''
 
-    // 6. Decidir estratégia baseado na similaridade (ou tipo de pergunta)
+    // 7. Decidir estratégia baseado na similaridade (ou tipo de pergunta)
     if (similarityScore >= 0.80 && bestMatch) {
       // Alta similaridade → usar resposta exata, MAS se for HOM, priorizar contexto HOM
       if (isHOMRelated(message)) {
@@ -1623,7 +1660,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 7. Salvar query no log com análise
+    // 8. Salvar query no log com análise
     try {
       const { data: savedQuery } = await supabaseAdmin
         .from('wellness_user_queries')
@@ -1657,43 +1694,109 @@ export async function POST(request: NextRequest) {
       console.error('⚠️ Erro ao salvar log (não crítico):', logError)
     }
 
-    // 8. Verificar se deve sugerir aprendizado
-    if (source === 'ia_generated' && similarityScore < 0.40) {
+    // 9. Verificar se deve sugerir aprendizado (apenas se não foi encontrado no auto-learning)
+    // Não sugerir se já foi encontrado no auto-learning ou se já existe sugestão com alta frequência
+    const shouldSuggestLearning = source === 'ia_generated' && 
+                                   similarityScore < 0.40 && 
+                                   !autoLearnedItem
+    
+    if (shouldSuggestLearning) {
       // Query nova que pode virar conhecimento
       try {
-        const { data: suggestionData, error: learnError } = await supabaseAdmin
+        // PRIMEIRO: Verificar se existe sugestão PARECIDA (não apenas idêntica)
+        const lowerMessage = message.toLowerCase().trim()
+        const messageWords = lowerMessage.split(/\s+/).filter(w => w.length > 2)
+        
+        const { data: existingSuggestions } = await supabaseAdmin
           .from('wellness_learning_suggestions')
-          .upsert({
-            query: message,
-            suggested_response: response.substring(0, 2000),
-            suggested_category: module,
-            frequency: 1,
-            last_seen_at: new Date().toISOString(),
-          }, {
-            onConflict: 'query',
-            ignoreDuplicates: false,
+          .select('*')
+          .eq('suggested_category', module)
+          .limit(50) // Buscar últimas 50 para comparar
+        
+        let similarSuggestion: any = null
+        let bestSimilarity = 0
+        
+        if (existingSuggestions) {
+          for (const existing of existingSuggestions) {
+            const existingText = existing.query.toLowerCase()
+            let score = 0
+            
+            // Contar palavras em comum
+            for (const word of messageWords) {
+              if (existingText.includes(word)) {
+                score += 1
+              }
+            }
+            
+            // Bonus se muito similar
+            if (existingText.includes(lowerMessage) || lowerMessage.includes(existingText)) {
+              score += 3
+            }
+            
+            const similarity = Math.min(1, score / Math.max(1, messageWords.length + 3))
+            
+            if (similarity > bestSimilarity && similarity >= 0.7) { // 70% de similaridade = mesma pergunta
+              bestSimilarity = similarity
+              similarSuggestion = existing
+            }
+          }
+        }
+        
+        let suggestionData: any
+        
+        if (similarSuggestion) {
+          // Encontrou sugestão parecida → incrementar frequência
+          console.log(`🔄 [Auto-Learning] Encontrada sugestão similar (${(bestSimilarity * 100).toFixed(1)}%), incrementando frequência`)
+          
+          const { data: updatedFrequency } = await supabaseAdmin.rpc('increment_learning_frequency', {
+            suggestion_id: similarSuggestion.id,
           })
-          .select()
-          .single()
+          
+          // Atualizar last_seen_at
+          await supabaseAdmin
+            .from('wellness_learning_suggestions')
+            .update({ last_seen_at: new Date().toISOString() })
+            .eq('id', similarSuggestion.id)
+          
+          // Buscar sugestão atualizada
+          const { data: updated } = await supabaseAdmin
+            .from('wellness_learning_suggestions')
+            .select('*')
+            .eq('id', similarSuggestion.id)
+            .single()
+          
+          suggestionData = updated
+        } else {
+          // Não encontrou parecida → criar nova sugestão
+          const { data: newSuggestion, error: learnError } = await supabaseAdmin
+            .from('wellness_learning_suggestions')
+            .insert({
+              query: message,
+              suggested_response: response.substring(0, 2000),
+              suggested_category: module,
+              frequency: 1,
+              last_seen_at: new Date().toISOString(),
+            })
+            .select()
+            .single()
 
-        if (learnError) {
-          throw learnError
+          if (learnError) {
+            throw learnError
+          }
+          
+          suggestionData = newSuggestion
         }
 
         if (suggestionData) {
-          // Incrementar frequência se já existe
-          const { data: updatedFrequency, error: incrementError } = await supabaseAdmin.rpc('increment_learning_frequency', {
-            suggestion_id: suggestionData.id,
-          })
-
-          // Buscar sugestão atualizada para obter a frequência
+          // Buscar frequência atualizada
           const { data: updatedSuggestion } = await supabaseAdmin
             .from('wellness_learning_suggestions')
             .select('frequency')
             .eq('id', suggestionData.id)
             .single()
 
-          // Notificar admin se frequência >= 3
+          // Notificar admin se frequência >= 3 (mas não adicionar automaticamente aqui, 
+          // pois o auto-learning já faz isso antes de chamar IA)
           if (updatedSuggestion && updatedSuggestion.frequency >= 3) {
             try {
               const { notifyAdminNewLearningSuggestion } = await import('@/lib/wellness-learning-notifications')

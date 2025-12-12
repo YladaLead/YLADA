@@ -259,3 +259,261 @@ export async function saveItemEmbedding(itemId: string, content: string): Promis
   }
 }
 
+/**
+ * Busca sugestões de aprendizado que podem ser usadas automaticamente
+ * Retorna sugestões aprovadas ou com frequência >= 3 (threshold para auto-aprovação)
+ */
+export async function searchLearningSuggestions(
+  query: string,
+  module: NoelModule,
+  autoApproveThreshold: number = 3
+): Promise<{ suggestion: any; similarity: number } | null> {
+  try {
+    const lowerQuery = query.toLowerCase().trim()
+    
+    // Buscar sugestões aprovadas ou com frequência alta
+    const { data: suggestions, error } = await supabaseAdmin
+      .from('wellness_learning_suggestions')
+      .select('*')
+      .or(`approved.eq.true,and(approved.is.null,frequency.gte.${autoApproveThreshold})`)
+      .eq('suggested_category', module)
+      .order('frequency', { ascending: false })
+      .order('last_seen_at', { ascending: false })
+      .limit(10)
+
+    if (error || !suggestions || suggestions.length === 0) {
+      return null
+    }
+
+    // Calcular similaridade simples entre query e sugestões
+    const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 2)
+    
+    let bestMatch: any = null
+    let bestSimilarity = 0
+
+    for (const suggestion of suggestions) {
+      const suggestionText = `${suggestion.query} ${suggestion.suggested_response}`.toLowerCase()
+      let score = 0
+      
+      // Contar palavras da query que aparecem na sugestão
+      for (const word of queryWords) {
+        if (suggestionText.includes(word)) {
+          score += 1
+        }
+      }
+      
+      // Bonus se query exata ou muito similar
+      if (suggestion.query.toLowerCase().includes(lowerQuery) || lowerQuery.includes(suggestion.query.toLowerCase())) {
+        score += 3
+      }
+      
+      // Normalizar score (0-1)
+      const similarity = Math.min(1, score / Math.max(1, queryWords.length + 3))
+      
+      if (similarity > bestSimilarity && similarity >= 0.5) { // Threshold mínimo de 50%
+        bestSimilarity = similarity
+        bestMatch = suggestion
+      }
+    }
+
+    if (bestMatch) {
+      console.log(`✅ [Auto-Learning] Encontrada sugestão com similaridade ${(bestSimilarity * 100).toFixed(1)}%`)
+      return { suggestion: bestMatch, similarity: bestSimilarity }
+    }
+
+    return null
+  } catch (error: any) {
+    console.error('❌ Erro ao buscar sugestões de aprendizado:', error)
+    return null
+  }
+}
+
+/**
+ * Adiciona automaticamente uma sugestão à base de conhecimento
+ * Chamado quando frequência >= threshold (padrão: 3)
+ */
+export async function autoAddSuggestionToKnowledgeBase(
+  suggestionId: string,
+  module: NoelModule
+): Promise<{ success: boolean; itemId?: string; error?: string }> {
+  try {
+    // Buscar sugestão
+    const { data: suggestion, error: fetchError } = await supabaseAdmin
+      .from('wellness_learning_suggestions')
+      .select('*')
+      .eq('id', suggestionId)
+      .single()
+
+    if (fetchError || !suggestion) {
+      return { success: false, error: 'Sugestão não encontrada' }
+    }
+
+    // Verificar se já foi adicionada (evitar duplicatas)
+    if (suggestion.approved === true) {
+      console.log('ℹ️ [Auto-Learning] Sugestão já foi aprovada anteriormente')
+      return { success: false, error: 'Já foi adicionada' }
+    }
+
+    // Gerar slug único
+    const slugBase = suggestion.query
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
+      .substring(0, 50)
+    
+    const slug = `auto-learned-${slugBase}-${Date.now()}`
+
+    // Extrair título da query (primeiras palavras)
+    const title = suggestion.query.length > 60 
+      ? suggestion.query.substring(0, 60) + '...'
+      : suggestion.query
+
+    // Adicionar à base de conhecimento
+    // Nota: campos metadata e source podem não existir, então usar apenas campos obrigatórios
+    const insertData: any = {
+      title: title,
+      slug: slug,
+      category: module,
+      subcategory: 'auto_learned',
+      tags: ['auto_learned', `freq_${suggestion.frequency}`],
+      priority: 5, // Prioridade média
+      content: suggestion.suggested_response,
+      is_active: true,
+    }
+    
+    // Adicionar campos opcionais se a tabela suportar
+    const { data: newItem, error: insertError } = await supabaseAdmin
+      .from('knowledge_wellness_items')
+      .insert(insertData)
+      .select()
+      .single()
+
+    if (insertError || !newItem) {
+      console.error('❌ Erro ao adicionar à base:', insertError)
+      return { success: false, error: insertError?.message || 'Erro ao inserir' }
+    }
+
+    // Gerar e salvar embedding
+    try {
+      await saveItemEmbedding(newItem.id, suggestion.suggested_response)
+    } catch (embeddingError) {
+      console.warn('⚠️ Erro ao gerar embedding (não crítico):', embeddingError)
+      // Continuar mesmo se embedding falhar
+    }
+
+    // Marcar sugestão como aprovada automaticamente
+    await supabaseAdmin
+      .from('wellness_learning_suggestions')
+      .update({
+        approved: true,
+        approved_at: new Date().toISOString(),
+      })
+      .eq('id', suggestionId)
+
+    console.log(`✅ [Auto-Learning] Sugestão adicionada automaticamente à base (ID: ${newItem.id})`)
+    
+    return { success: true, itemId: newItem.id }
+  } catch (error: any) {
+    console.error('❌ Erro ao adicionar sugestão automaticamente:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Verifica e processa sugestões que devem ser adicionadas automaticamente
+ * Chamado antes de buscar na base de conhecimento
+ */
+export async function processAutoLearning(
+  query: string,
+  module: NoelModule
+): Promise<KnowledgeItem | null> {
+  try {
+    // 1. Buscar sugestões que podem ser usadas
+    const suggestionResult = await searchLearningSuggestions(query, module, 3)
+    
+    if (!suggestionResult) {
+      return null
+    }
+
+    const { suggestion, similarity } = suggestionResult
+
+    // 2. Se frequência >= 3 e ainda não foi adicionada, adicionar automaticamente
+    if (suggestion.frequency >= 3 && suggestion.approved !== true) {
+      console.log(`🤖 [Auto-Learning] Adicionando automaticamente (frequência: ${suggestion.frequency})`)
+      
+      const addResult = await autoAddSuggestionToKnowledgeBase(suggestion.id, module)
+      
+      if (addResult.success && addResult.itemId) {
+        // Retornar como KnowledgeItem para uso imediato
+        return {
+          id: addResult.itemId,
+          title: suggestion.query.length > 60 
+            ? suggestion.query.substring(0, 60) + '...'
+            : suggestion.query,
+          slug: `auto-learned-${suggestion.id}`,
+          category: module,
+          subcategory: 'auto_learned',
+          tags: ['auto_learned'],
+          priority: 5,
+          content: suggestion.suggested_response,
+          similarity: similarity,
+        }
+      }
+    }
+
+    // 3. Se já foi aprovada, tentar buscar item na base de conhecimento
+    // (pode ter sido adicionado manualmente pelo admin)
+    if (suggestion.approved === true && similarity >= 0.7) {
+      // Buscar por slug ou título similar
+      const searchTitle = suggestion.query.length > 60 
+        ? suggestion.query.substring(0, 60)
+        : suggestion.query
+      
+      const { data: items } = await supabaseAdmin
+        .from('knowledge_wellness_items')
+        .select('*')
+        .eq('is_active', true)
+        .or(`title.ilike.%${searchTitle}%,content.ilike.%${suggestion.query.substring(0, 30)}%`)
+        .limit(1)
+
+      if (items && items.length > 0) {
+        const item = items[0]
+        return {
+          id: item.id,
+          title: item.title,
+          slug: item.slug,
+          category: item.category,
+          subcategory: item.subcategory,
+          tags: item.tags || [],
+          priority: item.priority,
+          content: item.content,
+          similarity: similarity,
+        }
+      }
+    }
+
+    // 4. Se similaridade alta mas ainda não adicionada, usar resposta da sugestão diretamente
+    if (similarity >= 0.7) {
+      return {
+        id: `suggestion-${suggestion.id}`,
+        title: suggestion.query,
+        slug: `suggestion-${suggestion.id}`,
+        category: module,
+        subcategory: 'learning_suggestion',
+        tags: ['learning_suggestion'],
+        priority: 4,
+        content: suggestion.suggested_response,
+        similarity: similarity,
+      }
+    }
+
+    return null
+  } catch (error: any) {
+    console.error('❌ Erro ao processar auto-learning:', error)
+    return null
+  }
+}
+
