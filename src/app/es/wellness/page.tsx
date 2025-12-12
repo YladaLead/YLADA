@@ -25,15 +25,15 @@ export default function WellnessPage() {
       </header>
 
       <main>
-        {/* Em Construção */}
+        {/* En Construcción */}
         <section className="bg-gradient-to-br from-purple-50 via-green-50 to-emerald-50 py-32 sm:py-40 lg:py-48">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-                Em Construção
+                En Construcción
               </h1>
               <p className="text-xl sm:text-2xl text-gray-600">
-                Estamos trabalhando para trazer a melhor experiência para você.
+                Estamos trabajando para brindarte la mejor experiencia.
               </p>
             </div>
           </div>
@@ -59,7 +59,7 @@ export default function WellnessPage() {
               Powered by <span className="font-semibold">YLADA</span>
             </p>
             <p className="text-gray-500 text-xs text-center mb-2">
-              © {new Date().getFullYear()} YLADA. Todos os direitos reservados.
+              © {new Date().getFullYear()} YLADA. Todos los derechos reservados.
             </p>
             <p className="text-gray-400 text-xs text-center">
               Portal Solutions Tech & Innovation LTDA
