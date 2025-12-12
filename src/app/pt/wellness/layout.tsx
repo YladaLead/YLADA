@@ -13,11 +13,11 @@ export const metadata: Metadata = {
     icon: '/images/logo/wellness-quadrado.png',
     apple: '/images/logo/wellness-quadrado.png',
   },
-  title: 'WELLNESS - Transforme seu trabalho de bem-estar em conexões reais',
-  description: 'O YLADA Wellness é o assistente digital que te ajuda a gerar novos contatos, despertar interesse em pessoas certas e fortalecer suas conexões — de forma leve, simples e inspiradora.',
+  title: 'WELLNESS - Transforme como você conversa: fale com 10x mais pessoas',
+  description: 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve. Com inteligência artificial integrada.',
   openGraph: {
-    title: 'WELLNESS - Transforme seu trabalho de bem-estar em conexões reais',
-    description: 'O YLADA Wellness é o assistente digital que te ajuda a gerar novos contatos, despertar interesse em pessoas certas e fortalecer suas conexões — de forma leve, simples e inspiradora.',
+    title: 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve',
+    description: 'Com inteligência artificial integrada.',
     url: `${baseUrl}/pt/wellness`,
     siteName: 'WELLNESS - Your Leading Data System',
     type: 'website',
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'WELLNESS - Transforme seu trabalho de bem-estar em conexões reais',
-    description: 'O YLADA Wellness é o assistente digital que te ajuda a gerar novos contatos e fortalecer suas conexões.',
+    title: 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve',
+    description: 'Com inteligência artificial integrada.',
     images: [ogImageUrl],
   },
 }

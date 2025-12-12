@@ -139,19 +139,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       // Construir URL base para fallback
       // Usar imagem específica para WhatsApp (COM logo) mesmo no fallback
       const inferredImage = `${baseUrl}/images/wellness-hero-com-logo.png`
-      const inferredSlug = normalizeTemplateSlug(toolSlug)
-      const inferredMessages = getOGMessages(inferredSlug)
       
       console.log('[OG Metadata] 🔍 Using inferred metadata (fallback):', {
         toolSlug,
-        inferredSlug,
         inferredImage,
-        hasInferredMessage: !!inferredMessages.title
       })
       
-      // Fallback para metadata padrão (mas tentando usar imagem específica se possível)
-      let fallbackTitle = inferredMessages.title || 'Ferramenta de Bem-Estar'
-      const fallbackDescription = inferredMessages.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida'
+      // Fallback para metadata padrão com texto consistente
+      let fallbackTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
+      const fallbackDescription = 'Com inteligência artificial integrada.'
       
       // Remover "WELLNESS" duplicado se já estiver no título
       if (fallbackTitle.includes('WELLNESS')) {
@@ -213,10 +209,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       fallbackTitle: tool.title
     })
     
-    // Usar mensagens estimulantes ou título/descrição personalizados do usuário
-    // Priorizar mensagens estimulantes para melhor conversão
-    let ogTitle = ogMessages.title || tool.title || 'Ferramenta de Bem-Estar'
-    const ogDescription = ogMessages.description || tool.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida'
+    // Usar texto padrão para WhatsApp: "Transforme como você conversa: fale com 10x mais pessoas"
+    // Isso garante consistência no preview do WhatsApp
+    let ogTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
+    const ogDescription = 'Com inteligência artificial integrada.'
     
     // Remover "WELLNESS" duplicado se já estiver no título
     if (ogTitle.includes('WELLNESS')) {
