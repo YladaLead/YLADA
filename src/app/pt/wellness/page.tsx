@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import LanguageSelector from '../../../components/LanguageSelector'
 import SalesSupportChat from '@/components/wellness/SalesSupportChat'
+import { landingPageVideos } from '@/lib/landing-pages-assets'
 
 export default function WellnessPage() {
   const [currentUrl, setCurrentUrl] = useState('https://ylada.app/pt/wellness')
@@ -138,16 +139,51 @@ export default function WellnessPage() {
               </div>
               
               <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video mx-2 sm:mx-0 mb-6 sm:mb-8">
-                {/* Vídeo local da Wellness */}
+                {/* Vídeo do Supabase Storage */}
                 <video 
                   className="w-full h-full object-cover"
                   controls
                   loop
                   playsInline
-                  poster="/videos/wellness-hero-poster.png"
+                  preload="metadata"
+                  poster={landingPageVideos.wellnessHeroPoster}
+                  onError={(e) => {
+                    const video = e.currentTarget
+                    const error = video.error
+                    console.error('❌ Erro ao carregar vídeo:', {
+                      errorCode: error?.code,
+                      errorMessage: error?.message,
+                      videoSrc: video.src,
+                      videoCurrentSrc: video.currentSrc,
+                      poster: video.poster,
+                      networkState: video.networkState,
+                      readyState: video.readyState,
+                    })
+                    
+                    // Tentar carregar novamente após 2 segundos
+                    setTimeout(() => {
+                      video.load()
+                    }, 2000)
+                  }}
+                  onLoadStart={() => {
+                    console.log('🔄 Iniciando carregamento do vídeo:', landingPageVideos.wellnessHero)
+                  }}
+                  onLoadedMetadata={(e) => {
+                    const video = e.currentTarget
+                    console.log('✅ Vídeo carregado com sucesso:', {
+                      duration: video.duration,
+                      videoWidth: video.videoWidth,
+                      videoHeight: video.videoHeight,
+                      src: video.src,
+                      currentSrc: video.currentSrc,
+                      networkState: video.networkState,
+                    })
+                  }}
+                  onCanPlay={() => {
+                    console.log('▶️ Vídeo pronto para reproduzir')
+                  }}
                 >
-                  <source src="/videos/wellness-hero.mp4" type="video/mp4" />
-                  <source src="/videos/wellness-hero.webm" type="video/webm" />
+                  <source src={landingPageVideos.wellnessHero} type="video/mp4" />
                   Seu navegador não suporta vídeo HTML5.
                 </video>
               </div>

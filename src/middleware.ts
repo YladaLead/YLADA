@@ -21,7 +21,10 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api/') ||
     pathname.startsWith('/auth/') || // Callback do Supabase
     pathname.startsWith('/_next/') ||
-    pathname.includes('.') ||
+    pathname.startsWith('/videos/') || // Arquivos de vídeo estáticos
+    pathname.startsWith('/images/') || // Arquivos de imagem estáticos
+    pathname.startsWith('/logos/') || // Arquivos de logo estáticos
+    pathname.includes('.') || // Qualquer arquivo com extensão
     pathname === '/favicon.ico'
   ) {
     console.log('Middleware - Rota excluída (sem redirecionamento):', pathname)
@@ -118,8 +121,11 @@ export const config = {
      * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
+     * - videos (video files)
+     * - images (image files)
+     * - logos (logo files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|videos|images|logos|favicon.ico).*)',
   ],
 }
