@@ -15,31 +15,62 @@ interface LyaAnalise {
 export default function LyaAnaliseHoje() {
   const [analise, setAnalise] = useState<LyaAnalise | null>(null)
   const [loading, setLoading] = useState(true)
+  const [regenerando, setRegenerando] = useState(false)
 
   useEffect(() => {
     const carregarAnalise = async () => {
       try {
-        const response = await fetch('/api/nutri/lya/analise', {
-          credentials: 'include'
+        // Primeiro, tentar buscar análise existente
+        const getResponse = await fetch('/api/nutri/lya/analise', {
+          credentials: 'include',
+          method: 'GET'
         })
         
-        if (response.ok) {
-          const data = await response.json()
-          if (data.analise) {
-            setAnalise(data.analise)
+        if (getResponse.ok) {
+          const getData = await getResponse.json()
+          
+          // Se tem análise no formato novo, usar
+          if (getData.analise && getData.analise.foco_prioritario && 
+              getData.analise.acoes_recomendadas && getData.analise.acoes_recomendadas.length > 0) {
+            console.log('✅ [LYA] Análise encontrada no formato novo')
+            setAnalise(getData.analise)
+            setLoading(false)
+            return
+          }
+          
+          // Se não tem análise ou está no formato antigo, gerar nova
+          console.log('🔄 [LYA] Gerando nova análise (formato antigo ou ausente)...')
+          setRegenerando(true)
+          const postResponse = await fetch('/api/nutri/lya/analise', {
+            credentials: 'include',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          
+          if (postResponse.ok) {
+            const postData = await postResponse.json()
+            if (postData.analise && postData.analise.foco_prioritario) {
+              console.log('✅ [LYA] Nova análise gerada com sucesso')
+              setAnalise(postData.analise)
+            } else {
+              console.warn('⚠️ [LYA] Nova análise não retornou formato correto')
+            }
           }
         }
       } catch (error) {
-        console.error('Erro ao carregar análise da LYA:', error)
+        console.error('❌ Erro ao carregar análise da LYA:', error)
       } finally {
         setLoading(false)
+        setRegenerando(false)
       }
     }
 
     carregarAnalise()
   }, [])
 
-  if (loading) {
+  if (loading || regenerando) {
     return (
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-8">
         <div className="animate-pulse">
@@ -47,12 +78,17 @@ export default function LyaAnaliseHoje() {
           <div className="h-4 bg-blue-200 rounded w-3/4 mb-2"></div>
           <div className="h-4 bg-blue-200 rounded w-1/2"></div>
         </div>
+        {regenerando && (
+          <p className="text-sm text-gray-500 mt-4 text-center">
+            Gerando nova análise no formato atualizado...
+          </p>
+        )}
       </div>
     )
   }
 
-  if (!analise) {
-    return null // Não mostrar se não houver análise
+  if (!analise || !analise.foco_prioritario || !analise.acoes_recomendadas || analise.acoes_recomendadas.length === 0) {
+    return null // Não mostrar se não houver análise válida
   }
 
   return (

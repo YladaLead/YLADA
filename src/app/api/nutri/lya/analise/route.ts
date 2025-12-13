@@ -315,10 +315,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Se a análise antiga não tem formato novo, converter
+    // Se a análise antiga não tem formato novo, tentar converter ou forçar nova geração
     if (analise && !analise.foco_prioritario && analise.mensagem_completa) {
+      console.log('🔄 [LYA GET] Análise antiga encontrada, tentando converter...')
       const parsed = parseLyaResponse(analise.mensagem_completa)
       if (parsed.isValid) {
+        console.log('✅ [LYA GET] Conversão bem-sucedida')
         return NextResponse.json({
           analise: {
             foco_prioritario: parsed.foco_prioritario,
@@ -329,11 +331,32 @@ export async function GET(request: NextRequest) {
             mensagem_completa: analise.mensagem_completa
           }
         })
+      } else {
+        console.warn('⚠️ [LYA GET] Não foi possível converter análise antiga, retornando null para forçar nova geração')
+        // Retornar null para forçar componente a gerar nova análise
+        return NextResponse.json({
+          analise: null
+        })
       }
     }
 
+    // Se tem análise no formato novo, retornar
+    if (analise && analise.foco_prioritario) {
+      return NextResponse.json({
+        analise: {
+          foco_prioritario: analise.foco_prioritario,
+          acoes_recomendadas: analise.acoes_recomendadas || [],
+          onde_aplicar: analise.onde_aplicar || '',
+          metrica_sucesso: analise.metrica_sucesso || '',
+          link_interno: analise.link_interno || '/pt/nutri/home',
+          mensagem_completa: analise.mensagem_completa
+        }
+      })
+    }
+
+    // Se não tem análise, retornar null
     return NextResponse.json({
-      analise: analise || null
+      analise: null
     })
   } catch (error: any) {
     console.error('❌ Erro ao buscar análise da LYA:', error)

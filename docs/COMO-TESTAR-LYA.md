@@ -279,3 +279,4 @@ Se você quiser forçar uma nova análise, pode fazer um POST para `/api/nutri/l
 A análise atual é sempre a mais recente salva no banco. Se você quiser gerar uma nova, faça um POST.
 
 
+
