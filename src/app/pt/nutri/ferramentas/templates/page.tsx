@@ -92,16 +92,31 @@ export default function TemplatesNutri() {
     const carregarUserSlug = async () => {
       try {
         const response = await fetch('/api/nutri/profile', {
-          credentials: 'include'
+          credentials: 'include',
+          cache: 'no-store'
         })
         if (response.ok) {
           const data = await response.json()
-          if (data.profile?.user_slug) {
-            setUserSlug(data.profile.user_slug)
+          console.log('📋 [Templates] Dados do perfil recebidos:', {
+            hasProfile: !!data.profile,
+            userSlug: data.profile?.userSlug,
+            user_slug: data.profile?.user_slug,
+            email: data.profile?.email,
+            fullData: data.profile
+          })
+          // API retorna userSlug (camelCase), mas pode ter user_slug também
+          const slug = data.profile?.userSlug || data.profile?.user_slug
+          if (slug) {
+            setUserSlug(slug)
+            console.log('✅ [Templates] user_slug carregado:', slug)
+          } else {
+            console.warn('⚠️ [Templates] user_slug não encontrado no perfil')
           }
+        } else {
+          console.error('❌ [Templates] Erro ao buscar perfil:', response.status)
         }
       } catch (error) {
-        console.error('Erro ao carregar user_slug:', error)
+        console.error('❌ [Templates] Erro ao carregar user_slug:', error)
       }
     }
     carregarUserSlug()
