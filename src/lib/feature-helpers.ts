@@ -45,10 +45,12 @@ export async function hasFeatureAccess(
 
     // Se não tem assinatura, retornar false
     if (!subscription || !subscription.features) {
+      console.log(`ℹ️ hasFeatureAccess: Usuário ${userId} não tem assinatura ativa para área ${area}`)
       return false
     }
 
     const features = subscription.features as string[]
+    console.log(`ℹ️ hasFeatureAccess: Usuário ${userId} tem features:`, features, `(verificando: ${feature})`)
 
     // Se tem "completo", tem acesso a tudo
     if (features.includes('completo')) {
@@ -56,7 +58,9 @@ export async function hasFeatureAccess(
     }
 
     // Verificar se tem a feature específica
-    return features.includes(feature)
+    const hasAccess = features.includes(feature)
+    console.log(`ℹ️ hasFeatureAccess: Acesso ${hasAccess ? 'permitido' : 'negado'} para feature ${feature}`)
+    return hasAccess
   } catch (error) {
     console.error('❌ Erro ao verificar feature:', error)
     return false

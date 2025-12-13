@@ -41,6 +41,9 @@ export default function RequireFeature({
   const [canBypass, setCanBypass] = useState(false)
 
   useEffect(() => {
+    let isMounted = true
+    let timeoutId: NodeJS.Timeout | null = null
+
     const checkAccess = async () => {
       if (authLoading || !user) {
         return
@@ -48,6 +51,8 @@ export default function RequireFeature({
 
       // Admin e suporte podem bypassar
       if (userProfile?.is_admin || userProfile?.is_support) {
+        if (!isMounted) return
+        console.log('✅ RequireFeature: Admin/Suporte detectado, bypassando verificação')
         setCanBypass(true)
         setHasAccess(true)
         setChecking(false)
@@ -55,28 +60,64 @@ export default function RequireFeature({
       }
 
       try {
+        if (!isMounted) return
         setChecking(true)
 
+        // Timeout de 3 segundos para evitar travamento
+        const timeoutPromise = new Promise<boolean>((resolve) => {
+          timeoutId = setTimeout(() => {
+            console.warn('⚠️ RequireFeature: Timeout na verificação de feature, permitindo acesso temporário')
+            resolve(true) // Permitir acesso em caso de timeout (fail-open)
+          }, 3000)
+        })
+
         // Verificar acesso
-        let access = false
-        if (Array.isArray(feature)) {
-          // Verificar se tem qualquer uma das features
-          access = await hasAnyFeature(user.id, area, feature)
-        } else {
-          // Verificar feature específica
-          access = await hasFeatureAccess(user.id, area, feature)
+        const accessPromise = (async () => {
+          try {
+            let access = false
+            if (Array.isArray(feature)) {
+              // Verificar se tem qualquer uma das features
+              access = await hasAnyFeature(user.id, area, feature)
+            } else {
+              // Verificar feature específica
+              access = await hasFeatureAccess(user.id, area, feature)
+            }
+            return access
+          } catch (error) {
+            console.error('❌ Erro ao verificar feature:', error)
+            return false
+          }
+        })()
+
+        // Race entre timeout e verificação
+        const access = await Promise.race([accessPromise, timeoutPromise])
+        
+        // Limpar timeout se a verificação terminou antes
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
         }
 
+        if (!isMounted) return
         setHasAccess(access)
       } catch (error) {
-        console.error('Erro ao verificar feature:', error)
+        console.error('❌ Erro ao verificar feature:', error)
+        if (!isMounted) return
         setHasAccess(false)
       } finally {
+        if (!isMounted) return
         setChecking(false)
       }
     }
 
     checkAccess()
+
+    return () => {
+      isMounted = false
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
   }, [user, userProfile, authLoading, area, feature])
 
   // Loading
