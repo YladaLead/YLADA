@@ -447,24 +447,19 @@ export default function TemplatesNutri() {
           </div>
         )}
 
-        {/* Ações rápidas */}
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link
-            href="/pt/nutri/ferramentas/nova"
-            className="flex items-center p-5 bg-white border border-gray-200 rounded-2xl shadow-sm hover:border-sky-300 transition-colors"
-          >
-            <span className="text-3xl mr-4">➕</span>
-            <div>
-              <h3 className="font-semibold text-gray-900">Criar Link Personalizado</h3>
-              <p className="text-sm text-gray-600">Monte do zero quando precisar de algo exclusivo</p>
-            </div>
-          </Link>
-          <div className="flex items-center p-5 bg-white border border-gray-200 rounded-2xl shadow-sm">
-            <span className="text-3xl mr-4">💡</span>
-            <div>
-              <h3 className="font-semibold text-gray-900">Sugerir Novo Template</h3>
-              <p className="text-sm text-gray-600">Nos conte quais ferramentas podem ajudar sua rotina</p>
-            </div>
+        {/* Criar Quiz Personalizado */}
+        <div className="mt-10">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Criar Quiz Personalizado</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Crie um quiz completamente personalizado com suas próprias perguntas e respostas.
+            </p>
+            <Link
+              href="/pt/nutri/quiz-personalizado"
+              className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+            >
+              Criar Quiz Personalizado →
+            </Link>
           </div>
         </div>
 
