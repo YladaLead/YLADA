@@ -13,6 +13,7 @@
     "preencher-migrados": "tsx scripts/preencher-dados-migrados.ts",
     "duplicar-templates-nutri": "tsx scripts/duplicar-templates-wellness-para-nutri.ts",
     "upload-wellness-video": "tsx scripts/upload-wellness-hero-video.ts",
+    "upload-wellness-poster": "tsx scripts/upload-wellness-poster.ts",
     "test-video-url": "tsx scripts/test-video-url.ts"
   },
   "dependencies": {
