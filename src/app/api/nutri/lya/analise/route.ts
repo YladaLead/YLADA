@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { hasActiveSubscription } from '@/lib/subscription-helpers'
+import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -187,8 +187,9 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
         util: null // Será marcado depois pelo feedback
       })
 
-    // Verificar se usuário tem assinatura com acesso a cursos
-    const temAcessoCursos = await hasActiveSubscription(user.id, 'nutri')
+    // Verificar se usuário tem acesso a cursos (assinatura ou bypass)
+    const podeBypass = await canBypassSubscription(user.id)
+    const temAcessoCursos = podeBypass || await hasActiveSubscription(user.id, 'nutri')
     
     // Determinar link interno baseado na regra única (MVP)
     // Se não tem acesso a cursos, não sugerir link que requer assinatura
@@ -197,7 +198,7 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
     
     if (jornadaDiaAtual === null) {
       if (temAcessoCursos) {
-        // Usuário tem assinatura, pode acessar jornada
+        // Usuário tem assinatura ou pode bypassar, pode acessar jornada
         linkInterno = '/pt/nutri/metodo/jornada/dia/1'
         acaoPratica = 'Iniciar Dia 1 da Jornada'
       } else {
