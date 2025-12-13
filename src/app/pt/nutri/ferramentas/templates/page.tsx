@@ -84,12 +84,14 @@ export default function TemplatesNutri() {
   const [busca, setBusca] = useState('')
   const [templatePreviewAberto, setTemplatePreviewAberto] = useState<string | null>(null)
   const [userSlug, setUserSlug] = useState<string | null>(null)
+  const [loadingUserSlug, setLoadingUserSlug] = useState(true)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
   const [qrCopiado, setQrCopiado] = useState<string | null>(null)
 
   // Carregar userSlug do perfil
   useEffect(() => {
     const carregarUserSlug = async () => {
+      setLoadingUserSlug(true)
       try {
         const response = await fetch('/api/nutri/profile', {
           credentials: 'include',
@@ -111,12 +113,17 @@ export default function TemplatesNutri() {
             console.log('✅ [Templates] user_slug carregado:', slug)
           } else {
             console.warn('⚠️ [Templates] user_slug não encontrado no perfil')
+            setUserSlug('') // String vazia indica que foi verificado mas não existe
           }
         } else {
           console.error('❌ [Templates] Erro ao buscar perfil:', response.status)
+          setUserSlug('') // Marcar como verificado mesmo em caso de erro
         }
       } catch (error) {
         console.error('❌ [Templates] Erro ao carregar user_slug:', error)
+        setUserSlug('') // Marcar como verificado mesmo em caso de erro
+      } finally {
+        setLoadingUserSlug(false)
       }
     }
     carregarUserSlug()
@@ -432,7 +439,7 @@ export default function TemplatesNutri() {
                         </div>
                       </div>
                     )}
-                    {!linkTemplate && userSlug === null && (
+                    {!loadingUserSlug && !linkTemplate && !userSlug && (
                       <div className="mt-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
                         Configure seu user_slug no perfil para gerar links
                       </div>
