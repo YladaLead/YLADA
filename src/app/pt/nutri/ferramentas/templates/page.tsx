@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Sparkles } from 'lucide-react'
+import QRCode from '@/components/QRCode'
 import NutriNavBar from '@/components/nutri/NutriNavBar'
+import { buildNutriToolUrl, getAppUrl } from '@/lib/url-utils'
 
 type TemplateContent = {
   questions?: unknown[]
@@ -81,6 +83,29 @@ export default function TemplatesNutri() {
   const [carregandoTemplates, setCarregandoTemplates] = useState(true)
   const [busca, setBusca] = useState('')
   const [templatePreviewAberto, setTemplatePreviewAberto] = useState<string | null>(null)
+  const [userSlug, setUserSlug] = useState<string | null>(null)
+  const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
+  const [qrCopiado, setQrCopiado] = useState<string | null>(null)
+
+  // Carregar userSlug do perfil
+  useEffect(() => {
+    const carregarUserSlug = async () => {
+      try {
+        const response = await fetch('/api/nutri/profile', {
+          credentials: 'include'
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.profile?.user_slug) {
+            setUserSlug(data.profile.user_slug)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar user_slug:', error)
+      }
+    }
+    carregarUserSlug()
+  }, [])
 
   // Carregar templates do banco
   useEffect(() => {
@@ -178,6 +203,68 @@ export default function TemplatesNutri() {
 
   const templatePreviewSelecionado = templates.find(t => t.id === templatePreviewAberto)
 
+  // Gerar link fixo para template
+  const gerarLinkTemplate = (template: TemplateCard): string | null => {
+    if (!userSlug || !template.slug) {
+      return null
+    }
+    return buildNutriToolUrl(userSlug, template.slug)
+  }
+
+  // Copiar link
+  const copiarLink = async (link: string, templateId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    try {
+      if (!link || link.trim() === '') {
+        alert('⚠️ Link não disponível. Configure seu user_slug no perfil primeiro.')
+        return
+      }
+      await navigator.clipboard.writeText(link)
+      setLinkCopiado(templateId)
+      setTimeout(() => setLinkCopiado(null), 2000)
+      alert('✅ Link copiado!')
+    } catch (error) {
+      console.error('Erro ao copiar link:', error)
+      alert('⚠️ Erro ao copiar link. Tente selecionar e copiar manualmente.')
+    }
+  }
+
+  // Copiar QR Code
+  const copiarQRCode = async (link: string, templateId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    try {
+      if (!link) {
+        alert('Link não disponível. Configure seu perfil primeiro.')
+        return
+      }
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`
+      const response = await fetch(qrUrl)
+      if (!response.ok) throw new Error('Erro ao gerar QR code')
+      const blob = await response.blob()
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ])
+      setQrCopiado(templateId)
+      setTimeout(() => setQrCopiado(null), 2000)
+      alert('✅ QR Code copiado!')
+    } catch (error) {
+      console.error('Erro ao copiar QR code:', error)
+      try {
+        // Fallback: copiar o link se QR code não funcionar
+        await navigator.clipboard.writeText(link)
+        alert('✅ Link copiado (QR code não suportado, mas link foi copiado)!')
+      } catch (e) {
+        alert('⚠️ Erro ao copiar. Tente salvar a imagem manualmente.')
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <NutriNavBar showTitle title="Templates Nutri" />
@@ -271,10 +358,7 @@ export default function TemplatesNutri() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {templatesFiltrados.map((template) => {
-              const link =
-                template.slug
-                  ? `/pt/nutri/ferramentas/nova?template=${template.slug}`
-                  : '/pt/nutri/ferramentas/nova'
+              const linkTemplate = gerarLinkTemplate(template)
               return (
                 <div
                   key={template.id}
@@ -300,6 +384,44 @@ export default function TemplatesNutri() {
                       <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Preview</p>
                       <p className="text-sm text-gray-700">{template.preview || template.descricao}</p>
                     </div>
+
+                    {/* Link e QR Code */}
+                    {linkTemplate && (
+                      <div className="mt-4 space-y-2">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-gray-500">Link:</span>
+                          <span className="text-gray-700 font-mono truncate flex-1">{linkTemplate}</span>
+                          <button
+                            onClick={(e) => copiarLink(linkTemplate, template.id, e)}
+                            className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                              linkCopiado === template.id
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                            }`}
+                          >
+                            {linkCopiado === template.id ? '✓ Copiado' : 'Copiar'}
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <QRCode url={linkTemplate} size={80} />
+                          <button
+                            onClick={(e) => copiarQRCode(linkTemplate, template.id, e)}
+                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                              qrCopiado === template.id
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                            }`}
+                          >
+                            {qrCopiado === template.id ? '✓ QR Copiado' : 'Copiar QR'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {!linkTemplate && userSlug === null && (
+                      <div className="mt-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
+                        Configure seu user_slug no perfil para gerar links
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-6 pt-0 flex flex-col gap-3">
@@ -309,12 +431,15 @@ export default function TemplatesNutri() {
                     >
                       Ver Preview
                     </button>
-                    <Link
-                      href={link}
-                      className="w-full text-center py-2.5 rounded-xl font-semibold border-2 border-sky-600 text-sky-700 hover:bg-sky-50 transition-colors"
-                    >
-                      Criar com este template
-                    </Link>
+                    {linkTemplate && (
+                      <Link
+                        href={linkTemplate}
+                        target="_blank"
+                        className="w-full text-center py-2.5 rounded-xl font-semibold border-2 border-sky-600 text-sky-700 hover:bg-sky-50 transition-colors"
+                      >
+                        Abrir Ferramenta →
+                      </Link>
+                    )}
                   </div>
                 </div>
               )
