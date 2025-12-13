@@ -81,3 +81,5 @@ All Environments
 
 **✅ Pronto! Adicione na Vercel e faça deploy!**
 
+
+

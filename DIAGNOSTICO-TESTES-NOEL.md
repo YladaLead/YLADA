@@ -153,3 +153,5 @@ Se o Assistants API não passar parâmetros, tentar inferir do contexto.
 
 **✅ Correções aplicadas! Próximo passo: verificar descrições das functions no OpenAI Dashboard.**
 
+
+

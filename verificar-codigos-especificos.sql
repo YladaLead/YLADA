@@ -185,3 +185,5 @@ SELECT
     ELSE '❌ NÃO EXISTE' 
   END;
 
+
+

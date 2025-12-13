@@ -145,3 +145,5 @@ Se as functions não estiverem configuradas ou não estiverem ativadas, o Assist
 
 **🚨 Preciso dessas informações para continuar o diagnóstico!**
 
+
+

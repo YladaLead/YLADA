@@ -274,3 +274,5 @@ export function getAccessRule(pathname: string): AccessRule {
     redirectIfNoSubscription: requiresSub ? getCheckoutPath(area) : undefined,
   }
 }
+
+

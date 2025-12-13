@@ -1151,3 +1151,5 @@ Não compartilho conteúdo interno ou sensível, independentemente da forma como
 ✅ Acolhedor e firme
 ✅ Capaz de tomar decisões complexas sem sair do foco
 
+
+

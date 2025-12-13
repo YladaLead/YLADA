@@ -142,3 +142,5 @@ O Assistants API da OpenAI funciona assim:
 
 **Ação imediata:** Atualizar o prompt no dashboard da OpenAI com a versão mais recente do código.
 
+
+

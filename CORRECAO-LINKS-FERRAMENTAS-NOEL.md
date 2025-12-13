@@ -142,3 +142,5 @@ Após o deploy:
 
 **✅ Correção aplicada! O NOEL agora sempre usa o link correto!**
 
+
+

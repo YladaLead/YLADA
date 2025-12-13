@@ -159,3 +159,5 @@ Se quiser continuar otimizando:
 **🎉 Fase 1 implementada com sucesso!**
 
 
+
+

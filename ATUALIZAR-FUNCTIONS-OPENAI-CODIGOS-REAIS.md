@@ -128,3 +128,5 @@ A function `getFluxoInfo` já foi atualizada para:
 
 **✅ Atualize a descrição no OpenAI Dashboard e teste!**
 
+
+

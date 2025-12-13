@@ -154,3 +154,5 @@
 
 **⚠️ Preciso dos logs e da confirmação das functions para continuar o diagnóstico!**
 
+
+

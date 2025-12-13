@@ -170,3 +170,5 @@ Após executar os SQLs:
 
 **🚀 Execute os SQLs e me envie os resultados!**
 
+
+

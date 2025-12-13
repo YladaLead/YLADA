@@ -86,3 +86,5 @@ WHERE
   AND ut.profession = 'wellness'
   AND ut.status = 'active';
 
+
+

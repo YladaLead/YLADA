@@ -226,3 +226,5 @@ O prompt do dashboard está **funcional mas incompleto**. Ele tem as regras bás
 
 **A solução imediata é atualizar o prompt do dashboard com a versão completa do código.**
 
+
+

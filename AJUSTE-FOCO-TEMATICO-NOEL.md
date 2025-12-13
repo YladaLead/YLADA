@@ -90,3 +90,5 @@ O ajuste mantém o foco em Wellness, mas permite que o Noel:
 
 **O Noel voltará a ser direcionador e dialogador como antes, mas mantendo o foco em Wellness.**
 
+
+

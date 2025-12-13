@@ -175,3 +175,5 @@ Sempre converta a descrição do usuário para o slug correspondente (ex: 'calcu
 
 **✅ Pronto! Cole essas definições completas no OpenAI Dashboard!**
 
+
+

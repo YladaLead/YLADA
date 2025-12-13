@@ -132,3 +132,5 @@ Environment: Production, Preview, Development
 
 **✅ Adicione `OPENAI_FUNCTION_SECRET` e faça deploy!**
 
+
+

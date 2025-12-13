@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
 // import LanguageSelector from '../../../components/LanguageSelector'
 
 export default function NutriLandingPage() {
@@ -67,15 +68,18 @@ export default function NutriLandingPage() {
                 <div className="order-1 lg:order-2 w-full">
                   <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
                     <div className="aspect-video bg-gray-900 relative">
-                      {/* Vídeo do YouTube - formato otimizado */}
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full"
-                        src="https://www.youtube.com/embed/p7koYETLIlw?autoplay=1&mute=1&loop=1&playlist=p7koYETLIlw&controls=1&rel=0&modestbranding=1"
-                        title="YLADA Nutri - Vídeo de Vendas"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        loading="eager"
-                      />
+                      {/* Vídeo original da Nutri */}
+                      <video 
+                        className="w-full h-full object-cover"
+                        controls
+                        loop
+                        playsInline
+                        poster="/videos/nutri-hero-poster.jpg"
+                      >
+                        <source src="/videos/nutri-hero.mp4" type="video/mp4" />
+                        <source src="/videos/nutri-hero.webm" type="video/webm" />
+                        Seu navegador não suporta vídeo HTML5.
+                      </video>
                     </div>
                   </div>
                 </div>
@@ -716,12 +720,15 @@ export default function NutriLandingPage() {
       {/* Botão flutuante fixo - WhatsApp (visível em toda a página) */}
       <button
         onClick={openWhatsApp}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#2572FF] hover:to-[#0B57FF] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base w-[160px] sm:w-[240px] justify-center"
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#2572FF] hover:to-[#0B57FF] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base w-[160px] sm:w-[240px] justify-center"
         style={{ bottom: '80px' }}
       >
         <span className="text-xl sm:text-2xl">💬</span>
         <span>Tirar dúvida com uma consultora</span>
       </button>
+
+      {/* LYA Sales Widget - Chat de vendas */}
+      <LyaSalesWidget />
 
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-16">

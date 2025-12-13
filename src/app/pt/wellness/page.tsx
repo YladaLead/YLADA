@@ -138,15 +138,18 @@ export default function WellnessPage() {
               </div>
               
               <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video mx-2 sm:mx-0 mb-6 sm:mb-8">
-                <iframe
-                  className="w-full h-full"
-                  src="https://www.youtube.com/embed/74pBmNZ7x0o?rel=0&modestbranding=1&controls=1&enablejsapi=1&origin=https://ylada.app"
-                  title="Wellness - Como Funciona na Prática"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  id="wellness-video-player"
-                ></iframe>
+                {/* Vídeo local da Wellness */}
+                <video 
+                  className="w-full h-full object-cover"
+                  controls
+                  loop
+                  playsInline
+                  poster="/videos/wellness-hero-poster.png"
+                >
+                  <source src="/videos/wellness-hero.mp4" type="video/mp4" />
+                  <source src="/videos/wellness-hero.webm" type="video/webm" />
+                  Seu navegador não suporta vídeo HTML5.
+                </video>
               </div>
 
               <div className="text-center">

@@ -102,3 +102,5 @@ a7694b36214a9bccb4bcf2a31d00a55ac1696f6396af5f365ea24d2da78c7094
 
 **✅ Adicione no `.env.local` e reinicie o servidor!**
 
+
+

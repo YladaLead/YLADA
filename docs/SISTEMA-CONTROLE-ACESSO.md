@@ -238,3 +238,5 @@ const SUBSCRIPTION_REQUIRED_PAGES: (string | RegExp)[] = [
 3. ✅ Manutenção de sessão
 4. ⏳ (Futuro) Analytics de redirecionamentos
 5. ⏳ (Futuro) A/B testing de páginas de checkout
+
+

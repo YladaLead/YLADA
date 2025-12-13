@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import SupportChatWidget from '@/components/nutri/support/SupportChatWidget'
+import LyaChatWidget from '@/components/nutri/LyaChatWidget'
 import WhatsAppFloatingButton from '@/components/nutri/WhatsAppFloatingButton'
 import { useEffect, useState } from 'react'
 
@@ -69,9 +70,14 @@ export default function ConditionalWidget() {
     )
   }
 
-  // Caso contrário, mostrar chat de suporte (apenas para Nutri por enquanto)
+  // Caso contrário, mostrar widgets apropriados (apenas para Nutri por enquanto)
   if (area === 'nutri') {
-    return <SupportChatWidget />
+    return (
+      <>
+        <LyaChatWidget />
+        <SupportChatWidget />
+      </>
+    )
   }
 
   // Para Coach e Wellness, não mostrar nada por enquanto
