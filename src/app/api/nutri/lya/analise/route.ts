@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
+import { parseLyaResponse, getFallbackLyaResponse } from '@/lib/nutri/parse-lya-response'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -67,15 +68,34 @@ REGRAS IMPORTANTES:
 - Você nunca orienta tudo. Você orienta apenas o próximo passo certo.
 - Se o campo aberto foi preenchido, você deve reconhecer explicitamente na sua resposta.
 - Se o campo aberto não foi preenchido, não precisa mencionar.
-- Toda resposta deve conter:
-  1. Reconhecimento do momento da Nutri
-  2. Definição clara do foco atual
-  3. Uma única ação prática
-  4. Indicação exata de onde clicar no sistema
-  5. Uma métrica simples de acompanhamento
+- Toda resposta DEVE seguir EXATAMENTE o formato fixo abaixo (sem exceção).
 
 Tom de voz: ${perfil.tom_lya}
 Ritmo de condução: ${perfil.ritmo_conducao}
+
+FORMATO FIXO DE RESPOSTA (OBRIGATÓRIO - SEM EXCEÇÃO):
+
+ANÁLISE DA LYA — HOJE
+
+1) FOCO PRIORITÁRIO
+[Uma única frase objetiva e estratégica. Exemplo: "Iniciar sua organização profissional com método."]
+
+2) AÇÃO RECOMENDADA
+[Checklist de 1 a 3 ações no máximo. Cada ação em uma linha, começando com ☐. Exemplo:
+☐ Iniciar o Dia 1 da Jornada
+☐ Completar a tarefa principal do Dia 1]
+
+3) ONDE APLICAR
+[Nome do módulo, área ou fluxo. Exemplo: "Jornada 30 Dias → Dia 1" ou "Ferramentas → Criar Quiz"]
+
+4) MÉTRICA DE SUCESSO
+[Como validar em 24-72h. Exemplo: "Dia 1 concluído até hoje." ou "Quiz criado e publicado até hoje."]
+
+IMPORTANTE:
+- Use APENAS este formato. Não adicione texto antes ou depois.
+- Não use markdown para links. Apenas texto natural.
+- Não use emojis nos blocos (exceto ☐ para checklist).
+- Seja direto e objetivo. Sem parágrafos longos.
 
 REGRA ÚNICA (MVP):
 SE jornada não iniciada → sempre orientar: "Inicie o Dia 1 da Jornada" (link: /pt/nutri/metodo/jornada/dia/1)`
@@ -101,14 +121,15 @@ Jornada:
 - Iniciada: ${jornadaDiaAtual !== null ? 'Sim' : 'Não'}
 - Dia Atual: ${jornadaDiaAtual || 'Não iniciada'}
 
-Gere a primeira análise da LYA seguindo o formato:
-${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0 
-  ? '1. Reconhecimento do campo aberto (se preenchido)'
-  : '1. Reconhecimento do momento da nutricionista'}
-2. Foco principal
-3. Uma ação prática única
-4. Link interno exato
-5. Métrica simples`
+Gere a análise da LYA seguindo EXATAMENTE o formato fixo de 4 blocos definido acima.
+
+IMPORTANTE: Sua resposta deve começar com "ANÁLISE DA LYA — HOJE" e seguir os 4 blocos na ordem exata:
+1) FOCO PRIORITÁRIO
+2) AÇÃO RECOMENDADA
+3) ONDE APLICAR
+4) MÉTRICA DE SUCESSO
+
+Não adicione texto antes ou depois desses blocos.`
 
     // ============================================
     // FASE 2: Buscar Estado, Memória e Conhecimento (RAG)
@@ -172,6 +193,30 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
     const respostaLya = completion.choices[0]?.message?.content || ''
     const tokensUsados = completion.usage?.total_tokens || 0
 
+    // Parsear resposta para extrair os 4 blocos
+    const parsed = parseLyaResponse(respostaLya)
+    
+    // Log de validação
+    if (!parsed.isValid) {
+      console.warn('⚠️ [LYA] Resposta não seguiu formato fixo')
+      console.warn('📝 Resposta recebida:', respostaLya.substring(0, 500))
+      console.warn('🔍 Blocos extraídos:', {
+        foco: !!parsed.foco_prioritario,
+        acoes: parsed.acoes_recomendadas.length,
+        onde: !!parsed.onde_aplicar,
+        metrica: !!parsed.metrica_sucesso
+      })
+    } else {
+      console.log('✅ [LYA] Resposta parseada com sucesso')
+    }
+    
+    // Se não conseguiu parsear, usar fallback
+    if (!parsed.isValid) {
+      console.warn('🔄 [LYA] Usando fallback')
+      const fallback = getFallbackLyaResponse()
+      Object.assign(parsed, fallback)
+    }
+
     // Salvar resposta na memória de eventos (Fase 2)
     await supabaseAdmin
       .from('ai_memory_events')
@@ -182,7 +227,8 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
           resposta: respostaLya,
           tokens_usados: tokensUsados,
           modelo: 'gpt-4o-mini',
-          foco_principal: perfil.foco_prioritario
+          foco_principal: parsed.foco_prioritario,
+          parsed: parsed.isValid
         },
         util: null // Será marcado depois pelo feedback
       })
@@ -194,30 +240,28 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
     // Determinar link interno baseado na regra única (MVP)
     // Se não tem acesso a cursos, não sugerir link que requer assinatura
     let linkInterno = '/pt/nutri/home'
-    let acaoPratica = 'Verificar resposta da LYA'
     
     if (jornadaDiaAtual === null) {
       if (temAcessoCursos) {
         // Usuário tem assinatura ou pode bypassar, pode acessar jornada
         linkInterno = '/pt/nutri/metodo/jornada/dia/1'
-        acaoPratica = 'Iniciar Dia 1 da Jornada'
       } else {
         // Usuário não tem assinatura, sugerir ação sem link direto
         linkInterno = '/pt/nutri/home'
-        acaoPratica = 'Iniciar sua jornada (acesse a área Jornada 30 Dias no menu)'
       }
     }
 
-    // Salvar análise
+    // Salvar análise (formato novo)
     const { data: analise, error: analiseError } = await supabaseAdmin
       .from('lya_analise_nutri')
       .insert({
         user_id: user.id,
         mensagem_completa: respostaLya,
-        foco_principal: perfil.foco_prioritario,
-        acao_pratica: acaoPratica,
-        link_interno: linkInterno,
-        metrica_simples: jornadaDiaAtual === null ? 'Completar Dia 1 até hoje' : 'Executar ação sugerida'
+        foco_prioritario: parsed.foco_prioritario,
+        acoes_recomendadas: parsed.acoes_recomendadas,
+        onde_aplicar: parsed.onde_aplicar,
+        metrica_sucesso: parsed.metrica_sucesso,
+        link_interno: linkInterno
       })
       .select()
       .single()
@@ -229,11 +273,12 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
     return NextResponse.json({
       success: true,
       analise: {
-        mensagem_completa: respostaLya,
-        foco_principal: perfil.foco_prioritario,
-        acao_pratica: acaoPratica,
+        foco_prioritario: parsed.foco_prioritario,
+        acoes_recomendadas: parsed.acoes_recomendadas,
+        onde_aplicar: parsed.onde_aplicar,
+        metrica_sucesso: parsed.metrica_sucesso,
         link_interno: linkInterno,
-        metrica_simples: jornadaDiaAtual === null ? 'Completar Dia 1 até hoje' : 'Executar ação sugerida'
+        mensagem_completa: respostaLya
       }
     })
   } catch (error: any) {
@@ -268,6 +313,23 @@ export async function GET(request: NextRequest) {
         { error: 'Erro ao buscar análise da LYA' },
         { status: 500 }
       )
+    }
+
+    // Se a análise antiga não tem formato novo, converter
+    if (analise && !analise.foco_prioritario && analise.mensagem_completa) {
+      const parsed = parseLyaResponse(analise.mensagem_completa)
+      if (parsed.isValid) {
+        return NextResponse.json({
+          analise: {
+            foco_prioritario: parsed.foco_prioritario,
+            acoes_recomendadas: parsed.acoes_recomendadas,
+            onde_aplicar: parsed.onde_aplicar,
+            metrica_sucesso: parsed.metrica_sucesso,
+            link_interno: analise.link_interno || '/pt/nutri/home',
+            mensagem_completa: analise.mensagem_completa
+          }
+        })
+      }
     }
 
     return NextResponse.json({
