@@ -402,43 +402,6 @@ export default function TemplatesNutri() {
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-xl p-3 mt-4">
-                      <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Preview</p>
-                      <p className="text-sm text-gray-700">{template.preview || template.descricao}</p>
-                    </div>
-
-                    {/* Link e QR Code */}
-                    {linkTemplate && (
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className="text-gray-500">Link:</span>
-                          <span className="text-gray-700 font-mono truncate flex-1">{linkTemplate}</span>
-                          <button
-                            onClick={(e) => copiarLink(linkTemplate, template.id, e)}
-                            className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                              linkCopiado === template.id
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                            }`}
-                          >
-                            {linkCopiado === template.id ? '✓ Copiado' : 'Copiar'}
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <QRCode url={linkTemplate} size={80} />
-                          <button
-                            onClick={(e) => copiarQRCode(linkTemplate, template.id, e)}
-                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                              qrCopiado === template.id
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                            }`}
-                          >
-                            {qrCopiado === template.id ? '✓ QR Copiado' : 'Copiar QR'}
-                          </button>
-                        </div>
-                      </div>
-                    )}
                     {!loadingUserSlug && !linkTemplate && !userSlug && (
                       <div className="mt-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
                         Configure seu user_slug no perfil para gerar links
@@ -446,21 +409,40 @@ export default function TemplatesNutri() {
                     )}
                   </div>
 
-                  <div className="p-6 pt-0 flex flex-col gap-3">
+                  <div className="p-6 pt-0 flex flex-col gap-3 border-t border-gray-100">
                     <button
                       onClick={() => setTemplatePreviewAberto(template.id)}
                       className="w-full bg-sky-600 text-white text-center py-2.5 rounded-xl font-semibold hover:bg-sky-700 transition-colors"
                     >
                       Ver Preview
                     </button>
-                    {linkTemplate && (
-                      <Link
-                        href={linkTemplate}
-                        target="_blank"
-                        className="w-full text-center py-2.5 rounded-xl font-semibold border-2 border-sky-600 text-sky-700 hover:bg-sky-50 transition-colors"
-                      >
-                        Abrir Ferramenta →
-                      </Link>
+                    {linkTemplate ? (
+                      <>
+                        <button
+                          onClick={(e) => copiarLink(linkTemplate, template.id, e)}
+                          className={`w-full text-center py-2.5 rounded-xl font-semibold transition-colors ${
+                            linkCopiado === template.id
+                              ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                              : 'bg-blue-100 text-blue-700 border-2 border-blue-300 hover:bg-blue-200'
+                          }`}
+                        >
+                          {linkCopiado === template.id ? '✓ Link Copiado' : 'Copiar Link'}
+                        </button>
+                        <button
+                          onClick={(e) => copiarQRCode(linkTemplate, template.id, e)}
+                          className={`w-full text-center py-2.5 rounded-xl font-semibold transition-colors ${
+                            qrCopiado === template.id
+                              ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                              : 'bg-purple-100 text-purple-700 border-2 border-purple-300 hover:bg-purple-200'
+                          }`}
+                        >
+                          {qrCopiado === template.id ? '✓ QR Code Copiado' : 'Copiar QR Code'}
+                        </button>
+                      </>
+                    ) : (
+                      <div className="text-center py-2 text-xs text-gray-500">
+                        Configure seu user_slug para gerar links
+                      </div>
                     )}
                   </div>
                 </div>
