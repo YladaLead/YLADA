@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -186,10 +187,25 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
         util: null // Será marcado depois pelo feedback
       })
 
+    // Verificar se usuário tem assinatura com acesso a cursos
+    const temAcessoCursos = await hasActiveSubscription(user.id, 'nutri')
+    
     // Determinar link interno baseado na regra única (MVP)
-    const linkInterno = jornadaDiaAtual === null 
-      ? '/pt/nutri/metodo/jornada/dia/1' 
-      : '/pt/nutri/home'
+    // Se não tem acesso a cursos, não sugerir link que requer assinatura
+    let linkInterno = '/pt/nutri/home'
+    let acaoPratica = 'Verificar resposta da LYA'
+    
+    if (jornadaDiaAtual === null) {
+      if (temAcessoCursos) {
+        // Usuário tem assinatura, pode acessar jornada
+        linkInterno = '/pt/nutri/metodo/jornada/dia/1'
+        acaoPratica = 'Iniciar Dia 1 da Jornada'
+      } else {
+        // Usuário não tem assinatura, sugerir ação sem link direto
+        linkInterno = '/pt/nutri/home'
+        acaoPratica = 'Iniciar sua jornada (acesse a área Jornada 30 Dias no menu)'
+      }
+    }
 
     // Salvar análise
     const { data: analise, error: analiseError } = await supabaseAdmin
@@ -198,7 +214,7 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
         user_id: user.id,
         mensagem_completa: respostaLya,
         foco_principal: perfil.foco_prioritario,
-        acao_pratica: jornadaDiaAtual === null ? 'Iniciar Dia 1 da Jornada' : 'Verificar resposta da LYA',
+        acao_pratica: acaoPratica,
         link_interno: linkInterno,
         metrica_simples: jornadaDiaAtual === null ? 'Completar Dia 1 até hoje' : 'Executar ação sugerida'
       })
@@ -214,7 +230,7 @@ ${diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
       analise: {
         mensagem_completa: respostaLya,
         foco_principal: perfil.foco_prioritario,
-        acao_pratica: jornadaDiaAtual === null ? 'Iniciar Dia 1 da Jornada' : 'Verificar resposta da LYA',
+        acao_pratica: acaoPratica,
         link_interno: linkInterno,
         metrica_simples: jornadaDiaAtual === null ? 'Completar Dia 1 até hoje' : 'Executar ação sugerida'
       }
