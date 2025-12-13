@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import ChatIA from '../../../../components/ChatIA'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
+import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import NutriSidebar from '../../../../components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 import JornadaBlock from '@/components/nutri/home/JornadaBlock'
@@ -13,11 +14,14 @@ import BibliotecaBlock from '@/components/nutri/home/BibliotecaBlock'
 import AnotacoesBlock from '@/components/nutri/home/AnotacoesBlock'
 import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 import NutriChatWidget from '@/components/nutri/NutriChatWidget'
+import LyaAnaliseHoje from '@/components/nutri/LyaAnaliseHoje'
 
 export default function NutriHome() {
   return (
     <ProtectedRoute perfil="nutri" allowAdmin={true}>
-      <NutriHomeContent />
+      <RequireDiagnostico area="nutri">
+        <NutriHomeContent />
+      </RequireDiagnostico>
     </ProtectedRoute>
   )
 }
@@ -82,6 +86,11 @@ function NutriHomeContent() {
               />
             </div>
           )}
+
+          {/* Análise da LYA Hoje */}
+          <div className="mb-8">
+            <LyaAnaliseHoje />
+          </div>
 
           {/* Bloco 1: Jornada de Transformação */}
           <div className="mb-8">
