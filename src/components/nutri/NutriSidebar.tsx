@@ -97,11 +97,9 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       icon: '🧰',
       color: 'blue',
       items: [
-        { title: 'Meus Links', icon: '🔗', href: '/pt/nutri/ferramentas' },
-        { title: 'Criar Fluxo', icon: '➕', href: '/pt/nutri/ferramentas/nova' },
+        { title: 'Minhas Ferramentas', icon: '🔗', href: '/pt/nutri/ferramentas' },
         { title: 'Criar Quiz', icon: '🎯', href: '/pt/nutri/quiz-personalizado' },
         { title: 'Templates', icon: '🎨', href: '/pt/nutri/ferramentas/templates' },
-        { title: 'Quizzes', icon: '📝', href: '/pt/nutri/quizzes' },
       ]
     },
     // GSAL só aparece após completar Dia 1
