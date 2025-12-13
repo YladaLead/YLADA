@@ -2,12 +2,6 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import NutriNavBar from '@/components/nutri/NutriNavBar'
-
-'use client'
-
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function FerramentasNutri() {
   const router = useRouter()
