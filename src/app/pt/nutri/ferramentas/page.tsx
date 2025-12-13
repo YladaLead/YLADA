@@ -250,28 +250,22 @@ export default function FerramentasNutri() {
           />
         </div>
 
-        {/* Atalhos Rápidos */}
+        {/* Atalhos Rápidos - Apenas Quiz Personalizado */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Atalhos Rápidos</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Criar Nova Ferramenta</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 max-w-md">
             <Link
               href="/pt/nutri/quiz-personalizado"
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-lg transition-colors font-medium text-center shadow-sm"
             >
-              Criar Quiz
+              Criar Quiz Personalizado
             </Link>
-            <Link
-              href="/pt/nutri/ferramentas/nova"
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-lg transition-colors font-medium text-center shadow-sm"
-            >
-              Criar Fluxo
-            </Link>
-            <Link
-              href="/pt/nutri/ferramentas/templates"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-lg transition-colors font-medium text-center shadow-sm"
-            >
-              Biblioteca de Templates
-            </Link>
+          </div>
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-gray-700">
+              💡 <strong>Nota:</strong> As ferramentas pré-definidas (calculadoras, templates) já estão prontas para uso com links fixos. 
+              Você pode criar apenas Quizzes personalizados para customizar completamente.
+            </p>
           </div>
         </div>
 
@@ -590,12 +584,19 @@ export default function FerramentasNutri() {
                       >
                         Ver Link →
                       </Link>
-                      <Link
-                        href={`/pt/nutri/ferramentas/${ferramenta.id}/editar`}
-                        className="text-sm text-gray-600 hover:text-gray-800 font-medium"
-                      >
-                        Editar
-                      </Link>
+                      {/* Botão Editar - apenas para Quiz Personalizado */}
+                      {ferramenta.categoria === 'Quiz Personalizado' ? (
+                        <Link
+                          href={`/pt/nutri/ferramentas/${ferramenta.id}/editar`}
+                          className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                        >
+                          Editar
+                        </Link>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">
+                          Link fixo (não editável)
+                        </span>
+                      )}
                       <button
                         onClick={() => excluirFerramenta(ferramenta.id)}
                         disabled={ferramentaExcluindoId === ferramenta.id}

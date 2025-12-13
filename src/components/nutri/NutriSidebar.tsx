@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 
 interface MenuItem {
   title: string
@@ -30,6 +31,10 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
   const [hoveredSection, setHoveredSection] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [novosLeadsCount, setNovosLeadsCount] = useState<number>(0)
+  const { progress } = useJornadaProgress()
+  
+  // Verificar se completou Dia 1 (current_day >= 2)
+  const dia1Completo = progress && progress.current_day >= 2
 
   // Carregar contador de novos leads
   useEffect(() => {
@@ -99,7 +104,8 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         { title: 'Quizzes', icon: '📝', href: '/pt/nutri/quizzes' },
       ]
     },
-    {
+    // GSAL só aparece após completar Dia 1
+    ...(dia1Completo ? [{
       title: 'Gestão GSAL',
       icon: '📊',
       color: 'green',
@@ -113,7 +119,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
         { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
       ]
-    },
+    }] : []),
     {
       title: 'Biblioteca',
       icon: '🎒',

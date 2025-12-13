@@ -198,7 +198,7 @@ Não adicione texto antes ou depois desses blocos.`
     
     // Log de validação
     if (!parsed.isValid) {
-      console.warn('⚠️ [LYA] Resposta não seguiu formato fixo')
+      console.warn('⚠️ [LYA] Resposta não seguiu formato fixo completamente')
       console.warn('📝 Resposta recebida:', respostaLya.substring(0, 500))
       console.warn('🔍 Blocos extraídos:', {
         foco: !!parsed.foco_prioritario,
@@ -210,11 +210,21 @@ Não adicione texto antes ou depois desses blocos.`
       console.log('✅ [LYA] Resposta parseada com sucesso')
     }
     
-    // Se não conseguiu parsear, usar fallback
-    if (!parsed.isValid) {
-      console.warn('🔄 [LYA] Usando fallback')
+    // Preencher campos faltantes com fallback inteligente
+    if (!parsed.foco_prioritario || parsed.acoes_recomendadas.length === 0) {
+      console.warn('🔄 [LYA] Usando fallback completo')
       const fallback = getFallbackLyaResponse()
       Object.assign(parsed, fallback)
+    } else {
+      // Preencher apenas campos faltantes
+      if (!parsed.onde_aplicar) {
+        parsed.onde_aplicar = 'Jornada 30 Dias → Dia 1'
+        console.log('🔧 [LYA] Preenchendo "onde_aplicar" com fallback')
+      }
+      if (!parsed.metrica_sucesso) {
+        parsed.metrica_sucesso = 'Dia 1 concluído até hoje.'
+        console.log('🔧 [LYA] Preenchendo "metrica_sucesso" com fallback')
+      }
     }
 
     // Salvar resposta na memória de eventos (Fase 2)

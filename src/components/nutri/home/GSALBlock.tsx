@@ -6,30 +6,46 @@ import Card from '@/components/shared/Card'
 import Section from '@/components/shared/Section'
 import KPICard from '@/components/shared/KPICard'
 import PrimaryButton from '@/components/shared/PrimaryButton'
+import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 
 export default function GSALBlock() {
-  const [stats, setStats] = useState({
-    clientesAtivos: 0,
-    novosClientes: 0,
-    consultasMes: 0
+  const { progress } = useJornadaProgress()
+  const dia1Completo = progress && progress.current_day >= 2
+  const [pipelineStats, setPipelineStats] = useState({
+    lead: 0,
+    avaliacao: 0,
+    plano: 0,
+    acompanhamento: 0
   })
   const [carregando, setCarregando] = useState(true)
 
   useEffect(() => {
+    if (!dia1Completo) {
+      setCarregando(false)
+      return
+    }
+
     const carregarStats = async () => {
       try {
-        const res = await fetch('/api/nutri/dashboard', {
+        // Carregar contagens do pipeline por status
+        const clientesRes = await fetch('/api/c/clientes', {
           credentials: 'include'
         })
 
-        if (res.ok) {
-          const data = await res.json()
-          if (data.stats) {
-            setStats({
-              clientesAtivos: data.stats.clientesAtivos || 0,
-              novosClientes: 0, // TODO: calcular novos clientes do mês
-              consultasMes: 0 // TODO: calcular consultas do mês
-            })
+        if (clientesRes.ok) {
+          const clientesData = await clientesRes.json()
+          if (clientesData.success && clientesData.data?.clientes) {
+            const clientes = clientesData.data.clientes
+            
+            // Contar por status do pipeline GSAL
+            const stats = {
+              lead: clientes.filter((c: any) => c.status === 'lead' || c.status === 'novo').length,
+              avaliacao: clientes.filter((c: any) => c.status === 'avaliacao' || c.status === 'avaliando').length,
+              plano: clientes.filter((c: any) => c.status === 'plano' || c.status === 'em_plano').length,
+              acompanhamento: clientes.filter((c: any) => c.status === 'acompanhamento' || c.status === 'ativo').length
+            }
+            
+            setPipelineStats(stats)
           }
         }
       } catch (error) {
@@ -40,67 +56,82 @@ export default function GSALBlock() {
     }
 
     carregarStats()
-  }, [])
+  }, [dia1Completo])
+
+  // Se não completou Dia 1, mostrar card bloqueado
+  if (!dia1Completo) {
+    return (
+      <Section
+        title="📊 Gestão GSAL"
+        subtitle="Gerar, Servir, Acompanhar, Lucrar"
+      >
+        <Card className="bg-gray-50 border-2 border-dashed border-gray-300">
+          <div className="text-center py-8">
+            <div className="text-4xl mb-4">🔒</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Complete o Dia 1 da Jornada
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              O GSAL será desbloqueado após você completar o primeiro dia da sua jornada de transformação.
+            </p>
+            <PrimaryButton href="/pt/nutri/metodo/jornada/dia/1">
+              Ir para Dia 1 →
+            </PrimaryButton>
+          </div>
+        </Card>
+      </Section>
+    )
+  }
 
   return (
     <Section
       title="📊 Gestão GSAL"
       subtitle="Gerar, Servir, Acompanhar, Lucrar"
     >
-      {/* Resumo */}
+      {/* Microcopy sobre LYA */}
+      <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-xs text-gray-700">
+          💡 <strong>Dica:</strong> A LYA usa os dados do seu GSAL para te orientar com precisão. 
+          Mantenha seus números atualizados para receber orientações mais personalizadas.
+        </p>
+      </div>
+
+      {/* Resumo Simplificado - Apenas números essenciais */}
       <Card className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="font-semibold text-gray-900 mb-1">Resumo GSAL</h3>
-            <p className="text-sm text-gray-600">
-              {carregando ? 'Carregando...' : `Clientes ativos: ${stats.clientesAtivos} • Novos: ${stats.novosClientes}`}
+            <p className="text-xs text-gray-500">
+              Números essenciais do seu negócio
             </p>
           </div>
           <PrimaryButton href="/pt/nutri/gsal">
-            Acessar Painel de Gestão
+            Ver Detalhes
           </PrimaryButton>
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* KPIs Essenciais - Apenas 4 números principais do pipeline GSAL */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <KPICard
-            icon="👥"
-            value={stats.clientesAtivos}
-            label="Clientes Ativos"
+            icon="🎯"
+            value={carregando ? '...' : pipelineStats.lead}
+            label="Leads"
           />
           <KPICard
-            icon="🆕"
-            value={stats.novosClientes}
-            label="Novos Clientes"
+            icon="📋"
+            value={carregando ? '...' : pipelineStats.avaliacao}
+            label="Avaliações"
           />
           <KPICard
-            icon="📅"
-            value={stats.consultasMes}
-            label="Consultas do Mês"
+            icon="📝"
+            value={carregando ? '...' : pipelineStats.plano}
+            label="Planos"
           />
-        </div>
-      </Card>
-
-      {/* Pipeline Visual */}
-      <Card>
-        <h3 className="font-semibold text-gray-900 mb-4">Pipeline de Acompanhamento</h3>
-        <div className="grid grid-cols-4 gap-3">
-          <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="text-2xl mb-2">🎯</div>
-            <p className="text-xs font-medium text-gray-700">Lead</p>
-          </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
-            <div className="text-2xl mb-2">📋</div>
-            <p className="text-xs font-medium text-gray-700">Avaliação</p>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-            <div className="text-2xl mb-2">📝</div>
-            <p className="text-xs font-medium text-gray-700">Plano</p>
-          </div>
-          <div className="text-center p-4 bg-amber-50 rounded-lg border border-amber-200">
-            <div className="text-2xl mb-2">📊</div>
-            <p className="text-xs font-medium text-gray-700">Acompanhamento</p>
-          </div>
+          <KPICard
+            icon="📊"
+            value={carregando ? '...' : pipelineStats.acompanhamento}
+            label="Acompanhamento"
+          />
         </div>
       </Card>
     </Section>

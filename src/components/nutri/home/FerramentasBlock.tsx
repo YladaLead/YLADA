@@ -39,26 +39,22 @@ export default function FerramentasBlock() {
       title="🧰 Ferramentas Profissionais"
       subtitle="Crie e gerencie suas ferramentas de captação"
     >
-      {/* Atalhos Rápidos */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      {/* Atalhos Rápidos - Apenas Quiz Personalizado */}
+      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6">
         <PrimaryButton
           href="/pt/nutri/quiz-personalizado"
           className="bg-purple-600 hover:bg-purple-700"
         >
-          Criar Quiz
+          Criar Quiz Personalizado
         </PrimaryButton>
-        <PrimaryButton
-          href="/pt/nutri/ferramentas/nova"
-          className="bg-green-600 hover:bg-green-700"
-        >
-          Criar Fluxo
-        </PrimaryButton>
-        <PrimaryButton
-          href="/pt/nutri/ferramentas/templates"
-          className="bg-indigo-600 hover:bg-indigo-700"
-        >
-          Biblioteca de Templates
-        </PrimaryButton>
+      </div>
+      
+      {/* Informação sobre ferramentas fixas */}
+      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-sm text-gray-700">
+          💡 <strong>Dica:</strong> As ferramentas pré-definidas (calculadoras, templates) já estão prontas para uso. 
+          Você pode criar apenas Quizzes personalizados. Acesse suas ferramentas abaixo.
+        </p>
       </div>
 
       {/* Resumo */}

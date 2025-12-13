@@ -80,9 +80,27 @@ export function parseLyaResponse(response: string): ParsedLyaResponse {
     result.acoes_recomendadas = acoes.length > 0 ? acoes : [acoesText.trim().substring(0, 150)]
   }
 
-  // Extrair onde aplicar
+  // Extrair onde aplicar (tentar múltiplos padrões)
   if (ondeMatch) {
     result.onde_aplicar = ondeMatch[1].trim().replace(/\n/g, ' ').substring(0, 200)
+  } else {
+    // Tentar padrão alternativo sem parêntese
+    const ondeMatchAlt = normalized.match(/3[\.\)]\s*ONDE\s*APLICAR\s*:?\s*\n?([^\n]+(?:\n[^\n]+)*?)(?=\n\s*4[\.\)]|$)/i)
+    if (ondeMatchAlt) {
+      result.onde_aplicar = ondeMatchAlt[1].trim().replace(/\n/g, ' ').substring(0, 200)
+    }
+  }
+  
+  // Se ainda estiver vazio, tentar inferir do link_interno ou ação
+  if (!result.onde_aplicar && result.acoes_recomendadas.length > 0) {
+    const primeiraAcao = result.acoes_recomendadas[0].toLowerCase()
+    if (primeiraAcao.includes('dia 1') || primeiraAcao.includes('jornada')) {
+      result.onde_aplicar = 'Jornada 30 Dias → Dia 1'
+    } else if (primeiraAcao.includes('quiz')) {
+      result.onde_aplicar = 'Ferramentas → Criar Quiz'
+    } else {
+      result.onde_aplicar = 'Área Nutri → Home'
+    }
   }
 
   // Extrair métrica de sucesso

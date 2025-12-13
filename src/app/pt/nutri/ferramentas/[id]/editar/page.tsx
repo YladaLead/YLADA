@@ -213,6 +213,16 @@ export default function EditarFerramentaNutri() {
 
       const data = await response.json()
       const tool = data.tool
+      
+      // Bloquear edição de ferramentas que não são Quiz Personalizado
+      const isQuizPersonalizado = tool.is_quiz || tool.template_slug === 'quiz-personalizado'
+      if (!isQuizPersonalizado) {
+        // Redirecionar para página de uso da ferramenta
+        alert('Esta ferramenta não pode ser editada. Apenas Quizzes Personalizados podem ser customizados.')
+        router.push(`/pt/nutri/ferramentas`)
+        return
+      }
+      
       setToolData(tool)
 
       setSlugOriginal(tool.slug)
