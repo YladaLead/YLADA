@@ -212,18 +212,36 @@ export default function LoginForm({
         }
       } else {
         // LOGIN: Verificar se perfil corresponde à área
+        console.log('🔍 Verificando perfil para login:', {
+          email,
+          perfilDesejado: perfil,
+          checkData,
+          hasProfile: checkData.hasProfile,
+          perfilAtual: checkData.perfil
+        })
+        
         if (checkData.exists && checkData.hasProfile && checkData.perfil) {
           // EXCEÇÃO: Admin e Suporte podem acessar qualquer área
           if (checkData.is_admin || checkData.is_support) {
             // Admin/Suporte pode fazer login em qualquer área
+            console.log('✅ Admin/Suporte - permitindo login em qualquer área')
             // Continuar com login
           } else if (checkData.perfil !== perfil) {
             // Perfil não corresponde à área atual
             const areaLabel = perfilAreaLabels[checkData.perfil] || checkData.perfil
+            console.error('❌ Perfil não corresponde:', {
+              perfilAtual: checkData.perfil,
+              perfilDesejado: perfil
+            })
             setError(`Este email está cadastrado na área ${areaLabel}. Faça login na área correta.`)
             setLoading(false)
             return
+          } else {
+            console.log('✅ Perfil corresponde - continuando login')
           }
+        } else {
+          // Não tem perfil ou não existe - permitir login e criar perfil automaticamente
+          console.log('⚠️ Usuário sem perfil ou não encontrado - permitindo login para criar perfil automaticamente')
         }
 
         // Fazer login
@@ -249,7 +267,46 @@ export default function LoginForm({
           return
         }
 
-        console.log('✅ Login bem-sucedido!')
+        console.log('✅ Login bem-sucedido!', {
+          userId: session.user.id,
+          email: session.user.email
+        })
+
+        // Verificar se perfil existe, se não, criar automaticamente
+        try {
+          const { data: profileCheck, error: profileCheckError } = await supabase
+            .from('user_profiles')
+            .select('id, perfil')
+            .eq('user_id', session.user.id)
+            .maybeSingle()
+          
+          if (!profileCheck && !profileCheckError) {
+            // Perfil não existe - criar automaticamente
+            console.log('📝 Criando perfil automaticamente após login...')
+            const { data: newProfile, error: createProfileError } = await supabase
+              .from('user_profiles')
+              .insert({
+                user_id: session.user.id,
+                email: session.user.email || email,
+                nome_completo: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+                perfil: perfil
+              })
+              .select()
+              .single()
+            
+            if (createProfileError) {
+              console.error('❌ Erro ao criar perfil automaticamente:', createProfileError)
+              // Não bloquear login - perfil pode ser criado depois
+            } else {
+              console.log('✅ Perfil criado automaticamente:', newProfile)
+            }
+          } else if (profileCheck) {
+            console.log('✅ Perfil já existe:', profileCheck)
+          }
+        } catch (profileError) {
+          console.warn('⚠️ Erro ao verificar/criar perfil:', profileError)
+          // Não bloquear login - perfil pode ser criado depois
+        }
 
         // Verificar se a senha é provisória e se ainda está válida
         try {
@@ -300,9 +357,21 @@ export default function LoginForm({
         }
         
         // Usar setTimeout para garantir que o estado foi atualizado e sessão persistida
+        // Aumentado para 500ms para garantir que a sessão seja persistida antes do redirecionamento
         setTimeout(() => {
+          // Verificar novamente se a sessão ainda existe antes de redirecionar
+          supabase.auth.getSession().then(({ data: { session: verifySession } }) => {
+            if (verifySession) {
+              console.log('✅ Sessão confirmada antes do redirecionamento')
           router.replace(finalRedirectPath) // Usar replace para não adicionar ao histórico
-        }, 200) // Aumentado para 200ms para garantir persistência da sessão
+            } else {
+              console.error('❌ Sessão perdida antes do redirecionamento - tentando novamente')
+              // Tentar fazer login novamente ou mostrar erro
+              setError('Erro ao manter sessão. Tente fazer login novamente.')
+              setLoading(false)
+            }
+          })
+        }, 500) // Aumentado para 500ms para garantir persistência da sessão
 
         return
       }

@@ -1,8 +1,6 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import SupportChatWidget from '@/components/nutri/support/SupportChatWidget'
-import LyaChatWidget from '@/components/nutri/LyaChatWidget'
 import WhatsAppFloatingButton from '@/components/nutri/WhatsAppFloatingButton'
 import { useEffect, useState } from 'react'
 
@@ -70,14 +68,10 @@ export default function ConditionalWidget() {
     )
   }
 
-  // Caso contrário, mostrar widgets apropriados (apenas para Nutri por enquanto)
+  // Caso contrário, não mostrar widgets na área Nutri
+  // (o botão "Tirar dúvida com uma consultora" está na landing page)
   if (area === 'nutri') {
-    return (
-      <>
-        <LyaChatWidget />
-        <SupportChatWidget />
-      </>
-    )
+    return null
   }
 
   // Para Coach e Wellness, não mostrar nada por enquanto

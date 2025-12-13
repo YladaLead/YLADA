@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { hasFeatureAccess, hasAnyFeature, type Feature, type Area } from '@/lib/feature-helpers'
@@ -39,20 +39,28 @@ export default function RequireFeature({
   const [checking, setChecking] = useState(true)
   const [hasAccess, setHasAccess] = useState(false)
   const [canBypass, setCanBypass] = useState(false)
+  const lastCheckedUserIdRef = useRef<string | null>(null) // Rastrear último userId verificado
 
   useEffect(() => {
     let isMounted = true
     let timeoutId: NodeJS.Timeout | null = null
 
     const checkAccess = async () => {
+      // Se ainda está carregando ou não tem usuário, aguardar
       if (authLoading || !user) {
         return
       }
 
-      // Admin e suporte podem bypassar
+      // Se já verificou para este usuário, não verificar novamente
+      if (lastCheckedUserIdRef.current === user.id) {
+        return
+      }
+
+      // Admin e suporte podem bypassar (verificar ANTES de qualquer chamada de API)
       if (userProfile?.is_admin || userProfile?.is_support) {
         if (!isMounted) return
         console.log('✅ RequireFeature: Admin/Suporte detectado, bypassando verificação')
+        lastCheckedUserIdRef.current = user.id
         setCanBypass(true)
         setHasAccess(true)
         setChecking(false)
@@ -99,15 +107,25 @@ export default function RequireFeature({
         }
 
         if (!isMounted) return
+        lastCheckedUserIdRef.current = user.id
         setHasAccess(access)
       } catch (error) {
         console.error('❌ Erro ao verificar feature:', error)
         if (!isMounted) return
+        lastCheckedUserIdRef.current = user.id
         setHasAccess(false)
       } finally {
         if (!isMounted) return
         setChecking(false)
       }
+    }
+
+    // Resetar verificação se mudou usuário
+    if (user?.id && lastCheckedUserIdRef.current && lastCheckedUserIdRef.current !== user.id) {
+      lastCheckedUserIdRef.current = null
+      setCanBypass(false)
+      setHasAccess(false)
+      setChecking(true)
     }
 
     checkAccess()
@@ -118,7 +136,8 @@ export default function RequireFeature({
         clearTimeout(timeoutId)
       }
     }
-  }, [user, userProfile, authLoading, area, feature])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, userProfile?.is_admin, userProfile?.is_support, authLoading, area, feature])
 
   // Loading
   if (authLoading || checking) {

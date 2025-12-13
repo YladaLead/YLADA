@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
 // import LanguageSelector from '../../../components/LanguageSelector'
 
 export default function NutriLandingPage() {
@@ -727,8 +726,6 @@ export default function NutriLandingPage() {
         <span>Tirar dúvida com uma consultora</span>
       </button>
 
-      {/* LYA Sales Widget - Chat de vendas */}
-      <LyaSalesWidget />
 
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-16">
