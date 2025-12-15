@@ -28,7 +28,7 @@ export async function GET(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -43,7 +43,7 @@ export async function GET(
 
     // Buscar evolução
     const { data: evolution, error } = await supabaseAdmin
-      .from('client_evolution')
+      .from('coach_client_evolution')
       .select('*')
       .eq('id', evolucaoId)
       .eq('client_id', clientId)
@@ -99,7 +99,7 @@ export async function PUT(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -114,7 +114,7 @@ export async function PUT(
 
     // Verificar se a evolução existe e pertence ao cliente/usuário
     const { data: existingEvolution, error: evolutionError } = await supabaseAdmin
-      .from('client_evolution')
+      .from('coach_client_evolution')
       .select('*')
       .eq('id', evolucaoId)
       .eq('client_id', clientId)
@@ -196,7 +196,7 @@ export async function PUT(
 
     // Atualizar evolução
     const { data: updatedEvolution, error } = await supabaseAdmin
-      .from('client_evolution')
+      .from('coach_client_evolution')
       .update(updateData)
       .eq('id', evolucaoId)
       .eq('client_id', clientId)
@@ -252,7 +252,7 @@ export async function DELETE(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -267,7 +267,7 @@ export async function DELETE(
 
     // Verificar se a evolução existe e pertence ao cliente/usuário
     const { data: existingEvolution, error: evolutionError } = await supabaseAdmin
-      .from('client_evolution')
+      .from('coach_client_evolution')
       .select('id, measurement_date, weight')
       .eq('id', evolucaoId)
       .eq('client_id', clientId)
@@ -283,7 +283,7 @@ export async function DELETE(
 
     // Deletar evolução
     const { error } = await supabaseAdmin
-      .from('client_evolution')
+      .from('coach_client_evolution')
       .delete()
       .eq('id', evolucaoId)
       .eq('client_id', clientId)

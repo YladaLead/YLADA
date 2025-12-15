@@ -40,7 +40,7 @@ export async function GET(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id, name')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -55,7 +55,7 @@ export async function GET(
 
     // Buscar evoluções
     const { data: evolutions, error, count } = await supabaseAdmin
-      .from('client_evolution')
+      .from('coach_client_evolution')
       .select('*', { count: 'exact' })
       .eq('client_id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -141,7 +141,7 @@ export async function POST(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id, name')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)
@@ -247,7 +247,7 @@ export async function POST(
 
     // Inserir evolução
     const { data: newEvolution, error } = await supabaseAdmin
-      .from('client_evolution')
+      .from('coach_client_evolution')
       .insert(evolutionData)
       .select()
       .single()

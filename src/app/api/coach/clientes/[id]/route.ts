@@ -28,8 +28,8 @@ export async function GET(
 
     // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     const { data: client, error } = await supabaseAdmin
-      .from('clients')
-      .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, next_appointment, last_appointment, tags')
+      .from('coach_clients')
+      .select('id, name, email, phone, status, notes, converted_from_lead, lead_source, created_at, updated_at, next_appointment, last_contact, tags')
       .eq('id', id)
       .eq('user_id', authenticatedUserId)
       .single()
@@ -83,7 +83,7 @@ export async function PUT(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: existingClient, error: fetchError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id, name')
       .eq('id', id)
       .eq('user_id', authenticatedUserId)
@@ -157,7 +157,7 @@ export async function PUT(
 
     // Atualizar cliente
     const { data: updatedClient, error } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .update(updateData)
       .eq('id', id)
       .eq('user_id', authenticatedUserId)
@@ -176,7 +176,7 @@ export async function PUT(
     if (status && status !== existingClient.status) {
       try {
         await supabaseAdmin
-          .from('client_history')
+          .from('coach_client_history')
           .insert({
             client_id: id,
             user_id: authenticatedUserId,
@@ -235,7 +235,7 @@ export async function DELETE(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: existingClient, error: fetchError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id, name')
       .eq('id', id)
       .eq('user_id', authenticatedUserId)
@@ -248,12 +248,12 @@ export async function DELETE(
       )
     }
 
-    // Soft delete: marcar como deletado (ou mudar status para 'finalizada')
-    // Por enquanto, vamos apenas mudar o status para 'finalizada'
+    // Soft delete: marcar como deletado (ou mudar status para 'encerrado')
+    // Por enquanto, vamos apenas mudar o status para 'encerrado'
     // Se quiser implementar soft delete real, adicione um campo 'deleted_at' na tabela
     const { error } = await supabaseAdmin
-      .from('clients')
-      .update({ status: 'finalizada' })
+      .from('coach_clients')
+      .update({ status: 'encerrado' })
       .eq('id', id)
       .eq('user_id', authenticatedUserId)
 
@@ -268,7 +268,7 @@ export async function DELETE(
     // Criar evento no histórico
     try {
       await supabaseAdmin
-        .from('client_history')
+        .from('coach_client_history')
         .insert({
           client_id: id,
           user_id: authenticatedUserId,

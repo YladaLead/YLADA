@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     // Se ID foi fornecido, retornar cliente específico
     if (clientId) {
       const { data: client, error } = await supabaseAdmin
-        .from('clients')
+        .from('coach_clients')
         .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, tags')
         .eq('id', clientId)
         .eq('user_id', authenticatedUserId)
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     // Construir query base
     // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     let query = supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, tags', { count: 'exact' })
       .eq('user_id', authenticatedUserId)
       .order(orderBy, { ascending: order === 'asc' })
@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
 
     // Inserir cliente
     const { data: newClient, error } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .insert(clientData)
       .select()
       .single()
@@ -250,11 +250,13 @@ export async function POST(request: NextRequest) {
     // Criar evento no histórico
     try {
       await supabaseAdmin
-        .from('client_history')
+        .from('coach_client_history')
         .insert({
           client_id: newClient.id,
           user_id: authenticatedUserId,
           activity_type: 'cliente_criado',
+          title: 'Cliente criado',
+          description: `Cliente ${newClient.name} foi criado`,
           metadata: {
             name: newClient.name,
             status: newClient.status

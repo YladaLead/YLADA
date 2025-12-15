@@ -30,7 +30,7 @@ export async function GET(
 
     // Verificar se o cliente existe e pertence ao usuário
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)

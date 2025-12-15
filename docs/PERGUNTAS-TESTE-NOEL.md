@@ -1,315 +1,134 @@
-# 📋 PERGUNTAS PARA TESTAR O NOEL
+# 🧪 PERGUNTAS PARA TESTAR O NOEL
 
-**Guia rápido de perguntas para validar o funcionamento completo**
+## 📋 Perguntas de Teste
 
----
-
-## 🎯 TESTES POR PERFIL
-
-### **Perfil 1: Distribuidor de Bebidas Funcionais**
-
-#### Teste 1: Detecção de Perfil
+### 1. **Teste de Cálculo Básico (deve usar perfil automaticamente)**
 ```
-Me dá um convite leve para vender kit de energia.
-```
-
-#### Teste 2: Venda de Kit
-```
-Como vendo o kit de 39,90?
-```
-
-#### Teste 3: Venda Turbo Detox
-```
-Como vendo o turbo detox?
-```
-
-#### Teste 4: Follow-up
-```
-Me manda um follow-up leve para quem não respondeu.
-```
-
-#### Teste 5: Script de Venda
-```
-Me dá um script para vender 10 bebidas hoje.
-```
-
----
-
-### **Perfil 2: Distribuidor de Produto Fechado**
-
-#### Teste 1: Detecção de Perfil
-```
-Eu vendo shakes e chá. Como faço para vender mais?
-```
-
-#### Teste 2: Venda de Shake
-```
-Como vendo shake para um cliente?
-```
-
-#### Teste 3: Argumentos de Venda
-```
-Me dá argumentos para vender o chá.
-```
-
-#### Teste 4: Montar Pacote
-```
-Como monto um pacote semanal para cliente?
-```
-
-#### Teste 5: Objeções
-```
-O cliente disse que está caro. O que eu falo?
-```
-
----
-
-### **Perfil 3: Ativador Wellness**
-
-#### Teste 1: Detecção de Perfil
-```
-Como convido alguém para fazer uma avaliação?
-```
-
-#### Teste 2: Script de Avaliação
-```
-Me dá um script para convidar para avaliação.
-```
-
-#### Teste 3: Acompanhamento
-```
-O cliente sumiu, o que eu digo?
-```
-
-#### Teste 4: Programa de 90 Dias
-```
-Como explico o programa de transformação?
-```
-
-#### Teste 5: Mensagem para Cliente
-```
-Me ajuda a responder um cliente que não está seguindo o programa.
-```
-
----
-
-## 🔄 TESTES POR MÓDULO
-
-### **Módulo: VENDAS**
-
-```
-Como vendo mais?
-Me ajuda a vender hoje.
-Quero aumentar minhas vendas.
-```
-
-### **Módulo: CONVITES**
-
-```
-Me dá um convite leve.
-Como convido alguém de forma simples?
-Quero um convite para apresentação.
-```
-
-### **Módulo: RECRUTAMENTO**
-
-```
-Como explico o negócio em 1 minuto?
-Quero recrutar alguém, o que falo?
-Como apresento a oportunidade?
-```
-
-### **Módulo: DUPLICAÇÃO (2-5-10)**
-
-```
-O que é 2-5-10?
-Como funciona o fluxo 2-5-10?
-Me dá um checklist de hoje.
-```
-
-### **Módulo: ONBOARDING**
-
-```
-Sou novo, o que faço?
-Quero começar hoje, por onde começo?
-Me ajuda nos primeiros dias.
-```
-
-### **Módulo: CLIENTES**
-
-```
-O cliente sumiu, o que eu digo?
-Como faço follow-up com cliente?
-Me ajuda a recuperar um cliente.
-```
-
-### **Módulo: SCRIPTS**
-
-```
-Me dá um script para WhatsApp.
-Quero uma mensagem pronta.
-Como falo isso para o cliente?
-```
-
-### **Módulo: PLANO PRESIDENTE**
-
-```
-Como cresço minha equipe?
-Quero ser líder, o que faço?
-Como duplico meu negócio?
-```
-
----
-
-## 🧪 TESTES DE VALIDAÇÃO TÉCNICA
-
-### **Teste 1: Saudação Básica**
-```
-Oi Noel, tudo bem?
-Quem é você?
+Quantos produtos preciso vender para bater minha meta financeira?
 ```
 
 **O que verificar:**
-- ✅ Resposta amigável
-- ✅ Apresentação do NOEL
-- ✅ CTA final
+- ✅ NOEL NÃO pergunta qual é a meta (deve usar do perfil)
+- ✅ NOEL chama `calcularObjetivosCompletos()` automaticamente
+- ✅ Retorna objetivos específicos de vendas
+- ✅ Personaliza baseado no `tipo_trabalho` do perfil
 
 ---
 
-### **Teste 2: Detecção Automática de Perfil**
+### 2. **Teste de Plano Completo (deve montar plano personalizado)**
 ```
-Vendo kits de energia e acelera.
+Me dê um plano para bater minha meta
 ```
 
 **O que verificar:**
-- ✅ Perfil detectado: `beverage_distributor`
-- ✅ Linguagem adaptada (simples, direta)
-- ✅ Resposta com foco em bebidas
+- ✅ NOEL usa informações do perfil sem perguntar
+- ✅ Retorna plano com objetivos de vendas e equipe
+- ✅ Inclui scripts baseados no `tipo_trabalho`
+- ✅ Adiciona ações práticas e próximo passo
 
 ---
 
-### **Teste 3: Pergunta Sem Contexto**
+### 3. **Teste de Meta no Perfil (não deve pedir novamente)**
 ```
-Me ajuda.
+Minha meta está no meu perfil, me mostre quantos kits preciso vender
 ```
 
 **O que verificar:**
-- ✅ NOEL pergunta o que precisa
-- ✅ Oferece opções
-- ✅ Não dá resposta genérica
+- ✅ NOEL NÃO pergunta qual é a meta
+- ✅ Usa `calcularObjetivosCompletos()` diretamente
+- ✅ Retorna quantidade específica de kits/produtos
+- ✅ Se `tipo_trabalho = bebidas_funcionais`, prioriza Kits Energia/Acelera
 
 ---
 
-### **Teste 4: Múltiplas Intenções**
+### 4. **Teste de Objetivos de Equipe (deve calcular recrutamento)**
 ```
-Quero vender mais e recrutar também.
+Quantos consultores preciso recrutar para bater minha meta de PV?
 ```
 
 **O que verificar:**
-- ✅ NOEL identifica ambas intenções
-- ✅ Prioriza uma ou pergunta qual focar
-- ✅ Oferece ajuda para ambas
+- ✅ NOEL calcula objetivos de equipe automaticamente
+- ✅ Retorna quantidade de convites necessários
+- ✅ Retorna quantidade de apresentações necessárias
+- ✅ Retorna quantidade de novos consultores necessários
+- ✅ Inclui PV da equipe necessário
 
 ---
 
-### **Teste 5: Fluxo Completo**
+### 5. **Teste de Personalização por Tipo de Trabalho**
 ```
-1. "O que é 2-5-10?"
-2. "Me dá um checklist de hoje"
-3. "Como faço os 2 convites?"
+Quero que você me dê o plano completo
 ```
 
 **O que verificar:**
-- ✅ Respostas conectadas
-- ✅ Contexto mantido
-- ✅ Progressão lógica
+- ✅ Se `tipo_trabalho = bebidas_funcionais`:
+  - Prioriza Kits Energia e Acelera
+  - Menciona estratégia de kits R$39,90
+  - Sugere pincelar outras bebidas depois
+  
+- ✅ Se `tipo_trabalho = produtos_fechados`:
+  - Prioriza Shake, Fiber, NRG, Herbal, CR7
+  - Foca em follow-up e ciclo de recompra
+  
+- ✅ Se `tipo_trabalho = cliente_que_indica`:
+  - Foca em convites e apresentações
+  - Metas de quantidade de convites
 
 ---
 
-## 📊 CHECKLIST DE VALIDAÇÃO
+## 🔍 O QUE OBSERVAR NOS LOGS
 
-Após fazer as perguntas, verifique:
+Ao testar, verifique nos logs do servidor:
 
-### **No Chat:**
-- [ ] ✅ Resposta recebida (não timeout)
-- [ ] ✅ Resposta faz sentido
-- [ ] ✅ Tem CTA (pergunta final)
-- [ ] ✅ Linguagem adequada ao perfil
-- [ ] ✅ Script pronto (quando solicitado)
+1. **Busca de perfil:**
+   ```
+   👤 [NOEL] Perfil estratégico: encontrado
+   ```
 
-### **Nos Logs do Terminal:**
-- [ ] ✅ Perfil detectado corretamente
-- [ ] ✅ Intenção detectada corretamente
-- [ ] ✅ Módulo correto acionado
-- [ ] ✅ Interação salva no BD
-- [ ] ✅ Sem erros críticos
+2. **Chamada da função:**
+   ```
+   🔧 Executando function: calcularObjetivosCompletos
+   ```
 
-### **No Banco de Dados (Opcional):**
-- [ ] ✅ Registro em `noel_interactions`
-- [ ] ✅ `profile_detected` preenchido
-- [ ] ✅ `category_detected` preenchido
-- [ ] ✅ `thread_id` preenchido
-- [ ] ✅ Settings atualizados em `noel_user_settings`
+3. **Resposta da função:**
+   ```
+   ✅ [NOEL Handler] Function calcularObjetivosCompletos executada com sucesso
+   ```
+
+4. **Uso do texto_formatado:**
+   - Verificar se a resposta usa o formato retornado pela função
+   - Verificar se adiciona scripts baseados no tipo_trabalho
 
 ---
 
-## 🎯 PERGUNTAS PRIORITÁRIAS (3 Testes Essenciais)
+## ❌ COMPORTAMENTOS QUE NÃO DEVEM ACONTECER
 
-Se tiver pouco tempo, faça apenas estas 3:
-
-### **1. Teste de Perfil (Bebidas)**
-```
-Me dá um convite leve para vender kit de energia.
-```
-
-### **2. Teste de Fluxo 2-5-10**
-```
-O que é 2-5-10?
-```
-
-### **3. Teste de Script**
-```
-Me dá um script para vender shake.
-```
+1. ❌ NOEL perguntar "qual é sua meta financeira?" quando já está no perfil
+2. ❌ NOEL perguntar "qual é sua meta de PV?" quando já está no perfil
+3. ❌ NOEL não chamar `calcularObjetivosCompletos()` quando pedir cálculo
+4. ❌ NOEL retornar valores genéricos sem usar a função
+5. ❌ NOEL não personalizar baseado no tipo_trabalho
 
 ---
 
-## 💡 DICAS
+## ✅ COMPORTAMENTOS ESPERADOS
 
-1. **Comece simples:** Perguntas diretas funcionam melhor
-2. **Seja específico:** "Como vendo kit?" é melhor que "Me ajuda"
-3. **Teste diferentes perfis:** Faça perguntas que acionem cada perfil
-4. **Verifique logs:** Sempre olhe o terminal para ver o que está acontecendo
-5. **Teste em sequência:** Faça perguntas relacionadas para testar contexto
-
----
-
-## ⚠️ PERGUNTAS QUE NÃO DEVEM FUNCIONAR
-
-O NOEL **NÃO deve** responder a:
-
-- ❌ Perguntas médicas ("Posso tomar isso com remédio?")
-- ❌ Diagnósticos ("Tenho diabetes, posso usar?")
-- ❌ Promessas de saúde ("Vou emagrecer quanto?")
-- ❌ Conselhos jurídicos ("Isso é legal?")
-- ❌ Críticas à Herbalife ("A Herbalife é boa?")
-
-**O que deve acontecer:**
-- ✅ NOEL redireciona para profissional adequado
-- ✅ Mantém foco em vendas/negócio
-- ✅ Não dá conselhos médicos
+1. ✅ NOEL sempre busca perfil antes de responder
+2. ✅ NOEL chama `calcularObjetivosCompletos()` automaticamente
+3. ✅ NOEL usa valores reais dos produtos do banco
+4. ✅ NOEL personaliza baseado no tipo_trabalho
+5. ✅ NOEL inclui scripts e ações práticas
+6. ✅ NOEL não pede informações que já estão no perfil
 
 ---
 
-## 🚀 PRÓXIMOS PASSOS
+## 🎯 ORDEM RECOMENDADA DE TESTE
 
-Após testar:
-
-1. ✅ Validar que todas as perguntas funcionam
-2. ✅ Verificar logs sem erros
-3. ✅ Confirmar que perfis estão sendo detectados
-4. ✅ Fazer commit + deploy
+1. Primeiro: Teste com usuário que TEM perfil completo
+2. Segundo: Teste perguntas que pedem cálculo/plano
+3. Terceiro: Verifique personalização por tipo_trabalho
+4. Quarto: Teste com usuário SEM perfil (deve orientar onboarding)
 
 ---
 
-**Boa sorte com os testes! 🎯**
+**Boa sorte nos testes! 🚀**

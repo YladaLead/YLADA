@@ -1,0 +1,427 @@
+[
+  {
+    "template": {
+      "id": "040a9fb3-ebd1-4628-b2c2-a405fe71d640",
+      "name": "Calculadora de Água",
+      "slug": "calculadora-agua",
+      "type": "calculadora"
+    },
+    "userTemplate": {
+      "id": "0bb5592d-6ca7-402a-96e7-2669b3d7e975",
+      "slug": "calculadora-de-agua",
+      "template_slug": "calculadora-agua",
+      "status": "active"
+    },
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/calculadora-agua",
+      "esperada": "http://localhost:3000/pt/nutri/demo/calculadora-de-agua",
+      "match": false
+    },
+    "status": "✅ TEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "1181ae69-d411-4649-a2eb-21abbc30ea8d",
+      "name": "Calculadora de Calorias",
+      "slug": "calculadora-calorias",
+      "type": "calculadora"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/calculadora-calorias",
+      "esperada": "http://localhost:3000/pt/nutri/demo/calculadora-calorias",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "28fb46e7-f34a-4e36-8df8-1716bf93b523",
+      "name": "Calculadora de IMC",
+      "slug": "calculadora-imc",
+      "type": "calculadora"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/calculadora-imc",
+      "esperada": "http://localhost:3000/pt/nutri/demo/calculadora-imc",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "80f8cdcb-c7f1-442f-af0e-5aea7e351eee",
+      "name": "Calculadora de Proteína",
+      "slug": "calculadora-proteina",
+      "type": "calculadora"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/calculadora-proteina",
+      "esperada": "http://localhost:3000/pt/nutri/demo/calculadora-proteina",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "c0e8f448-3e13-4ce7-93bf-d9996f486940",
+      "name": "Avaliação de Intolerâncias/Sensibilidades",
+      "slug": "avaliacao-intolerancia-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/avaliacao-intolerancia-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/avaliacao-intolerancia-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "1b91f645-b877-4557-ad81-faf8be917d33",
+      "name": "Avaliação do Perfil Metabólico",
+      "slug": "avaliacao-perfil-metabolico-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/avaliacao-perfil-metabolico-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/avaliacao-perfil-metabolico-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "3b01fc2b-0d16-4c7d-b8eb-0455957ff005",
+      "name": "Avaliação do Sono e Energia",
+      "slug": "avaliacao-sono-energia",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/avaliacao-sono-energia",
+      "esperada": "http://localhost:3000/pt/nutri/demo/avaliacao-sono-energia",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "7af48a74-c5d6-4e68-b931-dcd9d1f4967e",
+      "name": "Avaliação Inicial",
+      "slug": "avaliacao-inicial-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/avaliacao-inicial-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/avaliacao-inicial-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "2e826e57-3ff2-4a95-a70e-dea3b14501a2",
+      "name": "Desafio 21 Dias",
+      "slug": "desafio-21-dias-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/desafio-21-dias-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/desafio-21-dias-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "bfb60c5c-17af-4119-8332-32db35caa531",
+      "name": "Descubra seu Perfil de Bem-Estar",
+      "slug": "descoberta-perfil-bem-estar",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/descoberta-perfil-bem-estar",
+      "esperada": "http://localhost:3000/pt/nutri/demo/descoberta-perfil-bem-estar",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "eeb96d12-bdcd-4bb5-897c-51a75a476ced",
+      "name": "Diagnóstico de Eletrólitos",
+      "slug": "diagnostico-eletrolitos-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/diagnostico-eletrolitos-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/diagnostico-eletrolitos-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "fbc42995-147e-43de-bc71-8cb09c5a5d99",
+      "name": "Diagnóstico de Parasitose",
+      "slug": "template-diagnostico-parasitose",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/template-diagnostico-parasitose",
+      "esperada": "http://localhost:3000/pt/nutri/demo/template-diagnostico-parasitose",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "461c8818-bed6-4bc4-bc86-642d2ee7136b",
+      "name": "Diagnóstico de Sintomas Intestinais",
+      "slug": "diagnostico-sintomas-intestinais-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/diagnostico-sintomas-intestinais-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/diagnostico-sintomas-intestinais-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "a28a1bdd-a93f-4840-9793-59d7693973f8",
+      "name": "Pronto para Emagrecer com Saúde?",
+      "slug": "pronto-emagrecer-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/pronto-emagrecer-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/pronto-emagrecer-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "22f927f1-7ad7-4dda-97b7-27d802897554",
+      "name": "Qual é o seu Tipo de Fome?",
+      "slug": "quiz-tipo-fome",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-tipo-fome",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-tipo-fome",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "c776bd50-9722-4fe0-8eda-624db0e0ac40",
+      "name": "Quiz de Bem-Estar",
+      "slug": "quiz-bem-estar-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-bem-estar-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-bem-estar-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "723b0295-b272-47ca-9999-e52120fe65ff",
+      "name": "Quiz de Perfil Nutricional",
+      "slug": "quiz-perfil-nutricional",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-perfil-nutricional",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-perfil-nutricional",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "ee882269-77c7-4387-a4d1-99ec413e4938",
+      "name": "Quiz Detox",
+      "slug": "quiz-detox-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-detox-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-detox-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "5e2a0878-9227-4bf9-8f82-ee83c09c440d",
+      "name": "Quiz Energético",
+      "slug": "quiz-energetico-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-energetico-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-energetico-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "00ce61c6-0ca8-4f69-ac4e-0aa2d823698e",
+      "name": "Quiz Interativo",
+      "slug": "quiz-interativo-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-interativo-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-interativo-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "772eb739-b32c-40da-976d-ead9ac9f3807",
+      "name": "Quiz: Alimentação Saudável",
+      "slug": "quiz-alimentacao-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-alimentacao-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-alimentacao-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "128d43ea-321b-4e15-b850-f7af2dd6683a",
+      "name": "Risco de Síndrome Metabólica",
+      "slug": "sindrome-metabolica-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/sindrome-metabolica-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/sindrome-metabolica-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "74397cf8-0f45-441b-9332-8d18f85b644c",
+      "name": "Seu corpo está pedindo Detox?",
+      "slug": "quiz-pedindo-detox",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/quiz-pedindo-detox",
+      "esperada": "http://localhost:3000/pt/nutri/demo/quiz-pedindo-detox",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "27c66bf3-9fda-462d-8d67-bd14b8a48868",
+      "name": "Teste de Retenção de Líquidos",
+      "slug": "retencao-liquidos-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/retencao-liquidos-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/retencao-liquidos-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "46368854-8b1c-4469-881d-b314e896843f",
+      "name": "Você conhece o seu corpo?",
+      "slug": "conhece-seu-corpo-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/conhece-seu-corpo-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/conhece-seu-corpo-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "a1cfa7e2-39c2-41c6-8e1e-3bba26281ded",
+      "name": "Você é mais disciplinado ou emocional com a comida?",
+      "slug": "disciplinado-emocional-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/disciplinado-emocional-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/disciplinado-emocional-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "8b8cf83b-d452-48d5-9183-886f77268494",
+      "name": "Você está nutrido ou apenas alimentado?",
+      "slug": "nutrido-vs-alimentado-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/nutrido-vs-alimentado-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/nutrido-vs-alimentado-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  },
+  {
+    "template": {
+      "id": "748c26c5-2759-4d4f-a294-90107bd7a656",
+      "name": "Você está se alimentando conforme sua rotina?",
+      "slug": "alimentacao-rotina-nutri",
+      "type": "quiz"
+    },
+    "userTemplate": null,
+    "urls": {
+      "gerada": "http://localhost:3000/pt/nutri/demo/alimentacao-rotina-nutri",
+      "esperada": "http://localhost:3000/pt/nutri/demo/alimentacao-rotina-nutri",
+      "match": false
+    },
+    "status": "❌ SEM USER_TEMPLATE"
+  }
+]

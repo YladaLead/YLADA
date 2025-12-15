@@ -39,7 +39,7 @@ function ClienteDetalhesCoachContent() {
     const carregarCliente = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/c/clientes?id=${clientId}`, {
+        const response = await fetch(`/api/coach/clientes?id=${clientId}`, {
           credentials: 'include'
         })
 
@@ -1448,7 +1448,7 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
       params.append('order', 'desc')
       params.append('limit', '100')
 
-      const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes?${params.toString()}`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -2085,7 +2085,7 @@ function EmocionalTab({ cliente, clientId }: { cliente: any; clientId: string })
           params.append('record_type', tipoFiltro)
         }
 
-        const response = await fetch(`/api/c/clientes/${clientId}/emocional?${params.toString()}`, {
+        const response = await fetch(`/api/coach/clientes/${clientId}/emocional?${params.toString()}`, {
           credentials: 'include'
         })
 
@@ -2836,7 +2836,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     const carregarAvaliacoes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/c/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
+        const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
           credentials: 'include'
         })
 
@@ -3625,7 +3625,7 @@ function TimelineTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         params.append('end_date', `${endDate}T23:59:59Z`)
       }
 
-      const response = await fetch(`/api/c/clientes/${clientId}/historico?${params.toString()}`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/historico?${params.toString()}`, {
         credentials: 'include'
       })
 
@@ -3715,7 +3715,7 @@ function TimelineTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     setErro(null)
 
     try {
-      const response = await fetch(`/api/c/clientes/${clientId}/historico`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/historico`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -4158,7 +4158,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
 
   const updateProgramContent = async (programId: string, updatedContent: any) => {
     try {
-      const response = await fetch(`/api/c/clientes/${clientId}/programas/${programId}`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/programas/${programId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
