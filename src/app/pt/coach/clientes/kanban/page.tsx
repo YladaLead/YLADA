@@ -125,7 +125,7 @@ function ClienteCard({
       style={style as CSSProperties}
       {...listeners}
       {...attributes}
-      className={`bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing`}
+      className={`bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-lg hover:border-purple-300 transition-all cursor-grab active:cursor-grabbing transform hover:scale-[1.02]`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
@@ -496,7 +496,7 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col rounded-lg ${borderColor} ${bgColor} ${isOver ? 'ring-2 ring-purple-400 ring-offset-1' : ''} min-h-[500px] w-[280px] flex-shrink-0 shadow-sm`}
+      className={`flex flex-col rounded-lg ${borderColor} ${bgColor} ${isOver ? 'ring-4 ring-purple-400 ring-offset-2 shadow-lg scale-[1.02]' : ''} min-h-[500px] w-[280px] flex-shrink-0 shadow-sm transition-all duration-200`}
     >
       <div className={`px-3 py-2 border-b ${borderColor} bg-white/60 backdrop-blur-sm`}>
         {isEditing ? (
@@ -556,17 +556,17 @@ function KanbanColumn({
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={() => onEditColumn(status)}
-                className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-colors"
-                title="Editar coluna"
+                className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors"
+                title="Editar coluna (ou clique duplo no título)"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </button>
               {!isDefaultColumn && (
                 <button
                   onClick={() => onDeleteColumn(status)}
-                  className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                  className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                   title="Remover coluna"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -582,12 +582,13 @@ function KanbanColumn({
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
         <button
           onClick={() => onAddClient(status)}
-          className="w-full border-2 border-dashed border-gray-300 rounded-lg py-2 px-3 text-sm text-gray-600 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+          className="w-full border-2 border-dashed border-purple-300 rounded-lg py-3 px-3 text-sm font-medium text-purple-700 hover:border-purple-500 hover:text-purple-800 hover:bg-purple-50 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md group"
+          title="Adicionar novo cliente nesta coluna"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          + Adicionar Cliente
+          <span>+ Adicionar Cliente</span>
         </button>
 
         {clientes.length === 0 ? (
@@ -646,6 +647,7 @@ function KanbanContent() {
     const carregarConfig = async () => {
       try {
         setCarregandoConfig(true)
+        setErro(null)
         const response = await fetch('/api/c/kanban/config', {
           credentials: 'include'
         })
@@ -657,10 +659,32 @@ function KanbanContent() {
             setColumns(config.columns || defaultColumns)
             setCardFields(config.card_fields || [])
             setQuickActions(config.quick_actions || [])
+          } else if (data.success && data.data?.config === null) {
+            // Config não existe ainda, usar padrões
+            setColumns(defaultColumns)
+            setCardFields([])
+            setQuickActions([])
           }
+        } else if (response.status === 404) {
+          // Config não existe, usar padrões
+          setColumns(defaultColumns)
+          setCardFields([])
+          setQuickActions([])
+        } else {
+          const errorData = await response.json().catch(() => ({ error: 'Erro ao carregar configuração' }))
+          throw new Error(errorData.error || `Erro ${response.status}`)
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao carregar config do Kanban:', error)
+        // Usar padrões em caso de erro
+        setColumns(defaultColumns)
+        setCardFields([])
+        setQuickActions([])
+        // Não mostrar erro para o usuário se for apenas falta de config
+        if (!error.message?.includes('404')) {
+          setErro('Erro ao carregar configuração. Usando padrões.')
+          setTimeout(() => setErro(null), 5000)
+        }
       } finally {
         setCarregandoConfig(false)
       }
@@ -725,10 +749,16 @@ function KanbanContent() {
         setColumns(config.columns)
         setCardFields(config.card_fields)
         setQuickActions(config.quick_actions)
+        setErro(null) // Limpar erros anteriores
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar config do Kanban:', error)
-      alert('Erro ao salvar configuração. Tente novamente.')
+      setErro(error.message || 'Erro ao salvar configuração. Tente novamente.')
+      // Auto-dismiss após 5 segundos
+      setTimeout(() => setErro(null), 5000)
     }
   }
 
@@ -925,7 +955,7 @@ function KanbanContent() {
       )
     )
 
-    setAtualizacaoPendente(clientId)
+      setAtualizacaoPendente(clientId)
 
     try {
       const response = await fetch(`/api/c/clientes/${clientId}`, {
@@ -933,12 +963,17 @@ function KanbanContent() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status: targetStatus })
+        body: JSON.stringify({ status: targetStatus }),
+        credentials: 'include'
       })
 
       if (!response.ok) {
-        throw new Error('Não foi possível atualizar o status')
+        const errorData = await response.json().catch(() => ({ error: 'Erro ao atualizar status' }))
+        throw new Error(errorData.error || 'Não foi possível atualizar o status')
       }
+
+      // Sucesso - limpar qualquer erro anterior
+      setErro(null)
 
     } catch (error: any) {
       console.error('Erro ao atualizar status via Kanban:', error)
@@ -947,7 +982,8 @@ function KanbanContent() {
           cliente.id === clientId ? { ...cliente, status: estadoAnterior } : cliente
         )
       )
-      setErro('Não conseguimos mover essa cliente agora. Tente novamente em instantes.')
+      setErro(error.message || 'Não conseguimos mover essa cliente agora. Tente novamente em instantes.')
+      setTimeout(() => setErro(null), 5000)
     } finally {
       setAtualizacaoPendente(null)
     }
@@ -1049,8 +1085,22 @@ function KanbanContent() {
           </div>
 
           {erro && (
-            <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-lg p-4 text-sm text-red-800">
-              {erro}
+            <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-4 text-sm text-red-800 flex items-start justify-between gap-3 animate-in slide-in-from-top duration-300">
+              <div className="flex items-start gap-2 flex-1">
+                <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="flex-1">{erro}</p>
+              </div>
+              <button
+                onClick={() => setErro(null)}
+                className="text-red-600 hover:text-red-800 transition-colors flex-shrink-0"
+                title="Fechar"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           )}
 
@@ -1066,8 +1116,8 @@ function KanbanContent() {
               onDragEnd={handleDragEnd}
               onDragCancel={() => setActiveClient(null)}
             >
-              <div className="overflow-x-auto pb-4">
-                <div className="flex gap-4 min-w-max">
+              <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="flex gap-4 min-w-max pr-2">
                   {clientesPorStatus.map((coluna) => (
                     <KanbanColumn
                       key={coluna.value}
@@ -1087,10 +1137,26 @@ function KanbanContent() {
                     />
                   ))}
                   
-                  {/* Botão para adicionar nova coluna */}
+                  {/* Botão para adicionar nova coluna - SEMPRE VISÍVEL */}
                   {showNewColumnForm ? (
-                    <div className="bg-white rounded-2xl border-2 border-dashed border-gray-300 p-4 w-[280px] flex-shrink-0 min-h-[500px]">
+                    <div className="bg-white rounded-2xl border-2 border-dashed border-purple-400 shadow-md p-4 w-[280px] flex-shrink-0 min-h-[500px] animate-in fade-in duration-200">
                       <div className="space-y-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-sm font-semibold text-gray-900">Nova Coluna</h3>
+                          <button
+                            onClick={() => {
+                              setShowNewColumnForm(false)
+                              setNewColumnLabel('')
+                              setNewColumnDescription('')
+                            }}
+                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            title="Fechar"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
                             Nome da Coluna *
@@ -1102,11 +1168,20 @@ function KanbanContent() {
                             placeholder="Ex: Em Análise"
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                             autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && newColumnLabel.trim()) {
+                                handleAddColumn()
+                              } else if (e.key === 'Escape') {
+                                setShowNewColumnForm(false)
+                                setNewColumnLabel('')
+                                setNewColumnDescription('')
+                              }
+                            }}
                           />
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
-                            Descrição
+                            Descrição (opcional)
                           </label>
                           <textarea
                             value={newColumnDescription}
@@ -1116,13 +1191,13 @@ function KanbanContent() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                           />
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 pt-2">
                           <button
                             onClick={handleAddColumn}
                             disabled={!newColumnLabel.trim()}
-                            className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                           >
-                            Criar Coluna
+                            ➕ Criar Coluna
                           </button>
                           <button
                             onClick={() => {
@@ -1144,12 +1219,20 @@ function KanbanContent() {
                         setNewColumnLabel('')
                         setNewColumnDescription('')
                       }}
-                      className="bg-white rounded-2xl border-2 border-dashed border-gray-300 p-4 w-[280px] flex-shrink-0 min-h-[500px] flex flex-col items-center justify-center text-gray-500 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+                      className="bg-white rounded-2xl border-2 border-dashed border-purple-400 p-6 w-[280px] flex-shrink-0 min-h-[500px] flex flex-col items-center justify-center text-gray-600 hover:border-purple-500 hover:text-purple-700 hover:bg-purple-50 transition-all duration-200 shadow-sm hover:shadow-md group"
+                      title="Adicionar Nova Coluna"
                     >
-                      <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      <span className="text-sm font-medium">Nova Coluna</span>
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                          <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm font-semibold text-gray-700 group-hover:text-purple-700">Adicionar Coluna</span>
+                          <p className="text-xs text-gray-500 mt-1">Clique para criar</p>
+                        </div>
+                      </div>
                     </button>
                   )}
                 </div>
@@ -1157,11 +1240,26 @@ function KanbanContent() {
 
               <DragOverlay>
                 {activeClient ? (
-                  <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-lg w-64">
-                    <p className="text-sm font-semibold text-gray-900">{activeClient.name}</p>
-                    {activeClient.goal && (
-                      <p className="text-xs text-gray-600 mt-2">🎯 {activeClient.goal}</p>
-                    )}
+                  <div className="bg-white rounded-xl border-2 border-purple-400 p-4 shadow-2xl w-64 transform rotate-2">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-purple-600 font-semibold text-sm">
+                          {activeClient.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{activeClient.name}</p>
+                        {activeClient.goal && (
+                          <p className="text-xs text-gray-600 mt-1 line-clamp-2">🎯 {activeClient.goal}</p>
+                        )}
+                        {activeClient.phone && (
+                          <p className="text-xs text-gray-500 mt-1">{displayPhoneWithFlag(activeClient.phone)}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <span className="text-xs text-purple-600 font-medium">Arraste para mover</span>
+                    </div>
                   </div>
                 ) : null}
               </DragOverlay>

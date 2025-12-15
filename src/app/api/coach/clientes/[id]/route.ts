@@ -126,7 +126,7 @@ export async function PUT(
     if (gender !== undefined) updateData.gender = gender || null
     if (cpf !== undefined) updateData.cpf = cpf?.trim() || null
     if (status !== undefined) {
-      const validStatuses = ['lead', 'pre_consulta', 'ativa', 'pausa', 'finalizada']
+      const validStatuses = ['lead', 'pre_consulta', 'ativa', 'pausa', 'encerrado']
       if (!validStatuses.includes(status)) {
         return NextResponse.json(
           { error: `Status inválido. Use um dos seguintes: ${validStatuses.join(', ')}` },

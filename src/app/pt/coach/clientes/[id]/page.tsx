@@ -1612,12 +1612,32 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
         </div>
         <div className="flex flex-wrap gap-3">
           {assessments.length > 0 && (
-            <button
-              onClick={() => carregarAvaliacoes()}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
-            >
-              Atualizar lista
-            </button>
+            <>
+              <button
+                onClick={() => carregarAvaliacoes()}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Atualizar lista
+              </button>
+              {assessments.filter((a: any) => !a.is_reevaluation).length > 0 && (
+                <button
+                  onClick={() => {
+                    const primeiraAvaliacao = assessments.find((a: any) => !a.is_reevaluation)
+                    if (primeiraAvaliacao) {
+                      setFormData({
+                        ...initialFormState(),
+                        is_reevaluation: true,
+                        parent_assessment_id: primeiraAvaliacao.id
+                      })
+                      setMostrarForm(true)
+                    }
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all text-sm font-medium shadow-md hover:shadow-lg"
+                >
+                  🔄 Nova Reavaliação
+                </button>
+              )}
+            </>
           )}
           <button
             onClick={() => {
@@ -1970,21 +1990,55 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
                 )}
 
                 {selectedAssessment.is_reevaluation && selectedAssessment.comparison_data && (
-                  <div className="mt-6 border-t pt-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Comparação automática</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {['weight', 'bmi', 'body_fat_percentage', 'muscle_mass', 'waist_circumference', 'hip_circumference'].map((field) => {
+                  <div className="mt-6 border-t-2 border-purple-200 pt-6 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-2xl">📊</span>
+                      <h4 className="text-lg font-semibold text-gray-900">Comparação com Avaliação Anterior</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[
+                        { field: 'weight', label: 'Peso', unit: 'kg', positiveIsGood: false },
+                        { field: 'bmi', label: 'IMC', unit: '', positiveIsGood: false },
+                        { field: 'body_fat_percentage', label: '% Gordura', unit: '%', positiveIsGood: false },
+                        { field: 'muscle_mass', label: 'Massa Magra', unit: 'kg', positiveIsGood: true },
+                        { field: 'waist_circumference', label: 'Cintura', unit: 'cm', positiveIsGood: false },
+                        { field: 'hip_circumference', label: 'Quadril', unit: 'cm', positiveIsGood: false }
+                      ].map(({ field, label, unit, positiveIsGood }) => {
                         const comp = selectedAssessment.comparison_data[field]
-                        if (!comp || typeof comp !== 'object') return null
+                        if (!comp || typeof comp !== 'object' || comp.difference === null || comp.difference === undefined) return null
                         const diff = parseFloat(comp.difference ?? 0)
                         const signal = diff > 0 ? '+' : ''
+                        const isPositive = diff > 0
+                        const isGood = positiveIsGood ? isPositive : !isPositive
                         return (
-                          <div key={field} className="rounded-lg border border-gray-200 p-4">
-                            <p className="text-xs uppercase text-gray-500">{field.replace('_', ' ')}</p>
-                            <p className="text-lg font-semibold text-gray-900">{signal}{diff.toFixed(1)}</p>
-                            {comp.percent_change && (
-                              <p className="text-xs text-gray-500">{comp.percent_change}% desde a última avaliação</p>
-                            )}
+                          <div 
+                            key={field} 
+                            className={`rounded-lg border-2 p-4 transition-all ${
+                              isGood 
+                                ? 'border-green-300 bg-green-50' 
+                                : diff === 0
+                                ? 'border-gray-200 bg-gray-50'
+                                : 'border-orange-300 bg-orange-50'
+                            }`}
+                          >
+                            <p className="text-xs font-semibold uppercase text-gray-600 mb-1">{label}</p>
+                            <div className="flex items-baseline gap-2">
+                              <p className={`text-2xl font-bold ${
+                                isGood ? 'text-green-700' : diff === 0 ? 'text-gray-700' : 'text-orange-700'
+                              }`}>
+                                {signal}{Math.abs(diff).toFixed(1)}{unit ? ` ${unit}` : ''}
+                              </p>
+                              {comp.percent_change && (
+                                <span className={`text-xs font-medium ${
+                                  isGood ? 'text-green-600' : 'text-orange-600'
+                                }`}>
+                                  ({comp.percent_change > 0 ? '+' : ''}{comp.percent_change.toFixed(1)}%)
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {comp.old?.toFixed(1)}{unit ? ` ${unit}` : ''} → {comp.current?.toFixed(1)}{unit ? ` ${unit}` : ''}
+                            </p>
                           </div>
                         )
                       })}
@@ -2175,7 +2229,7 @@ function EmocionalTab({ cliente, clientId }: { cliente: any; clientId: string })
         notes: formData.notes || null
       }
 
-      const response = await fetch(`/api/c/clientes/${clientId}/emocional`, {
+      const response = await fetch(`/api/coach/clientes/${clientId}/emocional`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
