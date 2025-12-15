@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import RequireDia1Completo from '@/components/auth/RequireDia1Completo'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 import NutriChatWidget from '@/components/nutri/NutriChatWidget'
@@ -20,9 +19,7 @@ import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 export default function GSALPage() {
   return (
     <ProtectedRoute perfil="nutri" allowAdmin={true}>
-      <RequireDia1Completo>
-        <GSALPageContent />
-      </RequireDia1Completo>
+      <GSALPageContent />
     </ProtectedRoute>
   )
 }

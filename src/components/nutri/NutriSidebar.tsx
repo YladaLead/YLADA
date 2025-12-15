@@ -102,8 +102,8 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         { title: 'Criar Quiz', icon: '🎯', href: '/pt/nutri/quiz-personalizado' },
       ]
     },
-    // GSAL só aparece após completar Dia 1
-    ...(dia1Completo ? [{
+    // Gestão GSAL - sempre visível e acessível
+    {
       title: 'Gestão GSAL',
       icon: '📊',
       color: 'green',
@@ -117,7 +117,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
         { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
       ]
-    }] : []),
+    },
     {
       title: 'Biblioteca',
       icon: '🎒',
@@ -129,6 +129,12 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       icon: '📝',
       href: '/pt/nutri/anotacoes',
       color: 'purple'
+    },
+    {
+      title: 'Perfil Nutri-Empresária',
+      icon: '🎯',
+      href: '/pt/nutri/diagnostico',
+      color: 'orange'
     },
     {
       title: 'Configurações',
@@ -180,6 +186,12 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         text: isActive ? 'text-yellow-700' : 'text-gray-700',
         border: 'border-yellow-200',
         active: 'bg-yellow-100 text-yellow-900'
+      },
+      orange: {
+        bg: isActive ? 'bg-orange-50' : 'hover:bg-orange-50',
+        text: isActive ? 'text-orange-700' : 'text-gray-700',
+        border: 'border-orange-200',
+        active: 'bg-orange-100 text-orange-900'
       },
       gray: {
         bg: isActive ? 'bg-gray-50' : 'hover:bg-gray-50',
