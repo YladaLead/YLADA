@@ -151,6 +151,11 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
         }
         break
 
+      case 'calcularObjetivosCompletos':
+        url = `${baseUrl}/api/wellness/noel/calcular-objetivos`
+        body = {} // Não precisa de parâmetros, usa o userId da sessão
+        break
+
       default:
         throw new Error(`Function desconhecida: ${functionName}`)
     }
