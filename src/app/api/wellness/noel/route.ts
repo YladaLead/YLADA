@@ -244,17 +244,28 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
     if (profile.tipo_trabalho) {
       context += `1️⃣ COMO PRETENDE TRABALHAR: ${profile.tipo_trabalho}\n`
       if (profile.tipo_trabalho === 'bebidas_funcionais') {
-        context += '   → Distribuidor de alta conversão rápida\n'
+        context += '   → Distribuidor que SERVE GARRAFAS FECHADAS (bebidas funcionais)\n'
         context += '   → Trabalho local/presencial\n'
         context += '   → Foco em rotina de atendimento, margem de lucro e volume\n'
+        context += '   → ESTRATÉGIA DE PRODUTOS:\n'
+        context += '      • Prioridade inicial: Kits Energia e Acelera (Kit 5 dias = R$ 39,90)\n'
+        context += '      • Depois: pincelar outras bebidas (Turbo Detox, Hype Drink, Litrão Detox) em kits avulsos\n'
+        context += '      • Upsell: produtos fechados após consolidar carteira\n'
         context += '   → ENTREGAR: Fluxo de Bebidas, estratégia kits R$39,90, metas diárias, scripts de upsell\n'
       } else if (profile.tipo_trabalho === 'produtos_fechados') {
-        context += '   → Distribuidor com foco em valor maior por venda\n'
+        context += '   → Distribuidor que VENDE PRODUTOS FECHADOS\n'
+        context += '   → Foco em valor maior por venda\n'
         context += '   → Menos volume, mais lucro unitário\n'
+        context += '   → ESTRATÉGIA DE PRODUTOS:\n'
+        context += '      • Prioridade: Shake, Fiber, NRG, Herbal, Creatina, CR7\n'
+        context += '      • Foco: follow-up estruturado, ciclo de recompra\n'
         context += '   → ENTREGAR: Scripts de vendas de produtos fechados, estratégia de follow-up, ciclo de recompra\n'
       } else if (profile.tipo_trabalho === 'cliente_que_indica') {
-        context += '   → Perfil leve, porta de entrada\n'
+        context += '   → Perfil que APENAS INDICA (não vende diretamente)\n'
         context += '   → Foco em duplicação simples\n'
+        context += '   → ESTRATÉGIA:\n'
+        context += '      • Foco: convites, links, material de divulgação\n'
+        context += '      • Metas: quantidade de convites, apresentações, conversões\n'
         context += '   → ENTREGAR: Script de indicação, link de convite, como ganhar R$100-300 só indicando\n'
       }
       context += '\n'
@@ -599,13 +610,18 @@ Você tem acesso às seguintes funções para buscar informações REAIS do banc
    - IMPORTANTE: Sempre entregue o link_atalho_completo na resposta, formatado como link clicável
 
 6. **calcularObjetivosCompletos()** - Calcula objetivos precisos de vendas, recrutamento e produção da equipe
-   - Use quando o usuário perguntar:
+   - Use SEMPRE quando o usuário perguntar sobre:
      * "Quantos produtos preciso vender para bater minha meta?"
      * "Como calcular meus objetivos de vendas?"
      * "Quantos consultores preciso recrutar?"
      * "Qual a produção da equipe necessária?"
      * "Me mostre o caminho para bater minha meta financeira e de PV"
+     * "Me dê um plano" / "Quero que você me dê o plano"
+     * "Quantos kits preciso vender?"
+     * "Objetivos de vendas"
    - Esta função usa valores REAIS dos produtos (preços, custos, PVs) do banco de dados
+   - Esta função usa automaticamente o perfil do usuário (meta financeira, meta PV, tipo de trabalho)
+   - NÃO peça informações que já estão no perfil - use a função que busca tudo automaticamente
    - Retorna:
      * Objetivos de vendas (quantidade de cada produto necessário)
      * Objetivos de recrutamento (convites, apresentações, novos consultores)
@@ -613,10 +629,17 @@ Você tem acesso às seguintes funções para buscar informações REAIS do banc
      * Cenários de combinação (apenas vendas, vendas+equipe, foco equipe)
      * Resumo executivo com ações prioritárias
    - Exemplos de uso:
-     * "Noel, me mostre quantos kits preciso vender para bater R$ 3.000 de meta"
-     * "Como calcular meus objetivos para bater 1000 PV?"
-     * "Qual o caminho mais rápido para minha meta?"
-   - IMPORTANTE: Esta função calcula usando os valores ATUAIS dos produtos cadastrados no sistema
+     * "Noel, me mostre quantos kits preciso vender para bater R$ 3.000 de meta" → CHAMAR calcularObjetivosCompletos()
+     * "Como calcular meus objetivos para bater 1000 PV?" → CHAMAR calcularObjetivosCompletos()
+     * "Qual o caminho mais rápido para minha meta?" → CHAMAR calcularObjetivosCompletos()
+     * "Me dê um plano" → CHAMAR calcularObjetivosCompletos() e montar plano baseado no resultado
+   - IMPORTANTE: 
+     * Esta função calcula usando os valores ATUAIS dos produtos cadastrados no sistema
+     * Esta função usa automaticamente o perfil do usuário - NÃO peça informações que já estão no perfil
+     * Se o usuário não tiver perfil completo, oriente a completar o onboarding primeiro
+     * Quando a função retornar, use o campo "texto_formatado" como base da resposta
+     * Adicione scripts e ações práticas baseados no "tipo_trabalho" do perfil
+     * Personalize com base nos "cenarios" retornados (apenas_vendas, vendas_equipe_50_50, foco_equipe)
 
 🚨 REGRA CRÍTICA: NUNCA invente informações sobre fluxos, ferramentas, quizzes, links, materiais ou cálculos de metas.
 SEMPRE chame a função correspondente para buscar dados REAIS do banco ou fazer cálculos precisos.
@@ -663,9 +686,63 @@ Quando encontrar material usando getMaterialInfo, SEMPRE responda assim:
 
 💡 Tipo: [tipo] | Categoria: [categoria]
 
+**FORMATO ESPECIAL PARA calcularObjetivosCompletos():**
+Quando calcularObjetivosCompletos() retornar, SEMPRE responda assim:
+
+1. Use o campo "texto_formatado" como base principal da resposta
+2. Adicione scripts específicos baseados no tipo_trabalho do perfil:
+   - Se tipo_trabalho = "bebidas_funcionais": adicione scripts de abordagem leve, kit R$39,90
+   - Se tipo_trabalho = "produtos_fechados": adicione scripts de apresentação e fechamento
+   - Se tipo_trabalho = "cliente_que_indica": adicione scripts de convite e apresentação leve
+3. Adicione "PRÓXIMO PASSO IMEDIATO" com ação prática (script ou tarefa)
+4. Use os "cenarios" retornados para sugerir estratégia (apenas_vendas, vendas_equipe_50_50, foco_equipe)
+
+Exemplo de resposta:
+[texto_formatado da função]
+
+📝 Script sugerido para começar:
+[Script baseado no tipo_trabalho]
+
+💡 Próximo passo:
+[Ação imediata baseada nas acoes_prioritarias]
+
 ================================================
 🧠 DETECÇÃO INTELIGENTE DE CONTEXTO
 ================================================
+
+**REGRAS CRÍTICAS:**
+1. SEMPRE buscar o perfil do usuário ANTES de responder sobre metas, objetivos ou planos
+2. NUNCA peça informações que já estão no perfil (meta financeira, meta PV, tipo de trabalho)
+3. Se o usuário pedir cálculo ou plano, CHAME calcularObjetivosCompletos() IMEDIATAMENTE
+4. Use o perfil para personalizar TODAS as respostas
+5. Se o usuário disser "minha meta está no meu perfil" ou "quero que você me dê o plano", CHAME calcularObjetivosCompletos() SEM perguntar mais nada
+6. O perfil contém: meta_financeira, meta_pv, tipo_trabalho, carga_horaria_diaria, dias_por_semana, foco_trabalho, ganhos_prioritarios
+7. Use essas informações do perfil para calcular e responder, não peça novamente
+
+**GRUPOS DE TRABALHO (baseado em tipo_trabalho do perfil):**
+
+1. **bebidas_funcionais** (serve garrafas fechadas):
+   - Prioridade inicial: Kits Energia e Acelera (Kit 5 dias = R$ 39,90)
+   - Depois: pincelar outras bebidas (Turbo Detox, Hype Drink, Litrão Detox) em kits avulsos
+   - Upsell: produtos fechados após consolidar carteira
+   - Foco: volume, rotina diária, margem por bebida
+   - Scripts: sempre começar com abordagem leve de R$ 10 (teste) → Kit 5 dias → Kit 10 dias → Kit 30 dias
+   - Metas: baseadas em quantidade de bebidas/kits por dia/semana
+
+2. **produtos_fechados** (vende produtos fechados):
+   - Prioridade: Shake, Fiber, NRG, Herbal, Creatina, CR7
+   - Foco: valor maior por venda, follow-up estruturado, ciclo de recompra
+   - Menos volume, mais lucro unitário
+   - Scripts: apresentação de produto fechado → diagnóstico rápido → fechamento leve (2 opções sempre)
+   - Metas: baseadas em quantidade de produtos fechados por semana
+
+3. **cliente_que_indica** (apenas indica):
+   - Foco: convites, links, material de divulgação
+   - Metas: quantidade de convites, apresentações, conversões
+   - Scripts: convite leve → apresentação leve → oferta leve
+   - Não foca em vendas diretas, apenas em indicação e recrutamento
+
+**IMPORTANTE:** Sempre identifique o tipo_trabalho do perfil e ajuste suas orientações conforme o grupo.
 
 Quando detectar estas situações, chame a função correspondente:
 
@@ -679,14 +756,89 @@ Quando detectar estas situações, chame a função correspondente:
 - "qual é o link?" / "onde acho?" → getLinkInfo ou getFerramentaInfo
 - "você tem a imagem de..." / "tem material de..." / "preciso de vídeo de..." → getMaterialInfo({ busca: "...", tipo: "..." })
 - "material para divulgação" / "post para redes sociais" → getMaterialInfo({ categoria: "divulgacao" })
-- "quantos produtos preciso vender" / "calcular objetivos" / "quantos kits para bater meta" / "objetivos de vendas" / "produção da equipe" / "quantos consultores preciso" → calcularObjetivosCompletos()
+- "quantos produtos preciso vender" / "calcular objetivos" / "quantos kits para bater meta" / "objetivos de vendas" / "produção da equipe" / "quantos consultores preciso" / "me dê um plano" / "quero que você me dê o plano" / "me mostre quantos" → calcularObjetivosCompletos()
 
 **PRIORIDADE:**
 1. Ação imediata → 2. Cliente → 3. Venda → 4. Ferramentas
 
 ${knowledgeContext ? `\nContexto da Base de Conhecimento:\n${knowledgeContext}\n\nUse este contexto como base, mas personalize e expanda conforme necessário.` : ''}
 ${consultantContext ? `\n\nContexto do Consultor (use para personalizar):\n${consultantContext}\n\nAdapte sua resposta considerando o estágio da carreira, desafios identificados e histórico do consultor.` : ''}
-${strategicProfileContext ? `\n\n${strategicProfileContext}` : ''}`
+${strategicProfileContext ? `\n\n${strategicProfileContext}` : ''}
+
+================================================
+🎯 REGRAS DE RESPOSTA PARA CÁLCULOS E PLANOS
+================================================
+
+**QUANDO O USUÁRIO PEDIR CÁLCULO, PLANO OU OBJETIVOS:**
+
+1. NÃO pergunte informações que já estão no perfil
+2. CHAME calcularObjetivosCompletos() IMEDIATAMENTE
+3. Use o resultado para montar o plano personalizado
+4. Se não tiver perfil completo, oriente a completar onboarding
+
+**FORMATO DE RESPOSTA PARA PLANOS:**
+
+🎯 SEU PLANO PERSONALIZADO:
+
+📊 METAS:
+• Meta de PV: [valor do perfil]
+• Meta financeira: [valor do perfil]
+• PV necessário: [calculado]
+
+🛒 OBJETIVOS DE VENDAS:
+• [Produto 1]: [quantidade] por mês
+• [Produto 2]: [quantidade] por mês
+
+👥 OBJETIVOS DE EQUIPE:
+• Convites: [quantidade] por mês
+• Apresentações: [quantidade] por mês
+• Novos consultores: [quantidade]
+
+⚡ AÇÕES PRIORITÁRIAS:
+1. [Ação específica baseada no tipo de trabalho]
+2. [Ação específica baseada no tipo de trabalho]
+3. [Ação específica baseada no tipo de trabalho]
+
+💡 PRÓXIMO PASSO:
+[Script ou ação imediata baseada no perfil]
+
+**NUNCA responda genérico quando tiver perfil disponível.**
+**SEMPRE use calcularObjetivosCompletos() quando pedir cálculo ou plano.**
+
+================================================
+🚨 EXEMPLOS DE USO CORRETO
+================================================
+
+**Cenário 1: Usuário pede cálculo/plano**
+Usuário: "Quantos produtos preciso vender para bater minha meta financeira?"
+NOEL deve: CHAMAR calcularObjetivosCompletos() IMEDIATAMENTE
+Resposta: Usar o texto_formatado retornado pela função + personalizar com scripts baseados no tipo_trabalho
+
+**Cenário 2: Usuário diz que meta está no perfil**
+Usuário: "minha meta está no meu perfil" / "quero que você me dê o plano"
+NOEL deve: CHAMAR calcularObjetivosCompletos() IMEDIATAMENTE (não perguntar mais nada)
+Resposta: Usar o texto_formatado + montar plano completo baseado no tipo_trabalho
+
+**Cenário 3: Usuário pede plano específico**
+Usuário: "Me dê um plano para bater R$ 3.000"
+NOEL deve: CHAMAR calcularObjetivosCompletos() IMEDIATAMENTE
+Resposta: Usar o resultado + adicionar scripts e ações diárias baseadas no tipo_trabalho
+
+**FORMATO DE RESPOSTA APÓS calcularObjetivosCompletos():**
+
+1. Use o campo "texto_formatado" como base principal
+2. Adicione scripts específicos baseados no tipo_trabalho:
+   - bebidas_funcionais: scripts de abordagem leve, kit R$39,90, upsell
+   - produtos_fechados: scripts de apresentação, diagnóstico, fechamento
+   - cliente_que_indica: scripts de convite, apresentação leve
+3. Adicione ações práticas diárias baseadas nas "acoes_prioritarias"
+4. Inclua próximo passo imediato (script ou ação)
+
+**IMPORTANTE:** 
+- Se o perfil não tiver meta_financeira ou meta_pv, oriente a completar o onboarding
+- Mas se tiver, NUNCA peça novamente - use o que está no perfil
+- Quando calcularObjetivosCompletos() retornar, use o "texto_formatado" + personalize com scripts
+`
 
   // Sempre retorna o prompt base como MENTOR, mas adapta o foco baseado no módulo detectado
   let focusInstructions = ''
@@ -872,7 +1024,15 @@ export async function POST(request: NextRequest) {
         const userProfile = await detectUserProfile(user.id, message)
         const intention = classifyIntention(message)
         
+        // Buscar perfil estratégico completo do wellness_noel_profile
+        const { data: strategicProfile } = await supabaseAdmin
+          .from('wellness_noel_profile')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
         console.log('👤 [NOEL] Perfil detectado:', userProfile || 'não definido')
+        console.log('👤 [NOEL] Perfil estratégico:', strategicProfile ? 'encontrado' : 'não encontrado')
         console.log('🎯 [NOEL] Intenção detectada:', intention.module, `(confiança: ${intention.confidence})`)
         
         // Se perfil não detectado e não for pergunta de clarificação, perguntar
@@ -891,9 +1051,22 @@ export async function POST(request: NextRequest) {
         }
         
         // Construir mensagem com contexto do perfil
-        const contextMessage = userProfile
-          ? `[CONTEXTO] Perfil do usuário: ${userProfile}. Intenção detectada: ${intention.module}. Módulo ativo: ${intention.module}.\n\n[MENSAGEM DO USUÁRIO] ${message}`
-          : message
+        let contextMessage = message
+        
+        // Se tem perfil estratégico, adicionar contexto
+        if (strategicProfile) {
+          const profileInfo = []
+          if (strategicProfile.tipo_trabalho) profileInfo.push(`Tipo: ${strategicProfile.tipo_trabalho}`)
+          if (strategicProfile.meta_financeira) profileInfo.push(`Meta financeira: R$ ${strategicProfile.meta_financeira}`)
+          if (strategicProfile.meta_pv) profileInfo.push(`Meta PV: ${strategicProfile.meta_pv}`)
+          if (strategicProfile.carga_horaria_diaria) profileInfo.push(`Carga horária: ${strategicProfile.carga_horaria_diaria}`)
+          
+          if (profileInfo.length > 0) {
+            contextMessage = `[CONTEXTO DO PERFIL] ${profileInfo.join(' | ')}\n\n[MENSAGEM DO USUÁRIO] ${message}`
+          }
+        } else if (userProfile) {
+          contextMessage = `[CONTEXTO] Perfil do usuário: ${userProfile}. Intenção detectada: ${intention.module}. Módulo ativo: ${intention.module}.\n\n[MENSAGEM DO USUÁRIO] ${message}`
+        }
         
         const { processMessageWithAssistant } = await import('@/lib/noel-assistant-handler')
         

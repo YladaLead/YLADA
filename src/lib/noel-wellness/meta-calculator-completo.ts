@@ -563,7 +563,7 @@ export async function calcularObjetivosCompletos(
 /**
  * Formata o cálculo completo para exibição no NOEL
  */
-export function formatarCalculoParaNoel(calculo: CalculoMetaCompleto): string {
+export function formatarCalculoParaNoel(calculo: CalculoMetaCompleto, tipoTrabalho?: string): string {
   let texto = `\n🎯 SEUS OBJETIVOS PARA BATER AS METAS:\n\n`
   
   texto += `📊 METAS:\n`
@@ -572,35 +572,89 @@ export function formatarCalculoParaNoel(calculo: CalculoMetaCompleto): string {
   texto += `• PV atual: ${calculo.pv_atual.toLocaleString('pt-BR')} PV\n`
   texto += `• PV necessário: ${calculo.pv_necessario.toLocaleString('pt-BR')} PV\n\n`
   
+  // Ajustar objetivos de vendas baseado no tipo de trabalho
   texto += `🛒 OBJETIVOS DE VENDAS (quantidade mensal):\n`
-  if (calculo.objetivos_vendas.energia_kit5 > 0) {
-    texto += `• Energia - Kit 5 dias: ${calculo.objetivos_vendas.energia_kit5} kits\n`
-  }
-  if (calculo.objetivos_vendas.turbo_detox_kit5 > 0) {
-    texto += `• Turbo Detox - Kit 5 dias: ${calculo.objetivos_vendas.turbo_detox_kit5} kits\n`
-  }
-  if (calculo.objetivos_vendas.hype_drink_kit5 > 0) {
-    texto += `• Hype Drink - Kit 5 dias: ${calculo.objetivos_vendas.hype_drink_kit5} kits\n`
-  }
-  if (calculo.objetivos_vendas.shake_550g > 0) {
-    texto += `• Shake 550g: ${calculo.objetivos_vendas.shake_550g} unidades\n`
-  }
-  if (calculo.objetivos_vendas.nrg_100g > 0) {
-    texto += `• N-R-G 100g: ${calculo.objetivos_vendas.nrg_100g} unidades\n`
+  
+  if (tipoTrabalho === 'bebidas_funcionais') {
+    // Prioridade: Kits Energia e Acelera
+    if (calculo.objetivos_vendas.energia_kit5 > 0) {
+      texto += `• Energia - Kit 5 dias: ${calculo.objetivos_vendas.energia_kit5} kits (prioridade inicial)\n`
+    }
+    if (calculo.objetivos_vendas.acelera_kit5 > 0) {
+      texto += `• Acelera - Kit 5 dias: ${calculo.objetivos_vendas.acelera_kit5} kits (prioridade inicial)\n`
+    }
+    // Depois: outras bebidas
+    if (calculo.objetivos_vendas.turbo_detox_kit5 > 0) {
+      texto += `• Turbo Detox - Kit 5 dias: ${calculo.objetivos_vendas.turbo_detox_kit5} kits (pincelar depois)\n`
+    }
+    if (calculo.objetivos_vendas.hype_drink_kit5 > 0) {
+      texto += `• Hype Drink - Kit 5 dias: ${calculo.objetivos_vendas.hype_drink_kit5} kits (pincelar depois)\n`
+    }
+    if (calculo.objetivos_vendas.litrao_detox_kit5 > 0) {
+      texto += `• Litrão Detox - Kit 5 dias: ${calculo.objetivos_vendas.litrao_detox_kit5} kits (pincelar depois)\n`
+    }
+  } else if (tipoTrabalho === 'produtos_fechados') {
+    // Prioridade: produtos fechados
+    if (calculo.objetivos_vendas.shake_550g > 0) {
+      texto += `• Shake 550g: ${calculo.objetivos_vendas.shake_550g} unidades\n`
+    }
+    if (calculo.objetivos_vendas.nrg_100g > 0) {
+      texto += `• N-R-G 100g: ${calculo.objetivos_vendas.nrg_100g} unidades\n`
+    }
+    if (calculo.objetivos_vendas.herbal_102g > 0) {
+      texto += `• Herbal Concentrate 102g: ${calculo.objetivos_vendas.herbal_102g} unidades\n`
+    }
+    if (calculo.objetivos_vendas.fiber_450ml > 0) {
+      texto += `• Fiber Concentrate 450ml: ${calculo.objetivos_vendas.fiber_450ml} unidades\n`
+    }
+    if (calculo.objetivos_vendas.cr7_drive > 0) {
+      texto += `• CR7 Drive: ${calculo.objetivos_vendas.cr7_drive} unidades\n`
+    }
+  } else {
+    // Mostrar todos os produtos relevantes
+    if (calculo.objetivos_vendas.energia_kit5 > 0) {
+      texto += `• Energia - Kit 5 dias: ${calculo.objetivos_vendas.energia_kit5} kits\n`
+    }
+    if (calculo.objetivos_vendas.turbo_detox_kit5 > 0) {
+      texto += `• Turbo Detox - Kit 5 dias: ${calculo.objetivos_vendas.turbo_detox_kit5} kits\n`
+    }
+    if (calculo.objetivos_vendas.shake_550g > 0) {
+      texto += `• Shake 550g: ${calculo.objetivos_vendas.shake_550g} unidades\n`
+    }
   }
   texto += `\n`
   
-  texto += `👥 OBJETIVOS DE EQUIPE:\n`
-  texto += `• Convites necessários: ${calculo.objetivos_equipe.convites_necessarios} por mês\n`
-  texto += `• Apresentações necessárias: ${calculo.objetivos_equipe.apresentacoes_necessarias} por mês\n`
-  texto += `• Novos consultores necessários: ${calculo.objetivos_equipe.novos_consultores_necessarios}\n`
-  texto += `• PV da equipe necessário: ${calculo.objetivos_equipe.pv_equipe_necessario.toLocaleString('pt-BR')} PV\n`
-  texto += `• Royalties estimados: R$ ${calculo.objetivos_equipe.royalties_estimados_mes.toLocaleString('pt-BR')}/mês\n\n`
+  // Objetivos de equipe (só mostrar se relevante)
+  if (calculo.objetivos_equipe.convites_necessarios > 0 || calculo.objetivos_equipe.novos_consultores_necessarios > 0) {
+    texto += `👥 OBJETIVOS DE EQUIPE:\n`
+    if (calculo.objetivos_equipe.convites_necessarios > 0) {
+      texto += `• Convites necessários: ${calculo.objetivos_equipe.convites_necessarios} por mês\n`
+    }
+    if (calculo.objetivos_equipe.apresentacoes_necessarias > 0) {
+      texto += `• Apresentações necessárias: ${calculo.objetivos_equipe.apresentacoes_necessarias} por mês\n`
+    }
+    if (calculo.objetivos_equipe.novos_consultores_necessarios > 0) {
+      texto += `• Novos consultores necessários: ${calculo.objetivos_equipe.novos_consultores_necessarios}\n`
+    }
+    if (calculo.objetivos_equipe.pv_equipe_necessario > 0) {
+      texto += `• PV da equipe necessário: ${calculo.objetivos_equipe.pv_equipe_necessario.toLocaleString('pt-BR')} PV\n`
+    }
+    if (calculo.objetivos_equipe.royalties_estimados_mes > 0) {
+      texto += `• Royalties estimados: R$ ${calculo.objetivos_equipe.royalties_estimados_mes.toLocaleString('pt-BR')}/mês\n`
+    }
+    texto += `\n`
+  }
   
   texto += `⚡ AÇÕES PRIORITÁRIAS:\n`
-  calculo.resumo.acoes_prioritarias.forEach((acao, index) => {
-    texto += `${index + 1}. ${acao}\n`
-  })
+  if (calculo.resumo.acoes_prioritarias.length > 0) {
+    calculo.resumo.acoes_prioritarias.forEach((acao, index) => {
+      texto += `${index + 1}. ${acao}\n`
+    })
+  } else {
+    texto += `1. Focar em vendas diárias consistentes\n`
+    texto += `2. Manter rotina de contatos\n`
+    texto += `3. Acompanhar progresso semanalmente\n`
+  }
   texto += `\n`
   
   texto += `⏱️ Tempo estimado: ${calculo.resumo.tempo_estimado_meses} ${calculo.resumo.tempo_estimado_meses === 1 ? 'mês' : 'meses'}\n`

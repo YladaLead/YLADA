@@ -4,12 +4,12 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { calcularObjetivosCompletos, formatarCalculoParaNoel } from '@/lib/noel-wellness/meta-calculator-completo'
 
 /**
- * GET /api/wellness/noel/calcular-objetivos
+ * POST /api/wellness/noel/calcular-objetivos
  * 
  * Calcula objetivos completos de vendas, recrutamento e produção da equipe
  * para bater as metas estabelecidas pelo usuário
  */
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const user = await requireApiAuth(request)
     if (!user) {
@@ -45,8 +45,9 @@ export async function GET(request: NextRequest) {
     // Calcular objetivos completos
     const calculo = await calcularObjetivosCompletos(profile, pvAtual)
 
-    // Formatar para o NOEL
-    const textoFormatado = formatarCalculoParaNoel(calculo)
+    // Formatar para o NOEL (passar tipo_trabalho para personalizar)
+    const tipoTrabalho = profile.tipo_trabalho || null
+    const textoFormatado = formatarCalculoParaNoel(calculo, tipoTrabalho || undefined)
 
     return NextResponse.json({
       sucesso: true,

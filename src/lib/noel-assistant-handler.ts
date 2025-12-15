@@ -187,7 +187,21 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
     }
 
     const data = await response.json()
-    return data.success ? data.data : null
+    
+    // Tratar diferentes formatos de resposta
+    if (data.success !== undefined) {
+      // Formato padrão: { success: true, data: ... }
+      return data.success ? data.data : null
+    } else if (data.sucesso !== undefined) {
+      // Formato calcularObjetivosCompletos: { sucesso: true, calculo: ..., texto_formatado: ... }
+      return data
+    } else if (data.data) {
+      // Formato alternativo: { data: ... }
+      return data.data
+    }
+    
+    // Retornar dados completos se não tiver formato conhecido
+    return data
   } catch (error: any) {
     console.error(`❌ Erro ao executar function ${functionName}:`, error)
     throw error
