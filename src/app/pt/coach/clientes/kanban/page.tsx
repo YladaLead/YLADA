@@ -244,15 +244,13 @@ function ClienteCard({
   )
 }
 
-function AddClientForm({ 
-  status, 
-  onSave, 
-  onCancel 
-}: { 
+interface AddClientFormProps {
   status: string
   onSave: (data: any) => void
   onCancel: () => void
-}) {
+}
+
+function AddClientForm({ status, onSave, onCancel }: AddClientFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
