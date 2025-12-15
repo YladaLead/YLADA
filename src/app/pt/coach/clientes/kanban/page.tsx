@@ -157,14 +157,15 @@ function ClienteCard({
           </div>
           <div className="flex-1 min-w-0">
             <h3 className={`${modoCompacto ? 'text-xs' : 'text-sm'} font-semibold text-gray-900 leading-tight truncate`}>{cliente.name}</h3>
-          {showField('telefone') && cliente.phone && (
-            <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
-              {displayPhoneWithFlag(cliente.phone)}
-            </p>
-          )}
-          {showField('email') && cliente.email && (
-            <p className="text-xs text-gray-500 mt-1">{cliente.email}</p>
-          )}
+            {showField('telefone') && cliente.phone && (
+              <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
+                {displayPhoneWithFlag(cliente.phone)}
+              </p>
+            )}
+            {showField('email') && cliente.email && (
+              <p className="text-xs text-gray-500 mt-1">{cliente.email}</p>
+            )}
+          </div>
         </div>
         {showField('status_badge') && (
           <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${getStatusBadge(cliente.status)}`}>
