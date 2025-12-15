@@ -12,9 +12,45 @@ type CookiePreferences = {
 
 const COOKIE_CONSENT_KEY = 'ylada_cookie_consent'
 const COOKIE_PREFERENCES_KEY = 'ylada_cookie_preferences'
+const COOKIE_CONSENT_DATE_KEY = 'ylada_cookie_consent_date'
+
+// Função auxiliar para verificar consentimento de forma segura
+function hasConsent(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    const consent = localStorage.getItem(COOKIE_CONSENT_KEY)
+    return consent === 'true'
+  } catch (e) {
+    console.error('Erro ao verificar consentimento:', e)
+    return false
+  }
+}
+
+// Função auxiliar para salvar cookie HTTP também (mais persistente)
+function setCookie(name: string, value: string, days: number = 365) {
+  if (typeof document === 'undefined') return
+  const expires = new Date()
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`
+}
+
+// Função auxiliar para ler cookie HTTP
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const nameEQ = name + '='
+  const ca = document.cookie.split(';')
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i]
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length)
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length)
+  }
+  return null
+}
 
 export default function CookieConsentBanner() {
+  // Verificar consentimento imediatamente no estado inicial
   const [mounted, setMounted] = useState(false)
+  const [hasConsentState, setHasConsentState] = useState(false)
   const [showBanner, setShowBanner] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [preferences, setPreferences] = useState<CookiePreferences>({
@@ -27,24 +63,34 @@ export default function CookieConsentBanner() {
     // Garantir que só executa no cliente
     setMounted(true)
     
-    // Verificar se já tem consentimento salvo
+    // Verificar se já tem consentimento salvo (localStorage + cookie HTTP)
     if (typeof window === 'undefined') return
 
-    const consent = localStorage.getItem(COOKIE_CONSENT_KEY)
-    const savedPreferences = localStorage.getItem(COOKIE_PREFERENCES_KEY)
-
-    if (!consent) {
-      // Primeira visita - mostrar banner apenas após 2 segundos (não atrapalha experiência inicial)
-      const timer = setTimeout(() => {
-        setShowBanner(true)
-      }, 2000)
-      return () => clearTimeout(timer)
-    } else {
+    // Verificar localStorage primeiro
+    const consentLocalStorage = localStorage.getItem(COOKIE_CONSENT_KEY)
+    // Verificar cookie HTTP também (backup)
+    const consentCookie = getCookie(COOKIE_CONSENT_KEY)
+    
+    // Se tem consentimento em qualquer lugar, não mostrar banner
+    const hasConsentValue = consentLocalStorage === 'true' || consentCookie === 'true'
+    
+    if (hasConsentValue) {
       // Já tem consentimento - garantir que o banner NÃO apareça
+      setHasConsentState(true)
       setShowBanner(false)
       setShowSettings(false)
       
+      // Sincronizar: se tem no cookie mas não no localStorage, salvar no localStorage
+      if (consentCookie === 'true' && consentLocalStorage !== 'true') {
+        localStorage.setItem(COOKIE_CONSENT_KEY, 'true')
+      }
+      // Sincronizar: se tem no localStorage mas não no cookie, salvar no cookie
+      if (consentLocalStorage === 'true' && consentCookie !== 'true') {
+        setCookie(COOKIE_CONSENT_KEY, 'true', 365)
+      }
+      
       // Carregar preferências salvas se existirem
+      const savedPreferences = localStorage.getItem(COOKIE_PREFERENCES_KEY)
       if (savedPreferences) {
         try {
           const parsed = JSON.parse(savedPreferences)
@@ -53,6 +99,16 @@ export default function CookieConsentBanner() {
           console.error('Erro ao carregar preferências de cookies:', e)
         }
       }
+    } else {
+      // Primeira visita - mostrar banner apenas após 2 segundos (não atrapalha experiência inicial)
+      setHasConsentState(false)
+      const timer = setTimeout(() => {
+        // Verificar novamente antes de mostrar (pode ter sido salvo em outra aba)
+        if (!hasConsent()) {
+          setShowBanner(true)
+        }
+      }, 2000)
+      return () => clearTimeout(timer)
     }
   }, [])
 
@@ -81,20 +137,35 @@ export default function CookieConsentBanner() {
   const saveConsent = (prefs: CookiePreferences) => {
     if (typeof window === 'undefined') return
 
-    // Salvar no localStorage
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'true')
-    localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs))
-    localStorage.setItem(`${COOKIE_CONSENT_KEY}_date`, new Date().toISOString())
+    try {
+      // Salvar no localStorage (persistência principal)
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'true')
+      localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs))
+      localStorage.setItem(COOKIE_CONSENT_DATE_KEY, new Date().toISOString())
 
-    // Salvar no servidor (se usuário estiver logado)
-    // Isso será feito pela API de consentimento
+      // Salvar também em cookie HTTP (backup mais persistente, sobrevive a limpezas de localStorage)
+      setCookie(COOKIE_CONSENT_KEY, 'true', 365)
+      setCookie(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs), 365)
+      setCookie(COOKIE_CONSENT_DATE_KEY, new Date().toISOString(), 365)
 
-    // Aplicar preferências
-    applyCookiePreferences(prefs)
+      // Atualizar estado
+      setHasConsentState(true)
 
-    // Fechar banner
-    setShowBanner(false)
-    setShowSettings(false)
+      // Salvar no servidor (se usuário estiver logado)
+      // Isso será feito pela API de consentimento
+
+      // Aplicar preferências
+      applyCookiePreferences(prefs)
+
+      // Fechar banner
+      setShowBanner(false)
+      setShowSettings(false)
+    } catch (e) {
+      console.error('Erro ao salvar consentimento:', e)
+      // Mesmo com erro, tentar fechar o banner para não travar o usuário
+      setShowBanner(false)
+      setShowSettings(false)
+    }
   }
 
   const applyCookiePreferences = (prefs: CookiePreferences) => {
@@ -131,17 +202,17 @@ export default function CookieConsentBanner() {
     return null
   }
 
-  // Verificação adicional: se já tem consentimento salvo, não mostrar nada
-  if (typeof window !== 'undefined') {
-    const consent = localStorage.getItem(COOKIE_CONSENT_KEY)
-    if (consent && !showSettings) {
-      return null
-    }
+  // Verificação robusta: se já tem consentimento salvo (localStorage ou cookie), não mostrar nada
+  // Esta verificação é feita tanto no estado quanto diretamente no localStorage/cookie
+  // para garantir que mesmo se o estado não estiver sincronizado, o banner não apareça
+  const hasConsentNow = hasConsentState || (typeof window !== 'undefined' && hasConsent())
+  
+  if (hasConsentNow && !showSettings) {
+    return null
   }
 
+  // Se não tem consentimento e não está mostrando banner nem settings, não mostrar nada
   if (!showBanner && !showSettings) {
-    // Não mostrar botão flutuante - apenas quando necessário (não atrapalha UX)
-    // O usuário pode acessar configurações via footer ou política de privacidade
     return null
   }
 
@@ -205,7 +276,7 @@ export default function CookieConsentBanner() {
               <button
                 onClick={() => {
                   setShowSettings(false)
-                  if (!localStorage.getItem(COOKIE_CONSENT_KEY)) {
+                  if (!hasConsent()) {
                     setShowBanner(true)
                   }
                 }}
@@ -288,7 +359,7 @@ export default function CookieConsentBanner() {
               <button
                 onClick={() => {
                   setShowSettings(false)
-                  if (!localStorage.getItem(COOKIE_CONSENT_KEY)) {
+                  if (!hasConsent()) {
                     setShowBanner(true)
                   }
                 }}
