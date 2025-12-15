@@ -8,10 +8,11 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request, ['coach', 'admin'])
-    if (!user || user instanceof NextResponse) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request, ['coach', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     const { data: config, error } = await supabaseAdmin
       .from('kanban_config')
@@ -86,10 +87,11 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request, ['coach', 'admin'])
-    if (!user || user instanceof NextResponse) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request, ['coach', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     const body = await request.json()
     const { columns, card_fields, quick_actions } = body
