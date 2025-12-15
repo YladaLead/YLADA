@@ -37,7 +37,7 @@ export default function FerramentasBlock() {
   return (
     <Section
       title="🧰 Ferramentas Profissionais"
-      subtitle="Crie e gerencie suas ferramentas de captação"
+      subtitle="Crie estruturas que trabalham por você"
     >
       {/* Atalhos Rápidos - Apenas Quiz Personalizado */}
       <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6">

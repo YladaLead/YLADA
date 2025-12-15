@@ -69,13 +69,13 @@ export default function GSALBlock() {
           <div className="text-center py-8">
             <div className="text-4xl mb-4">🔒</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Complete o Dia 1 da Jornada
+              🔒 Complete o Dia 1 da Jornada
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              O GSAL será desbloqueado após você completar o primeiro dia da sua jornada de transformação.
+              A Gestão GSAL será desbloqueada após você concluir o primeiro dia da sua jornada de transformação.
             </p>
             <PrimaryButton href="/pt/nutri/metodo/jornada/dia/1">
-              Ir para Dia 1 →
+              Ir para o Dia 1 →
             </PrimaryButton>
           </div>
         </Card>

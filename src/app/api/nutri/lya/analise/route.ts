@@ -51,6 +51,79 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ============================================
+    // REGRAS DISCIPLINARES PARA DIAS 1-3
+    // ============================================
+    const estaNosPrimeiros3Dias = jornadaDiaAtual !== null && jornadaDiaAtual >= 1 && jornadaDiaAtual <= 3
+    
+    // Mensagens padrão por dia (para usar quando necessário)
+    const mensagensPadraoPorDia: Record<number, { foco: string; acoes: string[]; onde: string; metrica: string }> = {
+      1: {
+        foco: "Hoje não é sobre fazer tudo. Hoje é sobre começar do jeito certo.",
+        acoes: [
+          "Executar o Dia 1 da Jornada com atenção e sem pular etapas",
+          "Completar a tarefa principal do Dia 1"
+        ],
+        onde: "Jornada 30 Dias → Dia 1",
+        metrica: "Dia 1 concluído até hoje. Isso já te coloca à frente da maioria das nutricionistas."
+      },
+      2: {
+        foco: "Você está no Dia 2, e isso já diz muito sobre você. A maioria começa empolgada e para.",
+        acoes: [
+          "Executar o Dia 2 da Jornada com consistência",
+          "Focar em consistência, não perfeição"
+        ],
+        onde: "Jornada 30 Dias → Dia 2",
+        metrica: "Dia 2 concluído. Você está construindo algo diferente."
+      },
+      3: {
+        foco: "A partir do Dia 3, algo muda. Você começa a sair do modo sobrevivência e entra no modo construção profissional.",
+        acoes: [
+          "Continuar seguindo a Jornada",
+          "Respeitar as etapas sem pular"
+        ],
+        onde: "Jornada 30 Dias → Dia 3",
+        metrica: "Dia 3 concluído. Os resultados não vêm de pular etapas — vêm de respeitá-las."
+      }
+    }
+
+    // Construir regras disciplinares baseadas no dia atual
+    let regrasDisciplinares = ''
+    let mensagemInicial = ''
+    
+    if (jornadaDiaAtual === null) {
+      // Jornada não iniciada
+      regrasDisciplinares = `
+REGRA CRÍTICA - JORNADA NÃO INICIADA:
+- Você DEVE sempre orientar: "Inicie o Dia 1 da Jornada"
+- Não sugira outras ações até que o Dia 1 seja completado
+- Seja direto e claro: o único foco agora é iniciar o Dia 1`
+      mensagemInicial = 'A nutricionista ainda não iniciou a Jornada. Seu único objetivo é conduzi-la para o Dia 1.'
+    } else if (estaNosPrimeiros3Dias) {
+      // Dias 1-3: disciplina máxima
+      const diaInfo = mensagensPadraoPorDia[jornadaDiaAtual]
+      regrasDisciplinares = `
+REGRA CRÍTICA - DIAS 1-3 (DISCIPLINA MÁXIMA):
+Você está no Dia ${jornadaDiaAtual} da Jornada. Isso significa disciplina total.
+
+COMPORTAMENTO OBRIGATÓRIO:
+- Se a pergunta NÃO está relacionada ao Dia ${jornadaDiaAtual} atual → você DEVE redirecionar para a Jornada
+- Se a pergunta é sobre temas avançados (GSAL completo, estratégias complexas, etc.) → você DEVE dizer: "Isso vamos tratar no momento certo. Agora, foque no Dia ${jornadaDiaAtual}."
+- Se a pergunta tenta pular etapas → você DEVE dizer: "Confie no processo. Volte para o Dia ${jornadaDiaAtual} e execute exatamente o que está proposto."
+
+TOM ESPECÍFICO DO DIA ${jornadaDiaAtual}:
+${jornadaDiaAtual === 1 ? '- Direção + Segurança: "Hoje não é sobre fazer tudo. Hoje é sobre começar do jeito certo."' : ''}
+${jornadaDiaAtual === 2 ? '- Consistência + Validação: "Você está construindo algo diferente. Hoje, seu foco é consistência, não perfeição."' : ''}
+${jornadaDiaAtual === 3 ? '- Autoridade + Visão: "Menos ansiedade. Mais direção. Continue seguindo a Jornada."' : ''}
+
+FRASE-CHAVE QUE DEVE SE REPETIR:
+"Menos ansiedade. Mais direção."
+
+FUNÇÃO DA LYA NESSE INÍCIO:
+Conduzir, não agradar. Sua função é criar disciplina, autoridade e resultado real.`
+      mensagemInicial = `A nutricionista está no Dia ${jornadaDiaAtual}. Você deve manter disciplina total e redirecionar qualquer pergunta fora do foco para a Jornada.`
+    }
+
     // PROMPT-MESTRE DA LYA (MVP - será substituído pela Assistant depois)
     const systemPrompt = `Você é LYA, mentora estratégica oficial da plataforma Nutri YLADA.
 
@@ -69,6 +142,8 @@ REGRAS IMPORTANTES:
 - Se o campo aberto foi preenchido, você deve reconhecer explicitamente na sua resposta.
 - Se o campo aberto não foi preenchido, não precisa mencionar.
 - Toda resposta DEVE seguir EXATAMENTE o formato fixo abaixo (sem exceção).
+
+${regrasDisciplinares}
 
 Tom de voz: ${perfil.tom_lya}
 Ritmo de condução: ${perfil.ritmo_conducao}
@@ -95,16 +170,13 @@ IMPORTANTE:
 - Use APENAS este formato. Não adicione texto antes ou depois.
 - Não use markdown para links. Apenas texto natural.
 - Não use emojis nos blocos (exceto ☐ para checklist).
-- Seja direto e objetivo. Sem parágrafos longos.
-
-REGRA ÚNICA (MVP):
-SE jornada não iniciada → sempre orientar: "Inicie o Dia 1 da Jornada" (link: /pt/nutri/metodo/jornada/dia/1)`
+- Seja direto e objetivo. Sem parágrafos longos.`
 
     const campoAbertoInfo = diagnostico.campo_aberto && diagnostico.campo_aberto.trim().length > 0
       ? `- Campo Aberto: "${diagnostico.campo_aberto}"`
       : '- Campo Aberto: Não preenchido (nutricionista optou por não adicionar informações extras)'
 
-    const userMessage = `Dados da nutricionista:
+    const userMessage = `${mensagemInicial ? mensagemInicial + '\n\n' : ''}Dados da nutricionista:
 
 Perfil Estratégico:
 - Tipo: ${perfil.tipo_nutri}
@@ -120,8 +192,11 @@ ${campoAbertoInfo}
 Jornada:
 - Iniciada: ${jornadaDiaAtual !== null ? 'Sim' : 'Não'}
 - Dia Atual: ${jornadaDiaAtual || 'Não iniciada'}
+${estaNosPrimeiros3Dias ? `\n⚠️ ATENÇÃO: Você está nos primeiros 3 dias (Dia ${jornadaDiaAtual}). Mantenha disciplina total e redirecione qualquer pergunta fora do foco para a Jornada.` : ''}
 
 Gere a análise da LYA seguindo EXATAMENTE o formato fixo de 4 blocos definido acima.
+
+${estaNosPrimeiros3Dias ? `\nIMPORTANTE - DISCIPLINA DIAS 1-3:\nSe a análise tentar sugerir ações fora do Dia ${jornadaDiaAtual}, você DEVE usar a mensagem padrão do Dia ${jornadaDiaAtual}:\n${JSON.stringify(mensagensPadraoPorDia[jornadaDiaAtual], null, 2)}` : ''}
 
 IMPORTANTE: Sua resposta deve começar com "ANÁLISE DA LYA — HOJE" e seguir os 4 blocos na ordem exata:
 1) FOCO PRIORITÁRIO
@@ -259,6 +334,9 @@ Não adicione texto antes ou depois desses blocos.`
         // Usuário não tem assinatura, sugerir ação sem link direto
         linkInterno = '/pt/nutri/home'
       }
+    } else if (estaNosPrimeiros3Dias && temAcessoCursos) {
+      // Se está nos primeiros 3 dias, sempre redirecionar para o dia atual
+      linkInterno = `/pt/nutri/metodo/jornada/dia/${jornadaDiaAtual}`
     }
 
     // Salvar análise (formato novo)
@@ -338,7 +416,8 @@ export async function GET(request: NextRequest) {
             onde_aplicar: parsed.onde_aplicar,
             metrica_sucesso: parsed.metrica_sucesso,
             link_interno: analise.link_interno || '/pt/nutri/home',
-            mensagem_completa: analise.mensagem_completa
+            mensagem_completa: analise.mensagem_completa,
+            created_at: analise.created_at
           }
         })
       } else {
@@ -359,7 +438,8 @@ export async function GET(request: NextRequest) {
           onde_aplicar: analise.onde_aplicar || '',
           metrica_sucesso: analise.metrica_sucesso || '',
           link_interno: analise.link_interno || '/pt/nutri/home',
-          mensagem_completa: analise.mensagem_completa
+          mensagem_completa: analise.mensagem_completa,
+          created_at: analise.created_at
         }
       })
     }

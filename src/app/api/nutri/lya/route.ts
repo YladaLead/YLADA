@@ -70,6 +70,79 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================
+    // VERIFICAÇÃO DISCIPLINAR PARA DIAS 1-3
+    // ============================================
+    const jornadaResult = await supabaseAdmin
+      .from('journey_progress')
+      .select('day_number, completed')
+      .eq('user_id', user.id)
+      .order('day_number', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    
+    const jornadaDiaAtual = jornadaResult.data?.day_number || null
+    const estaNosPrimeiros3Dias = jornadaDiaAtual !== null && jornadaDiaAtual >= 1 && jornadaDiaAtual <= 3
+    
+    // Palavras-chave que indicam tentativa de pular etapas ou temas avançados
+    const palavrasChaveAvancadas = [
+      'gsal completo', 'gestão completa', 'pipeline completo',
+      'estratégia avançada', 'técnica avançada', 'método avançado',
+      'pular', 'adiantar', 'avançar', 'pular etapas',
+      'dia 4', 'dia 5', 'dia 6', 'dia 7', 'dia 8', 'dia 9', 'dia 10',
+      'semana 2', 'semana 3', 'semana 4'
+    ]
+    
+    const mensagemLower = message.toLowerCase()
+    const tentandoPularEtapas = palavrasChaveAvancadas.some(palavra => mensagemLower.includes(palavra))
+    
+    // Se está nos primeiros 3 dias e tentando pular etapas, aplicar disciplina
+    if (estaNosPrimeiros3Dias && tentandoPularEtapas) {
+      console.log(`🔒 [LYA] Disciplina aplicada - Dia ${jornadaDiaAtual}, tentativa de pular etapas detectada`)
+      
+      const respostasDisciplinadas: Record<number, string> = {
+        1: `Eu sei que isso parece importante, mas não é o foco agora.
+
+Hoje não é sobre fazer tudo. Hoje é sobre começar do jeito certo.
+
+Você está no Dia 1 da sua Jornada YLADA.
+Seu único objetivo agora é executar o Dia 1 com atenção e sem pular etapas.
+
+Confie no processo.
+Volte para o Dia 1 e execute exatamente o que está proposto.
+
+Se você fizer isso hoje, você já estará à frente da maioria das nutricionistas.`,
+        2: `Esse tema vai ser muito melhor aproveitado mais adiante.
+
+Você está no Dia 2, e isso já diz muito sobre você.
+A maioria começa empolgada e para.
+Você está construindo algo diferente.
+
+Hoje, seu foco é consistência, não perfeição.
+Faça o que está proposto no Dia 2 e siga em frente.
+
+Agora, seu crescimento vem da sequência, não da antecipação.`,
+        3: `A partir do Dia 3, algo muda.
+
+Você começa a sair do modo sobrevivência
+e entra no modo construção profissional.
+
+Continue seguindo a Jornada.
+Os resultados não vêm de pular etapas — vêm de respeitá-las.
+
+Menos ansiedade. Mais direção.
+
+Foque no Dia 3. O resto vem no momento certo.`
+      }
+      
+      return NextResponse.json({
+        response: respostasDisciplinadas[jornadaDiaAtual] || respostasDisciplinadas[1],
+        threadId: threadId || 'disciplined',
+        modelUsed: 'gpt-4-disciplined',
+        disciplined: true
+      })
+    }
+
+    // ============================================
     // PRIORIDADE 1: Assistants API com function calling
     // ============================================
     const assistantId = process.env.OPENAI_ASSISTANT_LYA_ID || process.env.OPENAI_ASSISTANT_ID

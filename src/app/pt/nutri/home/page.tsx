@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import ChatIA from '../../../../components/ChatIA'
 import ProtectedRoute from '../../../../components/auth/ProtectedRoute'
 import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import NutriSidebar from '../../../../components/nutri/NutriSidebar'
@@ -13,7 +12,7 @@ import GSALBlock from '@/components/nutri/home/GSALBlock'
 import BibliotecaBlock from '@/components/nutri/home/BibliotecaBlock'
 import AnotacoesBlock from '@/components/nutri/home/AnotacoesBlock'
 import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
-import NutriChatWidget from '@/components/nutri/NutriChatWidget'
+import LyaChatWidget from '@/components/nutri/LyaChatWidget'
 import LyaAnaliseHoje from '@/components/nutri/LyaAnaliseHoje'
 
 export default function NutriHome() {
@@ -28,7 +27,6 @@ export default function NutriHome() {
 
 function NutriHomeContent() {
   const { user, loading } = useAuth()
-  const [chatAberto, setChatAberto] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Aguardar autenticação
@@ -97,8 +95,8 @@ function NutriHomeContent() {
             <JornadaBlock />
           </div>
 
-          {/* Bloco 2: Pilares do Método */}
-          <div className="mb-8">
+          {/* Bloco 2: Pilares do Método (visualmente secundário) */}
+          <div className="mb-8 opacity-75">
             <PilaresBlock />
           </div>
 
@@ -112,19 +110,19 @@ function NutriHomeContent() {
             <GSALBlock />
           </div>
 
-          {/* Bloco 5: Biblioteca / Materiais Extras */}
-          <div className="mb-8">
+          {/* Bloco 5: Biblioteca / Materiais Extras (visualmente secundário) */}
+          <div className="mb-8 opacity-75">
             <BibliotecaBlock />
           </div>
 
-          {/* Bloco 6: Minhas Anotações */}
-          <div className="mb-8">
+          {/* Bloco 6: Minhas Anotações (visualmente secundário) */}
+          <div className="mb-8 opacity-75">
             <AnotacoesBlock />
           </div>
         </div>
 
-        {/* Chat Widget Flutuante - Assistente de Formação como padrão na Home */}
-        <NutriChatWidget chatbotId="formacao" />
+        {/* Chat Widget Flutuante - Mentora LYA */}
+        <LyaChatWidget />
       </div>
     </div>
   )

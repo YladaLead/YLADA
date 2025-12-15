@@ -43,7 +43,7 @@ export default function JornadaBlock() {
           Jornada de Transformação YLADA
         </h2>
         <p className="text-gray-700 text-sm sm:text-base">
-          Continue seu processo de evolução
+          Você não precisa fazer tudo. Você precisa fazer o próximo passo certo.
         </p>
       </div>
 
@@ -84,11 +84,11 @@ export default function JornadaBlock() {
               </div>
             ) : (
               <PrimaryButton
-                href="/pt/nutri/metodo/jornada"
+                href="/pt/nutri/metodo/jornada/dia/1"
                 fullWidth
                 className="text-lg py-4"
               >
-                Iniciar Jornada de 30 Dias
+                Iniciar Dia 1 da Jornada →
               </PrimaryButton>
             )}
           </div>
