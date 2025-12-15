@@ -192,10 +192,47 @@ export function useAuth() {
           
           setSession(sessionToUse)
           setUser(sessionToUse.user ?? null)
-          // Se temos sessão, marcar loading como false imediatamente (perfil pode carregar depois)
-          setLoading(false)
-
-          // Buscar perfil em background (não bloqueia)
+          
+          // 🚀 OTIMIZAÇÃO: Tentar carregar perfil do cache primeiro (instantâneo)
+          // Se cache existe, marcar loading=false imediatamente
+          // Se não, buscar perfil e marcar loading=false após buscar
+          if (typeof window !== 'undefined') {
+            const cacheKey = `user_profile_${sessionToUse.user.id}`
+            const cached = sessionStorage.getItem(cacheKey)
+            
+            if (cached) {
+              try {
+                const { data, timestamp } = JSON.parse(cached)
+                const age = Date.now() - timestamp
+                const TTL = 2 * 60 * 1000 // 2 minutos
+                
+                if (age < TTL) {
+                  // Cache válido - usar imediatamente
+                  console.log('✅ useAuth: Perfil encontrado no cache (instantâneo)')
+                  setUserProfile(data as UserProfile)
+                  setLoading(false)
+                  
+                  // Atualizar perfil em background (sem bloquear)
+                  fetchUserProfile(sessionToUse.user.id, false)
+                    .then(profile => {
+                      if (!mounted) return
+                      if (profile) {
+                        setUserProfile(profile) // Atualizar se mudou
+                      }
+                    })
+                    .catch(() => {
+                      // Ignorar erros em background
+                    })
+                  return
+                }
+              } catch (e) {
+                // Cache inválido, continuar normalmente
+              }
+            }
+          }
+          
+          // Cache não encontrado ou inválido - buscar perfil
+          // Marcar loading=false apenas após buscar (ou timeout)
           fetchUserProfile(sessionToUse.user.id, true)
             .then(profile => {
               if (!mounted) return
@@ -205,11 +242,13 @@ export function useAuth() {
                 console.warn('⚠️ useAuth: Perfil não encontrado')
               }
               setUserProfile(profile)
+              setLoading(false) // Marcar loading=false apenas após buscar perfil
             })
             .catch(err => {
               if (!mounted) return
               console.error('❌ useAuth: Erro ao buscar perfil:', err?.message)
               setUserProfile(null)
+              setLoading(false) // Marcar loading=false mesmo em caso de erro
             })
         } else {
           console.log('⚠️ useAuth: Nenhuma sessão encontrada', { isPWA, error })
@@ -228,9 +267,9 @@ export function useAuth() {
       }
     }
 
-    // Timeout de segurança: mais curto para PWA (1s) e normal para web (1.5s)
+    // 🚀 OTIMIZAÇÃO: Timeout reduzido (500ms PWA, 800ms web) - mais rápido
     // Não acionar se já temos uma sessão válida (mesmo que o perfil ainda esteja carregando)
-    const timeoutDuration = isPWA ? 1000 : 1500
+    const timeoutDuration = isPWA ? 500 : 800
     loadingTimeout = setTimeout(() => {
       if (!mounted) return
       // Verificar se ainda está em loading e não temos sessão
@@ -251,7 +290,8 @@ export function useAuth() {
     let lastSessionId: string | null = null
     let profileLoading = false
     let lastAuthEventTime = 0
-    const AUTH_EVENT_DEBOUNCE = 1000 // 1 segundo entre eventos
+    // 🚀 OTIMIZAÇÃO: Debounce reduzido de 1000ms para 300ms - mais responsivo
+    const AUTH_EVENT_DEBOUNCE = 300 // 300ms entre eventos (reduzido de 1s)
     
     const {
       data: { subscription },
@@ -299,12 +339,9 @@ export function useAuth() {
         console.log('🔍 useAuth: Buscando perfil após auth change para user_id:', session.user.id)
         
         try {
-          // Invalidar cache após login para garantir dados atualizados
-          const shouldInvalidateCache = event === 'SIGNED_IN'
-          if (shouldInvalidateCache && typeof window !== 'undefined') {
-            const cacheKey = `user_profile_${session.user.id}`
-            sessionStorage.removeItem(cacheKey)
-          }
+          // 🚀 OTIMIZAÇÃO: Não invalidar cache imediatamente - apenas atualizar se necessário
+          // Cache será atualizado automaticamente quando perfil for buscado
+          const shouldInvalidateCache = false // Sempre usar cache primeiro (mais rápido)
           
           const profile = await fetchUserProfile(session.user.id, !shouldInvalidateCache)
           if (!mounted) return
@@ -358,8 +395,9 @@ export function useAuth() {
         console.log('🔄 useAuth: App voltou ao foreground, verificando sessão...')
         checkingSessionRef = true
         
-        // Aguardar um pouco antes de verificar (evita race conditions)
-        setTimeout(async () => {
+        // 🚀 OTIMIZAÇÃO: Verificar imediatamente (sem delay) - mais rápido
+        // Usar requestAnimationFrame para evitar race conditions sem adicionar delay
+        requestAnimationFrame(async () => {
           if (!mounted) {
             checkingSessionRef = false
             return
@@ -399,7 +437,7 @@ export function useAuth() {
             console.warn('⚠️ useAuth: Erro ao verificar sessão após voltar do background:', err)
             checkingSessionRef = false
           }
-        }, 500) // Aguardar 500ms antes de verificar
+        })
       }
     }
 

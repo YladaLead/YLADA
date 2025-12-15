@@ -191,7 +191,6 @@ export default function LoginForm({
               lastPage.length > 3 // Garantir que não é apenas "/pt" ou "/e"
             const finalRedirectPath = isValidRoute ? lastPage : redirectPath
             
-            // Aguardar um pouco para garantir que a sessão foi persistida
             console.log('🔄 Redirecionando após cadastro para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : '(padrão)')
             
             // Verificar se já está na página de destino para evitar loop
@@ -202,9 +201,10 @@ export default function LoginForm({
               return
             }
             
-            setTimeout(() => {
-              router.replace(finalRedirectPath) // Usar replace ao invés de push
-            }, 300) // Aumentado para 300ms para garantir persistência da sessão
+            // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sessão já foi criada)
+            // useAuth vai detectar a sessão automaticamente via onAuthStateChange
+            router.replace(finalRedirectPath) // Usar replace ao invés de push
+            setLoading(false) // Marcar loading=false imediatamente
           }
         } else {
           setError('Erro ao criar conta. Tente novamente.')
@@ -344,8 +344,6 @@ export default function LoginForm({
           lastPage.length > 3 // Garantir que não é apenas "/pt" ou "/e"
         const finalRedirectPath = isValidRoute ? lastPage : redirectPath
         
-        // 🚀 CORREÇÃO: Redirecionar imediatamente após login bem-sucedido
-        // Aguardar um pouco para garantir que a sessão foi persistida
         console.log('🔄 Redirecionando após login para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : '(padrão)')
         
         // Verificar se já está na página de destino para evitar loop
@@ -356,22 +354,11 @@ export default function LoginForm({
           return
         }
         
-        // Usar setTimeout para garantir que o estado foi atualizado e sessão persistida
-        // Aumentado para 500ms para garantir que a sessão seja persistida antes do redirecionamento
-        setTimeout(() => {
-          // Verificar novamente se a sessão ainda existe antes de redirecionar
-          supabase.auth.getSession().then(({ data: { session: verifySession } }) => {
-            if (verifySession) {
-              console.log('✅ Sessão confirmada antes do redirecionamento')
-          router.replace(finalRedirectPath) // Usar replace para não adicionar ao histórico
-            } else {
-              console.error('❌ Sessão perdida antes do redirecionamento - tentando novamente')
-              // Tentar fazer login novamente ou mostrar erro
-              setError('Erro ao manter sessão. Tente fazer login novamente.')
-              setLoading(false)
-            }
-          })
-        }, 500) // Aumentado para 500ms para garantir persistência da sessão
+        // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sessão já foi criada)
+        // useAuth vai detectar a sessão automaticamente via onAuthStateChange
+        // Não precisa aguardar - a sessão já está disponível
+        router.replace(finalRedirectPath) // Usar replace para não adicionar ao histórico
+        setLoading(false) // Marcar loading=false imediatamente
 
         return
       }

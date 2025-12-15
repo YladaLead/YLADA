@@ -61,9 +61,8 @@ export default function AutoRedirect() {
         console.log('✅ AutoRedirect: Usuário logado em página de login, redirecionando para:', homePath)
         hasRedirectedRef.current = true
         
-        redirectTimeoutRef.current = setTimeout(() => {
-          router.replace(homePath)
-        }, 100) // Redirecionamento rápido
+        // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sem delay)
+        router.replace(homePath)
         
         return
       }
@@ -101,9 +100,8 @@ export default function AutoRedirect() {
         console.log('🔄 AutoRedirect: Usuário não logado em página protegida, redirecionando para:', loginPath)
         hasRedirectedRef.current = true
         
-        redirectTimeoutRef.current = setTimeout(() => {
-          router.replace(loginPath)
-        }, 100)
+        // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sem delay)
+        router.replace(loginPath)
         
         return
       }

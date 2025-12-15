@@ -29,7 +29,7 @@ export default function ProtectedRoute({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef(true)
 
-  // Timeout reduzido para 1 segundo (melhor UX com cache)
+  // 🚀 OTIMIZAÇÃO: Timeout reduzido para 500ms (com cache, raramente necessário)
   useEffect(() => {
     mountedRef.current = true
     
@@ -38,11 +38,31 @@ export default function ProtectedRoute({
     }
 
     if (loading) {
+      // 🚀 OTIMIZAÇÃO: Verificar cache primeiro antes de usar timeout
+      if (user && typeof window !== 'undefined') {
+        const cacheKey = `user_profile_${user.id}`
+        const cached = sessionStorage.getItem(cacheKey)
+        if (cached) {
+          try {
+            const { data, timestamp } = JSON.parse(cached)
+            const age = Date.now() - timestamp
+            const TTL = 2 * 60 * 1000 // 2 minutos
+            if (age < TTL) {
+              // Cache válido - não precisa timeout
+              setHasTimedOut(false)
+              return
+            }
+          } catch (e) {
+            // Cache inválido, continuar com timeout
+          }
+        }
+      }
+      
       timeoutRef.current = setTimeout(() => {
         if (mountedRef.current) {
           setHasTimedOut(true)
         }
-      }, 1000) // Reduzido de 1500ms para 1000ms (com cache, carrega mais rápido)
+      }, 500) // Reduzido de 1000ms para 500ms (com cache, raramente necessário)
     } else {
       setHasTimedOut(false)
     }
@@ -53,7 +73,7 @@ export default function ProtectedRoute({
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [loading])
+  }, [loading, user])
 
   // 🚀 FASE 2: Removido redirecionamento - AutoRedirect cuida disso
   // Este componente apenas verifica permissão, não redireciona

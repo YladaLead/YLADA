@@ -39,14 +39,34 @@ export default function RequireSubscription({
   
   // IMPORTANTE: TODOS os Hooks devem estar sempre no topo, antes de qualquer retorno condicional
   // Hook 1: Timeout do perfil
-  // 🚀 OTIMIZAÇÃO: Reduzido de 1s para 0.8s (com cache do useAuth, perfil carrega mais rápido)
+  // 🚀 OTIMIZAÇÃO: Reduzido para 400ms (com cache, perfil carrega instantaneamente)
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
     
     if (!userProfile && user) {
+      // 🚀 OTIMIZAÇÃO: Verificar cache primeiro antes de usar timeout
+      if (typeof window !== 'undefined') {
+        const cacheKey = `user_profile_${user.id}`
+        const cached = sessionStorage.getItem(cacheKey)
+        if (cached) {
+          try {
+            const { data, timestamp } = JSON.parse(cached)
+            const age = Date.now() - timestamp
+            const TTL = 2 * 60 * 1000 // 2 minutos
+            if (age < TTL) {
+              // Cache válido - não precisa timeout
+              setProfileCheckTimeout(false)
+              return
+            }
+          } catch (e) {
+            // Cache inválido, continuar com timeout
+          }
+        }
+      }
+      
       timer = setTimeout(() => {
         setProfileCheckTimeout(true)
-      }, 800) // Reduzido de 1s para 0.8s
+      }, 400) // Reduzido de 800ms para 400ms (com cache, raramente necessário)
     } else {
       setProfileCheckTimeout(false)
     }
@@ -127,9 +147,9 @@ export default function RequireSubscription({
           return
         }
 
-        // Cache não encontrado ou expirado, verificar via API (com timeout reduzido para 1.5s)
+        // 🚀 OTIMIZAÇÃO: Cache não encontrado ou expirado, verificar via API (com timeout reduzido para 1s)
         controller = new AbortController()
-        const timeoutId = setTimeout(() => controller?.abort(), 1500)
+        const timeoutId = setTimeout(() => controller?.abort(), 1000) // Reduzido de 1500ms para 1000ms
         
         // Obter access token para enviar no header (fallback quando cookies falharem)
         let accessToken: string | null = null
@@ -184,34 +204,44 @@ export default function RequireSubscription({
           setHasSubscription(hasActive)
           setCanBypass(canBypassValue)
 
-          // Se tem assinatura, buscar detalhes (em background, não bloqueia)
+          // 🚀 OTIMIZAÇÃO: Se tem assinatura, buscar detalhes em paralelo (não bloqueia)
+          // Usar requestIdleCallback para não bloquear renderização
           if (data.hasActiveSubscription) {
-            fetch(`/api/${area}/subscription`, {
-              credentials: 'include',
-            })
-              .then(subResponse => {
-                if (subResponse.ok) {
-                  return subResponse.json()
-                }
+            const fetchDetails = () => {
+              fetch(`/api/${area}/subscription`, {
+                credentials: 'include',
               })
-              .then(subData => {
-                if (isMounted && subData?.subscription) {
-                  setSubscriptionData(subData.subscription)
-                  // Calcular dias até vencimento imediatamente
-                  if (subData.subscription?.current_period_end) {
-                    const expiryDate = new Date(subData.subscription.current_period_end)
-                    const now = new Date()
-                    const diffTime = expiryDate.getTime() - now.getTime()
-                    // Usar Math.floor para arredondar para baixo (se faltam 2.1 dias, mostra 2 dias)
-                    // Math.ceil estava causando erro: se faltam 2.1 dias, mostrava 3 dias
-                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-                    setDaysUntilExpiry(diffDays)
+                .then(subResponse => {
+                  if (subResponse.ok) {
+                    return subResponse.json()
                   }
-                }
-              })
-              .catch(err => {
-                console.error('Erro ao buscar detalhes da assinatura:', err)
-              })
+                })
+                .then(subData => {
+                  if (isMounted && subData?.subscription) {
+                    setSubscriptionData(subData.subscription)
+                    // Calcular dias até vencimento imediatamente
+                    if (subData.subscription?.current_period_end) {
+                      const expiryDate = new Date(subData.subscription.current_period_end)
+                      const now = new Date()
+                      const diffTime = expiryDate.getTime() - now.getTime()
+                      // Usar Math.floor para arredondar para baixo (se faltam 2.1 dias, mostra 2 dias)
+                      // Math.ceil estava causando erro: se faltam 2.1 dias, mostrava 3 dias
+                      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+                      setDaysUntilExpiry(diffDays)
+                    }
+                  }
+                })
+                .catch(err => {
+                  console.error('Erro ao buscar detalhes da assinatura:', err)
+                })
+            }
+            
+            // Usar requestIdleCallback se disponível, senão setTimeout
+            if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+              requestIdleCallback(fetchDetails, { timeout: 2000 })
+            } else {
+              setTimeout(fetchDetails, 0)
+            }
           }
 
           setCheckingSubscription(false)
@@ -246,17 +276,17 @@ export default function RequireSubscription({
   }, [user, userProfile, authLoading, area, profileCheckTimeout])
 
   // Hook 3: Timeout para verificação de assinatura
-  // 🚀 OTIMIZAÇÃO: Reduzido de 2s para 1s (com cache, verificação é muito mais rápida)
+  // 🚀 OTIMIZAÇÃO: Reduzido para 600ms (com cache, verificação é instantânea)
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
     
     if (checkingSubscription) {
       timer = setTimeout(() => {
-        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 1s, permitindo acesso temporário')
+        console.warn('⚠️ RequireSubscription: Verificação demorou mais de 600ms, permitindo acesso temporário')
         setShowLoading(false)
         setCheckingSubscription(false)
         setHasSubscription(true)
-      }, 1000) // Reduzido de 2s para 1s (com cache, raramente será necessário)
+      }, 600) // Reduzido de 1000ms para 600ms (com cache, raramente será necessário)
     } else {
       setShowLoading(false)
     }
@@ -396,12 +426,10 @@ export default function RequireSubscription({
       console.log('🔄 RequireSubscription: Usuário sem assinatura, redirecionando para:', redirectPath)
       setHasRedirected(true)
       
-      // Pequeno delay para evitar múltiplos redirecionamentos
-      const timer = setTimeout(() => {
-        router.replace(redirectPath)
-      }, 100)
+      // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sem delay)
+      router.replace(redirectPath)
       
-      return () => clearTimeout(timer)
+      return () => {}
     }
   }, [hasSubscription, canBypass, checkingSubscription, authLoading, user, hasRedirected, pathname, area, router])
   
