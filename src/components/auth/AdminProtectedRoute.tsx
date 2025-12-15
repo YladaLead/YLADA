@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { getCachedAdminCheck, setCachedAdminCheck, clearCachedAdminCheck } from '@/lib/auth-cache'
+import { useAuth } from '@/contexts/AuthContext'
 
 const supabase = createClient()
 
@@ -13,19 +14,43 @@ interface AdminProtectedRouteProps {
 export default function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
+  const { user, userProfile, loading: authLoading } = useAuth()
+  const checkingRef = useRef(false)
 
   useEffect(() => {
+    // Evitar múltiplas execuções simultâneas
+    if (checkingRef.current) {
+      return
+    }
+    
+    // Só executar quando autenticação terminar de carregar
+    if (authLoading) {
+      console.log('⏳ AdminProtectedRoute: Aguardando autenticação...')
+      return
+    }
+    
+    // Se não tem usuário, redirecionar
+    if (!user) {
+      console.log('❌ AdminProtectedRoute: Sem usuário')
+      if (loading) {
+        setLoading(false)
+      }
+      window.location.href = '/admin/login'
+      return
+    }
+    
+    checkingRef.current = true
     let mounted = true
     let timeoutId: NodeJS.Timeout | null = null
 
-    // Timeout de segurança: se demorar mais de 10s, redirecionar
+    // Timeout de segurança: se demorar mais de 15s, redirecionar
     timeoutId = setTimeout(() => {
       if (mounted && loading) {
-        console.error('⏰ AdminProtectedRoute: Timeout de segurança (10s) - redirecionando...')
+        console.error('⏰ AdminProtectedRoute: Timeout de segurança (15s) - redirecionando...')
         clearCachedAdminCheck()
         window.location.href = '/admin/login'
       }
-    }, 10000)
+    }, 15000)
 
     const checkAdmin = async () => {
       try {
@@ -38,8 +63,11 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
           // Verificar sessão rapidamente para confirmar que ainda está autenticado
           const { data: { session } } = await supabase.auth.getSession()
           if (session?.access_token) {
-            setIsAdmin(true)
-            setLoading(false)
+            if (mounted) {
+              setIsAdmin(true)
+              setLoading(false)
+            }
+            if (timeoutId) clearTimeout(timeoutId)
             return
           } else {
             // Sessão expirada, limpar cache
@@ -47,38 +75,91 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
           }
         }
         
-        // 🚀 OTIMIZAÇÃO: Paralelizar getUser() e getSession() (mais rápido)
-        const [userResult, sessionResult] = await Promise.all([
-          supabase.auth.getUser(),
-          supabase.auth.getSession()
-        ])
+        // Aguardar autenticação carregar (se ainda estiver carregando)
+        if (authLoading) {
+          console.log('⏳ AdminProtectedRoute: Aguardando autenticação carregar...')
+          // Aguardar até 5s pela autenticação
+          let waitCount = 0
+          while (authLoading && waitCount < 50 && mounted) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+            waitCount++
+          }
+        }
         
-        const { data: { user }, error: userError } = userResult
-        const { data: { session } } = sessionResult
+        // 🚀 OTIMIZAÇÃO: Usar user do useAuth se disponível (mais rápido)
+        let currentUser = user
+        let currentSession = null
+        
+        if (!currentUser) {
+          // Se não tem user do useAuth, buscar diretamente
+          console.log('🔍 AdminProtectedRoute: Buscando usuário diretamente...')
+          const [userResult, sessionResult] = await Promise.all([
+            supabase.auth.getUser(),
+            supabase.auth.getSession()
+          ])
+          
+          const { data: { user: fetchedUser }, error: userError } = userResult
+          const { data: { session } } = sessionResult
+          
+          if (!mounted) return
+
+          if (!fetchedUser || userError) {
+            console.log('❌ AdminProtectedRoute: Sem usuário autenticado:', userError?.message)
+            if (timeoutId) clearTimeout(timeoutId)
+            if (mounted) setLoading(false)
+            clearCachedAdminCheck()
+            window.location.href = '/admin/login'
+            return
+          }
+
+          currentUser = fetchedUser
+          currentSession = session
+        } else {
+          // Usar sessão do useAuth ou buscar
+          const { data: { session } } = await supabase.auth.getSession()
+          currentSession = session
+        }
         
         if (!mounted) return
 
-        if (!user || userError) {
-          console.log('❌ AdminProtectedRoute: Sem usuário autenticado:', userError?.message)
-          clearCachedAdminCheck()
-          window.location.href = '/admin/login'
-          return
-        }
-
-        if (!session?.access_token) {
+        if (!currentSession?.access_token) {
           console.error('❌ AdminProtectedRoute: Sem access_token')
+          if (timeoutId) clearTimeout(timeoutId)
+          if (mounted) setLoading(false)
           clearCachedAdminCheck()
           window.location.href = '/admin/login'
           return
         }
 
-        console.log('✅ AdminProtectedRoute: Usuário autenticado! User:', user.email)
+        console.log('✅ AdminProtectedRoute: Usuário autenticado! User:', currentUser.email)
+        
+        // 🚀 OTIMIZAÇÃO: Se userProfile já estiver carregado e tiver is_admin, usar diretamente
+        if (userProfile?.is_admin === true) {
+          console.log('✅ AdminProtectedRoute: is_admin encontrado no userProfile!')
+          if (mounted) {
+            setCachedAdminCheck(true)
+            setIsAdmin(true)
+            setLoading(false)
+          }
+          if (timeoutId) clearTimeout(timeoutId)
+          return
+        }
+        
+        // Se userProfile está carregado mas is_admin é false, não é admin
+        if (userProfile && userProfile.is_admin === false) {
+          console.log('❌ AdminProtectedRoute: is_admin = false no userProfile')
+          if (timeoutId) clearTimeout(timeoutId)
+          if (mounted) setLoading(false)
+          clearCachedAdminCheck()
+          window.location.href = '/admin/login'
+          return
+        }
 
         // Verificar se é admin usando API route (evita problemas de RLS em produção)
         let isAdmin = false
         
-        // 🚀 OTIMIZAÇÃO: Reduzir timeout de 5s para 2s (mais rápido)
-        const fetchWithTimeout = (url: string, options: RequestInit, timeout = 2000) => {
+        // Função auxiliar para timeout
+        const fetchWithTimeout = (url: string, options: RequestInit, timeout = 5000) => {
           return Promise.race([
             fetch(url, options),
             new Promise<Response>((_, reject) =>
@@ -94,11 +175,11 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
           const checkAdminResponse = await fetchWithTimeout('/api/admin/check', {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${session.access_token}`,
+              'Authorization': `Bearer ${currentSession.access_token}`,
               'Content-Type': 'application/json'
             },
             credentials: 'include' // Garantir que cookies sejam enviados
-          }, 5000) // Aumentado para 5s para dar mais tempo em conexões lentas
+          }, 5000) // 5s timeout
 
           const apiDuration = Date.now() - apiStartTime
           console.log(`⏱️ AdminProtectedRoute: API respondeu em ${apiDuration}ms`)
@@ -116,7 +197,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
               const { data: profile, error: profileError } = await supabase
                 .from('user_profiles')
                 .select('is_admin')
-                .eq('user_id', user.id)
+                .eq('user_id', currentUser.id)
                 .maybeSingle()
 
               if (!profileError && profile) {
@@ -155,7 +236,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
             const { data: profile, error: profileError } = await supabase
               .from('user_profiles')
               .select('is_admin')
-              .eq('user_id', user.id)
+              .eq('user_id', currentUser.id)
               .maybeSingle()
 
             if (!profileError && profile) {
@@ -196,6 +277,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
         if (mounted) {
           setIsAdmin(true)
           setLoading(false)
+          checkingRef.current = false // Permitir re-verificação se necessário
         }
         // Limpar timeout de segurança
         if (timeoutId) clearTimeout(timeoutId)
@@ -206,6 +288,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
         // Limpar timeout de segurança
         if (timeoutId) clearTimeout(timeoutId)
         // Em caso de erro, garantir que o loading seja desativado
+        checkingRef.current = false
         setLoading(false)
         // Em caso de erro, redirecionar para login
         clearCachedAdminCheck()
@@ -225,10 +308,11 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
     return () => {
       mounted = false
+      checkingRef.current = false
       if (timeoutId) clearTimeout(timeoutId)
       subscription.unsubscribe()
     }
-  }, [])
+  }, [user, userProfile, authLoading]) // Re-executar quando user, userProfile ou authLoading mudarem
 
   if (loading) {
     return (
