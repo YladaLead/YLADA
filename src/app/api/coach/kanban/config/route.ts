@@ -20,45 +20,56 @@ export async function GET(request: NextRequest) {
       .eq('area', 'coach')
       .maybeSingle()
 
+    // PGRST116 = nenhuma linha encontrada (não é erro)
     if (error && error.code !== 'PGRST116') {
+      console.error('❌ Erro ao buscar kanban_config:', error)
       throw error
     }
 
     // Se não existe, retornar padrão (cores roxas para Coach)
     if (!config) {
+      const defaultConfig = {
+        columns: [
+          { id: 'lead', value: 'lead', label: 'Contato', description: 'Entrou agora, precisa de acolhimento', color: 'border-purple-300 bg-purple-50', order: 1 },
+          { id: 'pre_consulta', value: 'pre_consulta', label: 'Pré-Consulta', description: 'Já falou com você, falta agendar', color: 'border-yellow-300 bg-yellow-50', order: 2 },
+          { id: 'ativa', value: 'ativa', label: 'Ativa', description: 'Em atendimento e com plano ativo', color: 'border-green-300 bg-green-50', order: 3 },
+          { id: 'pausa', value: 'pausa', label: 'Pausa', description: 'Deu um tempo, precisa nutrir relação', color: 'border-orange-300 bg-orange-50', order: 4 },
+          { id: 'finalizada', value: 'finalizada', label: 'Finalizada', description: 'Concluiu o ciclo com você', color: 'border-gray-300 bg-gray-50', order: 5 }
+        ],
+        card_fields: [
+          { field: 'telefone', visible: true },
+          { field: 'email', visible: false },
+          { field: 'objetivo', visible: true },
+          { field: 'proxima_consulta', visible: true },
+          { field: 'ultima_consulta', visible: true },
+          { field: 'tags', visible: false },
+          { field: 'status_badge', visible: true },
+          { field: 'data_cadastro', visible: false }
+        ],
+        quick_actions: [
+          { action: 'whatsapp', visible: true },
+          { action: 'ver_perfil', visible: true }
+        ]
+      }
+
       return NextResponse.json({
         success: true,
         data: {
-          config: {
-            columns: [
-              { id: 'lead', value: 'lead', label: 'Contato', description: 'Entrou agora, precisa de acolhimento', color: 'border-purple-300 bg-purple-50', order: 1 },
-              { id: 'pre_consulta', value: 'pre_consulta', label: 'Pré-Consulta', description: 'Já falou com você, falta agendar', color: 'border-yellow-300 bg-yellow-50', order: 2 },
-              { id: 'ativa', value: 'ativa', label: 'Ativa', description: 'Em atendimento e com plano ativo', color: 'border-green-300 bg-green-50', order: 3 },
-              { id: 'pausa', value: 'pausa', label: 'Pausa', description: 'Deu um tempo, precisa nutrir relação', color: 'border-orange-300 bg-orange-50', order: 4 },
-              { id: 'finalizada', value: 'finalizada', label: 'Finalizada', description: 'Concluiu o ciclo com você', color: 'border-gray-300 bg-gray-50', order: 5 }
-            ],
-            card_fields: [
-              { field: 'telefone', visible: true },
-              { field: 'email', visible: false },
-              { field: 'objetivo', visible: true },
-              { field: 'proxima_consulta', visible: true },
-              { field: 'ultima_consulta', visible: true },
-              { field: 'tags', visible: false },
-              { field: 'status_badge', visible: true },
-              { field: 'data_cadastro', visible: false }
-            ],
-            quick_actions: [
-              { action: 'whatsapp', visible: true },
-              { action: 'ver_perfil', visible: true }
-            ]
-          }
+          config: defaultConfig
         }
       })
     }
 
+    // Garantir que a estrutura está correta
+    const configData = {
+      columns: config.columns || [],
+      card_fields: config.card_fields || [],
+      quick_actions: config.quick_actions || []
+    }
+
     return NextResponse.json({
       success: true,
-      data: { config }
+      data: { config: configData }
     })
   } catch (error: any) {
     console.error('❌ Erro ao buscar config do Kanban:', error)
@@ -90,17 +101,20 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validar estrutura dos dados antes de salvar
+    const configToSave = {
+      user_id: user.id,
+      area: 'coach',
+      columns: Array.isArray(columns) ? columns : [],
+      card_fields: Array.isArray(card_fields) ? card_fields : [],
+      quick_actions: Array.isArray(quick_actions) ? quick_actions : [],
+      updated_at: new Date().toISOString()
+    }
+
     const { data, error } = await supabaseAdmin
       .from('kanban_config')
       .upsert(
-        {
-          user_id: user.id,
-          area: 'coach',
-          columns: columns || [],
-          card_fields: card_fields || [],
-          quick_actions: quick_actions || [],
-          updated_at: new Date().toISOString()
-        },
+        configToSave,
         {
           onConflict: 'user_id,area'
         }
@@ -109,12 +123,20 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('❌ Erro ao salvar kanban_config:', error)
       throw error
+    }
+
+    // Retornar estrutura consistente
+    const responseData = {
+      columns: data.columns || [],
+      card_fields: data.card_fields || [],
+      quick_actions: data.quick_actions || []
     }
 
     return NextResponse.json({
       success: true,
-      data: { config: data }
+      data: { config: responseData }
     })
   } catch (error: any) {
     console.error('❌ Erro ao salvar config do Kanban:', error)

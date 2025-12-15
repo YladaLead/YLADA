@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (clientId) {
       const { data: client, error } = await supabaseAdmin
         .from('coach_clients')
-        .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, tags')
+        .select('id, name, email, phone, status, converted_from_lead, lead_source, created_at, updated_at, tags')
         .eq('id', clientId)
         .eq('user_id', authenticatedUserId)
         .single()
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
     let query = supabaseAdmin
       .from('coach_clients')
-      .select('id, name, email, phone, status, goal, converted_from_lead, lead_source, created_at, updated_at, tags', { count: 'exact' })
+      .select('id, name, email, phone, status, converted_from_lead, lead_source, created_at, updated_at, tags', { count: 'exact' })
       .eq('user_id', authenticatedUserId)
       .order(orderBy, { ascending: order === 'asc' })
       .range(offset, offset + limit - 1)
@@ -191,8 +191,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar status
-    const validStatuses = ['lead', 'pre_consulta', 'ativa', 'pausa', 'finalizada']
+    // Validar status (conforme schema: 'ativo', 'inativo', 'pausado', 'encerrado')
+    // Mantendo compatibilidade com valores antigos
+    const validStatuses = ['ativo', 'inativo', 'pausado', 'encerrado', 'lead', 'pre_consulta', 'ativa', 'pausa']
     if (status && !validStatuses.includes(status)) {
       return NextResponse.json(
         { error: `Status inválido. Use um dos seguintes: ${validStatuses.join(', ')}` },
@@ -213,12 +214,19 @@ export async function POST(request: NextRequest) {
       gender: gender || null,
       cpf: cpf?.trim() || null,
       status: status,
-      goal: goal || null,
-      instagram: instagram?.trim() || null,
       converted_from_lead: converted_from_lead,
       lead_source: lead_source || null,
       lead_template_id: lead_template_id || null,
       custom_fields: custom_fields || null
+    }
+    
+    // Adicionar campos opcionais ao custom_fields se necessário
+    if (goal || instagram) {
+      clientData.custom_fields = {
+        ...(custom_fields || {}),
+        ...(goal ? { goal } : {}),
+        ...(instagram ? { instagram } : {})
+      }
     }
 
     // Adicionar endereço se fornecido
