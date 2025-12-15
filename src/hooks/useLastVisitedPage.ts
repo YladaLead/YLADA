@@ -24,13 +24,19 @@ export function useLastVisitedPage() {
     }
 
     // Validar que é uma rota válida antes de salvar
+    // Aceitar rotas com prefixo de idioma (/pt/, /en/, /es/) ou rotas administrativas (/admin)
     const isValidRoute = pathname && 
       pathname.startsWith('/') && 
-      (pathname.startsWith('/pt/') || pathname.startsWith('/en/') || pathname.startsWith('/es/')) &&
+      (
+        pathname.startsWith('/pt/') || 
+        pathname.startsWith('/en/') || 
+        pathname.startsWith('/es/') ||
+        pathname.startsWith('/admin')
+      ) &&
       pathname.length > 3 // Garantir que não é apenas "/pt" ou "/e"
     
     if (!isValidRoute) {
-      console.warn('⚠️ Rota inválida ignorada:', pathname)
+      // Não logar warning para rotas que não precisam ser salvas (evita spam no console)
       return
     }
 
@@ -66,12 +72,16 @@ export function useLastVisitedPage() {
         // Validar que a rota salva ainda é válida
         if (lastPage) {
           const isValidRoute = lastPage.startsWith('/') && 
-            (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
+            (
+              lastPage.startsWith('/pt/') || 
+              lastPage.startsWith('/en/') || 
+              lastPage.startsWith('/es/') ||
+              lastPage.startsWith('/admin')
+            ) &&
             lastPage.length > 3
           
           if (!isValidRoute) {
             // Limpar rota inválida do localStorage
-            console.warn('⚠️ Rota inválida encontrada no localStorage, removendo:', lastPage)
             localStorage.removeItem(LAST_VISITED_KEY)
             localStorage.removeItem(LAST_VISITED_TIMESTAMP_KEY)
             return null

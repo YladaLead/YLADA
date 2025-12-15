@@ -16,6 +16,16 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
   useEffect(() => {
     let mounted = true
+    let timeoutId: NodeJS.Timeout | null = null
+
+    // Timeout de segurança: se demorar mais de 10s, redirecionar
+    timeoutId = setTimeout(() => {
+      if (mounted && loading) {
+        console.error('⏰ AdminProtectedRoute: Timeout de segurança (10s) - redirecionando...')
+        clearCachedAdminCheck()
+        window.location.href = '/admin/login'
+      }
+    }, 10000)
 
     const checkAdmin = async () => {
       try {
@@ -86,8 +96,9 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
             headers: {
               'Authorization': `Bearer ${session.access_token}`,
               'Content-Type': 'application/json'
-            }
-          }, 2000) // 🚀 Reduzido de 5s para 2s
+            },
+            credentials: 'include' // Garantir que cookies sejam enviados
+          }, 5000) // Aumentado para 5s para dar mais tempo em conexões lentas
 
           const apiDuration = Date.now() - apiStartTime
           console.log(`⏱️ AdminProtectedRoute: API respondeu em ${apiDuration}ms`)
@@ -101,19 +112,31 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
             console.error('❌ AdminProtectedRoute: Erro na API de verificação:', checkAdminResponse.status, errorData)
             // Fallback: tentar query direta
             console.log('🔄 AdminProtectedRoute: Tentando fallback (query direta)...')
-            const { data: profile, error: profileError } = await supabase
-              .from('user_profiles')
-              .select('is_admin')
-              .eq('user_id', user.id)
-              .maybeSingle()
+            try {
+              const { data: profile, error: profileError } = await supabase
+                .from('user_profiles')
+                .select('is_admin')
+                .eq('user_id', user.id)
+                .maybeSingle()
 
-            if (!profileError && profile) {
-              isAdmin = profile.is_admin === true
-              console.log('✅ AdminProtectedRoute: Usando fallback (query direta):', { isAdmin })
-            } else {
-              console.error('❌ AdminProtectedRoute: Erro no fallback também:', profileError?.message)
-              // Se fallback falhar, redirecionar
+              if (!profileError && profile) {
+                isAdmin = profile.is_admin === true
+                console.log('✅ AdminProtectedRoute: Usando fallback (query direta):', { isAdmin })
+              } else {
+                console.error('❌ AdminProtectedRoute: Erro no fallback também:', profileError?.message)
+                // Se fallback falhar, redirecionar
+                if (!mounted) return
+                if (timeoutId) clearTimeout(timeoutId)
+                setLoading(false)
+                clearCachedAdminCheck()
+                window.location.href = '/admin/login'
+                return
+              }
+            } catch (fallbackErr: any) {
+              console.error('❌ AdminProtectedRoute: Erro ao executar fallback:', fallbackErr.message)
               if (!mounted) return
+              if (timeoutId) clearTimeout(timeoutId)
+              setLoading(false)
               clearCachedAdminCheck()
               window.location.href = '/admin/login'
               return
@@ -170,12 +193,20 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
         // ✅ NOVO: Salvar no cache (true) apenas se for admin
         setCachedAdminCheck(true)
         console.log('✅✅✅ AdminProtectedRoute: ACESSO PERMITIDO!')
-        setIsAdmin(true)
-        setLoading(false)
+        if (mounted) {
+          setIsAdmin(true)
+          setLoading(false)
+        }
+        // Limpar timeout de segurança
+        if (timeoutId) clearTimeout(timeoutId)
       } catch (error: any) {
         if (!mounted) return
         
         console.error('❌ AdminProtectedRoute: Erro geral:', error.message)
+        // Limpar timeout de segurança
+        if (timeoutId) clearTimeout(timeoutId)
+        // Em caso de erro, garantir que o loading seja desativado
+        setLoading(false)
         // Em caso de erro, redirecionar para login
         clearCachedAdminCheck()
         window.location.href = '/admin/login'
@@ -194,6 +225,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
 
     return () => {
       mounted = false
+      if (timeoutId) clearTimeout(timeoutId)
       subscription.unsubscribe()
     }
   }, [])
