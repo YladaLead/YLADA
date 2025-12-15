@@ -50,7 +50,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Redirecionar rotas antigas da área Coach para novas rotas com /c/ (sem "coach" na URL)
+  // Redirecionar rotas de FERRAMENTAS da área Coach para /c/ (apenas links de ferramentas)
   // /pt/coach/formularios/* -> /pt/c/formularios/*
   if (pathname.startsWith('/pt/coach/formularios')) {
     const url = request.nextUrl.clone()
@@ -79,25 +79,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // /pt/coach/portals/* -> /pt/c/portals/*
-  if (pathname.startsWith('/pt/coach/portals/')) {
-    const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/portals/', '/pt/c/portals/')
-    return NextResponse.redirect(url)
-  }
-
-  // Redirecionar outras rotas /pt/coach/* para /pt/c/* (exceto as já tratadas acima)
-  if (pathname.startsWith('/pt/coach/') && 
-      !pathname.startsWith('/pt/coach/c/') && 
-      !pathname.startsWith('/pt/coach/formularios') &&
-      !pathname.startsWith('/pt/coach/clientes') &&
-      !pathname.startsWith('/pt/coach/leads') &&
-      !pathname.startsWith('/pt/coach/ferramentas/') &&
-      !pathname.startsWith('/pt/coach/portals/')) {
-    const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/', '/pt/c/')
-    return NextResponse.redirect(url)
-  }
+  // NOTA: Páginas regulares (login, home, dashboard, sales, quizzes, portais administrativos, etc.) devem permanecer em /pt/coach/
+  // Apenas links de ferramentas (formulários, clientes, leads, ferramentas) são redirecionados para /c/
+  // Links públicos de quizzes individuais já usam /pt/c/[user-slug]/quiz/[slug] diretamente
+  // Links públicos de portais individuais já usam /pt/c/portal/[slug] diretamente
   
   // Verificar se já tem idioma na URL
   const hasLanguage = pathname.startsWith('/pt') || pathname.startsWith('/en') || pathname.startsWith('/es')
