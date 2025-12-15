@@ -136,21 +136,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         baseUrl
       })
       
+      // Verificar se o slug parece ser um fluxo de recrutamento
+      // (tentativa de detectar mesmo sem dados completos)
+      const slugLower = toolSlug.toLowerCase()
+      const pareceFluxoRecrutamento = slugLower.includes('maes') || 
+                                      slugLower.includes('renda') || 
+                                      slugLower.includes('trabalhar') ||
+                                      slugLower.includes('recrutamento')
+      
       // Construir URL base para fallback
-      // Usar imagem específica para WhatsApp (COM logo) mesmo no fallback (versão otimizada)
-      const inferredImage = `${baseUrl}/images/wellness-hero-com-logo.png`
+      let inferredImage: string
+      let fallbackTitle: string
+      let fallbackDescription: string
+      
+      if (pareceFluxoRecrutamento) {
+        // Se parece ser fluxo de recrutamento, usar imagem do quiz-potencial
+        inferredImage = `${baseUrl}/images/og/wellness/quiz-potencial.jpg`
+        fallbackTitle = toolSlug // Usar o slug como título (será formatado)
+        fallbackDescription = 'Descubra seu perfil e potencial'
+      } else {
+        // Para outros casos, usar imagem padrão
+        inferredImage = `${baseUrl}/images/wellness-hero-com-logo.png`
+        fallbackTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
+        fallbackDescription = 'Com inteligência artificial integrada.'
+      }
       
       console.log('[OG Metadata] 🔍 Using inferred metadata (fallback):', {
         toolSlug,
         inferredImage,
+        pareceFluxoRecrutamento
       })
       
-      // Fallback para metadata padrão com texto consistente
-      let fallbackTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
-      const fallbackDescription = 'Com inteligência artificial integrada.'
-      
-      // Remover "WELLNESS" duplicado se já estiver no título
-      if (fallbackTitle.includes('WELLNESS')) {
+      // Remover "WELLNESS" duplicado se já estiver no título (apenas para não-fluxos)
+      if (!pareceFluxoRecrutamento && fallbackTitle.includes('WELLNESS')) {
         fallbackTitle = fallbackTitle.replace(/\s*-\s*WELLNESS\s*/gi, '').trim()
       }
       
@@ -168,12 +186,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             url: inferredImage,
             width: 1200,
             height: 630,
-            type: 'image/png',
+            type: pareceFluxoRecrutamento ? 'image/jpeg' : 'image/png',
           }],
         },
       }
     }
 
+    // Verificar se é um fluxo de recrutamento
+    const isFluxoRecrutamento = tool.is_fluxo && (
+      tool.fluxo_tipo === 'recrutamento' || 
+      (tool.content?.tipo === 'recrutamento')
+    )
+    
     // Normalizar template_slug
     const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
     
@@ -184,44 +208,55 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       template_slug: tool.template_slug,
       normalizedSlug,
       toolTitle: tool.title,
-      toolId: tool.id
+      toolId: tool.id,
+      isFluxoRecrutamento,
+      fluxo_tipo: tool.fluxo_tipo
     })
     
-    // Usar imagem específica para WhatsApp (COM logo do Wellness)
-    // URL absoluta da imagem para compartilhamento no WhatsApp (versão otimizada)
-    const ogImageUrl = `${baseUrl}/images/wellness-hero-com-logo.png`
+    // Se for fluxo de recrutamento, usar imagem do quiz-potencial e texto do fluxo
+    let ogImageUrl: string
+    let ogTitle: string
+    let ogDescription: string
     
-    // Debug: log para verificar imagem OG
-    console.log('[OG Metadata] Image URL:', {
-      normalizedSlug,
-      ogImageUrl,
-      usingWhatsAppImage: true
-    })
+    if (isFluxoRecrutamento) {
+      // Para fluxos de recrutamento: usar imagem do quiz-potencial
+      ogImageUrl = `${baseUrl}/images/og/wellness/quiz-potencial.jpg`
+      
+      // Usar o nome do fluxo como título (é a proposta para quem vai preencher)
+      ogTitle = tool.title || tool.content?.fluxo?.nome || 'Avaliação Personalizada'
+      ogDescription = 'Descubra seu perfil e potencial'
+      
+      console.log('[OG Metadata] Fluxo de recrutamento detectado:', {
+        fluxoNome: tool.content?.fluxo?.nome,
+        ogTitle,
+        ogImageUrl
+      })
+    } else {
+      // Para outras ferramentas: usar imagem padrão e texto genérico
+      ogImageUrl = `${baseUrl}/images/wellness-hero-com-logo.png`
+      
+      // Obter mensagens estimulantes baseadas no tipo de ferramenta
+      const ogMessages = getOGMessages(normalizedSlug)
+      
+      // Usar texto padrão para WhatsApp: "Transforme como você conversa: fale com 10x mais pessoas"
+      ogTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
+      ogDescription = 'Com inteligência artificial integrada.'
+      
+      console.log('[OG Metadata] Ferramenta normal:', {
+        normalizedSlug,
+        ogImageUrl,
+        ogTitle
+      })
+    }
     
-    // Obter mensagens estimulantes baseadas no tipo de ferramenta
-    const ogMessages = getOGMessages(normalizedSlug)
-    
-    // Debug: log para verificar mensagens
-    console.log('[OG Metadata] Messages:', {
-      normalizedSlug,
-      hasMessage: !!ogMessages.title,
-      ogTitle: ogMessages.title,
-      fallbackTitle: tool.title
-    })
-    
-    // Usar texto padrão para WhatsApp: "Transforme como você conversa: fale com 10x mais pessoas"
-    // Isso garante consistência no preview do WhatsApp
-    let ogTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
-    const ogDescription = 'Com inteligência artificial integrada.'
-    
-    // Remover "WELLNESS" duplicado se já estiver no título
-    if (ogTitle.includes('WELLNESS')) {
+    // Remover "WELLNESS" duplicado se já estiver no título (apenas para não-fluxos)
+    if (!isFluxoRecrutamento && ogTitle.includes('WELLNESS')) {
       ogTitle = ogTitle.replace(/\s*-\s*WELLNESS\s*/gi, '').trim()
     }
     
     // Garantir que o título não esteja vazio
     if (!ogTitle || ogTitle.trim() === '') {
-      ogTitle = 'Ferramenta de Bem-Estar'
+      ogTitle = isFluxoRecrutamento ? 'Avaliação Personalizada' : 'Ferramenta de Bem-Estar'
     }
 
     // Construir URL completa da página
@@ -241,7 +276,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: 'image/png',
+            type: isFluxoRecrutamento ? 'image/jpeg' : 'image/png',
           },
         ],
         locale: 'pt_BR',
