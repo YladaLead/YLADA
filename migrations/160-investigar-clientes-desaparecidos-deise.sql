@@ -32,8 +32,7 @@ SELECT
   created_at,
   updated_at,
   converted_from_lead,
-  lead_source,
-  deleted_at
+  lead_source
 FROM coach_clients
 WHERE user_id = (
   SELECT id FROM auth.users WHERE email = 'paula@gmail.com'
@@ -43,8 +42,8 @@ ORDER BY created_at DESC;
 -- Contar total de clientes
 SELECT 
   COUNT(*) as total_clientes_coach,
-  COUNT(CASE WHEN deleted_at IS NULL THEN 1 END) as clientes_ativos,
-  COUNT(CASE WHEN deleted_at IS NOT NULL THEN 1 END) as clientes_deletados
+  COUNT(CASE WHEN status != 'encerrado' THEN 1 END) as clientes_ativos,
+  COUNT(CASE WHEN status = 'encerrado' THEN 1 END) as clientes_encerrados
 FROM coach_clients
 WHERE user_id = (
   SELECT id FROM auth.users WHERE email = 'paula@gmail.com'
@@ -215,18 +214,18 @@ FROM coach_clients
 WHERE user_id = (SELECT id FROM auth.users WHERE email = 'paula@gmail.com')
 UNION ALL
 SELECT 
-  'Clientes ativos (não deletados)',
+  'Clientes ativos (não encerrados)',
   COUNT(*)::text
 FROM coach_clients
 WHERE user_id = (SELECT id FROM auth.users WHERE email = 'paula@gmail.com')
-AND deleted_at IS NULL
+AND status != 'encerrado'
 UNION ALL
 SELECT 
-  'Clientes deletados',
+  'Clientes encerrados',
   COUNT(*)::text
 FROM coach_clients
 WHERE user_id = (SELECT id FROM auth.users WHERE email = 'paula@gmail.com')
-AND deleted_at IS NOT NULL
+AND status = 'encerrado'
 UNION ALL
 SELECT 
   'Total de clientes em clients (tabela antiga)',

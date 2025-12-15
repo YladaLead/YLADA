@@ -112,16 +112,16 @@ AND NOT EXISTS (
 ORDER BY h.created_at DESC;
 
 -- =====================================================
--- 4. RESTAURAR CLIENTES DELETADOS (SOFT DELETE)
+-- 4. RESTAURAR CLIENTES ENCERRADOS
 -- =====================================================
--- Se os clientes foram deletados com soft delete, restaurar:
+-- Se os clientes foram encerrados, restaurar para ativo:
 /*
 UPDATE coach_clients
-SET deleted_at = NULL
+SET status = 'ativo'
 WHERE user_id = (
   SELECT id FROM auth.users WHERE email = 'paula@gmail.com'
 )
-AND deleted_at IS NOT NULL;
+AND status = 'encerrado';
 */
 
 -- =====================================================
