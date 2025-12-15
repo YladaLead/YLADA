@@ -12,6 +12,7 @@ interface Aula {
   tipo: string
   ordem: number
   duracao_minutos: number | null
+  material_url: string | null
   concluido: boolean
 }
 
@@ -279,7 +280,7 @@ export default function WellnessModuloPage() {
                   </div>
 
                   {/* Conteúdo da Aula */}
-                  <div className="prose max-w-none">
+                  <div className="prose max-w-none mb-4">
                     <div
                       className="text-gray-700 whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{
@@ -287,6 +288,32 @@ export default function WellnessModuloPage() {
                       }}
                     />
                   </div>
+
+                  {/* Material Complementar (PDF) */}
+                  {aula.material_url && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <p className="text-sm text-gray-600 mb-2 font-medium">
+                        📄 Material Complementar:
+                      </p>
+                      <div className="flex gap-2">
+                        <a
+                          href={aula.material_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          📄 Abrir PDF
+                        </a>
+                        <a
+                          href={aula.material_url}
+                          download
+                          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          ⬇️ Baixar PDF
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
