@@ -273,7 +273,7 @@ function CoachLeadsContent() {
         
         // Redirecionar para o perfil do cliente após 1.5 segundos
         setTimeout(() => {
-          router.push(`/pt/c/clientes/${data.data.client.id}`)
+          router.push(`/pt/coach/clientes/${data.data.client.id}`)
         }, 1500)
       }
     } catch (error: any) {

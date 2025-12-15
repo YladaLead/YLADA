@@ -311,7 +311,7 @@ function FormulariosCoachContent() {
                 </div>
                 <div className="mt-4">
                   <button
-                    onClick={() => router.push('/pt/c/configuracao')}
+                    onClick={() => router.push('/pt/coach/configuracao')}
                     className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
                   >
                     Ir para Configurações
@@ -348,7 +348,7 @@ function FormulariosCoachContent() {
               <p className="text-gray-600 mt-1">Crie e gerencie seus formulários de anamnese e avaliação</p>
             </div>
             <Link
-              href="/pt/c/formularios/novo"
+              href="/pt/coach/formularios/novo"
               className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
             >
               <span>➕</span>
@@ -426,7 +426,7 @@ function FormulariosCoachContent() {
                       <button
                         onClick={() => {
                           // Editar template diretamente (não criar cópia)
-                          router.push(`/pt/c/formularios/${template.id}`)
+                          router.push(`/pt/coach/formularios/${template.id}`)
                         }}
                         className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium"
                         title="Editar formulário"
@@ -550,7 +550,7 @@ function FormulariosCoachContent() {
                     <div className="flex items-center justify-center gap-2 flex-wrap">
                       {/* Botão Editar */}
                       <button
-                        onClick={() => router.push(`/pt/c/formularios/${form.id}`)}
+                        onClick={() => router.push(`/pt/coach/formularios/${form.id}`)}
                         className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium"
                         title="Editar formulário"
                       >
@@ -675,7 +675,7 @@ function FormulariosCoachContent() {
                   : 'Comece criando seu primeiro formulário personalizado'}
               </p>
               <Link
-                href="/pt/c/formularios/novo"
+                href="/pt/coach/formularios/novo"
                 className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
                 <span>➕</span>

@@ -50,39 +50,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Redirecionar rotas de FERRAMENTAS da área Coach para /c/ (apenas links de ferramentas)
-  // /pt/coach/formularios/* -> /pt/c/formularios/*
-  if (pathname.startsWith('/pt/coach/formularios')) {
-    const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/formularios', '/pt/c/formularios')
-    return NextResponse.redirect(url)
-  }
-
-  // /pt/coach/clientes/* -> /pt/c/clientes/*
-  if (pathname.startsWith('/pt/coach/clientes')) {
-    const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/clientes', '/pt/c/clientes')
-    return NextResponse.redirect(url)
-  }
-
-  // /pt/coach/leads/* -> /pt/c/leads/*
-  if (pathname.startsWith('/pt/coach/leads')) {
-    const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/leads', '/pt/c/leads')
-    return NextResponse.redirect(url)
-  }
-
-  // /pt/coach/ferramentas/* -> /pt/c/ferramentas/*
-  if (pathname.startsWith('/pt/coach/ferramentas/')) {
-    const url = request.nextUrl.clone()
-    url.pathname = pathname.replace('/pt/coach/ferramentas/', '/pt/c/ferramentas/')
-    return NextResponse.redirect(url)
-  }
-
-  // NOTA: Páginas regulares (login, home, dashboard, sales, quizzes, portais administrativos, etc.) devem permanecer em /pt/coach/
-  // Apenas links de ferramentas (formulários, clientes, leads, ferramentas) são redirecionados para /c/
-  // Links públicos de quizzes individuais já usam /pt/c/[user-slug]/quiz/[slug] diretamente
-  // Links públicos de portais individuais já usam /pt/c/portal/[slug] diretamente
+  // NOTA: Páginas administrativas devem permanecer em /pt/coach/
+  // Apenas links públicos de ferramentas usam /c/:
+  // - Formulários públicos: /pt/c/[user-slug]/formulario/[slug]
+  // - Ferramentas públicas: /pt/c/[user-slug]/[tool-slug]
+  // - Quizzes públicos: /pt/c/[user-slug]/quiz/[slug]
+  // - Portais públicos: /pt/c/portal/[slug]
+  // 
+  // Páginas administrativas (formularios, clientes, leads, etc.) NÃO devem ser redirecionadas
+  // Elas devem permanecer em /pt/coach/ para manter a consistência
   
   // Verificar se já tem idioma na URL
   const hasLanguage = pathname.startsWith('/pt') || pathname.startsWith('/en') || pathname.startsWith('/es')

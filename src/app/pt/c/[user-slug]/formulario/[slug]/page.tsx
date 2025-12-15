@@ -164,7 +164,7 @@ export default function PreencherFormularioCoachPage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Página não encontrada</h1>
             <p className="text-gray-600 mb-6">{erro}</p>
             <button
-              onClick={() => window.location.href = '/pt/c/formularios'}
+              onClick={() => window.location.href = '/pt/coach/formularios'}
               className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
             >
               Voltar para Formulários

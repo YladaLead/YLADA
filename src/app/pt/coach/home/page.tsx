@@ -275,7 +275,7 @@ function CoachHomeContent() {
                   </div>
                 </div>
                 <Link
-                  href="/pt/c/formularios"
+                  href="/pt/coach/formularios"
                   className="px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-semibold text-sm sm:text-base whitespace-nowrap"
                 >
                   Ver Formulários →
@@ -422,7 +422,7 @@ function CoachHomeContent() {
               </Link>
               
               <Link 
-                href="/pt/c/clientes/kanban"
+                href="/pt/coach/clientes/kanban"
                 className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-green-100"
               >
                 <div className="text-4xl mb-3">📌</div>
@@ -452,7 +452,7 @@ function CoachHomeContent() {
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
               <Link 
-                href="/pt/c/formularios/novo"
+                href="/pt/coach/formularios/novo"
                 className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
               >
                 <div className="text-4xl mb-3">➕</div>
@@ -470,7 +470,7 @@ function CoachHomeContent() {
               </Link>
               
               <Link 
-                href="/pt/c/formularios/respostas"
+                href="/pt/coach/formularios/respostas"
                 className="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow border border-purple-100"
               >
                 <div className="text-4xl mb-3">📨</div>
@@ -526,7 +526,7 @@ function CoachHomeContent() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">📩 Leads Recentes</h3>
                 <Link 
-                  href="/pt/c/leads"
+                  href="/pt/coach/leads"
                   className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                 >
                   Ver todos →
@@ -642,7 +642,7 @@ function CoachHomeContent() {
               </Link>
               
               <Link
-                href="/pt/c/formularios/novo"
+                href="/pt/coach/formularios/novo"
                 className="bg-purple-50 hover:bg-purple-100 rounded-lg p-4 text-center transition-colors border border-purple-200"
               >
                 <div className="text-2xl mb-2">➕</div>

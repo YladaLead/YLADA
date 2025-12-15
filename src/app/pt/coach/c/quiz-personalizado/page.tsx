@@ -1294,7 +1294,7 @@ export default function QuizPersonalizadoPage() {
                                 </p>
                                 <p className="text-xs text-gray-600">
                                   Este número será usado automaticamente. Para alterar, vá em{' '}
-                                  <Link href="/pt/c/configuracao" className="text-green-600 underline font-semibold">
+                                  <Link href="/pt/coach/configuracao" className="text-green-600 underline font-semibold">
                                     Configurações → Perfil
                                   </Link>
                                 </p>
@@ -1313,7 +1313,7 @@ export default function QuizPersonalizadoPage() {
                                   Configure seu WhatsApp no perfil para usar esta opção.
                                 </p>
                                 <Link
-                                  href="/pt/c/configuracao"
+                                  href="/pt/coach/configuracao"
                                   className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors"
                                 >
                                   Ir para Configurações
