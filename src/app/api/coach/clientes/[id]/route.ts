@@ -26,10 +26,10 @@ export async function GET(
     const { id } = await params
     const authenticatedUserId = user.id
 
-    // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários
+    // Buscar cliente com todos os campos e dados relacionados
     const { data: client, error } = await supabaseAdmin
       .from('coach_clients')
-      .select('id, name, email, phone, status, notes, converted_from_lead, lead_source, created_at, updated_at, next_appointment, last_contact, tags')
+      .select('*')
       .eq('id', id)
       .eq('user_id', authenticatedUserId)
       .single()
@@ -41,9 +41,46 @@ export async function GET(
       )
     }
 
+    // Buscar dados relacionados
+    const [professionalData, healthData, foodHabitsData] = await Promise.all([
+      supabaseAdmin
+        .from('coach_client_professional')
+        .select('*')
+        .eq('client_id', id)
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from('coach_client_health')
+        .select('*')
+        .eq('client_id', id)
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from('coach_client_food_habits')
+        .select('*')
+        .eq('client_id', id)
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+    ])
+
+    // Adicionar dados relacionados ao cliente
+    const clientWithRelations = {
+      ...client,
+      professional: professionalData.data || null,
+      health: healthData.data || null,
+      food_habits: foodHabitsData.data || null
+    }
+
+    if (error || !client) {
+      return NextResponse.json(
+        { error: 'Cliente não encontrado' },
+        { status: 404 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
-      data: { client }
+      data: { client: clientWithRelations }
     })
 
   } catch (error: any) {
@@ -113,7 +150,17 @@ export async function PUT(
       converted_from_lead,
       lead_source,
       lead_template_id,
-      custom_fields
+      custom_fields,
+      // Novos campos
+      current_weight,
+      current_height,
+      goal_weight,
+      goal_deadline,
+      goal_type,
+      professional,
+      health,
+      digestion,
+      food_habits
     } = body
 
     // Preparar dados para atualização (apenas campos fornecidos)
@@ -137,6 +184,12 @@ export async function PUT(
     }
     if (goal !== undefined) updateData.goal = goal || null
     if (instagram !== undefined) updateData.instagram = instagram?.trim() || null
+    // Novos campos de objetivo
+    if (current_weight !== undefined) updateData.current_weight = current_weight || null
+    if (current_height !== undefined) updateData.current_height = current_height || null
+    if (goal_weight !== undefined) updateData.goal_weight = goal_weight || null
+    if (goal_deadline !== undefined) updateData.goal_deadline = goal_deadline || null
+    if (goal_type !== undefined) updateData.goal_type = goal_type || null
     if (origin !== undefined) updateData.origin = origin || null
     if (origin_id !== undefined) updateData.origin_id = origin_id || null
     if (converted_from_lead !== undefined) updateData.converted_from_lead = converted_from_lead
@@ -170,6 +223,78 @@ export async function PUT(
         { error: 'Erro ao atualizar cliente', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
         { status: 500 }
       )
+    }
+
+    // Atualizar ou criar dados profissionais
+    if (professional !== undefined) {
+      const professionalUpdate = {
+        client_id: id,
+        user_id: authenticatedUserId,
+        occupation: professional.occupation || null,
+        work_start_time: professional.work_start_time || null,
+        work_end_time: professional.work_end_time || null,
+        wake_time: professional.wake_time || null,
+        sleep_time: professional.sleep_time || null,
+        who_cooks: professional.who_cooks || null,
+        household_members: professional.household_members || null,
+        takes_lunchbox: professional.takes_lunchbox || false
+      }
+
+      await supabaseAdmin
+        .from('coach_client_professional')
+        .upsert(professionalUpdate, { onConflict: 'client_id' })
+    }
+
+    // Atualizar ou criar dados de saúde e digestão (mesma tabela)
+    if (health !== undefined || digestion !== undefined) {
+      // Buscar dados existentes para mesclar
+      const { data: existingHealth } = await supabaseAdmin
+        .from('coach_client_health')
+        .select('*')
+        .eq('client_id', id)
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+
+      const mergedHealth = {
+        client_id: id,
+        user_id: authenticatedUserId,
+        // Campos de saúde (usar novos se fornecidos, senão manter existentes)
+        health_problems: health?.health_problems !== undefined ? (health.health_problems || null) : (existingHealth?.health_problems || null),
+        medications: health?.medications !== undefined ? (health.medications || []) : (existingHealth?.medications || []),
+        dietary_restrictions: health?.dietary_restrictions !== undefined ? (health.dietary_restrictions || null) : (existingHealth?.dietary_restrictions || null),
+        supplements_current: health?.supplements_current !== undefined ? (health.supplements_current || null) : (existingHealth?.supplements_current || null),
+        supplements_recommended: health?.supplements_recommended !== undefined ? (health.supplements_recommended || null) : (existingHealth?.supplements_recommended || null),
+        // Campos de digestão (usar novos se fornecidos, senão manter existentes)
+        bowel_function: digestion?.bowel_function !== undefined ? (digestion.bowel_function || null) : (existingHealth?.bowel_function || null),
+        digestive_complaints: digestion?.digestive_complaints !== undefined ? (digestion.digestive_complaints || null) : (existingHealth?.digestive_complaints || null)
+      }
+
+      await supabaseAdmin
+        .from('coach_client_health')
+        .upsert(mergedHealth, { onConflict: 'client_id' })
+    }
+
+    // Atualizar ou criar hábitos alimentares
+    if (food_habits !== undefined) {
+      const foodHabitsUpdate = {
+        client_id: id,
+        user_id: authenticatedUserId,
+        water_intake_liters: food_habits.water_intake_liters || null,
+        breakfast: food_habits.breakfast || null,
+        morning_snack: food_habits.morning_snack || null,
+        lunch: food_habits.lunch || null,
+        afternoon_snack: food_habits.afternoon_snack || null,
+        dinner: food_habits.dinner || null,
+        supper: food_habits.supper || null,
+        snacks_between_meals: food_habits.snacks_between_meals || false,
+        snacks_description: food_habits.snacks_description || null,
+        alcohol_consumption: food_habits.alcohol_consumption || null,
+        soda_consumption: food_habits.soda_consumption || null
+      }
+
+      await supabaseAdmin
+        .from('coach_client_food_habits')
+        .upsert(foodHabitsUpdate, { onConflict: 'client_id' })
     }
 
     // Criar evento no histórico se status mudou

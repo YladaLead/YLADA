@@ -8,6 +8,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
 import DocumentosTab from '@/components/coach/DocumentosTab'
+import GoalExpandedSection from '@/components/coach/GoalExpandedSection'
+import ProfessionalDataSection from '@/components/coach/ProfessionalDataSection'
+import HealthDataSection from '@/components/coach/HealthDataSection'
+import DigestionDataSection from '@/components/coach/DigestionDataSection'
+import FoodHabitsSection from '@/components/coach/FoodHabitsSection'
 
 export default function ClienteDetalhesCoach() {
   return (
@@ -362,6 +367,13 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
     }
   })
 
+  // Estados para os novos dados
+  const [goalData, setGoalData] = useState<any>(null)
+  const [professionalData, setProfessionalData] = useState<any>(null)
+  const [healthData, setHealthData] = useState<any>(null)
+  const [digestionData, setDigestionData] = useState<any>(null)
+  const [foodHabitsData, setFoodHabitsData] = useState<any>(null)
+
   // Atualizar formData quando cliente mudar
   useEffect(() => {
     if (cliente) {
@@ -427,7 +439,7 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
         cpf: payload.cpf?.trim() || null,
         instagram: payload.instagram?.trim() || null,
         status: payload.status,
-        goal: payload.goal?.trim() || null,
+        goal: goalData?.goal || payload.goal?.trim() || null,
         address: {
           street: payload.address.street?.trim() || null,
           number: payload.address.number?.trim() || null,
@@ -436,7 +448,51 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
           city: payload.address.city?.trim() || null,
           state: payload.address.state?.trim() || null,
           zipcode: payload.address.zipcode?.trim() || null
-        }
+        },
+        // Novos campos de objetivo
+        current_weight: goalData?.current_weight ? parseFloat(goalData.current_weight) : null,
+        current_height: goalData?.current_height ? parseFloat(goalData.current_height) : null,
+        goal_weight: goalData?.goal_weight ? parseFloat(goalData.goal_weight) : null,
+        goal_deadline: goalData?.goal_deadline || null,
+        goal_type: goalData?.goal_type || null,
+        // Dados profissionais
+        professional: professionalData ? {
+          occupation: professionalData.occupation || null,
+          work_start_time: professionalData.work_start_time || null,
+          work_end_time: professionalData.work_end_time || null,
+          wake_time: professionalData.wake_time || null,
+          sleep_time: professionalData.sleep_time || null,
+          who_cooks: professionalData.who_cooks || null,
+          household_members: professionalData.household_members || null,
+          takes_lunchbox: professionalData.takes_lunchbox || false
+        } : null,
+        // Dados de saúde
+        health: healthData ? {
+          health_problems: healthData.health_problems ? healthData.health_problems.split(',').map((s: string) => s.trim()).filter(Boolean) : null,
+          medications: healthData.medications || [],
+          dietary_restrictions: healthData.dietary_restrictions ? healthData.dietary_restrictions.split(',').map((s: string) => s.trim()).filter(Boolean) : null,
+          supplements_current: healthData.supplements_current ? healthData.supplements_current.split(',').map((s: string) => s.trim()).filter(Boolean) : null,
+          supplements_recommended: healthData.supplements_recommended ? healthData.supplements_recommended.split(',').map((s: string) => s.trim()).filter(Boolean) : null
+        } : null,
+        // Dados de digestão
+        digestion: digestionData ? {
+          bowel_function: digestionData.bowel_function || null,
+          digestive_complaints: digestionData.digestive_complaints ? digestionData.digestive_complaints.split(',').map((s: string) => s.trim()).filter(Boolean) : null
+        } : null,
+        // Hábitos alimentares
+        food_habits: foodHabitsData ? {
+          water_intake_liters: foodHabitsData.water_intake_liters ? parseFloat(foodHabitsData.water_intake_liters) : null,
+          breakfast: foodHabitsData.breakfast || null,
+          morning_snack: foodHabitsData.morning_snack || null,
+          lunch: foodHabitsData.lunch || null,
+          afternoon_snack: foodHabitsData.afternoon_snack || null,
+          dinner: foodHabitsData.dinner || null,
+          supper: foodHabitsData.supper || null,
+          snacks_between_meals: foodHabitsData.snacks_between_meals || false,
+          snacks_description: foodHabitsData.snacks_description || null,
+          alcohol_consumption: foodHabitsData.alcohol_consumption || null,
+          soda_consumption: foodHabitsData.soda_consumption || null
+        } : null
       }
 
       const response = await fetch(`/api/coach/clientes/${clientId}`, {
@@ -618,24 +674,20 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
             </div>
           </div>
 
-          {/* Objetivo */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Objetivo</h3>
-            <div>
-              <label htmlFor="goal" className="block text-sm font-medium text-gray-700 mb-2">
-                Objetivo da Cliente
-              </label>
-              <textarea
-                id="goal"
-                name="goal"
-                value={formData.goal}
-                onChange={handleChange}
-                rows={4}
-                placeholder="Descreva o objetivo principal da cliente..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              />
-            </div>
-          </div>
+          {/* Objetivo Expandido */}
+          <GoalExpandedSection
+            clientId={clientId}
+            initialData={{
+              current_weight: cliente.current_weight,
+              current_height: cliente.current_height,
+              goal_weight: cliente.goal_weight,
+              goal_deadline: cliente.goal_deadline,
+              goal_type: cliente.goal_type,
+              goal: cliente.goal
+            }}
+            editando={editando}
+            onDataChange={setGoalData}
+          />
 
           {/* Endereço */}
           <div>
@@ -745,6 +797,38 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
             </div>
           </div>
 
+          {/* Dados Profissionais e Rotina */}
+          <ProfessionalDataSection
+            clientId={clientId}
+            initialData={cliente.professional}
+            editando={editando}
+            onDataChange={setProfessionalData}
+          />
+
+          {/* Saúde Geral */}
+          <HealthDataSection
+            clientId={clientId}
+            initialData={cliente.health}
+            editando={editando}
+            onDataChange={setHealthData}
+          />
+
+          {/* Intestino e Digestão */}
+          <DigestionDataSection
+            clientId={clientId}
+            initialData={cliente.health}
+            editando={editando}
+            onDataChange={setDigestionData}
+          />
+
+          {/* Hábitos Alimentares */}
+          <FoodHabitsSection
+            clientId={clientId}
+            initialData={cliente.food_habits}
+            editando={editando}
+            onDataChange={setFoodHabitsData}
+          />
+
           {/* Status */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Status</h3>
@@ -846,13 +930,52 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
             </div>
           </div>
 
-          {/* Objetivo */}
-          {cliente.goal && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Objetivo</h3>
-              <p className="text-base text-gray-700">{cliente.goal}</p>
-            </div>
-          )}
+          {/* Objetivo Expandido */}
+          <GoalExpandedSection
+            clientId={clientId}
+            initialData={{
+              current_weight: cliente.current_weight,
+              current_height: cliente.current_height,
+              goal_weight: cliente.goal_weight,
+              goal_deadline: cliente.goal_deadline,
+              goal_type: cliente.goal_type,
+              goal: cliente.goal
+            }}
+            editando={editando}
+            onDataChange={setGoalData}
+          />
+
+          {/* Dados Profissionais e Rotina */}
+          <ProfessionalDataSection
+            clientId={clientId}
+            initialData={cliente.professional}
+            editando={editando}
+            onDataChange={setProfessionalData}
+          />
+
+          {/* Saúde Geral */}
+          <HealthDataSection
+            clientId={clientId}
+            initialData={cliente.health}
+            editando={editando}
+            onDataChange={setHealthData}
+          />
+
+          {/* Intestino e Digestão */}
+          <DigestionDataSection
+            clientId={clientId}
+            initialData={cliente.health}
+            editando={editando}
+            onDataChange={setDigestionData}
+          />
+
+          {/* Hábitos Alimentares */}
+          <FoodHabitsSection
+            clientId={clientId}
+            initialData={cliente.food_habits}
+            editando={editando}
+            onDataChange={setFoodHabitsData}
+          />
 
           {/* Endereço */}
           {(cliente.address_street || cliente.address_city) && (
@@ -2884,6 +3007,13 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
   const [avaliacaoSelecionada, setAvaliacaoSelecionada] = useState<string | null>(null)
   const [comparacao, setComparacao] = useState<any>(null)
   const [carregandoComparacao, setCarregandoComparacao] = useState(false)
+  const [mostrarForm, setMostrarForm] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+  const [formData, setFormData] = useState({
+    assessment_date: new Date().toISOString().split('T')[0],
+    goal: '',
+    observations: ''
+  })
 
   // Carregar avaliações (incluindo reavaliações)
   useEffect(() => {
@@ -2946,6 +3076,74 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     carregarComparacao()
   }, [clientId, avaliacaoSelecionada])
 
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmitReavaliacao = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErro(null)
+    setSalvando(true)
+
+    try {
+      const payload = {
+        assessment_type: 'reavaliacao',
+        assessment_name: `Reavaliação - ${formData.assessment_date}`,
+        is_reevaluation: true,
+        data: {
+          assessment_date: formData.assessment_date,
+          goal: formData.goal,
+          observations: formData.observations
+        },
+        interpretation: formData.observations,
+        status: 'completo'
+      }
+
+      const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao criar reavaliação')
+      }
+
+      if (data.success) {
+        setMostrarForm(false)
+        setFormData({
+          assessment_date: new Date().toISOString().split('T')[0],
+          goal: '',
+          observations: ''
+        })
+        // Recarregar lista de reavaliações
+        const reloadResponse = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
+          credentials: 'include'
+        })
+        if (reloadResponse.ok) {
+          const reloadData = await reloadResponse.json()
+          if (reloadData.success) {
+            setAvaliacoes(reloadData.data.assessments || [])
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('Erro ao criar reavaliação:', error)
+      setErro(error.message || 'Erro ao criar reavaliação. Tente novamente.')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
   if (carregando) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -2961,11 +3159,123 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Reavaliações</h2>
+        {!mostrarForm && (
+          <button
+            onClick={() => setMostrarForm(true)}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nova Reavaliação
+          </button>
+        )}
       </div>
 
       {erro && (
         <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
           <p className="text-red-800">{erro}</p>
+        </div>
+      )}
+
+      {/* Formulário de Nova Reavaliação */}
+      {mostrarForm && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Nova Reavaliação</h3>
+            <button
+              onClick={() => {
+                setMostrarForm(false)
+                setFormData({
+                  assessment_date: new Date().toISOString().split('T')[0],
+                  goal: '',
+                  observations: ''
+                })
+                setErro(null)
+              }}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmitReavaliacao} className="space-y-4">
+            <div>
+              <label htmlFor="assessment_date" className="block text-sm font-medium text-gray-700 mb-2">
+                Data *
+              </label>
+              <input
+                type="date"
+                id="assessment_date"
+                name="assessment_date"
+                value={formData.assessment_date}
+                onChange={handleFormChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="goal" className="block text-sm font-medium text-gray-700 mb-2">
+                Meta
+              </label>
+              <input
+                type="text"
+                id="goal"
+                name="goal"
+                value={formData.goal}
+                onChange={handleFormChange}
+                placeholder="Ex: Perder 5kg, Ganhar massa muscular..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="observations" className="block text-sm font-medium text-gray-700 mb-2">
+                Observações
+              </label>
+              <textarea
+                id="observations"
+                name="observations"
+                value={formData.observations}
+                onChange={handleFormChange}
+                rows={4}
+                placeholder="Anote suas observações sobre a reavaliação..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setMostrarForm(false)
+                  setFormData({
+                    assessment_date: new Date().toISOString().split('T')[0],
+                    goal: '',
+                    observations: ''
+                  })
+                  setErro(null)
+                }}
+                disabled={salvando}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={salvando}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+              >
+                {salvando && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                {salvando ? 'Salvando...' : 'Salvar Reavaliação'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

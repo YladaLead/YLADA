@@ -101,6 +101,9 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
   const [ocrProgress, setOcrProgress] = useState<number | null>(null)
   const [isProcessingOcr, setIsProcessingOcr] = useState(false)
   const [pastedText, setPastedText] = useState('')
+  const [importFormat, setImportFormat] = useState<'excel' | 'json'>('excel')
+  const [jsonData, setJsonData] = useState<string>('')
+  const [jsonPreview, setJsonPreview] = useState<any>(null)
 
   const downloadTemplate = () => {
     // Definir cabeçalhos padrão - TODOS os campos da ficha completa de cliente
@@ -777,8 +780,17 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
 
   const validateData = async () => {
     setStep('validation')
+    setError(null)
     
     try {
+      // Para JSON, validar diretamente na API de importação
+      if (importFormat === 'json' && jsonPreview) {
+        // JSON já foi validado no processJSON, pode ir direto para importação
+        await importData()
+        return
+      }
+
+      // Para Excel/CSV, usar validação normal
       const response = await fetch('/api/coach/import/validate', {
         method: 'POST',
         headers: {
@@ -821,15 +833,33 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
         })
       }, 200)
       
-      const response = await fetch('/api/c/import/process', {
+      // Determinar formato e dados
+      let requestBody: any
+      let apiEndpoint = '/api/import/process' // Nova API unificada
+
+      if (importFormat === 'json' && jsonPreview) {
+        // Importação JSON
+        requestBody = {
+          format: 'json',
+          data: jsonPreview.data,
+          mappings: null // JSON não precisa de mapeamento
+        }
+      } else {
+        // Importação Excel/CSV (formato antigo)
+        requestBody = {
+          format: 'excel',
+          data: parsedData,
+          mappings: fieldMappings
+        }
+        apiEndpoint = '/api/c/import/process' // Manter compatibilidade
+      }
+
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          data: parsedData,
-          mappings: fieldMappings
-        }),
+        body: JSON.stringify(requestBody),
         credentials: 'include'
       })
       
@@ -863,6 +893,61 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
     }
   }
 
+  const processJSON = () => {
+    try {
+      setError(null)
+      
+      if (!jsonData.trim()) {
+        throw new Error('Por favor, cole o JSON no campo acima')
+      }
+
+      // Parse JSON
+      const parsed = JSON.parse(jsonData)
+      
+      // Validar estrutura básica
+      if (Array.isArray(parsed)) {
+        // Array de clientes
+        if (parsed.length === 0) {
+          throw new Error('O JSON está vazio')
+        }
+        setJsonPreview({ type: 'array', data: parsed, count: parsed.length })
+      } else if (parsed.identification) {
+        // Ficha completa estruturada
+        setJsonPreview({ type: 'structured', data: parsed, count: 1 })
+      } else if (parsed.name) {
+        // Objeto simples
+        setJsonPreview({ type: 'single', data: parsed, count: 1 })
+      } else {
+        throw new Error('Formato JSON não reconhecido. Esperado: array, objeto com "identification" ou objeto com "name"')
+      }
+
+      // Ir para preview
+      setStep('preview')
+    } catch (err: any) {
+      setError(err.message || 'Erro ao processar JSON. Verifique se o JSON está válido.')
+    }
+  }
+
+  const handleJSONFileUpload = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string
+        setJsonData(content)
+        // Processar automaticamente
+        setTimeout(() => {
+          processJSON()
+        }, 100)
+      } catch (err: any) {
+        setError('Erro ao ler arquivo JSON: ' + err.message)
+      }
+    }
+    reader.onerror = () => {
+      setError('Erro ao ler arquivo')
+    }
+    reader.readAsText(file)
+  }
+
   const resetModal = () => {
     setStep('upload')
     setFiles([])
@@ -872,6 +957,9 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
     setImporting(false)
     setImportProgress(0)
     setError(null)
+    setImportFormat('excel')
+    setJsonData('')
+    setJsonPreview(null)
   }
 
   const handleClose = () => {
@@ -894,7 +982,7 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Importar Clientes</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Importe seus clientes de planilhas Excel, CSV ou Google Sheets
+              Importe seus clientes de planilhas Excel, CSV, Google Sheets ou JSON estruturado
             </p>
           </div>
           <button
@@ -973,6 +1061,100 @@ export default function ImportClientsModal({ isOpen, onClose, onImportSuccess }:
           {/* Upload Step */}
           {step === 'upload' && (
             <div className="space-y-6">
+              {/* Seletor de Formato */}
+              <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+                  Escolha o formato de importação
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setImportFormat('excel')}
+                    className={`p-6 rounded-lg border-2 transition-all ${
+                      importFormat === 'excel'
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-4xl mb-2">📊</div>
+                    <h5 className="font-semibold text-gray-900 mb-1">Planilha (Excel/CSV)</h5>
+                    <p className="text-sm text-gray-600">Importe de arquivos Excel ou CSV</p>
+                  </button>
+                  <button
+                    onClick={() => setImportFormat('json')}
+                    className={`p-6 rounded-lg border-2 transition-all ${
+                      importFormat === 'json'
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-4xl mb-2">📋</div>
+                    <h5 className="font-semibold text-gray-900 mb-1">JSON Estruturado</h5>
+                    <p className="text-sm text-gray-600">Cole JSON formatado pelo ChatGPT</p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Conteúdo baseado no formato selecionado */}
+              {importFormat === 'json' ? (
+                /* Importação JSON */
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="text-4xl">🤖</div>
+                      <div className="flex-1">
+                        <h4 className="text-xl font-bold text-gray-900 mb-3">
+                          Importar via JSON (Ficha Completa)
+                        </h4>
+                        <p className="text-gray-700 mb-4">
+                          Use o ChatGPT para formatar a ficha do cliente em JSON. Cole o JSON gerado abaixo e importe automaticamente!
+                        </p>
+                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-4">
+                          <p className="text-sm text-gray-700">
+                            <strong>💡 Como usar:</strong> 1) Use o prompt do ChatGPT (documento PROMPT-IMPORTACAO-CLIENTES-SIMPLES.txt) → 2) Cole a ficha do cliente → 3) ChatGPT retorna JSON → 4) Cole aqui e importe!
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Cole o JSON aqui:
+                    </label>
+                    <textarea
+                      value={jsonData}
+                      onChange={(e) => setJsonData(e.target.value)}
+                      placeholder='{"identification": {"name": "João Silva", ...}, ...}'
+                      className="w-full h-64 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-mono text-sm"
+                    />
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        onClick={processJSON}
+                        disabled={!jsonData.trim()}
+                        className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Processar JSON
+                      </button>
+                      <label className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors cursor-pointer">
+                        📁 Carregar Arquivo JSON
+                        <input
+                          type="file"
+                          accept=".json,application/json"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              handleJSONFileUpload(file)
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Importação Excel/CSV (código existente) */
+                <>
               {/* Template Padrão - Destaque Principal */}
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-8 text-center">
                 <div className="text-5xl mb-4">📋</div>
@@ -1131,11 +1313,111 @@ INSTRUÇÕES:
                   </button>
                 </div>
               </div>
+                </>
+              )}
             </div>
           )}
 
-          {/* Preview Step */}
-          {step === 'preview' && parsedData.length > 0 && (
+          {/* Preview Step - JSON */}
+          {step === 'preview' && jsonPreview && importFormat === 'json' && (
+            <div className="space-y-6">
+              <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="text-4xl">✅</div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">JSON Válido!</h3>
+                    <p className="text-sm text-gray-700">
+                      {jsonPreview.count} {jsonPreview.count === 1 ? 'cliente encontrado' : 'clientes encontrados'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Preview dos dados */}
+                <div className="bg-white rounded-lg border border-gray-200 p-4 max-h-96 overflow-y-auto">
+                  <h4 className="font-semibold text-gray-900 mb-3">Preview dos Dados:</h4>
+                  {jsonPreview.type === 'structured' && jsonPreview.data.identification && (
+                    <div className="space-y-3">
+                      <div>
+                        <span className="font-medium text-gray-700">Nome: </span>
+                        <span className="text-gray-900">{jsonPreview.data.identification.name}</span>
+                      </div>
+                      {jsonPreview.data.identification.birth_date && (
+                        <div>
+                          <span className="font-medium text-gray-700">Data de Nascimento: </span>
+                          <span className="text-gray-900">{jsonPreview.data.identification.birth_date}</span>
+                        </div>
+                      )}
+                      {jsonPreview.data.goal && (
+                        <div>
+                          <span className="font-medium text-gray-700">Objetivo: </span>
+                          <span className="text-gray-900">{jsonPreview.data.goal.goal_type || 'Não informado'}</span>
+                        </div>
+                      )}
+                      {jsonPreview.data.goal?.current_weight && (
+                        <div>
+                          <span className="font-medium text-gray-700">Peso Atual: </span>
+                          <span className="text-gray-900">{jsonPreview.data.goal.current_weight} kg</span>
+                        </div>
+                      )}
+                      {jsonPreview.data.goal?.goal_weight && (
+                        <div>
+                          <span className="font-medium text-gray-700">Meta: </span>
+                          <span className="text-gray-900">{jsonPreview.data.goal.goal_weight} kg</span>
+                        </div>
+                      )}
+                      {jsonPreview.data.address?.city && (
+                        <div>
+                          <span className="font-medium text-gray-700">Cidade: </span>
+                          <span className="text-gray-900">{jsonPreview.data.address.city}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {jsonPreview.type === 'array' && (
+                    <div className="space-y-2">
+                      {jsonPreview.data.slice(0, 5).map((client: any, index: number) => (
+                        <div key={index} className="p-3 bg-gray-50 rounded border border-gray-200">
+                          <span className="font-medium text-gray-700">Cliente {index + 1}: </span>
+                          <span className="text-gray-900">{client.name || client.identification?.name || 'Sem nome'}</span>
+                        </div>
+                      ))}
+                      {jsonPreview.data.length > 5 && (
+                        <p className="text-sm text-gray-600 mt-2">
+                          ... e mais {jsonPreview.data.length - 5} cliente(s)
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={async () => {
+                      // Validar e importar diretamente (JSON não precisa de mapeamento)
+                      setStep('validation')
+                      await validateData()
+                    }}
+                    className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                  >
+                    Validar e Importar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setStep('upload')
+                      setJsonData('')
+                      setJsonPreview(null)
+                    }}
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  >
+                    Voltar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Preview Step - Excel/CSV */}
+          {step === 'preview' && parsedData.length > 0 && importFormat === 'excel' && (
             <div>
               {isStandardTemplate && (
                 <div className="text-center py-8">
