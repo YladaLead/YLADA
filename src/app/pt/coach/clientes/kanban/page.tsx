@@ -8,11 +8,19 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
   useDraggable,
-  useDroppable
+  useDroppable,
+  closestCenter
 } from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachSidebar from "@/components/coach/CoachSidebar"
@@ -79,11 +87,13 @@ function useStatusHelpers() {
 function ClienteCard({ 
   cliente, 
   cardFields, 
-  quickActions 
+  quickActions,
+  modoCompacto = false
 }: { 
   cliente: Cliente
   cardFields: CardField[]
   quickActions: QuickAction[]
+  modoCompacto?: boolean
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useDraggable({
     id: cliente.id,
@@ -119,17 +129,34 @@ function ClienteCard({
     return statusMap[status] || status
   }
 
+  // Calcular dias desde última interação para indicador de urgência
+  const diasDesdeUltimaInteracao = cliente.last_appointment 
+    ? Math.floor((new Date().getTime() - new Date(cliente.last_appointment).getTime()) / (1000 * 60 * 60 * 24))
+    : null
+  
+  const isUrgente = diasDesdeUltimaInteracao !== null && diasDesdeUltimaInteracao > 30
+
   return (
     <div
       ref={setNodeRef}
       style={style as CSSProperties}
       {...listeners}
       {...attributes}
-      className={`bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-lg hover:border-purple-300 transition-all cursor-grab active:cursor-grabbing transform hover:scale-[1.02]`}
+      className={`bg-white rounded-xl border ${isUrgente ? 'border-orange-300' : 'border-gray-200'} ${modoCompacto ? 'p-2' : 'p-4'} shadow-sm hover:shadow-lg hover:border-purple-300 transition-all cursor-grab active:cursor-grabbing transform hover:scale-[1.02] relative`}
     >
+      {isUrgente && (
+        <div className="absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full animate-pulse" title="Necessita atenção - mais de 30 dias sem interação" />
+      )}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex-1">
-          <h3 className="text-sm font-semibold text-gray-900 leading-tight">{cliente.name}</h3>
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          {/* Avatar */}
+          <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-purple-600 font-semibold text-xs">
+              {cliente.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className={`${modoCompacto ? 'text-xs' : 'text-sm'} font-semibold text-gray-900 leading-tight truncate`}>{cliente.name}</h3>
           {showField('telefone') && cliente.phone && (
             <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
               {displayPhoneWithFlag(cliente.phone)}
@@ -146,8 +173,8 @@ function ClienteCard({
         )}
       </div>
 
-      {showField('objetivo') && cliente.goal && (
-        <p className="text-xs text-gray-700 mt-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg p-2">
+      {showField('objetivo') && cliente.goal && !modoCompacto && (
+        <p className="text-xs text-gray-700 mt-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg p-2 line-clamp-2">
           🎯 {cliente.goal}
         </p>
       )}
@@ -444,7 +471,7 @@ function AddClientForm({
   )
 }
 
-function KanbanColumn({
+function SortableColumn({
   status,
   label,
   description,
@@ -457,7 +484,8 @@ function KanbanColumn({
   onDeleteColumn,
   isEditing,
   onSaveEdit,
-  onCancelEdit
+  onCancelEdit,
+  modoCompacto
 }: {
   status: string
   label: string
@@ -472,11 +500,32 @@ function KanbanColumn({
   isEditing?: boolean
   onSaveEdit?: (label: string, description: string) => void
   onCancelEdit?: () => void
+  modoCompacto?: boolean
 }) {
-  const { setNodeRef, isOver } = useDroppable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: `column-${status}` })
+
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: `column-${status}`,
     data: { status }
   })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1
+  }
+
+  const combinedRef = (node: HTMLDivElement | null) => {
+    setNodeRef(node)
+    setDroppableRef(node)
+  }
 
   const isDefaultColumn = ['lead', 'pre_consulta', 'ativa', 'pausa', 'finalizada'].includes(status)
   const [editLabel, setEditLabel] = useState(label)
@@ -495,9 +544,21 @@ function KanbanColumn({
   
   return (
     <div
-      ref={setNodeRef}
-      className={`flex flex-col rounded-lg ${borderColor} ${bgColor} ${isOver ? 'ring-4 ring-purple-400 ring-offset-2 shadow-lg scale-[1.02]' : ''} min-h-[500px] w-[280px] flex-shrink-0 shadow-sm transition-all duration-200`}
+      ref={combinedRef}
+      style={style}
+      className={`flex flex-col rounded-lg ${borderColor} ${bgColor} ${isOver ? 'ring-4 ring-purple-400 ring-offset-2 shadow-lg scale-[1.02]' : ''} ${isDragging ? 'z-50' : ''} min-h-[500px] w-[280px] flex-shrink-0 shadow-sm transition-all duration-200`}
     >
+      {/* Handle para arrastar coluna */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 right-2 cursor-grab active:cursor-grabbing text-gray-400 hover:text-purple-600 p-1 rounded hover:bg-purple-50 transition-colors"
+        title="Arraste para reordenar colunas"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+        </svg>
+      </div>
       <div className={`px-3 py-2 border-b ${borderColor} bg-white/60 backdrop-blur-sm`}>
         {isEditing ? (
           <div className="space-y-2">
@@ -603,6 +664,7 @@ function KanbanColumn({
               cliente={cliente}
               cardFields={cardFields}
               quickActions={quickActions}
+              modoCompacto={modoCompacto}
             />
           ))
         )}
@@ -633,10 +695,18 @@ function KanbanContent() {
   const [editingColumn, setEditingColumn] = useState<string | null>(null)
   const [editingColumnLabel, setEditingColumnLabel] = useState('')
   const [editingColumnDescription, setEditingColumnDescription] = useState('')
+  const [activeColumn, setActiveColumn] = useState<string | null>(null)
+  const [filtroStatus, setFiltroStatus] = useState<string[]>([])
+  const [filtroData, setFiltroData] = useState<string>('')
+  const [modoCompacto, setModoCompacto] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 }
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates
     })
   )
 
@@ -788,7 +858,7 @@ function KanbanContent() {
 
       if (data.success) {
         // Recarregar clientes
-        const reloadResponse = await fetch(`/api/c/clientes?limit=200&order_by=created_at&order=asc`, {
+        const reloadResponse = await fetch(`/api/coach/clientes?limit=200&order_by=created_at&order=asc`, {
           credentials: 'include'
         })
         if (reloadResponse.ok) {
@@ -911,13 +981,85 @@ function KanbanContent() {
   }
 
   const clientesFiltrados = useMemo(() => {
-    if (!busca) return clientes
-    const termo = busca.toLowerCase().trim()
-    return clientes.filter((cliente) => {
-      const alvo = `${cliente.name || ''} ${cliente.email || ''} ${cliente.phone || ''}`.toLowerCase()
-      return alvo.includes(termo)
-    })
-  }, [clientes, busca])
+    let filtrados = [...clientes]
+
+    // Filtro de busca
+    if (busca) {
+      const termo = busca.toLowerCase().trim()
+      filtrados = filtrados.filter((cliente) => {
+        const alvo = `${cliente.name || ''} ${cliente.email || ''} ${cliente.phone || ''}`.toLowerCase()
+        return alvo.includes(termo)
+      })
+    }
+
+    // Filtro por status
+    if (filtroStatus.length > 0) {
+      filtrados = filtrados.filter((cliente) => filtroStatus.includes(cliente.status))
+    }
+
+    // Filtro por data
+    if (filtroData) {
+      const dataFiltro = new Date(filtroData)
+      filtrados = filtrados.filter((cliente) => {
+        const dataCliente = new Date(cliente.created_at)
+        return dataCliente.toDateString() === dataFiltro.toDateString()
+      })
+    }
+
+    return filtrados
+  }, [clientes, busca, filtroStatus, filtroData])
+
+  // Atalhos de teclado
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignorar se estiver digitando em um input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        if (e.key === 'Escape') {
+          // Esc fecha modais e formulários
+          if (showNewColumnForm) {
+            setShowNewColumnForm(false)
+            setNewColumnLabel('')
+            setNewColumnDescription('')
+          }
+          if (showAddClientModal) {
+            setShowAddClientModal(false)
+            setClientStatusToAdd(null)
+          }
+          if (configModalOpen) {
+            setConfigModalOpen(false)
+          }
+          if (showHelp) {
+            setShowHelp(false)
+          }
+        }
+        return
+      }
+
+      // Atalhos globais
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault()
+        setShowHelp(!showHelp)
+      } else if (e.key === 'c' || e.key === 'C') {
+        if (!showNewColumnForm && !showAddClientModal && !configModalOpen) {
+          e.preventDefault()
+          setShowNewColumnForm(true)
+        }
+      } else if (e.key === 'n' || e.key === 'N') {
+        if (!showNewColumnForm && !showAddClientModal && !configModalOpen) {
+          e.preventDefault()
+          // Adicionar cliente na primeira coluna
+          if (columns.length > 0) {
+            const primeiraColuna = columns.sort((a, b) => a.order - b.order)[0]
+            setClientStatusToAdd(primeiraColuna.value)
+            setShowAddClientModal(true)
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showNewColumnForm, showAddClientModal, configModalOpen, showHelp, columns])
 
   const clientesPorStatus = useMemo(() => {
     // Ordenar colunas por order
@@ -929,9 +1071,54 @@ function KanbanContent() {
   }, [clientesFiltrados, columns])
 
   const handleDragStart = (event: DragStartEvent) => {
-    const clientId = event.active.id as string
-    const cliente = clientes.find((c) => c.id === clientId)
-    setActiveClient(cliente || null)
+    const activeId = event.active.id as string
+    
+    // Verificar se é uma coluna ou um cliente
+    if (activeId.startsWith('column-')) {
+      const columnValue = activeId.replace('column-', '')
+      setActiveColumn(columnValue)
+    } else {
+      const cliente = clientes.find((c) => c.id === activeId)
+      setActiveClient(cliente || null)
+    }
+  }
+
+  // Handler para reordenar colunas
+  const handleColumnDragEnd = (event: DragEndEvent) => {
+    setActiveColumn(null)
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const activeId = active.id as string
+    const overId = over.id as string
+
+    // Verificar se são colunas
+    if (!activeId.startsWith('column-') || !overId.startsWith('column-')) return
+
+    const activeValue = activeId.replace('column-', '')
+    const overValue = overId.replace('column-', '')
+
+    const oldIndex = columns.findIndex(c => c.value === activeValue)
+    const newIndex = columns.findIndex(c => c.value === overValue)
+
+    if (oldIndex === -1 || newIndex === -1) return
+
+    const newColumns = [...columns]
+    const [removed] = newColumns.splice(oldIndex, 1)
+    newColumns.splice(newIndex, 0, removed)
+
+    // Atualizar ordem
+    const reordered = newColumns.map((col, index) => ({
+      ...col,
+      order: index + 1
+    }))
+
+    setColumns(reordered)
+    handleSaveConfig({
+      columns: reordered,
+      card_fields: cardFields,
+      quick_actions: quickActions
+    })
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -1070,18 +1257,87 @@ function KanbanContent() {
             </div>
           </div>
 
-          <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-            <label htmlFor="busca" className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar por nome, telefone ou email
-            </label>
-            <input
-              id="busca"
-              type="text"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder="Ex: Maria, 11 9999..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-            />
+          <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <label htmlFor="busca" className="block text-sm font-medium text-gray-700 mb-2">
+                  Buscar por nome, telefone ou email
+                </label>
+                <input
+                  id="busca"
+                  type="text"
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  placeholder="Ex: Maria, 11 9999..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
+              <div className="md:w-48">
+                <label htmlFor="filtroData" className="block text-sm font-medium text-gray-700 mb-2">
+                  Filtrar por data
+                </label>
+                <input
+                  id="filtroData"
+                  type="date"
+                  value={filtroData}
+                  onChange={(e) => setFiltroData(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por status
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {columns.map((col) => (
+                  <label key={col.value} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filtroStatus.includes(col.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFiltroStatus([...filtroStatus, col.value])
+                        } else {
+                          setFiltroStatus(filtroStatus.filter(s => s !== col.value))
+                        }
+                      }}
+                      className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                    />
+                    <span className="text-sm text-gray-700">{col.label}</span>
+                  </label>
+                ))}
+                {filtroStatus.length > 0 && (
+                  <button
+                    onClick={() => setFiltroStatus([])}
+                    className="text-xs text-purple-600 hover:text-purple-800 underline"
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={modoCompacto}
+                  onChange={(e) => setModoCompacto(e.target.checked)}
+                  className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                />
+                <span className="text-sm text-gray-700">Modo compacto</span>
+              </label>
+              <button
+                onClick={() => setShowHelp(true)}
+                className="text-sm text-purple-600 hover:text-purple-800 flex items-center gap-1"
+                title="Ver atalhos de teclado (pressione ?)"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Ajuda (?)
+              </button>
+            </div>
           </div>
 
           {erro && (
@@ -1112,30 +1368,46 @@ function KanbanContent() {
           ) : (
             <DndContext
               sensors={sensors}
+              collisionDetection={closestCenter}
               onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDragCancel={() => setActiveClient(null)}
+              onDragEnd={(event) => {
+                const activeId = event.active.id as string
+                if (activeId.startsWith('column-')) {
+                  handleColumnDragEnd(event)
+                } else {
+                  handleDragEnd(event)
+                }
+              }}
+              onDragCancel={() => {
+                setActiveClient(null)
+                setActiveColumn(null)
+              }}
             >
               <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <div className="flex gap-4 min-w-max pr-2">
-                  {clientesPorStatus.map((coluna) => (
-                    <KanbanColumn
-                      key={coluna.value}
-                      status={coluna.value}
-                      label={coluna.label}
-                      description={coluna.description}
-                      color={coluna.color}
-                      clientes={coluna.clientes}
-                      cardFields={cardFields}
-                      quickActions={quickActions}
-                      onAddClient={handleAddClient}
-                      onEditColumn={handleEditColumn}
-                      onDeleteColumn={handleDeleteColumn}
-                      isEditing={editingColumn === coluna.value}
-                      onSaveEdit={handleSaveColumnEdit}
-                      onCancelEdit={handleCancelColumnEdit}
-                    />
-                  ))}
+                <SortableContext
+                  items={clientesPorStatus.map(col => `column-${col.value}`)}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  <div className="flex gap-4 min-w-max pr-2">
+                    {clientesPorStatus.map((coluna) => (
+                      <SortableColumn
+                        key={coluna.value}
+                        status={coluna.value}
+                        label={coluna.label}
+                        description={coluna.description}
+                        color={coluna.color}
+                        clientes={coluna.clientes}
+                        cardFields={cardFields}
+                        quickActions={quickActions}
+                        onAddClient={handleAddClient}
+                        onEditColumn={handleEditColumn}
+                        onDeleteColumn={handleDeleteColumn}
+                        isEditing={editingColumn === coluna.value}
+                        onSaveEdit={handleSaveColumnEdit}
+                        onCancelEdit={handleCancelColumnEdit}
+                        modoCompacto={modoCompacto}
+                      />
+                    ))}
                   
                   {/* Botão para adicionar nova coluna - SEMPRE VISÍVEL */}
                   {showNewColumnForm ? (
@@ -1235,11 +1507,23 @@ function KanbanContent() {
                       </div>
                     </button>
                   )}
-                </div>
+                  </div>
+                </SortableContext>
               </div>
 
               <DragOverlay>
-                {activeClient ? (
+                {activeColumn ? (
+                  <div className="bg-white rounded-xl border-2 border-purple-400 p-4 shadow-2xl w-[280px]">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                      </svg>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {columns.find(c => c.value === activeColumn)?.label || 'Coluna'}
+                      </span>
+                    </div>
+                  </div>
+                ) : activeClient ? (
                   <div className="bg-white rounded-xl border-2 border-purple-400 p-4 shadow-2xl w-64 transform rotate-2">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
@@ -1295,6 +1579,60 @@ function KanbanContent() {
           )}
         </div>
       </div>
+
+      {/* Modal de Ajuda - Atalhos de Teclado */}
+      {showHelp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowHelp(false)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Atalhos de Teclado</h2>
+              <button
+                onClick={() => setShowHelp(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono">C</kbd>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Adicionar Nova Coluna</p>
+                  <p className="text-xs text-gray-500">Abre o formulário para criar uma nova coluna</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono">N</kbd>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Adicionar Novo Cliente</p>
+                  <p className="text-xs text-gray-500">Abre o formulário para adicionar cliente na primeira coluna</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono">?</kbd>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Mostrar/Ocultar Ajuda</p>
+                  <p className="text-xs text-gray-500">Abre ou fecha este modal de ajuda</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono">Esc</kbd>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Fechar Modais</p>
+                  <p className="text-xs text-gray-500">Fecha qualquer modal ou formulário aberto</p>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500">
+                  💡 <strong>Dica:</strong> Você pode arrastar colunas para reordená-las. Use o ícone de arrastar no canto superior direito de cada coluna.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Configuração */}
       <KanbanConfigModal
