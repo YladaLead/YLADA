@@ -116,20 +116,27 @@ ORDER BY h.created_at DESC;
 -- =====================================================
 -- 5. VERIFICAR LEADS QUE PODERIAM TER SIDO CONVERTIDOS
 -- =====================================================
+-- Nota: A tabela coach_leads não tem colunas 'status' nem 'converted_to_client'
+-- Verificar se foram convertidos checando se existe cliente com lead_id correspondente
 SELECT 
-  id,
-  name,
-  email,
-  phone,
-  source,
-  status,
-  converted_to_client,
-  created_at
-FROM coach_leads
-WHERE user_id = (
+  l.id,
+  l.name,
+  l.email,
+  l.phone,
+  l.source,
+  l.created_at,
+  CASE 
+    WHEN c.id IS NOT NULL THEN 'CONVERTIDO'
+    ELSE 'NÃO CONVERTIDO'
+  END as status_conversao,
+  c.id as client_id,
+  c.name as nome_cliente
+FROM coach_leads l
+LEFT JOIN coach_clients c ON c.lead_id = l.id
+WHERE l.user_id = (
   SELECT id FROM auth.users WHERE email = 'paula@gmail.com'
 )
-ORDER BY created_at DESC;
+ORDER BY l.created_at DESC;
 
 -- =====================================================
 -- 6. VERIFICAR AVALIAÇÕES E OUTROS DADOS RELACIONADOS
@@ -241,10 +248,10 @@ WHERE user_id = (SELECT id FROM auth.users WHERE email = 'paula@gmail.com')
 UNION ALL
 SELECT 
   'Leads convertidos',
-  COUNT(*)::text
-FROM coach_leads
-WHERE user_id = (SELECT id FROM auth.users WHERE email = 'paula@gmail.com')
-AND converted_to_client = true
+  COUNT(DISTINCT l.id)::text
+FROM coach_leads l
+INNER JOIN coach_clients c ON c.lead_id = l.id
+WHERE l.user_id = (SELECT id FROM auth.users WHERE email = 'paula@gmail.com')
 UNION ALL
 SELECT 
   'Total de avaliações',
