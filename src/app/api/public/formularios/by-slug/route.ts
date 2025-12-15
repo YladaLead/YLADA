@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Se não encontrou formulário do usuário, tentar buscar template público
+    // e clonar automaticamente para o usuário (mantendo o slug)
     if (!form && !error) {
       console.log('🔍 Buscando template público com slug:', slug)
       
@@ -99,8 +100,39 @@ export async function GET(request: NextRequest) {
       })
 
       if (template) {
-        form = template
-        error = null
+        // Clonar automaticamente para o usuário para que o form_id pertença ao dono do slug
+        const { data: clonedForm, error: cloneError } = await supabaseAdmin
+          .from('custom_forms')
+          .insert({
+            user_id: userProfile.user_id,
+            name: template.name,
+            description: template.description,
+            form_type: template.form_type,
+            structure: template.structure,
+            is_active: true,
+            is_template: false,
+            slug: template.slug, // manter slug igual para URL estável
+            short_code: null // evitar conflito de short_code único
+          })
+          .select('*')
+          .single()
+
+        if (cloneError) {
+          console.error('❌ Erro ao clonar template para usuário:', {
+            userId: userProfile.user_id,
+            slug,
+            cloneError
+          })
+          error = cloneError
+        } else {
+          form = clonedForm
+          error = null
+          console.log('✅ Template clonado para usuário:', {
+            newFormId: clonedForm.id,
+            userId: clonedForm.user_id,
+            slug: clonedForm.slug
+          })
+        }
       } else if (templateError) {
         error = templateError
       }
@@ -126,9 +158,15 @@ export async function GET(request: NextRequest) {
       isTemplate: form.is_template
     })
 
+    // Montar URL pública padronizada com o user_slug
+    const publicUrl = `/pt/coach/${userSlug}/formulario/${form.slug}`
+
     return NextResponse.json({
       success: true,
-      data: { form }
+      data: { 
+        form,
+        public_url: publicUrl
+      }
     })
 
   } catch (error: any) {
