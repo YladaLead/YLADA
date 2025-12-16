@@ -157,8 +157,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       } else {
         // Para outros casos, usar imagem padrão
         inferredImage = `${baseUrl}/images/wellness-hero-com-logo.png`
-        fallbackTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
-        fallbackDescription = 'Com inteligência artificial integrada.'
+        fallbackTitle = 'Ferramenta de Bem-Estar'
+        fallbackDescription = 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
       }
       
       console.log('[OG Metadata] 🔍 Using inferred metadata (fallback):', {
@@ -238,9 +238,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       // Obter mensagens estimulantes baseadas no tipo de ferramenta
       const ogMessages = getOGMessages(normalizedSlug)
       
-      // Usar texto padrão para WhatsApp: "Transforme como você conversa: fale com 10x mais pessoas"
-      ogTitle = 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve'
-      ogDescription = 'Com inteligência artificial integrada.'
+      // Usar título e descrição da ferramenta ou texto genérico
+      ogTitle = tool.title || 'Ferramenta de Bem-Estar'
+      ogDescription = tool.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
       
       console.log('[OG Metadata] Ferramenta normal:', {
         normalizedSlug,

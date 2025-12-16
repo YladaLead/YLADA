@@ -13,11 +13,11 @@ export const metadata: Metadata = {
     icon: '/images/logo/wellness-quadrado.png',
     apple: '/images/logo/wellness-quadrado.png',
   },
-  title: 'WELLNESS - Transforme como você conversa: fale com 10x mais pessoas',
-  description: 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve. Com inteligência artificial integrada.',
+  title: 'WELLNESS - Ferramentas de Bem-Estar Personalizadas',
+  description: 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.',
   openGraph: {
-    title: 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve',
-    description: 'Com inteligência artificial integrada.',
+    title: 'WELLNESS - Ferramentas de Bem-Estar Personalizadas',
+    description: 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.',
     url: `${baseUrl}/pt/wellness`,
     siteName: 'WELLNESS - Your Leading Data System',
     type: 'website',
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Transforme como você conversa: fale com 10x mais pessoas, de forma simples e leve',
-    description: 'Com inteligência artificial integrada.',
+    title: 'WELLNESS - Ferramentas de Bem-Estar Personalizadas',
+    description: 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.',
     images: [ogImageUrl],
   },
 }
