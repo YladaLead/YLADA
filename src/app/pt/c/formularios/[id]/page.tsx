@@ -18,7 +18,7 @@ import {
   getHelpTextExample, 
   renderFieldPreview, 
   ModalEditarCampo 
-} from '../novo/page'
+} from '../../coach/(protected)/formularios/novo/page'
 
 export default function EditarFormularioCoach() {
   return (
