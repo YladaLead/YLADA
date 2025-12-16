@@ -67,9 +67,9 @@ export {
   getFieldPlaceholderExample,
   getPlaceholderExample,
   getHelpTextExample,
-  renderFieldPreview,
-  ModalEditarCampo
+  renderFieldPreview
 } from '@/components/coach/formularios-utils'
+// ModalEditarCampo não é re-exportado - temos implementação específica local abaixo
 
 // Componente para item de componente arrastável
 function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label: string; icon: string; description: string; suggestion: string } }) {
