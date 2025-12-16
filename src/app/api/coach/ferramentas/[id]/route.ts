@@ -9,6 +9,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let id: string = 'unknown'
   try {
     // 🔒 Verificar autenticação e perfil coach
     const authResult = await requireApiAuth(request, ['coach', 'admin'])
@@ -17,9 +18,24 @@ export async function GET(
     }
     const { user } = authResult
 
-    const { id } = await params
+    const resolvedParams = await params
+    id = resolvedParams.id
     const { searchParams } = new URL(request.url)
     const profession = searchParams.get('profession') || 'coach'
+
+    // ✅ Validar formato UUID para evitar tentativas com IDs inválidos (ex: IDs de clientes)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(id)) {
+      console.warn('⚠️ Tentativa de acessar ferramenta com ID inválido:', {
+        id,
+        url: request.url,
+        user_id: user.id
+      })
+      return NextResponse.json(
+        { error: 'ID de ferramenta inválido. O ID deve ser um UUID válido.' },
+        { status: 400 }
+      )
+    }
 
     // 🔒 Usar user_id do token (seguro), não do parâmetro
     const authenticatedUserId = user.id
@@ -33,9 +49,28 @@ export async function GET(
       .eq('user_id', authenticatedUserId) // 🔒 Garantir que pertence ao usuário
       .single()
 
-    if (error) throw error
+    if (error) {
+      // Log detalhado em desenvolvimento para ajudar a identificar problemas
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('⚠️ Erro ao buscar ferramenta:', {
+          id,
+          error: error.message,
+          code: error.code,
+          user_id: authenticatedUserId
+        })
+      }
+      throw error
+    }
 
     if (!toolData) {
+      // Log em desenvolvimento para identificar tentativas de acesso a ferramentas inexistentes
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('⚠️ Ferramenta não encontrada:', {
+          id,
+          profession,
+          user_id: authenticatedUserId
+        })
+      }
       return NextResponse.json(
         { error: 'Ferramenta não encontrada ou você não tem permissão para acessá-la' },
         { status: 404 }
@@ -64,10 +99,19 @@ export async function GET(
 
     return NextResponse.json({ tool: data })
   } catch (error: any) {
+    // Se for erro 404 do Supabase (PGRST116), retornar 404 em vez de 500
+    if (error?.code === 'PGRST116' || error?.message?.includes('No rows')) {
+      return NextResponse.json(
+        { error: 'Ferramenta não encontrada ou você não tem permissão para acessá-la' },
+        { status: 404 }
+      )
+    }
+    
     console.error('❌ Erro técnico ao buscar ferramenta por ID:', {
       error,
       message: error?.message,
-      code: error?.code
+      code: error?.code,
+      id
     })
     
     const mensagemAmigavel = translateError(error)
