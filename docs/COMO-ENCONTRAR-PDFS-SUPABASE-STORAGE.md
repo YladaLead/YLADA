@@ -188,3 +188,4 @@ Após atualizar as URLs:
 1. Recarregue a página `/pt/wellness/biblioteca/scripts`
 2. Os PDFs devem aparecer na lista
 3. Clique em um PDF para testar se abre corretamente
+

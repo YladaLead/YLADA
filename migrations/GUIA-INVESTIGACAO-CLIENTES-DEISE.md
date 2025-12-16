@@ -126,3 +126,5 @@ Com base nos resultados, identifique:
 - **Execute uma parte por vez**
 - **Verifique os resultados antes de continuar**
 - **Me envie os resultados da query rápida primeiro!**
+
+

@@ -217,3 +217,5 @@ WHERE user_id = (SELECT id FROM auth.users WHERE email = 'paula@gmail.com');
 -- =====================================================
 -- FIM DA VERIFICAÇÃO DE SINCRONIZAÇÃO
 -- =====================================================
+
+

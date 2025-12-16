@@ -149,3 +149,6 @@ O Assistants API da OpenAI funciona assim:
 
 
 
+
+
+

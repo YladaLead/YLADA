@@ -241,3 +241,5 @@ ORDER BY
 -- 3. Com base nos resultados, descomente apenas as etapas necessárias
 -- 4. Execute uma etapa por vez
 -- 5. Verifique os resultados antes de continuar
+
+

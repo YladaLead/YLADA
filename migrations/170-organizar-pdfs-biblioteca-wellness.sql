@@ -284,3 +284,4 @@ ORDER BY a.ordem;
 --    - Scripts agora são apenas via NOEL
 -- 
 -- ============================================
+

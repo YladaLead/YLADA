@@ -28,3 +28,4 @@ FROM wellness_materiais
 WHERE tipo = 'pdf' 
   AND categoria = 'cartilha'
 ORDER BY codigo;
+

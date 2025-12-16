@@ -94,3 +94,6 @@ COMMENT ON COLUMN user_consents.user_agent IS 'User agent do navegador (para aud
 
 
 
+
+
+

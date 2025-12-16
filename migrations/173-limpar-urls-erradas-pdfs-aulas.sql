@@ -156,3 +156,4 @@ ORDER BY a.ordem;
 --    migrations/172-corrigir-vinculos-pdfs-aulas.sql
 -- 
 -- ============================================
+

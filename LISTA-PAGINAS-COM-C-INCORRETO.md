@@ -127,3 +127,6 @@ A abreviação `/c/` deve ser usada **APENAS** em:
 1. Corrigir todos os links internos (href, router.push) de páginas administrativas para usar `/pt/coach/` ao invés de `/pt/c/`
 2. Revisar o middleware - talvez remover os redirecionamentos de páginas administrativas
 3. Manter apenas os redirecionamentos para links públicos de ferramentas
+
+
+

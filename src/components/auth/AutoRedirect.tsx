@@ -8,15 +8,18 @@ import { isPublicPage, getAccessRule, getHomePath, getAreaFromPath } from '@/lib
 /**
  * Componente que gerencia redirecionamento automático baseado em autenticação
  * 
- * NOVA LÓGICA CENTRALIZADA:
- * 1. Se usuário já está logado e acessa página pública → permanece lá
- * 2. Se usuário já está logado e acessa página de login → redireciona para home do perfil
- * 3. Se usuário já está logado e acessa página protegida → permite acesso (RequireSubscription cuida da assinatura)
- * 4. Se usuário NÃO está logado e acessa página protegida → redireciona para login
- * 5. Se usuário NÃO está logado e acessa página pública → permite acesso
- * 6. Se usuário NÃO está logado e acessa página de login → permanece lá
+ * VERSÃO SIMPLIFICADA - APENAS UX (não segurança)
  * 
- * IMPORTANTE: Mantém usuários logados quando voltam à plataforma (sessão persiste)
+ * Server-side já cuida de:
+ * - Validar sessão
+ * - Validar perfil
+ * - Validar assinatura
+ * - Redirecionar páginas protegidas
+ * 
+ * AutoRedirect apenas faz:
+ * - Redirecionar de /login para /home quando logado (UX)
+ * 
+ * IMPORTANTE: Não redireciona páginas protegidas - server já faz isso
  */
 export default function AutoRedirect() {
   const { user, userProfile, loading, isAuthenticated } = useAuth()
@@ -53,58 +56,36 @@ export default function AutoRedirect() {
 
     // CASO 1: Usuário está logado
     if (isAuthenticated && user) {
-      // Se está em página de login → redirecionar para home do perfil
-      if (isLoginPage) {
+      // APENAS UX: Se está em página de login → redirecionar para home do perfil
+      // Server-side já validou tudo, então podemos confiar
+      if (isLoginPage && !hasRedirectedRef.current) {
         const perfil = userProfile?.perfil || getAreaFromPath(pathname) || 'wellness'
         const homePath = getHomePath(perfil)
 
-        console.log('✅ AutoRedirect: Usuário logado em página de login, redirecionando para:', homePath)
+        console.log('✅ AutoRedirect (UX): Usuário logado em página de login, redirecionando para:', homePath)
         hasRedirectedRef.current = true
-        
-        // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sem delay)
         router.replace(homePath)
-        
         return
       }
 
-      // Se está em página pública → permitir acesso (não redirecionar)
-      // Usuário logado pode acessar páginas públicas normalmente
-      if (isPublic) {
-        console.log('✅ AutoRedirect: Usuário logado em página pública, permitindo acesso')
-        return
-      }
-
-      // Se está em página protegida → permitir acesso
-      // RequireSubscription vai verificar assinatura e redirecionar se necessário
-      console.log('✅ AutoRedirect: Usuário logado em página protegida, permitindo acesso (RequireSubscription vai verificar assinatura)')
+      // Páginas públicas e protegidas → permitir acesso
+      // Server-side já validou se tem acesso
       return
     }
 
     // CASO 2: Usuário NÃO está logado
+    // Server-side já redirecionou páginas protegidas
+    // AutoRedirect não precisa fazer nada aqui
+    // Apenas permitir acesso a páginas públicas e login
     if (!isAuthenticated || !user) {
-      // Se está em página pública → permitir acesso
-      if (isPublic) {
-        console.log('✅ AutoRedirect: Usuário não logado em página pública, permitindo acesso')
+      // Páginas públicas ou login → permitir acesso
+      if (isPublic || isLoginPage) {
         return
       }
 
-      // Se está em página de login → permitir acesso (permanecer lá)
-      if (isLoginPage) {
-        console.log('✅ AutoRedirect: Usuário não logado em página de login, permitindo acesso')
-        return
-      }
-
-      // Se está em página protegida → redirecionar para login
-      if (accessRule.requiresAuth && !hasRedirectedRef.current) {
-        const loginPath = accessRule.redirectIfNotAuth || `/pt/${getAreaFromPath(pathname) || 'wellness'}/login`
-        console.log('🔄 AutoRedirect: Usuário não logado em página protegida, redirecionando para:', loginPath)
-        hasRedirectedRef.current = true
-        
-        // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sem delay)
-        router.replace(loginPath)
-        
-        return
-      }
+      // Páginas protegidas → server já redirecionou, não fazer nada
+      // (Este código não deve ser alcançado, mas mantido como fallback)
+      return
     }
 
     return () => {

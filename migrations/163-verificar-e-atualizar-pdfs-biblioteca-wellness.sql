@@ -175,3 +175,4 @@ SELECT get_supabase_storage_url('fubynpjagxxqbyfjsile', 'pdfs/scripts/Calculador
 -- 5. Execute a PARTE 3 para atualizar as URLs
 -- 
 -- ============================================
+

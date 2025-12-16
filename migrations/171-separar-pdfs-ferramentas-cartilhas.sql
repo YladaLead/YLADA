@@ -61,3 +61,4 @@ ORDER BY
   CASE WHEN ativo = true THEN 0 ELSE 1 END,
   ordem,
   titulo;
+

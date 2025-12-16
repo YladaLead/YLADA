@@ -143,3 +143,5 @@ GROUP BY h.client_id, cc.id, cc.deleted_at, cc.name
 ORDER BY ultima_atividade DESC
 LIMIT 20;
 
+
+

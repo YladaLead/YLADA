@@ -184,3 +184,4 @@ Se quiser executar todas de uma vez, use esta ordem:
 
 **Documento criado em:** Dezembro 2025  
 **Versão:** 1.0
+

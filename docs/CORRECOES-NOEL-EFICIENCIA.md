@@ -122,3 +122,6 @@ Após essas correções, o NOEL deve:
 
 **Status:** ✅ Correções implementadas e commitadas  
 **Próximo passo:** Adicionar function no OpenAI Assistant e testar
+
+
+

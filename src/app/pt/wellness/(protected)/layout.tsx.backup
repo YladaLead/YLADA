@@ -1,0 +1,42 @@
+import { ReactNode } from 'react'
+import { redirect } from 'next/navigation'
+import { validateProtectedAccess } from '@/lib/auth-server'
+
+interface ProtectedLayoutProps {
+  children: ReactNode
+}
+
+/**
+ * Layout protegido para área Wellness
+ * 
+ * Valida no server-side:
+ * - Sessão válida
+ * - Perfil correto (wellness) ou admin/suporte
+ * - Assinatura ativa (admin/suporte pode bypassar)
+ * 
+ * Se qualquer validação falhar → redirect server-side
+ * Se tudo OK → renderiza children
+ */
+export default async function ProtectedWellnessLayout({ children }: ProtectedLayoutProps) {
+  // TEMPORÁRIO: Validação simplificada para debug
+  // Depois voltar para validação completa
+  try {
+    await validateProtectedAccess('wellness', {
+      requireSubscription: false, // TEMPORÁRIO: desabilitar assinatura para testar
+      allowAdmin: true,
+      allowSupport: true,
+    })
+  } catch (error: any) {
+    // Se for redirect, re-lançar
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error
+    }
+    // Outros erros: logar e redirecionar
+    console.error('❌ Erro no layout:', error)
+    redirect('/pt/wellness/login')
+  }
+
+  // Se chegou aqui, tudo está OK - renderizar children
+  return <>{children}</>
+}
+

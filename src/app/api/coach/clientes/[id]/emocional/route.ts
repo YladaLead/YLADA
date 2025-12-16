@@ -114,9 +114,9 @@ export async function POST(
     const { id: clientId } = await params
     const authenticatedUserId = user.id
 
-    // Verificar se o cliente existe
+    // Verificar se o cliente existe na área de coach
     const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
+      .from('coach_clients')
       .select('id, name')
       .eq('id', clientId)
       .eq('user_id', authenticatedUserId)

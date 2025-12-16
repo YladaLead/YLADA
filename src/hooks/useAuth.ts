@@ -22,6 +22,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isStable, setIsStable] = useState(false) // Flag para indicar quando estado está completamente consolidado
   const router = useRouter()
 
   const fetchUserProfile = async (userId: string, useCache = true) => {
@@ -153,6 +154,7 @@ export function useAuth() {
       if (!mounted) return
       
       console.log('🔄 useAuth: Iniciando carregamento...', { isPWA })
+      setIsStable(false) // Marcar como instável durante carregamento
       
       try {
         // Buscar sessão uma única vez (sem retries excessivos)
@@ -219,10 +221,13 @@ export function useAuth() {
                       if (profile) {
                         setUserProfile(profile) // Atualizar se mudou
                       }
+                      setIsStable(true) // Estável após carregar perfil do cache
                     })
                     .catch(() => {
                       // Ignorar erros em background
+                      if (mounted) setIsStable(true) // Estável mesmo em erro
                     })
+                  setIsStable(true) // Estável quando usa cache
                   return
                 }
               } catch (e) {

@@ -21,8 +21,9 @@ export async function GET(request: NextRequest) {
     const tag = searchParams.get('tag')
     const busca = searchParams.get('busca')
 
-    // Buscar scripts
-    let query = supabaseAdmin
+    // Buscar apenas scripts de texto da tabela wellness_scripts
+    // PDFs foram movidos para cartilhas, então não buscamos mais aqui
+    let queryScripts = supabaseAdmin
       .from('wellness_scripts')
       .select('*')
       .eq('ativo', true)
@@ -30,30 +31,39 @@ export async function GET(request: NextRequest) {
       .order('titulo', { ascending: true })
 
     if (categoria) {
-      query = query.eq('categoria', categoria)
+      queryScripts = queryScripts.eq('categoria', categoria)
     }
 
     if (tag) {
-      query = query.contains('tags', [tag])
+      queryScripts = queryScripts.contains('tags', [tag])
     }
 
     if (busca) {
-      query = query.or(`titulo.ilike.%${busca}%,descricao.ilike.%${busca}%,texto.ilike.%${busca}%`)
+      queryScripts = queryScripts.or(`titulo.ilike.%${busca}%,descricao.ilike.%${busca}%,texto.ilike.%${busca}%`)
     }
 
-    const { data: scripts, error } = await query
+    const { data: scriptsTexto, error: errorScripts } = await queryScripts
 
-    if (error) {
-      console.error('❌ Erro ao buscar scripts:', error)
-      return NextResponse.json(
-        { error: 'Erro ao buscar scripts' },
-        { status: 500 }
-      )
+    if (errorScripts) {
+      console.error('❌ Erro ao buscar scripts de texto:', errorScripts)
     }
+
+    // Transformar scripts para formato unificado
+    const scriptsFormatados = (scriptsTexto || []).map((script: any) => ({
+      id: script.id,
+      codigo: script.codigo,
+      titulo: script.titulo,
+      descricao: script.descricao,
+      categoria: script.categoria,
+      texto: script.texto,
+      tags: script.tags,
+      tipo: 'texto' as const,
+      url: null
+    }))
 
     return NextResponse.json({
       success: true,
-      data: scripts || []
+      data: scriptsFormatados
     })
   } catch (error: any) {
     console.error('❌ Erro ao buscar scripts:', error)

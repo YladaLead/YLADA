@@ -144,3 +144,4 @@ FROM wellness_materiais
 WHERE tipo = 'pdf' 
   AND categoria = 'script'
 ORDER BY ordem, titulo;
+

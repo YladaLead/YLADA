@@ -433,3 +433,6 @@ Este documento mapeia todos os ajustes necessários de copy/textos considerando 
 
 **Última atualização:** 2025-01-13  
 **Próxima revisão:** Após conclusão dos itens de alta prioridade
+
+
+

@@ -128,14 +128,9 @@ function formatarRitmo(ritmo?: string): string {
   return map[ritmo] || ritmo
 }
 
+// Layout server-side já valida autenticação, perfil e assinatura
 export default function WellnessPerfilPage() {
-  return (
-    <ProtectedRoute perfil="wellness" allowAdmin={true}>
-      <RequireSubscription area="wellness">
-        <WellnessPerfilContent />
-      </RequireSubscription>
-    </ProtectedRoute>
-  )
+  return <WellnessPerfilContent />
 }
 
 function WellnessPerfilContent() {

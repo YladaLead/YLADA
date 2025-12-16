@@ -124,3 +124,4 @@ ORDER BY a.ordem;
 - Os PDFs de ferramentas (calculadoras, quizzes) devem ficar apenas em **Cartilhas**
 - Os PDFs das aulas devem estar vinculados às **Aulas** na trilha
 - Se os PDFs das aulas não existirem, as aulas funcionarão normalmente, apenas sem o material complementar
+

@@ -191,3 +191,6 @@ async function diagnosticoCompleto() {
 
 diagnosticoCompleto()
 
+
+
+

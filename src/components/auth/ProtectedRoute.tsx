@@ -12,10 +12,18 @@ interface ProtectedRouteProps {
 }
 
 /**
- * VERSÃO OTIMIZADA FASE 2 - Apenas verificação de permissão
- * - NÃO redireciona (AutoRedirect cuida disso)
- * - Apenas verifica se usuário tem permissão
- * - Timeout reduzido para melhor UX
+ * VERSÃO SIMPLIFICADA - APENAS UI (não segurança)
+ * 
+ * Server-side já cuida de:
+ * - Validar sessão
+ * - Validar perfil
+ * - Validar assinatura
+ * - Redirecionar se inválido
+ * 
+ * ProtectedRoute apenas:
+ * - Verifica perfil para UI (mostrar/esconder conteúdo)
+ * - Não redireciona (server já fez)
+ * - Não bloqueia acesso (server já validou)
  */
 export default function ProtectedRoute({ 
   children, 
@@ -90,9 +98,9 @@ export default function ProtectedRoute({
     )
   }
 
-  // Se não está autenticado, não renderizar nada (AutoRedirect vai redirecionar)
+  // Se não está autenticado, server já redirecionou
+  // Apenas mostrar loading enquanto carrega
   if (!isAuthenticated || !user) {
-    // Mostrar loading apenas se ainda está carregando
     if (loading && !hasTimedOut) {
       return (
         <div className="min-h-screen bg-white flex items-center justify-center">
@@ -103,7 +111,7 @@ export default function ProtectedRoute({
         </div>
       )
     }
-    // Se não está carregando e não está autenticado, AutoRedirect vai cuidar
+    // Server já redirecionou, não renderizar nada
     return null
   }
 
@@ -135,11 +143,13 @@ export default function ProtectedRoute({
       return <>{children}</>
     }
 
-    // Verificar se perfil corresponde (após timeout, permitir acesso temporário)
+    // Verificar se perfil corresponde
+    // Se server permitiu chegar aqui, provavelmente está OK (admin/suporte pode bypassar)
+    // Mas ainda verificamos para UI (mostrar/esconder conteúdo específico)
     if (userProfile?.perfil !== perfil) {
-      if (hasTimedOut) {
-        return <>{children}</>
-      }
+      // Se é admin/suporte e allowAdmin/allowSupport está true, já foi verificado acima
+      // Se não, server já deveria ter redirecionado
+      // Por segurança, não renderizar se perfil não corresponde
       return null
     }
   }

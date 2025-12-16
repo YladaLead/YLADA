@@ -358,3 +358,5 @@ ORDER BY deleted_at DESC;
 -- Execute todas essas queries e me envie os resultados
 -- Isso vai nos ajudar a identificar exatamente o que aconteceu
 
+
+

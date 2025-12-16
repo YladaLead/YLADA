@@ -258,3 +258,5 @@ ORDER BY created_at DESC;
 -- 4. Execute uma parte por vez
 -- 5. Verifique os resultados antes de continuar
 -- 6. Faça backup antes de executar qualquer UPDATE ou INSERT
+
+

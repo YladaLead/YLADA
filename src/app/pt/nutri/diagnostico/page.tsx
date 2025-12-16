@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
@@ -18,6 +18,7 @@ function NutriDiagnosticoContent() {
   const { user } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   // Estados do formulário
@@ -29,10 +30,10 @@ function NutriDiagnosticoContent() {
     
     // BLOCO 2
     situacao_atual: '',
-    processos_captacao: false,
-    processos_avaliacao: false,
-    processos_fechamento: false,
-    processos_acompanhamento: false,
+    processos_captacao: true, // true = tem processo (checkbox desmarcado), false = falta processo (checkbox marcado)
+    processos_avaliacao: true,
+    processos_fechamento: true,
+    processos_acompanhamento: true,
     
     // BLOCO 3
     objetivo_principal: '',
@@ -48,6 +49,46 @@ function NutriDiagnosticoContent() {
     // BLOCO 6
     campo_aberto: ''
   })
+
+  // Carregar diagnóstico existente para edição
+  useEffect(() => {
+    const carregarDiagnostico = async () => {
+      try {
+        const response = await fetch('/api/nutri/diagnostico', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.diagnostico) {
+            // Preencher formulário com dados existentes
+            setFormData({
+              tipo_atuacao: data.diagnostico.tipo_atuacao || '',
+              tempo_atuacao: data.diagnostico.tempo_atuacao || '',
+              autoavaliacao: data.diagnostico.autoavaliacao || '',
+              situacao_atual: data.diagnostico.situacao_atual || '',
+              processos_captacao: data.diagnostico.processos_captacao || false,
+              processos_avaliacao: data.diagnostico.processos_avaliacao || false,
+              processos_fechamento: data.diagnostico.processos_fechamento || false,
+              processos_acompanhamento: data.diagnostico.processos_acompanhamento || false,
+              objetivo_principal: data.diagnostico.objetivo_principal || '',
+              meta_financeira: data.diagnostico.meta_financeira || '',
+              travas: data.diagnostico.travas || [],
+              tempo_disponivel: data.diagnostico.tempo_disponivel || '',
+              preferencia: data.diagnostico.preferencia || '',
+              campo_aberto: data.diagnostico.campo_aberto || ''
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar diagnóstico:', error)
+      } finally {
+        setCarregando(false)
+      }
+    }
+
+    carregarDiagnostico()
+  }, [])
 
   // Função para verificar se formulário está completo
   const isFormValid = () => {
@@ -167,6 +208,20 @@ function NutriDiagnosticoContent() {
     })
   }
 
+  if (carregando) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <NutriSidebar />
+        <div className="flex-1 lg:ml-56 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando seu perfil Nutri-Empresária...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <NutriSidebar />
@@ -175,10 +230,10 @@ function NutriDiagnosticoContent() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-xl shadow-lg p-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Diagnóstico Inicial
+              Perfil Nutri-Empresária
             </h1>
             <p className="text-gray-600 mb-8">
-              A LYA precisa conhecer você para te orientar da melhor forma possível.
+              A LYA precisa conhecer você para te orientar da melhor forma possível. Você pode editar essas informações a qualquer momento.
             </p>
 
             {error && (
@@ -495,7 +550,7 @@ function NutriDiagnosticoContent() {
                   disabled={loading || !isFormValid()}
                   className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Salvando...' : 'Finalizar Diagnóstico'}
+                  {loading ? 'Salvando...' : 'Salvar Perfil Nutri-Empresária'}
                 </button>
               </div>
             </form>
