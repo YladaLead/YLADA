@@ -119,25 +119,54 @@ export async function POST(request: NextRequest) {
       hasOtpHash: !!linkData.properties?.otp_hash
     })
     
-    // Prioridade 1: action_link (link completo do Supabase)
+    // Prioridade 1: Extrair token do action_link e construir link direto para nossa aplicação
+    // O action_link do Supabase aponta para o domínio do Supabase, mas precisamos que aponte para nossa aplicação
     if (linkData.properties?.action_link) {
-      resetLink = linkData.properties.action_link
-      console.log('✅ Usando action_link do Supabase (link completo)')
+      try {
+        const actionLinkUrl = new URL(linkData.properties.action_link)
+        const token = actionLinkUrl.searchParams.get('token')
+        const type = actionLinkUrl.searchParams.get('type') || 'recovery'
+        
+        if (token) {
+          // Construir link direto para nossa aplicação usando /auth/v1/verify que processa o token
+          resetLink = `${baseUrl}/auth/v1/verify?token=${encodeURIComponent(token)}&type=${type}`
+          console.log('✅ Extraído token do action_link e construído link direto para aplicação')
+        } else {
+          // Se não conseguir extrair token, usar o action_link original (fallback)
+          resetLink = linkData.properties.action_link
+          console.log('⚠️ Não foi possível extrair token do action_link, usando link original')
+        }
+      } catch (err) {
+        console.warn('⚠️ Erro ao processar action_link, tentando usar diretamente:', err)
+        resetLink = linkData.properties.action_link
+      }
     } 
     // Prioridade 2: Construir com hashed_token
     else if (linkData.properties?.hashed_token) {
-      resetLink = `${baseUrl}${resetPath}?token=${linkData.properties.hashed_token}&type=recovery`
-      console.log('✅ Construindo link com hashed_token')
+      resetLink = `${baseUrl}/auth/v1/verify?token=${encodeURIComponent(linkData.properties.hashed_token)}&type=recovery`
+      console.log('✅ Construindo link com hashed_token via /auth/v1/verify')
     }
     // Prioridade 3: Construir com otp_hash (formato alternativo)
     else if (linkData.properties?.otp_hash) {
-      resetLink = `${baseUrl}${resetPath}?token=${linkData.properties.otp_hash}&type=recovery`
-      console.log('✅ Construindo link com otp_hash')
+      resetLink = `${baseUrl}/auth/v1/verify?token=${encodeURIComponent(linkData.properties.otp_hash)}&type=recovery`
+      console.log('✅ Construindo link com otp_hash via /auth/v1/verify')
     }
-    // Prioridade 4: verification_url
+    // Prioridade 4: verification_url (extrair token se possível)
     else if (linkData.properties?.verification_url) {
-      resetLink = linkData.properties.verification_url
-      console.log('✅ Usando verification_url do Supabase')
+      try {
+        const verifyUrl = new URL(linkData.properties.verification_url)
+        const token = verifyUrl.searchParams.get('token')
+        if (token) {
+          resetLink = `${baseUrl}/auth/v1/verify?token=${encodeURIComponent(token)}&type=recovery`
+          console.log('✅ Extraído token do verification_url e construído link direto')
+        } else {
+          resetLink = linkData.properties.verification_url
+          console.log('⚠️ Usando verification_url original (não foi possível extrair token)')
+        }
+      } catch (err) {
+        resetLink = linkData.properties.verification_url
+        console.log('⚠️ Erro ao processar verification_url, usando original:', err)
+      }
     }
     // Prioridade 5: Tentar usar o link direto se disponível
     else if ((linkData as any).link) {
