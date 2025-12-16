@@ -5,28 +5,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { validateNoelFunctionAuth } from '@/lib/noel-assistant-handler'
+import { validateNoelFunctionAuth } from '@/lib/noel-functions-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
     // Autenticação especial para NOEL (Bearer token)
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.replace('Bearer ', '')
-    const isValid = await validateNoelFunctionAuth(token)
-    
-    if (!isValid) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      )
+    const authError = validateNoelFunctionAuth(request)
+    if (authError) {
+      return authError
     }
 
     const { searchParams } = new URL(request.url)
