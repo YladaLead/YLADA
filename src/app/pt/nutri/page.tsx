@@ -171,7 +171,7 @@ export default function NutriLandingPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                O que a faculdade te ensinou — e o que ela não te ensinou
+                O que a faculdade te ensinou, e o que ela não te ensinou
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8 mb-12">
@@ -426,9 +426,12 @@ export default function NutriLandingPage() {
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                A LYA — Sua Mentora Estratégica
+              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 text-[#1A1A1A]">
+                LYA: Sua Mentora Estratégica
               </h2>
+              <p className="text-xl text-center text-gray-600 mb-12">
+                Direcionamento diário, clareza de foco e execução prática
+              </p>
               
               <div className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] rounded-xl shadow-lg p-8 sm:p-10 mb-8 text-white">
                 <p className="text-xl sm:text-2xl font-bold mb-6">
