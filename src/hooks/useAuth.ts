@@ -272,18 +272,24 @@ export function useAuth() {
       }
     }
 
-    // 🚀 OTIMIZAÇÃO: Timeout reduzido (500ms PWA, 800ms web) - mais rápido
-    // Não acionar se já temos uma sessão válida (mesmo que o perfil ainda esteja carregando)
-    const timeoutDuration = isPWA ? 500 : 800
+    // 🚀 CORREÇÃO: Timeout aumentado para dar tempo suficiente para carregar sessão
+    // Evita marcar como "não autenticado" prematuramente em conexões lentas
+    // PWA: 2000ms, Web: 3000ms (aumentado de 500-800ms)
+    const timeoutDuration = isPWA ? 2000 : 3000
     loadingTimeout = setTimeout(() => {
       if (!mounted) return
       // Verificar se ainda está em loading e não temos sessão
       supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
         if (!mounted) return
         // Se não temos sessão após timeout, marcar como não autenticado
+        // Mas apenas se realmente não há sessão (não marcar prematuramente)
         if (!currentSession) {
-          console.warn('⚠️ useAuth: Timeout de carregamento sem sessão, marcando como não autenticado', { isPWA })
+          console.warn('⚠️ useAuth: Timeout de carregamento sem sessão após', timeoutDuration, 'ms', { isPWA })
           setLoading(false)
+        } else {
+          // Se temos sessão mas ainda está em loading, aguardar mais um pouco
+          // Isso evita marcar como não autenticado quando a sessão está carregando
+          console.log('✅ useAuth: Sessão encontrada durante timeout, aguardando carregamento completo')
         }
         // Se temos sessão, não fazer nada (já foi marcado como false no loadAuthData)
       })

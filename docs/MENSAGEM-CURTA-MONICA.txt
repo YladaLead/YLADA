@@ -1,0 +1,26 @@
+Olá Monica! 👋
+
+O problema não está no seu cadastro, está tudo correto. Precisamos verificar algo no seu navegador.
+
+🔧 SOLUÇÃO RÁPIDA (tente primeiro):
+
+1. Faça LOGOUT da aplicação
+2. Feche TODAS as abas do navegador
+3. Abra o navegador novamente
+4. Faça LOGIN novamente
+5. Tente usar o NOEL
+
+Se ainda não funcionar, siga abaixo:
+
+📸 ENVIAR SCREENSHOT:
+
+1. Pressione F12 (ou clique com botão direito → "Inspecionar")
+2. Clique na aba "Network" (ou "Rede")
+3. Tente usar o NOEL
+4. Procure por "/api/wellness/noel" na lista
+5. Clique nela
+6. Tire um screenshot da tela inteira
+
+Envie o screenshot para que possamos ver o que está acontecendo.
+
+Obrigada! 🙏

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
+import { useAuth } from '@/hooks/useAuth'
 // REMOVIDO: ProtectedRoute e RequireSubscription - layout server-side cuida disso
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
 import FormatarMensagem from '@/components/wellness/FormatarMensagem'
@@ -105,7 +106,16 @@ export default function NoelChatPage() {
     if (typeof window === 'undefined') return null
     
     try {
-      return localStorage.getItem(STORAGE_KEYS.THREAD_ID)
+      const savedThreadId = localStorage.getItem(STORAGE_KEYS.THREAD_ID)
+      // Validar que threadId é válido (começa com 'thread_') antes de retornar
+      if (savedThreadId && savedThreadId.startsWith('thread_')) {
+        return savedThreadId
+      } else if (savedThreadId === 'new' || savedThreadId === '') {
+        // Limpar threadId inválido do localStorage
+        localStorage.removeItem(STORAGE_KEYS.THREAD_ID)
+        return null
+      }
+      return null
     } catch (error) {
       console.error('❌ Erro ao carregar threadId do localStorage:', error)
       return null
@@ -205,7 +215,32 @@ export default function NoelChatPage() {
   }, [])
 
   const enviarMensagem = async () => {
+    // 🚀 CORREÇÃO: Bloquear requisições durante carregamento de autenticação
     if (!perguntaAtual.trim() || enviando) return
+    
+    // Aguardar autenticação carregar antes de fazer requisição
+    if (authLoading) {
+      console.log('⏳ Aguardando autenticação carregar...')
+      // Aguardar até 3 segundos para autenticação completar
+      let waitTime = 0
+      const maxWait = 3000
+      while (authLoading && waitTime < maxWait) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+        waitTime += 100
+      }
+      
+      // Se ainda está carregando após aguardar, mostrar erro
+      if (authLoading) {
+        alert('Por favor, aguarde alguns segundos e tente novamente. A autenticação ainda está carregando.')
+        return
+      }
+    }
+    
+    // Verificar se usuário está autenticado
+    if (!user) {
+      alert('Você precisa fazer login para continuar. Por favor, recarregue a página.')
+      return
+    }
 
     const pergunta = perguntaAtual.trim()
     setPerguntaAtual('')
@@ -264,10 +299,16 @@ export default function NoelChatPage() {
       const data = await response.json()
 
       // Guardar threadId se retornado (para manter conversa no Assistants API)
-      if (data.threadId) {
+      // Validar que threadId é válido (começa com 'thread_') antes de salvar
+      if (data.threadId && typeof data.threadId === 'string' && data.threadId.startsWith('thread_')) {
         setThreadId(data.threadId)
         salvarThreadId(data.threadId)
         console.log('🧵 Thread ID salvo:', data.threadId)
+      } else if (data.threadId === 'new' || data.threadId === null || data.threadId === undefined) {
+        // Limpar threadId inválido do localStorage
+        setThreadId(null)
+        salvarThreadId(null)
+        console.log('🧵 Thread ID inválido removido')
       }
 
       // Atualizar módulo ativo
