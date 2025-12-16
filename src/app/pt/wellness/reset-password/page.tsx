@@ -133,7 +133,37 @@ function ResetPasswordContent() {
             return
           }
 
-          console.log('✅ Token verificado, atualizando senha...')
+          console.log('✅ Token verificado, verificando se nova senha é diferente da atual...')
+
+          // IMPORTANTE: Verificar se a nova senha é diferente da senha atual
+          // Tentar fazer login com a nova senha para verificar se é a mesma
+          const userEmail = data.user?.email
+          if (userEmail) {
+            // Criar um cliente temporário para testar a senha
+            const { createClient } = await import('@supabase/supabase-js')
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            
+            if (supabaseUrl && supabaseAnonKey) {
+              const tempSupabase = createClient(supabaseUrl, supabaseAnonKey)
+              
+              // Tentar fazer login com a nova senha
+              const { data: testLogin, error: testError } = await tempSupabase.auth.signInWithPassword({
+                email: userEmail,
+                password: password
+              })
+              
+              // Se o login funcionou, significa que a senha é a mesma
+              if (!testError && testLogin?.session) {
+                console.warn('⚠️ Nova senha é igual à senha atual')
+                setError('A nova senha deve ser diferente da senha atual. Por favor, escolha uma senha diferente.')
+                setLoading(false)
+                return
+              }
+              
+              console.log('✅ Nova senha é diferente da senha atual, prosseguindo com atualização...')
+            }
+          }
 
           // Atualizar senha
           const { error: updateError } = await supabase.auth.updateUser({

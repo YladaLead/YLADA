@@ -117,6 +117,29 @@ function ResetPasswordContent() {
         }
 
         if (data.session) {
+          // IMPORTANTE: Verificar se a nova senha é diferente da senha atual
+          const userEmail = data.user?.email
+          if (userEmail) {
+            const { createClient } = await import('@supabase/supabase-js')
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            
+            if (supabaseUrl && supabaseAnonKey) {
+              const tempSupabase = createClient(supabaseUrl, supabaseAnonKey)
+              const { data: testLogin, error: testError } = await tempSupabase.auth.signInWithPassword({
+                email: userEmail,
+                password: password
+              })
+              
+              if (!testError && testLogin?.session) {
+                console.warn('⚠️ Nova senha é igual à senha atual')
+                setError('A nova senha deve ser diferente da senha atual. Por favor, escolha uma senha diferente.')
+                setLoading(false)
+                return
+              }
+            }
+          }
+
           const { error: updateError } = await supabase.auth.updateUser({
             password: password
           })

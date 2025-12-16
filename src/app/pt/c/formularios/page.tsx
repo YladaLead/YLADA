@@ -1,5 +1,5 @@
-// Re-exportar página de formulários de /pt/coach/formularios para /pt/c/formularios
-export { default } from '../../coach/formularios/page'
+// Re-exportar página de formulários de /pt/coach/(protected)/formularios para /pt/c/formularios
+export { default } from '../../coach/(protected)/formularios/page'
 
 
 

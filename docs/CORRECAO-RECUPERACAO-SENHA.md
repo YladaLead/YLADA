@@ -179,8 +179,34 @@ Certifique-se de que estão configuradas:
 
 4. **Logs:** Todos os logs importantes estão no console do servidor para facilitar debug em caso de problemas.
 
+## 🔒 Validação de Segurança: Impedir Reutilização de Senha
+
+### Problema
+Usuários podiam reutilizar a mesma senha antiga após recuperar/resetar a senha, o que é uma falha de segurança.
+
+### Solução Implementada
+- ✅ Validação que verifica se a nova senha é diferente da senha atual
+- ✅ Antes de atualizar, tenta fazer login com a nova senha
+- ✅ Se o login funcionar, significa que a senha é a mesma e rejeita a atualização
+- ✅ Aplicado em todas as páginas de reset: Wellness, Nutri, Coach e Admin
+
+**Código adicionado:**
+```typescript
+// Verificar se a nova senha é diferente da senha atual
+const { data: testLogin, error: testError } = await tempSupabase.auth.signInWithPassword({
+  email: userEmail,
+  password: password
+})
+
+if (!testError && testLogin?.session) {
+  setError('A nova senha deve ser diferente da senha atual. Por favor, escolha uma senha diferente.')
+  return
+}
+```
+
 ## ✅ Status
 
 - ✅ Correção implementada
+- ✅ Validação de segurança adicionada (impedir reutilização de senha)
 - ✅ Testes recomendados antes de deploy em produção
 - ✅ Documentação atualizada
