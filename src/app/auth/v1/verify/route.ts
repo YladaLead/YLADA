@@ -22,59 +22,50 @@ export async function GET(request: NextRequest) {
     console.log('🔄 Link de recovery detectado, determinando área do usuário...')
     
     try {
-      // Tentar verificar o token para obter o email do usuário
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      const cookieStore = await cookies()
+      // IMPORTANTE: Não verificar o token aqui, pois isso consumiria o token
+      // O token será verificado na página de reset quando o usuário submeter o formulário
+      // Aqui apenas tentamos determinar a área do usuário se possível, mas não é crítico
       
-      const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll() {},
-        },
-      })
-
-      const { data: verifyData } = await supabase.auth.verifyOtp({
-        token_hash: token,
-        type: 'recovery',
-      })
-
       let resetPath = '/pt/wellness/reset-password' // padrão
-
-      if (verifyData?.user?.email) {
-        // Buscar perfil do usuário para determinar a área
-        const { data: profile } = await supabaseAdmin
-          .from('user_profiles')
-          .select('perfil')
-          .eq('email', verifyData.user.email)
-          .maybeSingle()
-
-        if (profile?.perfil) {
-          if (profile.perfil === 'nutri') {
-            resetPath = '/pt/nutri/reset-password'
-          } else if (profile.perfil === 'coach') {
-            resetPath = '/pt/coach/reset-password'
-          } else if (profile.perfil === 'admin') {
-            resetPath = '/admin/reset-password'
-          } else {
-            resetPath = '/pt/wellness/reset-password'
+      
+      // Tentar determinar a área usando o redirectTo se disponível
+      if (redirectTo) {
+        try {
+          const decoded = decodeURIComponent(redirectTo)
+          // Se o redirectTo contém um path de reset, usar ele
+          if (decoded.includes('/reset-password')) {
+            // Extrair o path da URL
+            const url = new URL(decoded, requestUrl.origin)
+            resetPath = url.pathname
+            console.log('✅ Área determinada pelo redirectTo:', resetPath)
           }
+        } catch (e) {
+          console.warn('⚠️ Erro ao processar redirectTo:', e)
         }
       }
+      
+      // Se não conseguiu determinar pelo redirectTo, tentar buscar pelo token (sem consumir)
+      // Mas isso requer decodificar o token, o que pode não ser possível
+      // Por segurança, vamos sempre redirecionar para wellness como padrão
+      // A página de reset tentará verificar o token e determinar a área se necessário
 
       const resetUrl = new URL(resetPath, requestUrl.origin)
       resetUrl.searchParams.set('token', token)
       resetUrl.searchParams.set('type', type)
-      console.log('🔄 Redirecionando para:', resetPath)
+      if (redirectTo) {
+        resetUrl.searchParams.set('redirect_to', redirectTo)
+      }
+      console.log('🔄 Redirecionando para página de reset:', resetPath)
       return NextResponse.redirect(resetUrl)
     } catch (err) {
-      console.error('❌ Erro ao determinar área, usando padrão:', err)
+      console.error('❌ Erro ao processar recovery link, usando padrão:', err)
       // Fallback: redirecionar para Wellness
       const resetUrl = new URL('/pt/wellness/reset-password', requestUrl.origin)
       resetUrl.searchParams.set('token', token)
       resetUrl.searchParams.set('type', type)
+      if (redirectTo) {
+        resetUrl.searchParams.set('redirect_to', redirectTo)
+      }
       return NextResponse.redirect(resetUrl)
     }
   }
