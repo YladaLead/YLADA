@@ -66,10 +66,10 @@ export default function NutriLandingPage() {
               </p>
               
               <Link
-                href="#oferta"
+                href="#como-funciona"
                 className="inline-block bg-white text-[#0B57FF] px-8 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
               >
-                Quero me tornar uma Nutri-Empresária
+                Quero entender como me tornar uma Nutri-Empresária
               </Link>
             </div>
           </div>
@@ -162,6 +162,40 @@ export default function NutriLandingPage() {
                   Você não está sozinha nessa. Milhares de nutricionistas talentosas passam pela mesma frustração. A diferença entre quem consegue construir uma carreira sólida e quem fica presa no ciclo de "tentativa e erro" não é talento. <strong>É método.</strong>
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SEÇÃO VÍDEO — ENTENDENDO O CAMINHO */}
+        <section id="como-funciona" className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 text-[#1A1A1A]">
+                Assista e entenda como funciona o caminho da Nutri-Empresária
+              </h2>
+              <p className="text-lg sm:text-xl text-center text-gray-700 mb-8 max-w-2xl mx-auto">
+                Em poucos minutos, você vai entender o método, o papel da LYA e como essa transformação acontece na prática.
+              </p>
+              
+              <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-6">
+                <div className="aspect-video bg-gray-900 relative">
+                  <video 
+                    className="w-full h-full object-cover"
+                    controls
+                    loop
+                    playsInline
+                    poster="/videos/nutri-hero-poster.jpg"
+                  >
+                    <source src="/videos/nutri-hero.mp4" type="video/mp4" />
+                    <source src="/videos/nutri-hero.webm" type="video/webm" />
+                    Seu navegador não suporta vídeo HTML5.
+                  </video>
+                </div>
+              </div>
+              
+              <p className="text-center text-lg text-gray-600">
+                Continue lendo para ver se esse caminho faz sentido para você.
+              </p>
             </div>
           </div>
         </section>
@@ -793,17 +827,16 @@ export default function NutriLandingPage() {
                 <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400">
                   <div className="text-center mb-6">
                     <span className="inline-block bg-yellow-400 text-[#1A1A1A] px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                      ⭐ Mais Escolhido
+                      ✨ Mais escolhido
                     </span>
                     <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Anual Fidelidade</h3>
-                    <p className="text-gray-600 mb-4">Compromisso com a própria evolução profissional</p>
+                    <p className="text-gray-600 mb-4">Para quem decidiu se comprometer com a própria evolução profissional</p>
                   </div>
                   
                   <div className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] rounded-xl p-6 mb-6 text-center text-white">
-                    <p className="text-3xl sm:text-4xl font-bold mb-2">
+                    <p className="text-3xl sm:text-4xl font-bold">
                       12× de R$ 197
                     </p>
-                    <p className="text-sm opacity-90">Pagamento anual obrigatório</p>
                   </div>
                   
                   <ul className="space-y-3 mb-6 text-gray-700">
@@ -825,17 +858,20 @@ export default function NutriLandingPage() {
                     </li>
                   </ul>
                   
-                  <div className="bg-[#E9F1FF] rounded-lg p-4 mb-6 text-sm text-gray-700">
-                    <strong>Garantia Incondicional de 7 Dias</strong>
-                    <br />
-                    Cartão obrigatório na entrada. Se por qualquer motivo você não estiver satisfeita, devolvemos 100% do seu investimento.
+                  <div className="bg-[#E9F1FF] rounded-lg p-4 mb-6 text-center">
+                    <p className="text-sm text-gray-700">
+                      <span className="text-xl mr-2">🛡️</span>
+                      <strong>7 dias de garantia incondicional</strong>
+                      <br />
+                      <span className="text-xs">Entre, use a plataforma e sinta a experiência.</span>
+                    </p>
                   </div>
                   
                   <button
                     onClick={() => handleCheckout('annual')}
                     className="w-full bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#2572FF] hover:to-[#0B57FF] transition-all shadow-xl"
                   >
-                    Escolher Plano Anual
+                    👉 Escolher Plano Anual
                   </button>
                 </div>
                 
@@ -843,51 +879,57 @@ export default function NutriLandingPage() {
                 <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-gray-300">
                   <div className="text-center mb-6">
                     <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Mensal Flexível</h3>
-                    <p className="text-gray-600 mb-4">Flexibilidade para quem prefere testar primeiro</p>
+                    <p className="text-gray-600 mb-4">Para quem prefere começar com mais liberdade</p>
                   </div>
                   
                   <div className="bg-gray-100 rounded-xl p-6 mb-6 text-center">
-                    <p className="text-3xl sm:text-4xl font-bold mb-2 text-[#1A1A1A]">
-                      R$ 297/mês
+                    <p className="text-3xl sm:text-4xl font-bold text-[#1A1A1A]">
+                      R$ 297 / mês
                     </p>
-                    <p className="text-sm text-gray-600">Sem fidelização — pode cancelar quando quiser</p>
                   </div>
                   
                   <ul className="space-y-3 mb-6 text-gray-700">
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Flexibilidade total</span>
+                      <span>Liberdade para cancelar quando quiser</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Sem compromisso de longo prazo</span>
+                      <span>Mesmo acesso à mentoria e ao método</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Ideal para quem quer experimentar antes de se comprometer</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Preço maior por optar por flexibilidade</span>
+                      <span>Ideal para quem quer iniciar sem compromisso anual</span>
                     </li>
                   </ul>
                   
-                  <div className="bg-[#E9F1FF] rounded-lg p-4 mb-6 text-sm text-gray-700">
-                    <strong>Garantia Incondicional de 7 Dias</strong>
-                    <br />
-                    Cartão obrigatório na entrada. Se por qualquer motivo você não estiver satisfeita, devolvemos 100% do seu investimento.
+                  <div className="bg-[#E9F1FF] rounded-lg p-4 mb-6 text-center">
+                    <p className="text-sm text-gray-700">
+                      <span className="text-xl mr-2">🛡️</span>
+                      <strong>7 dias de garantia incondicional</strong>
+                    </p>
                   </div>
                   
                   <button
                     onClick={() => handleCheckout('monthly')}
                     className="w-full bg-gray-600 text-white px-6 py-4 rounded-xl text-lg font-bold hover:bg-gray-700 transition-all shadow-xl"
                   >
-                    Escolher Plano Mensal
+                    👉 Escolher Plano Mensal
                   </button>
                 </div>
               </div>
               
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center text-white">
+              {/* Informações técnicas discretas */}
+              <div className="mt-8 text-center">
+                <p className="text-sm text-white/80 mb-2">
+                  ℹ️ <strong>Informações importantes</strong>
+                </p>
+                <p className="text-xs text-white/70 max-w-2xl mx-auto">
+                  O plano anual possui fidelidade de 12 meses. Ambos os planos contam com garantia incondicional de 7 dias. Detalhes completos no checkout.
+                </p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center text-white mt-8">
                 <p className="text-xl font-bold mb-4">
                   Mentoria estratégica, não curso.
                 </p>
@@ -907,9 +949,12 @@ export default function NutriLandingPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <div className="text-6xl mb-6">🛡️</div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-[#1A1A1A]">
-                Garantia Incondicional de 7 Dias — Válida para ambos os planos
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-[#1A1A1A]">
+                Garantia Incondicional de 7 Dias
               </h2>
+              <p className="text-lg sm:text-xl text-gray-600 mb-6">
+                Válida para ambos os planos
+              </p>
               <p className="text-xl mb-4 text-gray-700">
                 Cartão obrigatório na entrada. Se por qualquer motivo você não estiver satisfeita com a LYA e a mentoria estratégica, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.
               </p>
