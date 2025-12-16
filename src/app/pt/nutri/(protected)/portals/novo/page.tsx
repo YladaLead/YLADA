@@ -60,7 +60,7 @@ function NovoPortalNutriContent() {
   const carregarUserSlug = async () => {
     try {
       setCarregandoSlug(true)
-      const response = await fetch('/api/wellness/profile', { // TODO: Criar /api/nutri/profile quando necessário
+      const response = await fetch('/api/nutri/profile', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -218,7 +218,7 @@ function NovoPortalNutriContent() {
       }
 
       // Buscar user_slug para construir URL completa
-      const profileResponse = await fetch('/api/wellness/profile', {
+      const profileResponse = await fetch('/api/nutri/profile', {
         credentials: 'include'
       })
       let userSlug = null

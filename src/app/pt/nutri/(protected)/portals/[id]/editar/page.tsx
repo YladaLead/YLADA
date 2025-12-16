@@ -62,7 +62,7 @@ function EditarPortalNutriContent() {
   const carregarUserSlug = async () => {
     try {
       setCarregandoSlug(true)
-      const response = await fetch('/api/wellness/profile', { // TODO: Criar /api/nutri/profile quando necessário
+      const response = await fetch('/api/nutri/profile', {
         credentials: 'include'
       })
       if (response.ok) {
