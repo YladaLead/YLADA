@@ -33,9 +33,8 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
         
         if (result.success && result.data) {
           setLinkData(result.data)
-          // Tentar detectar área do usuário que criou o link
-          // Por enquanto, default para wellness
-          setArea('wellness')
+          // Usar área retornada pela API ou default para wellness
+          setArea(result.data.area || 'wellness')
         } else {
           // Fallback para dados mock se não encontrar
           const mockLinkData = {
@@ -166,15 +165,23 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
             <Image
               src={area === 'wellness' 
                 ? '/images/logo/wellness-horizontal.png'
+                : area === 'nutri'
+                ? '/images/logo/nutri-horizontal.png'
+                : area === 'coach'
+                ? '/images/logo/coach-horizontal.png'
                 : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
               }
               alt={area === 'wellness' 
                 ? 'WELLNESS - Your Leading Data System'
+                : area === 'nutri'
+                ? 'Nutri by YLADA'
+                : area === 'coach'
+                ? 'Coach by YLADA'
                 : 'YLADA'
               }
-              width={area === 'wellness' ? 572 : 280}
-              height={area === 'wellness' ? 150 : 84}
-              className={area === 'wellness' ? 'h-14 sm:h-16 w-auto object-contain' : 'h-10 w-auto'}
+              width={area === 'wellness' ? 572 : area === 'nutri' || area === 'coach' ? 280 : 280}
+              height={area === 'wellness' ? 150 : area === 'nutri' || area === 'coach' ? 84 : 84}
+              className={area === 'wellness' ? 'h-14 sm:h-16 w-auto object-contain' : area === 'nutri' || area === 'coach' ? 'h-10 w-auto object-contain' : 'h-10 w-auto'}
               style={{ backgroundColor: 'transparent' }}
               priority
             />

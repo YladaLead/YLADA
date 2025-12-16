@@ -37,6 +37,42 @@ export async function GET(
       .update({ views: link.views + 1 })
       .eq('id', link.id)
 
+    // Tentar buscar área através de user_templates usando o slug
+    let area: string | null = null
+    
+    // Primeiro, tentar buscar através de user_templates pelo slug
+    const { data: userTemplate } = await supabaseAdmin
+      .from('user_templates')
+      .select('profession, user_id')
+      .eq('slug', slug)
+      .single()
+    
+    if (userTemplate?.profession) {
+      area = userTemplate.profession
+    } else if (userTemplate?.user_id) {
+      // Se não encontrar profession, tentar buscar do perfil do usuário
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('perfil')
+        .eq('user_id', userTemplate.user_id)
+        .single()
+      
+      if (profile?.perfil) {
+        area = profile.perfil
+      }
+    } else if (link.user_id) {
+      // Se o link tiver user_id diretamente, buscar do perfil
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('perfil')
+        .eq('user_id', link.user_id)
+        .single()
+      
+      if (profile?.perfil) {
+        area = profile.perfil
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -45,7 +81,8 @@ export async function GET(
         description: link.description,
         content: link.content,
         views: link.views + 1,
-        leadsCount: link.leads_count
+        leadsCount: link.leads_count,
+        area: area || 'wellness' // Default para wellness se não encontrar
       }
     })
 

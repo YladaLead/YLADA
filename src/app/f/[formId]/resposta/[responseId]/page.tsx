@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import YLADALogo from '@/components/YLADALogo'
+import Image from 'next/image'
 
 export default function VerRespostaFormularioPage() {
   const params = useParams()
@@ -12,6 +12,7 @@ export default function VerRespostaFormularioPage() {
   const [formulario, setFormulario] = useState<any>(null)
   const [resposta, setResposta] = useState<any>(null)
   const [erro, setErro] = useState<string | null>(null)
+  const [area, setArea] = useState<string | null>(null)
 
   useEffect(() => {
     if (!formId || !responseId) return
@@ -28,6 +29,14 @@ export default function VerRespostaFormularioPage() {
         const formData = await formResponse.json()
         if (formData.success) {
           setFormulario(formData.data.form)
+          // Determinar área baseado no perfil do usuário ou form_type
+          const userArea = formData.data.form.user_area
+          const formType = formData.data.form.form_type
+          if (userArea === 'coach' || userArea === 'nutri') {
+            setArea(userArea)
+          } else if (formType === 'coach' || formType === 'nutri') {
+            setArea(formType)
+          }
         }
 
         // Buscar resposta
@@ -126,7 +135,27 @@ export default function VerRespostaFormularioPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <YLADALogo />
+          <Image
+            src={
+              area === 'coach'
+                ? "/images/logo/coach-horizontal.png"
+                : area === 'nutri'
+                ? "/images/logo/nutri-horizontal.png"
+                : "/images/logo/ylada/horizontal/verde/ylada-horizontal-verde-2.png"
+            }
+            alt={
+              area === 'coach'
+                ? "Coach by YLADA"
+                : area === 'nutri'
+                ? "Nutri by YLADA"
+                : "YLADA Logo"
+            }
+            width={area === 'coach' || area === 'nutri' ? 280 : 280}
+            height={area === 'coach' || area === 'nutri' ? 84 : 84}
+            className="h-12 w-auto object-contain"
+            style={{ backgroundColor: 'transparent' }}
+            priority
+          />
         </div>
       </div>
 
