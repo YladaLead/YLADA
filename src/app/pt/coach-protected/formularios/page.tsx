@@ -4,7 +4,7 @@
 import dynamic from 'next/dynamic'
 
 const FormulariosCoach = dynamic(
-  () => import('@/app/pt/coach/(protected)/formularios/page'),
+  () => import('../../coach/(protected)/formularios/page'),
   { ssr: false }
 )
 

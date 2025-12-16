@@ -4,9 +4,9 @@
 
 import dynamic from 'next/dynamic'
 
-// Dynamic import com caminho absoluto usando alias
+// Dynamic import - caminho relativo de um nível acima
 const NovoFormularioCoach = dynamic(
-  () => import('@/app/pt/coach/(protected)/formularios/novo/page'),
+  () => import('../../../coach/(protected)/formularios/novo/page'),
   { ssr: false }
 )
 
