@@ -42,9 +42,9 @@ export async function POST(request: NextRequest) {
 
 CONTEXTO DA PLATAFORMA:
 - YLADA Nutri é uma plataforma completa para nutricionistas
-- Oferece: Ferramentas de Captação, Gestão Profissional, Comunidade, Mentoria Semanal e Formação Empresarial Nutri (R$970)
-- Promoção de lançamento: R$ 970 (à vista ou 12x) por 1 ano completo
-- Planos mensais também disponíveis (sem curso)
+- Oferece: Ferramentas de Captação, Gestão Profissional, Comunidade, Mentoria Semanal e Formação Empresarial Nutri
+- Plano anual: R$ 2.364 (12× de R$ 197) por 1 ano completo
+- Plano mensal: R$ 297/mês
 
 SEU ESTILO:
 - Empática, calorosa e profissional
@@ -61,10 +61,10 @@ OBJETIVO:
 - Conduzir para o checkout (/pt/nutri/checkout)
 
 INFORMAÇÕES IMPORTANTES:
-- Preço promocional: R$ 970 (1 ano completo com curso)
-- Planos mensais: R$ 59,90 (Ferramentas OU Gestão) ou R$ 97 (Ferramentas + Gestão)
+- Plano anual: R$ 2.364 (12× de R$ 197) - inclui Formação Empresarial Nutri
+- Plano mensal: R$ 297/mês
 - Garantia: 7 dias incondicional
-- Formação Empresarial Nutri: R$ 970 (incluída na promoção anual)
+- Formação Empresarial Nutri: incluída no plano anual
 - Link para checkout: /pt/nutri/checkout
 
 RESPONDA DE FORMA:

@@ -1,0 +1,126 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
+
+export default function NutriOnboardingPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const [checking, setChecking] = useState(true)
+
+  // Verificar se já tem diagnóstico (não deveria estar aqui se tiver)
+  useEffect(() => {
+    const verificarDiagnostico = async () => {
+      if (loading || !user) return
+
+      try {
+        const response = await fetch('/api/nutri/diagnostico', {
+          credentials: 'include'
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          // Se já tem diagnóstico, redirecionar para home
+          if (data.hasDiagnostico) {
+            router.replace('/pt/nutri/home')
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar diagnóstico:', error)
+      } finally {
+        setChecking(false)
+      }
+    }
+
+    verificarDiagnostico()
+  }, [user, loading, router])
+
+  const handleComecar = () => {
+    router.push('/pt/nutri/diagnostico')
+  }
+
+  if (loading || checking) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
+      <div className="max-w-2xl w-full">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Image
+            src="/images/logo/nutri-horizontal.png"
+            alt="YLADA Nutri"
+            width={200}
+            height={60}
+            className="h-12 w-auto mx-auto mb-6"
+            priority
+          />
+        </div>
+
+        {/* Card Principal */}
+        <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 border border-gray-100">
+          {/* Mensagem da LYA */}
+          <div className="text-center mb-8">
+            <div className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-6 py-3 mb-6">
+              <span className="text-2xl mr-2">🤖</span>
+              <span className="font-semibold text-lg">LYA</span>
+            </div>
+            
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+              Bem-vinda à YLADA Nutri
+            </h1>
+            
+            <p className="text-xl text-gray-700 leading-relaxed mb-6">
+              Aqui você não caminha sozinha.
+            </p>
+            
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Eu sou a <strong className="text-blue-600">LYA</strong> e vou te guiar passo a passo para você se tornar uma <strong className="text-blue-600">Nutri-Empresária</strong> organizada, confiante e lucrativa.
+            </p>
+          </div>
+
+          {/* Separador */}
+          <div className="border-t border-gray-200 my-8"></div>
+
+          {/* Próximo Passo */}
+          <div className="text-center">
+            <p className="text-gray-600 mb-6 text-lg">
+              Para começar, preciso conhecer você melhor. Vamos fazer seu <strong className="text-gray-900">Diagnóstico Estratégico</strong>?
+            </p>
+            
+            <button
+              onClick={handleComecar}
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              👉 Começar meu Diagnóstico Estratégico
+            </button>
+            
+            <p className="text-sm text-gray-500 mt-4">
+              Leva apenas alguns minutos e é essencial para eu te orientar da melhor forma
+            </p>
+          </div>
+        </div>
+
+        {/* Informação adicional */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500">
+            Você pode editar essas informações a qualquer momento depois
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+

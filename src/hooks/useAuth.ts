@@ -478,11 +478,31 @@ export function useAuth() {
       }
     }
     
+    // Detectar área atual baseado na URL para redirecionar para login da mesma área
+    let redirectPath = '/pt' // padrão: página inicial
+    
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname
+      
+      // Detectar área baseado no path
+      if (currentPath.includes('/nutri/')) {
+        redirectPath = '/pt/nutri/login'
+      } else if (currentPath.includes('/coach/')) {
+        redirectPath = '/pt/coach/login'
+      } else if (currentPath.includes('/wellness/')) {
+        redirectPath = '/pt/wellness/login'
+      } else if (currentPath.includes('/nutra/')) {
+        redirectPath = '/pt/nutra/login'
+      } else if (currentPath.includes('/admin/')) {
+        redirectPath = '/admin/login'
+      }
+    }
+    
     await supabase.auth.signOut()
     setUser(null)
     setSession(null)
     setUserProfile(null)
-    router.push('/pt')
+    router.push(redirectPath)
   }
 
   return {

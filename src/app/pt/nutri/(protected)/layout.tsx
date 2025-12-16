@@ -13,6 +13,9 @@ interface ProtectedLayoutProps {
  * - Perfil correto (nutri) ou admin/suporte
  * - Assinatura ativa (admin/suporte pode bypassar)
  * 
+ * EXCEÇÃO: Onboarding e Diagnóstico não exigem assinatura
+ * (usuário precisa completar diagnóstico antes de assinar)
+ * 
  * Se qualquer validação falhar → redirect server-side
  * Se tudo OK → renderiza children
  */
@@ -21,6 +24,10 @@ export default async function ProtectedNutriLayout({ children }: ProtectedLayout
     requireSubscription: true,
     allowAdmin: true,
     allowSupport: true,
+    // Rotas que não exigem assinatura (onboarding flow)
+    // O validateProtectedAccess verifica internamente se a requisição é para essas rotas
+    excludeRoutesFromSubscription: ['/onboarding', '/diagnostico'],
+    currentPath: '', // Será detectado internamente via headers se necessário
   })
 
   return <>{children}</>

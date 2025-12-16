@@ -17,9 +17,23 @@ export function useLastVisitedPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     
-    // Não salvar páginas de login, logout ou callback
-    const excludedPaths = ['/login', '/logout', '/auth/callback', '/acesso']
+    // 🚨 NÃO salvar páginas de login, logout, callback, checkout ou outras páginas que não devem ser salvas
+    // IMPORTANTE: /checkout nunca deve ser salvo para evitar redirecionamento indesejado após login
+    const excludedPaths = ['/login', '/logout', '/auth/callback', '/acesso', '/checkout', '/404', '/not-found']
     if (excludedPaths.some(path => pathname.includes(path))) {
+      // Se for checkout, também limpar qualquer entrada anterior no localStorage
+      if (pathname.includes('/checkout')) {
+        try {
+          const lastPage = localStorage.getItem(LAST_VISITED_KEY)
+          if (lastPage && lastPage.includes('/checkout')) {
+            console.log('🧹 Limpando /checkout do localStorage (página checkout detectada)')
+            localStorage.removeItem(LAST_VISITED_KEY)
+            localStorage.removeItem(LAST_VISITED_TIMESTAMP_KEY)
+          }
+        } catch (e) {
+          console.warn('⚠️ Erro ao limpar localStorage:', e)
+        }
+      }
       return
     }
 
@@ -71,6 +85,8 @@ export function useLastVisitedPage() {
         
         // Validar que a rota salva ainda é válida
         if (lastPage) {
+          const excludedPaths = ['/checkout', '/login', '/logout', '/auth/callback', '/404', '/not-found', '/acesso']
+          const hasExcludedPath = excludedPaths.some(path => lastPage.includes(path))
           const isValidRoute = lastPage.startsWith('/') && 
             (
               lastPage.startsWith('/pt/') || 
@@ -78,10 +94,11 @@ export function useLastVisitedPage() {
               lastPage.startsWith('/es/') ||
               lastPage.startsWith('/admin')
             ) &&
-            lastPage.length > 3
+            lastPage.length > 3 &&
+            !hasExcludedPath
           
-          if (!isValidRoute) {
-            // Limpar rota inválida do localStorage
+          if (!isValidRoute || hasExcludedPath) {
+            // Limpar rota inválida ou excluída do localStorage
             localStorage.removeItem(LAST_VISITED_KEY)
             localStorage.removeItem(LAST_VISITED_TIMESTAMP_KEY)
             return null

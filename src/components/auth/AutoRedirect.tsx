@@ -56,15 +56,49 @@ export default function AutoRedirect() {
 
     // CASO 1: Usuário está logado
     if (isAuthenticated && user) {
-      // APENAS UX: Se está em página de login → redirecionar para home do perfil
-      // Server-side já validou tudo, então podemos confiar
+      // APENAS UX: Se está em página de login → verificar assinatura antes de redirecionar
+      // Se não tiver assinatura, permitir que o usuário permaneça na página de login
       if (isLoginPage && !hasRedirectedRef.current) {
         const perfil = userProfile?.perfil || getAreaFromPath(pathname) || 'wellness'
-        const homePath = getHomePath(perfil)
-
-        console.log('✅ AutoRedirect (UX): Usuário logado em página de login, redirecionando para:', homePath)
-        hasRedirectedRef.current = true
-        router.replace(homePath)
+        
+        // 🚨 IMPORTANTE: Verificar assinatura antes de redirecionar
+        // Se não tiver assinatura, não redirecionar (permitir que usuário fique na página de login)
+        const checkSubscription = async () => {
+          try {
+            const area = perfil === 'nutri' ? 'nutri' : 
+                        perfil === 'coach' ? 'coach' : 
+                        perfil === 'nutra' ? 'nutra' : 'wellness'
+            
+            const response = await fetch(`/api/${area}/subscription/check`, {
+              credentials: 'include',
+            })
+            
+            if (response.ok) {
+              const data = await response.json()
+              const hasSubscription = data.hasActiveSubscription || data.bypassed
+              
+              // Se tiver assinatura, redirecionar para home
+              if (hasSubscription) {
+                const homePath = getHomePath(perfil)
+                console.log('✅ AutoRedirect (UX): Usuário logado com assinatura em página de login, redirecionando para:', homePath)
+                hasRedirectedRef.current = true
+                router.replace(homePath)
+              } else {
+                // Se não tiver assinatura, permitir que usuário permaneça na página de login
+                console.log('ℹ️ AutoRedirect: Usuário logado sem assinatura, permitindo acesso à página de login')
+              }
+            } else {
+              // Em caso de erro, não redirecionar (permitir acesso à página de login)
+              console.log('ℹ️ AutoRedirect: Erro ao verificar assinatura, permitindo acesso à página de login')
+            }
+          } catch (error) {
+            // Em caso de erro, não redirecionar (permitir acesso à página de login)
+            console.log('ℹ️ AutoRedirect: Erro ao verificar assinatura, permitindo acesso à página de login')
+          }
+        }
+        
+        // Verificar assinatura de forma assíncrona
+        checkSubscription()
         return
       }
 
