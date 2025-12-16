@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 import dynamic from 'next/dynamic'
+import React from 'react'
 
 // Lazy load do QRCode
 const QRCode = dynamic(() => import('@/components/QRCode'), { ssr: false })
@@ -313,7 +314,7 @@ function FieldPreview({ field, onEdit, onRemove }: { field: Field, onEdit?: (fie
   )
 }
 
-function getFieldTypeLabel(type: FieldType): string {
+export function getFieldTypeLabel(type: FieldType): string {
   const labels = {
     text: 'Texto',
     textarea: 'Área de texto',
@@ -326,6 +327,44 @@ function getFieldTypeLabel(type: FieldType): string {
     phone: 'Telefone'
   }
   return labels[type] || type
+}
+
+// Stub functions para compatibilidade com imports de [id]/page.tsx
+export function TooltipButton({ children, onClick, className, tooltip }: { 
+  children: React.ReactNode
+  onClick: () => void
+  className: string
+  tooltip: string
+}) {
+  return (
+    <button onClick={onClick} className={className} title={tooltip}>
+      {children}
+    </button>
+  )
+}
+
+export function getFieldDescription(type: FieldType): string {
+  return ''
+}
+
+export function getFieldPlaceholderExample(type: FieldType): string {
+  return ''
+}
+
+export function getPlaceholderExample(type: FieldType): string {
+  return ''
+}
+
+export function getHelpTextExample(type: FieldType): string {
+  return ''
+}
+
+export function renderFieldPreview(field: Field) {
+  return <div className="text-sm text-gray-500">Preview do campo {field.label}</div>
+}
+
+export function ModalEditarCampo({ campo, onChange, onSalvar, onCancelar }: any) {
+  return null
 }
 
 function NovoFormularioNutriContent() {
