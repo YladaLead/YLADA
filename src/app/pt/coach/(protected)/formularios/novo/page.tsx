@@ -10,7 +10,10 @@ import {
   Field,
   renderFieldPreview,
   getFieldTypeLabel,
-  getFieldDescription
+  getFieldDescription,
+  getFieldPlaceholderExample,
+  getPlaceholderExample,
+  getHelpTextExample
 } from '@/components/coach/formularios-utils'
 
 // Lazy load do QRCode
