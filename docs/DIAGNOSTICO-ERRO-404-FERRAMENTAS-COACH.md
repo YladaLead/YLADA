@@ -120,6 +120,58 @@ grep -r "ferramentas/\${.*cliente" src/
 4. ✅ Monitorar logs para identificar origem do problema
 5. ✅ Adicionar testes para prevenir regressões
 
+---
+
+## ✅ MIGRAÇÃO CONCLUÍDA - Estrutura Consolidada
+
+**Data:** Janeiro 2025
+
+### Estrutura Final
+
+Todas as páginas de ferramentas foram migradas para a estrutura `(protected)`:
+
+```
+/pt/coach/
+├── (protected)/
+│   ├── ferramentas/          ✅ Estrutura protegida (server-side)
+│   │   ├── page.tsx          ✅ Lista de ferramentas
+│   │   ├── nova/page.tsx     ✅ Criar nova ferramenta
+│   │   ├── [id]/editar/page.tsx  ✅ Editar ferramenta
+│   │   └── templates/page.tsx    ✅ Templates disponíveis
+│   └── layout.tsx            ✅ Validação server-side
+└── ferramentas/page.tsx      ✅ Redirect para (protected)/ferramentas
+```
+
+### Mudanças Implementadas
+
+1. **Consolidação de Rotas**
+   - ✅ Removida estrutura duplicada `/pt/coach/c/ferramentas`
+   - ✅ Migradas todas as páginas para `(protected)/ferramentas`
+   - ✅ URLs simplificadas: `/pt/coach/ferramentas` (em vez de `/c/ferramentas`)
+
+2. **Validação Server-Side**
+   - ✅ Todas as páginas protegidas com validação no layout
+   - ✅ Sem necessidade de `ProtectedRoute` ou `RequireSubscription` nas páginas
+   - ✅ Validação única e determinística no servidor
+
+3. **Tratamento de Erros**
+   - ✅ Validação de UUID no endpoint (retorna 400 em vez de 404)
+   - ✅ Tratamento silencioso de 404/400 no frontend
+   - ✅ Logs apenas em desenvolvimento
+
+4. **Links Atualizados**
+   - ✅ Todos os links internos atualizados para nova estrutura
+   - ✅ CoachSidebar usando rotas corretas
+   - ✅ Navegação consistente em toda aplicação
+
+### Benefícios
+
+- **Eficiência**: Código consolidado, sem duplicação
+- **Eficácia**: Rotas protegidas com validação server-side
+- **Manutenibilidade**: Estrutura única e clara
+- **Performance**: Menos rotas, menos overhead
+- **UX**: URLs mais limpas e consistentes
+
 ## 🔗 Referências
 
 - Documentação do Next.js sobre prefetch: https://nextjs.org/docs/app/api-reference/components/link#prefetch

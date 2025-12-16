@@ -414,7 +414,7 @@ export default function EditarFerramentaCoach() {
       
       // Redirecionar após 2 segundos
       setTimeout(() => {
-        router.push('/pt/coach/c/ferramentas')
+        router.push('/pt/coach/ferramentas')
       }, 2000)
     } catch (error: any) {
       console.error('Erro ao salvar ferramenta:', error)
@@ -485,7 +485,7 @@ export default function EditarFerramentaCoach() {
       // Mostrar mensagem de sucesso e redirecionar
       setMensagemSucesso('Ferramenta excluída com sucesso!')
       setTimeout(() => {
-        router.push('/pt/coach/c/ferramentas')
+        router.push('/pt/coach/ferramentas')
       }, 1500)
     } catch (error: any) {
       console.error('Erro ao excluir ferramenta:', error)
@@ -514,7 +514,7 @@ export default function EditarFerramentaCoach() {
         <div className="text-center">
           <p className="text-red-600 mb-4">Ferramenta não encontrada</p>
           <Link
-            href="/pt/coach/c/ferramentas"
+            href="/pt/coach/ferramentas"
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
           >
             Voltar
@@ -1190,7 +1190,7 @@ export default function EditarFerramentaCoach() {
 
               <div className="flex gap-4 mt-8">
                 <button
-                  onClick={() => router.push('/pt/coach/c/ferramentas')}
+                  onClick={() => router.push('/pt/coach/ferramentas')}
                   disabled={salvando || excluindo}
                   className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import CoachNavBar from '@/components/coach/CoachNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -17,11 +16,7 @@ interface Tool {
 }
 
 export default function EditarPortalCoach() {
-  return (
-    <ProtectedRoute perfil="coach" allowAdmin={true}>
-      <EditarPortalCoachContent />
-    </ProtectedRoute>
-  )
+  return <EditarPortalCoachContent />
 }
 
 function EditarPortalCoachContent() {
@@ -463,7 +458,7 @@ function EditarPortalCoachContent() {
               <p className="text-sm text-purple-700">
                 <span className="font-medium">ℹ️ Informação:</span> As ferramentas disponíveis são apenas as que você criou. 
                 Para adicionar mais ferramentas ao portal,{' '}
-                <Link href="/pt/coach/c/ferramentas/nova" className="text-purple-600 hover:underline font-medium">
+                <Link href="/pt/coach/ferramentas/nova" className="text-purple-600 hover:underline font-medium">
                   crie-as individualmente primeiro
                 </Link>.
               </p>
@@ -472,7 +467,7 @@ function EditarPortalCoachContent() {
             {tools.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
                 Nenhuma ferramenta encontrada. Crie ferramentas primeiro em{' '}
-                <Link href="/pt/coach/c/ferramentas/nova" className="text-purple-600 hover:underline">
+                <Link href="/pt/coach/ferramentas/nova" className="text-purple-600 hover:underline">
                   Ferramentas → Nova
                 </Link>
               </p>

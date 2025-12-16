@@ -273,8 +273,8 @@ export default function TemplatesCoach() {
             {templatesFiltrados.map((template) => {
               const link =
                 template.slug
-                  ? `/pt/coach/c/ferramentas/nova?template=${template.slug}`
-                  : '/pt/coach/c/ferramentas/nova'
+                  ? `/pt/coach/ferramentas/nova?template=${template.slug}`
+                  : '/pt/coach/ferramentas/nova'
               return (
                 <div
                   key={template.id}
@@ -325,7 +325,7 @@ export default function TemplatesCoach() {
         {/* Ações rápidas */}
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
-            href="/pt/coach/c/ferramentas/nova"
+            href="/pt/coach/ferramentas/nova"
             className="flex items-center p-5 bg-white border border-gray-200 rounded-2xl shadow-sm hover:border-purple-300 transition-colors"
           >
             <span className="text-3xl mr-4">➕</span>
@@ -417,4 +417,3 @@ export default function TemplatesCoach() {
     </div>
   )
 }
-

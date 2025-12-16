@@ -7,7 +7,7 @@ export default function FerramentasRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    router.replace('/pt/coach/c/ferramentas')
+    router.replace('/pt/coach/ferramentas')
   }, [router])
 
   return (

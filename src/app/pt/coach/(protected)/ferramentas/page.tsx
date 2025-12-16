@@ -134,6 +134,12 @@ export default function FerramentasCoach() {
       })
 
       if (!response.ok) {
+        // Tratamento silencioso de 404/400 (IDs inválidos)
+        if (response.status === 404 || response.status === 400) {
+          // ID inválido ou não encontrado - remover da lista silenciosamente
+          setFerramentas(prev => prev.filter(f => f.id !== id))
+          return
+        }
         const data = await response.json().catch(() => ({}))
         throw new Error(data.error || 'Erro ao excluir link')
       }
@@ -141,8 +147,10 @@ export default function FerramentasCoach() {
       setFerramentas(prev => prev.filter(f => f.id !== id))
       // Notificação silenciosa - não usar alert
     } catch (error: any) {
-      console.error('Erro ao excluir link:', error)
-      // Notificação silenciosa - não usar alert
+      // Tratamento silencioso - apenas logar em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Erro ao excluir ferramenta:', error)
+      }
     } finally {
       setFerramentaExcluindoId(null)
     }
@@ -182,7 +190,7 @@ export default function FerramentasCoach() {
             </p>
           </div>
           <Link
-            href="/pt/coach/c/ferramentas/nova"
+            href="/pt/coach/ferramentas/nova"
             className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105 shadow-lg font-medium"
           >
             + Criar Novo Link
@@ -292,7 +300,7 @@ export default function FerramentasCoach() {
                 : 'Tente ajustar os filtros para ver mais links'}
             </p>
             <Link
-              href="/pt/coach/c/ferramentas/nova"
+              href="/pt/coach/ferramentas/nova"
               className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               Criar Novo Link
@@ -411,7 +419,7 @@ export default function FerramentasCoach() {
                         Ver Link →
                       </Link>
                       <Link
-                        href={`/pt/coach/c/ferramentas/${ferramenta.id}/editar`}
+                        href={`/pt/coach/ferramentas/${ferramenta.id}/editar`}
                         className="text-sm text-gray-600 hover:text-gray-800 font-medium"
                       >
                         Editar

@@ -2,11 +2,16 @@
 
 import { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
-import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import RequireFeature from '@/components/auth/RequireFeature'
 import ConditionalSidebar from '@/components/nutri/ConditionalSidebar'
 import ConditionalWidget from '@/components/nutri/ConditionalWidget'
 
+/**
+ * Layout do Método YLADA
+ * 
+ * Nota: ProtectedRoute foi removido - autenticação é feita pelo layout (protected)
+ * RequireFeature mantido para validação de features específicas
+ */
 export default function MetodoLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   
@@ -14,7 +19,7 @@ export default function MetodoLayout({ children }: { children: ReactNode }) {
   const isJornada = pathname?.includes('/metodo/jornada')
   
   return (
-    <ProtectedRoute perfil="nutri" allowAdmin={true}>
+    <>
       {isJornada ? (
         // Jornada: acesso livre (sem RequireFeature)
         <>
@@ -34,7 +39,7 @@ export default function MetodoLayout({ children }: { children: ReactNode }) {
           <ConditionalWidget />
         </RequireFeature>
       )}
-    </ProtectedRoute>
+    </>
   )
 }
 
