@@ -64,16 +64,49 @@ function ResetPasswordContent() {
 
     try {
       if (token) {
-        console.log('🔄 Processando reset de senha com token...')
+        console.log('🔄 Processando reset de senha com token...', { hasToken: !!token, type })
+        
+        // Decodificar token se estiver codificado na URL
+        let decodedToken = token
+        try {
+          if (token.includes('%')) {
+            decodedToken = decodeURIComponent(token)
+            console.log('✅ Token decodificado da URL')
+          }
+        } catch (decodeErr) {
+          console.warn('⚠️ Não foi possível decodificar token, usando original:', decodeErr)
+          decodedToken = token
+        }
         
         const { data, error: verifyError } = await supabase.auth.verifyOtp({
-          token_hash: token,
+          token_hash: decodedToken,
           type: (type as any) || 'recovery',
         })
 
         if (verifyError) {
-          console.error('❌ Erro ao verificar token:', verifyError)
-          setError(verifyError.message || 'Token inválido ou expirado. Solicite um novo link de reset.')
+          console.error('❌ Erro ao verificar token:', {
+            message: verifyError.message,
+            status: verifyError.status,
+            name: verifyError.name
+          })
+          
+          let errorMessage = 'Token inválido ou expirado. Solicite um novo link de reset.'
+          if (verifyError.message?.includes('expired') || verifyError.message?.includes('expirado')) {
+            errorMessage = 'O link de recuperação expirou. Por favor, solicite um novo link de reset de senha.'
+          } else if (verifyError.message?.includes('invalid') || verifyError.message?.includes('inválido')) {
+            errorMessage = 'Link de recuperação inválido. Por favor, solicite um novo link de reset de senha.'
+          } else if (verifyError.message) {
+            errorMessage = verifyError.message
+          }
+          
+          setError(errorMessage)
+          setLoading(false)
+          return
+        }
+
+        if (!data || !data.session) {
+          console.error('❌ Sessão não criada após verificação do token')
+          setError('Erro ao processar token. Por favor, solicite um novo link de reset de senha.')
           setLoading(false)
           return
         }
