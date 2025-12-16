@@ -67,6 +67,12 @@ export async function GET(request: NextRequest) {
       return await hasActiveSubscription(ownerId, 'wellness')
     }
 
+    // Log inicial para diagnóstico
+    console.log('🔍 [Wellness API] Buscando ferramenta:', {
+      user_slug: userSlug,
+      tool_slug: toolSlug
+    })
+    
     // Buscar ferramenta pela combinação user_slug + tool_slug
     // Primeiro buscar o user_id pelo user_slug
     const { data: userProfile, error: profileError } = await supabaseAdmin
@@ -76,8 +82,13 @@ export async function GET(request: NextRequest) {
       .maybeSingle()
     
     if (profileError || !userProfile) {
+      console.warn('⚠️ [Wellness API] Usuário não encontrado:', {
+        user_slug: userSlug,
+        error: profileError?.message,
+        code: profileError?.code
+      })
       return NextResponse.json(
-        { error: 'Usuário não encontrado' },
+        { error: 'Usuário não encontrado', message: `Não foi possível encontrar um usuário com o slug "${userSlug}"` },
         { status: 404 }
       )
     }
@@ -95,14 +106,34 @@ export async function GET(request: NextRequest) {
     // Se encontrou a ferramenta, adicionar o perfil e retornar
     if (data) {
       const ownerId = data.user_id || userProfile.user_id
+      
+      // Log detalhado para diagnóstico
+      console.log('🔍 [Wellness API] Ferramenta encontrada, verificando assinatura:', {
+        tool_id: data.id,
+        tool_slug: data.slug,
+        user_id: ownerId,
+        user_slug: userSlug
+      })
+      
       const subscriptionOk = await ensureActiveSubscription(ownerId)
       
       if (!subscriptionOk) {
+        console.warn('⚠️ [Wellness API] Assinatura não ativa ou expirada:', {
+          tool_id: data.id,
+          user_id: ownerId,
+          user_slug: userSlug,
+          tool_slug: toolSlug
+        })
         return NextResponse.json(
-          { error: 'link_indisponivel', message: 'Assinatura expirada' },
+          { error: 'link_indisponivel', message: 'Assinatura expirada ou não ativa' },
           { status: 403 }
         )
       }
+      
+      console.log('✅ [Wellness API] Ferramenta retornada com sucesso:', {
+        tool_id: data.id,
+        tool_slug: data.slug
+      })
       
       return NextResponse.json({ 
         tool: {
@@ -117,14 +148,28 @@ export async function GET(request: NextRequest) {
         // Ferramenta não encontrada - verificar se é um fluxo
         const fluxoEncontrado = encontrarFluxoPorSlug(toolSlug)
         if (fluxoEncontrado) {
+          console.log('🔍 [Wellness API] Fluxo encontrado, verificando assinatura:', {
+            fluxo_id: fluxoEncontrado.fluxo.id,
+            tipo: fluxoEncontrado.tipo,
+            user_id: userProfile.user_id
+          })
+          
           // Verificar assinatura
           const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
           if (!subscriptionOk) {
+            console.warn('⚠️ [Wellness API] Assinatura não ativa (fluxo):', {
+              fluxo_id: fluxoEncontrado.fluxo.id,
+              user_id: userProfile.user_id
+            })
             return NextResponse.json(
-              { error: 'link_indisponivel', message: 'Assinatura expirada' },
+              { error: 'link_indisponivel', message: 'Assinatura expirada ou não ativa' },
               { status: 403 }
             )
           }
+          
+          console.log('✅ [Wellness API] Fluxo retornado:', {
+            fluxo_id: fluxoEncontrado.fluxo.id
+          })
           
           // Retornar fluxo formatado como ferramenta
           return NextResponse.json({
@@ -160,14 +205,28 @@ export async function GET(request: NextRequest) {
         
         if (!errorByTemplateSlug && toolByTemplateSlug) {
           // Encontrou por template_slug - verificar assinatura
+          console.log('🔍 [Wellness API] Ferramenta encontrada por template_slug, verificando assinatura:', {
+            tool_id: toolByTemplateSlug.id,
+            template_slug: toolByTemplateSlug.template_slug,
+            user_id: userProfile.user_id
+          })
+          
           const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
           
           if (!subscriptionOk) {
-          return NextResponse.json(
-              { error: 'link_indisponivel', message: 'Assinatura expirada' },
+            console.warn('⚠️ [Wellness API] Assinatura não ativa (template_slug):', {
+              tool_id: toolByTemplateSlug.id,
+              user_id: userProfile.user_id
+            })
+            return NextResponse.json(
+              { error: 'link_indisponivel', message: 'Assinatura expirada ou não ativa' },
               { status: 403 }
-          )
+            )
           }
+          
+          console.log('✅ [Wellness API] Ferramenta retornada (template_slug):', {
+            tool_id: toolByTemplateSlug.id
+          })
           
           return NextResponse.json({ 
             tool: {
@@ -241,21 +300,35 @@ export async function GET(request: NextRequest) {
         }
         
         if (templateBase) {
-              // Verificar assinatura
-              const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
-              if (!subscriptionOk) {
-                return NextResponse.json(
-                  { error: 'link_indisponivel', message: 'Assinatura expirada' },
-                  { status: 403 }
-                )
-              }
-              
+          // Verificar assinatura
+          console.log('🔍 [Wellness API] Template base encontrado, verificando assinatura:', {
+            template_id: templateBase.id,
+            template_slug: templateBase.slug,
+            user_id: userProfile.user_id
+          })
+          
+          const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
+          if (!subscriptionOk) {
+            console.warn('⚠️ [Wellness API] Assinatura não ativa (template base):', {
+              template_id: templateBase.id,
+              user_id: userProfile.user_id
+            })
+            return NextResponse.json(
+              { error: 'link_indisponivel', message: 'Assinatura expirada ou não ativa' },
+              { status: 403 }
+            )
+          }
+          
+          console.log('✅ [Wellness API] Ferramenta virtual criada (template base):', {
+            template_id: templateBase.id
+          })
+          
           // Criar ferramenta virtual baseada no template
-              return NextResponse.json({
-                tool: {
+          return NextResponse.json({
+            tool: {
               id: `template-${templateBase.id}`,
               title: templateBase.name,
-                  slug: toolSlug,
+              slug: toolSlug,
               template_slug: toolSlug,
               template_id: templateBase.id,
               description: templateBase.description || templateBase.title || '',
@@ -264,19 +337,26 @@ export async function GET(request: NextRequest) {
               cta_type: 'whatsapp',
               whatsapp_number: userProfile.whatsapp || null,
               cta_button_text: 'Conversar com Especialista',
-                  profession: 'wellness',
-                  status: 'active',
+              profession: 'wellness',
+              status: 'active',
               content: templateBase.content || {},
-                  user_profiles: userProfile,
+              user_profiles: userProfile,
               is_template_base: true // Flag para indicar que é template base
-                }
-              })
             }
-            
-            return NextResponse.json(
-              { error: 'Ferramenta não encontrada' },
-              { status: 404 }
-            )
+          })
+        }
+        
+        // Se chegou aqui, realmente não encontrou a ferramenta
+        console.warn('⚠️ [Wellness API] Ferramenta não encontrada após todas as tentativas:', {
+          user_slug: userSlug,
+          tool_slug: toolSlug,
+          user_id: userProfile.user_id
+        })
+        
+        return NextResponse.json(
+          { error: 'Ferramenta não encontrada', message: `Não foi possível encontrar uma ferramenta com o slug "${toolSlug}" para o usuário "${userSlug}"` },
+          { status: 404 }
+        )
           }
   } catch (error: any) {
     console.error('Erro ao buscar ferramenta por URL:', error)

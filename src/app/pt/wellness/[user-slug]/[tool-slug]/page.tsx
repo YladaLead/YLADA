@@ -93,15 +93,35 @@ export default function FerramentaPersonalizadaPage() {
         `/api/wellness/ferramentas/by-url?user_slug=${userSlug}&tool_slug=${toolSlug}`
       )
 
+      // Tratar erro 403 (assinatura expirada/indisponível)
       if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({}))
         setError('link_indisponivel')
         setTool(null)
         setLoading(false)
         return
       }
 
+      // Tratar erro 404 (ferramenta não encontrada)
+      if (response.status === 404) {
+        const errorData = await response.json().catch(() => ({}))
+        setError('ferramenta_nao_encontrada')
+        setTool(null)
+        setLoading(false)
+        return
+      }
+
       if (!response.ok) {
-        throw new Error('Ferramenta não encontrada')
+        const errorData = await response.json().catch(() => ({}))
+        // Se não for 403 ou 404, tratar como erro genérico
+        if (response.status >= 500) {
+          setError('erro_servidor')
+        } else {
+          setError('ferramenta_nao_encontrada')
+        }
+        setTool(null)
+        setLoading(false)
+        return
       }
 
       const data = await response.json()
@@ -151,24 +171,60 @@ export default function FerramentaPersonalizadaPage() {
 
   if (error || !tool) {
     const isLinkUnavailable = error === 'link_indisponivel'
+    const isFerramentaNaoEncontrada = error === 'ferramenta_nao_encontrada'
+    const isErroServidor = error === 'erro_servidor'
+    
+    // Determinar mensagem e ícone baseado no tipo de erro
+    let titulo = 'Erro ao carregar ferramenta'
+    let mensagem = 'Ocorreu um erro ao carregar esta ferramenta. Tente novamente mais tarde.'
+    let icone = '⚠️'
+    let corBorda = 'border-red-200'
+    let corBotao = 'bg-green-600 hover:bg-green-700'
+    
+    if (isLinkUnavailable) {
+      titulo = 'Link indisponível'
+      mensagem = 'Este link está indisponível porque a assinatura precisa ser renovada. Se você já fez o pagamento, aguarde alguns minutos ou entre em contato com o suporte.'
+      icone = '⛔'
+      corBorda = 'border-orange-200'
+      corBotao = 'bg-orange-600 hover:bg-orange-700'
+    } else if (isFerramentaNaoEncontrada) {
+      titulo = 'Ferramenta não encontrada'
+      mensagem = 'A ferramenta que você está procurando não existe, foi removida ou o link está incorreto. Verifique se o link está completo e correto.'
+      icone = '🔍'
+      corBorda = 'border-red-200'
+      corBotao = 'bg-green-600 hover:bg-green-700'
+    } else if (isErroServidor) {
+      titulo = 'Erro no servidor'
+      mensagem = 'Ocorreu um erro técnico ao carregar esta ferramenta. Nossa equipe foi notificada. Tente novamente em alguns instantes.'
+      icone = '🔧'
+      corBorda = 'border-yellow-200'
+      corBotao = 'bg-yellow-600 hover:bg-yellow-700'
+    }
+    
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 border-red-200">
+        <div className={`max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center border-2 ${corBorda}`}>
           <div className="mb-4">
-            <span className="text-red-600 text-5xl">{isLinkUnavailable ? '⛔' : '⚠️'}</span>
+            <span className="text-5xl">{icone}</span>
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">
-            {isLinkUnavailable ? 'Link indisponível' : 'Ferramenta não encontrada'}
+            {titulo}
           </h2>
           <p className="text-gray-600 mb-6">
-            {isLinkUnavailable
-              ? 'Este link está indisponível no momento. Entre em contato com a pessoa que enviou para continuar.'
-              : error || 'A ferramenta que você está procurando não existe ou foi removida.'}
+            {mensagem}
           </p>
           <div className="space-y-2">
+            {isLinkUnavailable && (
+              <button
+                onClick={() => router.push(`/pt/wellness/checkout?plan=monthly`)}
+                className={`w-full px-4 py-2 ${corBotao} text-white rounded-lg transition-colors font-medium`}
+              >
+                Renovar Assinatura
+              </button>
+            )}
             <button
               onClick={() => router.push('/pt/wellness/ferramentas')}
-              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className={`w-full px-4 py-2 ${corBotao} text-white rounded-lg transition-colors font-medium`}
             >
               Voltar para Meus Links
             </button>
