@@ -1,5 +1,6 @@
--- RESETAR nutri1@ylada.com PARA ESTADO INICIAL (SEM DIAGNÓSTICO)
--- Execute esta query no Supabase SQL Editor
+-- ============================================
+-- RESETAR nutri1@ylada.com PARA ESTADO INICIAL
+-- ============================================
 
 -- 1. Remover diagnóstico
 DELETE FROM nutri_diagnostico
@@ -16,7 +17,11 @@ WHERE user_id = (SELECT id FROM auth.users WHERE email = 'nutri1@ylada.com');
 DELETE FROM journey_progress
 WHERE user_id = (SELECT id FROM auth.users WHERE email = 'nutri1@ylada.com');
 
--- 4. Verificar resultado (deve mostrar diagnostico_completo = false)
+-- 4. Remover assinatura (se houver)
+DELETE FROM subscriptions
+WHERE user_id = (SELECT id FROM auth.users WHERE email = 'nutri1@ylada.com');
+
+-- 5. Verificar resultado após reset
 SELECT 
   u.email,
   up.perfil,

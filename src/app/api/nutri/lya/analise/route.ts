@@ -284,8 +284,25 @@ Não adicione texto antes ou depois desses blocos.`
           .join('\n')}\n`
       : ''
 
+    // Contexto das anotações da jornada (reflexões e aprendizados)
+    const anotacoesContexto = (checklistNotes.length > 0 || dailyNotes.length > 0)
+      ? `\nReflexões e aprendizados da nutricionista (últimos dias da jornada):\n${
+          dailyNotes.length > 0
+            ? `Anotações diárias:\n${dailyNotes.map(n => `- Dia ${n.day_number}: ${n.conteudo?.substring(0, 200) || 'Sem anotação'}...`).join('\n')}\n`
+            : ''
+        }${
+          checklistNotes.length > 0
+            ? `Exercícios de reflexão:\n${checklistNotes
+                .filter(n => n.nota && n.nota.trim())
+                .slice(0, 6)
+                .map(n => `- Dia ${n.day_number}, exercício ${n.item_index + 1}: ${n.nota.substring(0, 150)}...`)
+                .join('\n')}\n`
+            : ''
+        }`
+      : ''
+
     // Adicionar contexto RAG à mensagem do usuário
-    const userMessageComRAG = `${userMessage}${estadoContexto}${memoriaContexto}${conhecimentoContexto}`
+    const userMessageComRAG = `${userMessage}${estadoContexto}${memoriaContexto}${conhecimentoContexto}${anotacoesContexto}`
 
     // Chamar OpenAI (por enquanto, depois será Assistant/Responses API)
     const completion = await openai.chat.completions.create({
