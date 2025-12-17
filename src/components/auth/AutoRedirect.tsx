@@ -61,9 +61,14 @@ export default function AutoRedirect() {
       if (isLoginPage && !hasRedirectedRef.current) {
         const perfil = userProfile?.perfil || getAreaFromPath(pathname) || 'wellness'
         
-        // 🚨 IMPORTANTE: Verificar assinatura antes de redirecionar
-        // Se não tiver assinatura, não redirecionar (permitir que usuário fique na página de login)
+        // 🚨 CORREÇÃO: Adicionar timeout para não bloquear página de login
+        // Se verificação demorar mais de 3 segundos, permitir acesso à página
         const checkSubscription = async () => {
+          const timeoutId = setTimeout(() => {
+            console.log('⏱️ AutoRedirect: Timeout na verificação de assinatura, permitindo acesso à página de login')
+            hasRedirectedRef.current = true // Marcar como processado para não tentar novamente
+          }, 3000) // 3 segundos de timeout
+          
           try {
             const area = perfil === 'nutri' ? 'nutri' : 
                         perfil === 'coach' ? 'coach' : 
@@ -71,7 +76,10 @@ export default function AutoRedirect() {
             
             const response = await fetch(`/api/${area}/subscription/check`, {
               credentials: 'include',
+              signal: AbortSignal.timeout(2500) // Timeout de 2.5s na requisição
             })
+            
+            clearTimeout(timeoutId) // Limpar timeout se requisição completar
             
             if (response.ok) {
               const data = await response.json()
@@ -86,14 +94,22 @@ export default function AutoRedirect() {
               } else {
                 // Se não tiver assinatura, permitir que usuário permaneça na página de login
                 console.log('ℹ️ AutoRedirect: Usuário logado sem assinatura, permitindo acesso à página de login')
+                hasRedirectedRef.current = true // Marcar como processado
               }
             } else {
               // Em caso de erro, não redirecionar (permitir acesso à página de login)
               console.log('ℹ️ AutoRedirect: Erro ao verificar assinatura, permitindo acesso à página de login')
+              hasRedirectedRef.current = true // Marcar como processado
             }
-          } catch (error) {
-            // Em caso de erro, não redirecionar (permitir acesso à página de login)
-            console.log('ℹ️ AutoRedirect: Erro ao verificar assinatura, permitindo acesso à página de login')
+          } catch (error: any) {
+            clearTimeout(timeoutId) // Limpar timeout em caso de erro
+            // Em caso de erro ou timeout, não redirecionar (permitir acesso à página de login)
+            if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+              console.log('⏱️ AutoRedirect: Timeout na verificação de assinatura, permitindo acesso à página de login')
+            } else {
+              console.log('ℹ️ AutoRedirect: Erro ao verificar assinatura, permitindo acesso à página de login:', error.message)
+            }
+            hasRedirectedRef.current = true // Marcar como processado
           }
         }
         
