@@ -23,26 +23,29 @@ export default function PilarSecao({ secao, pilarId }: PilarSecaoProps) {
             {secao.conteudo.split('\n').map((line, index) => {
               const trimmedLine = line.trim()
               
-              // Detectar emojis de caixas (🔹) - remover emoji do texto e renderizar apenas ícone visual
+              // Detectar fundamentos/seções (🔹) - renderizar com bullet point limpo
               if (trimmedLine.startsWith('🔹')) {
-                // Remover o emoji do texto (pode ter 1 ou mais caracteres Unicode)
+                // Remover o emoji do texto completamente
                 const textWithoutEmoji = trimmedLine.replace(/^🔹\s*/, '').trim()
-                const titleMatch = textWithoutEmoji.match(/^(.+?)(?:\n|$)/)
-                const title = titleMatch ? titleMatch[1] : textWithoutEmoji
-                const description = textWithoutEmoji.replace(title, '').trim()
+                // Separar título (primeira linha) e descrição (resto)
+                const lines = textWithoutEmoji.split('\n').filter(l => l.trim())
+                const title = lines[0] || ''
+                const description = lines.slice(1).join(' ').trim()
                 
                 return (
-                  <div key={index} className="ml-6 mb-4 flex items-start">
-                    <span className="mr-3 text-blue-600 text-xl font-bold">•</span>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 mb-2 text-lg">
-                        {title}
-                      </p>
-                      {description && (
-                        <p className="text-gray-700 leading-relaxed">
-                          {description}
+                  <div key={index} className="mb-4">
+                    <div className="flex items-start">
+                      <span className="mr-3 mt-1 text-blue-600 text-lg font-bold">•</span>
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 mb-2 text-lg">
+                          {title}
                         </p>
-                      )}
+                        {description && (
+                          <p className="text-gray-700 leading-relaxed">
+                            {description}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
