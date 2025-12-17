@@ -29,9 +29,9 @@ export const pilaresConfig: Pilar[] = [
     id: '1',
     numero: 1,
     nome: 'Filosofia YLADA',
-    subtitulo: 'O que a faculdade não ensinou — a base que sustenta sua identidade profissional.',
+    subtitulo: 'O que a faculdade não ensinou, a base que sustenta sua identidade profissional.',
     descricao_curta: 'A profissional que entende quem ela é, o que entrega de verdade e como se posiciona, se torna impossível de ser ignorada.',
-    descricao_introducao: 'O que a faculdade não ensinou — a base que sustenta sua identidade profissional.',
+    descricao_introducao: 'O que a faculdade não ensinou, a base que sustenta sua identidade profissional.',
     secoes: [
       {
         id: 'o-que-e-nutri-empresaria',
@@ -156,7 +156,7 @@ O tempo dedicado a atender clientes, responder mensagens, fazer acompanhamento, 
 
 🔹 Momento de Construção
 
-Tempo para construir sua referência, estudar, usar o GSAL, organizar, planejar. É o investimento em você e no seu negócio.
+Tempo para construir sua referência, estudar, organizar sua gestão de clientes, planejar. É o investimento em você e no seu negócio.
 
 Esses 3 momentos do seu dia trabalham juntos para criar um dia completo e produtivo, sem sobrecarga.`,
         order_index: 2
