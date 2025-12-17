@@ -104,10 +104,36 @@ export async function validateProtectedAccess(
 
     // 2. Verificar autenticação (usar getUser() para segurança)
     // getUser() valida com o servidor Supabase, mais seguro que getSession()
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    // 🚨 CORREÇÃO: Tentar getSession() primeiro (mais rápido), depois getUser() se necessário
+    let user = null
+    let userError = null
+    
+    // Tentar getSession() primeiro (mais rápido e funciona melhor após login recente)
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) {
+      user = session.user
+      console.log(`✅ ProtectedLayout [${area}]: Sessão encontrada via getSession() para user:`, user.email)
+    } else {
+      // Se getSession() não retornar, tentar getUser() (valida com servidor)
+      const getUserResult = await supabase.auth.getUser()
+      user = getUserResult.data?.user || null
+      userError = getUserResult.error || null
+      if (user) {
+        console.log(`✅ ProtectedLayout [${area}]: Usuário encontrado via getUser() para user:`, user.email)
+      } else {
+        console.log(`⚠️ ProtectedLayout [${area}]: getSession() e getUser() não retornaram usuário`, { 
+          sessionExists: !!session, 
+          getUserError: userError?.message 
+        })
+      }
+    }
 
     if (userError || !user) {
-      console.log(`❌ ProtectedLayout [${area}]: Usuário não autenticado, redirecionando para login`)
+      console.log(`❌ ProtectedLayout [${area}]: Usuário não autenticado, redirecionando para login`, {
+        hasError: !!userError,
+        errorMessage: userError?.message,
+        hasUser: !!user
+      })
       redirect(`/pt/${area}/login`)
     }
 

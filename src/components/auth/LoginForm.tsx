@@ -233,9 +233,13 @@ export default function LoginForm({
               return
             }
             
-            // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sessão já foi criada)
-            // useAuth vai detectar a sessão automaticamente via onAuthStateChange
-            router.replace(finalRedirectPath) // Usar replace ao invés de push
+            // 🚀 CORREÇÃO: Usar window.location.href para garantir redirecionamento em produção
+            // router.replace pode não funcionar corretamente em alguns casos
+            console.log('🚀 Iniciando redirecionamento após cadastro para:', finalRedirectPath)
+            setTimeout(() => {
+              console.log('🔄 Redirecionando via window.location para:', finalRedirectPath)
+              window.location.href = finalRedirectPath
+            }, 100)
             setLoading(false) // Marcar loading=false imediatamente
           }
         } else {
@@ -425,7 +429,20 @@ export default function LoginForm({
         // 🚀 OTIMIZAÇÃO: Redirecionar imediatamente (sessão já foi criada)
         // useAuth vai detectar a sessão automaticamente via onAuthStateChange
         // Não precisa aguardar - a sessão já está disponível
-        router.replace(finalRedirectPath) // Usar replace para não adicionar ao histórico
+        console.log('🚀 Iniciando redirecionamento para:', finalRedirectPath)
+        
+        // Usar window.location.href em produção para garantir que funciona
+        // router.replace pode não funcionar corretamente em alguns casos
+        if (typeof window !== 'undefined') {
+          // Pequeno delay para garantir que a sessão foi salva
+          setTimeout(() => {
+            console.log('🔄 Redirecionando via window.location para:', finalRedirectPath)
+            window.location.href = finalRedirectPath
+          }, 100)
+        } else {
+          router.replace(finalRedirectPath)
+        }
+        
         setLoading(false) // Marcar loading=false imediatamente
 
         return
