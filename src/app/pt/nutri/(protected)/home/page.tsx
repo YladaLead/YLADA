@@ -90,31 +90,31 @@ function NutriHomeContent() {
           </div>
 
           {/* Dias 1-7: Apenas WelcomeCard + LyaAnaliseHoje (já renderizados acima) */}
-          {isFirstDays ? null : (
+          {!isFirstDays && currentDay && (
             <>
               {/* Dia 8+: Jornada Block aparece */}
-              {currentDay && currentDay >= 8 && (
+              {currentDay >= 8 && (
                 <div className="mb-8">
                   <JornadaBlock />
                 </div>
               )}
 
               {/* Dia 8-14: Ferramentas Block (filtrado por relevância) */}
-              {currentDay && currentDay >= 8 && currentDay < 15 && (
+              {currentDay >= 8 && currentDay < 15 && (
                 <div className="mb-8">
                   <FerramentasBlock />
                 </div>
               )}
 
               {/* Dia 15+: GSAL Block (quando LYA detecta necessidade) */}
-              {currentDay && currentDay >= 15 && (
+              {currentDay >= 15 && (
                 <div className="mb-8">
                   <GSALBlock />
                 </div>
               )}
 
               {/* Dia 21+: Pilares e Biblioteca */}
-              {currentDay && currentDay >= 21 && (
+              {currentDay >= 21 && (
                 <>
                   <div className="mb-8">
                     <PilaresBlock />
@@ -126,22 +126,11 @@ function NutriHomeContent() {
               )}
 
               {/* Anotações sempre disponíveis após Dia 1 */}
-              {currentDay && currentDay >= 2 && (
+              {currentDay >= 2 && (
                 <div className="mb-8">
                   <AnotacoesBlock />
                 </div>
               )}
-
-              {/* Vídeo apenas se LYA não tiver mensagem relevante (opcional, pode remover) */}
-              {/* {videoUrl && currentDay && currentDay >= 8 && (
-                <div className="mb-8">
-                  <VideoPlayerYLADA
-                    videoUrl={videoUrl}
-                    title="Bem-vindo ao YLADA Premium"
-                    description="Descubra como o YLADA vai transformar sua prática profissional."
-                  />
-                </div>
-              )} */}
             </>
           )}
         </div>
