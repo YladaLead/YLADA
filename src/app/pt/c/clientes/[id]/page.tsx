@@ -3292,6 +3292,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
                     <p className="text-gray-600">Nenhuma comparação disponível para esta reavaliação.</p>
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 text-center">
