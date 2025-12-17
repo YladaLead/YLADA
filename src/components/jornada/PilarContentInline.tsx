@@ -56,18 +56,6 @@ export default function PilarContentInline({ pilarId, dayNumber }: PilarContentI
         </div>
       )}
 
-      {/* Link opcional para ver Pilar completo (no rodapé) */}
-      <div className="mt-6 bg-white rounded-xl p-4 border border-gray-200 text-center">
-        <p className="text-sm text-gray-600 mb-2">
-          Quer ver este Pilar completo com todos os detalhes?
-        </p>
-        <a
-          href={`/pt/nutri/metodo/pilares/${pilarId}?fromDay=${dayNumber}`}
-          className="inline-block text-blue-600 hover:text-blue-700 font-medium text-sm transition-all duration-200 ease-out hover:opacity-90"
-        >
-          Ver Pilar Completo →
-        </a>
-      </div>
     </div>
   )
 }

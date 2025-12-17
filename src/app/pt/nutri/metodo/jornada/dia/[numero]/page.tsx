@@ -452,20 +452,7 @@ export default function JornadaDiaPage() {
           />
         )}
 
-        {/* Material complementar (PDFs) - apenas para dias específicos */}
-        {dayNumber === 1 && (
-          <div className="bg-purple-50 rounded-xl p-4 mb-6 border border-gray-100">
-            <p className="text-sm text-gray-700 mb-2">
-              <strong>📘 Material complementar:</strong>{' '}
-              <Link
-                href="/pt/nutri/metodo/biblioteca/pdf-1-guia-completo"
-                className="text-purple-700 hover:text-purple-800 font-medium transition-all duration-200 ease-out hover:opacity-90"
-              >
-                Ler Guia Completo do Método YLADA
-              </Link>
-            </p>
-          </div>
-        )}
+        {/* Material complementar removido - LYA conduz o fluxo */}
         {(dayNumber >= 8 && dayNumber <= 14) && (
           <div className="bg-green-50 rounded-xl p-4 mb-6 border border-gray-100">
             <p className="text-sm text-gray-700 mb-2">
@@ -604,17 +591,7 @@ export default function JornadaDiaPage() {
           )}
         </div>
 
-        {/* Link para Guia Completo (Dia 1) */}
-        {dayNumber === 1 && (
-          <div className="mt-8 bg-blue-50 rounded-xl p-4 border border-gray-100 text-center">
-            <Link
-              href="/pt/nutri/metodo/biblioteca/guia-metodo-ylada"
-              className="inline-flex items-center gap-2 text-blue-700 hover:text-blue-800 font-medium transition-all duration-200 ease-out hover:opacity-90"
-            >
-              📘 Ler Guia Completo do Método YLADA →
-            </Link>
-          </div>
-        )}
+        {/* Link para Guia Completo removido - LYA conduz o fluxo */}
       </div>
 
       {/* Modal de Bloqueio */}
