@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
     }
     const { user } = authResult
 
-    // Buscar diagnóstico e perfil estratégico
-    const [diagnosticoResult, perfilResult, jornadaResult] = await Promise.all([
+    // Buscar diagnóstico, perfil estratégico, progresso e anotações da jornada
+    const [diagnosticoResult, perfilResult, jornadaResult, checklistNotesResult, dailyNotesResult] = await Promise.all([
       supabaseAdmin
         .from('nutri_diagnostico')
         .select('*')
@@ -37,13 +37,30 @@ export async function POST(request: NextRequest) {
         .eq('user_id', user.id)
         .order('day_number', { ascending: false })
         .limit(1)
-        .maybeSingle()
+        .maybeSingle(),
+      // Buscar anotações dos exercícios de reflexão (últimos 3 dias)
+      supabaseAdmin
+        .from('journey_checklist_notes')
+        .select('day_number, item_index, nota')
+        .eq('user_id', user.id)
+        .order('day_number', { ascending: false })
+        .order('item_index', { ascending: true })
+        .limit(20), // Últimas 20 anotações (últimos ~3 dias)
+      // Buscar anotações diárias (últimos 3 dias)
+      supabaseAdmin
+        .from('journey_daily_notes')
+        .select('day_number, conteudo')
+        .eq('user_id', user.id)
+        .order('day_number', { ascending: false })
+        .limit(3)
     ])
 
     const diagnostico = diagnosticoResult.data
     const perfil = perfilResult.data
     // Se tem progresso, pegar o maior day_number. Se não tem, jornada não iniciada
     const jornadaDiaAtual = jornadaResult.data?.day_number || null
+    const checklistNotes = checklistNotesResult.data || []
+    const dailyNotes = dailyNotesResult.data || []
     
     // Determinar fase atual baseado no dia da jornada
     const currentPhase = getLyaPhase(jornadaDiaAtual)
