@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/hooks/useAuth'
 import NutriChatWidget from '@/components/nutri/NutriChatWidget'
 import PageLayout from '@/components/shared/PageLayout'
 import Section from '@/components/shared/Section'
