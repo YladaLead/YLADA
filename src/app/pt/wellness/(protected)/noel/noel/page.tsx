@@ -51,6 +51,7 @@ export default function NoelChatPage() {
   const [threadId, setThreadId] = useState<string | null>(null) // Thread ID do Assistants API
   const [copiadoId, setCopiadoId] = useState<string | null>(null) // ID da mensagem copiada (para feedback visual)
   const authenticatedFetch = useAuthenticatedFetch()
+  const { user, loading: authLoading } = useAuth() // 🚀 CORREÇÃO: Usar useAuth para verificar autenticação
   const mensagensEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const carregadoRef = useRef(false) // Flag para evitar carregar múltiplas vezes
