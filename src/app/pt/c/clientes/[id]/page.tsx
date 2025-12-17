@@ -3178,120 +3178,122 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
                 {/* Comparação */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Comparação com Avaliação Anterior</h3>
-                  {carregandoComparacao ? (
+                  {carregandoComparacao && (
                     <div className="flex items-center justify-center py-12">
                       <div className="text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
                         <p className="text-gray-600">Carregando comparação...</p>
                       </div>
                     </div>
-                  ) : comparacao ? (
+                  )}
+                  {!carregandoComparacao && comparacao && (
                     <div className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
-                    {/* Informações Gerais */}
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Informações da Comparação</h4>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-600">Avaliação Anterior: </span>
-                          <span className="font-medium text-gray-900">
-                            {comparacao.previous?.assessment_number
-                              ? `${comparacao.previous.assessment_number}ª Avaliação`
-                              : 'Avaliação Inicial'}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Dias entre avaliações: </span>
-                          <span className="font-medium text-gray-900">
-                            {comparacao.comparison?.dates?.days_between || '-'}
-                          </span>
+                      {/* Informações Gerais */}
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-3">Informações da Comparação</h4>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">Avaliação Anterior: </span>
+                            <span className="font-medium text-gray-900">
+                              {comparacao.previous?.assessment_number
+                                ? `${comparacao.previous.assessment_number}ª Avaliação`
+                                : 'Avaliação Inicial'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Dias entre avaliações: </span>
+                            <span className="font-medium text-gray-900">
+                              {comparacao.comparison?.dates?.days_between || '-'}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Dados Comparativos */}
-                    {comparacao.comparison && Object.keys(comparacao.comparison).length > 0 && (
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-3">Diferenças</h4>
-                        <div className="space-y-3">
-                          {Object.entries(comparacao.comparison)
-                            .filter(([key]) => key !== 'dates' && key !== 'summary')
-                            .map(([key, value]: [string, any]) => {
-                              if (!value || value.difference === null || value.difference === undefined) return null
-                              return (
-                                <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                  <div className="flex-1">
-                                    <span className="text-sm font-medium text-gray-700 capitalize block mb-1">
-                                      {key.replace(/_/g, ' ')}
-                                    </span>
-                                    <div className="text-xs text-gray-500">
-                                      Anterior: {value.old?.toFixed(2) || '-'} → Atual: {value.current?.toFixed(2) || '-'}
+                      {/* Dados Comparativos */}
+                      {comparacao.comparison && Object.keys(comparacao.comparison).length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-3">Diferenças</h4>
+                          <div className="space-y-3">
+                            {Object.entries(comparacao.comparison)
+                              .filter(([key]) => key !== 'dates' && key !== 'summary')
+                              .map(([key, value]: [string, any]) => {
+                                if (!value || value.difference === null || value.difference === undefined) return null
+                                return (
+                                  <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex-1">
+                                      <span className="text-sm font-medium text-gray-700 capitalize block mb-1">
+                                        {key.replace(/_/g, ' ')}
+                                      </span>
+                                      <div className="text-xs text-gray-500">
+                                        Anterior: {value.old?.toFixed(2) || '-'} → Atual: {value.current?.toFixed(2) || '-'}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className={`text-sm font-semibold ${
+                                          value.difference > 0
+                                            ? 'text-green-600'
+                                            : value.difference < 0
+                                            ? 'text-red-600'
+                                            : 'text-gray-600'
+                                        }`}
+                                      >
+                                        {value.difference > 0 ? '+' : ''}
+                                        {typeof value.difference === 'number'
+                                          ? value.difference.toFixed(2)
+                                          : value.difference}
+                                      </span>
+                                      {value.percent_change !== null && value.percent_change !== undefined && (
+                                        <span className="text-xs text-gray-500">
+                                          ({value.percent_change > 0 ? '+' : ''}
+                                          {value.percent_change.toFixed(1)}%)
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <span
-                                      className={`text-sm font-semibold ${
-                                        value.difference > 0
-                                          ? 'text-green-600'
-                                          : value.difference < 0
-                                          ? 'text-red-600'
-                                          : 'text-gray-600'
-                                      }`}
-                                    >
-                                      {value.difference > 0 ? '+' : ''}
-                                      {typeof value.difference === 'number'
-                                        ? value.difference.toFixed(2)
-                                        : value.difference}
-                                    </span>
-                                    {value.percent_change !== null && value.percent_change !== undefined && (
-                                      <span className="text-xs text-gray-500">
-                                        ({value.percent_change > 0 ? '+' : ''}
-                                        {value.percent_change.toFixed(1)}%)
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )
-                            })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Interpretação */}
-                    {comparacao.interpretation && (
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-3">Interpretação</h4>
-                        <p className="text-sm text-gray-700 bg-purple-50 p-4 rounded-lg">
-                          {comparacao.interpretation}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Resumo */}
-                    {comparacao.comparison?.summary && (
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-3">Resumo</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                            <p className="text-sm text-gray-600">Melhorias</p>
-                            <p className="text-2xl font-bold text-green-600">
-                              {comparacao.comparison.summary.improvements_count}
-                            </p>
-                          </div>
-                          <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                            <p className="text-sm text-gray-600">Regressões</p>
-                            <p className="text-2xl font-bold text-red-600">
-                              {comparacao.comparison.summary.regressions_count}
-                            </p>
+                                )
+                              })}
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 text-center">
-                    <p className="text-gray-600">Nenhuma comparação disponível para esta reavaliação.</p>
-                  </div>
-                )}
+                      )}
+
+                      {/* Interpretação */}
+                      {comparacao.interpretation && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-3">Interpretação</h4>
+                          <p className="text-sm text-gray-700 bg-purple-50 p-4 rounded-lg">
+                            {comparacao.interpretation}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Resumo */}
+                      {comparacao.comparison?.summary && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-3">Resumo</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                              <p className="text-sm text-gray-600">Melhorias</p>
+                              <p className="text-2xl font-bold text-green-600">
+                                {comparacao.comparison.summary.improvements_count}
+                              </p>
+                            </div>
+                            <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                              <p className="text-sm text-gray-600">Regressões</p>
+                              <p className="text-2xl font-bold text-red-600">
+                                {comparacao.comparison.summary.regressions_count}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {!carregandoComparacao && !comparacao && (
+                    <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 text-center">
+                      <p className="text-gray-600">Nenhuma comparação disponível para esta reavaliação.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
