@@ -289,10 +289,10 @@ export function useAuth() {
       }
     }
 
-    // 🚀 CORREÇÃO: Timeout aumentado para dar tempo suficiente para carregar sessão
-    // Evita marcar como "não autenticado" prematuramente em conexões lentas
-    // PWA: 2000ms, Web: 3000ms (aumentado de 500-800ms)
-    const timeoutDuration = isPWA ? 2000 : 3000
+    // 🚀 CORREÇÃO: Timeout aumentado e lógica melhorada para evitar race conditions
+    // Evita marcar como "não autenticado" prematuramente quando SIGNED_IN ainda pode chegar
+    // PWA: 3000ms, Web: 5000ms (aumentado para dar mais tempo para eventos chegarem)
+    const timeoutDuration = isPWA ? 3000 : 5000
     loadingTimeout = setTimeout(() => {
       if (!mounted) return
       // Verificar se ainda está em loading e não temos sessão
@@ -302,7 +302,21 @@ export function useAuth() {
         // Mas apenas se realmente não há sessão (não marcar prematuramente)
         if (!currentSession) {
           console.warn('⚠️ useAuth: Timeout de carregamento sem sessão após', timeoutDuration, 'ms', { isPWA })
-          setLoading(false)
+          // 🚀 CORREÇÃO: Não marcar como não autenticado imediatamente
+          // Aguardar mais um pouco para ver se evento SIGNED_IN chega
+          setTimeout(() => {
+            if (!mounted) return
+            // Verificar novamente antes de marcar como não autenticado
+            supabase.auth.getSession().then(({ data: { session: finalSession } }) => {
+              if (!mounted) return
+              if (!finalSession) {
+                console.warn('⚠️ useAuth: Confirmando ausência de sessão após timeout estendido')
+                setLoading(false)
+              } else {
+                console.log('✅ useAuth: Sessão encontrada após timeout estendido')
+              }
+            })
+          }, 1000) // Aguardar mais 1 segundo antes de confirmar ausência
         } else {
           // Se temos sessão mas ainda está em loading, aguardar mais um pouco
           // Isso evita marcar como não autenticado quando a sessão está carregando
@@ -351,6 +365,14 @@ export function useAuth() {
         userId: session?.user?.id,
         email: session?.user?.email
       })
+      
+      // 🚀 CORREÇÃO: Quando SIGNED_IN chega, garantir que loading seja false
+      // Isso resolve race condition onde timeout marca como não autenticado antes do evento chegar
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('✅ useAuth: SIGNED_IN detectado, garantindo que loading seja false')
+        setLoading(false) // Forçar loading=false quando SIGNED_IN chega
+        setIsStable(true) // Marcar como estável
+      }
       
       // Atualizar estado imediatamente
       setSession(session)

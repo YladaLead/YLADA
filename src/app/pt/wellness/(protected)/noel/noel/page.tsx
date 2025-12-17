@@ -220,20 +220,33 @@ export default function NoelChatPage() {
     if (!perguntaAtual.trim() || enviando) return
     
     // Aguardar autenticação carregar antes de fazer requisição
+    // 🚀 CORREÇÃO: Aumentado para 6 segundos para dar tempo ao evento SIGNED_IN chegar
     if (authLoading) {
       console.log('⏳ Aguardando autenticação carregar...')
-      // Aguardar até 3 segundos para autenticação completar
+      // Aguardar até 6 segundos para autenticação completar (aumentado de 3s)
+      // Isso dá tempo para eventos SIGNED_IN chegarem mesmo em conexões lentas
       let waitTime = 0
-      const maxWait = 3000
+      const maxWait = 6000
       while (authLoading && waitTime < maxWait) {
         await new Promise(resolve => setTimeout(resolve, 100))
         waitTime += 100
+        
+        // Verificar novamente se user foi definido (pode ter chegado durante a espera)
+        // Isso resolve race condition onde SIGNED_IN chega durante a espera
+        if (user) {
+          console.log('✅ Usuário encontrado durante espera, continuando...')
+          break
+        }
       }
       
-      // Se ainda está carregando após aguardar, mostrar erro
-      if (authLoading) {
-        alert('Por favor, aguarde alguns segundos e tente novamente. A autenticação ainda está carregando.')
-        return
+      // Se ainda está carregando após aguardar, verificar uma última vez
+      if (authLoading && !user) {
+        // Aguardar mais 1 segundo e verificar novamente
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        if (authLoading && !user) {
+          alert('Por favor, aguarde alguns segundos e tente novamente. A autenticação ainda está carregando.')
+          return
+        }
       }
     }
     

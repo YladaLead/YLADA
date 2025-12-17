@@ -33,13 +33,11 @@ SELECT
   up.nome_completo,
   up.is_admin,
   up.is_support,
-  up.is_active,
   up.created_at,
   up.updated_at,
   CASE 
     WHEN up.perfil IS NULL THEN '❌ Sem perfil'
     WHEN up.perfil != 'wellness' THEN '⚠️ Perfil incorreto: ' || up.perfil
-    WHEN up.is_active = false THEN '❌ Perfil inativo'
     ELSE '✅ Perfil wellness OK'
   END as status_perfil
 FROM user_profiles up
@@ -156,13 +154,11 @@ SELECT
   au.email,
   au.email_confirmed_at IS NOT NULL as email_ok,
   up.perfil = 'wellness' as perfil_ok,
-  up.is_active as perfil_ativo,
   s.status = 'active' AND s.area = 'wellness' AND s.current_period_end > NOW() as assinatura_ok,
   CASE 
     WHEN au.email_confirmed_at IS NULL THEN '❌ Email não confirmado'
     WHEN up.perfil IS NULL THEN '❌ Sem perfil'
     WHEN up.perfil != 'wellness' THEN '❌ Perfil incorreto: ' || up.perfil
-    WHEN up.is_active = false THEN '❌ Perfil inativo'
     WHEN s.id IS NULL THEN '❌ Sem assinatura wellness'
     WHEN s.status != 'active' THEN '❌ Assinatura não ativa'
     WHEN s.current_period_end < NOW() THEN '❌ Assinatura expirada'
