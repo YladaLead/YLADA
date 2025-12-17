@@ -49,22 +49,34 @@ export default function NutriOnboardingPage() {
   }, [user, loading, router])
 
   const handleComecar = (e?: React.MouseEvent) => {
-    e?.preventDefault()
-    e?.stopPropagation()
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     
     console.log('🚀 Iniciando diagnóstico - navegando para /pt/nutri/diagnostico')
     
     // 🚨 CORREÇÃO: Marcar no sessionStorage que veio do onboarding
     // Isso garante que a página de diagnóstico saiba que não deve redirecionar de volta
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem('nutri_veio_do_onboarding', 'true')
-      sessionStorage.setItem('nutri_veio_do_onboarding_timestamp', Date.now().toString())
-      console.log('✅ Flag de onboarding salva no sessionStorage')
+      try {
+        sessionStorage.setItem('nutri_veio_do_onboarding', 'true')
+        sessionStorage.setItem('nutri_veio_do_onboarding_timestamp', Date.now().toString())
+        console.log('✅ Flag de onboarding salva no sessionStorage')
+      } catch (err) {
+        console.error('Erro ao salvar no sessionStorage:', err)
+      }
       
-      // Usar window.location.href como fallback mais confiável
+      // Usar window.location.href como método principal (mais confiável)
       // Isso força uma navegação completa mesmo se router.push falhar
       console.log('🔄 Navegando para /pt/nutri/diagnostico usando window.location.href...')
-      window.location.href = '/pt/nutri/diagnostico'
+      try {
+        window.location.href = '/pt/nutri/diagnostico'
+      } catch (err) {
+        console.error('Erro ao navegar:', err)
+        // Fallback: tentar router.push
+        router.push('/pt/nutri/diagnostico')
+      }
     } else {
       // Fallback para SSR (não deve acontecer, mas por segurança)
       router.push('/pt/nutri/diagnostico')
