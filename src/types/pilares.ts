@@ -79,9 +79,9 @@ Esses 4 fundamentos trabalham juntos. Quando você tem os quatro, você vira uma
         titulo: 'O erro silencioso da Nutri brasileira',
         conteudo: `A maioria das nutricionistas vive de improviso, sem estrutura, apagando incêndio.
 
-A diferença entre Nutri Tradicional × Nutri-Empresária:
+A diferença entre **Nutri Tradicional** × **Nutri-Empresária**:
 
-❌ Nutri Tradicional:
+❌ **Nutri Tradicional:**
 • Trabalha reativamente
 • Sem rotina definida
 • Sem processos claros
@@ -89,7 +89,7 @@ A diferença entre Nutri Tradicional × Nutri-Empresária:
 • Vive no modo "apagar incêndio"
 • Agenda vazia ou lotada sem controle
 
-✅ Nutri-Empresária:
+✅ **Nutri-Empresária:**
 • Trabalha com intenção
 • Rotina mínima definida
 • Processos simples e repetíveis

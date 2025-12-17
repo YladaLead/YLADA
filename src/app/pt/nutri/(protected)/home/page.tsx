@@ -25,7 +25,7 @@ export default function NutriHome() {
 }
 
 function NutriHomeContent() {
-  const { user, loading } = useAuth()
+  const { user, loading, userProfile } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { progress } = useJornadaProgress()
   
@@ -35,6 +35,25 @@ function NutriHomeContent() {
   // Determinar se está nos primeiros dias (mostrar WelcomeCard simplificado)
   const currentDay = progress?.current_day || null
   const isFirstDays = currentDay === null || currentDay <= 1
+  
+  // Extrair primeiro nome da usuária para saudação personalizada
+  const getUserFirstName = () => {
+    if (userProfile?.nome_completo) {
+      return userProfile.nome_completo.split(' ')[0]
+    }
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name.split(' ')[0]
+    }
+    if (user?.user_metadata?.name) {
+      return user.user_metadata.name.split(' ')[0]
+    }
+    if (user?.email) {
+      return user.email.split('@')[0]
+    }
+    return null
+  }
+  
+  const userName = getUserFirstName()
 
   // Aguardar autenticação
   if (loading) {
@@ -84,7 +103,7 @@ function NutriHomeContent() {
           {/* 🚨 REVELAÇÃO PROGRESSIVA: Conteúdo aparece quando faz sentido */}
           
           {/* Sempre visível: WelcomeCard e LyaAnaliseHoje */}
-          <WelcomeCard currentDay={currentDay} />
+          <WelcomeCard currentDay={currentDay} userName={userName} />
           <div className="mb-8">
             <LyaAnaliseHoje />
           </div>

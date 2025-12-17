@@ -6,9 +6,10 @@ import { getLyaPhase, getLyaConfig } from '@/lib/nutri/lya-prompts'
 
 interface WelcomeCardProps {
   currentDay: number | null
+  userName?: string | null
 }
 
-export default function WelcomeCard({ currentDay }: WelcomeCardProps) {
+export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) {
   const router = useRouter()
   const { progress } = useJornadaProgress()
   
@@ -59,6 +60,13 @@ export default function WelcomeCard({ currentDay }: WelcomeCardProps) {
         
         {/* Conteúdo */}
         <div className="relative z-10">
+          {/* Saudação personalizada com nome */}
+          {userName && (
+            <p className="text-xl sm:text-2xl text-blue-50 mb-4">
+              Olá, <span className="font-semibold text-white">{userName}</span> 👋
+            </p>
+          )}
+          
           {/* Badge da LYA */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
             <span className="text-xl">🤖</span>

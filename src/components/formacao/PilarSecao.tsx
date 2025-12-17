@@ -71,8 +71,26 @@ export default function PilarSecao({ secao, pilarId }: PilarSecaoProps) {
                 )
               }
               
-              // Parágrafos normais
+              // Parágrafos normais (com suporte a markdown **negrito**)
               if (trimmedLine) {
+                // Processar markdown **texto** para negrito
+                if (trimmedLine.includes('**')) {
+                  const partes = trimmedLine.split(/(\*\*[^*]+\*\*)/g)
+                  return (
+                    <p key={index} className="mb-4">
+                      {partes.map((parte, i) => {
+                        if (parte.startsWith('**') && parte.endsWith('**')) {
+                          return (
+                            <strong key={i} className="font-bold text-gray-900">
+                              {parte.replace(/\*\*/g, '')}
+                            </strong>
+                          )
+                        }
+                        return <span key={i}>{parte}</span>
+                      })}
+                    </p>
+                  )
+                }
                 return (
                   <p key={index} className="mb-4">
                     {trimmedLine}

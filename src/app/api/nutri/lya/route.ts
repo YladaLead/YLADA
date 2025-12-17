@@ -5,7 +5,11 @@
  * 
  * Processa mensagens do usuário e retorna resposta da LYA
  * 
- * IMPORTANTE: A LYA usa APENAS Assistants API (OpenAI)
+ * PRIORIDADE DE USO:
+ * 1. Responses API com Prompt Object (LYA_PROMPT_ID) - Sistema novo recomendado
+ * 2. Assistants API (OPENAI_ASSISTANT_LYA_ID) - Sistema antigo (deprecado em 2026)
+ * 3. Chat Completions (fallback) - Se nenhum dos dois estiver configurado
+ * 
  * Baseado no DOSSIÊ LYA v1.0 como fonte única de verdade
  */
 
@@ -14,6 +18,11 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { processMessageWithLya } from '@/lib/lya-assistant-handler'
 import type { NutriProfile, NutriState, LyaFlow, LyaCycle } from '@/types/nutri-lya'
+import OpenAI from 'openai'
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 interface LyaRequest {
   message: string
@@ -143,15 +152,120 @@ Foque no Dia 3. O resto vem no momento certo.`
     }
 
     // ============================================
-    // PRIORIDADE 1: Assistants API com function calling
+    // PRIORIDADE 1: Verificar se é Prompt Object (Responses API) ou Assistant (Assistants API)
     // ============================================
-    const assistantId = process.env.OPENAI_ASSISTANT_LYA_ID || process.env.OPENAI_ASSISTANT_ID
+    const promptId = process.env.LYA_PROMPT_ID // Prompt Object (pmpt_...)
+    const assistantId = process.env.OPENAI_ASSISTANT_LYA_ID || process.env.OPENAI_ASSISTANT_ID // Assistant (asst_...)
     
-    console.log('🔍 [LYA] Verificando configuração Assistants API...')
-    console.log('🔍 [LYA] OPENAI_ASSISTANT_LYA_ID:', assistantId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
+    console.log('🔍 [LYA] Verificando configuração...')
+    console.log('🔍 [LYA] LYA_PROMPT_ID (Responses API):', promptId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
+    console.log('🔍 [LYA] OPENAI_ASSISTANT_LYA_ID (Assistants API):', assistantId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
     console.log('🔍 [LYA] OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
     
-    if (assistantId) {
+    // PRIORIDADE: Se tem LYA_PROMPT_ID, usar Responses API (sistema novo)
+    if (promptId && promptId.startsWith('pmpt_')) {
+      console.log('🚀 [LYA] Usando Responses API com Prompt Object')
+      try {
+        // Tentar usar Responses API
+        if ((openai as any).responses) {
+          console.log('✅ [LYA] Responses API disponível')
+          
+          // Buscar contexto do usuário para passar como variáveis
+          const { supabaseAdmin } = await import('@/lib/supabase')
+          
+          // Buscar progresso da jornada
+          const jornadaResult = await supabaseAdmin
+            .from('journey_progress')
+            .select('day_number, completed')
+            .eq('user_id', user.id)
+            .order('day_number', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          
+          const jornadaDiaAtual = jornadaResult.data?.day_number || null
+          
+          // Buscar semana do dia atual na tabela journey_days
+          let semanaAtual = null
+          if (jornadaDiaAtual) {
+            const dayResult = await supabaseAdmin
+              .from('journey_days')
+              .select('week_number')
+              .eq('day_number', jornadaDiaAtual)
+              .maybeSingle()
+            semanaAtual = dayResult.data?.week_number || Math.ceil(jornadaDiaAtual / 7)
+          }
+          
+          // Buscar reflexões recentes (incluindo ações práticas e exercícios)
+          const reflexoesResult = await supabaseAdmin
+            .from('journey_checklist_notes')
+            .select('day_number, item_index, nota')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(10) // Aumentar para incluir mais contexto
+          
+          const reflexoes = reflexoesResult.data
+            ?.filter(r => r.nota && r.nota.trim())
+            .map(r => {
+              const tipo = r.item_index === -1 ? 'Ação Prática' : `Exercício ${r.item_index + 1}`
+              return `Dia ${r.day_number} - ${tipo}: ${r.nota}`
+            })
+            .join('\n') || 'Nenhuma reflexão ainda.'
+          
+          console.log('📊 [LYA] Contexto da jornada:', {
+            dia: jornadaDiaAtual,
+            semana: semanaAtual,
+            reflexoesCount: reflexoesResult.data?.length || 0,
+            reflexoesPreview: reflexoes.substring(0, 150) + (reflexoes.length > 150 ? '...' : '')
+          })
+          
+          // Chamar Responses API
+          const response = await (openai as any).responses.create({
+            model: 'gpt-4o-mini', // Modelo recomendado para LYA
+            prompt: {
+              id: promptId,
+              variables: {
+                mensagem_usuario: message,
+                dia_atual: jornadaDiaAtual?.toString() || 'Jornada não iniciada',
+                semana_atual: semanaAtual?.toString() || 'N/A',
+                reflexoes_recentes: reflexoes || 'Nenhuma reflexão ainda.',
+                historico_conversa: conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n') || 'Nenhuma conversa anterior.'
+              }
+            }
+          })
+          
+          const respostaLya = response.output_text || response.text || ''
+          
+          console.log('✅ [LYA] Resposta via Responses API recebida, tamanho:', respostaLya.length)
+          
+          // Salvar interação
+          try {
+            await supabaseAdmin.from('lya_interactions').insert({
+              user_id: user.id,
+              user_message: message,
+              lya_response: respostaLya,
+              thread_id: threadId || 'responses-api',
+            })
+          } catch (logError: any) {
+            console.warn('⚠️ [LYA] Erro ao salvar interação (não crítico):', logError.message)
+          }
+          
+          return NextResponse.json({
+            response: respostaLya,
+            threadId: threadId || 'responses-api',
+            modelUsed: 'responses-api',
+            promptId: promptId
+          })
+        } else {
+          throw new Error('Responses API não disponível no SDK')
+        }
+      } catch (responsesError: any) {
+        console.warn('⚠️ [LYA] Responses API falhou, tentando fallback:', responsesError.message)
+        // Continuar para fallback abaixo
+      }
+    }
+    
+    // FALLBACK: Se tem Assistant ID, usar Assistants API (sistema antigo)
+    if (assistantId && assistantId.startsWith('asst_')) {
       try {
         console.log('🤖 [LYA] ==========================================')
         console.log('🤖 [LYA] INICIANDO ASSISTANTS API')
@@ -161,12 +275,65 @@ Foque no Dia 3. O resto vem no momento certo.`
         console.log('🧵 [LYA] Thread ID:', threadId || 'novo (será criado)')
         console.log('🆔 [LYA] Assistant ID:', assistantId)
         
+        // Buscar contexto da jornada para incluir na mensagem
+        const jornadaResult = await supabaseAdmin
+          .from('journey_progress')
+          .select('day_number, completed')
+          .eq('user_id', user.id)
+          .order('day_number', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        
+        const jornadaDiaAtual = jornadaResult.data?.day_number || null
+        
+        // Buscar semana do dia atual na tabela journey_days
+        let semanaAtual = null
+        if (jornadaDiaAtual) {
+          const dayResult = await supabaseAdmin
+            .from('journey_days')
+            .select('week_number')
+            .eq('day_number', jornadaDiaAtual)
+            .maybeSingle()
+          semanaAtual = dayResult.data?.week_number || Math.ceil(jornadaDiaAtual / 7)
+        }
+        
+        // Buscar reflexões recentes (incluindo ações práticas e exercícios)
+        const reflexoesResult = await supabaseAdmin
+          .from('journey_checklist_notes')
+          .select('day_number, item_index, nota')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10) // Aumentar para incluir mais contexto
+        
+        const reflexoes = reflexoesResult.data
+          ?.filter(r => r.nota && r.nota.trim())
+          .map(r => {
+            const tipo = r.item_index === -1 ? 'Ação Prática' : `Exercício ${r.item_index + 1}`
+            return `Dia ${r.day_number} - ${tipo}: ${r.nota}`
+          })
+          .join('\n') || 'Nenhuma reflexão ainda.'
+        
+        // Construir mensagem com contexto - SEMPRE incluir contexto da jornada
+        const contextoJornada = `\n\n[CONTEXTO DA JORNADA]\n` +
+          `- Dia atual da jornada: ${jornadaDiaAtual || 'Jornada não iniciada'}\n` +
+          `- Semana atual: ${semanaAtual || 'N/A'}\n` +
+          `- Reflexões recentes:\n${reflexoes}\n`
+        
+        const mensagemComContexto = message + contextoJornada
+        
+        console.log('📊 [LYA] Contexto da jornada adicionado:', {
+          dia: jornadaDiaAtual,
+          semana: semanaAtual,
+          reflexoesCount: reflexoesResult.data?.length || 0,
+          reflexoesPreview: reflexoes.substring(0, 100) + '...'
+        })
+        
         const { processMessageWithLya } = await import('@/lib/lya-assistant-handler')
         
         let assistantResult
         try {
           assistantResult = await processMessageWithLya(
-            message,
+            mensagemComContexto,
             user.id,
             threadId
           )
@@ -289,14 +456,97 @@ Foque no Dia 3. O resto vem no momento certo.`
       console.error('❌ [LYA] OPENAI_ASSISTANT_LYA_ID NÃO CONFIGURADO')
       console.error('❌ [LYA] ==========================================')
       
-      return NextResponse.json(
-        {
-          error: 'LYA (Assistants API) não configurado',
-          message: 'OPENAI_ASSISTANT_LYA_ID não está configurado. Configure a variável de ambiente.',
-          details: 'A LYA usa apenas Assistants API. Configure OPENAI_ASSISTANT_LYA_ID corretamente.',
-        },
-        { status: 500 }
-      )
+      // Se não tem nenhum dos dois, usar Chat Completions como fallback final
+      console.log('⚠️ [LYA] Nenhum ID configurado, usando Chat Completions como fallback')
+      
+      try {
+        // Buscar contexto da jornada
+        const jornadaResult = await supabaseAdmin
+          .from('journey_progress')
+          .select('day_number, completed')
+          .eq('user_id', user.id)
+          .order('day_number', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        
+        const jornadaDiaAtual = jornadaResult.data?.day_number || null
+        
+        // Buscar semana do dia atual na tabela journey_days
+        let semanaAtual = null
+        if (jornadaDiaAtual) {
+          const dayResult = await supabaseAdmin
+            .from('journey_days')
+            .select('week_number')
+            .eq('day_number', jornadaDiaAtual)
+            .maybeSingle()
+          semanaAtual = dayResult.data?.week_number || Math.ceil(jornadaDiaAtual / 7)
+        }
+        
+        // Buscar reflexões recentes
+        const reflexoesResult = await supabaseAdmin
+          .from('journey_checklist_notes')
+          .select('day_number, nota')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10)
+        
+        const reflexoes = reflexoesResult.data
+          ?.filter(r => r.nota && r.nota.trim())
+          .map(r => {
+            const tipo = r.item_index === -1 ? 'Ação Prática' : `Exercício ${r.item_index + 1}`
+            return `Dia ${r.day_number} - ${tipo}: ${r.nota}`
+          })
+          .join('\n') || 'Nenhuma reflexão ainda.'
+        
+        // Construir system prompt com contexto
+        const systemPrompt = `Você é LYA, mentora estratégica oficial da plataforma Nutri YLADA. Você ajuda nutricionistas a desenvolverem sua mentalidade, organização e posicionamento como Nutri-Empresárias. Seja direta, acolhedora e focada no próximo passo certo.
+
+CONTEXTO DA JORNADA DA NUTRICIONISTA:
+- Dia atual da jornada: ${jornadaDiaAtual || 'Jornada não iniciada'}
+- Semana atual: ${semanaAtual || 'N/A'}
+- Reflexões recentes:
+${reflexoes}
+
+IMPORTANTE: Quando a nutricionista perguntar "Em que semana estou?", responda sobre a SEMANA DA JORNADA (não a semana do ano). Quando perguntar "O que preciso fazer hoje?", responda baseado no DIA ATUAL DA JORNADA. Quando perguntar sobre reflexões, use as reflexões listadas acima.`
+        
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt
+            },
+            ...conversationHistory.map(m => ({
+              role: m.role,
+              content: m.content
+            })),
+            {
+              role: 'user',
+              content: message
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000
+        })
+        
+        const respostaLya = completion.choices[0]?.message?.content || 'Desculpe, não consegui processar sua mensagem.'
+        
+        return NextResponse.json({
+          response: respostaLya,
+          threadId: threadId || 'chat-completions',
+          modelUsed: 'gpt-4o-mini'
+        })
+      } catch (fallbackError: any) {
+        console.error('❌ [LYA] Fallback também falhou:', fallbackError.message)
+        return NextResponse.json(
+          {
+            error: 'LYA não configurada',
+            message: 'Configure LYA_PROMPT_ID (para Responses API) ou OPENAI_ASSISTANT_LYA_ID (para Assistants API) no arquivo .env.local',
+            details: 'A LYA precisa de uma das duas variáveis configuradas. Use LYA_PROMPT_ID (recomendado) para Responses API.',
+          },
+          { status: 500 }
+        )
+      }
     }
   } catch (error: any) {
     console.error('❌ [LYA] Erro geral no endpoint:', error)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
@@ -10,6 +10,7 @@ import ReflexaoDia from '@/components/formacao/ReflexaoDia'
 import BlockedDayModal from '@/components/jornada/BlockedDayModal'
 import DiaConcluidoModal from '@/components/jornada/DiaConcluidoModal'
 import PilarContentInline from '@/components/jornada/PilarContentInline'
+import FormatarOrientacao from '@/components/jornada/FormatarOrientacao'
 import { useAuth } from '@/hooks/useAuth'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 import type { JourneyDay } from '@/types/formacao'
@@ -32,7 +33,9 @@ export default function JornadaDiaPage() {
   
   const [checklistNotes, setChecklistNotes] = useState<Map<number, string>>(new Map())
   const [dailyNote, setDailyNote] = useState('')
+  const [acaoPraticaNote, setAcaoPraticaNote] = useState('')
   const [carregando, setCarregando] = useState(true)
+  const acaoPraticaDebounceRef = useRef<NodeJS.Timeout | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [concluindo, setConcluindo] = useState(false)
   const [showBlockedModal, setShowBlockedModal] = useState(false)
@@ -88,7 +91,12 @@ export default function JornadaDiaPage() {
           // checklist_notes vem como objeto simples do JSON, converter para Map
           if (data.data.checklist_notes) {
             const notesObj = data.data.checklist_notes
-            setChecklistNotes(new Map(Object.entries(notesObj).map(([k, v]: [string, any]) => [parseInt(k), v])))
+            const notesMap = new Map(Object.entries(notesObj).map(([k, v]: [string, any]) => [parseInt(k), v]))
+            setChecklistNotes(notesMap)
+            
+            // Inicializar nota da ação prática (usando item_index -1 como identificador especial)
+            const acaoPraticaNote = notesMap.get(-1) || ''
+            setAcaoPraticaNote(acaoPraticaNote)
           }
 
           // Inicializar anotação diária
@@ -413,13 +421,83 @@ export default function JornadaDiaPage() {
         {/* 2. ORIENTAÇÃO */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
           <h2 className="font-bold text-gray-900 mb-3 text-lg">📖 Orientação</h2>
-          <p className="text-gray-700 leading-relaxed">{day.guidance}</p>
+          <FormatarOrientacao texto={day.guidance} />
         </div>
 
         {/* 3. AÇÃO PRÁTICA */}
         {/* 🚀 FLUXO FLUIDO: Se ação for Pilar, renderizar conteúdo inline */}
         {day.action_type === 'pilar' && getPilarId() ? (
           <PilarContentInline pilarId={getPilarId()!} dayNumber={dayNumber} />
+        ) : day.action_type === 'exercicio' && !day.action_id ? (
+          /* 🚀 FLUXO FLUIDO: Exercícios sem action_id são renderizados inline (sem botão) */
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 mb-6 border-l-4 border-purple-500 shadow-md">
+            <h2 className="font-bold text-gray-900 mb-2 text-xl">💪 Ação Prática do Dia</h2>
+            <h3 className="font-semibold text-gray-800 mb-3 text-lg">{day.action_title}</h3>
+            <p className="text-sm text-purple-700 font-medium mb-4 italic">
+              "Faça esta ação primeiro. É o passo essencial do dia."
+            </p>
+            
+            {/* Campo de texto para escrever a ação prática */}
+            <div className="mt-4">
+              <textarea
+                value={acaoPraticaNote}
+                onChange={(e) => {
+                  setAcaoPraticaNote(e.target.value)
+                  
+                  // Debounce: salvar 800ms após parar de digitar
+                  if (acaoPraticaDebounceRef.current) {
+                    clearTimeout(acaoPraticaDebounceRef.current)
+                  }
+                  
+                  acaoPraticaDebounceRef.current = setTimeout(async () => {
+                    if (user) {
+                      try {
+                        await fetch('/api/nutri/metodo/jornada/checklist/note', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          credentials: 'include',
+                          body: JSON.stringify({
+                            day_number: dayNumber,
+                            item_index: -1, // Usar -1 como identificador especial para ação prática
+                            nota: e.target.value || null
+                          })
+                        })
+                      } catch (error) {
+                        console.error('Erro ao salvar ação prática:', error)
+                      }
+                    }
+                  }, 800)
+                }}
+                onBlur={async () => {
+                  // Cancelar debounce pendente e salvar imediatamente
+                  if (acaoPraticaDebounceRef.current) {
+                    clearTimeout(acaoPraticaDebounceRef.current)
+                    acaoPraticaDebounceRef.current = null
+                  }
+                  
+                  if (user) {
+                    try {
+                      await fetch('/api/nutri/metodo/jornada/checklist/note', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          day_number: dayNumber,
+                          item_index: -1,
+                          nota: acaoPraticaNote || null
+                        })
+                      })
+                    } catch (error) {
+                      console.error('Erro ao salvar ação prática:', error)
+                    }
+                  }
+                }}
+                placeholder={day.action_title}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-700 leading-relaxed resize-none"
+              />
+            </div>
+          </div>
         ) : (
           <AcaoPraticaCard
             title={day.action_title}
