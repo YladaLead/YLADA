@@ -114,15 +114,10 @@ export default function NutriOnboardingPage() {
           {/* Mensagem da LYA */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-6 py-3 mb-6 gap-3">
-              {/* Avatar da LYA - Substitua o caminho pela imagem correta do avatar */}
-              <Image
-                src="/images/lya/avatar-lya.png"
-                alt="LYA - Assistente Virtual"
-                width={32}
-                height={32}
-                className="w-8 h-8 rounded-full object-cover"
-                priority
-              />
+              {/* Avatar da LYA - Usar fallback até imagem estar disponível */}
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xl">
+                🤖
+              </div>
               <span className="font-semibold text-lg">LYA</span>
             </div>
             
