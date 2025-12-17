@@ -9,13 +9,13 @@ const bibliotecaItems = [
     title: 'Manual Técnico',
     icon: '📖',
     href: '/pt/nutri/metodo/manual',
-    description: 'Guia completo de uso do sistema'
+    description: 'Guia completo da plataforma'
   },
   {
     title: 'Tutoriais em Vídeo',
     icon: '🎥',
     href: '/pt/nutri/metodo/manual',
-    description: 'Vídeos explicativos das funcionalidades'
+    description: 'Vídeos que explicam como usar'
   },
   {
     title: 'PDFs da Formação',
@@ -34,8 +34,8 @@ const bibliotecaItems = [
 export default function BibliotecaBlock() {
   return (
     <Section
-      title="🎒 Biblioteca / Materiais Extras"
-      subtitle="Recursos de apoio para sua jornada"
+      title="🎒 Biblioteca"
+      subtitle="Materiais que vão te ajudar no dia a dia"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {bibliotecaItems.map((item, index) => (

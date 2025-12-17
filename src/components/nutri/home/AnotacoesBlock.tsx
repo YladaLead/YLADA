@@ -17,14 +17,14 @@ export default function AnotacoesBlock() {
   return (
     <Section
       title="📝 Minhas Anotações"
-      subtitle="Registre seus insights e aprendizados"
+      subtitle="Anote o que você aprendeu hoje"
     >
       <Card>
         <textarea
           value={anotacao}
           onChange={(e) => setAnotacao(e.target.value)}
           onBlur={handleSave}
-          placeholder="Escreva seus insights e aprendizados aqui..."
+          placeholder="O que você aprendeu hoje? Anote aqui..."
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none mb-4"
           rows={4}
         />

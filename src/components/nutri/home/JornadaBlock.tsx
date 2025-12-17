@@ -40,17 +40,17 @@ export default function JornadaBlock() {
     <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
       <div className="text-center mb-6">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          Jornada de Transformação YLADA
+          Sua Jornada de 30 Dias
         </h2>
         <p className="text-gray-700 text-sm sm:text-base">
-          Você não precisa fazer tudo. Você precisa fazer o próximo passo certo.
+          Você não precisa fazer tudo. Só o próximo passo certo.
         </p>
       </div>
 
       {carregando ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-sm">Carregando progresso...</p>
+          <p className="text-gray-600 text-sm">Carregando...</p>
         </div>
       ) : (
         <>

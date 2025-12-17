@@ -9,21 +9,21 @@ const pilares = [
     id: '1',
     title: 'Pilar 1 — Filosofia YLADA',
     subtitle: 'A Nova Nutri-Empresária',
-    description: 'Fundamentos da transformação profissional',
+    description: 'Como pensar e agir como Nutri-Empresária',
     icon: '🌟'
   },
   {
     id: '2',
     title: 'Pilar 2 — Rotina Mínima YLADA',
     subtitle: 'Estrutura & Consistência',
-    description: 'Rotina diária que gera resultados',
+    description: 'Rotina que funciona no dia a dia',
     icon: '⚡'
   },
   {
     id: '3',
     title: 'Pilar 3 — Captação YLADA',
     subtitle: 'Gerar Movimento',
-    description: 'Estratégias para captar leads diários',
+    description: 'Como fazer clientes chegarem até você',
     icon: '🎯'
   },
   {
@@ -37,7 +37,7 @@ const pilares = [
     id: '5',
     title: 'Pilar 5 — GSAL',
     subtitle: 'Gerar, Servir, Acompanhar, Lucrar',
-    description: 'Sistema completo de gestão',
+    description: 'Como organizar suas clientes do início ao fim',
     icon: '📊'
   }
 ]
@@ -46,7 +46,7 @@ export default function PilaresBlock() {
   return (
     <Section
       title="Os 5 Pilares do Método YLADA"
-      subtitle="A base sólida da sua transformação profissional"
+      subtitle="O que você precisa saber para crescer"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {pilares.map((pilar) => (

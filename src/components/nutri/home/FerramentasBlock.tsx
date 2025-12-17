@@ -52,8 +52,8 @@ export default function FerramentasBlock() {
       {/* Informação sobre ferramentas fixas */}
       <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-sm text-gray-700">
-          💡 <strong>Dica:</strong> As ferramentas pré-definidas (calculadoras, templates) já estão prontas para uso. 
-          Você pode criar apenas Quizzes personalizados. Acesse suas ferramentas abaixo.
+          💡 <strong>Dica:</strong> Calculadoras e templates já estão prontas pra você usar. 
+          Quer criar algo personalizado? Comece com um Quiz.
         </p>
       </div>
 
@@ -65,7 +65,7 @@ export default function FerramentasBlock() {
               {carregando ? 'Carregando...' : `${ferramentasCount} ferramentas criadas`}
             </h3>
             <p className="text-sm text-gray-600">
-              Acesse todas as suas ferramentas e gerencie seus links de captação
+              Veja suas ferramentas e links de captação
             </p>
           </div>
           <Link

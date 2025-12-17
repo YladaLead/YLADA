@@ -81,22 +81,59 @@ function NutriHomeContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
-          {isFirstDays ? (
-            /* Dashboard Simplificado - Primeiros Dias */
-            <>
-              {/* Card Principal - WelcomeCard */}
-              <WelcomeCard currentDay={currentDay} />
+          {/* 🚨 REVELAÇÃO PROGRESSIVA: Conteúdo aparece quando faz sentido */}
+          
+          {/* Sempre visível: WelcomeCard e LyaAnaliseHoje */}
+          <WelcomeCard currentDay={currentDay} />
+          <div className="mb-8">
+            <LyaAnaliseHoje />
+          </div>
 
-              {/* Análise da LYA Hoje */}
-              <div className="mb-8">
-                <LyaAnaliseHoje />
-              </div>
-            </>
-          ) : (
-            /* Dashboard Completo - Após Dia 1 */
+          {/* Dias 1-7: Apenas WelcomeCard + LyaAnaliseHoje (já renderizados acima) */}
+          {isFirstDays ? null : (
             <>
-              {/* Vídeo 1 — Boas-vindas (apenas na primeira visita) */}
-              {videoUrl && (
+              {/* Dia 8+: Jornada Block aparece */}
+              {currentDay && currentDay >= 8 && (
+                <div className="mb-8">
+                  <JornadaBlock />
+                </div>
+              )}
+
+              {/* Dia 8-14: Ferramentas Block (filtrado por relevância) */}
+              {currentDay && currentDay >= 8 && currentDay < 15 && (
+                <div className="mb-8">
+                  <FerramentasBlock />
+                </div>
+              )}
+
+              {/* Dia 15+: GSAL Block (quando LYA detecta necessidade) */}
+              {currentDay && currentDay >= 15 && (
+                <div className="mb-8">
+                  <GSALBlock />
+                </div>
+              )}
+
+              {/* Dia 21+: Pilares e Biblioteca */}
+              {currentDay && currentDay >= 21 && (
+                <>
+                  <div className="mb-8">
+                    <PilaresBlock />
+                  </div>
+                  <div className="mb-8">
+                    <BibliotecaBlock />
+                  </div>
+                </>
+              )}
+
+              {/* Anotações sempre disponíveis após Dia 1 */}
+              {currentDay && currentDay >= 2 && (
+                <div className="mb-8">
+                  <AnotacoesBlock />
+                </div>
+              )}
+
+              {/* Vídeo apenas se LYA não tiver mensagem relevante (opcional, pode remover) */}
+              {/* {videoUrl && currentDay && currentDay >= 8 && (
                 <div className="mb-8">
                   <VideoPlayerYLADA
                     videoUrl={videoUrl}
@@ -104,42 +141,7 @@ function NutriHomeContent() {
                     description="Descubra como o YLADA vai transformar sua prática profissional."
                   />
                 </div>
-              )}
-
-              {/* Análise da LYA Hoje */}
-              <div className="mb-8">
-                <LyaAnaliseHoje />
-              </div>
-
-              {/* Bloco 1: Jornada de Transformação */}
-              <div className="mb-8">
-                <JornadaBlock />
-              </div>
-
-              {/* Bloco 2: Pilares do Método (visualmente secundário) */}
-              <div className="mb-8 opacity-75">
-                <PilaresBlock />
-              </div>
-
-              {/* Bloco 3: Ferramentas Profissionais */}
-              <div className="mb-8">
-                <FerramentasBlock />
-              </div>
-
-              {/* Bloco 4: Gestão GSAL */}
-              <div className="mb-8">
-                <GSALBlock />
-              </div>
-
-              {/* Bloco 5: Biblioteca / Materiais Extras (visualmente secundário) */}
-              <div className="mb-8 opacity-75">
-                <BibliotecaBlock />
-              </div>
-
-              {/* Bloco 6: Minhas Anotações (visualmente secundário) */}
-              <div className="mb-8 opacity-75">
-                <AnotacoesBlock />
-              </div>
+              )} */}
             </>
           )}
         </div>
