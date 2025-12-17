@@ -372,6 +372,7 @@ export default function LoginForm({
 
         // 🚀 NOVO: Para área Nutri, verificar diagnóstico antes de redirecionar
         let baseRedirectPath = redirectPath
+        let temDiagnostico = false
         if (perfil === 'nutri') {
           try {
             const { data: nutriProfile } = await supabase
@@ -380,8 +381,10 @@ export default function LoginForm({
               .eq('user_id', session.user.id)
               .maybeSingle()
             
+            temDiagnostico = !!nutriProfile?.diagnostico_completo
+            
             // Se não tem diagnóstico, redirecionar para onboarding
-            if (!nutriProfile?.diagnostico_completo) {
+            if (!temDiagnostico) {
               baseRedirectPath = '/pt/nutri/onboarding'
               console.log('ℹ️ Usuário Nutri sem diagnóstico, redirecionando para onboarding')
             } else {
@@ -390,22 +393,39 @@ export default function LoginForm({
             }
           } catch (diagnosticoError) {
             console.warn('⚠️ Erro ao verificar diagnóstico, usando redirectPath padrão:', diagnosticoError)
-            // Em caso de erro, usar redirectPath padrão
+            // Em caso de erro, assumir que não tem diagnóstico (mais seguro)
+            baseRedirectPath = '/pt/nutri/onboarding'
+            temDiagnostico = false
           }
         }
 
         // 🚀 NOVO: Verificar última página visitada antes de redirecionar
         const lastPage = getLastVisitedPage()
-        // Validar que a última página é uma rota válida (deve começar com /pt/ ou /en/ ou /es/)
-        // E não deve ser checkout, login, logout, callback, 404, etc.
-        // 🚨 IMPORTANTE: Excluir também páginas de vendas (landing pages) - devem sempre ir para home após login
-        const excludedFromRedirect = ['/checkout', '/login', '/logout', '/auth/callback', '/404', '/not-found', '/acesso']
+        // 🚨 CORREÇÃO: Para usuário Nutri sem diagnóstico, NUNCA usar lastPage
+        // Sempre usar onboarding, independente de onde estava antes
+        const excludedFromRedirect = [
+          '/checkout', 
+          '/login', 
+          '/logout', 
+          '/auth/callback', 
+          '/404', 
+          '/not-found', 
+          '/acesso',
+          '/configuracao', // Usuário novo não deve ir para configurações
+          '/home', // Usuário sem diagnóstico não deve ir para home
+          '/dashboard' // Usuário sem diagnóstico não deve ir para dashboard
+        ]
         const isLandingPage = lastPage && (
           lastPage === `/pt/${perfil}` || 
           lastPage === `/pt/${perfil}/` ||
           lastPage.match(/^\/pt\/(nutri|coach|wellness|nutra)\/?$/)
         )
-        const isValidRoute = lastPage && 
+        
+        // 🚨 CORREÇÃO: Se usuário Nutri não tem diagnóstico, ignorar lastPage completamente
+        const shouldIgnoreLastPage = perfil === 'nutri' && !temDiagnostico
+        
+        const isValidRoute = !shouldIgnoreLastPage && // Ignorar lastPage se não tem diagnóstico
+          lastPage && 
           !isLandingPage && // Excluir páginas de vendas
           lastPage.startsWith('/') && 
           (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
@@ -413,7 +433,11 @@ export default function LoginForm({
           lastPage.length > 3 && // Garantir que não é apenas "/pt" ou "/e"
           !lastPage.includes('/checkout') && // Garantir que não é checkout
           !lastPage.includes('/login') && // Garantir que não é login
-          !lastPage.includes('/onboarding') // Não usar última página se for onboarding (sempre verificar diagnóstico)
+          !lastPage.includes('/onboarding') && // Não usar última página se for onboarding
+          !lastPage.includes('/configuracao') && // Não usar última página se for configurações
+          !lastPage.includes('/home') && // Não usar última página se for home
+          !lastPage.includes('/dashboard') // Não usar última página se for dashboard
+        
         const finalRedirectPath = isValidRoute ? lastPage : baseRedirectPath
         
         console.log('🔄 Redirecionando após login para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : isLandingPage ? '(página de vendas ignorada, usando padrão)' : '(padrão)')

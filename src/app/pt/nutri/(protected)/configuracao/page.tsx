@@ -7,6 +7,8 @@ import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import NutriNavBar from '@/components/nutri/NutriNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 import { translateError } from '@/lib/error-messages'
+import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
+import { useRouter } from 'next/navigation'
 
 function NutriConfiguracaoContent() {
   const { user, userProfile } = useAuth()
@@ -653,6 +655,10 @@ function NutriConfiguracaoContent() {
 }
 
 export default function NutriConfiguracaoPage() {
-  return <NutriConfiguracaoContent />
+  return (
+    <RequireDiagnostico area="nutri">
+      <NutriConfiguracaoContent />
+    </RequireDiagnostico>
+  )
 }
 

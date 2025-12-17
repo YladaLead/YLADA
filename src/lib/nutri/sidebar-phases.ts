@@ -27,10 +27,12 @@ export interface SidebarPhase {
 
 /**
  * Determina a fase atual baseado no dia da jornada
+ * 🚨 CORREÇÃO: Quando currentDay é null ou 0, retorna fase 1 mas com itens mínimos
  */
 export function getCurrentPhase(currentDay: number | null): 1 | 2 | 3 {
+  // Se não tem progresso ou está no dia 0, ainda é fase 1 (mas com itens mínimos)
   if (!currentDay || currentDay <= 0) {
-    return 1 // Sem progresso = Fase 1
+    return 1 // Sem progresso = Fase 1 (mas apenas Home e Jornada disponíveis)
   }
   
   if (currentDay <= 7) {
@@ -44,8 +46,14 @@ export function getCurrentPhase(currentDay: number | null): 1 | 2 | 3 {
 
 /**
  * Retorna os itens do sidebar disponíveis para uma fase específica
+ * 🚨 CORREÇÃO: Quando currentDay é null ou 0, apenas Home e Jornada
  */
-export function getSidebarItemsForPhase(phase: 1 | 2 | 3): SidebarItemKey[] {
+export function getSidebarItemsForPhase(phase: 1 | 2 | 3, currentDay: number | null = null): SidebarItemKey[] {
+  // 🚨 CORREÇÃO: Se não tem progresso (null ou 0), apenas Home e Jornada
+  if (!currentDay || currentDay <= 0) {
+    return ['home', 'jornada']
+  }
+  
   const baseItems: SidebarItemKey[] = [
     'home',
     'jornada',
@@ -87,42 +95,46 @@ export function getSidebarItemsForPhase(phase: 1 | 2 | 3): SidebarItemKey[] {
 
 /**
  * Verifica se um item específico está disponível na fase atual
+ * 🚨 CORREÇÃO: Passa currentDay para getSidebarItemsForPhase
  */
 export function isItemAvailable(
   item: SidebarItemKey,
   currentDay: number | null
 ): boolean {
   const phase = getCurrentPhase(currentDay)
-  const availableItems = getSidebarItemsForPhase(phase)
+  const availableItems = getSidebarItemsForPhase(phase, currentDay)
   return availableItems.includes(item)
 }
 
 /**
  * Retorna informações sobre a fase atual
+ * 🚨 CORREÇÃO: Precisa receber currentDay para calcular corretamente
  */
-export function getPhaseInfo(phase: 1 | 2 | 3): SidebarPhase {
+export function getPhaseInfo(phase: 1 | 2 | 3, currentDay: number | null = null): SidebarPhase {
   const phases: Record<1 | 2 | 3, SidebarPhase> = {
     1: {
       phase: 1,
       name: 'Fundamentos',
       days: 'Dias 1-7',
-      items: getSidebarItemsForPhase(1)
+      items: getSidebarItemsForPhase(1, currentDay)
     },
     2: {
       phase: 2,
       name: 'Captação & Posicionamento',
       days: 'Dias 8-15',
-      items: getSidebarItemsForPhase(2)
+      items: getSidebarItemsForPhase(2, currentDay)
     },
     3: {
       phase: 3,
       name: 'Gestão & Escala',
       days: 'Dias 16-30',
-      items: getSidebarItemsForPhase(3)
+      items: getSidebarItemsForPhase(3, currentDay)
     }
   }
 
   return phases[phase]
 }
+
+
 
 

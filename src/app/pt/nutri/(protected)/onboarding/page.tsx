@@ -49,6 +49,8 @@ export default function NutriOnboardingPage() {
   }, [user, loading, router])
 
   const handleComecar = () => {
+    console.log('🚀 Iniciando diagnóstico - navegando para /pt/nutri/diagnostico')
+    // Usar push ao invés de replace para permitir voltar se necessário
     router.push('/pt/nutri/diagnostico')
   }
 
