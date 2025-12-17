@@ -30,20 +30,20 @@ export const pilaresConfig: Pilar[] = [
     numero: 1,
     nome: 'Filosofia YLADA',
     subtitulo: 'O que a faculdade não ensinou — a base que sustenta sua identidade profissional.',
-    descricao_curta: 'A profissional que entende quem ela é, o valor que entrega e como se posiciona, se torna impossível de ser ignorada.',
+    descricao_curta: 'A profissional que entende quem ela é, o que entrega de verdade e como se posiciona, se torna impossível de ser ignorada.',
     descricao_introducao: 'O que a faculdade não ensinou — a base que sustenta sua identidade profissional.',
     secoes: [
       {
         id: 'o-que-e-nutri-empresaria',
         titulo: 'O que é ser Nutri-Empresária',
-        conteudo: `A profissional age como marca, não como prestadora.
+        conteudo: `A profissional se posiciona como referência, não como prestadora.
 
 É sobre comportamento, postura e clareza.
 
 A Nutri-Empresária entende que:
 
-• ela é a marca
-• ela é o sistema
+• ela é a referência
+• ela organiza tudo
 • ela é a experiência
 • ela define o padrão do seu atendimento e da sua carreira
 
@@ -57,15 +57,15 @@ Quando você se vê como Nutri-Empresária, tudo muda: como você fala, como voc
 
 🔹 Identidade
 
-Quem você é profissionalmente. Como você se vê e como quer ser vista. A identidade define o público, o posicionamento e o nível de autoridade.
+Quem você é profissionalmente. Como você se vê e como quer ser vista. Quando você sabe quem é, fica claro quem você atende e como você quer ser vista.
 
 🔹 Postura
 
-Como você quer ser percebida. Postura não é arrogância — é clareza. Posicionamento não é marketing — é autoconsciência.
+Como você quer ser percebida. Postura não é arrogância — é clareza. Não é sobre parecer, é sobre saber quem você é.
 
 🔹 Estrutura
 
-Como você organiza seu trabalho. Rotina mínima, processos simples, sistemas que mantêm tudo fluindo sem sobrecarga.
+Como você organiza seu trabalho. Rotina mínima, rotinas simples que mantêm tudo organizado sem sobrecarga.
 
 🔹 Consistência
 
@@ -107,11 +107,11 @@ O erro silencioso é acreditar que técnica sozinha é suficiente. Técnica + m�
 
 Essa é a promessa do Método YLADA.
 
-Não é sobre trabalhar mais horas. É sobre trabalhar com método.
+Não é sobre trabalhar mais horas. É sobre trabalhar com um jeito certo.
 
 Não é sobre fazer mais coisas. É sobre fazer as coisas certas.
 
-Não é sobre correr atrás de clientes. É sobre criar um sistema que traz clientes até você.
+Não é sobre correr atrás de clientes. É sobre criar uma rotina que faz clientes chegarem até você.
 
 A promessa YLADA é transformar sua prática em uma carreira previsível, organizada e lucrativa — sem perder sua essência, sem perder sua humanidade, sem perder sua paixão pela nutrição.`,
         order_index: 4
@@ -125,7 +125,7 @@ A promessa YLADA é transformar sua prática em uma carreira previsível, organi
     nome: 'Rotina Mínima YLADA',
     subtitulo: 'Sua rotina é a sua estratégia.',
     descricao_curta: 'Transformar a forma como a nutricionista opera no seu dia a dia. Dar clareza, autonomia e estrutura prática para que ela pare de trabalhar em modo reativo, ganhe controle da sua agenda, tenha processos simples e finalmente consiga crescer sem caos.',
-    descricao_introducao: `Sua rotina é a sua estratégia.
+    descricao_introducao: `Sua rotina é o seu jeito certo de fazer.
 
 A rotina mínima mantém constância mesmo nos dias ruins. É o que diferencia a Nutri que cresce da Nutri que se perde.`,
     secoes: [
@@ -143,22 +143,22 @@ Quando você tem uma rotina mínima definida, você nunca volta ao zero. Você s
       },
       {
         id: 'tres-blocos-diarios',
-        titulo: 'Os 3 blocos diários da Nutri-Empresária',
-        conteudo: `A rotina mínima da Nutri-Empresária se divide em 3 blocos essenciais:
+        titulo: 'Os 3 momentos do dia da Nutri-Empresária',
+        conteudo: `A rotina mínima da Nutri-Empresária se divide em 3 momentos essenciais:
 
-🔹 Bloco de Captação
+🔹 Momento de Captação
 
-Ações diárias para gerar movimento e atrair novas pessoas. Pode ser distribuir uma ferramenta, enviar um CTA, fazer um story, iniciar conversas.
+Ações diárias para fazer clientes chegarem e atrair novas pessoas. Pode ser distribuir uma ferramenta, enviar um convite, fazer um story, iniciar conversas.
 
-🔹 Bloco de Atendimento
+🔹 Momento de Atendimento
 
-O tempo dedicado a atender clientes, responder mensagens, fazer follow-up, criar conexões reais.
+O tempo dedicado a atender clientes, responder mensagens, fazer acompanhamento, criar conexões reais.
 
-🔹 Bloco de Construção
+🔹 Momento de Construção
 
-Tempo para construir marca, estudar, aplicar GSAL, organizar, planejar. É o investimento em você e no seu negócio.
+Tempo para construir sua referência, estudar, usar o GSAL, organizar, planejar. É o investimento em você e no seu negócio.
 
-Esses 3 blocos trabalham juntos para criar um dia completo e produtivo, sem sobrecarga.`,
+Esses 3 momentos do seu dia trabalham juntos para criar um dia completo e produtivo, sem sobrecarga.`,
         order_index: 2
       },
       {
@@ -185,7 +185,7 @@ A rotina mínima começa pequena e cresce naturalmente.`,
         checklist_items: [
           'Definir horários fixos',
           'Criar 1 ação obrigatória',
-          'Registrar rotina'
+          'Salvar rotina'
         ]
       },
       {
@@ -201,7 +201,7 @@ Olhe para o que você definiu no Dia 15. Está realista? Está aplicável? Está
 
 ☐ Reduzir excessos
 
-Se você colocou muitas coisas, reduza. Rotina mínima é sobre o essencial, não sobre fazer tudo.
+Se você colocou muitas coisas, reduza. Rotina mínima é fazer o que importa, não fazer tudo.
 
 ☐ Confirmar rotina oficial
 
@@ -226,7 +226,7 @@ A rotina mínima deve ser leve o suficiente para você fazer todos os dias, mas 
     descricao_curta: 'Ensinar a nutricionista a construir atração diária, com estratégias simples que funcionam independentemente do número de seguidores. A profissional aprende a criar ferramentas que chamam atenção, usar frases que fazem as pessoas clicarem, distribuir sem timidez e organizar leads para priorizar quem está mais quente.',
     descricao_introducao: `Como atrair pessoas todos os dias de forma leve e duplicável.
 
-Gerar movimento cria oportunidades.`,
+Quando você se mostra, oportunidades aparecem.`,
     secoes: [
       {
         id: 'o-que-e-captacao',
@@ -241,7 +241,7 @@ Quando você gera movimento, você cria oportunidades. E oportunidades viram lea
       {
         id: 'ferramentas-captacao',
         titulo: 'Ferramentas de Captação',
-        conteudo: `As ferramentas YLADA são o coração da captação. Elas resolvem microproblemas e abrem conversas automaticamente.
+        conteudo: `As ferramentas YLADA são o que faz a captação funcionar. Elas resolvem pequenos problemas e abrem conversas naturalmente.
 
 Lista de ferramentas disponíveis:
 
@@ -259,20 +259,20 @@ Cada ferramenta tem um propósito específico e pode ser personalizada com sua i
       },
       {
         id: 'ctas-inteligentes',
-        titulo: 'CTAs Inteligentes',
-        conteudo: `O formato YLADA de CTA:
+        titulo: 'Convites que Funcionam',
+        conteudo: `O jeito YLADA de convidar:
 
-Clareza → Ação simples → Zero pressão.
+Clareza, ação simples, sem pressão.
 
-Uma boa CTA não vende. Ela convida. Ela desperta curiosidade. Ela faz a pessoa querer saber mais.
+Um bom convite não vende. Ele convida. Ele desperta curiosidade. Ele faz a pessoa querer saber mais.
 
-Exemplos de CTAs YLADA:
+Exemplos de convites YLADA:
 
 • "Descubra seu perfil nutricional em 2 minutos"
 • "Quer saber se você está no caminho certo?"
 • "Teste grátis: como está sua rotina alimentar?"
 
-A CTA deve ser simples, clara e irresistível.`,
+O convite deve ser simples, claro e que desperte curiosidade.`,
         order_index: 3
       },
       {
@@ -294,17 +294,17 @@ Este método garante que você alcance novas pessoas todos os dias, de forma lev
       },
       {
         id: 'gestao-leads-ylada',
-        titulo: 'Gestão de Leads YLADA',
-        conteudo: `Leads precisam ser organizados para virar clientes.
+        titulo: 'Organização de Pessoas Interessadas YLADA',
+        conteudo: `Pessoas interessadas precisam ser organizadas para virar clientes.
 
-A gestão de leads YLADA ensina:
+A organização de pessoas interessadas YLADA ensina:
 
-• como separar leads quentes, mornos e frios
+• como separar quem está muito interessada, quem está pensando, e quem ainda não decidiu
 • como priorizar quem responde
 • como registrar interesse
-• como planejar retornos estratégicos
+• como planejar retornos no momento certo
 
-Lead organizado = dinheiro organizado.`,
+Pessoa interessada organizada vira cliente organizado.`,
         order_index: 5,
         exercicios_relacionados: ['gestao-leads'],
         ferramentas_relacionadas: ['gestao-leads']
@@ -316,16 +316,16 @@ Lead organizado = dinheiro organizado.`,
     id: '4',
     numero: 4,
     nome: 'Atendimento que Encanta',
-    subtitulo: 'Atendimento não é conversa — é estratégia.',
-    descricao_curta: 'Ensinar a nutricionista a dominar as quatro etapas da conversão natural: primeiro contato que cria conexão, atendimento que orienta sem pressionar, pós-atendimento que fideliza, e indicações e encantamentos que multiplicam oportunidades.',
-    descricao_introducao: `Atendimento não é conversa — é estratégia.`,
+    subtitulo: 'Atendimento não é conversa — é jeito certo de fazer.',
+    descricao_curta: 'Ensinar a nutricionista a dominar as quatro partes da conversão natural: primeiro contato que cria conexão, atendimento que orienta sem pressionar, cuidado depois do atendimento que fideliza, e indicações e encantamentos que multiplicam oportunidades.',
+    descricao_introducao: `Atendimento não é conversa — é jeito certo de fazer.`,
     secoes: [
       {
         id: 'o-que-e-atendimento-ylada',
         titulo: 'O que é um atendimento YLADA',
-        conteudo: `Explicar: simples, leve, intencional e eficiente.
+        conteudo: `Simples, leve, intencional e eficiente.
 
-O atendimento YLADA não é técnico. É emocional + estratégico.
+O atendimento YLADA não é técnico. É emocional e bem pensado.
 
 Ele faz a pessoa sentir:
 
@@ -340,8 +340,8 @@ Ele faz a pessoa sentir:
       },
       {
         id: 'estrutura-atendimento',
-        titulo: 'Estrutura do atendimento profissional',
-        conteudo: `O atendimento YLADA se divide em 4 blocos essenciais:
+        titulo: 'Como fazer um atendimento profissional',
+        conteudo: `O atendimento YLADA se divide em 4 partes essenciais:
 
 🔹 Acolhimento
 
@@ -349,17 +349,17 @@ O primeiro contato que cria conexão. Como você recebe a pessoa, como você ini
 
 🔹 Entendimento real
 
-Como você identifica a dor principal, como você faz perguntas estratégicas, como você demonstra que realmente entende o que a pessoa precisa.
+Como você identifica a dor principal, como você faz perguntas certas, como você demonstra que realmente entende o que a pessoa precisa.
 
 🔹 Direcionamento
 
-Como você conduz sem pressionar, como você orienta com clareza, como você cria desejo genuíno pelo atendimento.
+Como você conduz sem pressionar, como você orienta com clareza, como você faz a pessoa querer ser atendida por você.
 
-🔹 Encerramento estratégico
+🔹 Encerramento no momento certo
 
 Como você fecha a conversa, como você faz o convite natural, como você cria expectativa positiva.
 
-Esses 4 blocos trabalham juntos para criar um atendimento completo e eficiente.`,
+Essas 4 partes trabalham juntas para criar um atendimento completo e eficiente.`,
         order_index: 2
       },
       {
@@ -385,18 +385,18 @@ Perguntas-poder transformam conversas em conexões.`,
       },
       {
         id: 'pos-atendimento-ylada',
-        titulo: 'Pós-atendimento YLADA',
+        titulo: 'Cuidado Depois do Atendimento YLADA',
         conteudo: `A maioria das nutricionistas perde clientes depois da conversa.
 
-O pós-atendimento YLADA é onde a magia acontece:
+O cuidado depois do atendimento YLADA é onde a magia acontece:
 
 • mensagem de cuidado
-• lembrete estratégico
-• reforço de valor
+• lembrete no momento certo
+• lembrar o que você ajudou
 • acompanhamento leve
-• criação do vínculo emocional
+• criar confiança e proximidade
 
-Clientes fiéis surgem do pós-atendimento — não do atendimento.`,
+Clientes fiéis surgem do cuidado depois — não só da conversa.`,
         order_index: 4,
         exercicios_relacionados: ['roteiro-atendimento'],
         ferramentas_relacionadas: ['modelo-pos-atendimento']
@@ -408,53 +408,53 @@ Clientes fiéis surgem do pós-atendimento — não do atendimento.`,
     id: '5',
     numero: 5,
     nome: 'GSAL: Gerar, Servir, Acompanhar, Lucrar',
-    subtitulo: 'O método definitivo para lotar agendas.',
+    subtitulo: 'O jeito certo de lotar sua agenda.',
     descricao_curta: 'Transformar o crescimento da nutricionista em algo leve, organizado, sustentável, contínuo e previsível. E não algo caótico, por impulso ou por "sorte". Este pilar entrega o que toda profissional deseja: controle da própria carreira.',
-    descricao_introducao: `O método definitivo para lotar agendas.
+    descricao_introducao: `O jeito certo de lotar sua agenda.
 
-O GSAL é a estrutura que transforma seu trabalho em algo previsível. Quando você domina GSAL, sua agenda começa a encher naturalmente.`,
+O GSAL é o jeito de organizar seu trabalho para que você saiba o que esperar. Quando você domina GSAL, sua agenda começa a encher naturalmente.`,
     secoes: [
       {
         id: 'explicacao-geral-gsal',
         titulo: 'Explicação geral do GSAL',
-        conteudo: `O GSAL é a estrutura que transforma seu trabalho em algo previsível.
+        conteudo: `O GSAL é o jeito de organizar seu trabalho para que você saiba o que esperar.
 
-Criar 4 caixas:
+Organizar em 4 partes:
 
 🔹 G — Gerar
 
-Criar fluxo contínuo de oportunidades. Colocar seu trabalho em movimento diário, criando novas oportunidades de contato.
+Fazer oportunidades aparecerem todo dia. Fazer seu trabalho aparecer todo dia, criando novas chances de conversar.
 
 🔹 S — Servir
 
-Entregar valor que conecta. Não é trabalhar de graça — é entregar clareza e ajuda real, aquilo que aproxima as pessoas do seu método.
+Ajudar de verdade, de um jeito que aproxima. Não é trabalhar de graça — é ajudar de verdade antes de vender, aquilo que faz as pessoas confiarem em você.
 
 🔹 A — Acompanhar
 
-Transformar interesses em fechamentos. A maioria das vendas acontece no acompanhamento — não na primeira conversa.
+Transformar interesse em cliente. A maioria dos clientes aparece no acompanhamento — não na primeira conversa.
 
 🔹 L — Lucrar
 
-Estruturar sua agenda para crescer. É estruturar o fluxo de trabalho para que tudo leve naturalmente a fechamentos.
+Organizar sua agenda para crescer. É organizar seu dia a dia para que tudo leve naturalmente a novos clientes.
 
-Essas 4 etapas trabalham juntas para criar um ciclo completo de crescimento.`,
+Essas 4 partes trabalham juntas para criar um ciclo completo de crescimento.`,
         order_index: 1
       },
       {
         id: 'exercicio-gerar',
         titulo: 'Exercício G de Gerar',
-        conteudo: `Aplicar a primeira etapa do GSAL: GERAR.
+        conteudo: `Fazer a primeira parte do GSAL: GERAR.
 
-Gerar é colocar seu trabalho em movimento diário, criando novas oportunidades de contato.
+Gerar é fazer seu trabalho aparecer todo dia, criando novas chances de conversar.
 
 Ações práticas:
 
-• Escolher 1 ferramenta para gerar movimento hoje
-• Executar 1 ação de distribuição
+• Escolher 1 ferramenta para se mostrar hoje
+• Fazer 1 ação de distribuição
 • Iniciar 5 novas conversas
-• Registrar resultados no app
+• Anotar resultados aqui
 
-Quem gera movimento, cria oportunidades.`,
+Quem se mostra todo dia, cria oportunidades.`,
         order_index: 2,
         exercicios_relacionados: ['g-de-gerar']
       },
@@ -479,16 +479,16 @@ Quando você serve, você se torna inesquecível.`,
       {
         id: 'exercicio-acompanhar',
         titulo: 'Exercício A de Acompanhar',
-        conteudo: `Dominar o acompanhamento que realmente converte.
+        conteudo: `Fazer o acompanhamento que realmente converte.
 
-A maioria das vendas acontece no acompanhamento — não na primeira conversa.
+A maioria dos clientes aparece no acompanhamento — não na primeira conversa.
 
 Ações práticas:
 
-• Revisar leads quentes dos últimos 7 dias
+• Revisar pessoas muito interessadas dos últimos 7 dias
 • Enviar mensagem de acompanhamento para 5 pessoas
-• Registrar quem respondeu
-• Marcar quem avançou
+• Anotar quem respondeu
+• Marcar quem está mais próxima de virar cliente
 
 Acompanhamento é profissionalismo, não insistência.`,
         order_index: 4,
@@ -497,23 +497,23 @@ Acompanhamento é profissionalismo, não insistência.`,
       {
         id: 'exercicio-lucrar',
         titulo: 'Exercício L de Lucrar',
-        conteudo: `Criar uma estrutura de agenda que apoia seu crescimento.
+        conteudo: `Criar uma organização da agenda que apoia seu crescimento.
 
-Lucrar é estruturar o fluxo de trabalho para que tudo leve naturalmente a fechamentos.
+Lucrar é organizar seu dia a dia para que tudo leve naturalmente a novos clientes.
 
 Ações práticas:
 
 • Definir horários fixos de atendimento
 • Reservar horários de captação
-• Ajustar agenda mínima semanal
-• Registrar agenda oficial no app
+• Definir agenda mínima da semana
+• Salvar sua agenda oficial aqui
 
-Lucrar é consequência de estruturar.`,
+Lucrar é consequência de organizar.`,
         order_index: 5,
         exercicios_relacionados: ['l-de-lucrar', 'agenda-estrategica']
       }
     ],
-    campo_anotacao: 'Qual etapa do GSAL você quer dominar primeiro?'
+    campo_anotacao: 'Qual parte do GSAL você quer fazer primeiro?'
   }
 ]
 
