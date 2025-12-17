@@ -1,61 +1,27 @@
--- =====================================================
--- SCRIPT: Resetar nutri1@ylada.com
--- =====================================================
--- Use este script quando quiser resetar e testar tudo de novo
--- =====================================================
+-- RESETAR nutri1@ylada.com PARA ESTADO INICIAL (SEM DIAGNÓSTICO)
+-- Execute esta query no Supabase SQL Editor
 
-DO $$
-DECLARE
-  v_user_id UUID;
-BEGIN
-  SELECT id INTO v_user_id
-  FROM auth.users
-  WHERE email = 'nutri1@ylada.com';
+-- 1. Remover diagnóstico
+DELETE FROM nutri_diagnostico
+WHERE user_id = (SELECT id FROM auth.users WHERE email = 'nutri1@ylada.com');
 
-  IF v_user_id IS NULL THEN
-    RAISE EXCEPTION '❌ Usuário não encontrado!';
-  END IF;
+-- 2. Atualizar perfil para sem diagnóstico
+UPDATE user_profiles
+SET 
+  diagnostico_completo = false,
+  nome_completo = 'Nutricionista Teste 1'
+WHERE user_id = (SELECT id FROM auth.users WHERE email = 'nutri1@ylada.com');
 
-  -- 1. Deletar diagnóstico
-  DELETE FROM nutri_diagnostico WHERE user_id = v_user_id;
-  
-  -- 2. Resetar flag no perfil
-  UPDATE user_profiles 
-  SET diagnostico_completo = false 
-  WHERE user_id = v_user_id;
+-- 3. Remover progresso da jornada
+DELETE FROM journey_progress
+WHERE user_id = (SELECT id FROM auth.users WHERE email = 'nutri1@ylada.com');
 
-  -- 3. Deletar progresso da jornada
-  DELETE FROM journey_progress WHERE user_id = v_user_id;
-
-  -- 4. Deletar perfil estratégico
-  DELETE FROM nutri_perfil_estrategico WHERE user_id = v_user_id;
-
-  -- 5. Deletar análises da LYA
-  DELETE FROM lya_analise_nutri WHERE user_id = v_user_id;
-
-  RAISE NOTICE '✅ Reset completo realizado para: nutri1@ylada.com';
-  RAISE NOTICE '✅ Agora você pode testar tudo de novo!';
-END $$;
-
--- =====================================================
--- VERIFICAR RESULTADO
--- =====================================================
+-- 4. Verificar resultado
 SELECT 
-  au.email,
+  u.email,
+  up.perfil,
   up.diagnostico_completo,
-  CASE WHEN nd.user_id IS NULL THEN 'Sem diagnóstico' ELSE 'Com diagnóstico' END as status_diagnostico,
-  COUNT(jp.day_number) as dias_completos,
-  CASE 
-    WHEN COUNT(jp.day_number) = 0 THEN 'Sem jornada iniciada'
-    WHEN MAX(jp.day_number) <= 7 THEN 'Fase 1'
-    WHEN MAX(jp.day_number) <= 15 THEN 'Fase 2'
-    ELSE 'Fase 3'
-  END as fase_atual
-FROM auth.users au
-LEFT JOIN user_profiles up ON au.id = up.user_id
-LEFT JOIN nutri_diagnostico nd ON up.user_id = nd.user_id
-LEFT JOIN journey_progress jp ON up.user_id = jp.user_id AND jp.completed = true
-WHERE au.email = 'nutri1@ylada.com'
-GROUP BY au.email, up.diagnostico_completo, nd.user_id;
-
-
+  up.nome_completo
+FROM auth.users u
+LEFT JOIN user_profiles up ON u.id = up.user_id
+WHERE u.email = 'nutri1@ylada.com';
