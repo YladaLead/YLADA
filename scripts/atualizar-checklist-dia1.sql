@@ -1,12 +1,13 @@
 -- ATUALIZAR CHECKLIST DO DIA 1
--- Remove referências a vídeo e alinha com linguagem simples da LYA
+-- Remove referências a vídeo e material externo
+-- Alinha com linguagem simples da LYA e conteúdo inline
 -- Execute esta query no Supabase SQL Editor
 
 UPDATE journey_days
 SET checklist_items = '[
   "Ler o conteúdo do Pilar 1",
-  "Anotar os 3 principais aprendizados",
-  "Refletir sobre como aplicar na sua prática"
+  "Anotar o que mais fez sentido para você",
+  "Pensar em como usar isso no seu dia a dia"
 ]'::jsonb
 WHERE day_number = 1;
 
