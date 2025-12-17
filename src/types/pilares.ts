@@ -53,25 +53,25 @@ Quando você se vê como Nutri-Empresária, tudo muda: como você fala, como voc
       {
         id: 'fundamentos',
         titulo: 'Os 4 fundamentos da Filosofia YLADA',
-        conteudo: `A Filosofia YLADA se sustenta em 4 fundamentos essenciais:
+        conteudo: `A Filosofia YLADA se baseia em 4 fundamentos que fazem toda a diferença:
 
 🔹 Identidade
 
-Quem você é profissionalmente. Como você se vê e como quer ser vista. Quando você sabe quem é, fica claro quem você atende e como você quer ser vista.
+É saber quem você é como profissional. Quando você tem clareza sobre isso, fica fácil decidir quem você atende, como você fala e como você quer ser vista. Sem identidade clara, você fica perdida tentando agradar todo mundo.
 
 🔹 Postura
 
-Como você quer ser percebida. Postura não é arrogância — é clareza. Não é sobre parecer, é sobre saber quem você é.
+É como você se mostra para o mundo. Não é sobre ser arrogante ou superior. É sobre ter segurança no que você sabe e no que você oferece. Quando você tem postura, as pessoas confiam em você naturalmente.
 
 🔹 Estrutura
 
-Como você organiza seu trabalho. Rotina mínima, rotinas simples que mantêm tudo organizado sem sobrecarga.
+É ter um jeito certo de trabalhar que funciona no dia a dia. Não precisa ser complicado. Precisa ser simples e que você consiga fazer todo dia. Estrutura é o que evita que você viva apagando incêndio.
 
 🔹 Consistência
 
-A constância que transforma pequenas ações em grandes resultados. É fazer todos os dias, mesmo nos dias difíceis.
+É fazer todo dia, mesmo quando não está com vontade. Pequenas ações feitas com constância geram resultados grandes. É isso que separa quem cresce de quem fica parada no mesmo lugar.
 
-Esses 4 fundamentos trabalham juntos para criar a Nutri-Empresária completa.`,
+Esses 4 fundamentos trabalham juntos. Quando você tem os quatro, você vira uma Nutri-Empresária de verdade.`,
         order_index: 2
       },
       {
