@@ -733,10 +733,14 @@ function InfoTab({
                 id="goal"
                 name="goal"
                 value={formData.goal || ''}
-                onChange={handleChange}
+                onChange={(e) => {
+                  console.log('Campo goal mudou:', e.target.value)
+                  handleChange(e)
+                }}
                 rows={4}
                 placeholder="Descreva o objetivo principal da cliente..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                autoFocus={false}
               />
             </div>
           </div>
