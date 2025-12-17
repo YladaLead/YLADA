@@ -127,18 +127,35 @@ Identificar problemas de coerência, linguagem, clareza e estrutura educacional 
 
 ## 🚨 PROBLEMAS IDENTIFICADOS
 
-### **1. INCONSISTÊNCIA DE CONTEÚDO**
+### **1. CONTEÚDO IDÊNTICO ENTRE DIAS (PROBLEMA CRÍTICO)**
 
 #### **Dia 1 vs Dia 2:**
-- ⚠️ **AMBOS apontam para "Pilar 1"**
-  - Dia 1: "Acessar Pilar 1: Filosofia YLADA"
-  - Dia 2: "Acessar Pilar 1 - Seção: Identidade & Postura"
-- ❌ **PROBLEMA CRÍTICO**: Se ambos acessam o mesmo Pilar, o conteúdo pode parecer idêntico ou confuso
+- ❌ **AMBOS exibem o MESMO Pilar completo**
+  - Dia 1: Aponta para Pilar 1 (id: '1') → Exibe TODO o conteúdo do Pilar 1
+  - Dia 2: Aponta para Pilar 1 (id: '1') → Exibe TODO o conteúdo do Pilar 1 novamente
+- ❌ **PROBLEMA CRÍTICO CONFIRMADO**: O usuário vê conteúdo idêntico porque ambos os dias renderizam o Pilar 1 completo
+
+#### **Conteúdo do Pilar 1 que está sendo repetido:**
+1. "O que é ser Nutri-Empresária"
+2. "Os 4 fundamentos da Filosofia YLADA" (Identidade, Postura, Estrutura, Consistência)
+3. "O erro silencioso da Nutri brasileira"
+4. "A promessa YLADA"
 
 #### **Solução Necessária:**
-- Dia 1 deve focar na **introdução geral** da Filosofia
-- Dia 2 deve focar em **aplicação prática** da identidade
-- Ou Dia 2 deve apontar para conteúdo diferente (exercício específico, não o mesmo Pilar)
+**Opção A - Conteúdo Progressivo:**
+- Dia 1: Mostrar apenas introdução + seção "O que é ser Nutri-Empresária" + "Os 4 fundamentos"
+- Dia 2: Mostrar apenas seção "Identidade & Postura" (dos 4 fundamentos) + exercício prático específico
+- Dia 3: Mostrar Pilar 2 completo (Rotina Mínima)
+
+**Opção B - Conteúdo Específico por Dia:**
+- Dia 1: Criar conteúdo específico introdutório (não usar Pilar completo)
+- Dia 2: Criar exercício prático de identidade (não usar Pilar completo)
+- Dia 3: Usar Pilar 2 completo
+
+**Opção C - Filtrar Seções do Pilar:**
+- Modificar `PilarContentInline` para aceitar parâmetro `secoesFiltradas` ou `secaoId`
+- Dia 1: Mostrar apenas seções 1 e 2 do Pilar 1
+- Dia 2: Mostrar apenas seção específica sobre Identidade do Pilar 1
 
 ---
 
@@ -350,12 +367,50 @@ Identificar problemas de coerência, linguagem, clareza e estrutura educacional 
 
 ---
 
+## 📝 RESUMO EXECUTIVO
+
+### **PROBLEMA PRINCIPAL IDENTIFICADO:**
+❌ **Dia 1 e Dia 2 exibem conteúdo IDÊNTICO** porque ambos renderizam o Pilar 1 completo através do componente `PilarContentInline`.
+
+### **CAUSA RAIZ:**
+- Código em `src/app/pt/nutri/metodo/jornada/dia/[numero]/page.tsx` linha 422:
+  - Dia 1: `PilarContentInline pilarId="1"` → Renderiza TODO o Pilar 1
+  - Dia 2: `PilarContentInline pilarId="1"` → Renderiza TODO o Pilar 1 novamente
+- O componente `PilarContentInline` não tem filtro de seções, sempre mostra tudo
+
+### **OUTROS PROBLEMAS CRÍTICOS:**
+1. ❌ Checklist inconsistente (2 vs 4 itens)
+2. ⚠️ Linguagem técnica em alguns pontos
+3. ⚠️ Falta explicação "por quê" em alguns dias
+4. ⚠️ Falta orientação de comportamento
+5. ⚠️ Falta alertas sobre erros comuns
+
+---
+
 ## 📝 PRÓXIMOS PASSOS
 
-1. ✅ Análise completa realizada
-2. ⏳ Aguardando aprovação do padrão
-3. ⏳ Revisar e ajustar Dias 1-7 conforme padrão
-4. ⏳ Aplicar padrão aos Dias 8-30
+### **FASE 1: Resolver Conteúdo Duplicado (PRIORIDADE ALTA)**
+1. ⏳ Decidir estratégia:
+   - Opção A: Filtrar seções do Pilar por dia
+   - Opção B: Criar conteúdo específico para cada dia
+   - Opção C: Modificar `PilarContentInline` para aceitar `secoesFiltradas`
+2. ⏳ Implementar solução escolhida
+3. ⏳ Testar que Dia 1 e Dia 2 mostram conteúdos diferentes
+
+### **FASE 2: Padronizar Estrutura (PRIORIDADE MÉDIA)**
+1. ⏳ Aguardar aprovação do padrão proposto
+2. ⏳ Revisar e ajustar Dias 1-7 conforme padrão:
+   - Checklist máximo 2 itens
+   - Linguagem simples e conversacional
+   - Explicação de importância sempre presente
+   - Orientação de comportamento incluída
+   - Alertas sobre erros comuns
+3. ⏳ Aplicar padrão aos Dias 8-30
+
+### **FASE 3: Revisar Linguagem (PRIORIDADE MÉDIA)**
+1. ⏳ Substituir termos técnicos por linguagem simples
+2. ⏳ Garantir consistência de tempo verbal
+3. ⏳ Alinhar com tom de voz LYA
 
 ---
 
