@@ -42,26 +42,55 @@ export async function validateProtectedAccess(
   if (!actualPath && excludeRoutesFromSubscription.length > 0) {
     try {
       const headersList = await headers()
-      const referer = headersList.get('referer') || ''
       
-      // Extrair pathname do referer
-      if (referer) {
-        // Procurar por padrão /pt/{area}/{rota}
+      // 🚨 CORREÇÃO: Tentar obter pathname de múltiplas fontes
+      // 1. Tentar do header 'x-pathname' (se middleware definir)
+      let pathnameFromHeader = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
+      
+      // 2. Se não tiver, tentar do referer
+      if (!pathnameFromHeader) {
+        const referer = headersList.get('referer') || ''
+        if (referer) {
+          // Extrair pathname do referer (URL completa)
+          try {
+            const refererUrl = new URL(referer)
+            pathnameFromHeader = refererUrl.pathname
+          } catch (e) {
+            // Se referer não for URL válida, tentar regex
+            const areaPattern = `\/pt\/${area}\/(.+)`
+            const match = referer.match(new RegExp(areaPattern))
+            if (match && match[1]) {
+              pathnameFromHeader = '/' + match[1].split('?')[0]
+            }
+          }
+        }
+      }
+      
+      // 3. Extrair apenas a parte após /pt/{area}/
+      if (pathnameFromHeader) {
         const areaPattern = `\/pt\/${area}\/(.+)`
-        const match = referer.match(new RegExp(areaPattern))
+        const match = pathnameFromHeader.match(new RegExp(areaPattern))
         if (match && match[1]) {
           actualPath = '/' + match[1].split('?')[0] // Remover query params
+        } else if (pathnameFromHeader.startsWith('/')) {
+          // Se já começa com /, usar diretamente (pode ser pathname completo)
+          actualPath = pathnameFromHeader.split('?')[0]
         }
       }
       
       // Verificar se a rota atual está na lista de exceções
-      isExcludedRoute = excludeRoutesFromSubscription.some(route => {
-        const routePath = route.startsWith('/') ? route : '/' + route
-        return actualPath.includes(routePath) || actualPath.startsWith(routePath)
-      })
-      
-      if (isExcludedRoute) {
-        console.log(`ℹ️ ProtectedLayout [${area}]: Rota excluída de verificação de assinatura: ${actualPath}`)
+      if (actualPath) {
+        isExcludedRoute = excludeRoutesFromSubscription.some(route => {
+          const routePath = route.startsWith('/') ? route : '/' + route
+          // Verificar se actualPath contém ou começa com routePath
+          return actualPath === routePath || actualPath.startsWith(routePath + '/') || actualPath.includes(routePath)
+        })
+        
+        if (isExcludedRoute) {
+          console.log(`ℹ️ ProtectedLayout [${area}]: Rota excluída de verificação de assinatura: ${actualPath}`)
+        } else {
+          console.log(`ℹ️ ProtectedLayout [${area}]: Rota NÃO excluída: ${actualPath}`)
+        }
       }
     } catch (e) {
       // Se não conseguir obter, assumir que não é rota excluída
@@ -71,7 +100,7 @@ export async function validateProtectedAccess(
     // Se currentPath foi fornecido, verificar diretamente
     isExcludedRoute = excludeRoutesFromSubscription.some(route => {
       const routePath = route.startsWith('/') ? route : '/' + route
-      return actualPath.includes(routePath) || actualPath.startsWith(routePath)
+      return actualPath === routePath || actualPath.startsWith(routePath + '/') || actualPath.includes(routePath)
     })
   }
   
@@ -177,25 +206,23 @@ export async function validateProtectedAccess(
         hasSubscription = await hasActiveSubscription(user.id, area)
         
         if (!hasSubscription) {
-          // 🚨 EXCEÇÃO ESPECIAL PARA ÁREA NUTRI:
+          // 🚨 PRIORIDADE 1: Verificar se é rota excluída (onboarding/diagnóstico)
+          // Se for rota excluída, SEMPRE permitir acesso sem assinatura
+          if (isExcludedRoute) {
+            console.log(`ℹ️ ProtectedLayout [${area}]: Rota excluída (onboarding/diagnóstico) - permitindo acesso sem assinatura`)
+            hasSubscription = true // Virtualmente "tem assinatura" para essas rotas
+          }
+          // 🚨 PRIORIDADE 2: EXCEÇÃO ESPECIAL PARA ÁREA NUTRI SEM DIAGNÓSTICO
           // Se usuário não tem diagnóstico, SEMPRE permitir acesso sem assinatura
           // (usuário precisa completar diagnóstico antes de assinar)
           // O RequireDiagnostico (client-side) vai cuidar de redirecionar para onboarding se necessário
-          if (area === 'nutri' && !profile.diagnostico_completo) {
+          else if (area === 'nutri' && !profile.diagnostico_completo) {
             console.log(`ℹ️ ProtectedLayout [${area}]: Usuário sem diagnóstico - permitindo acesso sem assinatura`)
             hasSubscription = true // Virtualmente "tem assinatura" - permite acesso para completar diagnóstico
           } else {
             // Usuário tem diagnóstico ou não é área nutri - exige assinatura normalmente
-            // 🚨 EXCEÇÃO: Não redirecionar para checkout se estiver tentando acessar onboarding ou diagnostico
-            const shouldRedirectToCheckout = !isExcludedRoute
-            
-            if (shouldRedirectToCheckout) {
-              console.log(`❌ ProtectedLayout [${area}]: Sem assinatura, redirecionando para checkout`)
-              redirect(`/pt/${area}/checkout`)
-            } else {
-              console.log(`ℹ️ ProtectedLayout [${area}]: Rota de onboarding/diagnóstico - permitindo acesso sem assinatura`)
-              hasSubscription = true // Virtualmente "tem assinatura" para essas rotas
-            }
+            console.log(`❌ ProtectedLayout [${area}]: Sem assinatura e não é exceção, redirecionando para checkout`)
+            redirect(`/pt/${area}/checkout`)
           }
         }
       } else {
