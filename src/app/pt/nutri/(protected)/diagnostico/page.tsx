@@ -10,11 +10,12 @@ export default function NutriDiagnosticoPage() {
 }
 
 function NutriDiagnosticoContent() {
-  const { user } = useAuth()
+  const { user, userProfile } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [verificandoFluxo, setVerificandoFluxo] = useState(true)
   
   // Estados do formulário
   const [formData, setFormData] = useState({
@@ -45,8 +46,52 @@ function NutriDiagnosticoContent() {
     campo_aberto: ''
   })
 
+  // 🚨 VERIFICAÇÃO: Se usuário não tem diagnóstico, deve passar pelo onboarding primeiro
+  useEffect(() => {
+    const verificarFluxoOnboarding = async () => {
+      if (!user) return
+      
+      // Se já tem diagnóstico completo no perfil, pode acessar diretamente
+      if (userProfile?.diagnostico_completo) {
+        setVerificandoFluxo(false)
+        return
+      }
+      
+      try {
+        // Verificar se já tem diagnóstico completo
+        const response = await fetch('/api/nutri/diagnostico', {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          
+          // Se não tem diagnóstico, redirecionar para onboarding primeiro
+          // (usuário deve ver a página de boas-vindas antes de preencher o diagnóstico)
+          if (!data.hasDiagnostico) {
+            console.log('ℹ️ Usuário sem diagnóstico - redirecionando para onboarding primeiro')
+            router.replace('/pt/nutri/onboarding')
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar diagnóstico:', error)
+        // Em caso de erro, redirecionar para onboarding para ser seguro
+        router.replace('/pt/nutri/onboarding')
+        return
+      } finally {
+        setVerificandoFluxo(false)
+      }
+    }
+    
+    verificarFluxoOnboarding()
+  }, [user, userProfile, router])
+
   // Carregar diagnóstico existente para edição
   useEffect(() => {
+    // Só carregar diagnóstico se já passou pela verificação de fluxo
+    if (verificandoFluxo) return
+    
     const carregarDiagnostico = async () => {
       try {
         const response = await fetch('/api/nutri/diagnostico', {
@@ -83,7 +128,19 @@ function NutriDiagnosticoContent() {
     }
 
     carregarDiagnostico()
-  }, [])
+  }, [verificandoFluxo])
+  
+  // Mostrar loading enquanto verifica o fluxo
+  if (verificandoFluxo) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Função para verificar se formulário está completo
   const isFormValid = () => {
