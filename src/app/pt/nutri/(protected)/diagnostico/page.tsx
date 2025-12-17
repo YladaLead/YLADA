@@ -46,7 +46,8 @@ function NutriDiagnosticoContent() {
     campo_aberto: ''
   })
 
-  // 🚨 VERIFICAÇÃO: Se usuário não tem diagnóstico, deve passar pelo onboarding primeiro
+  // 🚨 CORREÇÃO: Verificar apenas se usuário acessou diretamente a URL (sem passar pelo onboarding)
+  // Se chegou através do botão da página de onboarding, não redirecionar de volta
   useEffect(() => {
     const verificarFluxoOnboarding = async () => {
       if (!user) return
@@ -57,8 +58,22 @@ function NutriDiagnosticoContent() {
         return
       }
       
+      // 🚨 CORREÇÃO: Verificar se veio do onboarding através do referrer
+      // Se veio do onboarding, não redirecionar de volta (evita loop)
+      if (typeof window !== 'undefined') {
+        const referrer = document.referrer
+        const veioDoOnboarding = referrer.includes('/onboarding')
+        
+        if (veioDoOnboarding) {
+          console.log('✅ Usuário veio do onboarding - permitindo acesso ao diagnóstico')
+          setVerificandoFluxo(false)
+          return
+        }
+      }
+      
+      // Se não veio do onboarding, verificar se tem diagnóstico
+      // Se não tem e acessou diretamente, redirecionar para onboarding
       try {
-        // Verificar se já tem diagnóstico completo
         const response = await fetch('/api/nutri/diagnostico', {
           credentials: 'include'
         })
@@ -66,18 +81,17 @@ function NutriDiagnosticoContent() {
         if (response.ok) {
           const data = await response.json()
           
-          // Se não tem diagnóstico, redirecionar para onboarding primeiro
-          // (usuário deve ver a página de boas-vindas antes de preencher o diagnóstico)
+          // Se não tem diagnóstico E não veio do onboarding, redirecionar
           if (!data.hasDiagnostico) {
-            console.log('ℹ️ Usuário sem diagnóstico - redirecionando para onboarding primeiro')
+            console.log('ℹ️ Usuário sem diagnóstico e acesso direto - redirecionando para onboarding')
             router.replace('/pt/nutri/onboarding')
             return
           }
         }
       } catch (error) {
         console.error('Erro ao verificar diagnóstico:', error)
-        // Em caso de erro, redirecionar para onboarding para ser seguro
-        router.replace('/pt/nutri/onboarding')
+        // Em caso de erro, não redirecionar (evita loops)
+        setVerificandoFluxo(false)
         return
       } finally {
         setVerificandoFluxo(false)

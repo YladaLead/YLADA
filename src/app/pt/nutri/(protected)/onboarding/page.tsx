@@ -10,10 +10,15 @@ export default function NutriOnboardingPage() {
   const router = useRouter()
   const [checking, setChecking] = useState(true)
 
-  // Verificar se já tem diagnóstico (não deveria estar aqui se tiver)
+  // 🚨 CORREÇÃO: Verificar se já tem diagnóstico apenas uma vez
+  // Se tiver diagnóstico, redirecionar para home
+  // Se não tiver, permanecer na página de onboarding (não redirecionar)
   useEffect(() => {
     const verificarDiagnostico = async () => {
-      if (loading || !user) return
+      if (loading || !user) {
+        setChecking(false)
+        return
+      }
 
       try {
         const response = await fetch('/api/nutri/diagnostico', {
@@ -24,12 +29,17 @@ export default function NutriOnboardingPage() {
           const data = await response.json()
           // Se já tem diagnóstico, redirecionar para home
           if (data.hasDiagnostico) {
+            console.log('✅ Usuário já tem diagnóstico - redirecionando para home')
             router.replace('/pt/nutri/home')
             return
+          } else {
+            // Se não tem diagnóstico, permanecer na página de onboarding
+            console.log('✅ Usuário sem diagnóstico - permanecendo na página de onboarding')
           }
         }
       } catch (error) {
         console.error('Erro ao verificar diagnóstico:', error)
+        // Em caso de erro, permanecer na página (não redirecionar)
       } finally {
         setChecking(false)
       }
@@ -72,8 +82,16 @@ export default function NutriOnboardingPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 border border-gray-100">
           {/* Mensagem da LYA */}
           <div className="text-center mb-8">
-            <div className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-6 py-3 mb-6">
-              <span className="text-2xl mr-2">🤖</span>
+            <div className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full px-6 py-3 mb-6 gap-3">
+              {/* Avatar da LYA - Substitua o caminho pela imagem correta do avatar */}
+              <Image
+                src="/images/lya/avatar-lya.png"
+                alt="LYA - Assistente Virtual"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-full object-cover"
+                priority
+              />
               <span className="font-semibold text-lg">LYA</span>
             </div>
             
@@ -122,5 +140,7 @@ export default function NutriOnboardingPage() {
     </div>
   )
 }
+
+
 
 
