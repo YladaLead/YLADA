@@ -206,22 +206,27 @@ export async function validateProtectedAccess(
         hasSubscription = await hasActiveSubscription(user.id, area)
         
         if (!hasSubscription) {
-          // 🚨 PRIORIDADE 1: Verificar se é rota excluída (onboarding/diagnóstico)
-          // Se for rota excluída, SEMPRE permitir acesso sem assinatura
-          if (isExcludedRoute) {
-            console.log(`ℹ️ ProtectedLayout [${area}]: Rota excluída (onboarding/diagnóstico) - permitindo acesso sem assinatura`)
-            hasSubscription = true // Virtualmente "tem assinatura" para essas rotas
-          }
-          // 🚨 PRIORIDADE 2: EXCEÇÃO ESPECIAL PARA ÁREA NUTRI SEM DIAGNÓSTICO
+          // 🚨 PRIORIDADE 1: EXCEÇÃO ESPECIAL PARA ÁREA NUTRI SEM DIAGNÓSTICO
           // Se usuário não tem diagnóstico, SEMPRE permitir acesso sem assinatura
           // (usuário precisa completar diagnóstico antes de assinar)
           // O RequireDiagnostico (client-side) vai cuidar de redirecionar para onboarding se necessário
-          else if (area === 'nutri' && !profile.diagnostico_completo) {
+          if (area === 'nutri' && !profile.diagnostico_completo) {
             console.log(`ℹ️ ProtectedLayout [${area}]: Usuário sem diagnóstico - permitindo acesso sem assinatura`)
             hasSubscription = true // Virtualmente "tem assinatura" - permite acesso para completar diagnóstico
+          }
+          // 🚨 PRIORIDADE 2: Verificar se é rota excluída (onboarding/diagnóstico)
+          // Se for rota excluída, SEMPRE permitir acesso sem assinatura
+          else if (isExcludedRoute) {
+            console.log(`ℹ️ ProtectedLayout [${area}]: Rota excluída (onboarding/diagnóstico) - permitindo acesso sem assinatura`)
+            hasSubscription = true // Virtualmente "tem assinatura" para essas rotas
           } else {
             // Usuário tem diagnóstico ou não é área nutri - exige assinatura normalmente
-            console.log(`❌ ProtectedLayout [${area}]: Sem assinatura e não é exceção, redirecionando para checkout`)
+            console.log(`❌ ProtectedLayout [${area}]: Sem assinatura e não é exceção, redirecionando para checkout`, {
+              area,
+              hasDiagnostico: profile.diagnostico_completo,
+              isExcludedRoute,
+              actualPath
+            })
             redirect(`/pt/${area}/checkout`)
           }
         }
