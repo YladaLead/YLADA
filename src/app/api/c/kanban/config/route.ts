@@ -8,9 +8,14 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request, ['coach', 'admin'])
-    if (!user || user instanceof NextResponse) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request, ['coach', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { user } = authResult
+
+    if (!user || !user.id) {
+      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
     }
 
     const { data: config, error } = await supabaseAdmin
@@ -86,9 +91,14 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request, ['coach', 'admin'])
-    if (!user || user instanceof NextResponse) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request, ['coach', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { user } = authResult
+
+    if (!user || !user.id) {
+      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -101,30 +111,84 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Validar estrutura dos dados antes de salvar
+    // Validar e sanitizar dados antes de salvar
     const configToSave = {
       user_id: user.id,
       area: 'coach',
-      columns: Array.isArray(columns) ? columns : [],
+      columns: Array.isArray(columns) ? columns.map((col: any, index: number) => ({
+        id: col.id || `custom-${Date.now()}-${index}`,
+        value: col.value || col.id || `custom_${Date.now()}_${index}`,
+        label: (col.label || 'Nova Coluna').trim(),
+        description: (col.description || '').trim(),
+        color: col.color || 'border-purple-300 bg-purple-50',
+        order: typeof col.order === 'number' ? col.order : index + 1
+      })) : [],
       card_fields: Array.isArray(card_fields) ? card_fields : [],
       quick_actions: Array.isArray(quick_actions) ? quick_actions : [],
       updated_at: new Date().toISOString()
     }
 
-    const { data, error } = await supabaseAdmin
+    console.log('💾 Salvando config do Kanban:', {
+      userId: user.id,
+      area: 'coach',
+      columnsCount: configToSave.columns.length
+    })
+
+    // Verificar se já existe configuração
+    const { data: existingConfig } = await supabaseAdmin
       .from('kanban_config')
-      .upsert(
-        configToSave,
-        {
-          onConflict: 'user_id,area'
-        }
-      )
-      .select()
-      .single()
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('area', 'coach')
+      .maybeSingle()
+
+    let data, error
+
+    if (existingConfig) {
+      // Atualizar configuração existente
+      const { data: updated, error: updateError } = await supabaseAdmin
+        .from('kanban_config')
+        .update({
+          columns: configToSave.columns,
+          card_fields: configToSave.card_fields,
+          quick_actions: configToSave.quick_actions,
+          updated_at: configToSave.updated_at
+        })
+        .eq('user_id', user.id)
+        .eq('area', 'coach')
+        .select()
+        .single()
+      
+      data = updated
+      error = updateError
+    } else {
+      // Criar nova configuração
+      const { data: created, error: createError } = await supabaseAdmin
+        .from('kanban_config')
+        .insert(configToSave)
+        .select()
+        .single()
+      
+      data = created
+      error = createError
+    }
 
     if (error) {
-      console.error('❌ Erro ao salvar kanban_config:', error)
-      throw error
+      console.error('❌ Erro ao salvar kanban_config:', {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        existingConfig: !!existingConfig
+      })
+      return NextResponse.json(
+        { 
+          error: 'Erro ao salvar configuração', 
+          details: error.message,
+          technical: process.env.NODE_ENV === 'development' ? error : undefined
+        },
+        { status: 500 }
+      )
     }
 
     // Retornar estrutura consistente
@@ -134,14 +198,21 @@ export async function PUT(request: NextRequest) {
       quick_actions: data.quick_actions || []
     }
 
+    console.log('✅ Config do Kanban salva com sucesso')
+
     return NextResponse.json({
       success: true,
       data: { config: responseData }
     })
   } catch (error: any) {
     console.error('❌ Erro ao salvar config do Kanban:', error)
+    console.error('Stack trace:', error.stack)
     return NextResponse.json(
-      { error: 'Erro ao salvar configuração', details: error.message },
+      { 
+        error: 'Erro ao salvar configuração', 
+        details: error.message,
+        technical: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }

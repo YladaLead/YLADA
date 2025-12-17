@@ -721,14 +721,21 @@ function KanbanContent() {
         credentials: 'include'
       })
 
-      if (response.ok) {
+      const data = await response.json()
+
+      if (response.ok && data.success) {
         setColumns(config.columns)
         setCardFields(config.card_fields)
         setQuickActions(config.quick_actions)
+        setErro(null) // Limpar erros anteriores
+      } else {
+        throw new Error(data.error || `Erro ${response.status}: ${response.statusText}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar config do Kanban:', error)
-      alert('Erro ao salvar configuração. Tente novamente.')
+      setErro(error.message || 'Erro ao salvar configuração. Tente novamente.')
+      // Auto-dismiss após 5 segundos
+      setTimeout(() => setErro(null), 5000)
     }
   }
 
@@ -777,28 +784,43 @@ function KanbanContent() {
   }
 
   // Adicionar nova coluna
-  const handleAddColumn = () => {
+  const handleAddColumn = async () => {
     if (!newColumnLabel.trim()) return
 
     const newColumn: Column = {
       id: `custom-${Date.now()}`,
       value: `custom_${Date.now()}`,
-      label: newColumnLabel,
-      description: newColumnDescription || '',
+      label: newColumnLabel.trim(),
+      description: (newColumnDescription || '').trim(),
       color: 'border-purple-300 bg-purple-50',
       order: columns.length + 1
     }
 
     const updatedColumns = [...columns, newColumn]
-    handleSaveConfig({
+    
+    // Atualizar estado local imediatamente para feedback visual
+    setColumns(updatedColumns)
+    setNewColumnLabel('')
+    setNewColumnDescription('')
+    setShowNewColumnForm(false)
+    
+    // Scroll para o final após atualizar o estado
+    setTimeout(() => {
+      const container = document.querySelector('.overflow-x-auto')
+      if (container) {
+        container.scrollTo({
+          left: container.scrollWidth,
+          behavior: 'smooth'
+        })
+      }
+    }, 100)
+    
+    // Salvar no backend
+    await handleSaveConfig({
       columns: updatedColumns,
       card_fields: cardFields,
       quick_actions: quickActions
     })
-    
-    setNewColumnLabel('')
-    setNewColumnDescription('')
-    setShowNewColumnForm(false)
   }
 
   // Editar coluna
@@ -1066,8 +1088,8 @@ function KanbanContent() {
               onDragEnd={handleDragEnd}
               onDragCancel={() => setActiveClient(null)}
             >
-              <div className="overflow-x-auto pb-4">
-                <div className="flex gap-4 min-w-max">
+              <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100" style={{ scrollBehavior: 'smooth' }}>
+                <div className="flex gap-4 min-w-max pr-8">
                   {clientesPorStatus.map((coluna) => (
                     <KanbanColumn
                       key={coluna.value}
@@ -1143,6 +1165,16 @@ function KanbanContent() {
                         setShowNewColumnForm(true)
                         setNewColumnLabel('')
                         setNewColumnDescription('')
+                        // Scroll para o final após um pequeno delay para garantir que o formulário seja renderizado
+                        setTimeout(() => {
+                          const container = document.querySelector('.overflow-x-auto')
+                          if (container) {
+                            container.scrollTo({
+                              left: container.scrollWidth,
+                              behavior: 'smooth'
+                            })
+                          }
+                        }, 100)
                       }}
                       className="bg-white rounded-2xl border-2 border-dashed border-gray-300 p-4 w-[280px] flex-shrink-0 min-h-[500px] flex flex-col items-center justify-center text-gray-500 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                     >
@@ -1220,6 +1252,7 @@ export default function KanbanClientesPage() {
     </ProtectedRoute>
   )
 }
+
 
 
 

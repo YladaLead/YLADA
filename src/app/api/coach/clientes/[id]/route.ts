@@ -227,74 +227,101 @@ export async function PUT(
 
     // Atualizar ou criar dados profissionais
     if (professional !== undefined) {
-      const professionalUpdate = {
-        client_id: id,
-        user_id: authenticatedUserId,
-        occupation: professional.occupation || null,
-        work_start_time: professional.work_start_time || null,
-        work_end_time: professional.work_end_time || null,
-        wake_time: professional.wake_time || null,
-        sleep_time: professional.sleep_time || null,
-        who_cooks: professional.who_cooks || null,
-        household_members: professional.household_members || null,
-        takes_lunchbox: professional.takes_lunchbox || false
-      }
+      try {
+        const professionalUpdate = {
+          client_id: id,
+          user_id: authenticatedUserId,
+          occupation: professional.occupation?.trim() || null,
+          work_start_time: professional.work_start_time || null,
+          work_end_time: professional.work_end_time || null,
+          wake_time: professional.wake_time || null,
+          sleep_time: professional.sleep_time || null,
+          who_cooks: professional.who_cooks?.trim() || null,
+          household_members: professional.household_members || null,
+          takes_lunchbox: professional.takes_lunchbox === true || professional.takes_lunchbox === 'true' || professional.takes_lunchbox === 1
+        }
 
-      await supabaseAdmin
-        .from('coach_client_professional')
-        .upsert(professionalUpdate, { onConflict: 'client_id' })
+        const { error: professionalError } = await supabaseAdmin
+          .from('coach_client_professional')
+          .upsert(professionalUpdate, { onConflict: 'client_id' })
+
+        if (professionalError) {
+          console.error('Erro ao atualizar dados profissionais:', professionalError)
+        }
+      } catch (professionalError: any) {
+        console.error('Erro ao processar dados profissionais:', professionalError)
+      }
     }
 
     // Atualizar ou criar dados de saúde e digestão (mesma tabela)
     if (health !== undefined || digestion !== undefined) {
-      // Buscar dados existentes para mesclar
-      const { data: existingHealth } = await supabaseAdmin
-        .from('coach_client_health')
-        .select('*')
-        .eq('client_id', id)
-        .eq('user_id', authenticatedUserId)
-        .maybeSingle()
+      try {
+        // Buscar dados existentes para mesclar
+        const { data: existingHealth } = await supabaseAdmin
+          .from('coach_client_health')
+          .select('*')
+          .eq('client_id', id)
+          .eq('user_id', authenticatedUserId)
+          .maybeSingle()
 
-      const mergedHealth = {
-        client_id: id,
-        user_id: authenticatedUserId,
-        // Campos de saúde (usar novos se fornecidos, senão manter existentes)
-        health_problems: health?.health_problems !== undefined ? (health.health_problems || null) : (existingHealth?.health_problems || null),
-        medications: health?.medications !== undefined ? (health.medications || []) : (existingHealth?.medications || []),
-        dietary_restrictions: health?.dietary_restrictions !== undefined ? (health.dietary_restrictions || null) : (existingHealth?.dietary_restrictions || null),
-        supplements_current: health?.supplements_current !== undefined ? (health.supplements_current || null) : (existingHealth?.supplements_current || null),
-        supplements_recommended: health?.supplements_recommended !== undefined ? (health.supplements_recommended || null) : (existingHealth?.supplements_recommended || null),
-        // Campos de digestão (usar novos se fornecidos, senão manter existentes)
-        bowel_function: digestion?.bowel_function !== undefined ? (digestion.bowel_function || null) : (existingHealth?.bowel_function || null),
-        digestive_complaints: digestion?.digestive_complaints !== undefined ? (digestion.digestive_complaints || null) : (existingHealth?.digestive_complaints || null)
+        const mergedHealth = {
+          client_id: id,
+          user_id: authenticatedUserId,
+          // Campos de saúde (usar novos se fornecidos, senão manter existentes)
+          health_problems: health?.health_problems !== undefined ? (health.health_problems?.trim() || null) : (existingHealth?.health_problems || null),
+          medications: health?.medications !== undefined ? (Array.isArray(health.medications) ? health.medications : []) : (existingHealth?.medications || []),
+          dietary_restrictions: health?.dietary_restrictions !== undefined ? (health.dietary_restrictions?.trim() || null) : (existingHealth?.dietary_restrictions || null),
+          supplements_current: health?.supplements_current !== undefined ? (health.supplements_current?.trim() || null) : (existingHealth?.supplements_current || null),
+          supplements_recommended: health?.supplements_recommended !== undefined ? (health.supplements_recommended?.trim() || null) : (existingHealth?.supplements_recommended || null),
+          // Campos de digestão (usar novos se fornecidos, senão manter existentes)
+          bowel_function: digestion?.bowel_function !== undefined ? (digestion.bowel_function?.trim() || null) : (existingHealth?.bowel_function || null),
+          digestive_complaints: digestion?.digestive_complaints !== undefined ? (digestion.digestive_complaints?.trim() || null) : (existingHealth?.digestive_complaints || null)
+        }
+
+        const { error: healthError } = await supabaseAdmin
+          .from('coach_client_health')
+          .upsert(mergedHealth, { onConflict: 'client_id' })
+
+        if (healthError) {
+          console.error('Erro ao atualizar dados de saúde:', healthError)
+        }
+      } catch (healthError: any) {
+        console.error('Erro ao processar dados de saúde:', healthError)
       }
-
-      await supabaseAdmin
-        .from('coach_client_health')
-        .upsert(mergedHealth, { onConflict: 'client_id' })
     }
 
     // Atualizar ou criar hábitos alimentares
     if (food_habits !== undefined) {
-      const foodHabitsUpdate = {
-        client_id: id,
-        user_id: authenticatedUserId,
-        water_intake_liters: food_habits.water_intake_liters || null,
-        breakfast: food_habits.breakfast || null,
-        morning_snack: food_habits.morning_snack || null,
-        lunch: food_habits.lunch || null,
-        afternoon_snack: food_habits.afternoon_snack || null,
-        dinner: food_habits.dinner || null,
-        supper: food_habits.supper || null,
-        snacks_between_meals: food_habits.snacks_between_meals || false,
-        snacks_description: food_habits.snacks_description || null,
-        alcohol_consumption: food_habits.alcohol_consumption || null,
-        soda_consumption: food_habits.soda_consumption || null
-      }
+      try {
+        const foodHabitsUpdate = {
+          client_id: id,
+          user_id: authenticatedUserId,
+          water_intake_liters: food_habits.water_intake_liters ? parseFloat(String(food_habits.water_intake_liters)) || null : null,
+          breakfast: food_habits.breakfast?.trim() || null,
+          morning_snack: food_habits.morning_snack?.trim() || null,
+          lunch: food_habits.lunch?.trim() || null,
+          afternoon_snack: food_habits.afternoon_snack?.trim() || null,
+          dinner: food_habits.dinner?.trim() || null,
+          supper: food_habits.supper?.trim() || null,
+          snacks_between_meals: food_habits.snacks_between_meals === true || food_habits.snacks_between_meals === 'true' || food_habits.snacks_between_meals === 1,
+          snacks_description: food_habits.snacks_description?.trim() || null,
+          alcohol_consumption: food_habits.alcohol_consumption?.trim() || null,
+          soda_consumption: food_habits.soda_consumption?.trim() || null
+        }
 
-      await supabaseAdmin
-        .from('coach_client_food_habits')
-        .upsert(foodHabitsUpdate, { onConflict: 'client_id' })
+        const { error: foodHabitsError } = await supabaseAdmin
+          .from('coach_client_food_habits')
+          .upsert(foodHabitsUpdate, { onConflict: 'client_id' })
+
+        if (foodHabitsError) {
+          console.error('Erro ao atualizar hábitos alimentares:', foodHabitsError)
+          // Não falhar a requisição inteira se apenas os hábitos alimentares falharem
+          // Mas logar o erro para debug
+        }
+      } catch (foodHabitsError: any) {
+        console.error('Erro ao processar hábitos alimentares:', foodHabitsError)
+        // Continuar mesmo se houver erro nos hábitos alimentares
+      }
     }
 
     // Criar evento no histórico se status mudou
@@ -325,8 +352,14 @@ export async function PUT(
 
   } catch (error: any) {
     console.error('Erro ao atualizar cliente:', error)
+    console.error('Stack trace:', error.stack)
+    console.error('Request body:', JSON.stringify(body, null, 2))
     return NextResponse.json(
-      { error: 'Erro interno do servidor', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
+      { 
+        error: 'Erro interno do servidor', 
+        technical: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }

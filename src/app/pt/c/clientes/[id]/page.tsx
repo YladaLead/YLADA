@@ -31,6 +31,7 @@ function ClienteDetalhesCoachContent() {
   const [cliente, setCliente] = useState<any>(null)
   const [mostrarModalExclusao, setMostrarModalExclusao] = useState(false)
   const [excluindo, setExcluindo] = useState(false)
+  const [forceEditInfo, setForceEditInfo] = useState(false)
 
   // Carregar cliente
   useEffect(() => {
@@ -205,7 +206,10 @@ function ClienteDetalhesCoachContent() {
               </div>
               <div className="flex items-center gap-2">
               <button
-                onClick={() => setActiveTab('info')}
+                onClick={() => {
+                  setActiveTab('info')
+                  setForceEditInfo(true)
+                }}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
               >
                 Editar
@@ -253,7 +257,11 @@ function ClienteDetalhesCoachContent() {
           {/* Tab Content */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             {activeTab === 'info' && (
-              <InfoTab cliente={cliente} clientId={clientId} />
+              <InfoTab cliente={cliente} clientId={clientId} initialEditando={forceEditInfo} onEditModeChange={(editing) => {
+                if (!editing) {
+                  setForceEditInfo(false)
+                }
+              }} />
             )}
             {activeTab === 'evolucao' && (
               <EvolucaoTab cliente={cliente} clientId={clientId} />
@@ -334,9 +342,49 @@ function ClienteDetalhesCoachContent() {
   )
 }
 
+// Função helper para formatar data para input type="date" (YYYY-MM-DD)
+function formatDateForInput(dateValue: string | null | undefined): string {
+  if (!dateValue) return ''
+  
+  try {
+    // Se já está no formato YYYY-MM-DD, retornar como está
+    if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      return dateValue
+    }
+    
+    // Tentar criar um objeto Date
+    const date = new Date(dateValue)
+    
+    // Verificar se a data é válida
+    if (isNaN(date.getTime())) {
+      return ''
+    }
+    
+    // Formatar para YYYY-MM-DD
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    
+    return `${year}-${month}-${day}`
+  } catch (error) {
+    console.warn('Erro ao formatar data:', dateValue, error)
+    return ''
+  }
+}
+
 // Componente: Aba Informações Básicas
-function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
-  const [editando, setEditando] = useState(false)
+function InfoTab({ 
+  cliente, 
+  clientId, 
+  initialEditando = false,
+  onEditModeChange 
+}: { 
+  cliente: any
+  clientId: string
+  initialEditando?: boolean
+  onEditModeChange?: (editing: boolean) => void
+}) {
+  const [editando, setEditando] = useState(initialEditando)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [sucesso, setSucesso] = useState(false)
@@ -345,7 +393,7 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
     email: cliente.email || '',
     phone: cliente.phone || '',
     phone_country_code: cliente.phone_country_code || 'BR',
-    birth_date: cliente.birth_date || '',
+    birth_date: formatDateForInput(cliente.birth_date),
     gender: cliente.gender || '',
     cpf: cliente.cpf || '',
     status: cliente.status || 'lead',
@@ -370,7 +418,7 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
         email: cliente.email || '',
         phone: cliente.phone || '',
         phone_country_code: cliente.phone_country_code || 'BR',
-        birth_date: cliente.birth_date || '',
+        birth_date: formatDateForInput(cliente.birth_date),
         gender: cliente.gender || '',
         cpf: cliente.cpf || '',
         status: cliente.status || 'lead',
@@ -388,6 +436,20 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
       })
     }
   }, [cliente])
+
+  // Sincronizar estado de edição com prop inicial
+  useEffect(() => {
+    if (initialEditando) {
+      setEditando(true)
+    }
+  }, [initialEditando])
+
+  // Notificar mudanças no modo de edição
+  useEffect(() => {
+    if (onEditModeChange) {
+      onEditModeChange(editando)
+    }
+  }, [editando, onEditModeChange])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -418,11 +480,16 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
       const { phone_country_code, ...payload } = formData
       
       // Preparar payload final
+      // Garantir que datas vazias sejam null
+      const birthDate = payload.birth_date && payload.birth_date.trim() !== '' 
+        ? payload.birth_date.trim() 
+        : null
+      
       const finalPayload: any = {
         name: payload.name.trim(),
         email: payload.email?.trim() || null,
         phone: payload.phone?.trim() || null,
-        birth_date: payload.birth_date || null,
+        birth_date: birthDate,
         gender: payload.gender || null,
         cpf: payload.cpf?.trim() || null,
         instagram: payload.instagram?.trim() || null,
@@ -457,16 +524,53 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
       if (data.success) {
         setSucesso(true)
         setEditando(false)
-        setTimeout(() => {
-          setSucesso(false)
-        // Recarregar página para atualizar dados
-        window.location.reload()
+        if (onEditModeChange) {
+          onEditModeChange(false)
+        }
+        // Recarregar dados do cliente sem recarregar a página inteira
+        setTimeout(async () => {
+          try {
+            const refreshResponse = await fetch(`/api/c/clientes?id=${clientId}`, {
+              credentials: 'include'
+            })
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json()
+              if (refreshData.success && refreshData.data.client) {
+                // Atualizar formData com os novos dados
+                setFormData({
+                  name: refreshData.data.client.name || '',
+                  email: refreshData.data.client.email || '',
+                  phone: refreshData.data.client.phone || '',
+                  phone_country_code: refreshData.data.client.phone_country_code || 'BR',
+                  birth_date: formatDateForInput(refreshData.data.client.birth_date),
+                  gender: refreshData.data.client.gender || '',
+                  cpf: refreshData.data.client.cpf || '',
+                  status: refreshData.data.client.status || 'lead',
+                  goal: refreshData.data.client.goal || '',
+                  instagram: refreshData.data.client.instagram || '',
+                  address: {
+                    street: refreshData.data.client.address_street || '',
+                    number: refreshData.data.client.address_number || '',
+                    complement: refreshData.data.client.address_complement || '',
+                    neighborhood: refreshData.data.client.address_neighborhood || '',
+                    city: refreshData.data.client.address_city || '',
+                    state: refreshData.data.client.address_state || '',
+                    zipcode: refreshData.data.client.address_zipcode || ''
+                  }
+                })
+              }
+            }
+            setSucesso(false)
+          } catch (refreshError) {
+            console.error('Erro ao recarregar dados:', refreshError)
+            // Se falhar, recarregar a página
+            window.location.reload()
+          }
         }, 1000)
       }
     } catch (error: any) {
       console.error('Erro ao atualizar cliente:', error)
       setErro(error.message || 'Erro ao atualizar cliente. Tente novamente.')
-    } finally {
       setSalvando(false)
     }
   }
@@ -628,7 +732,7 @@ function InfoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
               <textarea
                 id="goal"
                 name="goal"
-                value={formData.goal}
+                value={formData.goal || ''}
                 onChange={handleChange}
                 rows={4}
                 placeholder="Descreva o objetivo principal da cliente..."
@@ -2960,20 +3064,129 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
               ))}
           </div>
 
-          {/* Comparação */}
+          {/* Detalhes da Reavaliação Selecionada */}
           <div>
             {avaliacaoSelecionada ? (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Comparação</h3>
-                {carregandoComparacao ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                      <p className="text-gray-600">Carregando comparação...</p>
+              <div className="space-y-6">
+                {/* Informações da Reavaliação */}
+                {(() => {
+                  const avaliacaoSelecionadaObj = avaliacoes.find(a => a.id === avaliacaoSelecionada)
+                  if (!avaliacaoSelecionadaObj) return null
+                  
+                  return (
+                    <div className="bg-white rounded-lg p-6 border border-gray-200 space-y-4">
+                      <div className="flex items-center justify-between border-b pb-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {avaliacaoSelecionadaObj.assessment_name || `${avaliacaoSelecionadaObj.assessment_number || ''}ª Reavaliação`}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {new Date(avaliacaoSelecionadaObj.created_at).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                        {avaliacaoSelecionadaObj.assessment_type && (
+                          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium capitalize">
+                            {avaliacaoSelecionadaObj.assessment_type}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Interpretação */}
+                      {avaliacaoSelecionadaObj.interpretation && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-2">Interpretação / Observações</h4>
+                          <p className="text-sm text-gray-700 bg-purple-50 p-4 rounded-lg whitespace-pre-line">
+                            {avaliacaoSelecionadaObj.interpretation}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Recomendações */}
+                      {avaliacaoSelecionadaObj.recommendations && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-2">Recomendações / Plano</h4>
+                          <p className="text-sm text-gray-700 bg-blue-50 p-4 rounded-lg whitespace-pre-line">
+                            {avaliacaoSelecionadaObj.recommendations}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Anotações Internas */}
+                      {avaliacaoSelecionadaObj.data?.notes && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-2">Anotações Internas</h4>
+                          <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                            <p className="text-sm text-purple-800 whitespace-pre-line">
+                              {avaliacaoSelecionadaObj.data.notes}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Dados da Avaliação */}
+                      {avaliacaoSelecionadaObj.data && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">Dados da Avaliação</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {avaliacaoSelecionadaObj.data.weight && (
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <p className="text-xs text-gray-600">Peso</p>
+                                <p className="text-sm font-semibold text-gray-900">{avaliacaoSelecionadaObj.data.weight} kg</p>
+                              </div>
+                            )}
+                            {avaliacaoSelecionadaObj.data.height && (
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <p className="text-xs text-gray-600">Altura</p>
+                                <p className="text-sm font-semibold text-gray-900">{avaliacaoSelecionadaObj.data.height} m</p>
+                              </div>
+                            )}
+                            {avaliacaoSelecionadaObj.data.bmi && (
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <p className="text-xs text-gray-600">IMC</p>
+                                <p className="text-sm font-semibold text-gray-900">{avaliacaoSelecionadaObj.data.bmi}</p>
+                              </div>
+                            )}
+                            {avaliacaoSelecionadaObj.data.body_fat_percentage && (
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <p className="text-xs text-gray-600">% Gordura</p>
+                                <p className="text-sm font-semibold text-gray-900">{avaliacaoSelecionadaObj.data.body_fat_percentage}%</p>
+                              </div>
+                            )}
+                            {avaliacaoSelecionadaObj.data.muscle_mass && (
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <p className="text-xs text-gray-600">Massa Magra</p>
+                                <p className="text-sm font-semibold text-gray-900">{avaliacaoSelecionadaObj.data.muscle_mass} kg</p>
+                              </div>
+                            )}
+                            {avaliacaoSelecionadaObj.data.waist_circumference && (
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <p className="text-xs text-gray-600">Cintura</p>
+                                <p className="text-sm font-semibold text-gray-900">{avaliacaoSelecionadaObj.data.waist_circumference} cm</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ) : comparacao ? (
-                  <div className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
+                  )
+                })()}
+
+                {/* Comparação */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Comparação com Avaliação Anterior</h3>
+                  {carregandoComparacao ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Carregando comparação...</p>
+                      </div>
+                    </div>
+                  ) : comparacao ? (
+                    <div className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
                     {/* Informações Gerais */}
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3">Informações da Comparação</h4>
@@ -4692,6 +4905,7 @@ function ProgramaTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     </div>
   )
 }
+
 
 
 

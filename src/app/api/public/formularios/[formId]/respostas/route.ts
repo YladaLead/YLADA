@@ -106,9 +106,19 @@ export async function POST(
       )
     }
 
+    // Buscar perfil do usuário para determinar qual tabela usar
+    const { data: userProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('perfil')
+      .eq('user_id', form.user_id)
+      .maybeSingle()
+
+    const userPerfil = userProfile?.perfil || 'nutri' // Padrão para nutri se não encontrar
+
     console.log('✅ Formulário encontrado para salvar resposta:', {
       formId: form.id,
       userId: form.user_id,
+      perfil: userPerfil,
       isTemplate: form.is_template
     })
 
@@ -137,9 +147,12 @@ export async function POST(
         // Verificar se lead já existe (por email ou telefone)
         let existingLead = null
 
+        // Determinar qual tabela usar baseado no perfil
+        const leadsTable = userPerfil === 'coach' ? 'coach_leads' : 'nutri_leads'
+
         if (extractedData.email) {
           const { data: leadByEmail } = await supabaseAdmin
-            .from('coach_leads')
+            .from(leadsTable)
             .select('id')
             .eq('user_id', form.user_id)
             .eq('email', extractedData.email.toLowerCase().trim())
@@ -153,7 +166,7 @@ export async function POST(
         if (!existingLead && extractedData.phone) {
           const phoneClean = extractedData.phone.replace(/\D/g, '')
           const { data: leadByPhone } = await supabaseAdmin
-            .from('coach_leads')
+            .from(leadsTable)
             .select('id')
             .eq('user_id', form.user_id)
             .eq('phone', phoneClean)
@@ -167,7 +180,7 @@ export async function POST(
         if (existingLead) {
           // Lead já existe - vincular resposta
           leadId = existingLead.id
-          console.log('✅ Lead existente encontrado, vinculando resposta:', leadId)
+          console.log(`✅ Lead existente encontrado em ${leadsTable}, vinculando resposta:`, leadId)
         } else if (extractedData.name) {
           // Criar novo LEAD (não cliente)
           const leadData: any = {
@@ -194,18 +207,18 @@ export async function POST(
           }
 
           const { data: newLead, error: leadError } = await supabaseAdmin
-            .from('coach_leads')
+            .from(leadsTable)
             .insert(leadData)
             .select()
             .single()
 
           if (leadError) {
-            console.error('⚠️ Erro ao criar lead automaticamente:', leadError)
+            console.error(`⚠️ Erro ao criar lead automaticamente em ${leadsTable}:`, leadError)
             // Continuar mesmo se falhar - salvar resposta sem lead
           } else {
             leadId = newLead.id
             leadCreated = true
-            console.log('✅ Lead criado automaticamente:', leadId)
+            console.log(`✅ Lead criado automaticamente em ${leadsTable}:`, leadId)
           }
         }
       }

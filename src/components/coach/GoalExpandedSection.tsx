@@ -2,6 +2,36 @@
 
 import { useState, useEffect } from 'react'
 
+// Função helper para formatar data para input type="date" (YYYY-MM-DD)
+function formatDateForInput(dateValue: string | null | undefined): string {
+  if (!dateValue) return ''
+  
+  try {
+    // Se já está no formato YYYY-MM-DD, retornar como está
+    if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      return dateValue
+    }
+    
+    // Tentar criar um objeto Date
+    const date = new Date(dateValue)
+    
+    // Verificar se a data é válida
+    if (isNaN(date.getTime())) {
+      return ''
+    }
+    
+    // Formatar para YYYY-MM-DD
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    
+    return `${year}-${month}-${day}`
+  } catch (error) {
+    console.warn('Erro ao formatar data:', dateValue, error)
+    return ''
+  }
+}
+
 interface GoalExpandedSectionProps {
   clientId: string
   initialData?: {
@@ -26,7 +56,7 @@ export default function GoalExpandedSection({
     current_weight: initialData?.current_weight?.toString() || '',
     current_height: initialData?.current_height?.toString() || '',
     goal_weight: initialData?.goal_weight?.toString() || '',
-    goal_deadline: initialData?.goal_deadline || '',
+    goal_deadline: formatDateForInput(initialData?.goal_deadline),
     goal_type: initialData?.goal_type || '',
     goal: initialData?.goal || ''
   })
@@ -37,7 +67,7 @@ export default function GoalExpandedSection({
         current_weight: initialData.current_weight?.toString() || '',
         current_height: initialData.current_height?.toString() || '',
         goal_weight: initialData.goal_weight?.toString() || '',
-        goal_deadline: initialData.goal_deadline || '',
+        goal_deadline: formatDateForInput(initialData.goal_deadline),
         goal_type: initialData.goal_type || '',
         goal: initialData.goal || ''
       })
