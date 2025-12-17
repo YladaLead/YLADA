@@ -109,7 +109,7 @@ SELECT
   title,
   LEFT(objective, 80) as objective_preview,
   LEFT(guidance, 80) as guidance_preview,
-  array_length(checklist_items::jsonb::text::jsonb, 1) as num_reflexoes
+  jsonb_array_length(checklist_items) as num_reflexoes
 FROM journey_days
 WHERE day_number BETWEEN 1 AND 7
 ORDER BY day_number;
