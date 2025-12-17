@@ -107,9 +107,11 @@ export async function validateProtectedAccess(
     // 🚨 CORREÇÃO: Tentar getSession() primeiro (mais rápido), depois getUser() se necessário
     let user = null
     let userError = null
+    let session = null // Declarar session no escopo da função para reutilizar depois
     
     // Tentar getSession() primeiro (mais rápido e funciona melhor após login recente)
-    const { data: { session } } = await supabase.auth.getSession()
+    const sessionResult = await supabase.auth.getSession()
+    session = sessionResult.data?.session || null
     if (session?.user) {
       user = session.user
       console.log(`✅ ProtectedLayout [${area}]: Sessão encontrada via getSession() para user:`, user.email)
@@ -203,7 +205,11 @@ export async function validateProtectedAccess(
     }
 
     // Buscar sessão apenas para retornar (não para validação)
-    const { data: { session } } = await supabase.auth.getSession()
+    // session já foi declarada acima, apenas garantir que temos uma sessão válida
+    if (!session) {
+      const sessionResult = await supabase.auth.getSession()
+      session = sessionResult.data?.session || null
+    }
 
     return {
       session,
