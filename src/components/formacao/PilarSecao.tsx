@@ -23,18 +23,24 @@ export default function PilarSecao({ secao, pilarId }: PilarSecaoProps) {
             {secao.conteudo.split('\n').map((line, index) => {
               const trimmedLine = line.trim()
               
-              // Detectar emojis de caixas (🔹)
+              // Detectar emojis de caixas (🔹) - remover emoji do texto e renderizar apenas ícone visual
               if (trimmedLine.startsWith('🔹')) {
+                // Remover o emoji do texto (pode ter 1 ou mais caracteres Unicode)
+                const textWithoutEmoji = trimmedLine.replace(/^🔹\s*/, '').trim()
+                const titleMatch = textWithoutEmoji.match(/^(.+?)(?:\n|$)/)
+                const title = titleMatch ? titleMatch[1] : textWithoutEmoji
+                const description = textWithoutEmoji.replace(title, '').trim()
+                
                 return (
-                  <div key={index} className="ml-6 mb-3 flex items-start">
-                    <span className="mr-2 text-blue-600 text-lg">🔹</span>
+                  <div key={index} className="ml-6 mb-4 flex items-start">
+                    <span className="mr-3 text-blue-600 text-xl font-bold">•</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900 mb-1">
-                        {trimmedLine.substring(1).trim().split('\n')[0]}
+                      <p className="font-semibold text-gray-900 mb-2 text-lg">
+                        {title}
                       </p>
-                      {trimmedLine.includes('\n') && (
-                        <p className="text-gray-700 text-sm">
-                          {trimmedLine.substring(1).trim().split('\n').slice(1).join(' ')}
+                      {description && (
+                        <p className="text-gray-700 leading-relaxed">
+                          {description}
                         </p>
                       )}
                     </div>
