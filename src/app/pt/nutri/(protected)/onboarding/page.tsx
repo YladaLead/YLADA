@@ -50,6 +50,12 @@ export default function NutriOnboardingPage() {
 
   const handleComecar = () => {
     console.log('🚀 Iniciando diagnóstico - navegando para /pt/nutri/diagnostico')
+    // 🚨 CORREÇÃO: Marcar no sessionStorage que veio do onboarding
+    // Isso garante que a página de diagnóstico saiba que não deve redirecionar de volta
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('nutri_veio_do_onboarding', 'true')
+      sessionStorage.setItem('nutri_veio_do_onboarding_timestamp', Date.now().toString())
+    }
     // Usar push ao invés de replace para permitir voltar se necessário
     router.push('/pt/nutri/diagnostico')
   }

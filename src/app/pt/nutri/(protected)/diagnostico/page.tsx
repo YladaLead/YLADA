@@ -58,14 +58,30 @@ function NutriDiagnosticoContent() {
         return
       }
       
-      // 🚨 CORREÇÃO: Verificar se veio do onboarding através do referrer
+      // 🚨 CORREÇÃO: Verificar se veio do onboarding através de múltiplas formas
+      // 1. Verificar sessionStorage (mais confiável)
+      // 2. Verificar referrer como fallback
       // Se veio do onboarding, não redirecionar de volta (evita loop)
       if (typeof window !== 'undefined') {
+        // Verificar sessionStorage primeiro (mais confiável)
+        const veioDoOnboardingStorage = sessionStorage.getItem('nutri_veio_do_onboarding') === 'true'
+        const timestamp = sessionStorage.getItem('nutri_veio_do_onboarding_timestamp')
+        const timestampValido = timestamp && (Date.now() - parseInt(timestamp)) < 60000 // Válido por 1 minuto
+        
+        // Verificar referrer como fallback
         const referrer = document.referrer
-        const veioDoOnboarding = referrer.includes('/onboarding')
+        const veioDoOnboardingReferrer = referrer.includes('/onboarding')
+        
+        const veioDoOnboarding = veioDoOnboardingStorage && timestampValido || veioDoOnboardingReferrer
         
         if (veioDoOnboarding) {
-          console.log('✅ Usuário veio do onboarding - permitindo acesso ao diagnóstico')
+          console.log('✅ Usuário veio do onboarding - permitindo acesso ao diagnóstico', {
+            storage: veioDoOnboardingStorage && timestampValido,
+            referrer: veioDoOnboardingReferrer
+          })
+          // Limpar flag do sessionStorage após usar
+          sessionStorage.removeItem('nutri_veio_do_onboarding')
+          sessionStorage.removeItem('nutri_veio_do_onboarding_timestamp')
           setVerificandoFluxo(false)
           return
         }
