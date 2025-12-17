@@ -439,8 +439,8 @@ function InfoTab({
 
   // Sincronizar estado de edição com prop inicial
   useEffect(() => {
-    if (initialEditando) {
-      setEditando(true)
+    if (initialEditando !== undefined) {
+      setEditando(initialEditando)
     }
   }, [initialEditando])
 
