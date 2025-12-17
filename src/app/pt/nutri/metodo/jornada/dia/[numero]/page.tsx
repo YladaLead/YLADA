@@ -496,8 +496,8 @@ export default function JornadaDiaPage() {
         {/* 4. CHECKLIST DE FIXAÇÃO */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
           <h2 className="font-bold text-gray-900 mb-2 text-lg">✓ Checklist de Fixação</h2>
-          <p className="text-sm text-gray-600 mb-4 italic">
-            Use este checklist depois de concluir a ação prática para garantir que absorveu o conteúdo.
+          <p className="text-sm text-gray-600 mb-4">
+            Complete essas tarefas para garantir que você absorveu o conteúdo de hoje.
           </p>
           <div className="space-y-3">
             {day.checklist_items.map((item, index) => (

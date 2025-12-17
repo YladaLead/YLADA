@@ -34,14 +34,14 @@ export default function ReflexaoDia({
     <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
       <h2 className="font-bold text-gray-900 mb-3 text-lg">📝 Anotações do Dia</h2>
       <p className="text-sm text-gray-600 mb-4">
-        Use este espaço para registrar seus aprendizados, percepções e insights importantes do dia.
+        Anote o que você aprendeu hoje. Isso me ajuda a te orientar melhor.
       </p>
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onBlur={handleBlur}
         disabled={disabled}
-        placeholder="Escreva aqui o que aprendeu hoje, suas percepções ou qualquer insight importante."
+        placeholder="O que você aprendeu hoje? O que mais chamou atenção? Como você vai usar isso?"
         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
         rows={6}
       />

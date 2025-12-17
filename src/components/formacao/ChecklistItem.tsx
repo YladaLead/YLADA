@@ -104,29 +104,26 @@ export default function ChecklistItem({
         </span>
       </label>
 
-      {/* Campo de anotação aparece automaticamente quando marcado */}
-      {checked && (
-        <div className="mt-3 ml-8">
-          <textarea
-            value={localNote}
-            onChange={(e) => setLocalNote(e.target.value)}
-            placeholder="Escreva suas anotações aqui…"
-            disabled={disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-            rows={3}
-          />
-          {isSaving && (
-            <p className="text-xs text-gray-500 mt-1">Salvando...</p>
-          )}
-        </div>
-      )}
-
-      {/* Mostrar nota existente se houver e item não estiver marcado (caso raro) */}
-      {!checked && note && note.trim() && (
-        <div className="mt-2 ml-8 bg-purple-50 border-l-2 border-purple-300 rounded p-2">
-          <p className="text-sm text-gray-700 italic">"{note}"</p>
-        </div>
-      )}
+      {/* Campo de anotação sempre visível (não precisa clicar para abrir) */}
+      <div className="mt-3 ml-8">
+        <textarea
+          value={localNote}
+          onChange={(e) => setLocalNote(e.target.value)}
+          placeholder={
+            label.includes('fez sentido')
+              ? "O que você aprendeu? O que mais chamou atenção? Escreva aqui..."
+              : label.includes('ajudar')
+              ? "Pense em 3 coisas práticas: como isso vai te ajudar? O que vai mudar? Escreva aqui..."
+              : "Escreva suas anotações aqui..."
+          }
+          disabled={disabled}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+          rows={label.includes('ajudar') ? 4 : 3}
+        />
+        {isSaving && (
+          <p className="text-xs text-gray-500 mt-1">Salvando...</p>
+        )}
+      </div>
     </div>
   )
 }

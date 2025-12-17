@@ -5,9 +5,8 @@
 
 UPDATE journey_days
 SET checklist_items = '[
-  "Ler o conteúdo do Pilar 1",
   "Anotar o que mais fez sentido para você",
-  "Pensar em como usar isso no seu dia a dia"
+  "Pensar em 3 coisas que isso vai te ajudar no dia a dia"
 ]'::jsonb
 WHERE day_number = 1;
 
