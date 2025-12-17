@@ -85,12 +85,24 @@ export default function AutoRedirect() {
               const data = await response.json()
               const hasSubscription = data.hasActiveSubscription || data.bypassed
               
-              // Se tiver assinatura, redirecionar para home
+              // 🚨 CORREÇÃO: Para área Nutri, verificar diagnóstico antes de redirecionar
               if (hasSubscription) {
-                const homePath = getHomePath(perfil)
-                console.log('✅ AutoRedirect (UX): Usuário logado com assinatura em página de login, redirecionando para:', homePath)
+                let redirectPath = getHomePath(perfil)
+                
+                // Se for área Nutri, verificar diagnóstico
+                if (perfil === 'nutri' && userProfile) {
+                  if (!userProfile.diagnostico_completo) {
+                    redirectPath = '/pt/nutri/onboarding'
+                    console.log('ℹ️ AutoRedirect: Usuário Nutri sem diagnóstico, redirecionando para onboarding')
+                  } else {
+                    redirectPath = '/pt/nutri/home'
+                    console.log('✅ AutoRedirect: Usuário Nutri com diagnóstico, redirecionando para home')
+                  }
+                }
+                
+                console.log('✅ AutoRedirect (UX): Usuário logado com assinatura em página de login, redirecionando para:', redirectPath)
                 hasRedirectedRef.current = true
-                router.replace(homePath)
+                router.replace(redirectPath)
               } else {
                 // Se não tiver assinatura, permitir que usuário permaneça na página de login
                 console.log('ℹ️ AutoRedirect: Usuário logado sem assinatura, permitindo acesso à página de login')
