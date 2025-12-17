@@ -24,9 +24,9 @@ export default async function ProtectedNutriLayout({ children }: ProtectedLayout
     requireSubscription: true,
     allowAdmin: true,
     allowSupport: true,
-    // Rotas que não exigem assinatura (onboarding flow)
+    // Rotas que não exigem assinatura (onboarding flow + perfil)
     // O validateProtectedAccess verifica internamente se a requisição é para essas rotas
-    excludeRoutesFromSubscription: ['/onboarding', '/diagnostico'],
+    excludeRoutesFromSubscription: ['/onboarding', '/diagnostico', '/configuracao'],
     currentPath: '', // Será detectado internamente via headers se necessário
   })
 
