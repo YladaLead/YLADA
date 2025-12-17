@@ -54,13 +54,24 @@ export function useAuth() {
       
       console.log('🔍 Buscando perfil para user_id:', userId)
       
-      // Buscar perfil com apenas 1 tentativa (retry apenas em caso de erro de rede)
+      // 🚨 CORREÇÃO: Adicionar timeout para evitar travamento
+      // Criar uma Promise com timeout de 10 segundos
+      const profileQuery = supabase
+        .from('user_profiles')
+        .select('id, user_id, perfil, nome_completo, email, is_admin, is_support')
+        .eq('user_id', userId)
+        .maybeSingle()
+      
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout ao buscar perfil (10s)')), 10000)
+      })
+      
+      // Buscar perfil com timeout de 10 segundos
       try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('id, user_id, perfil, nome_completo, email, is_admin, is_support')
-          .eq('user_id', userId)
-          .maybeSingle()
+        const { data, error } = await Promise.race([
+          profileQuery,
+          timeoutPromise
+        ]) as any
 
         if (error) {
           console.error('❌ Erro ao buscar perfil:', {
@@ -238,7 +249,13 @@ export function useAuth() {
           
           // Cache não encontrado ou inválido - buscar perfil
           // Marcar loading=false apenas após buscar (ou timeout)
-          fetchUserProfile(sessionToUse.user.id, true)
+          // 🚨 CORREÇÃO: Adicionar timeout para evitar travamento
+          const profilePromise = fetchUserProfile(sessionToUse.user.id, true)
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout ao buscar perfil (10s)')), 10000)
+          })
+          
+          Promise.race([profilePromise, timeoutPromise])
             .then(profile => {
               if (!mounted) return
               if (profile) {
@@ -246,14 +263,14 @@ export function useAuth() {
               } else {
                 console.warn('⚠️ useAuth: Perfil não encontrado')
               }
-              setUserProfile(profile)
+              setUserProfile(profile as UserProfile | null)
               setLoading(false) // Marcar loading=false apenas após buscar perfil
             })
             .catch(err => {
               if (!mounted) return
-              console.error('❌ useAuth: Erro ao buscar perfil:', err?.message)
+              console.error('❌ useAuth: Erro ao buscar perfil:', err?.message || err)
               setUserProfile(null)
-              setLoading(false) // Marcar loading=false mesmo em caso de erro
+              setLoading(false) // Marcar loading=false mesmo em caso de erro ou timeout
             })
         } else {
           console.log('⚠️ useAuth: Nenhuma sessão encontrada', { isPWA, error })
@@ -348,28 +365,38 @@ export function useAuth() {
         
         profileLoading = true
         console.log('🔍 useAuth: Buscando perfil após auth change para user_id:', session.user.id)
-        
+
         try {
           // 🚀 OTIMIZAÇÃO: Não invalidar cache imediatamente - apenas atualizar se necessário
           // Cache será atualizado automaticamente quando perfil for buscado
           const shouldInvalidateCache = false // Sempre usar cache primeiro (mais rápido)
+
+          // 🚨 CORREÇÃO: Adicionar timeout para evitar travamento
+          const profilePromise = fetchUserProfile(session.user.id, !shouldInvalidateCache)
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout ao buscar perfil após auth change (10s)')), 10000)
+          })
           
-          const profile = await fetchUserProfile(session.user.id, !shouldInvalidateCache)
+          const profile = await Promise.race([profilePromise, timeoutPromise]) as UserProfile | null
           if (!mounted) return
-          
+
           if (profile) {
             console.log('✅ useAuth: Perfil carregado após auth change')
           } else {
             console.warn('⚠️ useAuth: Perfil não encontrado após auth change')
           }
           setUserProfile(profile)
+          setLoading(false) // 🚨 IMPORTANTE: Garantir que loading seja false mesmo se perfil não for encontrado
         } catch (err: any) {
           if (!mounted) return
-          console.error('❌ useAuth: Erro ao buscar perfil após auth change:', err?.message)
+          console.error('❌ useAuth: Erro ao buscar perfil após auth change:', err?.message || err)
           setUserProfile(null)
+          setLoading(false) // 🚨 IMPORTANTE: Garantir que loading seja false em caso de erro ou timeout
         } finally {
           profileLoading = false
-          setLoading(false)
+          if (mounted) {
+            setLoading(false) // Garantir que loading seja false no finally também
+          }
         }
       } else {
         console.log('⚠️ useAuth: Sessão removida')
