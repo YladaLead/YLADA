@@ -488,7 +488,7 @@ export default function JornadaDiaPage() {
                 userId={user?.id || ''}
                 itemIndex={index}
                 note={checklistNotes.get(index) || ''}
-                disabled={day.is_completed}
+                disabled={false} // Sempre permitir edição de reflexões (importante para LYA)
               />
             ))}
           </div>
@@ -499,7 +499,7 @@ export default function JornadaDiaPage() {
           dayNumber={dayNumber}
           initialContent={dailyNote}
           onSave={handleDailyNoteSave}
-          disabled={day.is_completed}
+          disabled={false} // Sempre permitir edição de anotações (importante para LYA)
         />
 
         {/* 6. MENSAGEM DO DIA */}
