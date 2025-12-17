@@ -30,7 +30,6 @@ export default function JornadaDiaPage() {
     daily_note?: string
   }) | null>(null)
   
-  const [checklist, setChecklist] = useState<boolean[]>([])
   const [checklistNotes, setChecklistNotes] = useState<Map<number, string>>(new Map())
   const [dailyNote, setDailyNote] = useState('')
   const [carregando, setCarregando] = useState(true)
