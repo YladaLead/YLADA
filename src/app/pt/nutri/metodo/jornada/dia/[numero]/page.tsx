@@ -58,37 +58,51 @@ export default function JornadaDiaPage() {
         setCarregando(true)
         setErro(null)
 
-        const res = await fetch(`/api/nutri/metodo/jornada/dia/${dayNumber}`, {
-          credentials: 'include',
-          signal: AbortSignal.timeout(10000) // Timeout de 10 segundos
-        })
+        // Criar AbortController para timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos
 
-        if (!res.ok) {
-          const errorData = await res.json()
-          // Se o erro for de bloqueio, mostrar modal
-          if (errorData.requires_previous_day || errorData.error?.includes('anterior')) {
-            setShowBlockedModal(true)
-            setCarregando(false)
-            return
+        try {
+          const res = await fetch(`/api/nutri/metodo/jornada/dia/${dayNumber}`, {
+            credentials: 'include',
+            signal: controller.signal
+          })
+
+          clearTimeout(timeoutId)
+
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({ error: 'Erro ao carregar dia' }))
+            // Se o erro for de bloqueio, mostrar modal
+            if (errorData.requires_previous_day || errorData.error?.includes('anterior')) {
+              setShowBlockedModal(true)
+              setCarregando(false)
+              return
+            }
+            throw new Error(errorData.error || 'Erro ao carregar dia')
           }
-          throw new Error(errorData.error || 'Erro ao carregar dia')
-        }
 
-        const data = await res.json()
-        setDay(data.data)
-        
-        // Inicializar notas dos exercícios de reflexão
-        // checklist_notes vem como objeto simples do JSON, converter para Map
-        if (data.data.checklist_notes) {
-          const notesObj = data.data.checklist_notes
-          setChecklistNotes(new Map(Object.entries(notesObj).map(([k, v]: [string, any]) => [parseInt(k), v])))
-        }
+          const data = await res.json()
+          setDay(data.data)
+          
+          // Inicializar notas dos exercícios de reflexão
+          // checklist_notes vem como objeto simples do JSON, converter para Map
+          if (data.data.checklist_notes) {
+            const notesObj = data.data.checklist_notes
+            setChecklistNotes(new Map(Object.entries(notesObj).map(([k, v]: [string, any]) => [parseInt(k), v])))
+          }
 
-        // Inicializar anotação diária
-        setDailyNote(data.data.daily_note || '')
+          // Inicializar anotação diária
+          setDailyNote(data.data.daily_note || '')
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId)
+          if (fetchError.name === 'AbortError') {
+            throw new Error('Tempo de carregamento excedido. Tente novamente.')
+          }
+          throw fetchError
+        }
       } catch (error: any) {
         console.error('Erro ao carregar dia:', error)
-        setErro(error.message || 'Erro ao carregar dia')
+        setErro(error.message || 'Erro ao carregar dia. Verifique sua conexão e tente novamente.')
       } finally {
         setCarregando(false)
       }
