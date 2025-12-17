@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import AcaoPraticaCard from '@/components/formacao/AcaoPraticaCard'
-import ChecklistItem from '@/components/formacao/ChecklistItem'
+import ExercicioReflexao from '@/components/jornada/ExercicioReflexao'
 import ReflexaoDia from '@/components/formacao/ReflexaoDia'
 import BlockedDayModal from '@/components/jornada/BlockedDayModal'
 import PilarContentInline from '@/components/jornada/PilarContentInline'
@@ -75,16 +75,7 @@ export default function JornadaDiaPage() {
         const data = await res.json()
         setDay(data.data)
         
-        // Inicializar checklist com base nos logs
-        // checklist_logs vem como objeto simples do JSON, converter para Map
-        const logsObj = data.data.checklist_logs || {}
-        const logsMap = new Map(Object.entries(logsObj).map(([k, v]) => [parseInt(k), v]))
-        const initialChecklist = (data.data.checklist_items || []).map((_: any, index: number) => {
-          return logsMap.get(index) || false
-        })
-        setChecklist(initialChecklist)
-
-        // Inicializar notas do checklist
+        // Inicializar notas dos exercícios de reflexão
         // checklist_notes vem como objeto simples do JSON, converter para Map
         if (data.data.checklist_notes) {
           const notesObj = data.data.checklist_notes
@@ -493,24 +484,22 @@ export default function JornadaDiaPage() {
           </div>
         )}
 
-        {/* 4. CHECKLIST DE FIXAÇÃO */}
+        {/* 4. EXERCÍCIO DE REFLEXÃO */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
-          <h2 className="font-bold text-gray-900 mb-2 text-lg">✓ Checklist de Fixação</h2>
+          <h2 className="font-bold text-gray-900 mb-2 text-lg">💭 Exercício de Reflexão</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Complete essas tarefas para garantir que você absorveu o conteúdo de hoje.
+            Reflita sobre o que você aprendeu hoje. Suas respostas me ajudam a te orientar melhor.
           </p>
-          <div className="space-y-3">
+          <div>
             {day.checklist_items.map((item, index) => (
-              <ChecklistItem
+              <ExercicioReflexao
                 key={index}
                 id={`day-${dayNumber}-item-${index}`}
                 label={item}
                 dayNumber={dayNumber}
                 userId={user?.id || ''}
                 itemIndex={index}
-                checked={checklist[index] || false}
                 note={checklistNotes.get(index) || ''}
-                onToggle={toggleChecklistItem}
                 disabled={day.is_completed}
               />
             ))}
