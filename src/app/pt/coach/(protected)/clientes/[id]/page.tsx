@@ -2997,6 +2997,7 @@ function EmocionalTab({ cliente, clientId }: { cliente: any; clientId: string })
 // Aba: Reavaliações
 function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string }) {
   const [avaliacoes, setAvaliacoes] = useState<any[]>([])
+  const [avaliacoesIniciais, setAvaliacoesIniciais] = useState<any[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [avaliacaoSelecionada, setAvaliacaoSelecionada] = useState<string | null>(null)
@@ -3006,6 +3007,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
   const [salvando, setSalvando] = useState(false)
   const [formData, setFormData] = useState({
     assessment_date: new Date().toISOString().split('T')[0],
+    parent_assessment_id: '',
     goal: '',
     observations: ''
   })
@@ -3015,17 +3017,31 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     const carregarAvaliacoes = async () => {
       try {
         setCarregando(true)
-        const response = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
+        
+        // Carregar reavaliações
+        const responseReavaliacoes = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?is_reevaluation=true`, {
           credentials: 'include'
         })
 
-        if (!response.ok) {
+        if (!responseReavaliacoes.ok) {
           throw new Error('Erro ao carregar reavaliações')
         }
 
-        const data = await response.json()
-        if (data.success) {
-          setAvaliacoes(data.data.assessments || [])
+        const dataReavaliacoes = await responseReavaliacoes.json()
+        if (dataReavaliacoes.success) {
+          setAvaliacoes(dataReavaliacoes.data.assessments || [])
+        }
+
+        // Carregar avaliações iniciais (não reavaliações) para o select
+        const responseIniciais = await fetch(`/api/coach/clientes/${clientId}/avaliacoes?is_reevaluation=false`, {
+          credentials: 'include'
+        })
+
+        if (responseIniciais.ok) {
+          const dataIniciais = await responseIniciais.json()
+          if (dataIniciais.success) {
+            setAvaliacoesIniciais(dataIniciais.data.assessments || [])
+          }
         }
       } catch (error: any) {
         console.error('Erro ao carregar reavaliações:', error)
@@ -3071,7 +3087,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     carregarComparacao()
   }, [clientId, avaliacaoSelecionada])
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -3084,11 +3100,19 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
     setErro(null)
     setSalvando(true)
 
+    // Validar se parent_assessment_id foi selecionado
+    if (!formData.parent_assessment_id) {
+      setErro('Selecione a avaliação base para criar a reavaliação')
+      setSalvando(false)
+      return
+    }
+
     try {
       const payload = {
         assessment_type: 'reavaliacao',
         assessment_name: `Reavaliação - ${formData.assessment_date}`,
         is_reevaluation: true,
+        parent_assessment_id: formData.parent_assessment_id,
         data: {
           assessment_date: formData.assessment_date,
           goal: formData.goal,
@@ -3117,6 +3141,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
         setMostrarForm(false)
         setFormData({
           assessment_date: new Date().toISOString().split('T')[0],
+          parent_assessment_id: '',
           goal: '',
           observations: ''
         })
@@ -3183,6 +3208,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
                 setMostrarForm(false)
                 setFormData({
                   assessment_date: new Date().toISOString().split('T')[0],
+                  parent_assessment_id: '',
                   goal: '',
                   observations: ''
                 })
@@ -3197,6 +3223,39 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
           </div>
 
           <form onSubmit={handleSubmitReavaliacao} className="space-y-4">
+            <div>
+              <label htmlFor="parent_assessment_id" className="block text-sm font-medium text-gray-700 mb-2">
+                Avaliação Base *
+              </label>
+              <select
+                id="parent_assessment_id"
+                name="parent_assessment_id"
+                value={formData.parent_assessment_id}
+                onChange={handleFormChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="">Selecione a avaliação base</option>
+                {avaliacoesIniciais
+                  .filter(a => !a.is_reevaluation)
+                  .sort((a, b) => {
+                    const numA = a.assessment_number || 0
+                    const numB = b.assessment_number || 0
+                    return numB - numA
+                  })
+                  .map(a => (
+                    <option key={a.id} value={a.id}>
+                      #{a.assessment_number || 1} • {a.assessment_name || 'Avaliação'} ({new Date(a.created_at).toLocaleDateString('pt-BR')})
+                    </option>
+                  ))}
+              </select>
+              {avaliacoesIniciais.length === 0 && (
+                <p className="mt-1 text-sm text-gray-500">
+                  Nenhuma avaliação inicial encontrada. Crie uma avaliação na aba "Avaliação Física" primeiro.
+                </p>
+              )}
+            </div>
+
             <div>
               <label htmlFor="assessment_date" className="block text-sm font-medium text-gray-700 mb-2">
                 Data *
@@ -3249,6 +3308,7 @@ function ReavaliacoesTab({ cliente, clientId }: { cliente: any; clientId: string
                   setMostrarForm(false)
                   setFormData({
                     assessment_date: new Date().toISOString().split('T')[0],
+                    parent_assessment_id: '',
                     goal: '',
                     observations: ''
                   })
