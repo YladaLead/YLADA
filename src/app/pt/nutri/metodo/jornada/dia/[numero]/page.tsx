@@ -59,7 +59,8 @@ export default function JornadaDiaPage() {
         setErro(null)
 
         const res = await fetch(`/api/nutri/metodo/jornada/dia/${dayNumber}`, {
-          credentials: 'include'
+          credentials: 'include',
+          signal: AbortSignal.timeout(10000) // Timeout de 10 segundos
         })
 
         if (!res.ok) {
@@ -129,7 +130,7 @@ export default function JornadaDiaPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          checklist_completed: checklist
+          checklist_completed: [] // Não há mais checkboxes, mas API ainda espera este campo
         })
       })
 
