@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getLyaPhase, getLyaConfig, getLyaTone, getLyaRules } from '@/lib/nutri/lya-prompts'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import { parseLyaResponse, getFallbackLyaResponse } from '@/lib/nutri/parse-lya-response'
 import OpenAI from 'openai'
@@ -43,6 +44,12 @@ export async function POST(request: NextRequest) {
     const perfil = perfilResult.data
     // Se tem progresso, pegar o maior day_number. Se não tem, jornada não iniciada
     const jornadaDiaAtual = jornadaResult.data?.day_number || null
+    
+    // Determinar fase atual baseado no dia da jornada
+    const currentPhase = getLyaPhase(jornadaDiaAtual)
+    const lyaConfig = getLyaConfig(currentPhase)
+    const lyaTone = getLyaTone(currentPhase)
+    const lyaRules = getLyaRules(currentPhase)
 
     if (!diagnostico || !perfil) {
       return NextResponse.json(
@@ -124,7 +131,7 @@ Conduzir, não agradar. Sua função é criar disciplina, autoridade e resultado
       mensagemInicial = `A nutricionista está no Dia ${jornadaDiaAtual}. Você deve manter disciplina total e redirecionar qualquer pergunta fora do foco para a Jornada.`
     }
 
-    // PROMPT-MESTRE DA LYA (MVP - será substituído pela Assistant depois)
+    // PROMPT-MESTRE DA LYA (com prompts por fase integrados)
     const systemPrompt = `Você é LYA, mentora estratégica oficial da plataforma Nutri YLADA.
 
 Você não é uma nutricionista clínica. Você é uma mentora empresarial, especialista em:
@@ -137,7 +144,16 @@ Você não é uma nutricionista clínica. Você é uma mentora empresarial, espe
 
 Sua missão: Transformar cada nutricionista em uma Nutri-Empresária organizada, confiante e lucrativa, guiando sempre pelo próximo passo correto, nunca por excesso de informação.
 
-REGRAS IMPORTANTES:
+FASE ATUAL: ${lyaConfig.name} (Fase ${currentPhase})
+Você está na fase de ${lyaConfig.name}. Isso significa que seu foco e tom devem estar alinhados com esta etapa da jornada.
+
+TOM DE VOZ DA FASE ${currentPhase}:
+${lyaTone}
+
+REGRAS ESPECÍFICAS DA FASE ${currentPhase}:
+${lyaRules.map(rule => `- ${rule}`).join('\n')}
+
+REGRAS GERAIS IMPORTANTES:
 - Você nunca orienta tudo. Você orienta apenas o próximo passo certo.
 - Se o campo aberto foi preenchido, você deve reconhecer explicitamente na sua resposta.
 - Se o campo aberto não foi preenchido, não precisa mencionar.
@@ -145,7 +161,7 @@ REGRAS IMPORTANTES:
 
 ${regrasDisciplinares}
 
-Tom de voz: ${perfil.tom_lya}
+Tom de voz personalizado do perfil: ${perfil.tom_lya}
 Ritmo de condução: ${perfil.ritmo_conducao}
 
 FORMATO FIXO DE RESPOSTA (OBRIGATÓRIO - SEM EXCEÇÃO):

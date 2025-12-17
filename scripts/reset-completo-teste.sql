@@ -66,3 +66,5 @@ LEFT JOIN nutri_diagnostico nd ON up.user_id = nd.user_id
 LEFT JOIN journey_progress jp ON up.user_id = jp.user_id AND jp.completed = true
 WHERE up.email = 'seu-email@exemplo.com' -- ⚠️⚠️⚠️ SUBSTITUA AQUI PELO EMAIL REAL ⚠️⚠️⚠️
 GROUP BY up.email, up.diagnostico_completo, nd.user_id;
+
+

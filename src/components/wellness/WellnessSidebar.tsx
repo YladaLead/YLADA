@@ -151,7 +151,7 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/pt')
+    // signOut já redireciona para /pt/wellness/login automaticamente
   }
 
   return (

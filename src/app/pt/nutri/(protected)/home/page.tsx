@@ -13,6 +13,8 @@ import AnotacoesBlock from '@/components/nutri/home/AnotacoesBlock'
 import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 import LyaChatWidget from '@/components/nutri/LyaChatWidget'
 import LyaAnaliseHoje from '@/components/nutri/LyaAnaliseHoje'
+import WelcomeCard from '@/components/nutri/home/WelcomeCard'
+import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 
 export default function NutriHome() {
   return (
@@ -25,6 +27,14 @@ export default function NutriHome() {
 function NutriHomeContent() {
   const { user, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { progress } = useJornadaProgress()
+  
+  // Verificar se completou Dia 1 (current_day >= 2 ou completed_days >= 1)
+  const dia1Completo = progress && (progress.current_day >= 2 || progress.completed_days >= 1)
+  
+  // Determinar se está nos primeiros dias (mostrar WelcomeCard simplificado)
+  const currentDay = progress?.current_day || null
+  const isFirstDays = currentDay === null || currentDay <= 1
 
   // Aguardar autenticação
   if (loading) {
@@ -71,55 +81,71 @@ function NutriHomeContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
-          {/* Vídeo 1 — Boas-vindas (apenas na primeira visita) */}
-          {videoUrl && (
-            <div className="mb-8">
-              <VideoPlayerYLADA
-                videoUrl={videoUrl}
-                title="Bem-vindo ao YLADA Premium"
-                description="Descubra como o YLADA vai transformar sua prática profissional."
-              />
-            </div>
+          {isFirstDays ? (
+            /* Dashboard Simplificado - Primeiros Dias */
+            <>
+              {/* Card Principal - WelcomeCard */}
+              <WelcomeCard currentDay={currentDay} />
+
+              {/* Análise da LYA Hoje */}
+              <div className="mb-8">
+                <LyaAnaliseHoje />
+              </div>
+            </>
+          ) : (
+            /* Dashboard Completo - Após Dia 1 */
+            <>
+              {/* Vídeo 1 — Boas-vindas (apenas na primeira visita) */}
+              {videoUrl && (
+                <div className="mb-8">
+                  <VideoPlayerYLADA
+                    videoUrl={videoUrl}
+                    title="Bem-vindo ao YLADA Premium"
+                    description="Descubra como o YLADA vai transformar sua prática profissional."
+                  />
+                </div>
+              )}
+
+              {/* Análise da LYA Hoje */}
+              <div className="mb-8">
+                <LyaAnaliseHoje />
+              </div>
+
+              {/* Bloco 1: Jornada de Transformação */}
+              <div className="mb-8">
+                <JornadaBlock />
+              </div>
+
+              {/* Bloco 2: Pilares do Método (visualmente secundário) */}
+              <div className="mb-8 opacity-75">
+                <PilaresBlock />
+              </div>
+
+              {/* Bloco 3: Ferramentas Profissionais */}
+              <div className="mb-8">
+                <FerramentasBlock />
+              </div>
+
+              {/* Bloco 4: Gestão GSAL */}
+              <div className="mb-8">
+                <GSALBlock />
+              </div>
+
+              {/* Bloco 5: Biblioteca / Materiais Extras (visualmente secundário) */}
+              <div className="mb-8 opacity-75">
+                <BibliotecaBlock />
+              </div>
+
+              {/* Bloco 6: Minhas Anotações (visualmente secundário) */}
+              <div className="mb-8 opacity-75">
+                <AnotacoesBlock />
+              </div>
+            </>
           )}
-
-          {/* Análise da LYA Hoje */}
-          <div className="mb-8">
-            <LyaAnaliseHoje />
-          </div>
-
-          {/* Bloco 1: Jornada de Transformação */}
-          <div className="mb-8">
-            <JornadaBlock />
-          </div>
-
-          {/* Bloco 2: Pilares do Método (visualmente secundário) */}
-          <div className="mb-8 opacity-75">
-            <PilaresBlock />
-          </div>
-
-          {/* Bloco 3: Ferramentas Profissionais */}
-          <div className="mb-8">
-            <FerramentasBlock />
-          </div>
-
-          {/* Bloco 4: Gestão GSAL */}
-          <div className="mb-8">
-            <GSALBlock />
-          </div>
-
-          {/* Bloco 5: Biblioteca / Materiais Extras (visualmente secundário) */}
-          <div className="mb-8 opacity-75">
-            <BibliotecaBlock />
-          </div>
-
-          {/* Bloco 6: Minhas Anotações (visualmente secundário) */}
-          <div className="mb-8 opacity-75">
-            <AnotacoesBlock />
-          </div>
         </div>
 
-        {/* Chat Widget Flutuante - Mentora LYA */}
-        <LyaChatWidget />
+        {/* Chat Widget Flutuante - Mentora LYA (apenas após completar Dia 1) */}
+        {dia1Completo && <LyaChatWidget />}
       </div>
     </div>
   )

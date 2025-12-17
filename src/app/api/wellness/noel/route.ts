@@ -906,11 +906,18 @@ export async function POST(request: NextRequest) {
       console.log('❌ [NOEL] Autenticação falhou')
       return authResult
     }
-    const { user } = authResult
+    const { user, profile } = authResult
     console.log('✅ [NOEL] Autenticação OK - User ID:', user.id)
+    console.log('✅ [NOEL] Perfil:', profile?.perfil, 'Admin:', profile?.is_admin, 'Suporte:', profile?.is_support)
 
     const body: NoelRequest = await request.json()
-    const { message, conversationHistory = [], threadId } = body
+    const { message, conversationHistory = [], threadId: rawThreadId } = body
+    
+    // Validar threadId: se for 'new' ou string vazia, usar undefined
+    // A OpenAI espera undefined/null para criar novo thread, não a string 'new'
+    const threadId = rawThreadId && rawThreadId !== 'new' && rawThreadId.startsWith('thread_') 
+      ? rawThreadId 
+      : undefined
 
     console.log('📥 [NOEL] Body recebido:', {
       messageLength: message?.length || 0,
@@ -973,7 +980,21 @@ export async function POST(request: NextRequest) {
     // ============================================
     // SEGURANÇA: Rate Limiting
     // ============================================
-    const rateLimitResult = await checkRateLimit(user.id)
+    // Admin e Suporte não têm rate limit (bypass)
+    const isAdminOrSupport = profile?.is_admin === true || profile?.is_support === true
+    
+    let rateLimitResult
+    if (isAdminOrSupport) {
+      console.log('✅ [NOEL] Admin/Suporte - bypass de rate limit')
+      rateLimitResult = {
+        allowed: true,
+        remaining: 999,
+        resetAt: new Date(Date.now() + 60000),
+        blocked: false,
+      }
+    } else {
+      rateLimitResult = await checkRateLimit(user.id)
+    }
     
     if (!rateLimitResult.allowed) {
       console.warn('⚠️ [NOEL] Rate limit excedido:', {
@@ -1044,7 +1065,7 @@ export async function POST(request: NextRequest) {
             response: clarificationMessage,
             module: intention.module,
             source: 'assistant_api',
-            threadId: threadId || 'new',
+            threadId: threadId || undefined,
             requiresProfileClarification: true,
             modelUsed: 'gpt-4.1-assistant',
           })
@@ -1111,7 +1132,7 @@ export async function POST(request: NextRequest) {
               response: helpfulResponse,
               module: intention.module,
               source: 'assistant_api',
-              threadId: threadId || 'new',
+              threadId: threadId || undefined,
               modelUsed: 'gpt-4.1-assistant',
               error: true,
               errorMessage: retryError.message || functionError.message || 'Erro ao processar mensagem'

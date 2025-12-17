@@ -16,7 +16,7 @@ export default function NutraNavBar({ showTitle = false, title }: NutraNavBarPro
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/pt')
+    // signOut já redireciona para /pt/nutra/login automaticamente
   }
 
   return (

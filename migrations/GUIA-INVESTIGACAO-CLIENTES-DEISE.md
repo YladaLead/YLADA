@@ -128,3 +128,7 @@ Com base nos resultados, identifique:
 - **Me envie os resultados da query rápida primeiro!**
 
 
+
+
+
+

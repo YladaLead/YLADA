@@ -149,3 +149,5 @@ export function getStatusMessage(phase: 1 | 2 | 3, currentDay: number): string {
   return `${phaseMsg} • ${progressMsg} • ${focusMsg}`
 }
 
+
+

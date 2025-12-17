@@ -3,16 +3,18 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
 
 export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
+  const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
 
   const toggleFaq = (index: number) => {
     setFaqOpen(faqOpen === index ? null : index)
   }
 
-  const openWhatsApp = () => {
-    window.open('https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20tirar%20dúvidas%20sobre%20o%20YLADA%20Nutri', '_blank')
+  const openLyaWidget = () => {
+    setLyaWidgetOpen(true)
   }
 
   const handleCheckout = async (planType: 'annual' | 'monthly') => {
@@ -1074,15 +1076,22 @@ export default function NutriLandingPage() {
         </section>
       </main>
 
-      {/* Botão flutuante fixo - WhatsApp */}
+      {/* Botão flutuante fixo - LYA IA Vendedora */}
       <button
-        onClick={openWhatsApp}
+        onClick={openLyaWidget}
         className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#2572FF] hover:to-[#0B57FF] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base"
         style={{ bottom: '80px' }}
       >
         <span className="text-xl sm:text-2xl">💬</span>
         <span>Tirar dúvida com uma consultora</span>
       </button>
+
+      {/* Widget LYA IA Vendedora */}
+      <LyaSalesWidget 
+        isOpen={lyaWidgetOpen} 
+        onOpenChange={setLyaWidgetOpen}
+        hideButton={true}
+      />
 
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-16">

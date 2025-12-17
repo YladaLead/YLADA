@@ -111,3 +111,7 @@
 - PDFs de aulas são vinculados automaticamente baseado no título e ordem
 - Se uma aula não for encontrada, o PDF não será vinculado (mas não quebra)
 
+
+
+
+

@@ -18,7 +18,7 @@ export default function WellnessNavBar({ showTitle = false, title, userName, use
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/pt')
+    // signOut já redireciona para /pt/wellness/login automaticamente
   }
 
   return (

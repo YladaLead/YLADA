@@ -260,3 +260,7 @@ ORDER BY created_at DESC;
 -- 6. Faça backup antes de executar qualquer UPDATE ou INSERT
 
 
+
+
+
+

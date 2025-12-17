@@ -123,18 +123,19 @@ export async function processMessageWithLya(
   functionCalls?: Array<{ name: string; arguments: any; result: any }>
 }> {
   // Escolher Assistant ID baseado no modo
+  // Se estiver em modo vendas e tiver ID específico, usa ele. Senão, usa fallback para ID geral
   const currentAssistantId = useSalesMode && ASSISTANT_SALES_ID 
     ? ASSISTANT_SALES_ID 
     : ASSISTANT_ID
 
   console.log('🔍 [LYA Handler] Verificando ASSISTANT_ID...')
-  console.log('🔍 [LYA Handler] Modo:', useSalesMode ? 'VENDAS' : 'MENTORIA')
-  console.log('🔍 [LYA Handler] ASSISTANT_ID:', currentAssistantId || '❌ NÃO CONFIGURADO')
+  console.log('🔍 [LYA Handler] Modo solicitado:', useSalesMode ? 'VENDAS' : 'MENTORIA')
+  console.log('🔍 [LYA Handler] ASSISTANT_SALES_ID disponível:', ASSISTANT_SALES_ID ? '✅ Sim' : '❌ Não')
+  console.log('🔍 [LYA Handler] ASSISTANT_ID disponível:', ASSISTANT_ID ? '✅ Sim' : '❌ Não')
+  console.log('🔍 [LYA Handler] ASSISTANT_ID escolhido:', currentAssistantId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
   
   if (!currentAssistantId) {
-    const errorMsg = useSalesMode
-      ? 'OPENAI_ASSISTANT_LYA_SALES_ID não configurado. Configure a variável de ambiente.'
-      : 'OPENAI_ASSISTANT_LYA_ID não configurado. Configure a variável de ambiente OPENAI_ASSISTANT_LYA_ID'
+    const errorMsg = 'Nenhum Assistant ID configurado. Configure OPENAI_ASSISTANT_LYA_SALES_ID ou OPENAI_ASSISTANT_LYA_ID.'
     console.error('❌ [LYA Handler]', errorMsg)
     throw new Error(errorMsg)
   }

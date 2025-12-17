@@ -16,7 +16,7 @@ export default function CoachNavBar({ showTitle = false, title }: CoachNavBarPro
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/pt')
+    // signOut já redireciona para /pt/coach/login automaticamente
   }
 
   return (

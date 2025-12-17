@@ -16,7 +16,7 @@ export default function NutriNavBar({ showTitle = false, title }: NutriNavBarPro
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/pt')
+    // signOut já redireciona para /pt/nutri/login automaticamente
   }
 
   return (

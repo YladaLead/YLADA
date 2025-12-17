@@ -96,7 +96,19 @@ export async function GET(request: NextRequest) {
     // Se tiver perfil, redirecionar para área correta
     if (userProfile?.perfil) {
       if (userProfile.perfil === 'nutri') {
-        redirectPath = '/pt/nutri/home'
+        // Verificar se tem diagnóstico completo
+        const { data: nutriProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('diagnostico_completo')
+          .eq('user_id', data.session.user.id)
+          .maybeSingle()
+        
+        // Se não tem diagnóstico, redirecionar para onboarding
+        if (!nutriProfile?.diagnostico_completo) {
+          redirectPath = '/pt/nutri/onboarding'
+        } else {
+          redirectPath = '/pt/nutri/home'
+        }
       } else if (userProfile.perfil === 'coach') {
         redirectPath = '/pt/coach/home'
       } else if (userProfile.perfil === 'nutra') {

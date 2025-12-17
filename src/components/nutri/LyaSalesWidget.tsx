@@ -9,8 +9,26 @@ interface Message {
   created_at?: string
 }
 
-export default function LyaSalesWidget() {
-  const [isOpen, setIsOpen] = useState(false)
+interface LyaSalesWidgetProps {
+  isOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  hideButton?: boolean
+}
+
+export default function LyaSalesWidget({ 
+  isOpen: externalIsOpen, 
+  onOpenChange,
+  hideButton = false 
+}: LyaSalesWidgetProps = {}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+  const setIsOpen = (value: boolean) => {
+    if (externalIsOpen === undefined) {
+      setInternalIsOpen(value)
+    } else {
+      onOpenChange?.(value)
+    }
+  }
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
@@ -110,10 +128,13 @@ export default function LyaSalesWidget() {
   ]
 
   if (!isOpen) {
+    if (hideButton) {
+      return null
+    }
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-full p-4 shadow-2xl z-50 transition-all animate-pulse"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] hover:from-[#2572FF] hover:to-[#0B57FF] text-white rounded-full p-4 shadow-2xl z-50 transition-all animate-pulse"
         aria-label="Falar com LYA sobre a plataforma"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,7 +148,7 @@ export default function LyaSalesWidget() {
   return (
     <div className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div className="bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
           <span className="font-semibold">LYA - Tire suas dúvidas</span>
@@ -135,7 +156,7 @@ export default function LyaSalesWidget() {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="hover:bg-purple-800 rounded p-1"
+            className="hover:bg-blue-800 rounded p-1"
             aria-label={isMinimized ? 'Expandir' : 'Minimizar'}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +170,7 @@ export default function LyaSalesWidget() {
               setMessages([])
               setThreadId(null)
             }}
-            className="hover:bg-purple-800 rounded p-1"
+            className="hover:bg-blue-800 rounded p-1"
             aria-label="Fechar"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +192,7 @@ export default function LyaSalesWidget() {
                     <button
                       key={index}
                       onClick={() => sendMessage(action)}
-                      className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full hover:bg-purple-100 transition-colors border border-purple-200"
+                      className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors border border-blue-200"
                     >
                       {action}
                     </button>
@@ -188,7 +209,7 @@ export default function LyaSalesWidget() {
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     msg.sender_type === 'user'
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white'
+                      ? 'bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white'
                       : msg.sender_type === 'system'
                       ? 'bg-yellow-100 text-yellow-800 text-sm'
                       : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
@@ -208,9 +229,9 @@ export default function LyaSalesWidget() {
               <div className="flex justify-start">
                 <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                   <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                   </div>
                 </div>
               </div>
@@ -228,13 +249,13 @@ export default function LyaSalesWidget() {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Digite sua dúvida sobre a plataforma..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B57FF] focus:border-transparent"
                 disabled={loading}
               />
               <button
                 onClick={() => sendMessage()}
                 disabled={loading || !inputMessage.trim()}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
+                className="bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 py-2 rounded-lg hover:from-[#2572FF] hover:to-[#0B57FF] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

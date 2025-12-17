@@ -57,10 +57,15 @@ export async function POST(request: NextRequest) {
     // ============================================
     // Assistants API com System Prompt de VENDAS
     // ============================================
-    const assistantId = process.env.OPENAI_ASSISTANT_LYA_SALES_ID || process.env.OPENAI_ASSISTANT_LYA_ID || process.env.OPENAI_ASSISTANT_ID
+    // Tenta primeiro o ID específico de vendas, depois fallback para o ID geral
+    const salesAssistantId = process.env.OPENAI_ASSISTANT_LYA_SALES_ID
+    const fallbackAssistantId = process.env.OPENAI_ASSISTANT_LYA_ID || process.env.OPENAI_ASSISTANT_ID
+    const assistantId = salesAssistantId || fallbackAssistantId
     
     console.log('🔍 [LYA Sales] Verificando configuração Assistants API...')
-    console.log('🔍 [LYA Sales] OPENAI_ASSISTANT_LYA_SALES_ID:', assistantId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
+    console.log('🔍 [LYA Sales] OPENAI_ASSISTANT_LYA_SALES_ID:', salesAssistantId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
+    console.log('🔍 [LYA Sales] Usando fallback OPENAI_ASSISTANT_LYA_ID:', !salesAssistantId && fallbackAssistantId ? '✅ Sim' : '❌ Não')
+    console.log('🔍 [LYA Sales] Assistant ID final:', assistantId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
     
     if (assistantId) {
       try {
@@ -77,11 +82,15 @@ export async function POST(request: NextRequest) {
         
         let assistantResult
         try {
+          // Se tiver ID específico de vendas, usa modo vendas. Senão, usa modo normal mas com fallback
+          const useSalesMode = !!salesAssistantId
+          console.log('🎯 [LYA Sales] Modo:', useSalesMode ? 'VENDAS (ID específico)' : 'MENTORIA (fallback)')
+          
           assistantResult = await processMessageWithLya(
             message,
             tempUserId, // Usar ID temporário para visitantes
             threadId,
-            true // useSalesMode = true para usar Assistant de vendas
+            useSalesMode // useSalesMode = true apenas se tiver ID específico de vendas
           )
         } catch (functionError: any) {
           console.error('❌ [LYA Sales] Erro ao processar mensagem:', functionError)

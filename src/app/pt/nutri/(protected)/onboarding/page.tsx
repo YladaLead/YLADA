@@ -55,8 +55,10 @@ export default function NutriOnboardingPage() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('nutri_veio_do_onboarding', 'true')
       sessionStorage.setItem('nutri_veio_do_onboarding_timestamp', Date.now().toString())
+      console.log('✅ Flag de onboarding salva no sessionStorage')
     }
     // Usar push ao invés de replace para permitir voltar se necessário
+    console.log('🔄 Navegando para /pt/nutri/diagnostico...')
     router.push('/pt/nutri/diagnostico')
   }
 

@@ -107,21 +107,23 @@ export async function validateProtectedAccess(
     // 🚨 CORREÇÃO: Tentar getSession() primeiro (mais rápido), depois getUser() se necessário
     let user = null
     let userError = null
-    let session = null // Declarar session no escopo da função para reutilizar depois
     
-    // Tentar getSession() primeiro (mais rápido e funciona melhor após login recente)
-    const sessionResult = await supabase.auth.getSession()
-    session = sessionResult.data?.session || null
-    if (session?.user) {
-      user = session.user
-      console.log(`✅ ProtectedLayout [${area}]: Sessão encontrada via getSession() para user:`, user.email)
+    // 🚨 CORREÇÃO: Usar getUser() primeiro para validação segura (conforme aviso do Supabase)
+    // getUser() valida com o servidor, enquanto getSession() apenas lê do storage (pode ser inseguro)
+    const getUserResult = await supabase.auth.getUser()
+    user = getUserResult.data?.user || null
+    userError = getUserResult.error || null
+    
+    if (user) {
+      console.log(`✅ ProtectedLayout [${area}]: Usuário autenticado via getUser() para user:`, user.email)
     } else {
-      // Se getSession() não retornar, tentar getUser() (valida com servidor)
-      const getUserResult = await supabase.auth.getUser()
-      user = getUserResult.data?.user || null
-      userError = getUserResult.error || null
-      if (user) {
-        console.log(`✅ ProtectedLayout [${area}]: Usuário encontrado via getUser() para user:`, user.email)
+      // Fallback: Tentar getSession() se getUser() falhar (para casos de rede lenta)
+      const sessionResult = await supabase.auth.getSession()
+      const session = sessionResult.data?.session || null
+      if (session?.user) {
+        user = session.user
+        console.log(`⚠️ ProtectedLayout [${area}]: Usando getSession() como fallback (getUser() falhou) para user:`, user.email)
+        console.log(`⚠️ Aviso: getSession() pode não ser seguro - erro do getUser():`, userError?.message)
       } else {
         console.log(`⚠️ ProtectedLayout [${area}]: getSession() e getUser() não retornaram usuário`, { 
           sessionExists: !!session, 
@@ -205,11 +207,10 @@ export async function validateProtectedAccess(
     }
 
     // Buscar sessão apenas para retornar (não para validação)
-    // session já foi declarada acima, apenas garantir que temos uma sessão válida
-    if (!session) {
-      const sessionResult = await supabase.auth.getSession()
-      session = sessionResult.data?.session || null
-    }
+    // Usar getSession() apenas para obter o objeto de sessão completo
+    let session = null
+    const sessionResult = await supabase.auth.getSession()
+    session = sessionResult.data?.session || null
 
     return {
       session,

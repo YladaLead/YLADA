@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
+import { getCurrentPhase, isItemAvailable, type SidebarItemKey } from '@/lib/nutri/sidebar-phases'
+import { getItemMicrocopy, getPhaseMessage, getStatusMessage } from '@/lib/nutri/sidebar-microcopy'
 
 interface MenuItem {
   title: string
@@ -19,6 +21,7 @@ interface MenuSection {
   href?: string
   items?: MenuItem[]
   color: string
+  isBlocked?: boolean
 }
 
 interface NutriSidebarProps {
@@ -35,6 +38,10 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
   
   // Verificar se completou Dia 1 (current_day >= 2)
   const dia1Completo = progress && progress.current_day >= 2
+  
+  // Determinar fase atual baseado no progresso
+  const currentDay = progress?.current_day || null
+  const currentPhase = getCurrentPhase(currentDay)
 
   // Carregar contador de novos leads
   useEffect(() => {
@@ -73,76 +80,104 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
     )
   }
 
-  const menuItems: MenuSection[] = [
-    {
-      title: 'Home',
-      icon: '🏠',
-      href: '/pt/nutri/home',
-      color: 'gray'
-    },
-    {
-      title: 'Jornada 30 Dias',
-      icon: '📘',
-      href: '/pt/nutri/metodo/jornada',
-      color: 'blue'
-    },
-    {
-      title: 'Pilares do Método',
-      icon: '📚',
-      href: '/pt/nutri/metodo/pilares',
-      color: 'purple'
-    },
-    {
-      title: 'Ferramentas',
-      icon: '🧰',
-      color: 'blue',
-      href: '/pt/nutri/ferramentas/templates',
-      items: [
-        { title: 'Templates', icon: '🎨', href: '/pt/nutri/ferramentas/templates' },
-        { title: 'Criar Quiz', icon: '🎯', href: '/pt/nutri/quiz-personalizado' },
-      ]
-    },
-    // Gestão GSAL - sempre visível e acessível
-    {
-      title: 'Gestão GSAL',
-      icon: '📊',
-      color: 'green',
-      href: '/pt/nutri/gsal',
-      items: [
-        { title: 'Painel GSAL', icon: '📊', href: '/pt/nutri/gsal' },
-        { title: 'Leads', icon: '🎯', href: '/pt/nutri/leads', badge: novosLeadsCount > 0 ? novosLeadsCount : undefined },
-        { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
-        { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
-        { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
-        { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
-        { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
-      ]
-    },
-    {
-      title: 'Biblioteca',
-      icon: '🎒',
-      href: '/pt/nutri/metodo/manual',
-      color: 'yellow'
-    },
-    {
-      title: 'Minhas Anotações',
-      icon: '📝',
-      href: '/pt/nutri/anotacoes',
-      color: 'purple'
-    },
-    {
-      title: 'Perfil Nutri-Empresária',
-      icon: '🎯',
-      href: '/pt/nutri/diagnostico',
-      color: 'orange'
-    },
-    {
-      title: 'Configurações',
-      icon: '⚙️',
-      href: '/pt/nutri/configuracao',
-      color: 'gray'
-    }
-  ]
+  // Mapeamento de títulos para chaves do sistema de fases
+  const titleToKey: Record<string, SidebarItemKey> = {
+    'Home': 'home',
+    'Jornada 30 Dias': 'jornada',
+    'Pilares do Método': 'pilares',
+    'Ferramentas': 'ferramentas',
+    'Gestão GSAL': 'gsal',
+    'Biblioteca': 'biblioteca',
+    'Minhas Anotações': 'anotacoes',
+    'Perfil Nutri-Empresária': 'perfil',
+    'Configurações': 'configuracoes'
+  }
+
+  // Filtrar itens baseado na fase atual (mostrar bloqueados também, mas com indicador)
+  const menuItems = useMemo(() => {
+    // Todos os itens do menu (estrutura completa)
+    const allMenuItems: MenuSection[] = [
+      {
+        title: 'Home',
+        icon: '🏠',
+        href: '/pt/nutri/home',
+        color: 'gray'
+      },
+      {
+        title: 'Jornada 30 Dias',
+        icon: '📘',
+        href: '/pt/nutri/metodo/jornada',
+        color: 'blue'
+      },
+      {
+        title: 'Pilares do Método',
+        icon: '📚',
+        href: '/pt/nutri/metodo/pilares',
+        color: 'purple'
+      },
+      {
+        title: 'Ferramentas',
+        icon: '🧰',
+        color: 'blue',
+        href: '/pt/nutri/ferramentas/templates',
+        items: [
+          { title: 'Templates', icon: '🎨', href: '/pt/nutri/ferramentas/templates' },
+          { title: 'Criar Quiz', icon: '🎯', href: '/pt/nutri/quiz-personalizado' },
+        ]
+      },
+      {
+        title: 'Gestão GSAL',
+        icon: '📊',
+        color: 'green',
+        href: '/pt/nutri/gsal',
+        items: [
+          { title: 'Painel GSAL', icon: '📊', href: '/pt/nutri/gsal' },
+          { title: 'Leads', icon: '🎯', href: '/pt/nutri/leads', badge: novosLeadsCount > 0 ? novosLeadsCount : undefined },
+          { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
+          { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
+          { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
+          { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
+          { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
+        ]
+      },
+      {
+        title: 'Biblioteca',
+        icon: '🎒',
+        href: '/pt/nutri/metodo/manual',
+        color: 'yellow'
+      },
+      {
+        title: 'Minhas Anotações',
+        icon: '📝',
+        href: '/pt/nutri/anotacoes',
+        color: 'purple'
+      },
+      {
+        title: 'Perfil Nutri-Empresária',
+        icon: '🎯',
+        href: '/pt/nutri/diagnostico',
+        color: 'orange'
+      },
+      {
+        title: 'Configurações',
+        icon: '⚙️',
+        href: '/pt/nutri/configuracao',
+        color: 'gray'
+      }
+    ]
+
+    // Mostrar todos os itens, mas marcar quais estão bloqueados
+    // Isso permite mostrar progressão e gerar desejo, não frustração
+    return allMenuItems.map(item => {
+      const itemKey = titleToKey[item.title]
+      if (!itemKey) {
+        // Se não tem mapeamento, sempre disponível (fallback)
+        return { ...item, isBlocked: false }
+      }
+      const available = isItemAvailable(itemKey, currentDay)
+      return { ...item, isBlocked: !available }
+    })
+  }, [currentDay, novosLeadsCount])
 
   const isActive = (href: string) => {
     if (href === '/pt/nutri/home' || href === '/pt/nutri/dashboard') {
@@ -241,6 +276,20 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
           </button>
         </div>
 
+        {/* Indicador de Fase (opcional, discreto) */}
+        {progress && currentDay && (
+          <div className="px-3 py-2 border-b border-gray-100 bg-blue-50/50">
+            <p className="text-xs text-gray-600 font-medium">
+              {getPhaseMessage(currentPhase)}
+            </p>
+            {currentDay > 0 && (
+              <p className="text-xs text-gray-500 mt-0.5">
+                Dia {currentDay} de 30
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Menu Principal */}
         <nav className="p-3 space-y-1">
           {menuItems.map((item) => {
@@ -252,6 +301,10 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
 
             // Se tem subitens, mostrar dropdown
             if (item.items && item.items.length > 0) {
+              const itemKey = titleToKey[item.title] || ''
+              const itemMicrocopy = getItemMicrocopy(itemKey)
+              const isBlocked = (item as any).isBlocked || false
+              
               return (
                 <div 
                   key={item.title}
@@ -259,25 +312,44 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
                   onMouseEnter={() => setHoveredSection(sectionId)}
                   onMouseLeave={() => setHoveredSection(null)}
                 >
-                  <button
-                    onClick={() => toggleSection(sectionId)}
-                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                      sectionIsActive || isHovered
-                        ? `${colors.bg} ${colors.text} font-medium`
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="text-lg flex-shrink-0">{item.icon}</span>
-                    <span className="flex-1 text-left truncate">{item.title}</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  {isBlocked ? (
+                    <div
+                      title={itemMicrocopy?.tooltip || 'Disponível após concluir sua fase atual.'}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 cursor-not-allowed opacity-60"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                      <span className="text-lg flex-shrink-0">🔒</span>
+                      <span className="flex-1 text-left truncate">{item.title}</span>
+                      <svg
+                        className="w-4 h-4 transition-transform flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => toggleSection(sectionId)}
+                      title={itemMicrocopy?.tooltip || item.title}
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                        sectionIsActive || isHovered
+                          ? `${colors.bg} ${colors.text} font-medium`
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span className="text-lg flex-shrink-0">{item.icon}</span>
+                      <span className="flex-1 text-left truncate">{item.title}</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  )}
 
                   {/* Subitens - Desktop (hover) e Mobile (expandido) */}
                   {(isHovered || isExpanded) && (
@@ -341,20 +413,36 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
             }
 
             // Item simples (sem subitens)
+            const itemKey = titleToKey[item.title] || ''
+            const itemMicrocopy = getItemMicrocopy(itemKey)
+            const isBlocked = itemKey && !isItemAvailable(itemKey, currentDay)
+            
             return (
-              <Link
-                key={item.title}
-                href={item.href || '#'}
-                onClick={onMobileClose}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  sectionIsActive
-                    ? `${colors.bg} ${colors.text} font-medium`
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <span className="text-lg flex-shrink-0">{item.icon}</span>
-                <span className="flex-1 truncate">{item.title}</span>
-              </Link>
+              <div key={item.title} className="relative group">
+                {isBlocked ? (
+                  <div
+                    title={itemMicrocopy?.tooltip || 'Disponível após concluir sua fase atual.'}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 cursor-not-allowed opacity-60"
+                  >
+                    <span className="text-lg flex-shrink-0">🔒</span>
+                    <span className="flex-1 truncate">{item.title}</span>
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href || '#'}
+                    onClick={onMobileClose}
+                    title={itemMicrocopy?.tooltip || item.title}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                      sectionIsActive
+                        ? `${colors.bg} ${colors.text} font-medium`
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="text-lg flex-shrink-0">{item.icon}</span>
+                    <span className="flex-1 truncate">{item.title}</span>
+                  </Link>
+                )}
+              </div>
             )
           })}
         </nav>

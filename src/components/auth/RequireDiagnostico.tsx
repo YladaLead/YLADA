@@ -51,8 +51,8 @@ export default function RequireDiagnostico({ children, area = 'nutri' }: Require
           if (data.hasDiagnostico) {
             setHasDiagnostico(true)
           } else {
-            // Redirecionar para diagnóstico
-            router.push('/pt/nutri/diagnostico')
+            // Redirecionar para onboarding (landing inicial antes do diagnóstico)
+            router.push('/pt/nutri/onboarding')
             return
           }
         }
