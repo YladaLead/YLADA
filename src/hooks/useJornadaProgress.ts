@@ -30,15 +30,19 @@ export function useJornadaProgress() {
         const data = await res.json()
         if (data.success && data.data?.stats) {
           const stats = data.data.stats
+          // 🚨 CORREÇÃO: Se current_day é 0 ou null, manter como null (não inicializar como 1)
+          // Isso garante que sidebar progressivo funcione corretamente
+          const currentDay = stats.current_day && stats.current_day > 0 ? stats.current_day : null
           setProgress({
-            current_day: stats.current_day || 1,
+            current_day: currentDay,
             completed_days: stats.completed_days || 0,
             total_days: stats.total_days || 30
           })
         } else {
-          // Se não há progresso, inicializar
+          // Se não há progresso, manter como null (não inicializar como 1)
+          // Sidebar mostrará apenas Home e Jornada
           setProgress({
-            current_day: 1,
+            current_day: null,
             completed_days: 0,
             total_days: 30
           })
@@ -46,9 +50,9 @@ export function useJornadaProgress() {
       } catch (err: any) {
         console.error('Erro ao carregar progresso:', err)
         setError(err.message || 'Erro ao carregar progresso')
-        // Em caso de erro, permitir acesso ao dia 1
+        // Em caso de erro, manter como null (não inicializar como 1)
         setProgress({
-          current_day: 1,
+          current_day: null,
           completed_days: 0,
           total_days: 30
         })
@@ -70,8 +74,10 @@ export function useJornadaProgress() {
         const data = await res.json()
         if (data.success && data.data?.stats) {
           const stats = data.data.stats
+          // 🚨 CORREÇÃO: Se current_day é 0 ou null, manter como null
+          const currentDay = stats.current_day && stats.current_day > 0 ? stats.current_day : null
           setProgress({
-            current_day: stats.current_day || 1,
+            current_day: currentDay,
             completed_days: stats.completed_days || 0,
             total_days: stats.total_days || 30
           })
