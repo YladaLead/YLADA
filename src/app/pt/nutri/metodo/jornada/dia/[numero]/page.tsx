@@ -8,6 +8,7 @@ import AcaoPraticaCard from '@/components/formacao/AcaoPraticaCard'
 import ExercicioReflexao from '@/components/jornada/ExercicioReflexao'
 import ReflexaoDia from '@/components/formacao/ReflexaoDia'
 import BlockedDayModal from '@/components/jornada/BlockedDayModal'
+import DiaConcluidoModal from '@/components/jornada/DiaConcluidoModal'
 import PilarContentInline from '@/components/jornada/PilarContentInline'
 import { useAuth } from '@/hooks/useAuth'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
@@ -36,6 +37,7 @@ export default function JornadaDiaPage() {
   const [erro, setErro] = useState<string | null>(null)
   const [concluindo, setConcluindo] = useState(false)
   const [showBlockedModal, setShowBlockedModal] = useState(false)
+  const [showConcluidoModal, setShowConcluidoModal] = useState(false)
 
   // Verificar acesso ao dia antes de carregar
   useEffect(() => {
@@ -97,30 +99,8 @@ export default function JornadaDiaPage() {
     }
   }, [dayNumber])
 
-  const toggleChecklistItem = async (index: number) => {
-    const newChecklist = [...checklist]
-    newChecklist[index] = !newChecklist[index]
-    setChecklist(newChecklist)
-
-    // Salvar log no backend
-    try {
-      await fetch('/api/nutri/metodo/jornada/checklist/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          day_number: dayNumber,
-          item_index: index,
-          marcado: newChecklist[index]
-        })
-      })
-    } catch (error) {
-      console.error('Erro ao salvar log do checklist:', error)
-    }
-  }
-
-  // Nota: handleChecklistNoteChange não é mais necessário
-  // O componente ChecklistItem agora salva automaticamente com debounce
+  // Nota: toggleChecklistItem removido - não há mais checkboxes
+  // O componente ExercicioReflexao salva automaticamente as notas com debounce
 
   const handleDailyNoteSave = async (content: string) => {
     setDailyNote(content)
@@ -174,17 +154,11 @@ export default function JornadaDiaPage() {
 
       const result = await res.json()
       
-      // Mostrar feedback visual de sucesso
-      alert('✔ Dia concluído! Continue avançando.')
-      
-      // Sucesso - redirecionar para o próximo dia disponível
+      // Calcular próximo dia
       const nextDay = dayNumber < 30 ? dayNumber + 1 : null
-      if (nextDay) {
-        router.push(`/pt/nutri/metodo/jornada/dia/${nextDay}`)
-      } else {
-        // Último dia concluído - ir para página de conclusão
-        router.push('/pt/nutri/metodo/jornada/concluida')
-      }
+      
+      // Mostrar modal de parabéns
+      setShowConcluidoModal(true)
     } catch (error: any) {
       console.error('Erro ao concluir dia:', error)
       // Não mostrar alert novamente se já foi mostrado
@@ -592,6 +566,14 @@ export default function JornadaDiaPage() {
         }}
         blockedDay={dayNumber}
         currentDay={progress?.current_day || 1}
+      />
+
+      {/* Modal de Dia Concluído */}
+      <DiaConcluidoModal
+        isOpen={showConcluidoModal}
+        onClose={() => setShowConcluidoModal(false)}
+        dayNumber={dayNumber}
+        nextDay={dayNumber < 30 ? dayNumber + 1 : null}
       />
     </div>
   )
