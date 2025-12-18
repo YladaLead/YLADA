@@ -74,6 +74,7 @@ function WellnessHomeContent() {
   const [loading, setLoading] = useState(true)
   const [noelProfile, setNoelProfile] = useState<any>(null)
   const [metasCalculadas, setMetasCalculadas] = useState<any>(null)
+  const [loadingTimeout, setLoadingTimeout] = useState(false) // Timeout de segurança para evitar loading infinito
 
   // Carregar perfil NOEL e calcular metas
   // CORREÇÃO: Aguardar autenticação completar antes de fazer requisições
@@ -120,7 +121,7 @@ function WellnessHomeContent() {
   useEffect(() => {
     // Não fazer requisições enquanto autenticação está carregando ou sem usuário
     if (authLoading || !user || !session) {
-      console.log('🔄 Home: Aguardando autenticação completar antes de carregar dados...')
+      console.log('🔄 Home: Aguardando autenticação completar antes de carregar dados...', { authLoading, hasUser: !!user, hasSession: !!session })
       return
     }
     
@@ -334,8 +335,25 @@ function WellnessHomeContent() {
   ]
   const fraseMotivacional = frasesMotivacionais[Math.floor(Math.random() * frasesMotivacionais.length)]
 
-  // Mostrar loading enquanto autenticação ou dados estão carregando
-  if (authLoading || loading) {
+  // 🚨 CORREÇÃO: Timeout de segurança para evitar loading infinito
+  // Se autenticação já terminou e temos usuário, mostra conteúdo mesmo que dados ainda estejam carregando
+  // Os dados vão aparecer quando carregarem (loading local apenas para UX, não bloqueia)
+  useEffect(() => {
+    // Timeout de 3 segundos para evitar loading infinito
+    const timer = setTimeout(() => {
+      setLoadingTimeout(true)
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Mostrar loading APENAS se:
+  // 1. authLoading é true (autenticação ainda não terminou)
+  // 2. OU loading é true E ainda não passou timeout E não temos usuário autenticado
+  // Se já temos usuário autenticado, mostrar conteúdo mesmo que dados ainda estejam carregando
+  const shouldShowLoading = authLoading || (loading && !loadingTimeout && !user)
+  
+  if (shouldShowLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex items-center justify-center min-h-[60vh]">

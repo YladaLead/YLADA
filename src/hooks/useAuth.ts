@@ -389,17 +389,23 @@ export function useAuth() {
         email: session?.user?.email
       })
       
-      // 🚀 CORREÇÃO: Quando SIGNED_IN chega, garantir que loading seja false
-      // Isso resolve race condition onde timeout marca como não autenticado antes do evento chegar
-      if (event === 'SIGNED_IN' && session?.user) {
-        console.log('✅ useAuth: SIGNED_IN detectado, garantindo que loading seja false')
-        setLoading(false) // Forçar loading=false quando SIGNED_IN chega
-        setIsStable(true) // Marcar como estável
-      }
-      
-      // Atualizar estado imediatamente
+      // Atualizar estado imediatamente - PRIMEIRO setar user/session
+      // DEPOIS setar loading=false para garantir que componentes vejam os valores corretos
       setSession(session)
       setUser(session?.user ?? null)
+      
+      // 🚀 CORREÇÃO: Quando SIGNED_IN chega, garantir que loading seja false
+      // Isso resolve race condition onde timeout marca como não autenticado antes do evento chegar
+      // IMPORTANTE: Setar loading DEPOIS de user/session para que componentes
+      // vejam os valores corretos quando loading mudar
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('✅ useAuth: SIGNED_IN detectado, garantindo que loading seja false')
+        // Usar requestAnimationFrame para garantir que o React processe user/session primeiro
+        requestAnimationFrame(() => {
+          setLoading(false) // Forçar loading=false quando SIGNED_IN chega
+          setIsStable(true) // Marcar como estável
+        })
+      }
 
       if (session?.user) {
         // Evitar buscar perfil múltiplas vezes simultaneamente
