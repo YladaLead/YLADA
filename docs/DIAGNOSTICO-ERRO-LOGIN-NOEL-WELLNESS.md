@@ -491,3 +491,4 @@ O código estava enviando a string `'new'` como `threadId` quando não havia thr
 **Status**: ✅ **CORRIGIDO** - Thread ID inválido corrigido. Rate limit ainda pode ocorrer se muitas requisições forem feitas.
 
 
+

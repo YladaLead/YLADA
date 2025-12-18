@@ -62,8 +62,8 @@ export default function GSALBlock() {
   if (!dia1Completo) {
     return (
       <Section
-        title="📊 Gestão GSAL"
-        subtitle="Gerar, Servir, Acompanhar, Lucrar"
+        title="📊 Gestão de Clientes"
+        subtitle="GSAL: Gerar, Servir, Acompanhar, Lucrar"
       >
         <Card className="bg-gray-50 border-2 border-dashed border-gray-300">
           <div className="text-center py-8">
@@ -85,9 +85,22 @@ export default function GSALBlock() {
 
   return (
     <Section
-      title="📊 Gestão GSAL"
-      subtitle="Gerar, Servir, Acompanhar, Lucrar"
+      title="📊 Gestão de Clientes"
+      subtitle="GSAL: Gerar, Servir, Acompanhar, Lucrar"
     >
+      {/* Explicação clara do GSAL */}
+      <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+        <p className="text-sm text-gray-800 mb-2">
+          <strong>💡 O que é GSAL?</strong>
+        </p>
+        <p className="text-xs text-gray-700 mb-3 leading-relaxed">
+          GSAL é o jeito YLADA de organizar sua gestão de clientes em 4 etapas: <strong>Gerar</strong> oportunidades, <strong>Servir</strong> com valor, <strong>Acompanhar</strong> a evolução e <strong>Lucrar</strong> de forma organizada.
+        </p>
+        <p className="text-xs text-gray-600 italic">
+          💬 <strong>Dúvida?</strong> Pergunte para a LYA: "O que é GSAL?" ou "Como funciona a gestão de clientes?"
+        </p>
+      </div>
+
       {/* Microcopy sobre LYA */}
       <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-xs text-gray-700">

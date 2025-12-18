@@ -102,3 +102,4 @@ LEFT JOIN wellness_noel_profile wnp ON wnp.user_id = au.id
 WHERE up.email = 'mmg.monica@hotmail.com';
 
 
+

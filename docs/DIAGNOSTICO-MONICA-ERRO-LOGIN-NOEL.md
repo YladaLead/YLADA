@@ -219,3 +219,4 @@ WHERE email ILIKE '%monica%'
 **Status:** ⚠️ **Aguardando verificação do perfil da Monica**
 
 
+

@@ -216,3 +216,4 @@ Todas as otimizações foram implementadas **sem alterar regras de negócio ou c
 
 
 
+

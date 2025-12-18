@@ -38,13 +38,48 @@ export default function FormatarMensagem({ texto }: FormatarMensagemProps) {
               {partes.map((parte, i) => {
                 if (parte.startsWith('**') && parte.endsWith('**')) {
                   return (
-                    <span key={i} className="font-bold text-gray-900">
+                    <span key={i} className="font-bold text-gray-900" style={{ fontWeight: 700 }}>
                       {parte.replace(/\*\*/g, '')}
                     </span>
                   )
                 }
                 return <span key={i}>{parte}</span>
               })}
+            </p>
+          )
+        }
+        
+        // Detectar listas numeradas (ex: "1. **Texto**" ou "1. Texto")
+        const matchLista = linha.match(/^(\d+)\.\s+(.+)$/)
+        if (matchLista) {
+          const numero = matchLista[1]
+          const conteudo = matchLista[2]
+          
+          // Verificar se tem negrito no conteúdo
+          if (conteudo.includes('**')) {
+            const partes = conteudo.split(/(\*\*[^*]+\*\*)/g)
+            return (
+              <p key={index} className="text-sm leading-relaxed mb-2">
+                <span className="font-bold text-gray-900" style={{ fontWeight: 700 }}>{numero}.</span>{' '}
+                {partes.map((parte, i) => {
+                  if (parte.startsWith('**') && parte.endsWith('**')) {
+                    return (
+                      <span key={i} className="font-bold text-gray-900" style={{ fontWeight: 700 }}>
+                        {parte.replace(/\*\*/g, '')}
+                      </span>
+                    )
+                  }
+                  return <span key={i}>{parte}</span>
+                })}
+              </p>
+            )
+          }
+          
+          // Lista numerada sem negrito
+          return (
+            <p key={index} className="text-sm leading-relaxed mb-2">
+              <span className="font-bold text-gray-900" style={{ fontWeight: 700 }}>{numero}.</span>{' '}
+              <span>{conteudo}</span>
             </p>
           )
         }

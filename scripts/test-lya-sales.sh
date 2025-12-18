@@ -81,3 +81,4 @@ echo "📖 Para testes completos, veja: docs/COMO-TESTAR-LYA-SALES.md"
 echo ""
 
 
+

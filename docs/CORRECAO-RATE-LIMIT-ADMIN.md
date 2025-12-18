@@ -102,3 +102,4 @@ if (isAdminOrSupport) {
 **Status:** ✅ **CORRIGIDO** - Admin agora tem bypass de rate limit
 
 
+

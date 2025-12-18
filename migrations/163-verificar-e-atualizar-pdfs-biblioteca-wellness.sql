@@ -180,3 +180,4 @@ SELECT get_supabase_storage_url('fubynpjagxxqbyfjsile', 'pdfs/scripts/Calculador
 
 
 
+

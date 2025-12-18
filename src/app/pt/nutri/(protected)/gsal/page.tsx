@@ -161,9 +161,51 @@ function GSALPageContent() {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
             <Section
-              title="📊 Gestão GSAL"
-              subtitle="Gerar, Servir, Acompanhar, Lucrar"
+              title="📊 Gestão de Clientes"
+              subtitle="GSAL: Gerar, Servir, Acompanhar, Lucrar"
             >
+              {/* Explicação clara do GSAL */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                <p className="text-sm text-gray-800 mb-2">
+                  <strong>💡 O que é GSAL?</strong>
+                </p>
+                <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                  GSAL é o jeito YLADA de organizar sua gestão de clientes em 4 etapas:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">G</span>
+                    <div>
+                      <strong className="text-gray-800">Gerar</strong>
+                      <p className="text-xs text-gray-600">Fazer oportunidades aparecerem todo dia</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">S</span>
+                    <div>
+                      <strong className="text-gray-800">Servir</strong>
+                      <p className="text-xs text-gray-600">Ajudar de verdade antes de vender</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">A</span>
+                    <div>
+                      <strong className="text-gray-800">Acompanhar</strong>
+                      <p className="text-xs text-gray-600">Transformar interesse em cliente</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">L</span>
+                    <div>
+                      <strong className="text-gray-800">Lucrar</strong>
+                      <p className="text-xs text-gray-600">Organizar sua agenda para crescer</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 italic border-t border-green-200 pt-3">
+                  💬 <strong>Dúvida?</strong> Pergunte para a LYA: "Como usar o GSAL?" ou "Preciso de ajuda com gestão de clientes"
+                </p>
+              </div>
               {/* Vídeo 4 — GSAL */}
               <div className="mb-6">
                 <VideoPlayerYLADA

@@ -137,3 +137,4 @@ WHERE user_id = (SELECT id FROM auth.users WHERE email = 'mmg.monica@hotmail.com
 Isso vai nos permitir identificar exatamente qual é o problema que está causando o erro "Você precisa fazer login para continuar".
 
 
+

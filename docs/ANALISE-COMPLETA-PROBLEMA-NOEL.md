@@ -391,3 +391,4 @@ WHERE created_at < NOW() - INTERVAL '1 hour';
 **Status:** ⚠️ **AÇÃO URGENTE NECESSÁRIA**
 
 
+
