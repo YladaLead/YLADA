@@ -49,7 +49,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
     },
     pilares: {
       label: 'Sobre o Método',
-      tooltip: 'A filosofia por trás de tudo. A LIA aplica com você.'
+      tooltip: 'A filosofia por trás de tudo. A LYA aplica com você.'
     },
     ferramentas: {
       label: 'Ferramentas',
@@ -61,7 +61,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
     },
     biblioteca: {
       label: 'Materiais de Apoio',
-      tooltip: 'PDFs e recursos extras. Use quando precisar, a LIA te orienta.'
+      tooltip: 'PDFs e recursos extras. Use quando precisar, a LYA te orienta.'
     },
     anotacoes: {
       label: 'Minhas Anotações',

@@ -100,7 +100,7 @@ export default function BibliotecaPage() {
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
             <p className="text-sm text-blue-800 flex items-start gap-2">
               <span className="text-lg">💡</span>
-              <span><strong>Esses materiais são apoio, não obrigação.</strong> A LIA te orienta sobre o que faz sentido para o seu momento. Use quando sentir necessidade.</span>
+              <span><strong>Esses materiais são apoio, não obrigação.</strong> A LYA te orienta sobre o que faz sentido para o seu momento. Use quando sentir necessidade.</span>
             </p>
           </div>
 

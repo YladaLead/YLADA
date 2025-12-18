@@ -70,13 +70,13 @@ function PilaresPageContent() {
                 O Método YLADA
               </h1>
               <p className="text-blue-100 text-lg mb-4 max-w-2xl">
-                5 pilares que sustentam sua transformação em Nutri-Empresária. 
+                5 pilares que sustentam seu crescimento como Nutri-Empresária. 
                 Não é curso, não é conteúdo para estudar — é a filosofia que guia tudo.
               </p>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                 <p className="text-sm text-blue-50 flex items-center gap-2">
                   <span className="text-xl">✨</span>
-                  <span><strong>A LIA aplica esses pilares com você no dia a dia.</strong> Você não precisa decorar — precisa seguir.</span>
+                  <span><strong>A LYA aplica esses pilares com você no dia a dia.</strong> Você não precisa decorar — precisa seguir.</span>
                 </p>
               </div>
             </div>
@@ -115,7 +115,7 @@ function PilaresPageContent() {
               <div className="mt-8 text-center">
                 <p className="text-sm text-gray-500 max-w-xl mx-auto">
                   💡 <strong>Dica:</strong> Você não precisa estudar todos os pilares antes de começar. 
-                  A LIA vai te guiar pelo que importa, no momento certo.
+                  A LYA vai te guiar pelo que importa, no momento certo.
                 </p>
               </div>
             </Section>
