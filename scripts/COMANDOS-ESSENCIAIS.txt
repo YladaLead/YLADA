@@ -1,0 +1,65 @@
+==========================================
+SETUP CONTA DEMO - COMANDOS ESSENCIAIS
+==========================================
+
+1. DESCOBRIR USER_ID
+==========================================
+SELECT id, email FROM auth.users;
+
+→ Copie o UUID
+
+
+2. ARQUIVO PARA EXECUTAR
+==========================================
+scripts/SETUP-CONTA-DEMO-COMPLETO.sql
+
+→ Substituir: 'SEU-USER-ID-AQUI' pelo UUID
+→ Executar no Supabase SQL Editor
+
+
+3. VERIFICAR
+==========================================
+SELECT COUNT(*) FROM journey_progress WHERE user_id = 'SEU-UUID'::uuid AND completed = true;
+(deve retornar 30)
+
+SELECT COUNT(*) FROM clients WHERE user_id = 'SEU-UUID'::uuid AND email LIKE '%.demo@email.com';
+(deve retornar 5)
+
+
+4. FAZER LOGIN
+==========================================
+URL: https://ylada-app.vercel.app
+Email: seu-email@aqui.com
+Senha: sua-senha
+
+
+5. SE NÃO TEM CONTA
+==========================================
+Criar no Supabase Dashboard:
+→ Authentication
+→ Add user
+→ Email: demo@ylada.app
+→ Password: Demo@2025!
+→ ✓ Auto Confirm User
+
+
+6. RESETAR TUDO
+==========================================
+DELETE FROM journey_progress WHERE user_id = 'SEU-UUID'::uuid;
+DELETE FROM clients WHERE user_id = 'SEU-UUID'::uuid AND email LIKE '%.demo@email.com';
+
+
+==========================================
+RESULTADO
+==========================================
+✅ Jornada: 30 dias liberados
+✅ Clientes: 5 perfis criados
+✅ Tudo pronto para demonstração!
+
+
+==========================================
+DOCUMENTAÇÃO COMPLETA
+==========================================
+scripts/GUIA-ACESSO-CONTA-DEMO.md
+scripts/QUICK-START-DEMO.md
+scripts/README-POPULAR-DEMO.md

@@ -1,0 +1,54 @@
+==========================================
+SETUP AUTOMÁTICO - demo.nutri@ylada.com
+==========================================
+
+CONTA: demo.nutri@ylada.com
+ARQUIVO: SETUP-DEMO-NUTRI-YLADA.sql
+
+
+COMO EXECUTAR:
+==========================================
+
+1. Abrir Supabase Dashboard → SQL Editor
+
+2. Copiar TUDO do arquivo:
+   scripts/SETUP-DEMO-NUTRI-YLADA.sql
+
+3. Colar no SQL Editor
+
+4. Clicar RUN
+
+5. Aguardar mensagem:
+   "🎉 SETUP COMPLETO - demo.nutri@ylada.com"
+
+
+RESULTADO:
+==========================================
+✅ Jornada: 30 dias liberados
+✅ Clientes: 5 perfis criados
+✅ Pronto para demonstração!
+
+
+LOGIN:
+==========================================
+URL: https://ylada-app.vercel.app
+Email: demo.nutri@ylada.com
+Senha: [a senha que você definiu]
+
+
+VERIFICAR:
+==========================================
+→ Menu "Método" → Jornada (30 dias)
+→ Menu "Gestão" → Clientes (5 perfis)
+
+
+IMPORTANTE:
+==========================================
+❗ Não precisa substituir nada no script
+❗ O script busca automaticamente a conta
+❗ Se der erro "conta não encontrada":
+   Crie a conta no Supabase primeiro
+
+
+FIM
+==========================================
