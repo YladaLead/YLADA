@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
     try {
       console.log('🔍 GET /api/nutri/profile - Buscando perfil para user_id:', user.id)
       
-      // Tentar buscar todos os campos primeiro
+      // Tentar buscar todos os campos primeiro (incluindo campos de branding)
       const { data: profileData, error: profileError } = await supabaseAdmin
         .from('user_profiles')
-        .select('nome_completo, email, whatsapp, bio, user_slug, country_code')
+        .select('nome_completo, email, whatsapp, bio, user_slug, country_code, logo_url, brand_color, brand_name, professional_credential')
         .eq('user_id', user.id)
         .single()
 
@@ -119,7 +119,12 @@ export async function GET(request: NextRequest) {
         whatsapp: profile?.whatsapp || '',
         countryCode: profile?.country_code || 'BR',
         bio: profile?.bio || '',
-        userSlug: profile?.user_slug || ''
+        userSlug: profile?.user_slug || '',
+        // Campos de branding
+        logoUrl: profile?.logo_url || '',
+        brandColor: profile?.brand_color || '',
+        brandName: profile?.brand_name || '',
+        professionalCredential: profile?.professional_credential || ''
       }
     }
 
@@ -167,7 +172,12 @@ export async function PUT(request: NextRequest) {
       whatsapp,
       countryCode,
       bio,
-      userSlug
+      userSlug,
+      // Campos de branding
+      logoUrl,
+      brandColor,
+      brandName,
+      professionalCredential
     } = body
 
     // Log dos valores recebidos para debug
@@ -285,6 +295,34 @@ export async function PUT(request: NextRequest) {
       console.log('🌍 Country code que será salvo:', countryCode)
     } else {
       console.log('🌍 Country code não fornecido, mantendo valor atual')
+    }
+    
+    // Campos de branding
+    if (logoUrl !== undefined) {
+      profileData.logo_url = logoUrl || null
+      console.log('🎨 Logo URL que será salvo:', logoUrl)
+    }
+    
+    if (brandColor !== undefined) {
+      // Validar formato HEX
+      if (brandColor && !/^#[0-9A-F]{6}$/i.test(brandColor)) {
+        return NextResponse.json(
+          { error: 'Cor da marca deve estar no formato HEX (#RRGGBB)' },
+          { status: 400 }
+        )
+      }
+      profileData.brand_color = brandColor || null
+      console.log('🎨 Cor da marca que será salva:', brandColor)
+    }
+    
+    if (brandName !== undefined) {
+      profileData.brand_name = brandName || null
+      console.log('🏢 Nome da marca que será salvo:', brandName)
+    }
+    
+    if (professionalCredential !== undefined) {
+      profileData.professional_credential = professionalCredential || null
+      console.log('📜 Credencial profissional que será salva:', professionalCredential)
     }
 
     // Preparar dados completos para UPSERT

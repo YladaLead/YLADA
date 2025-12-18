@@ -53,6 +53,7 @@ export async function GET(
         created_at,
         ip_address,
         user_agent,
+        viewed,
         clients (
           id,
           name,
@@ -72,6 +73,17 @@ export async function GET(
       )
     }
 
+    // 🆕 MARCAR RESPOSTA COMO VISUALIZADA automaticamente
+    if (!response.viewed) {
+      await supabaseAdmin
+        .from('form_responses')
+        .update({ viewed: true })
+        .eq('id', responseId)
+        .eq('user_id', authenticatedUserId)
+      
+      console.log(`✅ Resposta ${responseId} marcada como visualizada`)
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -86,6 +98,69 @@ export async function GET(
 
   } catch (error: any) {
     console.error('Erro ao buscar resposta:', error)
+    return NextResponse.json(
+      { error: 'Erro interno do servidor', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * PATCH - Marcar resposta como visualizada/não visualizada
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string; responseId: string }> }
+) {
+  try {
+    const authResult = await requireApiAuth(request, ['nutri', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { user } = authResult
+
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Configuração do servidor incompleta. Contate o suporte.' },
+        { status: 500 }
+      )
+    }
+
+    const { id: formId, responseId } = await params
+    const authenticatedUserId = user.id
+    const body = await request.json()
+    const { viewed } = body
+
+    if (typeof viewed !== 'boolean') {
+      return NextResponse.json(
+        { error: 'Campo "viewed" deve ser boolean' },
+        { status: 400 }
+      )
+    }
+
+    // Atualizar status viewed
+    const { error } = await supabaseAdmin
+      .from('form_responses')
+      .update({ viewed })
+      .eq('id', responseId)
+      .eq('form_id', formId)
+      .eq('user_id', authenticatedUserId)
+
+    if (error) {
+      console.error('Erro ao atualizar resposta:', error)
+      return NextResponse.json(
+        { error: 'Erro ao atualizar resposta', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Resposta marcada como ${viewed ? 'visualizada' : 'não visualizada'}`
+    })
+
+  } catch (error: any) {
+    console.error('Erro ao atualizar resposta:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor', technical: process.env.NODE_ENV === 'development' ? error.message : undefined },
       { status: 500 }

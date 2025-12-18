@@ -17,6 +17,12 @@ export default function PreencherFormularioNutriPage() {
   const [responseId, setResponseId] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [countryCodes, setCountryCodes] = useState<Record<string, string>>({})
+  const [branding, setBranding] = useState<{
+    logoUrl?: string
+    brandColor?: string
+    brandName?: string
+    professionalCredential?: string
+  } | null>(null)
 
   useEffect(() => {
     if (!userSlug || !slug) return
@@ -34,6 +40,22 @@ export default function PreencherFormularioNutriPage() {
         const data = await response.json()
         if (data.success && data.data.form) {
           setFormulario(data.data.form)
+          
+          // Buscar branding do nutricionista
+          if (data.data.form.user_id) {
+            try {
+              const brandingResponse = await fetch(`/api/public/nutri/branding/${data.data.form.user_id}`)
+              if (brandingResponse.ok) {
+                const brandingData = await brandingResponse.json()
+                if (brandingData.success && brandingData.data) {
+                  setBranding(brandingData.data)
+                }
+              }
+            } catch (brandingError) {
+              console.warn('Erro ao carregar branding (não crítico):', brandingError)
+            }
+          }
+          
           // Inicializar respostas vazias
           const respostasIniciais: Record<string, any> = {}
           data.data.form.structure?.fields?.forEach((field: any) => {
@@ -440,18 +462,46 @@ export default function PreencherFormularioNutriPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Image
-            src="/images/logo/nutri-horizontal.png"
-            alt="Nutri by YLADA"
-            width={280}
-            height={84}
-            className="h-12 w-auto object-contain"
-            style={{ backgroundColor: 'transparent' }}
-            priority
-          />
+      {/* Header com Branding Personalizado */}
+      <div 
+        className="text-white border-b"
+        style={{ 
+          backgroundColor: branding?.brandColor || '#3B82F6'
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-center space-x-4">
+            {branding?.logoUrl ? (
+              <div className="relative w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0">
+                <Image
+                  src={branding.logoUrl}
+                  alt="Logo"
+                  fill
+                  className="object-contain p-2"
+                />
+              </div>
+            ) : (
+              <div className="relative w-16 h-16 bg-white/10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <Image
+                  src="/images/logo/nutri-horizontal.png"
+                  alt="Nutri by YLADA"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 object-contain opacity-90"
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold">
+                {branding?.brandName || formulario.name}
+              </h2>
+              {branding?.professionalCredential && (
+                <p className="text-sm opacity-90 mt-1">
+                  {branding.professionalCredential}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -487,7 +537,10 @@ export default function PreencherFormularioNutriPage() {
               <button
                 type="submit"
                 disabled={enviando}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+                className="w-full px-6 py-3 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
+                style={{
+                  backgroundColor: branding?.brandColor || '#3B82F6'
+                }}
               >
                 {enviando ? 'Enviando...' : 'Enviar Formulário'}
               </button>

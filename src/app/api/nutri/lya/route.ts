@@ -184,6 +184,23 @@ Foque no Dia 3. O resto vem no momento certo.`
           
           const jornadaDiaAtual = jornadaResult.data?.day_number || null
           
+          // Buscar perfil do usuário (incluindo branding)
+          const perfilResult = await supabaseAdmin
+            .from('user_profiles')
+            .select('logo_url, brand_color, brand_name, professional_credential')
+            .eq('user_id', user.id)
+            .maybeSingle()
+          
+          const brandingInfo = perfilResult.data ? {
+            temLogo: !!perfilResult.data.logo_url,
+            temCor: !!perfilResult.data.brand_color,
+            temNome: !!perfilResult.data.brand_name,
+            temCredencial: !!perfilResult.data.professional_credential,
+            cor: perfilResult.data.brand_color || 'Não definida',
+            nome: perfilResult.data.brand_name || 'Não definida',
+            credencial: perfilResult.data.professional_credential || 'Não definida'
+          } : null
+          
           // Buscar semana do dia atual na tabela journey_days
           let semanaAtual = null
           if (jornadaDiaAtual) {
@@ -228,7 +245,22 @@ Foque no Dia 3. O resto vem no momento certo.`
                 dia_atual: jornadaDiaAtual?.toString() || 'Jornada não iniciada',
                 semana_atual: semanaAtual?.toString() || 'N/A',
                 reflexoes_recentes: reflexoes || 'Nenhuma reflexão ainda.',
-                historico_conversa: conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n') || 'Nenhuma conversa anterior.'
+                historico_conversa: conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n') || 'Nenhuma conversa anterior.',
+                branding_info: brandingInfo ? `MARCA PROFISSIONAL:
+- Logo: ${brandingInfo.temLogo ? 'Sim ✅' : 'Não ❌'}
+- Cor da marca: ${brandingInfo.cor}
+- Nome da marca: ${brandingInfo.nome}
+- Credencial: ${brandingInfo.credencial}
+
+DICAS PARA CORES:
+- Verde (#10B981): Saúde, vitalidade, natureza, frescor
+- Azul (#3B82F6): Confiança, profissionalismo, calma, segurança
+- Laranja (#F97316): Energia, entusiasmo, apetite, dinamismo
+- Rosa (#EC4899): Cuidado, empatia, feminilidade, delicadeza
+- Roxo (#8B5CF6): Sofisticação, transformação, sabedoria
+
+Se a nutricionista perguntar sobre cores, sugira baseado em sua personalidade e objetivos.
+Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'Perfil de branding não disponível.'
               }
             }
           })
@@ -498,6 +530,23 @@ Foque no Dia 3. O resto vem no momento certo.`
           })
           .join('\n') || 'Nenhuma reflexão ainda.'
         
+        // Buscar perfil do usuário (incluindo branding)
+        const perfilResult = await supabaseAdmin
+          .from('user_profiles')
+          .select('logo_url, brand_color, brand_name, professional_credential')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        const brandingInfo = perfilResult.data ? {
+          temLogo: !!perfilResult.data.logo_url,
+          temCor: !!perfilResult.data.brand_color,
+          temNome: !!perfilResult.data.brand_name,
+          temCredencial: !!perfilResult.data.professional_credential,
+          cor: perfilResult.data.brand_color || 'Não definida',
+          nome: perfilResult.data.brand_name || 'Não definida',
+          credencial: perfilResult.data.professional_credential || 'Não definida'
+        } : null
+        
         // Construir system prompt com contexto
         const systemPrompt = `Você é LYA, mentora estratégica oficial da plataforma Nutri YLADA. Você ajuda nutricionistas a desenvolverem sua mentalidade, organização e posicionamento como Nutri-Empresárias. Seja direta, acolhedora e focada no próximo passo certo.
 
@@ -506,6 +555,30 @@ CONTEXTO DA JORNADA DA NUTRICIONISTA:
 - Semana atual: ${semanaAtual || 'N/A'}
 - Reflexões recentes:
 ${reflexoes}
+
+${brandingInfo ? `MARCA PROFISSIONAL:
+- Logo: ${brandingInfo.temLogo ? 'Sim ✅' : 'Não ❌'}
+- Cor da marca: ${brandingInfo.cor}
+- Nome da marca: ${brandingInfo.nome}
+- Credencial: ${brandingInfo.credencial}
+
+DICAS PARA CORES DE MARCA:
+- Verde (#10B981): Saúde, vitalidade, natureza, frescor - ideal para nutrição
+- Azul (#3B82F6): Confiança, profissionalismo, calma, segurança
+- Laranja (#F97316): Energia, entusiasmo, apetite, dinamismo
+- Rosa (#EC4899): Cuidado, empatia, feminilidade, delicadeza
+- Roxo (#8B5CF6): Sofisticação, transformação, sabedoria
+
+QUANDO PERGUNTAR SOBRE CORES:
+1. Pergunte sobre a personalidade da nutricionista e objetivos
+2. Sugira 2-3 cores que façam sentido para ela
+3. Explique o significado de cada cor
+4. Dê o código HEX para ela copiar e usar
+
+QUANDO VALIDAR LOGO:
+- Se ela mencionar que fez upload, parabenize e sugira testar em diferentes fundos
+- Se perguntar sobre qualidade, sugira que o logo seja simples e legível
+- Recomende que o logo funcione bem em tamanhos pequenos` : ''}
 
 IMPORTANTE: Quando a nutricionista perguntar "Em que semana estou?", responda sobre a SEMANA DA JORNADA (não a semana do ano). Quando perguntar "O que preciso fazer hoje?", responda baseado no DIA ATUAL DA JORNADA. Quando perguntar sobre reflexões, use as reflexões listadas acima.`
         

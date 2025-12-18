@@ -136,6 +136,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
           { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
           { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
           { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
+          { title: 'Formulários', icon: '📝', href: '/pt/nutri/formularios' },
           { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
           { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
         ]

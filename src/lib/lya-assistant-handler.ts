@@ -73,6 +73,35 @@ async function executeLyaFunction(functionName: string, arguments_: any, userId:
         }
         break
 
+      // 🆕 FUNÇÕES DE FORMULÁRIOS
+      case 'criarFormulario':
+        url = `${baseUrl}/api/nutri/lya/criarFormulario`
+        body = {
+          user_id: userId,
+          descricao_solicitada: arguments_.descricao_solicitada
+        }
+        break
+
+      case 'resumirRespostas':
+        url = `${baseUrl}/api/nutri/lya/resumirRespostas`
+        body = {
+          user_id: userId,
+          response_id: arguments_.response_id || null,
+          form_id: arguments_.form_id || null,
+          client_id: arguments_.client_id || null
+        }
+        break
+
+      case 'identificarPadroes':
+        url = `${baseUrl}/api/nutri/lya/identificarPadroes`
+        body = {
+          user_id: userId,
+          form_id: arguments_.form_id || null,
+          form_type: arguments_.form_type || null,
+          period_days: arguments_.period_days || 30
+        }
+        break
+
       default:
         throw new Error(`Function desconhecida: ${functionName}`)
     }

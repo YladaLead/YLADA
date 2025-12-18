@@ -66,11 +66,39 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // 🆕 BUSCAR CONTAGEM DE RESPOSTAS NÃO VISUALIZADAS PARA CADA FORMULÁRIO
+    let formsWithUnreadCount = forms || []
+    
+    if (forms && forms.length > 0 && isTemplate !== 'true') {
+      // Para cada formulário, buscar quantidade de respostas não visualizadas
+      const formIds = forms.map(f => f.id)
+      
+      const { data: unreadCounts } = await supabaseAdmin
+        .from('form_responses')
+        .select('form_id')
+        .in('form_id', formIds)
+        .eq('user_id', authenticatedUserId)
+        .eq('viewed', false)
+      
+      // Criar mapa de contagem por formulário
+      const unreadCountMap = new Map<string, number>()
+      unreadCounts?.forEach(r => {
+        const currentCount = unreadCountMap.get(r.form_id) || 0
+        unreadCountMap.set(r.form_id, currentCount + 1)
+      })
+      
+      // Adicionar contagem aos formulários
+      formsWithUnreadCount = forms.map(form => ({
+        ...form,
+        unread_responses: unreadCountMap.get(form.id) || 0
+      }))
+    }
+
     // Debug: log dos resultados
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Formulários encontrados:', {
         total: count,
-        forms: forms?.map(f => ({ id: f.id, name: f.name, user_id: f.user_id })),
+        forms: formsWithUnreadCount?.map(f => ({ id: f.id, name: f.name, user_id: f.user_id, unread: f.unread_responses })),
         authenticatedUserId
       })
     }
@@ -78,14 +106,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        forms: forms || [],
+        forms: formsWithUnreadCount,
         total: count || 0
       },
       // Debug info apenas em desenvolvimento
       ...(process.env.NODE_ENV === 'development' && {
         debug: {
           authenticatedUserId,
-          formsFound: forms?.length || 0
+          formsFound: formsWithUnreadCount?.length || 0
         }
       })
     })

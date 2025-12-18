@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
@@ -9,6 +9,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { translateError } from '@/lib/error-messages'
 import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import { useRouter } from 'next/navigation'
+import BrandingPreview from '@/components/nutri/BrandingPreview'
+import LyaChatWidget from '@/components/nutri/LyaChatWidget'
+import { supabase } from '@/lib/supabase'
 
 function NutriConfiguracaoContent() {
   const { user, userProfile } = useAuth()
@@ -19,7 +22,12 @@ function NutriConfiguracaoContent() {
     whatsapp: '',
     countryCode: 'BR',
     bio: '',
-    userSlug: ''
+    userSlug: '',
+    // Campos de branding
+    logoUrl: '',
+    brandColor: '#3B82F6', // Azul padrão
+    brandName: '',
+    professionalCredential: ''
   })
   const [slugDisponivel, setSlugDisponivel] = useState(true)
   const [slugValidando, setSlugValidando] = useState(false)
@@ -37,6 +45,11 @@ function NutriConfiguracaoContent() {
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [erroSenha, setErroSenha] = useState<string | null>(null)
   const [sucessoSenha, setSucessoSenha] = useState(false)
+  
+  // Estados para upload de logo
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [logoError, setLogoError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Função para tratar slug (lowercase, sem espaços/acentos, SEM hífens - apenas um nome unificado)
   const tratarSlug = (texto: string): string => {
@@ -148,7 +161,12 @@ function NutriConfiguracaoContent() {
             whatsapp: data.profile.whatsapp || data.profile.telefone || '',
             countryCode: data.profile.countryCode || 'BR',
             bio: data.profile.bio || '',
-            userSlug: data.profile.userSlug || data.profile.user_slug || ''
+            userSlug: data.profile.userSlug || data.profile.user_slug || '',
+            // Campos de branding
+            logoUrl: data.profile.logoUrl || '',
+            brandColor: data.profile.brandColor || '#3B82F6',
+            brandName: data.profile.brandName || '',
+            professionalCredential: data.profile.professionalCredential || ''
           }
           
           console.log('✅ carregarPerfil: Definindo perfil:', novoPerfil)
@@ -247,7 +265,12 @@ function NutriConfiguracaoContent() {
           whatsapp: perfil.whatsapp,
           countryCode: perfil.countryCode,
           bio: perfil.bio,
-          userSlug: perfil.userSlug
+          userSlug: perfil.userSlug,
+          // Campos de branding
+          logoUrl: perfil.logoUrl,
+          brandColor: perfil.brandColor,
+          brandName: perfil.brandName,
+          professionalCredential: perfil.professionalCredential
         })
       })
 
@@ -288,6 +311,74 @@ function NutriConfiguracaoContent() {
     } finally {
       setSalvando(false)
     }
+  }
+
+  // Upload de logo
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+
+    // Validar tipo de arquivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      setLogoError('Formato inválido. Use JPG, PNG ou WEBP.')
+      setTimeout(() => setLogoError(null), 5000)
+      return
+    }
+
+    // Validar tamanho (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoError('Arquivo muito grande. Máximo 2MB.')
+      setTimeout(() => setLogoError(null), 5000)
+      return
+    }
+
+    try {
+      setUploadingLogo(true)
+      setLogoError(null)
+
+      // Nome único para o arquivo
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}/logo-${Date.now()}.${fileExt}`
+
+      // Upload para Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('nutri-logos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        })
+
+      if (error) {
+        console.error('Erro ao fazer upload:', error)
+        throw new Error('Erro ao fazer upload do logo')
+      }
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('nutri-logos')
+        .getPublicUrl(fileName)
+
+      // Atualizar estado
+      setPerfil(prev => ({ ...prev, logoUrl: publicUrl }))
+
+      console.log('✅ Logo uploaded:', publicUrl)
+    } catch (error: any) {
+      console.error('Erro ao fazer upload de logo:', error)
+      setLogoError(error.message || 'Erro ao fazer upload. Tente novamente.')
+      setTimeout(() => setLogoError(null), 5000)
+    } finally {
+      setUploadingLogo(false)
+      // Limpar input para permitir re-upload do mesmo arquivo
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  // Remover logo
+  const handleRemoveLogo = () => {
+    setPerfil(prev => ({ ...prev, logoUrl: '' }))
   }
 
   return (
@@ -471,6 +562,173 @@ function NutriConfiguracaoContent() {
           </div>
         </div>
 
+        {/* Marca Profissional */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">🎨 Marca Profissional</h2>
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-semibold">
+              NOVO
+            </span>
+          </div>
+          
+          <p className="text-sm text-gray-600 mb-6">
+            Personalize seus links públicos com seu logo, cores e identidade profissional. 
+            Seus pacientes verão sua marca nos formulários e ferramentas compartilhadas.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Formulário de personalização */}
+            <div className="space-y-4">
+              {/* Upload de Logo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Logo Profissional
+                </label>
+                
+                {perfil.logoUrl ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="relative w-24 h-24 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200">
+                      <Image
+                        src={perfil.logoUrl}
+                        alt="Logo"
+                        fill
+                        className="object-contain p-2"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <button
+                        onClick={handleRemoveLogo}
+                        className="text-sm text-red-600 hover:text-red-700 font-medium"
+                      >
+                        🗑️ Remover Logo
+                      </button>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Clique para remover e fazer novo upload
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                      id="logo-upload"
+                    />
+                    <label
+                      htmlFor="logo-upload"
+                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                        uploadingLogo
+                          ? 'border-blue-400 bg-blue-50 cursor-wait'
+                          : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                      }`}
+                    >
+                      {uploadingLogo ? (
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                          <span className="text-sm text-blue-600">Fazendo upload...</span>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <svg className="w-10 h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                          <span className="text-sm text-gray-600">Clique para fazer upload</span>
+                          <p className="text-xs text-gray-400 mt-1">JPG, PNG ou WEBP (máx. 2MB)</p>
+                        </div>
+                      )}
+                    </label>
+                  </>
+                )}
+                
+                {logoError && (
+                  <p className="text-sm text-red-600 mt-2">⚠️ {logoError}</p>
+                )}
+              </div>
+
+              {/* Nome da Marca */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome da Marca/Consultório
+                </label>
+                <input
+                  type="text"
+                  value={perfil.brandName}
+                  onChange={(e) => setPerfil({...perfil, brandName: e.target.value})}
+                  placeholder="Ex: Consultório Dra. Maria Silva"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Aparecerá no cabeçalho dos seus links públicos
+                </p>
+              </div>
+
+              {/* Credencial Profissional */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Credencial Profissional
+                </label>
+                <input
+                  type="text"
+                  value={perfil.professionalCredential}
+                  onChange={(e) => setPerfil({...perfil, professionalCredential: e.target.value})}
+                  placeholder="Ex: CRN 12345 - Nutricionista Clínica"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Seu CRN e especialidade
+                </p>
+              </div>
+
+              {/* Cor da Marca */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cor da Marca
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="color"
+                    value={perfil.brandColor}
+                    onChange={(e) => setPerfil({...perfil, brandColor: e.target.value})}
+                    className="w-16 h-16 rounded-lg cursor-pointer border-2 border-gray-300"
+                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={perfil.brandColor}
+                      onChange={(e) => {
+                        // Validar formato HEX
+                        if (/^#[0-9A-F]{0,6}$/i.test(e.target.value)) {
+                          setPerfil({...perfil, brandColor: e.target.value})
+                        }
+                      }}
+                      placeholder="#3B82F6"
+                      maxLength={7}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 font-mono"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Peça ajuda à LYA para escolher a cor ideal!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div>
+              <BrandingPreview
+                logoUrl={perfil.logoUrl}
+                brandColor={perfil.brandColor}
+                brandName={perfil.brandName}
+                professionalCredential={perfil.professionalCredential}
+                userSlug={perfil.userSlug}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Segurança */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">🔒 Segurança</h2>
@@ -650,6 +908,9 @@ function NutriConfiguracaoContent() {
           </div>
         </div>
       </main>
+      
+      {/* Widget da LYA para ajudar com personalização */}
+      <LyaChatWidget />
     </div>
   )
 }

@@ -21,6 +21,7 @@ function FormulariosNutriContent() {
   const [erro, setErro] = useState<string | null>(null)
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
   const [mostrarTemplates, setMostrarTemplates] = useState(true)
+  const [userSlug, setUserSlug] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -92,8 +93,24 @@ function FormulariosNutriContent() {
       }
     }
 
+    const carregarUserSlug = async () => {
+      try {
+        const profileResponse = await fetch('/api/nutri/profile', {
+          credentials: 'include'
+        })
+        
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json()
+          setUserSlug(profileData.user_slug || null)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar user_slug:', error)
+      }
+    }
+
     carregarFormularios()
     carregarTemplates()
+    carregarUserSlug()
   }, [user, filtroTipo])
 
   const getTipoLabel = (tipo: string) => {
@@ -116,6 +133,23 @@ function FormulariosNutriContent() {
       outro: 'bg-gray-100 text-gray-800'
     }
     return colors[tipo] || 'bg-gray-100 text-gray-800'
+  }
+
+  const compartilharWhatsApp = (form: any) => {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    let linkFormulario = ''
+    
+    // Tentar usar link amigável primeiro
+    if (userSlug && form.slug) {
+      linkFormulario = `${baseUrl}/pt/nutri/${userSlug}/formulario/${form.slug}`
+    } else if (form.short_code) {
+      linkFormulario = `${baseUrl}/p/${form.short_code}`
+    } else {
+      linkFormulario = `${baseUrl}/f/${form.id}`
+    }
+    
+    const mensagem = encodeURIComponent(`Olá! Preciso que você preencha este formulário: ${linkFormulario}\n\nObrigado!`)
+    window.open(`https://wa.me/?text=${mensagem}`, '_blank')
   }
 
   if (loading || carregando) {
@@ -289,24 +323,41 @@ function FormulariosNutriContent() {
                     {form.structure?.fields?.length || 0} {form.structure?.fields?.length === 1 ? 'campo' : 'campos'}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}`)}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}/respostas`)}
+                        className="relative flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                      >
+                        Respostas
+                        {form.unread_responses > 0 && (
+                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
+                            {form.unread_responses > 9 ? '9+' : form.unread_responses}
+                          </span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}/enviar`)}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                      >
+                        Enviar
+                      </button>
+                    </div>
                     <button
-                      onClick={() => router.push(`/pt/nutri/formularios/${form.id}`)}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        compartilharWhatsApp(form)
+                      }}
+                      className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
                     >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => router.push(`/pt/nutri/formularios/${form.id}/respostas`)}
-                      className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                    >
-                      Respostas
-                    </button>
-                    <button
-                      onClick={() => router.push(`/pt/nutri/formularios/${form.id}/enviar`)}
-                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                    >
-                      Enviar
+                      <span className="text-lg">💬</span>
+                      Compartilhar no WhatsApp
                     </button>
                   </div>
                 </div>
