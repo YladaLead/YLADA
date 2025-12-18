@@ -26,6 +26,16 @@ function AnotacoesContent() {
   const [filtroCategoria, setFiltroCategoria] = useState<string>('todas')
   const [carregando, setCarregando] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
+  // Estados para edição e exclusão
+  const [editando, setEditando] = useState<string | null>(null)
+  const [anotacaoEditada, setAnotacaoEditada] = useState({
+    titulo: '',
+    conteudo: '',
+    categoria: 'geral',
+    tags: ''
+  })
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -155,6 +165,53 @@ function AnotacoesContent() {
     } catch (error) {
       console.error('Erro ao salvar anotação:', error)
     }
+  }
+
+  // Iniciar edição de uma anotação
+  const handleIniciarEdicao = (anotacao: any) => {
+    setEditando(anotacao.id)
+    setAnotacaoEditada({
+      titulo: anotacao.titulo || '',
+      conteudo: anotacao.conteudo || '',
+      categoria: anotacao.categoria || 'geral',
+      tags: anotacao.tags || ''
+    })
+  }
+
+  // Salvar edição
+  const handleSalvarEdicao = () => {
+    if (!editando || !anotacaoEditada.conteudo.trim()) return
+
+    const novasAnotacoes = anotacoes.map(a => {
+      if (a.id === editando) {
+        return {
+          ...a,
+          ...anotacaoEditada,
+          updated_at: new Date().toISOString()
+        }
+      }
+      return a
+    })
+
+    setAnotacoes(novasAnotacoes)
+    localStorage.setItem('ylada_anotacoes', JSON.stringify(novasAnotacoes))
+    
+    setEditando(null)
+    setAnotacaoEditada({ titulo: '', conteudo: '', categoria: 'geral', tags: '' })
+  }
+
+  // Cancelar edição
+  const handleCancelarEdicao = () => {
+    setEditando(null)
+    setAnotacaoEditada({ titulo: '', conteudo: '', categoria: 'geral', tags: '' })
+  }
+
+  // Apagar anotação
+  const handleApagar = (id: string) => {
+    const novasAnotacoes = anotacoes.filter(a => a.id !== id)
+    setAnotacoes(novasAnotacoes)
+    localStorage.setItem('ylada_anotacoes', JSON.stringify(novasAnotacoes))
+    setConfirmandoExclusao(null)
   }
 
   if (loading) {
@@ -340,6 +397,87 @@ function AnotacoesContent() {
                   <div className="space-y-4">
                     {anotacoesFiltradas.map((anotacao) => (
                       <Card key={anotacao.id} className={anotacao.isJornada ? 'border-l-4 border-purple-500' : ''}>
+                        {/* Modal de Edição */}
+                        {editando === anotacao.id && !anotacao.isJornada && (
+                          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <h4 className="font-semibold text-gray-900 mb-3">✏️ Editando Anotação</h4>
+                            <div className="space-y-3">
+                              <input
+                                type="text"
+                                value={anotacaoEditada.titulo}
+                                onChange={(e) => setAnotacaoEditada({ ...anotacaoEditada, titulo: e.target.value })}
+                                placeholder="Título (opcional)"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                              />
+                              <textarea
+                                value={anotacaoEditada.conteudo}
+                                onChange={(e) => setAnotacaoEditada({ ...anotacaoEditada, conteudo: e.target.value })}
+                                placeholder="Conteúdo da anotação..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
+                                rows={4}
+                              />
+                              <div className="grid grid-cols-2 gap-3">
+                                <select
+                                  value={anotacaoEditada.categoria}
+                                  onChange={(e) => setAnotacaoEditada({ ...anotacaoEditada, categoria: e.target.value })}
+                                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                >
+                                  <option value="geral">Geral</option>
+                                  <option value="jornada">Jornada</option>
+                                  <option value="pilar">Pilar</option>
+                                  <option value="gsal">GSAL</option>
+                                  <option value="ferramentas">Ferramentas</option>
+                                </select>
+                                <input
+                                  type="text"
+                                  value={anotacaoEditada.tags}
+                                  onChange={(e) => setAnotacaoEditada({ ...anotacaoEditada, tags: e.target.value })}
+                                  placeholder="Tags (vírgulas)"
+                                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                />
+                              </div>
+                              <div className="flex gap-2 justify-end">
+                                <button
+                                  onClick={handleCancelarEdicao}
+                                  className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  onClick={handleSalvarEdicao}
+                                  disabled={!anotacaoEditada.conteudo.trim()}
+                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50"
+                                >
+                                  Salvar Alterações
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Confirmação de Exclusão */}
+                        {confirmandoExclusao === anotacao.id && !anotacao.isJornada && (
+                          <div className="mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                            <p className="text-red-800 font-medium mb-3">
+                              ⚠️ Tem certeza que deseja apagar esta anotação?
+                            </p>
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() => setConfirmandoExclusao(null)}
+                                className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium"
+                              >
+                                Cancelar
+                              </button>
+                              <button
+                                onClick={() => handleApagar(anotacao.id)}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
+                              >
+                                Sim, Apagar
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -352,6 +490,30 @@ function AnotacoesContent() {
                             </div>
                             <p className="text-gray-700 whitespace-pre-wrap">{anotacao.conteudo}</p>
                           </div>
+                          
+                          {/* Botões de Editar e Apagar (apenas para anotações manuais) */}
+                          {!anotacao.isJornada && editando !== anotacao.id && confirmandoExclusao !== anotacao.id && (
+                            <div className="flex items-center gap-1 ml-3">
+                              <button
+                                onClick={() => handleIniciarEdicao(anotacao)}
+                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Editar anotação"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => setConfirmandoExclusao(anotacao.id)}
+                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Apagar anotação"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
                           <div className="flex items-center gap-2">
