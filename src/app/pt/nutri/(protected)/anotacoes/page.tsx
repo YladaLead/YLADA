@@ -14,6 +14,7 @@ export default function AnotacoesPage() {
 function AnotacoesContent() {
   const { user, loading } = useAuth()
   const [anotacoes, setAnotacoes] = useState<any[]>([])
+  const [reflexoesJornada, setReflexoesJornada] = useState<any[]>([])
   const [anotacoesFiltradas, setAnotacoesFiltradas] = useState<any[]>([])
   const [novaAnotacao, setNovaAnotacao] = useState({
     titulo: '',
@@ -31,14 +32,42 @@ function AnotacoesContent() {
 
     const carregarAnotacoes = async () => {
       try {
-        // TODO: Implementar API para buscar anotações do Supabase
-        // Por enquanto, usar localStorage como fallback
+        // Carregar anotações manuais do localStorage
         const anotacoesSalvas = localStorage.getItem('ylada_anotacoes')
+        let anotacoesManuais: any[] = []
         if (anotacoesSalvas) {
-          const anotacoesParsed = JSON.parse(anotacoesSalvas)
-          setAnotacoes(anotacoesParsed)
-          aplicarFiltros(anotacoesParsed, busca, filtroCategoria)
+          anotacoesManuais = JSON.parse(anotacoesSalvas)
         }
+
+        // Carregar reflexões da jornada do Supabase
+        const responseReflexoes = await fetch('/api/nutri/metodo/jornada/reflexoes', {
+          credentials: 'include'
+        })
+        
+        let reflexoes: any[] = []
+        if (responseReflexoes.ok) {
+          const data = await responseReflexoes.json()
+          if (data.success && data.data) {
+            reflexoes = data.data.map((r: any) => ({
+              id: `jornada-${r.day_number}-${r.item_index}`,
+              titulo: r.item_index === -1 
+                ? `Dia ${r.day_number} - Ação Prática` 
+                : `Dia ${r.day_number} - Reflexão ${r.item_index + 1}`,
+              conteudo: r.nota,
+              categoria: 'jornada',
+              tags: `dia ${r.day_number}`,
+              created_at: r.updated_at || r.created_at,
+              isJornada: true
+            }))
+          }
+        }
+
+        setAnotacoes(anotacoesManuais)
+        setReflexoesJornada(reflexoes)
+        
+        // Combinar todas as anotações
+        const todasAnotacoes = [...anotacoesManuais, ...reflexoes]
+        aplicarFiltros(todasAnotacoes, busca, filtroCategoria)
       } catch (error) {
         console.error('Erro ao carregar anotações:', error)
       } finally {
@@ -81,8 +110,9 @@ function AnotacoesContent() {
 
   // Aplicar filtros quando busca ou categoria mudarem
   useEffect(() => {
-    aplicarFiltros(anotacoes, busca, filtroCategoria)
-  }, [busca, filtroCategoria, anotacoes])
+    const todasAnotacoes = [...anotacoes, ...reflexoesJornada]
+    aplicarFiltros(todasAnotacoes, busca, filtroCategoria)
+  }, [busca, filtroCategoria, anotacoes, reflexoesJornada])
 
   const handleSalvar = async () => {
     if (!novaAnotacao.titulo.trim() && !novaAnotacao.conteudo.trim()) {
@@ -271,7 +301,12 @@ function AnotacoesContent() {
               {/* Lista de Anotações */}
               <div>
                 <h3 className="font-semibold text-gray-900 mb-4">
-                  Anotações Salvas ({anotacoesFiltradas.length} de {anotacoes.length})
+                  Anotações Salvas ({anotacoesFiltradas.length} de {anotacoes.length + reflexoesJornada.length})
+                  {reflexoesJornada.length > 0 && (
+                    <span className="text-sm font-normal text-purple-600 ml-2">
+                      ({reflexoesJornada.length} da Jornada)
+                    </span>
+                  )}
                 </h3>
 
                 {carregando ? (
@@ -297,19 +332,28 @@ function AnotacoesContent() {
                 ) : (
                   <div className="space-y-4">
                     {anotacoesFiltradas.map((anotacao) => (
-                      <Card key={anotacao.id}>
+                      <Card key={anotacao.id} className={anotacao.isJornada ? 'border-l-4 border-purple-500' : ''}>
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            {anotacao.titulo && (
-                              <h4 className="font-semibold text-gray-900 mb-2">{anotacao.titulo}</h4>
-                            )}
+                            <div className="flex items-center gap-2 mb-2">
+                              {anotacao.isJornada && (
+                                <span className="text-purple-600">🎯</span>
+                              )}
+                              {anotacao.titulo && (
+                                <h4 className="font-semibold text-gray-900">{anotacao.titulo}</h4>
+                              )}
+                            </div>
                             <p className="text-gray-700 whitespace-pre-wrap">{anotacao.conteudo}</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                              {anotacao.categoria}
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              anotacao.isJornada 
+                                ? 'bg-purple-100 text-purple-700' 
+                                : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {anotacao.isJornada ? '📚 Jornada' : anotacao.categoria}
                             </span>
                             {anotacao.tags && (
                               <div className="flex flex-wrap gap-1">
