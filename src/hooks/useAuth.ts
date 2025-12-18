@@ -289,10 +289,10 @@ export function useAuth() {
       }
     }
 
-    // 🚀 CORREÇÃO: Timeout aumentado e lógica melhorada para evitar race conditions
-    // Evita marcar como "não autenticado" prematuramente quando SIGNED_IN ainda pode chegar
-    // PWA: 3000ms, Web: 5000ms (aumentado para dar mais tempo para eventos chegarem)
-    const timeoutDuration = isPWA ? 3000 : 5000
+    // 🚀 CORREÇÃO: Timeout aumentado significativamente para evitar race conditions
+    // O problema era que o timeout disparava ANTES do SIGNED_IN chegar
+    // PWA: 6000ms, Web: 8000ms (aumentado para dar mais tempo)
+    const timeoutDuration = isPWA ? 6000 : 8000
     loadingTimeout = setTimeout(() => {
       if (!mounted) return
       // Verificar se ainda está em loading e não temos sessão
@@ -302,21 +302,44 @@ export function useAuth() {
         // Mas apenas se realmente não há sessão (não marcar prematuramente)
         if (!currentSession) {
           console.warn('⚠️ useAuth: Timeout de carregamento sem sessão após', timeoutDuration, 'ms', { isPWA })
-          // 🚀 CORREÇÃO: Não marcar como não autenticado imediatamente
-          // Aguardar mais um pouco para ver se evento SIGNED_IN chega
+          // 🚀 CORREÇÃO: Aguardar mais tempo antes de confirmar ausência
+          // Especialmente importante após redirecionamento de login
           setTimeout(() => {
             if (!mounted) return
             // Verificar novamente antes de marcar como não autenticado
             supabase.auth.getSession().then(({ data: { session: finalSession } }) => {
               if (!mounted) return
               if (!finalSession) {
-                console.warn('⚠️ useAuth: Confirmando ausência de sessão após timeout estendido')
-                setLoading(false)
+                // Tentar refresh da sessão como último recurso
+                supabase.auth.refreshSession().then(({ data: { session: refreshedSession } }) => {
+                  if (!mounted) return
+                  if (refreshedSession) {
+                    console.log('✅ useAuth: Sessão recuperada via refresh após timeout')
+                    setSession(refreshedSession)
+                    setUser(refreshedSession.user)
+                    // Buscar perfil
+                    fetchUserProfile(refreshedSession.user.id, true).then(profile => {
+                      if (mounted) {
+                        setUserProfile(profile)
+                        setLoading(false)
+                        setIsStable(true)
+                      }
+                    })
+                  } else {
+                    console.warn('⚠️ useAuth: Confirmando ausência de sessão após timeout estendido')
+                    setLoading(false)
+                    setIsStable(true)
+                  }
+                })
               } else {
                 console.log('✅ useAuth: Sessão encontrada após timeout estendido')
+                setSession(finalSession)
+                setUser(finalSession.user)
+                setLoading(false)
+                setIsStable(true)
               }
             })
-          }, 1000) // Aguardar mais 1 segundo antes de confirmar ausência
+          }, 2000) // Aguardar 2 segundos antes de confirmar ausência (aumentado de 1s)
         } else {
           // Se temos sessão mas ainda está em loading, aguardar mais um pouco
           // Isso evita marcar como não autenticado quando a sessão está carregando

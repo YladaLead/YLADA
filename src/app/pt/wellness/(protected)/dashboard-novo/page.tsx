@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 // REMOVIDO: ProtectedRoute e RequireSubscription - layout server-side cuida disso
 import { useAuth } from '@/contexts/AuthContext'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
+import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { buildWellnessToolUrl, getAppUrl } from '@/lib/url-utils'
 import { getScriptsByTipo } from '@/lib/wellness-system/scripts-completo'
@@ -51,6 +52,7 @@ function WellnessDashboardNovoContent() {
   const { user } = useAuth()
   const { profile, loading: profileLoading } = useWellnessProfile()
   const router = useRouter()
+  const authenticatedFetch = useAuthenticatedFetch()
   
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,9 +75,8 @@ function WellnessDashboardNovoContent() {
     const carregarTemplates = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/wellness/templates', {
-          credentials: 'include'
-        })
+        // Usar authenticatedFetch para garantir token de autenticação
+        const response = await authenticatedFetch('/api/wellness/templates')
         
         if (response.ok) {
           const data = await response.json()
@@ -91,7 +92,7 @@ function WellnessDashboardNovoContent() {
     }
 
     carregarTemplates()
-  }, [])
+  }, [authenticatedFetch])
 
   // Verificar se precisa fazer onboarding (apenas uma vez)
   useEffect(() => {
@@ -100,9 +101,8 @@ function WellnessDashboardNovoContent() {
       
       try {
         setOnboardingChecked(true) // Marcar como verificado para evitar loops
-        const response = await fetch('/api/wellness/noel/onboarding', {
-          credentials: 'include'
-        })
+        // Usar authenticatedFetch para garantir token de autenticação
+        const response = await authenticatedFetch('/api/wellness/noel/onboarding')
         
         if (response.ok) {
           const data = await response.json()
@@ -131,17 +131,17 @@ function WellnessDashboardNovoContent() {
     }
 
     verificarOnboarding()
-  }, [user]) // Removido onboardingChecked e showOnboarding das dependências para evitar loop
+  }, [user, authenticatedFetch]) // Removido onboardingChecked e showOnboarding das dependências para evitar loop
 
   // Salvar onboarding
   const handleOnboardingComplete = async (onboardingData: any): Promise<void> => {
     try {
       console.log('💾 Salvando onboarding:', onboardingData)
       
-      const response = await fetch('/api/wellness/noel/onboarding', {
+      // Usar authenticatedFetch para garantir token de autenticação
+      const response = await authenticatedFetch('/api/wellness/noel/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(onboardingData)
       })
 

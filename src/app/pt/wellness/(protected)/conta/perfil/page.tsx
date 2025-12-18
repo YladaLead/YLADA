@@ -5,10 +5,12 @@ import { useState, useEffect } from 'react'
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
 import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { WellnessConsultantProfile } from '@/types/wellness-system'
 
 export default function ContaPerfilPage() {
   const { user } = useAuth()
+  const authenticatedFetch = useAuthenticatedFetch()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -27,15 +29,15 @@ export default function ContaPerfilPage() {
   // Carregar perfil ao montar
   useEffect(() => {
     loadProfile()
-  }, [])
+  }, [authenticatedFetch])
 
   const loadProfile = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // Buscar perfil NOEL (já retorna profile_type)
-      const noelResponse = await fetch('/api/wellness/noel/onboarding/check')
+      // Buscar perfil NOEL (já retorna profile_type) - usando authenticatedFetch
+      const noelResponse = await authenticatedFetch('/api/wellness/noel/onboarding/check')
       const noelData = await noelResponse.json()
 
       if (noelData.profile) {
@@ -50,8 +52,8 @@ export default function ContaPerfilPage() {
       } else if (noelData.profile?.profile_type) {
         setProfileType(noelData.profile.profile_type)
       } else {
-        // Fallback: buscar de user_profiles
-        const profileResponse = await fetch('/api/wellness/profile')
+        // Fallback: buscar de user_profiles - usando authenticatedFetch
+        const profileResponse = await authenticatedFetch('/api/wellness/profile')
         const profileData = await profileResponse.json()
         
         if (profileData.profile_type) {
@@ -147,8 +149,8 @@ export default function ContaPerfilPage() {
       const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos timeout
 
       try {
-        // Salvar perfil NOEL
-        const response = await fetch('/api/wellness/noel/onboarding', {
+        // Salvar perfil NOEL - usando authenticatedFetch
+        const response = await authenticatedFetch('/api/wellness/noel/onboarding', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dataToSave),
@@ -290,7 +292,8 @@ export default function ContaPerfilPage() {
                       setError(null)
                       setSuccess(false)
                       
-                      const response = await fetch('/api/wellness/noel/onboarding', {
+                      // Usar authenticatedFetch para garantir token de autenticação
+                      const response = await authenticatedFetch('/api/wellness/noel/onboarding', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data),

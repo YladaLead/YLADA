@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 // REMOVIDO: ProtectedRoute e RequireSubscription - layout server-side cuida disso
 import { useAuth } from '@/contexts/AuthContext'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
+import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
 import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto'
 import WellnessOnboardingBanners from '@/components/wellness/WellnessOnboardingBanners'
@@ -55,9 +56,10 @@ export default function WellnessHome() {
 }
 
 function WellnessHomeContent() {
-  const { user } = useAuth()
+  const { user, loading: authLoading, session } = useAuth()
   const { profile, loading: profileLoading } = useWellnessProfile()
   const router = useRouter()
+  const authenticatedFetch = useAuthenticatedFetch()
   
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardingComplete, setOnboardingComplete] = useState(false)
@@ -74,12 +76,19 @@ function WellnessHomeContent() {
   const [metasCalculadas, setMetasCalculadas] = useState<any>(null)
 
   // Carregar perfil NOEL e calcular metas
+  // CORREÇÃO: Aguardar autenticação completar antes de fazer requisições
   useEffect(() => {
+    // Não fazer requisições enquanto autenticação está carregando ou sem usuário
+    if (authLoading || !user || !session) {
+      console.log('🔄 Home: Aguardando autenticação completar antes de carregar perfil NOEL...')
+      return
+    }
+    
     const loadNoelProfile = async () => {
       try {
-        const response = await fetch('/api/wellness/noel/onboarding/check', {
-          credentials: 'include'
-        })
+        console.log('🔍 Home: Carregando perfil NOEL para user:', user.id)
+        // Usar authenticatedFetch para garantir que o token seja enviado
+        const response = await authenticatedFetch('/api/wellness/noel/onboarding/check')
         if (response.ok) {
           const data = await response.json()
           if (data.profile) {
@@ -96,27 +105,35 @@ function WellnessHomeContent() {
               }
             }
           }
+        } else {
+          console.warn('⚠️ Home: Erro ao carregar perfil NOEL:', response.status)
         }
       } catch (e) {
         console.error('Erro ao carregar perfil NOEL:', e)
       }
     }
     loadNoelProfile()
-  }, [])
+  }, [authenticatedFetch, authLoading, user, session])
 
   // Carregar dados iniciais
+  // CORREÇÃO: Aguardar autenticação completar antes de fazer requisições
   useEffect(() => {
+    // Não fazer requisições enquanto autenticação está carregando ou sem usuário
+    if (authLoading || !user || !session) {
+      console.log('🔄 Home: Aguardando autenticação completar antes de carregar dados...')
+      return
+    }
+    
     const carregarDados = async () => {
       try {
         setLoading(true)
+        console.log('🔍 Home: Carregando dados para user:', user.id)
 
         // Carregar progresso do plano
         if (user?.id) {
           try {
-            // Buscar diretamente do Supabase via API interna
-            const planResponse = await fetch('/api/wellness/plano/progresso', {
-              credentials: 'include'
-            })
+            // Buscar diretamente do Supabase via API interna (usando authenticatedFetch)
+            const planResponse = await authenticatedFetch('/api/wellness/plano/progresso')
             if (planResponse.ok) {
               const planData = await planResponse.json()
               if (planData.success && planData.data) {
@@ -152,11 +169,9 @@ function WellnessHomeContent() {
           }
         }
 
-        // Carregar estatísticas
+        // Carregar estatísticas (usando authenticatedFetch)
         try {
-          const statsResponse = await fetch('/api/wellness/consultor/estatisticas', {
-            credentials: 'include'
-          })
+          const statsResponse = await authenticatedFetch('/api/wellness/consultor/estatisticas')
           if (statsResponse.ok) {
             const statsData = await statsResponse.json()
             if (statsData.success) {
@@ -172,11 +187,9 @@ function WellnessHomeContent() {
           console.error('Erro ao carregar estatísticas:', e)
         }
 
-        // Carregar diagnóstico
+        // Carregar diagnóstico (usando authenticatedFetch)
         try {
-          const diagResponse = await fetch('/api/wellness/consultor/diagnostico', {
-            credentials: 'include'
-          })
+          const diagResponse = await authenticatedFetch('/api/wellness/consultor/diagnostico')
           if (diagResponse.ok) {
             const diagData = await diagResponse.json()
             if (diagData.hasDiagnostico && diagData.diagnostico) {
@@ -232,17 +245,22 @@ function WellnessHomeContent() {
     }
 
     carregarDados()
-  }, [user])
+  }, [user, authenticatedFetch, authLoading, session])
 
   // Verificar onboarding
+  // CORREÇÃO: Aguardar autenticação completar antes de verificar
   useEffect(() => {
+    // Não fazer requisições enquanto autenticação está carregando ou sem usuário
+    if (authLoading || !user || !session) {
+      return
+    }
+    
     if (!onboardingComplete && !profileLoading) {
-      // Verificar se já tem perfil configurado
+      // Verificar se já tem perfil configurado (usando authenticatedFetch)
       const checkOnboarding = async () => {
         try {
-          const response = await fetch('/api/wellness/noel/onboarding/check', {
-            credentials: 'include'
-          })
+          console.log('🔍 Home: Verificando onboarding para user:', user.id)
+          const response = await authenticatedFetch('/api/wellness/noel/onboarding/check')
           if (response.ok) {
             const data = await response.json()
             // Mostrar onboarding se não tiver perfil OU se precisa atualizar para novos campos
@@ -251,24 +269,27 @@ function WellnessHomeContent() {
             } else {
               setOnboardingComplete(true)
             }
+          } else {
+            console.warn('⚠️ Home: Erro ao verificar onboarding:', response.status)
           }
         } catch (e) {
+          console.error('❌ Home: Erro ao verificar onboarding:', e)
           // Se der erro, assumir que precisa fazer onboarding
           setShowOnboarding(true)
         }
       }
       checkOnboarding()
     }
-  }, [profileLoading, onboardingComplete])
+  }, [profileLoading, onboardingComplete, authenticatedFetch, authLoading, user, session])
 
   const handleOnboardingComplete = async (onboardingData: any): Promise<void> => {
     try {
       console.log('💾 Salvando onboarding:', onboardingData)
       
-      const response = await fetch('/api/wellness/noel/onboarding', {
+      // Usar authenticatedFetch para garantir que o token seja enviado
+      const response = await authenticatedFetch('/api/wellness/noel/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(onboardingData)
       })
 
@@ -313,13 +334,16 @@ function WellnessHomeContent() {
   ]
   const fraseMotivacional = frasesMotivacionais[Math.floor(Math.random() * frasesMotivacionais.length)]
 
-  if (loading) {
+  // Mostrar loading enquanto autenticação ou dados estão carregando
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando...</p>
+            <p className="text-gray-600">
+              {authLoading ? 'Verificando sessão...' : 'Carregando...'}
+            </p>
           </div>
         </div>
       </div>
