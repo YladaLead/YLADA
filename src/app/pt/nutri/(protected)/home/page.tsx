@@ -25,12 +25,12 @@ export default function NutriHome() {
 }
 
 function NutriHomeContent() {
-  const { user, loading, userProfile } = useAuth()
+  const { user, loading: authLoading, userProfile } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { progress } = useJornadaProgress()
+  const { progress, loading: progressLoading } = useJornadaProgress()
   
   // Verificar se completou Dia 1 (current_day >= 2 ou completed_days >= 1)
-  const dia1Completo = progress && (progress.current_day >= 2 || progress.completed_days >= 1)
+  const dia1Completo = progress && (progress.current_day !== null && progress.current_day >= 2 || progress.completed_days >= 1)
   
   // Determinar se está nos primeiros dias (mostrar WelcomeCard simplificado)
   const currentDay = progress?.current_day || null
@@ -55,8 +55,8 @@ function NutriHomeContent() {
   
   const userName = getUserFirstName()
 
-  // Aguardar autenticação
-  if (loading) {
+  // Aguardar autenticação E progresso da jornada (evita flash do Dia 1)
+  if (authLoading || progressLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
