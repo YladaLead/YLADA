@@ -13,6 +13,7 @@ import { getAppUrl, buildWellnessToolUrl } from '@/lib/url-utils'
 import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
+import ScriptsModal from '@/components/wellness/ScriptsModal'
 
 // Lazy load dos previews
 const DynamicTemplatePreview = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { ssr: false })
@@ -48,6 +49,12 @@ function LinksUnificadosPageContent() {
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
   const [qrCopiado, setQrCopiado] = useState<string | null>(null)
   const [homMensagemCopiada, setHomMensagemCopiada] = useState(false)
+  const [scriptsAberto, setScriptsAberto] = useState<{
+    nome: string
+    slug?: string
+    icon?: string
+    link?: string
+  } | null>(null)
 
   const baseUrl = getAppUrl()
 
@@ -667,8 +674,8 @@ Você vai adorar! 😊`
                 Segunda-feira às 20h • Quarta-feira às 9h
               </p>
               
-              {/* Três Botões Lado a Lado */}
-              <div className="flex gap-2">
+              {/* Quatro Botões - Grid 2x2 */}
+              <div className="grid grid-cols-2 gap-2">
                 {/* Botão Preview */}
                 <button
                   onClick={() => abrirPreview({
@@ -681,7 +688,7 @@ Você vai adorar! 😊`
                     icon: '📅',
                     metadata: { tipo: 'hom-agendadas' }
                   })}
-                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
                 >
                   👁️ Preview
                 </button>
@@ -691,7 +698,7 @@ Você vai adorar! 😊`
                   onClick={(e) => {
                     copiarLink('/pt/wellness/system/recrutar/enviar-link', 'hom-agendadas', e)
                   }}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                     linkCopiado === 'hom-agendadas'
                       ? 'bg-green-600 text-white'
                       : 'bg-green-600 hover:bg-green-700 text-white'
@@ -705,13 +712,28 @@ Você vai adorar! 😊`
                   onClick={(e) => {
                     copiarQRCode('/pt/wellness/system/recrutar/enviar-link', 'hom-agendadas', e)
                   }}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                     qrCopiado === 'hom-agendadas'
                       ? 'bg-purple-600 text-white'
                       : 'bg-purple-600 hover:bg-purple-700 text-white'
                   }`}
                 >
                   {qrCopiado === 'hom-agendadas' ? '✓ Copiado!' : '📱 Copiar QR'}
+                </button>
+
+                {/* Botão Ver Scripts */}
+                <button
+                  onClick={() => {
+                    setScriptsAberto({
+                      nome: 'HOM Gravada',
+                      slug: 'hom',
+                      icon: '📅',
+                      link: '/pt/wellness/system/recrutar/enviar-link'
+                    })
+                  }}
+                  className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors"
+                >
+                  📝 Scripts
                 </button>
               </div>
               
@@ -738,8 +760,8 @@ Você vai adorar! 😊`
                 Oportunidade: Bebidas Funcionais
               </p>
               
-              {/* Três Botões Lado a Lado */}
-              <div className="flex gap-2">
+              {/* Quatro Botões - Grid 2x2 */}
+              <div className="grid grid-cols-2 gap-2">
                 {/* Botão Preview */}
                 <button
                   onClick={() => {
@@ -759,7 +781,7 @@ Você vai adorar! 😊`
                       alert('⚠️ Configure seu user_slug no perfil para gerar o link da HOM.')
                     }
                   }}
-                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
                 >
                   👁️ Preview
                 </button>
@@ -772,7 +794,7 @@ Você vai adorar! 😊`
                     copiarMensagemCompletaHOM()
                   }}
                   disabled={!gerarLinkHOM()}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                     !gerarLinkHOM()
                       ? 'bg-gray-400 text-white cursor-not-allowed'
                       : homMensagemCopiada
@@ -794,7 +816,7 @@ Você vai adorar! 😊`
                     }
                   }}
                   disabled={!gerarLinkHOM()}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                     !gerarLinkHOM()
                       ? 'bg-gray-400 text-white cursor-not-allowed'
                       : qrCopiado === 'hom-gravada'
@@ -803,6 +825,21 @@ Você vai adorar! 😊`
                   }`}
                 >
                   {qrCopiado === 'hom-gravada' ? '✓ Copiado!' : '📱 Copiar QR'}
+                </button>
+
+                {/* Botão Ver Scripts */}
+                <button
+                  onClick={() => {
+                    setScriptsAberto({
+                      nome: 'HOM Gravada',
+                      slug: 'hom-gravada',
+                      icon: '🎥',
+                      link: gerarLinkHOM() || undefined
+                    })
+                  }}
+                  className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors"
+                >
+                  📝 Scripts
                 </button>
               </div>
               
@@ -849,15 +886,15 @@ Você vai adorar! 😊`
                   </div>
                 </div>
 
-                {/* Três Botões Lado a Lado */}
-                <div className="flex gap-2">
+                {/* Quatro Botões - Grid 2x2 */}
+                <div className="grid grid-cols-2 gap-2">
                   {/* Botão Preview */}
                   <button
                     onClick={() => {
                       console.log('Abrindo preview para:', item)
                       abrirPreview(item)
                     }}
-                    className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
                   >
                     👁️ Preview
                   </button>
@@ -869,7 +906,7 @@ Você vai adorar! 😊`
                       copiarLink(item.link, item.id, e)
                     }}
                     disabled={!item.link || item.link.trim() === ''}
-                    className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                       !item.link || item.link.trim() === ''
                         ? 'bg-gray-400 text-white cursor-not-allowed'
                         : linkCopiado === item.id
@@ -888,7 +925,7 @@ Você vai adorar! 😊`
                       copiarQRCode(item.link, item.id, e)
                     }}
                     disabled={!item.link || item.link.trim() === ''}
-                    className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                       !item.link || item.link.trim() === ''
                         ? 'bg-gray-400 text-white cursor-not-allowed'
                         : qrCopiado === item.id
@@ -898,6 +935,22 @@ Você vai adorar! 😊`
                     title={item.link ? `Copiar QR Code: ${item.link}` : 'Link não disponível'}
                   >
                     {qrCopiado === item.id ? '✓ Copiado!' : '📱 Copiar QR'}
+                  </button>
+
+                  {/* Botão Ver Scripts */}
+                  <button
+                    onClick={() => {
+                      const slug = item.metadata?.template?.slug || item.metadata?.fluxo?.slug || item.id
+                      setScriptsAberto({
+                        nome: item.nome,
+                        slug: slug,
+                        icon: item.icon,
+                        link: item.link
+                      })
+                    }}
+                    className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    📝 Scripts
                   </button>
                 </div>
                 
@@ -1174,6 +1227,18 @@ Você vai adorar! 😊`
             </div>
           )
         })()}
+
+        {/* Modal de Scripts */}
+        {scriptsAberto && (
+          <ScriptsModal
+            isOpen={true}
+            onClose={() => setScriptsAberto(null)}
+            ferramentaNome={scriptsAberto.nome}
+            ferramentaSlug={scriptsAberto.slug}
+            ferramentaIcon={scriptsAberto.icon}
+            linkFerramenta={scriptsAberto.link}
+          />
+        )}
       </main>
     </div>
   )
