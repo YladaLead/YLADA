@@ -419,7 +419,7 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     id: 'biblioteca',
     titulo: 'Biblioteca',
     descricao: 'Acesse a biblioteca completa de materiais e recursos',
-    caminho: '/pt/nutri/metodo/manual',
+    caminho: '/pt/nutri/metodo/biblioteca',
     passo_a_passo: [
       '1. Acesse o menu lateral',
       '2. Clique em "Biblioteca"',

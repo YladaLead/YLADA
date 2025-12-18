@@ -10,19 +10,17 @@ export default function BibliotecaPage() {
   const [bibliotecaFiltrada, setBibliotecaFiltrada] = useState<BibliotecaItem[]>([])
   const [loading, setLoading] = useState(true)
   const [pesquisa, setPesquisa] = useState('')
-  const [categoriaFiltro, setCategoriaFiltro] = useState<string>('Todas')
 
-  // Mapeamento de PDFs internos
+  // Mapeamento de PDFs internos (os 6 PDFs essenciais)
   const pdfsInternos: Record<string, string> = {
-    'guia completo do método ylada': '/pt/nutri/metodo/biblioteca/pdf-1-guia-completo',
-    'identidade & postura profissional': '/pt/nutri/metodo/biblioteca/pdf-2-identidade-postura',
-    'rotina & produtividade ylada': '/pt/nutri/metodo/biblioteca/pdf-3-rotina-produtividade',
-    'captação inteligente ylada': '/pt/nutri/metodo/biblioteca/pdf-4-captacao-inteligente',
-    'fidelização & experiência da cliente': '/pt/nutri/metodo/biblioteca/pdf-5-fidelizacao-experiencia',
-    'gestão & organização de clientes': '/pt/nutri/metodo/biblioteca/pdf-6-gestao-gsal',
-    'ferramentas ylada – uso prático': '/pt/nutri/metodo/biblioteca/pdf-7-ferramentas-uso-pratico',
-    'guia de divulgação das ferramentas': '/pt/nutri/metodo/biblioteca/pdf-8-guia-divulgacao',
-    'manual técnico das ferramentas ylada': '/pt/nutri/metodo/biblioteca/pdf-9-manual-tecnico'
+    'manual técnico da plataforma': '/pt/nutri/metodo/biblioteca/pdf-01-manual-tecnico-plataforma',
+    'checklist oficial do dia 1': '/pt/nutri/metodo/biblioteca/pdf-02-checklist-dia-1',
+    'checklist de consolidação': '/pt/nutri/metodo/biblioteca/pdf-03-checklist-dia-7',
+    'primeira semana': '/pt/nutri/metodo/biblioteca/pdf-03-checklist-dia-7',
+    'rotina mínima': '/pt/nutri/metodo/biblioteca/pdf-04-rotina-minima',
+    'scripts essenciais': '/pt/nutri/metodo/biblioteca/pdf-05-scripts-essenciais',
+    'guia prático de gestão gsal': '/pt/nutri/metodo/biblioteca/pdf-06-guia-gsal',
+    'guia gsal': '/pt/nutri/metodo/biblioteca/pdf-06-guia-gsal'
   }
 
   useEffect(() => {
@@ -47,30 +45,20 @@ export default function BibliotecaPage() {
     carregarBiblioteca()
   }, [])
 
-  // Filtrar biblioteca
+  // Filtrar biblioteca por pesquisa
   useEffect(() => {
     let filtrada = [...biblioteca]
 
-    // Filtro por categoria
-    if (categoriaFiltro !== 'Todas') {
-      filtrada = filtrada.filter(item => item.category === categoriaFiltro)
-    }
-
-    // Filtro por pesquisa
     if (pesquisa.trim()) {
       const pesquisaLower = pesquisa.toLowerCase()
       filtrada = filtrada.filter(item =>
         item.title.toLowerCase().includes(pesquisaLower) ||
-        item.description?.toLowerCase().includes(pesquisaLower) ||
-        item.category.toLowerCase().includes(pesquisaLower)
+        item.description?.toLowerCase().includes(pesquisaLower)
       )
     }
 
     setBibliotecaFiltrada(filtrada)
-  }, [biblioteca, categoriaFiltro, pesquisa])
-
-  // Obter categorias únicas
-  const categorias = ['Todas', ...Array.from(new Set(biblioteca.map(item => item.category)))]
+  }, [biblioteca, pesquisa])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -94,46 +82,24 @@ export default function BibliotecaPage() {
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Materiais de Apoio
           </h1>
-          <p className="text-lg text-gray-600 mb-4">
+          <p className="text-gray-600 mb-6">
             PDFs, scripts, checklists e templates para consultar quando precisar.
           </p>
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
-            <p className="text-sm text-blue-800 flex items-start gap-2">
-              <span className="text-lg">💡</span>
-              <span><strong>Esses materiais são apoio, não obrigação.</strong> A LYA te orienta sobre o que faz sentido para o seu momento. Use quando sentir necessidade.</span>
-            </p>
-          </div>
 
-          {/* Pesquisa e Filtros */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            {/* Campo de Pesquisa */}
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Pesquisar por nome, descrição ou categoria..."
-                value={pesquisa}
-                onChange={(e) => setPesquisa(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-out"
-              />
-            </div>
-
-            {/* Filtro por Categoria */}
-            <select
-              value={categoriaFiltro}
-              onChange={(e) => setCategoriaFiltro(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-out"
-            >
-              {categorias.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+          {/* Pesquisa */}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Pesquisar por nome ou descrição..."
+              value={pesquisa}
+              onChange={(e) => setPesquisa(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-out"
+            />
           </div>
 
           {/* Contador de resultados */}
           {!loading && (
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600">
               {bibliotecaFiltrada.length} {bibliotecaFiltrada.length === 1 ? 'material encontrado' : 'materiais encontrados'}
             </p>
           )}
@@ -152,24 +118,21 @@ export default function BibliotecaPage() {
         ) : bibliotecaFiltrada.length === 0 ? (
           <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
             <p className="text-gray-600">
-              {pesquisa || categoriaFiltro !== 'Todas' 
-                ? 'Nenhum material encontrado com os filtros aplicados.' 
+              {pesquisa 
+                ? 'Nenhum material encontrado com a pesquisa aplicada.' 
                 : 'Nenhum material disponível no momento.'}
             </p>
-            {(pesquisa || categoriaFiltro !== 'Todas') && (
+            {pesquisa && (
               <button
-                onClick={() => {
-                  setPesquisa('')
-                  setCategoriaFiltro('Todas')
-                }}
+                onClick={() => setPesquisa('')}
                 className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 ease-out"
               >
-                Limpar filtros
+                Limpar pesquisa
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {bibliotecaFiltrada.map((item) => {
               // Verificar se é PDF interno
               const tituloLower = item.title.toLowerCase()
@@ -181,46 +144,36 @@ export default function BibliotecaPage() {
               return (
                 <div
                   key={item.id}
-                  className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 ease-out hover:scale-[1.01]"
+                  className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 ease-out hover:border-blue-200"
                 >
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="text-4xl flex-shrink-0">
-                      {item.file_type === 'pdf' && '📄'}
-                      {item.file_type === 'template' && '🎨'}
-                      {item.file_type === 'script' && '📝'}
-                      {item.file_type === 'planilha' && '📊'}
-                      {item.file_type === 'mensagem' && '💬'}
-                      {!['pdf', 'template', 'script', 'planilha', 'mensagem'].includes(item.file_type) && '📎'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 text-lg mb-2">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
-                        {item.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                          {item.category}
-                        </span>
-                        {isPDFInterno ? (
-                          <Link
-                            href={linkHref}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 ease-out hover:shadow-md hover:opacity-90 font-medium text-sm"
-                          >
-                            Ler agora →
-                          </Link>
-                        ) : (
-                          <a
-                            href={item.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 ease-out hover:shadow-md hover:opacity-90 font-medium text-sm"
-                          >
-                            Baixar PDF →
-                          </a>
-                        )}
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="text-3xl flex-shrink-0">
+                        📄
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-base mb-2 leading-snug">
+                          {item.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4 leading-relaxed flex-1">
+                      {item.description}
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <Link
+                        href={linkHref}
+                        className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 ease-out hover:shadow-md font-medium text-sm text-center"
+                      >
+                        📖 Ler conteúdo
+                      </Link>
+                      <button
+                        disabled
+                        className="w-full px-4 py-2.5 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed font-medium text-sm"
+                        title="PDF em preparação"
+                      >
+                        📄 Baixar PDF (em breve)
+                      </button>
                     </div>
                   </div>
                 </div>

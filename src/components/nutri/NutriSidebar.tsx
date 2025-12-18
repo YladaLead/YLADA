@@ -143,7 +143,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       {
         title: 'Materiais de Apoio',
         icon: '🎒',
-        href: '/pt/nutri/metodo/manual',
+        href: '/pt/nutri/metodo/biblioteca',
         color: 'yellow'
       },
       {

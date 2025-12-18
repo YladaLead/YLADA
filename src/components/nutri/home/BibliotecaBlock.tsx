@@ -8,25 +8,25 @@ const bibliotecaItems = [
   {
     title: 'Manual Técnico',
     icon: '📖',
-    href: '/pt/nutri/metodo/manual',
+    href: '/pt/nutri/metodo/biblioteca',
     description: 'Guia completo da plataforma'
   },
   {
     title: 'Tutoriais em Vídeo',
     icon: '🎥',
-    href: '/pt/nutri/metodo/manual',
+    href: '/pt/nutri/metodo/biblioteca',
     description: 'Vídeos que explicam como usar'
   },
   {
     title: 'PDFs da Formação',
     icon: '📄',
-    href: '/pt/nutri/metodo/manual',
+    href: '/pt/nutri/metodo/biblioteca',
     description: 'Materiais complementares do método'
   },
   {
     title: 'Bônus Exclusivos',
     icon: '🎁',
-    href: '/pt/nutri/metodo/manual',
+    href: '/pt/nutri/metodo/biblioteca',
     description: 'Conteúdos extras e ferramentas'
   }
 ]
