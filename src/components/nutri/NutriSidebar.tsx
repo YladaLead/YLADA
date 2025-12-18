@@ -280,11 +280,16 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         {progress && currentDay && (
           <div className="px-3 py-2 border-b border-gray-100 bg-blue-50/50">
             <p className="text-xs text-gray-600 font-medium">
-              {getPhaseMessage(currentPhase)}
+              {currentDay > 30 ? 'Jornada Completa! 🏆' : getPhaseMessage(currentPhase)}
             </p>
-            {currentDay > 0 && (
+            {currentDay > 0 && currentDay <= 30 && (
               <p className="text-xs text-gray-500 mt-0.5">
                 Dia {currentDay} de 30
+              </p>
+            )}
+            {currentDay > 30 && (
+              <p className="text-xs text-green-600 mt-0.5 font-medium">
+                Você e a LYA: parceiras de crescimento 💜
               </p>
             )}
           </div>

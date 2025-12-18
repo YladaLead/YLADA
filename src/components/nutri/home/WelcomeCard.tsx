@@ -27,6 +27,16 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
       }
     }
     
+    // 🎉 JORNADA CONCLUÍDA: Dia > 30
+    if (currentDay > 30) {
+      return {
+        title: 'Parabéns! Você completou a Jornada 🏆',
+        description: 'Sua base está construída. Agora você e a LYA são parceiras de crescimento. Continue usando a plataforma para evoluir!',
+        action: '🤖 Conversar com a LYA',
+        href: '/pt/nutri/metodo/jornada/concluida'
+      }
+    }
+    
     if (currentDay === 1) {
       return {
         title: 'Seu plano de ação para hoje',
@@ -36,7 +46,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
       }
     }
     
-    // Dia 2-7 (ainda Fase 1)
+    // Dias 2-30
     return {
       title: 'Seu plano de ação para hoje',
       description: `Continue seguindo a Jornada. Você está no Dia ${currentDay} de 30. Mantenha o foco e a consistência.`,
