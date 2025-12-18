@@ -40,26 +40,32 @@ function AnotacoesContent() {
         }
 
         // Carregar reflexões da jornada do Supabase
-        const responseReflexoes = await fetch('/api/nutri/metodo/jornada/reflexoes', {
-          credentials: 'include'
-        })
-        
-        let reflexoes: any[] = []
-        if (responseReflexoes.ok) {
-          const data = await responseReflexoes.json()
-          if (data.success && data.data) {
-            reflexoes = data.data.map((r: any) => ({
-              id: `jornada-${r.day_number}-${r.item_index}`,
-              titulo: r.item_index === -1 
-                ? `Dia ${r.day_number} - Ação Prática` 
-                : `Dia ${r.day_number} - Reflexão ${r.item_index + 1}`,
-              conteudo: r.nota,
-              categoria: 'jornada',
-              tags: `dia ${r.day_number}`,
-              created_at: r.updated_at || r.created_at,
-              isJornada: true
-            }))
+        try {
+          const responseReflexoes = await fetch('/api/nutri/metodo/jornada/reflexoes', {
+            credentials: 'include'
+          })
+          
+          if (responseReflexoes.ok) {
+            const data = await responseReflexoes.json()
+            console.log('🔍 Reflexões da jornada:', data)
+            if (data.success && data.data && data.data.length > 0) {
+              reflexoes = data.data.map((r: any) => ({
+                id: `jornada-${r.day_number}-${r.item_index}`,
+                titulo: r.item_index === -1 
+                  ? `Dia ${r.day_number} - Ação Prática` 
+                  : `Dia ${r.day_number} - Reflexão ${r.item_index + 1}`,
+                conteudo: r.nota,
+                categoria: 'jornada',
+                tags: `dia ${r.day_number}`,
+                created_at: r.updated_at || r.created_at,
+                isJornada: true
+              }))
+            }
+          } else {
+            console.error('❌ Erro na API de reflexões:', responseReflexoes.status)
           }
+        } catch (apiError) {
+          console.error('❌ Erro ao buscar reflexões:', apiError)
         }
 
         setAnotacoes(anotacoesManuais)
