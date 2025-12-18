@@ -39,6 +39,7 @@
     "react-dropzone": "^14.3.8",
     "react-markdown": "^10.1.0",
     "react-player": "^3.4.0",
+    "recharts": "^3.6.0",
     "remark-gfm": "^4.0.1",
     "resend": "^6.4.2",
     "stripe": "^18.5.0",

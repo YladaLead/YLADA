@@ -7,6 +7,14 @@ import { useAuth } from '@/contexts/AuthContext'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { displayPhoneWithFlag } from '@/utils/phoneFormatter'
 import DocumentosTab from '@/components/nutri/DocumentosTab'
+import NovaEvolucaoModal from '@/components/nutri/NovaEvolucaoModal'
+import TabelaEvolucao from '@/components/nutri/TabelaEvolucao'
+import GraficoEvolucaoPeso from '@/components/nutri/GraficoEvolucaoPeso'
+import LyaChatWidget from '@/components/nutri/LyaChatWidget'
+import NovaAvaliacaoModal from '@/components/nutri/NovaAvaliacaoModal'
+import NovaReavaliacaoModal from '@/components/nutri/NovaReavaliacaoModal'
+import ComparacaoAvaliacoes from '@/components/nutri/ComparacaoAvaliacoes'
+import ListaAvaliacoes from '@/components/nutri/ListaAvaliacoes'
 
 export default function ClienteDetalhesNutri() {
   return <ClienteDetalhesNutriContent />
@@ -325,6 +333,9 @@ function ClienteDetalhesNutriContent() {
           </div>
         </div>
       )}
+
+      {/* Widget da LYA - sempre visível */}
+      <LyaChatWidget />
     </div>
   )
 }
@@ -912,152 +923,49 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
   const [evolucoes, setEvolucoes] = useState<any[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
-  const [mostrarForm, setMostrarForm] = useState(false)
-  const [salvando, setSalvando] = useState(false)
-  const [formData, setFormData] = useState({
-    measurement_date: new Date().toISOString().split('T')[0],
-    weight: '',
-    height: '',
-    waist_circumference: '',
-    hip_circumference: '',
-    neck_circumference: '',
-    arm_circumference: '',
-    thigh_circumference: '',
-    body_fat_percentage: '',
-    muscle_mass: '',
-    water_percentage: '',
-    visceral_fat: '',
-    notes: '',
-    photos_urls: [] as string[]
-  })
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [lyaInsightMessage, setLyaInsightMessage] = useState<string | null>(null)
 
   // Carregar evoluções
-  useEffect(() => {
-    const carregarEvolucoes = async () => {
-      try {
-        setCarregando(true)
-        const response = await fetch(`/api/nutri/clientes/${clientId}/evolucao`, {
-          credentials: 'include'
-        })
+  const carregarEvolucoes = async () => {
+    try {
+      setCarregando(true)
+      const response = await fetch(`/api/nutri/clientes/${clientId}/evolucao`, {
+        credentials: 'include'
+      })
 
-        if (!response.ok) {
-          throw new Error('Erro ao carregar evoluções')
-        }
-
-        const data = await response.json()
-        if (data.success) {
-          setEvolucoes(data.data.evolutions || [])
-        }
-      } catch (error: any) {
-        console.error('Erro ao carregar evoluções:', error)
-        setErro(error.message || 'Erro ao carregar evoluções')
-      } finally {
-        setCarregando(false)
+      if (!response.ok) {
+        throw new Error('Erro ao carregar evoluções')
       }
-    }
 
+      const data = await response.json()
+      if (data.success) {
+        setEvolucoes(data.data.evolutions || [])
+      }
+    } catch (error: any) {
+      console.error('Erro ao carregar evoluções:', error)
+      setErro(error.message || 'Erro ao carregar evoluções')
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  useEffect(() => {
     carregarEvolucoes()
   }, [clientId])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+  // Handler para quando nova evolução é salva com sucesso
+  const handleEvolucaoSalva = () => {
+    carregarEvolucoes()
+    setMostrarModal(false)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setErro(null)
-    setSalvando(true)
-
-    try {
-      const payload: any = {
-        measurement_date: formData.measurement_date,
-        weight: formData.weight ? parseFloat(formData.weight) : null,
-        height: formData.height ? parseFloat(formData.height) : null,
-        waist_circumference: formData.waist_circumference ? parseFloat(formData.waist_circumference) : null,
-        hip_circumference: formData.hip_circumference ? parseFloat(formData.hip_circumference) : null,
-        neck_circumference: formData.neck_circumference ? parseFloat(formData.neck_circumference) : null,
-        arm_circumference: formData.arm_circumference ? parseFloat(formData.arm_circumference) : null,
-        thigh_circumference: formData.thigh_circumference ? parseFloat(formData.thigh_circumference) : null,
-        body_fat_percentage: formData.body_fat_percentage ? parseFloat(formData.body_fat_percentage) : null,
-        muscle_mass: formData.muscle_mass ? parseFloat(formData.muscle_mass) : null,
-        water_percentage: formData.water_percentage ? parseFloat(formData.water_percentage) : null,
-        visceral_fat: formData.visceral_fat ? parseFloat(formData.visceral_fat) : null,
-        notes: formData.notes || null,
-        photos_urls: formData.photos_urls
-      }
-
-      const response = await fetch(`/api/nutri/clientes/${clientId}/evolucao`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao criar registro de evolução')
-      }
-
-      if (data.success) {
-        setMostrarForm(false)
-        setFormData({
-          measurement_date: new Date().toISOString().split('T')[0],
-          weight: '',
-          height: '',
-          waist_circumference: '',
-          hip_circumference: '',
-          neck_circumference: '',
-          arm_circumference: '',
-          thigh_circumference: '',
-          body_fat_percentage: '',
-          muscle_mass: '',
-          water_percentage: '',
-          visceral_fat: '',
-          notes: '',
-          photos_urls: []
-        })
-        // Recarregar evoluções
-        window.location.reload()
-      }
-    } catch (error: any) {
-      console.error('Erro ao criar evolução:', error)
-      setErro(error.message || 'Erro ao criar registro de evolução. Tente novamente.')
-    } finally {
-      setSalvando(false)
-    }
+  // Handler para mensagem de insight da LYA
+  const handleLyaInsight = (message: string) => {
+    setLyaInsightMessage(message)
+    // Limpar mensagem após 5 segundos
+    setTimeout(() => setLyaInsightMessage(null), 5000)
   }
-
-  // Preparar dados para gráficos
-  const dadosGraficoPeso = evolucoes
-    .filter(e => e.weight)
-    .map(e => ({
-      date: new Date(e.measurement_date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
-      weight: parseFloat(e.weight)
-    }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-  const dadosGraficoIMC = evolucoes
-    .filter(e => e.bmi)
-    .map(e => ({
-      date: new Date(e.measurement_date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
-      bmi: parseFloat(e.bmi)
-    }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-  const maxPeso = dadosGraficoPeso.length > 0 ? Math.max(...dadosGraficoPeso.map(d => d.weight)) : 100
-  const minPeso = dadosGraficoPeso.length > 0 ? Math.min(...dadosGraficoPeso.map(d => d.weight)) : 0
-  const rangePeso = maxPeso - minPeso || 1
-
-  const maxIMC = dadosGraficoIMC.length > 0 ? Math.max(...dadosGraficoIMC.map(d => d.bmi)) : 30
-  const minIMC = dadosGraficoIMC.length > 0 ? Math.min(...dadosGraficoIMC.map(d => d.bmi)) : 0
-  const rangeIMC = maxIMC - minIMC || 1
 
   if (carregando) {
     return (
@@ -1071,364 +979,107 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Evolução Física</h2>
-        <button
-          onClick={() => setMostrarForm(!mostrarForm)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-        >
-          {mostrarForm ? 'Cancelar' : '+ Novo Registro'}
-        </button>
-      </div>
-
-      {erro && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{erro}</p>
-        </div>
-      )}
-
-      {/* Formulário de Novo Registro */}
-      {mostrarForm && (
-        <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Novo Registro de Evolução</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="measurement_date" className="block text-sm font-medium text-gray-700 mb-2">
-                  Data da Medição *
-                </label>
-                <input
-                  type="date"
-                  id="measurement_date"
-                  name="measurement_date"
-                  value={formData.measurement_date}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-2">
-                  Peso (kg)
-                </label>
-                <input
-                  type="number"
-                  id="weight"
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleChange}
-                  step="0.1"
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-2">
-                  Altura (m)
-                </label>
-                <input
-                  type="number"
-                  id="height"
-                  name="height"
-                  value={formData.height}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="waist_circumference" className="block text-sm font-medium text-gray-700 mb-2">
-                  Cintura (cm)
-                </label>
-                <input
-                  type="number"
-                  id="waist_circumference"
-                  name="waist_circumference"
-                  value={formData.waist_circumference}
-                  onChange={handleChange}
-                  step="0.1"
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="hip_circumference" className="block text-sm font-medium text-gray-700 mb-2">
-                  Quadril (cm)
-                </label>
-                <input
-                  type="number"
-                  id="hip_circumference"
-                  name="hip_circumference"
-                  value={formData.hip_circumference}
-                  onChange={handleChange}
-                  step="0.1"
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="body_fat_percentage" className="block text-sm font-medium text-gray-700 mb-2">
-                  % Gordura Corporal
-                </label>
-                <input
-                  type="number"
-                  id="body_fat_percentage"
-                  name="body_fat_percentage"
-                  value={formData.body_fat_percentage}
-                  onChange={handleChange}
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
-                Observações
-              </label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setMostrarForm(false)}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={salvando}
-                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {salvando ? 'Salvando...' : 'Salvar Registro'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Gráficos */}
-      {evolucoes.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Gráfico de Peso */}
-          {dadosGraficoPeso.length > 0 && (
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Evolução do Peso</h3>
-              <div className="h-64 relative">
-                <svg width="100%" height="100%" className="overflow-visible">
-                  <defs>
-                    <linearGradient id="pesoGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  {/* Área do gráfico */}
-                  <path
-                    d={`M ${20} ${240 - ((dadosGraficoPeso[0].weight - minPeso) / rangePeso) * 200} ${dadosGraficoPeso.map((d, i) => `L ${20 + (i * (280 / (dadosGraficoPeso.length - 1 || 1)))} ${240 - ((d.weight - minPeso) / rangePeso) * 200}`).join(' ')} L ${300} 240 L 20 240 Z`}
-                    fill="url(#pesoGradient)"
-                  />
-                  {/* Linha do gráfico */}
-                  <polyline
-                    points={dadosGraficoPeso.map((d, i) => `${20 + (i * (280 / (dadosGraficoPeso.length - 1 || 1)))},${240 - ((d.weight - minPeso) / rangePeso) * 200}`).join(' ')}
-                    fill="none"
-                    stroke="#3B82F6"
-                    strokeWidth="2"
-                  />
-                  {/* Pontos */}
-                  {dadosGraficoPeso.map((d, i) => (
-                    <circle
-                      key={i}
-                      cx={20 + (i * (280 / (dadosGraficoPeso.length - 1 || 1)))}
-                      cy={240 - ((d.weight - minPeso) / rangePeso) * 200}
-                      r="4"
-                      fill="#3B82F6"
-                    />
-                  ))}
-                  {/* Labels */}
-                  {dadosGraficoPeso.map((d, i) => (
-                    <text
-                      key={i}
-                      x={20 + (i * (280 / (dadosGraficoPeso.length - 1 || 1)))}
-                      y={260}
-                      textAnchor="middle"
-                      className="text-xs fill-gray-600"
-                    >
-                      {d.date}
-                    </text>
-                  ))}
-                </svg>
-                <div className="absolute top-0 right-0 text-sm text-gray-600">
-                  {dadosGraficoPeso[dadosGraficoPeso.length - 1]?.weight.toFixed(1)} kg
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Gráfico de IMC */}
-          {dadosGraficoIMC.length > 0 && (
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Evolução do IMC</h3>
-              <div className="h-64 relative">
-                <svg width="100%" height="100%" className="overflow-visible">
-                  <defs>
-                    <linearGradient id="imcGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#10B981" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d={`M ${20} ${240 - ((dadosGraficoIMC[0].bmi - minIMC) / rangeIMC) * 200} ${dadosGraficoIMC.map((d, i) => `L ${20 + (i * (280 / (dadosGraficoIMC.length - 1 || 1)))} ${240 - ((d.bmi - minIMC) / rangeIMC) * 200}`).join(' ')} L ${300} 240 L 20 240 Z`}
-                    fill="url(#imcGradient)"
-                  />
-                  <polyline
-                    points={dadosGraficoIMC.map((d, i) => `${20 + (i * (280 / (dadosGraficoIMC.length - 1 || 1)))},${240 - ((d.bmi - minIMC) / rangeIMC) * 200}`).join(' ')}
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                  />
-                  {dadosGraficoIMC.map((d, i) => (
-                    <circle
-                      key={i}
-                      cx={20 + (i * (280 / (dadosGraficoIMC.length - 1 || 1)))}
-                      cy={240 - ((d.bmi - minIMC) / rangeIMC) * 200}
-                      r="4"
-                      fill="#10B981"
-                    />
-                  ))}
-                  {dadosGraficoIMC.map((d, i) => (
-                    <text
-                      key={i}
-                      x={20 + (i * (280 / (dadosGraficoIMC.length - 1 || 1)))}
-                      y={260}
-                      textAnchor="middle"
-                      className="text-xs fill-gray-600"
-                    >
-                      {d.date}
-                    </text>
-                  ))}
-                </svg>
-                <div className="absolute top-0 right-0 text-sm text-gray-600">
-                  {dadosGraficoIMC[dadosGraficoIMC.length - 1]?.bmi.toFixed(1)} IMC
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tabela Histórica */}
-      {evolucoes.length > 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (kg)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IMC</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cintura (cm)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quadril (cm)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Gordura</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {evolucoes
-                  .sort((a, b) => new Date(b.measurement_date).getTime() - new Date(a.measurement_date).getTime())
-                  .map((evolucao) => (
-                    <tr key={evolucao.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(evolucao.measurement_date).toLocaleDateString('pt-BR')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {evolucao.weight ? `${parseFloat(evolucao.weight).toFixed(1)}` : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {evolucao.bmi ? `${parseFloat(evolucao.bmi).toFixed(1)}` : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {evolucao.waist_circumference ? `${parseFloat(evolucao.waist_circumference).toFixed(1)}` : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {evolucao.hip_circumference ? `${parseFloat(evolucao.hip_circumference).toFixed(1)}` : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {evolucao.body_fat_percentage ? `${parseFloat(evolucao.body_fat_percentage).toFixed(1)}%` : '-'}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Evolução Física</h2>
+            <p className="text-sm text-gray-600 mt-1">Acompanhe o progresso do cliente com medições e gráficos detalhados</p>
           </div>
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-gray-600 mb-4">Nenhum registro de evolução encontrado.</p>
           <button
-            onClick={() => setMostrarForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            onClick={() => setMostrarModal(true)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold shadow-sm flex items-center gap-2"
           >
-            Adicionar Primeiro Registro
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nova Medição
           </button>
         </div>
-      )}
-    </div>
+
+        {erro && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+            <p className="text-red-800">{erro}</p>
+          </div>
+        )}
+
+        {/* Mensagem de Insight da LYA */}
+        {lyaInsightMessage && (
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 flex items-start gap-3 animate-fade-in">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold">LYA</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-blue-900 mb-1">Insight da LYA</p>
+              <p className="text-sm text-blue-700">{lyaInsightMessage}</p>
+              <p className="text-xs text-blue-600 mt-2">💬 Clique no widget da LYA para conversar sobre essa evolução</p>
+            </div>
+          </div>
+        )}
+
+        {/* Gráficos */}
+        <GraficoEvolucaoPeso evolucoes={evolucoes} />
+
+        {/* Tabela de Histórico */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Histórico de Medições</h3>
+          <TabelaEvolucao evolucoes={evolucoes} />
+        </div>
+
+        {/* Empty State */}
+        {evolucoes.length === 0 && (
+          <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-dashed border-blue-300">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Comece a acompanhar a evolução</h3>
+              <p className="text-gray-600 mb-6">
+                Registre a primeira medição para começar a visualizar o progresso do cliente.
+              </p>
+              <button
+                onClick={() => setMostrarModal(true)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Adicionar Primeira Medição
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modal de Nova Evolução */}
+      <NovaEvolucaoModal
+        isOpen={mostrarModal}
+        onClose={() => setMostrarModal(false)}
+        clientId={clientId}
+        onSuccess={handleEvolucaoSalva}
+        onLyaInsight={handleLyaInsight}
+      />
+    </>
   )
 }
 
+// Aba: Avaliação Física (usando componentes modulares)
 function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string }) {
   const [assessments, setAssessments] = useState<any[]>([])
   const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState<string | null>(null)
-  const [mostrarForm, setMostrarForm] = useState(false)
-  const [salvando, setSalvando] = useState(false)
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null)
+  const [mostrarNovaAvaliacao, setMostrarNovaAvaliacao] = useState(false)
+  const [mostrarReavaliacao, setMostrarReavaliacao] = useState(false)
+  const [avaliacaoParaReavaliar, setAvaliacaoParaReavaliar] = useState<string | null>(null)
+  const [mostrarComparacao, setMostrarComparacao] = useState(false)
+  const [avaliacaoParaComparar, setAvaliacaoParaComparar] = useState<string | null>(null)
 
-  const initialFormState = () => ({
-    assessment_type: 'antropometrica',
-    assessment_name: '',
-    measurement_date: new Date().toISOString().split('T')[0],
-    status: 'completo',
-    is_reevaluation: false,
-    parent_assessment_id: '',
-    interpretation: '',
-    recommendations: '',
-    data: {
-      weight: '',
-      height: '',
-      bmi: '',
-      waist_circumference: '',
-      hip_circumference: '',
-      chest_circumference: '',
-      arm_circumference: '',
-      thigh_circumference: '',
-      body_fat_percentage: '',
-      muscle_mass: '',
-      water_percentage: '',
-      visceral_fat: '',
-      notes: ''
-    }
-  })
-
-  const [formData, setFormData] = useState(initialFormState)
-
+  // Carregar avaliações
   const carregarAvaliacoes = async () => {
     try {
       setCarregando(true)
@@ -1449,14 +1100,11 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
       const data = await response.json()
       const lista = data.data?.assessments || []
       setAssessments(lista)
-      if (lista.length > 0) {
-        setSelectedAssessmentId((prev) => prev || lista[0].id)
-      } else {
-        setSelectedAssessmentId(null)
+      if (lista.length > 0 && !selectedAssessmentId) {
+        setSelectedAssessmentId(lista[0].id)
       }
     } catch (error: any) {
       console.error('Erro ao carregar avaliações:', error)
-      setErro(error.message || 'Erro ao carregar avaliações')
     } finally {
       setCarregando(false)
     }
@@ -1467,571 +1115,79 @@ function AvaliacaoTab({ cliente, clientId }: { cliente: any; clientId: string })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId])
 
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target
-    if (name === 'is_reevaluation') {
-      setFormData(prev => ({
-        ...prev,
-        is_reevaluation: checked,
-        parent_assessment_id: checked ? prev.parent_assessment_id : ''
-      }))
-      return
-    }
-
-    if (name.startsWith('data.')) {
-      const field = name.replace('data.', '')
-      setFormData(prev => {
-        const updated = {
-          ...prev,
-          data: {
-            ...prev.data,
-            [field]: value
-          }
-        }
-
-        if (field === 'weight' || field === 'height') {
-          const peso = parseFloat((field === 'weight' ? value : updated.data.weight || '').replace(',', '.'))
-          const altura = parseFloat((field === 'height' ? value : updated.data.height || '').replace(',', '.'))
-          if (!isNaN(peso) && !isNaN(altura) && altura > 0) {
-            const bmi = (peso / (altura * altura)).toFixed(1)
-            updated.data.bmi = bmi
-          } else {
-            updated.data.bmi = ''
-          }
-        }
-
-        return updated
-      })
-      return
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+  const handleNovaAvaliacaoSuccess = () => {
+    carregarAvaliacoes()
+    setMostrarNovaAvaliacao(false)
   }
 
-  const resetForm = () => {
-    setFormData(initialFormState())
+  const handleReavaliacaoSuccess = () => {
+    carregarAvaliacoes()
+    setMostrarReavaliacao(false)
+    setAvaliacaoParaReavaliar(null)
   }
 
-  const normalizeNumber = (value: string) => {
-    if (!value) return null
-    const parsed = parseFloat(value.replace(',', '.'))
-    return isNaN(parsed) ? null : parsed
+  const handleOpenReavaliacao = (parentId: string) => {
+    setAvaliacaoParaReavaliar(parentId)
+    setMostrarReavaliacao(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setErro(null)
-    setSalvando(true)
-
-    try {
-      const payload = {
-        assessment_type: formData.assessment_type,
-        assessment_name: formData.assessment_name || null,
-        status: formData.status,
-        is_reevaluation: formData.is_reevaluation,
-        parent_assessment_id: formData.is_reevaluation && formData.parent_assessment_id ? formData.parent_assessment_id : null,
-        interpretation: formData.interpretation || null,
-        recommendations: formData.recommendations || null,
-        data: {
-          measurement_date: formData.measurement_date,
-          weight: normalizeNumber(formData.data.weight),
-          height: normalizeNumber(formData.data.height),
-          bmi: normalizeNumber(formData.data.bmi),
-          waist_circumference: normalizeNumber(formData.data.waist_circumference),
-          hip_circumference: normalizeNumber(formData.data.hip_circumference),
-          chest_circumference: normalizeNumber(formData.data.chest_circumference),
-          arm_circumference: normalizeNumber(formData.data.arm_circumference),
-          thigh_circumference: normalizeNumber(formData.data.thigh_circumference),
-          body_fat_percentage: normalizeNumber(formData.data.body_fat_percentage),
-          muscle_mass: normalizeNumber(formData.data.muscle_mass),
-          water_percentage: normalizeNumber(formData.data.water_percentage),
-          visceral_fat: normalizeNumber(formData.data.visceral_fat),
-          notes: formData.data.notes || null
-        }
-      }
-
-      const response = await fetch(`/api/nutri/clientes/${clientId}/avaliacoes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao salvar avaliação')
-      }
-
-      setMostrarForm(false)
-      resetForm()
-      await carregarAvaliacoes()
-    } catch (error: any) {
-      console.error('Erro ao salvar avaliação:', error)
-      setErro(error.message || 'Erro ao salvar avaliação. Tente novamente.')
-    } finally {
-      setSalvando(false)
-    }
-  }
-
-  const selectedAssessment = assessments.find((assessment) => assessment.id === selectedAssessmentId)
-
-  if (carregando) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando avaliações...</p>
-        </div>
-      </div>
-    )
+  const handleOpenComparacao = (avaliacaoId: string) => {
+    setAvaliacaoParaComparar(avaliacaoId)
+    setMostrarComparacao(true)
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Avaliação Física</h2>
-          <p className="text-sm text-gray-600">Registre medidas corporais, composição e notas rápidas.</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {assessments.length > 0 && (
-            <button
-              onClick={() => carregarAvaliacoes()}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
-            >
-              Atualizar lista
-            </button>
-          )}
-          <button
-            onClick={() => {
-              setMostrarForm(!mostrarForm)
-              if (!mostrarForm) {
-                resetForm()
-              }
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            {mostrarForm ? 'Cancelar' : '+ Nova Avaliação'}
-          </button>
-        </div>
-      </div>
+    <>
+      <ListaAvaliacoes
+        clienteId={clientId}
+        avaliacoes={assessments}
+        carregando={carregando}
+        onReload={carregarAvaliacoes}
+        onSelectAvaliacao={setSelectedAssessmentId}
+        avaliacaoSelecionada={selectedAssessmentId}
+        onOpenNovaAvaliacao={() => setMostrarNovaAvaliacao(true)}
+        onOpenReavaliacao={handleOpenReavaliacao}
+        onOpenComparacao={handleOpenComparacao}
+      />
 
-      {erro && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
-          <p className="text-red-800 text-sm">{erro}</p>
-        </div>
+      {/* Modal Nova Avaliação */}
+      <NovaAvaliacaoModal
+        clienteId={clientId}
+        clienteNome={cliente.name}
+        isOpen={mostrarNovaAvaliacao}
+        onClose={() => setMostrarNovaAvaliacao(false)}
+        onSuccess={handleNovaAvaliacaoSuccess}
+      />
+
+      {/* Modal Reavaliação */}
+      {avaliacaoParaReavaliar && (
+        <NovaReavaliacaoModal
+          clienteId={clientId}
+          clienteNome={cliente.name}
+          avaliacaoAnteriorId={avaliacaoParaReavaliar}
+          isOpen={mostrarReavaliacao}
+          onClose={() => {
+            setMostrarReavaliacao(false)
+            setAvaliacaoParaReavaliar(null)
+          }}
+          onSuccess={handleReavaliacaoSuccess}
+        />
       )}
 
-      {mostrarForm && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900">Registrar Avaliação</h3>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Avaliação *</label>
-                <select
-                  name="assessment_type"
-                  value={formData.assessment_type}
-                  onChange={handleFieldChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="antropometrica">Antropométrica</option>
-                  <option value="bioimpedancia">Bioimpedância</option>
-                  <option value="anamnese">Anamnese</option>
-                  <option value="questionario">Questionário</option>
-                  <option value="reavaliacao">Reavaliação</option>
-                  <option value="outro">Outro</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nome / Identificação</label>
-                <input
-                  type="text"
-                  name="assessment_name"
-                  value={formData.assessment_name}
-                  onChange={handleFieldChange}
-                  placeholder="Ex: Avaliação inicial fevereiro"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Data da avaliação *</label>
-                <input
-                  type="date"
-                  name="measurement_date"
-                  value={formData.measurement_date}
-                  onChange={handleFieldChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleFieldChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="rascunho">Rascunho</option>
-                  <option value="completo">Completo</option>
-                </select>
-              </div>
-              <label className="flex items-center gap-3 text-sm font-medium text-gray-700 mt-6">
-                <input
-                  type="checkbox"
-                  name="is_reevaluation"
-                  checked={formData.is_reevaluation}
-                  onChange={handleFieldChange}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
-                Essa avaliação é uma reavaliação
-              </label>
-            </div>
-
-            {formData.is_reevaluation && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Avaliação anterior</label>
-                <select
-                  name="parent_assessment_id"
-                  value={formData.parent_assessment_id}
-                  onChange={handleFieldChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="">Selecione a avaliação base</option>
-                  {assessments
-                    .filter(a => !a.is_reevaluation)
-                    .map(a => (
-                      <option key={a.id} value={a.id}>
-                        #{a.assessment_number || 1} • {a.assessment_name || 'Avaliação'} ({new Date(a.created_at).toLocaleDateString('pt-BR')})
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
-
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h4 className="font-semibold text-gray-900 mb-4">Medidas corporais</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    name="data.weight"
-                    value={formData.data.weight}
-                    onChange={handleFieldChange}
-                    placeholder="Ex: 68.5"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Altura (m)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="data.height"
-                    value={formData.data.height}
-                    onChange={handleFieldChange}
-                    placeholder="Ex: 1.65"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">IMC</label>
-                  <input
-                    type="text"
-                    name="data.bmi"
-                    value={formData.data.bmi}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-200 bg-gray-100 rounded-lg text-gray-600"
-                    placeholder="Calculado automaticamente"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h4 className="font-semibold text-gray-900 mb-4">Circunferências (cm)</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { label: 'Cintura', name: 'waist_circumference' },
-                  { label: 'Quadril', name: 'hip_circumference' },
-                  { label: 'Peitoral', name: 'chest_circumference' },
-                  { label: 'Braço', name: 'arm_circumference' },
-                  { label: 'Coxa', name: 'thigh_circumference' }
-                ].map((field) => (
-                  <div key={field.name}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name={`data.${field.name}`}
-                      value={(formData.data as any)[field.name]}
-                      onChange={handleFieldChange}
-                      placeholder="Ex: 82"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h4 className="font-semibold text-gray-900 mb-4">Composição corporal</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { label: '% Gordura', name: 'body_fat_percentage', placeholder: 'Ex: 28.5' },
-                  { label: 'Massa Magra (kg)', name: 'muscle_mass', placeholder: 'Ex: 48' },
-                  { label: '% Água', name: 'water_percentage', placeholder: 'Ex: 52' },
-                  { label: 'Gordura visceral', name: 'visceral_fat', placeholder: 'Ex: 6' }
-                ].map((field) => (
-                  <div key={field.name}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name={`data.${field.name}`}
-                      value={(formData.data as any)[field.name]}
-                      onChange={handleFieldChange}
-                      placeholder={field.placeholder}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Interpretação / Observações</label>
-                <textarea
-                  name="interpretation"
-                  value={formData.interpretation}
-                  onChange={handleFieldChange}
-                  rows={3}
-                  placeholder="Resumo rápido do que você percebeu nesta avaliação."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Recomendações / Plano</label>
-                <textarea
-                  name="recommendations"
-                  value={formData.recommendations}
-                  onChange={handleFieldChange}
-                  rows={3}
-                  placeholder="Ex: Ajustar ingestão de proteínas, revisar treino..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Notas internas</label>
-                <textarea
-                  name="data.notes"
-                  value={formData.data.notes}
-                  onChange={handleFieldChange}
-                  rows={3}
-                  placeholder="Essas notas não são compartilhadas com a cliente."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  resetForm()
-                  setMostrarForm(false)
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
-                disabled={salvando}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={salvando}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
-              >
-                {salvando && (
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                )}
-                Salvar avaliação
-              </button>
-            </div>
-          </form>
-        </div>
+      {/* Modal Comparação */}
+      {avaliacaoParaComparar && (
+        <ComparacaoAvaliacoes
+          clienteId={clientId}
+          clienteNome={cliente.name}
+          avaliacaoAtualId={avaliacaoParaComparar}
+          isOpen={mostrarComparacao}
+          onClose={() => {
+            setMostrarComparacao(false)
+            setAvaliacaoParaComparar(null)
+          }}
+        />
       )}
-
-      {assessments.length === 0 && !mostrarForm ? (
-        <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-          <p className="text-gray-600 mb-4">Você ainda não registrou nenhuma avaliação física.</p>
-          <button
-            onClick={() => setMostrarForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            Registrar primeira avaliação
-          </button>
-        </div>
-      ) : null}
-
-      {assessments.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            {selectedAssessment ? (
-              <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                  <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide">Avaliação selecionada</p>
-                    <h3 className="text-2xl font-semibold text-gray-900">
-                      {selectedAssessment.assessment_name || 'Avaliação'} #{selectedAssessment.assessment_number || 1}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {selectedAssessment.assessment_type === 'antropometrica' && 'Antropométrica'}
-                      {selectedAssessment.assessment_type === 'bioimpedancia' && 'Bioimpedância'}
-                      {selectedAssessment.assessment_type === 'anamnese' && 'Anamnese'}
-                      {['questionario', 'reavaliacao', 'outro'].includes(selectedAssessment.assessment_type) && selectedAssessment.assessment_type}
-                      {' • '}
-                      {selectedAssessment.data?.measurement_date
-                        ? new Date(selectedAssessment.data.measurement_date).toLocaleDateString('pt-BR')
-                        : new Date(selectedAssessment.created_at).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedAssessment.status === 'completo'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {selectedAssessment.status === 'completo' ? 'Completo' : 'Rascunho'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { label: 'Peso', value: selectedAssessment.data?.weight ? `${selectedAssessment.data.weight} kg` : '-' },
-                    { label: 'Altura', value: selectedAssessment.data?.height ? `${selectedAssessment.data.height} m` : '-' },
-                    { label: 'IMC', value: selectedAssessment.data?.bmi ? selectedAssessment.data?.bmi : '-' },
-                    { label: 'Cintura', value: selectedAssessment.data?.waist_circumference ? `${selectedAssessment.data?.waist_circumference} cm` : '-' },
-                    { label: 'Quadril', value: selectedAssessment.data?.hip_circumference ? `${selectedAssessment.data?.hip_circumference} cm` : '-' },
-                    { label: 'Gordura corporal', value: selectedAssessment.data?.body_fat_percentage ? `${selectedAssessment.data?.body_fat_percentage}%` : '-' },
-                    { label: 'Massa magra', value: selectedAssessment.data?.muscle_mass ? `${selectedAssessment.data?.muscle_mass} kg` : '-' },
-                    { label: 'Água corporal', value: selectedAssessment.data?.water_percentage ? `${selectedAssessment.data?.water_percentage}%` : '-' }
-                  ].map(item => (
-                    <div key={item.label} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                      <p className="text-xs uppercase text-gray-500">{item.label}</p>
-                      <p className="text-lg font-semibold text-gray-900">{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {selectedAssessment.interpretation && (
-                  <div className="mt-6">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-2">Interpretação</h4>
-                    <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{selectedAssessment.interpretation}</p>
-                  </div>
-                )}
-
-                {selectedAssessment.recommendations && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-2">Recomendações</h4>
-                    <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{selectedAssessment.recommendations}</p>
-                  </div>
-                )}
-
-                {selectedAssessment.data?.notes && (
-                  <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-4">
-                    <p className="text-sm font-semibold text-blue-900 mb-1">Notas internas</p>
-                    <p className="text-sm text-blue-800 whitespace-pre-line">{selectedAssessment.data.notes}</p>
-                  </div>
-                )}
-
-                {selectedAssessment.is_reevaluation && selectedAssessment.comparison_data && (
-                  <div className="mt-6 border-t pt-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Comparação automática</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {['weight', 'bmi', 'body_fat_percentage', 'muscle_mass', 'waist_circumference', 'hip_circumference'].map((field) => {
-                        const comp = selectedAssessment.comparison_data[field]
-                        if (!comp || typeof comp !== 'object') return null
-                        const diff = parseFloat(comp.difference ?? 0)
-                        const signal = diff > 0 ? '+' : ''
-                        return (
-                          <div key={field} className="rounded-lg border border-gray-200 p-4">
-                            <p className="text-xs uppercase text-gray-500">{field.replace('_', ' ')}</p>
-                            <p className="text-lg font-semibold text-gray-900">{signal}{diff.toFixed(1)}</p>
-                            {comp.percent_change && (
-                              <p className="text-xs text-gray-500">{comp.percent_change}% desde a última avaliação</p>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="border border-dashed border-gray-300 rounded-xl p-6 text-center text-gray-500">
-                Selecione uma avaliação para visualizar os detalhes.
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700">Histórico de avaliações</h3>
-            <div className="space-y-3">
-              {assessments.map((assessment) => {
-                const data = assessment.data || {}
-                const isSelected = assessment.id === selectedAssessmentId
-                return (
-                  <button
-                    key={assessment.id}
-                    onClick={() => setSelectedAssessmentId(assessment.id)}
-                    className={`w-full text-left border rounded-lg p-4 transition-all ${
-                      isSelected ? 'border-blue-400 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-blue-200 bg-white'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {assessment.assessment_name || 'Avaliação'} #{assessment.assessment_number || 1}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {data.measurement_date
-                            ? new Date(data.measurement_date).toLocaleDateString('pt-BR')
-                            : new Date(assessment.created_at).toLocaleDateString('pt-BR')}
-                        </p>
-                      </div>
-                      <span className={`text-[11px] px-2 py-0.5 rounded-full ${
-                        assessment.is_reevaluation ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {assessment.is_reevaluation ? 'Reavaliação' : 'Inicial'}
-                      </span>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-600">
-                      {data.weight && <span>⚖️ {data.weight} kg</span>}
-                      {data.body_fat_percentage && <span>💧 {data.body_fat_percentage}% gordura</span>}
-                      {data.waist_circumference && <span>📏 Cintura {data.waist_circumference} cm</span>}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   )
 }
 

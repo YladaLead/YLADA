@@ -33,11 +33,18 @@ export default function LyaChatWidget() {
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender_type: 'lya',
-        message: 'Olá! Sou a LYA, sua mentora empresarial. Estou aqui para te ajudar a desenvolver sua mentalidade, organização e posicionamento como Nutri-Empresária. Como posso te ajudar hoje?',
+        message: 'Olá! Sou a LYA, sua mentora empresarial. Estou aqui para te ajudar a desenvolver sua mentalidade, organização e posicionamento como Nutri-Empresária.\n\n💡 **Novidade!** Agora posso te ajudar com formulários:\n\n• Criar formulários personalizados\n• Resumir respostas de clientes\n• Identificar padrões nos formulários\n\nComo posso te ajudar hoje?',
         created_at: new Date().toISOString()
       }])
     }
   }, [isOpen])
+
+  // Sugestões rápidas para formulários
+  const sugestoesRapidas = [
+    { emoji: '📝', texto: 'Criar formulário de anamnese', comando: 'LYA, cria uma anamnese básica pra mim' },
+    { emoji: '📊', texto: 'Ver padrões nas respostas', comando: 'LYA, identifica padrões nas respostas dos meus formulários' },
+    { emoji: '🍽️', texto: 'Criar recordatório 24h', comando: 'LYA, cria um formulário de recordatório alimentar 24h' },
+  ]
 
   const sendMessage = async (messageText?: string) => {
     const message = messageText || inputMessage.trim()
@@ -276,6 +283,26 @@ export default function LyaChatWidget() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Sugestões Rápidas */}
+          {messages.length <= 1 && (
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+              <p className="text-xs text-gray-600 mb-2 font-medium">💡 Sugestões rápidas:</p>
+              <div className="space-y-2">
+                {sugestoesRapidas.map((sugestao, index) => (
+                  <button
+                    key={index}
+                    onClick={() => sendMessage(sugestao.comando)}
+                    disabled={loading}
+                    className="w-full text-left px-3 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="mr-2">{sugestao.emoji}</span>
+                    <span className="text-gray-700">{sugestao.texto}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Input */}
           <div className="p-4 border-t border-gray-200 bg-white">
             <div className="flex space-x-2">
@@ -297,6 +324,11 @@ export default function LyaChatWidget() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
               </button>
+            </div>
+            
+            {/* Disclaimer */}
+            <div className="mt-2 text-xs text-gray-500 text-center">
+              💡 LYA é mentora de negócios. Análises clínicas são sua responsabilidade.
             </div>
           </div>
         </>
