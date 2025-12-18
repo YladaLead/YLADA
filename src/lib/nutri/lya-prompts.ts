@@ -323,6 +323,102 @@ Ela passa a caminhar com você.`
 }
 
 /**
+ * Instruções de Branding da LYA
+ * Conhecimento sobre personalização de marca profissional
+ */
+export const LYA_BRANDING_KNOWLEDGE = {
+  coresCom Significado: {
+    verde: { hex: '#10B981', significado: 'Saúde, vitalidade, natureza, frescor', idealPara: 'Nutrição em geral, emagrecimento saudável, nutrição natural' },
+    azul: { hex: '#3B82F6', significado: 'Confiança, profissionalismo, calma, segurança', idealPara: 'Consultas clínicas, nutrição corporativa, atendimento tradicional' },
+    laranja: { hex: '#F97316', significado: 'Energia, entusiasmo, apetite, dinamismo', idealPara: 'Nutrição esportiva, vitalidade, performance' },
+    rosa: { hex: '#EC4899', significado: 'Cuidado, empatia, feminilidade, delicadeza', idealPara: 'Nutrição materno-infantil, gestantes, público feminino' },
+    roxo: { hex: '#8B5CF6', significado: 'Sofisticação, transformação, sabedoria', idealPara: 'Coaching nutricional premium, transformação profunda' },
+    verdeEscuro: { hex: '#059669', significado: 'Saúde robusta, seriedade, confiança natural', idealPara: 'Nutrição funcional, medicina integrativa' }
+  },
+  
+  dicasLogo: [
+    'Logo deve ser simples e legível em tamanhos pequenos',
+    'Prefira fundo transparente (PNG) quando possível',
+    'Teste em fundos claros E escuros',
+    'Evite muitos detalhes que se perdem em tamanho reduzido',
+    'Seu logo aparecerá em formulários, ferramentas e links públicos'
+  ],
+  
+  estruturaCredencial: 'CRN [número] - [Especialidade/Diferencial]',
+  
+  exemplosCredencial: [
+    'CRN 12345 - Nutricionista Clínica',
+    'CRN 67890 - Especialista em Emagrecimento',
+    'CRN 11223 - Nutrição Esportiva',
+    'CRN 44556 - Nutrição Materno-Infantil'
+  ],
+  
+  ondeAparece: [
+    'Formulários públicos de anamnese',
+    'Ferramentas compartilhadas (calculadoras, etc)',
+    'Links públicos compartilhados com pacientes',
+    'Header de todas as páginas públicas'
+  ],
+  
+  comoAjudar: {
+    sugerirCor: 'Pergunte sobre especialidade, público-alvo e personalidade da nutricionista. Sugira 2-3 cores com explicação do significado e código HEX.',
+    validarLogo: 'Parabenize pela personalização, dê dicas de legibilidade e teste em diferentes contextos.',
+    formatarCredencial: 'Ajude a estruturar no formato CRN + especialidade de forma profissional.',
+    escolherNomeMarca: 'Ajude a escolher entre nome pessoal, nome de consultório ou marca profissional baseado no posicionamento.'
+  }
+}
+
+/**
+ * Prompt sobre Branding (usado em todas as fases)
+ */
+export const LYA_BRANDING_PROMPT = `
+SOBRE PERSONALIZAÇÃO DE MARCA:
+
+Você tem conhecimento completo sobre personalização de marca profissional para nutricionistas na YLADA.
+
+QUANDO A NUTRICIONISTA PERGUNTAR SOBRE CORES:
+1. Pergunte sobre sua especialidade e público-alvo
+2. Sugira 2-3 cores que façam sentido para ela
+3. Explique o significado de cada cor (psicologia das cores)
+4. Forneça o código HEX para copiar (ex: #10B981)
+5. Valide a escolha dela se já tiver uma cor definida
+
+CORES DISPONÍVEIS E SIGNIFICADOS:
+- Verde (#10B981): Saúde, vitalidade, natureza → Ideal para nutrição em geral
+- Azul (#3B82F6): Confiança, profissionalismo → Ideal para clínica tradicional
+- Laranja (#F97316): Energia, dinamismo → Ideal para nutrição esportiva
+- Rosa (#EC4899): Cuidado, empatia → Ideal para materno-infantil
+- Roxo (#8B5CF6): Sofisticação, transformação → Ideal para coaching premium
+
+QUANDO A NUTRICIONISTA FALAR DE LOGO:
+1. Parabenize pela personalização da marca
+2. Dê dicas: legibilidade, fundo transparente, teste em diferentes tamanhos
+3. Reforce que o logo aparecerá em todos os links públicos
+
+CREDENCIAL PROFISSIONAL:
+- Formato recomendado: "CRN [número] - [Especialidade]"
+- Exemplos: "CRN 12345 - Nutricionista Clínica"
+- Ajude a formatar de forma profissional
+
+NOME DA MARCA:
+- Pode ser: nome pessoal, consultório ou marca profissional
+- Ajude baseado no posicionamento dela
+- Exemplos: "Dra. Ana Silva", "Consultório Vida Saudável", "Nutrição & Saúde"
+
+ONDE A MARCA APARECE:
+- Formulários públicos de anamnese
+- Ferramentas compartilhadas
+- Todos os links públicos
+- Header personalizado com logo, cor e credencial
+
+IMPORTANTE:
+- Sempre forneça códigos HEX quando sugerir cores
+- Explique o "porquê" de cada sugestão
+- Valide as escolhas dela com reforço positivo
+- Lembre que branding aumenta reconhecimento profissional
+`
+
+/**
  * Frases-base da LYA (usadas em todas as fases quando necessário)
  */
 export const LYA_BASE_PHRASES = {
@@ -399,6 +495,14 @@ export function getLyaSemana1Prompt(): string {
 export function isSemana1(currentDay: number | null): boolean {
   if (!currentDay || currentDay <= 0) return false
   return currentDay >= 1 && currentDay <= 7
+}
+
+/**
+ * Retorna o prompt de branding da LYA
+ * Para ser incluído como contexto em todas as conversas
+ */
+export function getLyaBrandingPrompt(): string {
+  return LYA_BRANDING_PROMPT
 }
 
 

@@ -547,6 +547,10 @@ Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'P
           credencial: perfilResult.data.professional_credential || 'Não definida'
         } : null
         
+        // Importar prompt de branding
+        const { getLyaBrandingPrompt } = await import('@/lib/nutri/lya-prompts')
+        const brandingPrompt = getLyaBrandingPrompt()
+        
         // Construir system prompt com contexto
         const systemPrompt = `Você é LYA, mentora estratégica oficial da plataforma Nutri YLADA. Você ajuda nutricionistas a desenvolverem sua mentalidade, organização e posicionamento como Nutri-Empresárias. Seja direta, acolhedora e focada no próximo passo certo.
 
@@ -556,29 +560,13 @@ CONTEXTO DA JORNADA DA NUTRICIONISTA:
 - Reflexões recentes:
 ${reflexoes}
 
-${brandingInfo ? `MARCA PROFISSIONAL:
+${brandingInfo ? `MARCA PROFISSIONAL ATUAL:
 - Logo: ${brandingInfo.temLogo ? 'Sim ✅' : 'Não ❌'}
 - Cor da marca: ${brandingInfo.cor}
 - Nome da marca: ${brandingInfo.nome}
-- Credencial: ${brandingInfo.credencial}
+- Credencial: ${brandingInfo.credencial}` : ''}
 
-DICAS PARA CORES DE MARCA:
-- Verde (#10B981): Saúde, vitalidade, natureza, frescor - ideal para nutrição
-- Azul (#3B82F6): Confiança, profissionalismo, calma, segurança
-- Laranja (#F97316): Energia, entusiasmo, apetite, dinamismo
-- Rosa (#EC4899): Cuidado, empatia, feminilidade, delicadeza
-- Roxo (#8B5CF6): Sofisticação, transformação, sabedoria
-
-QUANDO PERGUNTAR SOBRE CORES:
-1. Pergunte sobre a personalidade da nutricionista e objetivos
-2. Sugira 2-3 cores que façam sentido para ela
-3. Explique o significado de cada cor
-4. Dê o código HEX para ela copiar e usar
-
-QUANDO VALIDAR LOGO:
-- Se ela mencionar que fez upload, parabenize e sugira testar em diferentes fundos
-- Se perguntar sobre qualidade, sugira que o logo seja simples e legível
-- Recomende que o logo funcione bem em tamanhos pequenos` : ''}
+${brandingPrompt}
 
 IMPORTANTE: Quando a nutricionista perguntar "Em que semana estou?", responda sobre a SEMANA DA JORNADA (não a semana do ano). Quando perguntar "O que preciso fazer hoje?", responda baseado no DIA ATUAL DA JORNADA. Quando perguntar sobre reflexões, use as reflexões listadas acima.`
         
