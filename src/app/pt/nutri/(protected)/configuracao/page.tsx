@@ -490,75 +490,6 @@ function NutriConfiguracaoContent() {
                 • Será usado para criar seus links personalizados
               </p>
             </div>
-            <button 
-              onClick={salvarPerfil}
-              disabled={salvando}
-              className={`bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center space-x-2 ${
-                salvando ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {salvando ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Salvando...</span>
-                </>
-              ) : (
-                <>
-                  <span>💾</span>
-                  <span>Salvar Alterações</span>
-                </>
-              )}
-            </button>
-            {salvoComSucesso && (
-              <div className="mt-2 px-4 py-3 bg-blue-50 border-2 border-blue-300 rounded-lg shadow-sm">
-                <div className="flex items-center space-x-2">
-                  <span className="text-blue-600 text-xl">✓</span>
-                  <div className="flex-1">
-                    <p className="text-sm text-blue-800 font-bold">
-                      Perfil salvo com sucesso!
-                    </p>
-                    <p className="text-xs text-blue-700 mt-1">
-                      Suas alterações foram salvas. Você pode continuar editando ou fechar esta página.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setSalvoComSucesso(false)}
-                    className="text-blue-600 hover:text-blue-800 text-lg font-bold"
-                    aria-label="Fechar mensagem de sucesso"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            )}
-            {erro && (
-              <div className="mt-2 px-4 py-3 bg-red-50 border-2 border-red-300 rounded-lg shadow-sm">
-                <div className="flex items-start space-x-2">
-                  <span className="text-red-600 text-xl">⚠️</span>
-                  <div className="flex-1">
-                    <p className="text-sm text-red-800 font-bold mb-1">
-                      Não foi possível salvar
-                    </p>
-                    <p className="text-sm text-red-700 mb-2">
-                      {erro}
-                    </p>
-                    <p className="text-xs text-red-600 mt-2 italic">
-                      Nenhuma alteração foi salva. Tente novamente após resolver o problema.
-                    </p>
-                    <p className="text-xs text-red-500 mt-2 font-mono bg-red-100 px-2 py-1 rounded">
-                      💡 Abra o console do navegador (F12) para ver detalhes técnicos do erro
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setErro(null)}
-                    className="text-red-600 hover:text-red-800 text-lg font-bold"
-                    aria-label="Fechar mensagem de erro"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -726,6 +657,78 @@ function NutriConfiguracaoContent() {
                 userSlug={perfil.userSlug}
               />
             </div>
+          </div>
+          
+          {/* Botão Salvar - Após Marca Profissional */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <button 
+              onClick={salvarPerfil}
+              disabled={salvando}
+              className={`w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center space-x-2 ${
+                salvando ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {salvando ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Salvando...</span>
+                </>
+              ) : (
+                <>
+                  <span>💾</span>
+                  <span>Salvar Alterações</span>
+                </>
+              )}
+            </button>
+            
+            {salvoComSucesso && (
+              <div className="mt-4 px-4 py-3 bg-blue-50 border-2 border-blue-300 rounded-lg shadow-sm">
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-600 text-xl">✓</span>
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-800 font-bold">
+                      Perfil e Marca salvos com sucesso!
+                    </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Suas alterações foram salvas. Seus links públicos agora exibem sua marca personalizada!
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSalvoComSucesso(false)}
+                    className="text-blue-600 hover:text-blue-800 text-lg font-bold"
+                    aria-label="Fechar mensagem de sucesso"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {erro && (
+              <div className="mt-4 px-4 py-3 bg-red-50 border-2 border-red-300 rounded-lg shadow-sm">
+                <div className="flex items-start space-x-2">
+                  <span className="text-red-600 text-xl">⚠️</span>
+                  <div className="flex-1">
+                    <p className="text-sm text-red-800 font-bold mb-1">
+                      Não foi possível salvar
+                    </p>
+                    <p className="text-sm text-red-700 mb-2">
+                      {erro}
+                    </p>
+                    <p className="text-xs text-red-600 mt-2 italic">
+                      Nenhuma alteração foi salva. Tente novamente após resolver o problema.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setErro(null)}
+                    className="text-red-600 hover:text-red-800 text-lg font-bold"
+                    aria-label="Fechar mensagem de erro"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
