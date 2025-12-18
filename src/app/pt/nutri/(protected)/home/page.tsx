@@ -108,8 +108,14 @@ function NutriHomeContent() {
             <LyaAnaliseHoje />
           </div>
 
-          {/* Dias 1-7: Apenas WelcomeCard + LyaAnaliseHoje (já renderizados acima) */}
-          {!isFirstDays && currentDay && (
+          {/* 
+            🎯 JORNADA COMPLETA (Dia > 30): 
+            Home LIMPA - apenas WelcomeCard + LyaAnaliseHoje
+            Tudo já está acessível pelo sidebar
+          */}
+          
+          {/* Dias 2-30: Blocos progressivos (NÃO aparece se > 30) */}
+          {currentDay && currentDay >= 2 && currentDay <= 30 && (
             <>
               {/* Dia 8+: Jornada Block aparece */}
               {currentDay >= 8 && (
@@ -119,20 +125,20 @@ function NutriHomeContent() {
               )}
 
               {/* Dia 8-14: Ferramentas Block (filtrado por relevância) */}
-              {currentDay >= 8 && currentDay < 15 && (
+              {currentDay >= 8 && currentDay <= 14 && (
                 <div className="mb-8">
                   <FerramentasBlock />
                 </div>
               )}
 
-              {/* Dia 15+: GSAL Block (quando LYA detecta necessidade) */}
+              {/* Dia 15-30: GSAL Block */}
               {currentDay >= 15 && (
                 <div className="mb-8">
                   <GSALBlock />
                 </div>
               )}
 
-              {/* Dia 21+: Pilares e Biblioteca */}
+              {/* Dia 21-30: Pilares e Biblioteca */}
               {currentDay >= 21 && (
                 <>
                   <div className="mb-8">
@@ -144,12 +150,10 @@ function NutriHomeContent() {
                 </>
               )}
 
-              {/* Anotações sempre disponíveis após Dia 1 */}
-              {currentDay >= 2 && (
-                <div className="mb-8">
-                  <AnotacoesBlock />
-                </div>
-              )}
+              {/* Anotações dias 2-30 */}
+              <div className="mb-8">
+                <AnotacoesBlock />
+              </div>
             </>
           )}
         </div>

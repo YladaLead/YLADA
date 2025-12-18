@@ -85,6 +85,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
     'Home': 'home',
     'Jornada 30 Dias': 'jornada',
     'Pilares do Método': 'pilares',
+    'Atrair': 'ferramentas',
     'Ferramentas': 'ferramentas',
     'Gestão GSAL': 'gsal',
     'Biblioteca': 'biblioteca',
@@ -116,13 +117,13 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         color: 'purple'
       },
       {
-        title: 'Ferramentas',
-        icon: '🧰',
+        title: 'Atrair',
+        icon: '🧲',
         color: 'blue',
         href: '/pt/nutri/ferramentas/templates',
         items: [
-          { title: 'Templates', icon: '🎨', href: '/pt/nutri/ferramentas/templates' },
-          { title: 'Criar Quiz', icon: '🎯', href: '/pt/nutri/quiz-personalizado' },
+          { title: 'Quizzes e Calculadoras', icon: '🎯', href: '/pt/nutri/ferramentas/templates' },
+          { title: 'Criar Quiz', icon: '✨', href: '/pt/nutri/quiz-personalizado' },
         ]
       },
       {
