@@ -8,7 +8,7 @@ interface FormacaoTabsProps {
 export default function FormacaoTabs({ activeTab, onTabChange }: FormacaoTabsProps) {
   const tabs = [
     { id: 'jornada' as const, label: '🗺️ Jornada', icon: '🗺️', subtitle: 'Jornada de 30 Dias' },
-    { id: 'trilhas' as const, label: '🏛️ Pilares', icon: '🏛️', subtitle: 'Pilares do Método' },
+    { id: 'trilhas' as const, label: '🏛️ Pilares', icon: '🏛️', subtitle: 'Sobre o Método' },
     { id: 'microcursos' as const, label: '💪 Exercícios', icon: '💪', subtitle: 'Exercícios Aplicáveis' },
     { id: 'biblioteca' as const, label: '🛠️ Ferramentas', icon: '🛠️', subtitle: 'Ferramentas YLADA' },
     { id: 'tutoriais' as const, label: '📖 Manual Técnico', icon: '📖', subtitle: 'Manual Técnico YLADA' },

@@ -79,7 +79,7 @@ export default function TrilhasSection({ trilhas }: TrilhasSectionProps) {
         <div className="text-center mb-6">
           <div className="text-6xl mb-4">🏛️</div>
           <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            Pilares do Método YLADA
+            A Filosofia do Método YLADA
           </h2>
           <p className="text-lg text-gray-700 max-w-3xl mx-auto">
             Os fundamentos que estruturam sua transformação em Nutri-Empresária.

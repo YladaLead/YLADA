@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Sparkles } from 'lucide-react'
-import QRCode from '@/components/QRCode'
 import NutriNavBar from '@/components/nutri/NutriNavBar'
-import { buildNutriToolUrl, getAppUrl } from '@/lib/url-utils'
+import ScriptsNutriModal from '@/components/nutri/ScriptsNutriModal'
+import { buildNutriToolUrl } from '@/lib/url-utils'
 
 type TemplateContent = {
   questions?: unknown[]
@@ -54,379 +54,6 @@ const COLOR_MAP: Record<string, string> = {
   Diagnóstico: 'red'
 }
 
-// =====================================================
-// SCRIPTS DE ABORDAGEM PARA NUTRICIONISTAS
-// =====================================================
-
-interface ScriptItem {
-  id: string
-  titulo: string
-  mensagem: string
-  dica?: string
-}
-
-interface ScriptCategoria {
-  id: string
-  nome: string
-  emoji: string
-  cor: string
-  descricao: string
-  scripts: ScriptItem[]
-}
-
-const SCRIPTS_NUTRI: ScriptCategoria[] = [
-  {
-    id: 'lista-quente',
-    nome: 'Lista Quente',
-    emoji: '🔥',
-    cor: 'orange',
-    descricao: 'Para amigos próximos, família e conhecidos',
-    scripts: [
-      {
-        id: 'lq-1',
-        titulo: 'Convite direto',
-        mensagem: `Oi [NOME]! Tudo bem?
-
-Lembrei de você quando criei esse quiz sobre hidratação. Sei que você sempre comenta sobre isso rs
-
-Faz rapidinho e me conta o resultado? 💧
-
-[LINK]`,
-        dica: 'Use com pessoas que já comentaram sobre o tema'
-      },
-      {
-        id: 'lq-2',
-        titulo: 'Pedindo opinião',
-        mensagem: `Ei [NOME]! Preciso da sua ajuda 🙏
-
-Criei uma calculadora de água pra usar com meus pacientes. Você pode testar e me dar um feedback sincero?
-
-Leva menos de 1 minuto:
-[LINK]
-
-Me conta o que achou!`,
-        dica: 'Funciona bem para validar suas ferramentas'
-      },
-      {
-        id: 'lq-3',
-        titulo: 'Compartilhando novidade',
-        mensagem: `[NOME]! Tenho uma novidade 🎉
-
-Lancei um quiz interativo sobre alimentação. Você responde algumas perguntas e descobre seu perfil nutricional.
-
-Fiz pensando em pessoas como você que se preocupam com saúde!
-
-Testa aqui: [LINK]`,
-        dica: 'Ideal para anunciar novas ferramentas'
-      }
-    ]
-  },
-  {
-    id: 'conhecidos',
-    nome: 'Conhecidos',
-    emoji: '🤝',
-    cor: 'blue',
-    descricao: 'Para colegas, ex-colegas e contatos profissionais',
-    scripts: [
-      {
-        id: 'c-1',
-        titulo: 'Retomando contato',
-        mensagem: `Oi [NOME], tudo bem? Aqui é a [SEU NOME], nutricionista.
-
-Faz tempo que não conversamos! Vi que você postou sobre rotina corrida e lembrei de um quiz que criei sobre alimentação e rotina.
-
-Se quiser fazer, é bem rápido: [LINK]
-
-Qualquer dúvida, estou por aqui! 😊`,
-        dica: 'Bom para reativar contatos antigos'
-      },
-      {
-        id: 'c-2',
-        titulo: 'Oferecendo valor',
-        mensagem: `Oi [NOME]!
-
-Sou nutricionista e criei uma calculadora gratuita de IMC que dá o resultado na hora com dicas personalizadas.
-
-Achei que poderia te interessar:
-[LINK]
-
-Se tiver alguma dúvida sobre o resultado, fico à disposição!`,
-        dica: 'Direto ao ponto, oferecendo valor primeiro'
-      },
-      {
-        id: 'c-3',
-        titulo: 'Contexto profissional',
-        mensagem: `Oi [NOME], tudo bem?
-
-Estou divulgando um quiz gratuito sobre bem-estar que criei para ajudar pessoas a entenderem melhor seus hábitos.
-
-Você faz em 2 minutos e já recebe o resultado:
-[LINK]
-
-Se gostar, agradeço se puder compartilhar! 🙏`,
-        dica: 'Tom profissional mas acessível'
-      }
-    ]
-  },
-  {
-    id: 'frios',
-    nome: 'Contatos Frios',
-    emoji: '🌱',
-    cor: 'green',
-    descricao: 'Para pessoas que não te conhecem ainda',
-    scripts: [
-      {
-        id: 'f-1',
-        titulo: 'Apresentação + Valor',
-        mensagem: `Oi! Tudo bem?
-
-Me chamo [SEU NOME], sou nutricionista e criei uma ferramenta gratuita que calcula a quantidade ideal de água por dia.
-
-É rápido e você descobre na hora:
-[LINK]
-
-Espero que seja útil! 💧`,
-        dica: 'Curto e direto, sem pressão'
-      },
-      {
-        id: 'f-2',
-        titulo: 'Baseado em interesse',
-        mensagem: `Oi [NOME]!
-
-Vi que você se interessa por [TEMA - alimentação/saúde/emagrecimento]. 
-
-Sou nutricionista e tenho um quiz gratuito que pode te ajudar a entender melhor seu perfil. Quer testar?
-
-[LINK]`,
-        dica: 'Personalize baseado no perfil da pessoa'
-      },
-      {
-        id: 'f-3',
-        titulo: 'Abordagem leve',
-        mensagem: `Oi! 😊
-
-Posso te mandar um quiz rápido sobre alimentação? É gratuito e você descobre seu perfil em 2 minutos.
-
-Se não quiser, sem problemas!`,
-        dica: 'Pede permissão antes, gera mais confiança'
-      }
-    ]
-  },
-  {
-    id: 'indicacoes',
-    nome: 'Pedir Indicações',
-    emoji: '🎁',
-    cor: 'purple',
-    descricao: 'Para pedir que compartilhem com outras pessoas',
-    scripts: [
-      {
-        id: 'i-1',
-        titulo: 'Após resultado positivo',
-        mensagem: `Que bom que gostou do resultado! 🎉
-
-Você conhece alguém que também se preocupa com [TEMA]? Pode compartilhar o link com ela, é gratuito:
-
-[LINK]
-
-Agradeço muito! 🙏`,
-        dica: 'Use logo após a pessoa completar o quiz'
-      },
-      {
-        id: 'i-2',
-        titulo: 'Pedido direto',
-        mensagem: `[NOME], preciso de uma ajuda sua!
-
-Estou divulgando meu trabalho e criei esse quiz gratuito. Você conhece 3 pessoas que poderiam se interessar?
-
-Pode ser qualquer pessoa que se preocupe com alimentação e saúde.
-
-[LINK]
-
-Muito obrigada! ❤️`,
-        dica: 'Número específico (3) aumenta chances de indicação'
-      },
-      {
-        id: 'i-3',
-        titulo: 'Para grupos',
-        mensagem: `Oi pessoal! 👋
-
-Sou nutricionista e criei um [TIPO] gratuito sobre [TEMA]. É rápido e você recebe o resultado na hora.
-
-Se alguém quiser testar:
-[LINK]
-
-Podem compartilhar com quem acharem que vai gostar! 😊`,
-        dica: 'Adapte para grupos de WhatsApp ou redes'
-      }
-    ]
-  },
-  {
-    id: 'stories',
-    nome: 'Stories e Redes',
-    emoji: '📱',
-    cor: 'pink',
-    descricao: 'Textos curtos para legendas e stories',
-    scripts: [
-      {
-        id: 's-1',
-        titulo: 'Story com CTA',
-        mensagem: `Você sabe quanta água deveria beber por dia? 💧
-
-Criei uma calculadora gratuita que te dá o resultado em segundos.
-
-Link nos destaques! ⬆️`,
-        dica: 'Use com imagem chamativa'
-      },
-      {
-        id: 's-2',
-        titulo: 'Legenda engajadora',
-        mensagem: `Seu corpo está pedindo detox? 🍃
-
-Fiz um quiz rápido que te ajuda a descobrir. É gratuito e você recebe o resultado na hora!
-
-Comenta "QUERO" que eu mando o link no direct 💬`,
-        dica: 'Gera engajamento nos comentários'
-      },
-      {
-        id: 's-3',
-        titulo: 'Story pergunta',
-        mensagem: `Enquete: Você sabe seu IMC atual?
-
-[ ] Sim, sei de cor
-[ ] Mais ou menos
-[ ] Não faço ideia
-
-Se marcou a última, tenho uma calculadora gratuita pra você! 🎯`,
-        dica: 'Use o recurso de enquete do Instagram'
-      },
-      {
-        id: 's-4',
-        titulo: 'Bio / Link',
-        mensagem: `🥗 Nutricionista
-📍 [CIDADE]
-🎯 Ajudo você a [BENEFÍCIO]
-
-⬇️ Faça o quiz gratuito:`,
-        dica: 'Para bio do Instagram com link'
-      }
-    ]
-  }
-]
-
-// Componente de Scripts
-function ScriptsNutriSection() {
-  const [categoriaAberta, setCategoriaAberta] = useState<string | null>(null)
-  const [scriptCopiado, setScriptCopiado] = useState<string | null>(null)
-
-  const copiarScript = async (mensagem: string, scriptId: string) => {
-    try {
-      await navigator.clipboard.writeText(mensagem)
-      setScriptCopiado(scriptId)
-      setTimeout(() => setScriptCopiado(null), 2000)
-    } catch (error) {
-      console.error('Erro ao copiar:', error)
-      alert('Erro ao copiar. Tente selecionar e copiar manualmente.')
-    }
-  }
-
-  return (
-    <div className="mt-10">
-      <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-yellow-50 rounded-2xl border border-amber-200 p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white text-2xl flex items-center justify-center shadow-md">
-            💬
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Scripts de Abordagem</h2>
-            <p className="text-sm text-gray-600">Mensagens prontas para compartilhar suas ferramentas</p>
-          </div>
-        </div>
-
-        {/* Grid de Categorias */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-          {SCRIPTS_NUTRI.map((categoria) => (
-            <button
-              key={categoria.id}
-              onClick={() => setCategoriaAberta(categoriaAberta === categoria.id ? null : categoria.id)}
-              className={`p-3 rounded-xl border-2 transition-all text-center ${
-                categoriaAberta === categoria.id
-                  ? 'border-amber-400 bg-amber-100 shadow-md'
-                  : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-amber-50'
-              }`}
-            >
-              <span className="text-2xl block mb-1">{categoria.emoji}</span>
-              <span className="text-xs font-medium text-gray-700 block">{categoria.nome}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Scripts da Categoria Selecionada */}
-        {categoriaAberta && (
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            {SCRIPTS_NUTRI.filter(c => c.id === categoriaAberta).map((categoria) => (
-              <div key={categoria.id}>
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xl">{categoria.emoji}</span>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{categoria.nome}</h3>
-                    <p className="text-xs text-gray-500">{categoria.descricao}</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  {categoria.scripts.map((script) => (
-                    <div key={script.id} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <h4 className="font-medium text-gray-800 text-sm">{script.titulo}</h4>
-                        <button
-                          onClick={() => copiarScript(script.mensagem, script.id)}
-                          className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex-shrink-0 ${
-                            scriptCopiado === script.id
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                          }`}
-                        >
-                          {scriptCopiado === script.id ? '✓ Copiado!' : '📋 Copiar'}
-                        </button>
-                      </div>
-                      <pre className="text-sm text-gray-600 whitespace-pre-wrap font-sans bg-white rounded-lg p-3 border border-gray-200">
-                        {script.mensagem}
-                      </pre>
-                      {script.dica && (
-                        <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-                          <span>💡</span> {script.dica}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Dica geral */}
-        {!categoriaAberta && (
-          <div className="text-center py-4 text-sm text-gray-500">
-            👆 Clique em uma categoria para ver os scripts
-          </div>
-        )}
-
-        {/* Instruções */}
-        <div className="mt-6 bg-amber-50 rounded-lg p-4 border border-amber-100">
-          <h4 className="font-medium text-amber-800 text-sm mb-2">📝 Como usar os scripts:</h4>
-          <ul className="text-xs text-amber-700 space-y-1">
-            <li>• Substitua <strong>[NOME]</strong> pelo nome da pessoa</li>
-            <li>• Substitua <strong>[SEU NOME]</strong> pelo seu nome</li>
-            <li>• Substitua <strong>[LINK]</strong> pelo link da ferramenta</li>
-            <li>• Substitua <strong>[TEMA]</strong> pelo assunto (hidratação, emagrecimento, etc)</li>
-            <li>• Personalize conforme o contexto e sua forma de falar</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // Lazy load do componente pesado
 const DynamicTemplatePreviewLazy = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { 
@@ -457,6 +84,12 @@ export default function TemplatesNutri() {
   const [carregandoTemplates, setCarregandoTemplates] = useState(true)
   const [busca, setBusca] = useState('')
   const [templatePreviewAberto, setTemplatePreviewAberto] = useState<string | null>(null)
+  const [scriptsAberto, setScriptsAberto] = useState<{
+    nome: string
+    slug: string
+    icon: string
+    link: string
+  } | null>(null)
   const [userSlug, setUserSlug] = useState<string | null>(null)
   const [loadingUserSlug, setLoadingUserSlug] = useState(true)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
@@ -748,47 +381,70 @@ export default function TemplatesNutri() {
                   </div>
 
                   <div className="p-4 pt-0 border-t border-gray-100">
-                    {/* Botões lado a lado */}
-                    <div className="flex gap-2">
+                    {/* Botões em grid 2x2 */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* Linha 1: Preview + Link */}
                       <button
                         onClick={() => setTemplatePreviewAberto(template.id)}
-                        className="flex-1 bg-sky-600 text-white text-center py-2 px-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors"
+                        className="bg-sky-600 text-white text-center py-2 px-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors"
                         title="Ver Preview"
                       >
-                        <span className="hidden sm:inline">👁️ Preview</span>
-                        <span className="sm:hidden">👁️</span>
+                        👁️ Preview
                       </button>
+                      {linkTemplate ? (
+                        <button
+                          onClick={(e) => copiarLink(linkTemplate, template.id, e)}
+                          className={`text-center py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
+                            linkCopiado === template.id
+                              ? 'bg-green-500 text-white'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                          title="Copiar Link"
+                        >
+                          {linkCopiado === template.id ? '✓ Copiado' : '🔗 Link'}
+                        </button>
+                      ) : (
+                        <div className="text-center py-2 text-xs text-gray-400 bg-gray-100 rounded-lg">
+                          Configure perfil
+                        </div>
+                      )}
+                      
+                      {/* Linha 2: QR + Scripts */}
                       {linkTemplate ? (
                         <>
                           <button
-                            onClick={(e) => copiarLink(linkTemplate, template.id, e)}
-                            className={`flex-1 text-center py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
-                              linkCopiado === template.id
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                            }`}
-                            title="Copiar Link"
-                          >
-                            <span className="hidden sm:inline">{linkCopiado === template.id ? '✓ Copiado' : '🔗 Link'}</span>
-                            <span className="sm:hidden">{linkCopiado === template.id ? '✓' : '🔗'}</span>
-                          </button>
-                          <button
                             onClick={(e) => copiarQRCode(linkTemplate, template.id, e)}
-                            className={`flex-1 text-center py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
+                            className={`text-center py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
                               qrCopiado === template.id
-                                ? 'bg-green-100 text-green-700'
+                                ? 'bg-green-500 text-white'
                                 : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                             }`}
                             title="Copiar QR Code"
                           >
-                            <span className="hidden sm:inline">{qrCopiado === template.id ? '✓ Copiado' : '📱 QR'}</span>
-                            <span className="sm:hidden">{qrCopiado === template.id ? '✓' : '📱'}</span>
+                            {qrCopiado === template.id ? '✓ Copiado' : '📱 QR'}
+                          </button>
+                          <button
+                            onClick={() => setScriptsAberto({
+                              nome: template.nome,
+                              slug: template.slug || '',
+                              icon: template.icon,
+                              link: linkTemplate
+                            })}
+                            className="bg-amber-100 text-amber-700 hover:bg-amber-200 text-center py-2 px-2 rounded-lg text-sm font-medium transition-colors"
+                            title="Ver Scripts"
+                          >
+                            💬 Scripts
                           </button>
                         </>
                       ) : (
-                        <div className="flex-1 text-center py-2 text-xs text-gray-400">
-                          Configure perfil
-                        </div>
+                        <>
+                          <div className="text-center py-2 text-xs text-gray-400 bg-gray-100 rounded-lg">
+                            -
+                          </div>
+                          <div className="text-center py-2 text-xs text-gray-400 bg-gray-100 rounded-lg">
+                            -
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
@@ -832,9 +488,19 @@ export default function TemplatesNutri() {
           </div>
         </div>
 
-        {/* Scripts de Abordagem */}
-        <ScriptsNutriSection />
       </main>
+
+      {/* Modal de Scripts */}
+      {scriptsAberto && (
+        <ScriptsNutriModal
+          isOpen={true}
+          onClose={() => setScriptsAberto(null)}
+          ferramentaNome={scriptsAberto.nome}
+          ferramentaSlug={scriptsAberto.slug}
+          ferramentaIcon={scriptsAberto.icon}
+          linkFerramenta={scriptsAberto.link}
+        />
+      )}
       {/* Modal de Preview - Usando DynamicTemplatePreview para TODOS os templates */}
       {templatePreviewSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setTemplatePreviewAberto(null)}>

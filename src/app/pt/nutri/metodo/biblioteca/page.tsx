@@ -86,17 +86,23 @@ export default function BibliotecaPage() {
             Método YLADA
           </Link>
           <span className="text-gray-400">→</span>
-          <span className="text-gray-700 font-medium">Biblioteca</span>
+          <span className="text-gray-700 font-medium">Materiais de Apoio</span>
         </div>
 
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
-            Biblioteca YLADA
+            Materiais de Apoio
           </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Materiais complementares, PDFs, scripts, checklists e templates para sua jornada.
+          <p className="text-lg text-gray-600 mb-4">
+            PDFs, scripts, checklists e templates para consultar quando precisar.
           </p>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+            <p className="text-sm text-blue-800 flex items-start gap-2">
+              <span className="text-lg">💡</span>
+              <span><strong>Esses materiais são apoio, não obrigação.</strong> A LIA te orienta sobre o que faz sentido para o seu momento. Use quando sentir necessidade.</span>
+            </p>
+          </div>
 
           {/* Pesquisa e Filtros */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">

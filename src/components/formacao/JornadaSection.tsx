@@ -97,13 +97,13 @@ export default function JornadaSection() {
             A estrutura da Jornada de 30 Dias está sendo configurada. Em breve você poderá iniciar sua transformação!
           </p>
           <p className="text-sm text-gray-600">
-            Enquanto isso, explore os Pilares do Método YLADA para começar sua jornada.
+            Enquanto isso, explore o Método YLADA para conhecer a filosofia por trás de tudo.
           </p>
           <Link
             href="/pt/nutri/metodo/pilares"
             className="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Ver Pilares do Método →
+            Ver Sobre o Método →
           </Link>
         </div>
       )

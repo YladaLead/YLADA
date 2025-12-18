@@ -390,12 +390,12 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
   
   'pilares-metodo': {
     id: 'pilares-metodo',
-    titulo: 'Pilares do Método',
+    titulo: 'Sobre o Método',
     descricao: 'Estude os pilares fundamentais da Filosofia ILADA',
     caminho: '/pt/nutri/metodo/pilares',
     passo_a_passo: [
       '1. Acesse o menu lateral',
-      '2. Clique em "Pilares do Método"',
+      '2. Clique em "Sobre o Método"',
       '3. Explore os diferentes pilares',
       '4. Estude cada pilar em profundidade',
       '5. Aplique os conceitos na sua prática',
@@ -403,7 +403,7 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     ],
     icone: '📚',
     categoria: 'formacao',
-    atalho: 'Menu > Pilares do Método',
+    atalho: 'Menu > Sobre o Método',
     nivel_dificuldade: 'medio',
     palavras_chave: [
       'pilares', 'pilares do método', 'método', 'filosofia',
@@ -914,7 +914,7 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     descricao: 'Estude um pilar específico do Método em profundidade',
     caminho: '/pt/nutri/metodo/pilares',
     passo_a_passo: [
-      '1. Acesse "Pilares do Método"',
+      '1. Acesse "Sobre o Método"',
       '2. Veja a lista de todos os pilares',
       '3. Clique no pilar que deseja estudar',
       '4. Leia o conteúdo completo',
@@ -923,7 +923,7 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     ],
     icone: '📚',
     categoria: 'formacao',
-    atalho: 'Menu > Pilares do Método > Pilar X',
+    atalho: 'Menu > Sobre o Método > Pilar X',
     nivel_dificuldade: 'medio',
     palavras_chave: [
       'pilar', 'pilar específico', 'estudar pilar',

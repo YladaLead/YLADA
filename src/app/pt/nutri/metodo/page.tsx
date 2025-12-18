@@ -61,7 +61,7 @@ export default function MetodoYLADAPage() {
         {/* Seção dos 5 Pilares */}
         <div className="mt-12 mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Os 5 Pilares do Método YLADA
+            Os 5 Pilares do Método
           </h2>
           <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
             Cada pilar é uma seção fundamental do método. Explore-os por conta própria ou siga a Jornada de 30 Dias, que organiza tudo passo a passo.

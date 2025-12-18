@@ -48,8 +48,8 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
       tooltip: 'Seu caminho guiado para se tornar uma Nutri-Empresária.'
     },
     pilares: {
-      label: 'Pilares do Método',
-      tooltip: 'Estrutura estratégica que sustenta suas decisões e ações.'
+      label: 'Sobre o Método',
+      tooltip: 'A filosofia por trás de tudo. A LIA aplica com você.'
     },
     ferramentas: {
       label: 'Ferramentas',
@@ -60,8 +60,8 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
       tooltip: 'Organização simples para acompanhar clientes e processos.'
     },
     biblioteca: {
-      label: 'Biblioteca',
-      tooltip: 'Materiais de apoio liberados conforme sua evolução.'
+      label: 'Materiais de Apoio',
+      tooltip: 'PDFs e recursos extras. Use quando precisar, a LIA te orienta.'
     },
     anotacoes: {
       label: 'Minhas Anotações',

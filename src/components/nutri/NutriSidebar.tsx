@@ -84,10 +84,10 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
   const titleToKey: Record<string, SidebarItemKey> = {
     'Home': 'home',
     'Jornada 30 Dias': 'jornada',
-    'Pilares do Método': 'pilares',
+    'Sobre o Método': 'pilares',
     'Ferramentas': 'ferramentas',
     'Gestão GSAL': 'gsal',
-    'Biblioteca': 'biblioteca',
+    'Materiais de Apoio': 'biblioteca',
     'Minhas Anotações': 'anotacoes',
     'Perfil Nutri-Empresária': 'perfil',
     'Configurações': 'configuracoes'
@@ -110,7 +110,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         color: 'blue'
       },
       {
-        title: 'Pilares do Método',
+        title: 'Sobre o Método',
         icon: '📚',
         href: '/pt/nutri/metodo/pilares',
         color: 'purple'
@@ -141,7 +141,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         ]
       },
       {
-        title: 'Biblioteca',
+        title: 'Materiais de Apoio',
         icon: '🎒',
         href: '/pt/nutri/metodo/manual',
         color: 'yellow'
