@@ -3,6 +3,9 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 
 // Buscar ferramenta por URL completa (user-slug/tool-slug)
+// Ordem de busca:
+// 1. Ferramentas personalizadas (user_templates)
+// 2. Templates oficiais (templates_nutrition) - fallback
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -16,6 +19,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Função para verificar assinatura
     const ensureActiveSubscription = async (ownerId: string | null, userSlug?: string | null) => {
       if (!ownerId) return true
       
@@ -36,166 +40,113 @@ export async function GET(request: NextRequest) {
       return await hasActiveSubscription(ownerId, 'nutri')
     }
 
-    // Buscar ferramenta pela combinação user_slug + tool_slug
-    const { data, error } = await supabaseAdmin
-      .from('user_templates')
-      .select(`
-        *,
-        user_profiles!inner(user_slug, user_id, nome_completo, email, country_code)
-      `)
-      .eq('user_profiles.user_slug', userSlug)
-      .eq('slug', toolSlug)
-      .eq('profession', 'nutri')
-      .eq('status', 'active')
-      .single()
+    // Buscar perfil do usuário primeiro
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_id, user_slug, nome_completo, email, country_code, whatsapp')
+      .eq('user_slug', userSlug)
+      .maybeSingle()
 
-    if (error) {
-      console.error('❌ Erro ao buscar ferramenta Nutri por URL:', {
-        error,
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        userSlug,
-        toolSlug
-      })
-      
-      if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: 'Ferramenta não encontrada' },
-          { status: 404 }
-        )
-      }
-      
-      // Se for erro de relação/join, tentar buscar sem join primeiro
-      if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
-        console.warn('⚠️ Erro de relação detectado, tentando busca alternativa...')
-        
-        // Buscar primeiro o user_id pelo user_slug
-        const { data: profile, error: profileError } = await supabaseAdmin
-          .from('user_profiles')
-          .select('user_id')
-          .eq('user_slug', userSlug)
-          .maybeSingle()
-        
-        if (profileError || !profile) {
-          return NextResponse.json(
-            { error: 'Usuário não encontrado' },
-            { status: 404 }
-          )
-        }
-        
-        // Buscar ferramenta diretamente pelo user_id e slug
-        const { data: toolData, error: toolError } = await supabaseAdmin
-          .from('user_templates')
-          .select('*')
-          .eq('user_id', profile.user_id)
-          .eq('slug', toolSlug)
-          .eq('profession', 'nutri')
-          .eq('status', 'active')
-          .single()
-        
-        if (toolError) {
-          if (toolError.code === 'PGRST116') {
-            return NextResponse.json(
-              { error: 'Ferramenta não encontrada' },
-              { status: 404 }
-            )
-          }
-          throw toolError
-        }
-        
-        // Bloquear se assinatura venceu
-        const ownerId = toolData?.user_id || profile.user_id
-        const subscriptionOk = await ensureActiveSubscription(ownerId, userSlug)
-        if (!subscriptionOk) {
-          return NextResponse.json(
-            { error: 'link_indisponivel', message: 'Assinatura expirada' },
-            { status: 403 }
-          )
-        }
-
-        // Buscar perfil separadamente e adicionar aos dados
-        const { data: userProfile } = await supabaseAdmin
-          .from('user_profiles')
-          .select('user_slug, user_id, nome_completo, email, country_code')
-          .eq('user_id', profile.user_id)
-          .maybeSingle()
-        
-        // Extrair leader_data_collection de content se existir
-        const leaderDataCollection = toolData.content?.leader_data_collection || null
-        
-        // Debug: verificar se country_code está sendo retornado
-        console.log('🔍 API Nutri - Ferramenta retornada (fallback):', {
-          tool_id: toolData.id,
-          whatsapp_number: toolData.whatsapp_number,
-          country_code: userProfile?.country_code,
-          user_profiles: userProfile,
-          leader_data_collection: leaderDataCollection
-        })
-        
-        return NextResponse.json({ 
-          tool: {
-            ...toolData,
-            user_profiles: userProfile,
-            leader_data_collection: leaderDataCollection
-          }
-        })
-      }
-      
-      throw error
+    if (profileError || !userProfile) {
+      console.error('❌ Usuário não encontrado:', userSlug)
+      return NextResponse.json(
+        { error: 'Usuário não encontrado' },
+        { status: 404 }
+      )
     }
 
-    const ownerId = data.user_profiles?.user_id || data.user_id
-    const ownerUserSlug = data.user_profiles?.user_slug || userSlug // userSlug vem do parâmetro da função
-    
-    // Debug: log antes de verificar assinatura
-    console.log('🔍 Verificando assinatura para ferramenta:', {
-      tool_id: data.id,
-      tool_slug: data.slug,
-      template_slug: data.template_slug,
-      owner_id: ownerId,
-      user_slug: ownerUserSlug
-    })
-    
-    const subscriptionOk = await ensureActiveSubscription(ownerId, ownerUserSlug)
-    
-    // Debug: log resultado da verificação
-    console.log('🔍 Resultado verificação assinatura:', {
-      owner_id: ownerId,
-      subscription_ok: subscriptionOk
-    })
-
+    // Verificar assinatura
+    const subscriptionOk = await ensureActiveSubscription(userProfile.user_id, userSlug)
     if (!subscriptionOk) {
-      console.error('❌ Assinatura não ativa para ferramenta:', {
-        tool_id: data.id,
-        tool_slug: data.slug,
-        owner_id: ownerId
-      })
       return NextResponse.json(
         { error: 'link_indisponivel', message: 'Assinatura expirada' },
         { status: 403 }
       )
     }
 
-    // Extrair leader_data_collection de content se existir
-    const leaderDataCollection = data.content?.leader_data_collection || null
-    
-    // Debug: verificar se country_code está sendo retornado
-    console.log('🔍 API Nutri - Ferramenta retornada:', {
-      tool_id: data.id,
-      whatsapp_number: data.whatsapp_number,
-      country_code: data.user_profiles?.country_code,
-      user_profiles: data.user_profiles,
-      leader_data_collection: leaderDataCollection
+    // 1️⃣ TENTAR BUSCAR FERRAMENTA PERSONALIZADA (user_templates)
+    const { data: customTool, error: customError } = await supabaseAdmin
+      .from('user_templates')
+      .select('*')
+      .eq('user_id', userProfile.user_id)
+      .eq('slug', toolSlug)
+      .eq('profession', 'nutri')
+      .eq('status', 'active')
+      .maybeSingle()
+
+    if (customTool) {
+      console.log('✅ Ferramenta personalizada encontrada:', {
+        tool_id: customTool.id,
+        slug: customTool.slug,
+        user_slug: userSlug
+      })
+
+      const leaderDataCollection = customTool.content?.leader_data_collection || null
+
+      return NextResponse.json({
+        tool: {
+          ...customTool,
+          user_profiles: userProfile,
+          leader_data_collection: leaderDataCollection,
+          is_official_template: false
+        }
+      })
+    }
+
+    // 2️⃣ FALLBACK: BUSCAR TEMPLATE OFICIAL (templates_nutrition)
+    // Os 28 templates oficiais funcionam para qualquer nutri
+    const { data: officialTemplate, error: templateError } = await supabaseAdmin
+      .from('templates_nutrition')
+      .select('*')
+      .eq('slug', toolSlug)
+      .eq('profession', 'nutri')
+      .eq('is_active', true)
+      .eq('language', 'pt')
+      .maybeSingle()
+
+    if (officialTemplate) {
+      console.log('✅ Template oficial encontrado:', {
+        template_id: officialTemplate.id,
+        slug: officialTemplate.slug,
+        name: officialTemplate.name,
+        user_slug: userSlug
+      })
+
+      // Montar objeto compatível com a estrutura esperada
+      return NextResponse.json({
+        tool: {
+          id: officialTemplate.id,
+          title: officialTemplate.name || officialTemplate.title,
+          description: officialTemplate.description,
+          slug: officialTemplate.slug,
+          template_slug: officialTemplate.slug,
+          type: officialTemplate.type,
+          content: officialTemplate.content,
+          custom_colors: {
+            principal: '#0284c7', // sky-600
+            secundaria: '#e0f2fe' // sky-100
+          },
+          cta_type: 'whatsapp',
+          whatsapp_number: userProfile.whatsapp || null,
+          cta_button_text: 'Falar com a Nutricionista',
+          user_profiles: userProfile,
+          is_official_template: true,
+          leader_data_collection: officialTemplate.content?.leader_data_collection || null
+        }
+      })
+    }
+
+    // 3️⃣ NENHUMA FERRAMENTA ENCONTRADA
+    console.error('❌ Ferramenta não encontrada:', {
+      userSlug,
+      toolSlug
     })
 
-    return NextResponse.json({ 
-      tool: {
-        ...data,
-        leader_data_collection: leaderDataCollection
-      }
-    })
+    return NextResponse.json(
+      { error: 'Ferramenta não encontrada' },
+      { status: 404 }
+    )
+
   } catch (error: any) {
     console.error('Erro ao buscar ferramenta Nutri por URL:', error)
     return NextResponse.json(

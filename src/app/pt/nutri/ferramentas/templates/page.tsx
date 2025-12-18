@@ -289,78 +289,42 @@ export default function TemplatesNutri() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NutriNavBar showTitle title="Templates Nutri" />
+      <NutriNavBar showTitle title="Atrair" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero */}
-        <div className="bg-gradient-to-r from-sky-50 via-blue-50 to-indigo-50 rounded-2xl p-8 border border-sky-100 shadow-sm mb-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        {/* Hero - Mobile-friendly */}
+        <div className="bg-gradient-to-r from-sky-50 via-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border border-sky-100 shadow-sm mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-sky-700 uppercase tracking-wide">
-                Catálogo Nutri
-              </p>
-              <h1 className="text-3xl font-bold text-gray-900 mt-2">
-                Ferramentas prontas para transformar leads em clientes
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Quizzes e Calculadoras
               </h1>
-              <p className="text-gray-700 mt-3 max-w-2xl">
-                Agora a área Nutri usa os mesmos templates modulados da Wellness. Escolha uma ferramenta, visualize o fluxo completo e personalize em poucos minutos mantendo o visual exclusivo do seu portal.
+              <p className="text-sm text-gray-600 mt-1">
+                Escolha, personalize e compartilhe em minutos.
               </p>
             </div>
-            <div className="bg-white rounded-2xl border border-sky-100 shadow p-5 w-full sm:w-auto">
-              <p className="text-sm text-gray-500">Templates disponíveis</p>
-              <p className="text-4xl font-bold text-sky-600">{templates.length}</p>
-              <p className="text-xs text-gray-500 mt-1">Atualizados automaticamente</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 text-sm text-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-sky-600 text-xl">✅</div>
-              <div>
-                <p className="font-semibold text-gray-900">{templates.length} templates modulados</p>
-                <p className="text-xs text-gray-600">Com diagnósticos prontos para Nutri</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-blue-500 text-xl">⚡</div>
-              <div>
-                <p className="font-semibold text-gray-900">Configuração em 5 minutos</p>
-                <p className="text-xs text-gray-600">Crie e compartilhe sem código</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-indigo-600 text-xl">🎯</div>
-              <div>
-                <p className="font-semibold text-gray-900">Alta conversão</p>
-                <p className="text-xs text-gray-600">Templates validados na prática</p>
-              </div>
+            <div className="flex items-center gap-2 bg-white rounded-xl border border-sky-100 shadow-sm px-4 py-2">
+              <span className="text-2xl font-bold text-sky-600">{templates.length}</span>
+              <span className="text-xs text-gray-500">disponíveis</span>
             </div>
           </div>
         </div>
 
-        {/* Busca */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
-          <div className="flex-1 min-w-[280px]">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar Template
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                placeholder="Buscar por nome, descrição ou categoria..."
-                className="w-full px-4 py-2 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-              />
-              <span className="absolute left-4 top-2.5 text-xl">🔍</span>
-            </div>
-            {busca && (
-              <p className="mt-2 text-sm text-gray-600">
-                {templatesFiltrados.length} template(s) encontrado(s)
-              </p>
-            )}
-          </div>
+        {/* Busca - Compacta */}
+        <div className="relative mb-6">
+          <input
+            type="text"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="🔍 Buscar quiz ou calculadora..."
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm"
+          />
+          {busca && (
+            <span className="absolute right-4 top-3 text-sm text-gray-500">
+              {templatesFiltrados.length} resultado(s)
+            </span>
+          )}
         </div>
-        <div className="mb-8" />
 
         {/* Grid */}
         {carregandoTemplates ? (
@@ -372,9 +336,9 @@ export default function TemplatesNutri() {
           </div>
         ) : templatesFiltrados.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-300">
-            <p className="text-gray-700 font-medium">Nenhum template encontrado.</p>
+            <p className="text-gray-700 font-medium">Nenhum resultado encontrado.</p>
             <p className="text-sm text-gray-500 mt-1">
-              Ajuste a busca ou experimente termos diferentes para continuar explorando.
+              Tente buscar por outro termo.
             </p>
           </div>
         ) : (
@@ -409,41 +373,50 @@ export default function TemplatesNutri() {
                     )}
                   </div>
 
-                  <div className="p-6 pt-0 flex flex-col gap-3 border-t border-gray-100">
-                    <button
-                      onClick={() => setTemplatePreviewAberto(template.id)}
-                      className="w-full bg-sky-600 text-white text-center py-2.5 rounded-xl font-semibold hover:bg-sky-700 transition-colors"
-                    >
-                      Ver Preview
-                    </button>
-                    {linkTemplate ? (
-                      <>
-                        <button
-                          onClick={(e) => copiarLink(linkTemplate, template.id, e)}
-                          className={`w-full text-center py-2.5 rounded-xl font-semibold transition-colors ${
-                            linkCopiado === template.id
-                              ? 'bg-green-100 text-green-700 border-2 border-green-300'
-                              : 'bg-blue-100 text-blue-700 border-2 border-blue-300 hover:bg-blue-200'
-                          }`}
-                        >
-                          {linkCopiado === template.id ? '✓ Link Copiado' : 'Copiar Link'}
-                        </button>
-                        <button
-                          onClick={(e) => copiarQRCode(linkTemplate, template.id, e)}
-                          className={`w-full text-center py-2.5 rounded-xl font-semibold transition-colors ${
-                            qrCopiado === template.id
-                              ? 'bg-green-100 text-green-700 border-2 border-green-300'
-                              : 'bg-purple-100 text-purple-700 border-2 border-purple-300 hover:bg-purple-200'
-                          }`}
-                        >
-                          {qrCopiado === template.id ? '✓ QR Code Copiado' : 'Copiar QR Code'}
-                        </button>
-                      </>
-                    ) : (
-                      <div className="text-center py-2 text-xs text-gray-500">
-                        Configure seu user_slug para gerar links
-                      </div>
-                    )}
+                  <div className="p-4 pt-0 border-t border-gray-100">
+                    {/* Botões lado a lado */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setTemplatePreviewAberto(template.id)}
+                        className="flex-1 bg-sky-600 text-white text-center py-2 px-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors"
+                        title="Ver Preview"
+                      >
+                        <span className="hidden sm:inline">👁️ Preview</span>
+                        <span className="sm:hidden">👁️</span>
+                      </button>
+                      {linkTemplate ? (
+                        <>
+                          <button
+                            onClick={(e) => copiarLink(linkTemplate, template.id, e)}
+                            className={`flex-1 text-center py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
+                              linkCopiado === template.id
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                            }`}
+                            title="Copiar Link"
+                          >
+                            <span className="hidden sm:inline">{linkCopiado === template.id ? '✓ Copiado' : '🔗 Link'}</span>
+                            <span className="sm:hidden">{linkCopiado === template.id ? '✓' : '🔗'}</span>
+                          </button>
+                          <button
+                            onClick={(e) => copiarQRCode(linkTemplate, template.id, e)}
+                            className={`flex-1 text-center py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
+                              qrCopiado === template.id
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                            }`}
+                            title="Copiar QR Code"
+                          >
+                            <span className="hidden sm:inline">{qrCopiado === template.id ? '✓ Copiado' : '📱 QR'}</span>
+                            <span className="sm:hidden">{qrCopiado === template.id ? '✓' : '📱'}</span>
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex-1 text-center py-2 text-xs text-gray-400">
+                          Configure perfil
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )
@@ -468,18 +441,18 @@ export default function TemplatesNutri() {
         </div>
 
         {/* Guia rápido */}
-        <div className="mt-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
-              <Sparkles className="w-6 h-6" />
+        <div className="mt-8 bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Como funciona</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">Como usar</h3>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Explore os templates usando a busca inteligente</li>
-                <li>• Clique em <strong>Ver Preview</strong> para visualizar o fluxo completo</li>
-                <li>• Selecione <strong>Criar com este template</strong> para personalizar seu link</li>
-                <li>• Compartilhe com seus leads e acompanhe o desempenho no dashboard</li>
+                <li>• Busque por nome ou categoria</li>
+                <li>• Clique em <strong>Preview</strong> para ver o fluxo</li>
+                <li>• Copie o <strong>Link</strong> ou <strong>QR Code</strong></li>
+                <li>• Compartilhe e acompanhe os resultados</li>
               </ul>
             </div>
           </div>

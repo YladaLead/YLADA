@@ -55,3 +55,4 @@ FROM templates_nutrition
 WHERE language = 'pt'
   AND is_active = true
 LIMIT 10;
+
