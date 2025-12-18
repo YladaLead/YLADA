@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { validateProtectedAccess } from '@/lib/auth-server'
+import { OfflineBanner } from '@/components/OfflineBanner'
 
 interface ProtectedLayoutProps {
   children: ReactNode
@@ -26,6 +27,11 @@ export default async function ProtectedWellnessLayout({ children }: ProtectedLay
   })
 
   // Se chegou aqui, tudo está OK - renderizar children
-  return <>{children}</>
+  return (
+    <>
+      <OfflineBanner />
+      {children}
+    </>
+  )
 }
 
