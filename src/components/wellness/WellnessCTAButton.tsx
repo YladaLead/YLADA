@@ -388,11 +388,10 @@ export default function WellnessCTAButton({
                     rastrearConversao()
                   }
                 }}
-                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                className="inline-flex items-center px-6 py-3 text-white rounded-xl transition-all transform hover:scale-105 font-bold shadow-lg hover:shadow-xl"
                 style={{
-                  background: config.custom_colors
-                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                    : '#16a34a'
+                  backgroundColor: config.custom_colors?.principal || '#16a34a',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                 }}
               >
                 📱 {botaoTexto || 'Enviar Dados e Falar no WhatsApp'}
@@ -403,11 +402,10 @@ export default function WellnessCTAButton({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={rastrearConversao}
-                className="inline-flex items-center px-6 py-3 text-white rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
+                className="inline-flex items-center px-6 py-3 text-white rounded-xl transition-all transform hover:scale-105 font-bold shadow-lg hover:shadow-xl"
                 style={{
-                  background: config.custom_colors
-                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                    : '#16a34a'
+                  backgroundColor: config.custom_colors?.principal || '#16a34a',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                 }}
               >
                 📱 {botaoTexto || 'Falar no WhatsApp'}
@@ -549,11 +547,10 @@ export default function WellnessCTAButton({
                     rastrearConversao()
                   }
                 }}
-                className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg animate-pulse-subtle"
+                className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-bold shadow-lg"
                 style={{
-                  background: config.custom_colors
-                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                    : 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                  backgroundColor: config.custom_colors?.principal || '#10b981',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                 }}
               >
                 <span className="mr-2">✨</span>
@@ -566,11 +563,10 @@ export default function WellnessCTAButton({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={rastrearConversao}
-                className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold shadow-lg animate-pulse-subtle"
+                className="inline-flex items-center px-8 py-4 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-bold shadow-lg"
                 style={{
-                  background: config.custom_colors
-                    ? `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
-                    : 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'
+                  backgroundColor: config.custom_colors?.principal || '#10b981',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                 }}
               >
                 <span className="mr-2">✨</span>
