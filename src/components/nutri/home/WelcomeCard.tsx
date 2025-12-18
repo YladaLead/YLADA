@@ -27,7 +27,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
             Olá{userName ? `, ${userName}` : ''} 👋
           </h1>
           <p className="text-gray-600 mt-1">
-            Sua jornada foi concluída! Agora você e a LYA crescem juntas. 💜
+            A LYA está aqui para você 💜
           </p>
         </div>
 
