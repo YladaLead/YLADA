@@ -327,7 +327,7 @@ Ela passa a caminhar com você.`
  * Conhecimento sobre personalização de marca profissional
  */
 export const LYA_BRANDING_KNOWLEDGE = {
-  coresCom Significado: {
+  coresComSignificado: {
     verde: { hex: '#10B981', significado: 'Saúde, vitalidade, natureza, frescor', idealPara: 'Nutrição em geral, emagrecimento saudável, nutrição natural' },
     azul: { hex: '#3B82F6', significado: 'Confiança, profissionalismo, calma, segurança', idealPara: 'Consultas clínicas, nutrição corporativa, atendimento tradicional' },
     laranja: { hex: '#F97316', significado: 'Energia, entusiasmo, apetite, dinamismo', idealPara: 'Nutrição esportiva, vitalidade, performance' },
