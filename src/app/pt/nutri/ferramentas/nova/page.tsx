@@ -1535,7 +1535,7 @@ function NovaFerramentaNutriContent() {
                 {configuracao.textoBotao && (
                   <div 
                     className="rounded-lg p-6 text-center"
-                    style={{ background: `linear-gradient(135deg, ${configuracao.cores.principal} 0%, ${configuracao.cores.secundaria} 100%)` }}
+                    style={{ backgroundColor: configuracao.cores.principal }}
                   >
                       <button
                       disabled
