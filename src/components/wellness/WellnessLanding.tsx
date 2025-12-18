@@ -75,11 +75,7 @@ export default function WellnessLanding({
 
       <button
         onClick={onStart}
-        className="w-full text-white py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] hover:shadow-xl shadow-lg"
-        style={{
-          backgroundColor: config?.custom_colors?.principal || '#0284c7',
-          textShadow: '0 1px 2px rgba(0,0,0,0.2)'
-        }}
+        className="w-full bg-sky-600 hover:bg-sky-700 text-white py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] hover:shadow-xl shadow-lg"
       >
         {buttonText}
       </button>
