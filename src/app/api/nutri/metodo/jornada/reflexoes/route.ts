@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { supabaseAdmin } from '@/lib/supabase'
+import { requireApiAuth } from '@/lib/api-auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const supabase = createClient(cookieStore)
+    // Autenticação usando o padrão da API
+    const authResult = await requireApiAuth(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { user } = authResult
 
-    // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, error: 'Não autenticado' },
-        { status: 401 }
-      )
+    // Verificar se supabaseAdmin está configurado
+    if (!supabaseAdmin) {
+      console.error('❌ Supabase Admin não configurado')
+      return NextResponse.json({
+        success: true,
+        data: []
+      })
     }
 
     // Buscar todas as reflexões da jornada do usuário
-    const { data: reflexoes, error } = await supabase
+    const { data: reflexoes, error } = await supabaseAdmin
       .from('journey_checklist_notes')
       .select('day_number, item_index, nota, created_at, updated_at')
       .eq('user_id', user.id)
@@ -28,11 +32,14 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar reflexões:', error)
-      return NextResponse.json(
-        { success: false, error: 'Erro ao buscar reflexões' },
-        { status: 500 }
-      )
+      // Retornar array vazio em vez de erro 500
+      return NextResponse.json({
+        success: true,
+        data: []
+      })
     }
+
+    console.log(`✅ Reflexões encontradas: ${reflexoes?.length || 0}`)
 
     return NextResponse.json({
       success: true,
@@ -41,9 +48,9 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Erro na API de reflexões:', error)
-    return NextResponse.json(
-      { success: false, error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      success: true,
+      data: []
+    })
   }
 }

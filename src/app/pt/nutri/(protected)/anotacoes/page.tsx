@@ -40,6 +40,7 @@ function AnotacoesContent() {
         }
 
         // Carregar reflexões da jornada do Supabase
+        let reflexoes: any[] = []
         try {
           const responseReflexoes = await fetch('/api/nutri/metodo/jornada/reflexoes', {
             credentials: 'include'
