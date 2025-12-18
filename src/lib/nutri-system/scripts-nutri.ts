@@ -2,7 +2,7 @@
  * SCRIPTS DE ABORDAGEM PARA NUTRICIONISTAS
  * 
  * Cada ferramenta tem scripts para 3 situações:
- * - Lista Quente: amigos, família, conhecidos
+ * - Lista Quente: amigos, família, indicações
  * - Lista Fria: desconhecidos, redes sociais
  * - Indicação: pedir que compartilhem após usar a ferramenta
  */

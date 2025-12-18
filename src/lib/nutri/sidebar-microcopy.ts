@@ -52,7 +52,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
       tooltip: 'A filosofia por trás de tudo. A LYA aplica com você.'
     },
     ferramentas: {
-      label: 'Ferramentas',
+      label: 'Captar',
       tooltip: 'Recursos práticos para atrair e organizar novos clientes.'
     },
     gsal: {

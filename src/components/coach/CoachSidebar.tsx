@@ -54,7 +54,7 @@ export default function CoachSidebar({ isMobileOpen = false, onMobileClose }: Co
         { title: 'Home / Visão Geral', icon: '🏠', href: '/pt/coach/home' },
         { title: 'Meus Links', icon: '🔗', href: '/pt/coach/ferramentas' },
         { title: 'Quizzes', icon: '🎯', href: '/pt/coach/quizzes' },
-        { title: 'Templates', icon: '🎨', href: '/pt/coach/ferramentas/templates' },
+        { title: 'Quiz e Calculadoras', icon: '🧮', href: '/pt/coach/ferramentas/templates' },
         { title: 'Leads', icon: '📈', href: '/pt/coach/leads' },
       ]
     },

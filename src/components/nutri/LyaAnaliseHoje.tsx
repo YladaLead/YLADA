@@ -262,34 +262,6 @@ export default function LyaAnaliseHoje() {
         </p>
       </div>
 
-      {/* Botões de Ação */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-blue-200">
-        <Link
-          href={analise.link_interno}
-          className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center flex items-center justify-center gap-2"
-        >
-          Ir para a ação →
-        </Link>
-        <button
-          className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-          onClick={() => {
-            // Abrir chat da LYA (o widget já está na página)
-            const chatButton = document.querySelector('[aria-label="Abrir chat com Mentora LYA"]') as HTMLElement
-            if (chatButton) {
-              chatButton.click()
-            } else {
-              // Fallback: scroll até o widget se existir
-              const chatWidget = document.querySelector('[class*="LyaChatWidget"]')
-              if (chatWidget) {
-                chatWidget.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              }
-            }
-          }}
-        >
-          Falar com a LYA
-        </button>
-      </div>
-
       {/* Microcopy */}
       <p className="text-xs text-gray-500 mt-4 text-center">
         A LYA usa seu perfil e seu progresso para te orientar com precisão.

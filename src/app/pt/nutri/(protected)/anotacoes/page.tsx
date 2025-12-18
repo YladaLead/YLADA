@@ -300,7 +300,7 @@ function AnotacoesContent() {
                         <option value="geral">Geral</option>
                         <option value="jornada">Jornada</option>
                         <option value="pilar">Pilar</option>
-                        <option value="gsal">GSAL</option>
+                        <option value="gestao">Gestão</option>
                         <option value="ferramentas">Ferramentas</option>
                       </select>
                     </div>
@@ -356,7 +356,7 @@ function AnotacoesContent() {
                     <option value="geral">Geral</option>
                     <option value="jornada">Jornada</option>
                     <option value="pilar">Pilar</option>
-                    <option value="gsal">GSAL</option>
+                    <option value="gestao">Gestão</option>
                     <option value="ferramentas">Ferramentas</option>
                   </select>
                 </div>
@@ -425,7 +425,7 @@ function AnotacoesContent() {
                                   <option value="geral">Geral</option>
                                   <option value="jornada">Jornada</option>
                                   <option value="pilar">Pilar</option>
-                                  <option value="gsal">GSAL</option>
+                                  <option value="gestao">Gestão</option>
                                   <option value="ferramentas">Ferramentas</option>
                                 </select>
                                 <input

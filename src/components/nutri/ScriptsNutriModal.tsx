@@ -59,9 +59,9 @@ export function ScriptsNutriModal({
   const { listaQuente, listaFria, indicacao } = getScriptsNutriPorTipo(config)
 
   const tabs: { id: TabTipo; label: string; icon: string; scripts: ScriptNutri[] }[] = [
-    { id: 'lista_quente', label: 'Lista Quente', icon: '🔥', scripts: listaQuente },
-    { id: 'lista_fria', label: 'Lista Fria', icon: '❄️', scripts: listaFria },
-    { id: 'indicacao', label: 'Indicação', icon: '🎁', scripts: indicacao }
+    { id: 'lista_quente', label: 'Conhecidos', icon: '🔥', scripts: listaQuente },
+    { id: 'lista_fria', label: 'Desconhecidos', icon: '❄️', scripts: listaFria },
+    { id: 'indicacao', label: 'Pedir Indicação', icon: '🎁', scripts: indicacao }
   ]
 
   const scriptsAtivos = tabs.find(t => t.id === tabAtiva)?.scripts || []
@@ -137,9 +137,9 @@ export function ScriptsNutriModal({
         {/* Descrição da Tab */}
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
           <p className="text-xs text-gray-600">
-            {tabAtiva === 'lista_quente' && '🔥 Para amigos, família e conhecidos que já têm algum relacionamento com você'}
-            {tabAtiva === 'lista_fria' && '❄️ Para desconhecidos, redes sociais ou pessoas que não te conhecem'}
-            {tabAtiva === 'indicacao' && '🎁 Para pedir que compartilhem depois de usar a ferramenta'}
+            {tabAtiva === 'lista_quente' && '🔥 Amigos, família e indicações que já têm algum relacionamento com você'}
+            {tabAtiva === 'lista_fria' && '❄️ Redes sociais, grupos ou pessoas que não te conhecem'}
+            {tabAtiva === 'indicacao' && '🎁 Mensagens para pedir indicações depois que a pessoa usou a ferramenta'}
           </p>
         </div>
 
