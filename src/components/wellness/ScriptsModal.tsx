@@ -173,8 +173,16 @@ export function ScriptsModal({
                 {/* Texto do Script */}
                 <div className="p-4">
                   <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans leading-relaxed">
-                    {script.texto.replace('[LINK]', linkFerramenta || '[SEU LINK]')}
+                    {script.texto.replace('[LINK]', linkFerramenta || '[SEU LINK AQUI]')}
                   </pre>
+                  
+                  {/* Mostrar link completo se disponível */}
+                  {linkFerramenta && (
+                    <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-xs text-green-700 font-medium mb-1">🔗 Seu link:</p>
+                      <p className="text-xs text-green-800 break-all font-mono">{linkFerramenta}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Dica */}

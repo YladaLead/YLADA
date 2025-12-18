@@ -728,7 +728,7 @@ Você vai adorar! 😊`
                       nome: 'HOM Gravada',
                       slug: 'hom',
                       icon: '📅',
-                      link: '/pt/wellness/system/recrutar/enviar-link'
+                      link: `${baseUrl}/pt/wellness/system/recrutar/enviar-link`
                     })
                   }}
                   className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors"
@@ -738,8 +738,8 @@ Você vai adorar! 😊`
               </div>
               
               {/* Link */}
-              <p className="text-xs text-gray-400 mt-2 truncate" title="/pt/wellness/system/recrutar/enviar-link">
-                /pt/wellness/system/recrutar/enviar-link
+              <p className="text-xs text-gray-400 mt-2 truncate" title={`${baseUrl}/pt/wellness/system/recrutar/enviar-link`}>
+                {`${baseUrl}/pt/wellness/system/recrutar/enviar-link`.replace(/^https?:\/\//, '')}
               </p>
             </div>
 
@@ -941,11 +941,16 @@ Você vai adorar! 😊`
                   <button
                     onClick={() => {
                       const slug = item.metadata?.template?.slug || item.metadata?.fluxo?.slug || item.id
+                      // Garantir que o link seja completo (com domínio)
+                      let linkCompleto = item.link
+                      if (linkCompleto && !linkCompleto.startsWith('http')) {
+                        linkCompleto = `${baseUrl}${linkCompleto.startsWith('/') ? '' : '/'}${linkCompleto}`
+                      }
                       setScriptsAberto({
                         nome: item.nome,
                         slug: slug,
                         icon: item.icon,
-                        link: item.link
+                        link: linkCompleto
                       })
                     }}
                     className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors"
