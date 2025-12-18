@@ -68,7 +68,11 @@ export default function LyaChatWidget() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao enviar mensagem')
+        // Se for erro de configuração, mostrar mensagem mais amigável
+        if (data.error?.includes('não configurado') || data.error?.includes('não está configurado')) {
+          throw new Error('A LYA ainda não está configurada. Entre em contato com o suporte para ativar.')
+        }
+        throw new Error(data.error || data.message || data.details || 'Erro ao enviar mensagem')
       }
 
       // Atualizar threadId se retornado
@@ -87,7 +91,7 @@ export default function LyaChatWidget() {
       console.error('Erro ao enviar mensagem:', error)
       const errorMessage: Message = {
         sender_type: 'system',
-        message: 'Erro ao enviar mensagem. Tente novamente.',
+        message: error.message || 'Erro ao enviar mensagem. Tente novamente.',
         created_at: new Date().toISOString()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -103,11 +107,84 @@ export default function LyaChatWidget() {
     }
   }
 
+  // Formatar mensagem com markdown para deixar números e títulos mais escuros
+  const formatarMensagemLYA = (texto: string) => {
+    const linhas = texto.split('\n')
+    
+    return linhas.map((linha, index) => {
+      // Se linha está vazia, retornar espaço
+      if (linha.trim() === '') {
+        return <br key={index} />
+      }
+      
+      // Detectar listas numeradas (ex: "1. **Texto**" ou "1. Texto")
+      const matchLista = linha.match(/^(\d+)\.\s+(.+)$/)
+      if (matchLista) {
+        const numero = matchLista[1]
+        const conteudo = matchLista[2]
+        
+        // Verificar se tem negrito no conteúdo
+        if (conteudo.includes('**')) {
+          const partes = conteudo.split(/(\*\*[^*]+\*\*)/g)
+          return (
+            <p key={index} className="mb-2">
+              <span className="font-bold text-gray-900" style={{ fontWeight: 700 }}>{numero}.</span>{' '}
+              {partes.map((parte, i) => {
+                if (parte.startsWith('**') && parte.endsWith('**')) {
+                  return (
+                    <span key={i} className="font-bold text-gray-900" style={{ fontWeight: 700 }}>
+                      {parte.replace(/\*\*/g, '')}
+                    </span>
+                  )
+                }
+                return <span key={i}>{parte}</span>
+              })}
+            </p>
+          )
+        }
+        
+        // Lista numerada sem negrito
+        return (
+          <p key={index} className="mb-2">
+            <span className="font-bold text-gray-900" style={{ fontWeight: 700 }}>{numero}.</span>{' '}
+            <span>{conteudo}</span>
+          </p>
+        )
+      }
+      
+      // Detectar texto em negrito simples
+      if (linha.includes('**')) {
+        const partes = linha.split(/(\*\*[^*]+\*\*)/g)
+        return (
+          <p key={index} className="mb-2">
+            {partes.map((parte, i) => {
+              if (parte.startsWith('**') && parte.endsWith('**')) {
+                return (
+                  <span key={i} className="font-bold text-gray-900" style={{ fontWeight: 700 }}>
+                    {parte.replace(/\*\*/g, '')}
+                  </span>
+                )
+              }
+              return <span key={i}>{parte}</span>
+            })}
+          </p>
+        )
+      }
+      
+      // Linha normal
+      return (
+        <p key={index} className="mb-2 text-gray-700">
+          {linha}
+        </p>
+      )
+    })
+  }
+
   if (!isOpen) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg z-50 transition-all group flex items-center gap-2 px-4 py-3"
+        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg z-50 transition-all group flex items-center gap-2 px-4 py-3"
         aria-label="Abrir chat com Mentora LYA"
         title="Falar com a Mentora LYA"
       >
@@ -122,7 +199,7 @@ export default function LyaChatWidget() {
   return (
     <div className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}>
       {/* Header */}
-      <div className="bg-purple-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-400 rounded-full"></div>
           <span className="font-semibold">LYA - Mentora Empresarial</span>
@@ -130,7 +207,7 @@ export default function LyaChatWidget() {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="hover:bg-purple-700 rounded p-1"
+            className="hover:bg-blue-700 rounded p-1"
             aria-label={isMinimized ? 'Expandir' : 'Minimizar'}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +221,7 @@ export default function LyaChatWidget() {
               setMessages([])
               setThreadId(null)
             }}
-            className="hover:bg-purple-700 rounded p-1"
+            className="hover:bg-blue-700 rounded p-1"
             aria-label="Fechar"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,13 +243,15 @@ export default function LyaChatWidget() {
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     msg.sender_type === 'user'
-                      ? 'bg-purple-600 text-white'
+                      ? 'bg-blue-600 text-white'
                       : msg.sender_type === 'system'
                       ? 'bg-yellow-100 text-yellow-800 text-sm'
                       : 'bg-white border border-gray-200 text-gray-800'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{msg.message}</p>
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {formatarMensagemLYA(msg.message)}
+                  </div>
                   {msg.created_at && (
                     <span className="text-xs opacity-70 mt-1 block">
                       {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
@@ -206,13 +285,13 @@ export default function LyaChatWidget() {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Digite sua mensagem..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={loading}
               />
               <button
                 onClick={() => sendMessage()}
                 disabled={loading || !inputMessage.trim()}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

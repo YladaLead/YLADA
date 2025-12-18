@@ -24,16 +24,20 @@ SET
 WHERE day_number = 8;
 
 -- =====================================================
--- DIA 9: Criando sua CTA Oficial da Semana
+-- DIA 9: Criando seu Convite da Semana
 -- =====================================================
 UPDATE journey_days
 SET
-  title = 'Criando sua CTA Oficial da Semana',
-  objective = 'Criar um convite simples e claro para iniciar conversas. Isso é importante porque clareza gera resposta.',
-  guidance = 'Hoje você vai perceber que CTA não precisa ser elaborada. Ela precisa ser honesta e fácil de entender. Fale como você falaria com alguém próximo. O erro comum aqui é complicar demais o convite. Simples funciona.',
+  title = 'Criando seu Convite da Semana',
+  objective = 'Criar uma frase de convite simples e clara para iniciar conversas. Isso é importante porque clareza gera resposta.',
+  guidance = 'Hoje você vai criar o seu "convite", que é a frase que você usa para chamar alguém para conversar ou conhecer seu trabalho. Não precisa ser elaborada, precisa ser honesta e fácil de entender. Fale como você falaria com alguém próximo.
+
+**Exemplo prático:** "Quer descobrir como está sua alimentação? Fiz um teste rápido e gratuito pra você."
+
+**Erro comum:** Complicar demais ou usar linguagem técnica. Simples funciona.',
   action_type = 'exercicio',
   action_id = NULL,
-  action_title = 'Pensar em uma frase simples de convite que você se sentiria confortável em usar.',
+  action_title = 'Escreva uma frase de convite simples que você se sentiria confortável em usar.',
   checklist_items = '[
     "Como você convidaria alguém para conversar sem se sentir invasiva?",
     "Sua frase soa natural ou forçada?"

@@ -20,7 +20,8 @@ const openai = new OpenAI({
 })
 
 // Assistant ID padrão (mentoria interna)
-const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_LYA_ID || process.env.OPENAI_ASSISTANT_ID
+// Aceita tanto OPENAI_ASSISTANT_LYA_ID quanto LYA_PROMPT_ID (para compatibilidade)
+const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_LYA_ID || process.env.OPENAI_ASSISTANT_ID || process.env.LYA_PROMPT_ID
 
 // Assistant ID para vendas (landing page)
 const ASSISTANT_SALES_ID = process.env.OPENAI_ASSISTANT_LYA_SALES_ID

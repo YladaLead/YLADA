@@ -126,12 +126,12 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         ]
       },
       {
-        title: 'Gestão GSAL',
+        title: 'Gestão de Clientes',
         icon: '📊',
         color: 'green',
         href: '/pt/nutri/gsal',
         items: [
-          { title: 'Painel GSAL', icon: '📊', href: '/pt/nutri/gsal' },
+          { title: 'Painel GSAL', icon: '📊', href: '/pt/nutri/gsal', tooltip: 'GSAL: Gerar, Servir, Acompanhar, Lucrar' },
           { title: 'Leads', icon: '🎯', href: '/pt/nutri/leads', badge: novosLeadsCount > 0 ? novosLeadsCount : undefined },
           { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
           { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },

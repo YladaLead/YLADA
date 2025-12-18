@@ -425,10 +425,9 @@ export default function JornadaDiaPage() {
         </div>
 
         {/* 3. AÇÃO PRÁTICA */}
-        {/* 🚀 FLUXO FLUIDO: Se ação for Pilar, renderizar conteúdo inline */}
-        {day.action_type === 'pilar' && getPilarId() ? (
-          <PilarContentInline pilarId={getPilarId()!} dayNumber={dayNumber} />
-        ) : day.action_type === 'exercicio' && !day.action_id ? (
+        {/* 🚀 NOVO MODELO COM LYA: Todos os dias mostram campo de ação prática inline */}
+        {/* Pilares não são mais renderizados - LYA conduz o conteúdo */}
+        {(day.action_type === 'exercicio' && !day.action_id) || day.action_type === 'pilar' ? (
           /* 🚀 FLUXO FLUIDO: Exercícios sem action_id são renderizados inline (sem botão) */
           <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 mb-6 border-l-4 border-purple-500 shadow-md">
             <h2 className="font-bold text-gray-900 mb-2 text-xl">💪 Ação Prática do Dia</h2>
@@ -509,8 +508,9 @@ export default function JornadaDiaPage() {
           />
         )}
 
-        {/* Material complementar removido - LYA conduz o fluxo */}
-        {(dayNumber >= 8 && dayNumber <= 14) && (
+        {/* Material complementar REMOVIDO - LYA conduz o conteúdo agora */}
+        {/* Os PDFs podem ser acessados via Biblioteca quando necessário */}
+        {false && (dayNumber >= 8 && dayNumber <= 14) && (
           <div className="bg-green-50 rounded-xl p-4 mb-6 border border-gray-100">
             <p className="text-sm text-gray-700 mb-2">
               <strong>📄 Material complementar:</strong>{' '}
@@ -523,7 +523,7 @@ export default function JornadaDiaPage() {
             </p>
           </div>
         )}
-        {(dayNumber >= 15 && dayNumber <= 16) && (
+        {false && (dayNumber >= 15 && dayNumber <= 16) && (
           <div className="bg-orange-50 rounded-xl p-4 mb-6 border border-gray-100">
             <p className="text-sm text-gray-700 mb-2">
               <strong>📄 Material complementar:</strong>{' '}
@@ -536,7 +536,7 @@ export default function JornadaDiaPage() {
             </p>
           </div>
         )}
-        {(dayNumber >= 22 && dayNumber <= 30) && (
+        {false && (dayNumber >= 22 && dayNumber <= 30) && (
           <div className="bg-indigo-50 rounded-xl p-4 mb-6 border border-gray-100">
             <p className="text-sm text-gray-700 mb-2">
               <strong>📄 Material complementar:</strong>{' '}

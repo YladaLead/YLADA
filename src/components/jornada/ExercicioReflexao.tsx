@@ -66,7 +66,7 @@ export default function ExercicioReflexao({
 
     // Se o texto mudou e não é apenas sincronização inicial, agendar salvamento
     const initialNote = note || ''
-    if (localNote !== initialNote && localNote.trim() !== '') {
+    if (localNote !== initialNote) {
       debounceTimerRef.current = setTimeout(() => {
         saveNoteToSupabase(localNote)
       }, 800) // 800ms de debounce
@@ -80,6 +80,21 @@ export default function ExercicioReflexao({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localNote])
+
+  // Salvar imediatamente quando o usuário sair do campo (onBlur)
+  const handleBlur = async () => {
+    // Cancelar qualquer debounce pendente
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+
+    // Salvar imediatamente se houve mudança
+    const initialNote = note || ''
+    if (localNote !== initialNote) {
+      await saveNoteToSupabase(localNote)
+    }
+  }
 
   // Placeholder contextual baseado no conteúdo do exercício
   const getPlaceholder = () => {
@@ -100,6 +115,7 @@ export default function ExercicioReflexao({
       <textarea
         value={localNote}
         onChange={(e) => setLocalNote(e.target.value)}
+        onBlur={handleBlur}
         placeholder={getPlaceholder()}
         disabled={disabled}
         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm resize-none disabled:opacity-50 disabled:cursor-not-allowed bg-white"
