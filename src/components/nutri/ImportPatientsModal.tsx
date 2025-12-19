@@ -729,55 +729,7 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
                 </div>
               </div>
 
-              {/* Seção removida - apenas Excel/CSV agora */}
-                      <strong>Não precisa de Excel!</strong> Cole suas anotações em qualquer formato e a LYA vai extrair e organizar os dados dos pacientes automaticamente.
-                    </p>
-                    
-                    <div className="bg-white rounded-lg p-6 mb-4">
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        📝 Cole ou digite suas anotações sobre os pacientes:
-                      </label>
-                      <textarea
-                        value={textInput}
-                        onChange={(e) => setTextInput(e.target.value)}
-                        placeholder="Exemplo:
-Maria Silva, email: maria@email.com, telefone: (11) 98765-4321, peso: 70kg, altura: 165cm, objetivo: emagrecimento
-João Santos, joao@email.com, (11) 91234-5678, 85kg, 175cm, ganho de massa muscular
-Ana Costa, anacosta@gmail.com, (21) 99876-5432, 60kg, 160cm, melhora da saúde..."
-                        className="w-full h-64 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm"
-                      />
-                      <p className="text-xs text-gray-500 mt-2">
-                        💡 Você pode colar anotações em qualquer formato: listas, textos corridos, planilhas copiadas, etc. A LYA vai entender e organizar!
-                      </p>
-                    </div>
-
-                    <div className="text-center">
-                      <button
-                        onClick={processTextWithAI}
-                        disabled={!textInput.trim() || processingText}
-                        className="px-8 py-4 bg-green-600 text-white rounded-lg font-bold text-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      >
-                        {processingText ? (
-                          <>
-                            <span className="inline-block animate-spin mr-2">⚙️</span>
-                            LYA está processando...
-                          </>
-                        ) : (
-                          <>
-                            🤖 Pedir ajuda da LYA
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded mt-4">
-                      <p className="text-sm text-gray-700">
-                        <strong>💡 Dica:</strong> Quanto mais informações você colar, melhor! A IA consegue extrair nomes, emails, telefones, pesos, alturas, objetivos e outras informações mesmo que estejam em formatos diferentes.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Seção de texto livre removida - apenas Excel/CSV agora */}
             </div>
           )}
 
@@ -1079,15 +1031,6 @@ Ana Costa, anacosta@gmail.com, (21) 99876-5432, 60kg, 160cm, melhora da saúde..
           </button>
           
           <div className="flex gap-3">
-            {false && step === 'preview' && (
-              <button
-                onClick={importData}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                disabled={importing || editingClients.some(c => !c.name || c.name.trim() === '')}
-              >
-                Importar {editingClients.length} Paciente(s)
-              </button>
-            )}
             
             {step === 'preview' && !isStandardTemplate && (
               <button
