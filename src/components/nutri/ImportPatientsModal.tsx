@@ -502,6 +502,11 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
         setStep('success')
         setImporting(false)
         setValidationResult(prev => prev ? { ...prev, validRows: result.imported || 0 } : null)
+        
+        // Fechar automaticamente após 2 segundos na tela de sucesso
+        setTimeout(() => {
+          handleSuccess()
+        }, 2000)
       }, 500)
       
     } catch (err: any) {
@@ -579,6 +584,11 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
         setStep('success')
         setImporting(false)
         setValidationResult(prev => prev ? { ...prev, validRows: result.imported || 0 } : null)
+        
+        // Fechar automaticamente após 2 segundos na tela de sucesso
+        setTimeout(() => {
+          handleSuccess()
+        }, 2000)
       }, 500)
       
     } catch (err: any) {
@@ -1014,8 +1024,11 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
             <div className="text-center">
               <div className="text-6xl mb-4">🎉</div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Importação Concluída!</h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-4">
                 Seus pacientes foram importados com sucesso e já estão disponíveis no sistema.
+              </p>
+              <p className="text-sm text-gray-500 mb-6">
+                Fechando automaticamente em alguns segundos...
               </p>
               
               <div className="bg-green-50 rounded-lg p-6 mb-6">
