@@ -18,6 +18,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { user_id, email, name, area, expires_in_days } = body
 
+    // Debug: log do body recebido
+    console.log('📥 Body recebido na API:', JSON.stringify(body, null, 2))
+    console.log('📥 user_id recebido:', user_id, 'tipo:', typeof user_id)
+    console.log('📥 email recebido:', email)
+
     // Validar campos obrigatórios
     if (!area) {
       return NextResponse.json(
@@ -32,6 +37,17 @@ export async function POST(request: NextRequest) {
         { error: 'Forneça user_id (se usuário existe) ou email (para criar novo usuário)' },
         { status: 400 }
       )
+    }
+
+    // Validar que user_id não é string vazia
+    if (user_id === '' || user_id === null || user_id === undefined) {
+      console.warn('⚠️ user_id está vazio, null ou undefined. Tentando usar email...')
+      if (!email) {
+        return NextResponse.json(
+          { error: 'user_id inválido e email não fornecido' },
+          { status: 400 }
+        )
+      }
     }
 
     // Validar área

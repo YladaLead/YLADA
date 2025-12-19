@@ -119,8 +119,14 @@ function AdminSubscriptionsContent() {
   // Selecionar usuário
   const selecionarUsuario = (usuario: any) => {
     setUsuarioSelecionado(usuario)
-    // A API retorna 'id' que é o user_id
-    setFreePlanForm({ ...freePlanForm, user_id: usuario.id })
+    // A API retorna 'id' que é o user_id, mas vamos garantir que temos o valor correto
+    const userId = usuario.id || usuario.user_id
+    if (!userId) {
+      console.error('❌ Usuário selecionado não tem id ou user_id:', usuario)
+      setError('Erro: Usuário selecionado não tem ID válido')
+      return
+    }
+    setFreePlanForm({ ...freePlanForm, user_id: userId, email: '', name: '' })
     setBuscaUsuario(`${usuario.nome} (${usuario.email})`)
     setUsuariosEncontrados([])
   }
@@ -129,15 +135,29 @@ function AdminSubscriptionsContent() {
     e.preventDefault()
     
     // Validar que tem user_id (selecionado) OU email (para criar novo)
-    if (!freePlanForm.user_id && !freePlanForm.email) {
+    const hasUserId = freePlanForm.user_id && freePlanForm.user_id.trim() !== ''
+    const hasEmail = freePlanForm.email && freePlanForm.email.trim() !== ''
+    
+    if (!hasUserId && !hasEmail) {
       setError('Selecione um usuário existente ou preencha email e nome para criar novo usuário')
       return
     }
 
     // Se for criar novo usuário, validar email e nome
-    if (!freePlanForm.user_id && (!freePlanForm.email || !freePlanForm.name)) {
+    if (!hasUserId && (!hasEmail || !freePlanForm.name || freePlanForm.name.trim() === '')) {
       setError('Para criar novo usuário, preencha email e nome')
       return
+    }
+
+    // Se tem usuário selecionado mas user_id está vazio, tentar usar o usuarioSelecionado
+    if (!hasUserId && usuarioSelecionado) {
+      const userId = usuarioSelecionado.id || usuarioSelecionado.user_id
+      if (userId) {
+        console.log('⚠️ user_id estava vazio, usando usuarioSelecionado.id:', userId)
+        setFreePlanForm({ ...freePlanForm, user_id: userId })
+        // Aguardar um tick para o estado atualizar
+        await new Promise(resolve => setTimeout(resolve, 0))
+      }
     }
 
     setLoading(true)
@@ -152,17 +172,34 @@ function AdminSubscriptionsContent() {
       }
 
       // Preparar body (remover campos vazios)
+      // Usar o estado atualizado após possível correção
+      const currentUserId = freePlanForm.user_id?.trim() || usuarioSelecionado?.id || usuarioSelecionado?.user_id || ''
+      const currentEmail = freePlanForm.email?.trim() || ''
+      
       const body: any = {
         area: freePlanForm.area,
         expires_in_days: freePlanForm.expires_in_days
       }
 
-      if (freePlanForm.user_id) {
-        body.user_id = freePlanForm.user_id
+      // Debug: verificar o que está sendo enviado
+      console.log('🔍 Debug - freePlanForm:', freePlanForm)
+      console.log('🔍 Debug - usuarioSelecionado:', usuarioSelecionado)
+      console.log('🔍 Debug - currentUserId:', currentUserId)
+
+      if (currentUserId) {
+        body.user_id = currentUserId
+        console.log('✅ Enviando user_id:', body.user_id)
+      } else if (currentEmail) {
+        body.email = currentEmail
+        body.name = freePlanForm.name?.trim() || ''
+        console.log('✅ Criando novo usuário com email:', body.email)
       } else {
-        body.email = freePlanForm.email
-        body.name = freePlanForm.name
+        setError('Erro: Nenhum usuário selecionado e nenhum email fornecido')
+        setLoading(false)
+        return
       }
+
+      console.log('📤 Body final sendo enviado:', JSON.stringify(body, null, 2))
 
       const response = await fetch('/api/admin/subscriptions/free', {
         method: 'POST',
@@ -325,9 +362,14 @@ function AdminSubscriptionsContent() {
                     type="text"
                     value={buscaUsuario}
                     onChange={(e) => {
-                      setBuscaUsuario(e.target.value)
-                      setUsuarioSelecionado(null)
-                      setFreePlanForm({ ...freePlanForm, user_id: '' })
+                      const newValue = e.target.value
+                      setBuscaUsuario(newValue)
+                      // Só limpar seleção se o usuário estiver realmente digitando uma nova busca
+                      // Se o campo estiver vazio ou diferente do usuário selecionado, limpar
+                      if (!newValue || (usuarioSelecionado && !newValue.includes(usuarioSelecionado.nome))) {
+                        setUsuarioSelecionado(null)
+                        setFreePlanForm({ ...freePlanForm, user_id: '', email: '', name: '' })
+                      }
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Digite nome, email ou telefone..."
