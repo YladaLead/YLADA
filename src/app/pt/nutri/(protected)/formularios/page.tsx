@@ -102,10 +102,18 @@ function FormulariosNutriContent() {
         
         if (profileResponse.ok) {
           const profileData = await profileResponse.json()
-          setUserSlug(profileData.user_slug || null)
+          const slug = profileData.user_slug || null
+          console.log('👤 User slug carregado:', slug)
+          setUserSlug(slug)
+          
+          if (!slug) {
+            console.warn('⚠️ User slug não encontrado no perfil. Verifique se está configurado em Configurações.')
+          }
+        } else {
+          console.error('❌ Erro ao buscar perfil:', profileResponse.status)
         }
       } catch (error) {
-        console.error('Erro ao carregar user_slug:', error)
+        console.error('❌ Erro ao carregar user_slug:', error)
       }
     }
 
@@ -137,7 +145,10 @@ function FormulariosNutriContent() {
   }
 
   const getLinkFormulario = (form: any) => {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    // Garantir que baseUrl não inclua /pt no final
+    let baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    // Remover qualquer /pt do final do baseUrl se existir
+    baseUrl = baseUrl.replace(/\/pt\/?$/, '')
     
     // Seguir a mesma lógica dos quizzes e ferramentas:
     // 1. Prioridade: short_code (se disponível)
@@ -151,7 +162,8 @@ function FormulariosNutriContent() {
       userSlug: userSlug,
       shortCode: form.short_code,
       hasSlug: !!form.slug,
-      hasUserSlug: !!userSlug
+      hasUserSlug: !!userSlug,
+      baseUrl: baseUrl
     })
     
     if (form.short_code) {
@@ -164,12 +176,14 @@ function FormulariosNutriContent() {
       return link
     } else {
       // Fallback para UUID - será redirecionado automaticamente se tiver slug depois
+      // IMPORTANTE: /f/ não deve ter /pt/ antes
       const link = `${baseUrl}/f/${form.id}`
       console.warn('⚠️ Usando fallback UUID (sem userSlug ou slug):', {
         link,
         userSlug,
         formSlug: form.slug,
-        reason: !userSlug ? 'sem userSlug' : 'sem slug no formulário'
+        reason: !userSlug ? 'sem userSlug' : 'sem slug no formulário',
+        formData: form
       })
       return link
     }
