@@ -212,36 +212,60 @@ export async function POST(request: NextRequest) {
         
         rows = rawRows
           .map((row, rowIndex) => {
+            // Pular se a linha não existe ou não é array
+            if (!row || !Array.isArray(row) || row.length === 0) {
+              return null
+            }
+            
             // Garantir que todas as linhas tenham o mesmo número de colunas que os cabeçalhos
             const normalizedRow = Array(headers.length).fill('')
             let hasAnyData = false
+            let nonEmptyCount = 0
             
             // Processar todas as células da linha original
-            if (row && Array.isArray(row)) {
-              for (let i = 0; i < Math.min(row.length, headers.length); i++) {
-                const cell = row[i]
-                // Aceitar qualquer valor não-null/undefined, mesmo que seja string vazia inicialmente
-                if (cell !== null && cell !== undefined) {
-                  const cellValue = String(cell).trim()
-                  normalizedRow[i] = cellValue
-                  if (cellValue !== '') {
-                    hasAnyData = true
-                  }
+            for (let i = 0; i < Math.min(row.length, headers.length); i++) {
+              const cell = row[i]
+              
+              // Aceitar qualquer valor não-null/undefined
+              if (cell !== null && cell !== undefined) {
+                const cellValue = String(cell).trim()
+                normalizedRow[i] = cellValue
+                
+                // Contar células não vazias
+                if (cellValue !== '') {
+                  hasAnyData = true
+                  nonEmptyCount++
                 }
               }
             }
             
-            // Se ainda não encontrou dados, verificar se a linha original tinha dados em qualquer coluna
-            if (!hasAnyData && row && Array.isArray(row) && row.length > 0) {
-              hasAnyData = row.some(cell => {
-                if (cell === null || cell === undefined) return false
-                const str = String(cell).trim()
-                return str !== '' && str !== 'null' && str !== 'undefined'
-              })
+            // Se a linha tem pelo menos 1 célula não vazia, aceitar
+            // Isso é mais permissivo e deve capturar todas as linhas com dados
+            if (hasAnyData && nonEmptyCount > 0) {
+              return normalizedRow
             }
             
-            // Retornar a linha se tiver pelo menos algum dado
-            return hasAnyData ? normalizedRow : null
+            // Se não encontrou dados nas primeiras colunas, verificar toda a linha original
+            if (!hasAnyData) {
+              const hasDataInRow = row.some(cell => {
+                if (cell === null || cell === undefined) return false
+                const str = String(cell).trim()
+                return str !== '' && str !== 'null' && str !== 'undefined' && str.length > 0
+              })
+              
+              if (hasDataInRow) {
+                // Se encontrou dados em qualquer lugar da linha, normalizar novamente
+                for (let i = 0; i < Math.min(row.length, headers.length); i++) {
+                  const cell = row[i]
+                  if (cell !== null && cell !== undefined) {
+                    normalizedRow[i] = String(cell).trim()
+                  }
+                }
+                return normalizedRow
+              }
+            }
+            
+            return null
           })
           .filter(row => row !== null && row !== undefined) as any[][]
         
@@ -268,13 +292,44 @@ export async function POST(request: NextRequest) {
         
         console.log(`✅ Detectados ${headers.length} cabeçalhos:`, headers.slice(0, 10).join(', '))
         console.log(`✅ ${rows.length} linhas de dados processadas`)
+        
+        // Se não encontrou linhas, tentar método mais permissivo
+        if (rows.length === 0 && rawRows.length > 0) {
+          console.warn(`⚠️ Nenhuma linha passou no filtro, tentando método mais permissivo...`)
+          // Tentar novamente sem filtro tão restritivo
+          rows = rawRows
+            .map((row) => {
+              if (!row || !Array.isArray(row)) return null
+              const normalizedRow = Array(headers.length).fill('')
+              let hasAnyData = false
+              
+              for (let i = 0; i < Math.min(row.length, headers.length); i++) {
+                const cell = row[i]
+                if (cell !== null && cell !== undefined) {
+                  const cellValue = String(cell).trim()
+                  normalizedRow[i] = cellValue
+                  // Aceitar linha se tiver pelo menos uma célula não vazia
+                  if (cellValue !== '') {
+                    hasAnyData = true
+                  }
+                }
+              }
+              
+              return hasAnyData ? normalizedRow : null
+            })
+            .filter(row => row !== null && row !== undefined) as any[][]
+          
+          console.log(`✅ Após método permissivo: ${rows.length} linhas encontradas`)
+        }
+        
         if (rows.length > 0) {
           console.log(`📋 Primeira linha de dados:`, rows[0].slice(0, 3).join(', '))
         } else {
           console.warn(`⚠️ Nenhuma linha de dados encontrada após processamento`)
           console.log(`📊 Total de linhas brutas: ${jsonData.length}`)
           console.log(`📊 Índice do cabeçalho: ${headerRowIndex}`)
-          console.log(`📊 Linhas após cabeçalho: ${jsonData.length - headerRowIndex - 1}`)
+          console.log(`📊 Linhas após cabeçalho: ${rawRows.length}`)
+          console.log(`📊 Primeira linha bruta:`, rawRows[0]?.slice(0, 5))
         }
       } catch (excelError: any) {
         console.error('Erro específico ao processar Excel:', excelError)
@@ -311,6 +366,8 @@ export async function POST(request: NextRequest) {
         return String(cell).trim()
       })
     )
+
+    console.log(`📦 Retornando: ${cleanedRows.length} linhas, ${headers.length} cabeçalhos`)
 
     return NextResponse.json({
       success: true,
