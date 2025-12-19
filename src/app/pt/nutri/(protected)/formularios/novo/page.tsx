@@ -1348,7 +1348,6 @@ function NovoFormularioNutriContent() {
           </div>
         </div>
       </div>
-      </div>
 
       {/* Drag Overlay */}
       <DragOverlay>
