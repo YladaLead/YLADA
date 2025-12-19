@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
