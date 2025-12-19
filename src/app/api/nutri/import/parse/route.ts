@@ -75,19 +75,41 @@ export async function POST(request: NextRequest) {
         
         console.log(`Range da planilha: ${worksheet['!ref']}, Colunas: ${maxCol + 1}, Linhas: ${maxRow + 1}`)
         
-        // Converter para JSON usando o range completo
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+        // Converter para JSON - usar método mais direto que captura todas as linhas
+        // Primeiro, tentar com blankrows: true para capturar todas as linhas
+        let jsonData = XLSX.utils.sheet_to_json(worksheet, { 
           header: 1, 
-          defval: '',
-          blankrows: false,
-          range: worksheet['!ref'] // Usar o range completo
+          defval: null,
+          blankrows: true, // Incluir linhas vazias
+          range: worksheet['!ref']
         }) as any[][]
+        
+        // Se não capturou linhas, tentar sem blankrows
+        if (jsonData.length === 0 || (jsonData.length === 1 && jsonData[0].every(c => !c))) {
+          console.log('⚠️ Tentando método alternativo de leitura...')
+          jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+            header: 1, 
+            defval: '',
+            blankrows: false
+          }) as any[][]
+        }
+        
+        console.log(`📊 Total de linhas no JSON: ${jsonData.length}`)
+        if (jsonData.length > 0) {
+          console.log(`📋 Primeiras 3 linhas (primeiras 3 colunas):`, jsonData.slice(0, 3).map(r => r?.slice(0, 3)))
+          console.log(`📋 Últimas 3 linhas (primeiras 3 colunas):`, jsonData.slice(-3).map(r => r?.slice(0, 3)))
+        }
         
         if (jsonData.length === 0) {
           return NextResponse.json(
-            { error: 'A planilha está vazia' },
+            { error: 'A planilha está vazia ou não foi possível ler os dados' },
             { status: 400 }
           )
+        }
+        
+        // Se só tem 1 linha e parece ser cabeçalho, avisar
+        if (jsonData.length === 1) {
+          console.warn('⚠️ Apenas 1 linha encontrada - pode ser apenas cabeçalho')
         }
         
         // Encontrar a linha com mais colunas não vazias (provavelmente é a linha de cabeçalho)
@@ -194,27 +216,34 @@ export async function POST(request: NextRequest) {
             const normalizedRow = Array(headers.length).fill('')
             let hasAnyData = false
             
-            for (let i = 0; i < Math.min(row?.length || 0, headers.length); i++) {
-              const cell = row[i]
-              if (cell !== null && cell !== undefined) {
-                const cellValue = String(cell).trim()
-                normalizedRow[i] = cellValue
-                if (cellValue !== '') {
-                  hasAnyData = true
+            // Processar todas as células da linha original
+            if (row && Array.isArray(row)) {
+              for (let i = 0; i < Math.min(row.length, headers.length); i++) {
+                const cell = row[i]
+                // Aceitar qualquer valor não-null/undefined, mesmo que seja string vazia inicialmente
+                if (cell !== null && cell !== undefined) {
+                  const cellValue = String(cell).trim()
+                  normalizedRow[i] = cellValue
+                  if (cellValue !== '') {
+                    hasAnyData = true
+                  }
                 }
               }
             }
             
-            // Se a linha normalizada não tem dados, verificar se a linha original tinha
-            if (!hasAnyData && row && row.length > 0) {
-              hasAnyData = row.some(cell => 
-                cell !== null && cell !== undefined && String(cell).trim() !== ''
-              )
+            // Se ainda não encontrou dados, verificar se a linha original tinha dados em qualquer coluna
+            if (!hasAnyData && row && Array.isArray(row) && row.length > 0) {
+              hasAnyData = row.some(cell => {
+                if (cell === null || cell === undefined) return false
+                const str = String(cell).trim()
+                return str !== '' && str !== 'null' && str !== 'undefined'
+              })
             }
             
+            // Retornar a linha se tiver pelo menos algum dado
             return hasAnyData ? normalizedRow : null
           })
-          .filter(row => row !== null) as any[][]
+          .filter(row => row !== null && row !== undefined) as any[][]
         
         console.log(`✅ Linhas válidas após filtro: ${rows.length}`)
         

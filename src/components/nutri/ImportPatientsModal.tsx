@@ -151,9 +151,20 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
       const parsed = await parseFiles(acceptedFiles)
       setImportProgress(30)
       
-      // Verificar se há dados
-      if (!parsed[0] || !parsed[0].rows || parsed[0].rows.length === 0) {
-        throw new Error('Nenhum dado encontrado na planilha. Verifique se o arquivo contém linhas de dados além do cabeçalho.')
+      // Verificar se o parse retornou dados válidos
+      if (!parsed || parsed.length === 0 || !parsed[0]) {
+        throw new Error('Erro ao processar o arquivo. Verifique se o arquivo está no formato correto.')
+      }
+      
+      // Verificar se há dados (mas não bloquear se houver headers - pode ser que precise de mapeamento)
+      if (!parsed[0].headers || parsed[0].headers.length === 0) {
+        throw new Error('Não foi possível detectar cabeçalhos na planilha.')
+      }
+      
+      // Se não houver linhas, ainda pode ser um arquivo válido que precisa de mapeamento
+      // Mas vamos avisar o usuário
+      if (!parsed[0].rows || parsed[0].rows.length === 0) {
+        console.warn('Nenhuma linha de dados encontrada, mas continuando para permitir mapeamento manual')
       }
       
       // Verificar se é template padrão
