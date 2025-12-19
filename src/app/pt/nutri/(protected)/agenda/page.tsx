@@ -654,14 +654,16 @@ function CalendarioSemanal({
                         <div className="flex items-center gap-1 mb-1">
                           <span>{getTipoIcon(consulta.appointment_type)}</span>
                           <span className="font-medium truncate">
-                            {consulta.title || 'Consulta'}
+                            {typeof consulta.clients === 'object' && consulta.clients
+                              ? consulta.clients.name
+                              : consulta.title || 'Consulta'}
                           </span>
                         </div>
-                        <div className="text-xs opacity-75 truncate">
-                          {typeof consulta.clients === 'object' && consulta.clients
-                            ? consulta.clients.name
-                            : 'Cliente'}
-                        </div>
+                        {typeof consulta.clients === 'object' && consulta.clients && consulta.title && (
+                          <div className="text-xs opacity-75 truncate">
+                            {consulta.title}
+                          </div>
+                        )}
                         <div className="text-xs opacity-75">
                           {inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
@@ -750,16 +752,21 @@ function CalendarioMensal({
                 </button>
               )}
               <div className="space-y-1">
-                {consultas.slice(0, 3).map((consulta) => (
-                  <div
-                    key={consulta.id}
-                    onClick={() => onConsultaClick(consulta)}
-                    className={`text-xs p-1 rounded cursor-pointer hover:shadow-sm transition-shadow truncate ${getStatusColor(consulta.status)}`}
-                  >
-                    <span className="mr-1">{getTipoIcon(consulta.appointment_type)}</span>
-                    {consulta.title || 'Consulta'}
-                  </div>
-                ))}
+                {consultas.slice(0, 3).map((consulta) => {
+                  const nomeCliente = typeof consulta.clients === 'object' && consulta.clients
+                    ? consulta.clients.name
+                    : null
+                  return (
+                    <div
+                      key={consulta.id}
+                      onClick={() => onConsultaClick(consulta)}
+                      className={`text-xs p-1 rounded cursor-pointer hover:shadow-sm transition-shadow truncate ${getStatusColor(consulta.status)}`}
+                    >
+                      <span className="mr-1">{getTipoIcon(consulta.appointment_type)}</span>
+                      {nomeCliente || consulta.title || 'Consulta'}
+                    </div>
+                  )
+                })}
                 {consultas.length > 3 && (
                   <div className="text-xs text-gray-500">
                     +{consultas.length - 3} mais
@@ -810,18 +817,27 @@ function ListaConsultas({
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">{consulta.title || 'Consulta'}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {typeof consulta.clients === 'object' && consulta.clients
+                    ? consulta.clients.name
+                    : consulta.title || 'Consulta'}
+                </h3>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(consulta.status)}`}>
                   {getStatusLabel(consulta.status)}
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
-                <div>
-                  <span className="font-medium">Cliente:</span>{' '}
-                  {typeof consulta.clients === 'object' && consulta.clients
-                    ? consulta.clients.name
-                    : 'Não informado'}
+              {typeof consulta.clients === 'object' && consulta.clients && consulta.title && (
+                <div className="text-sm text-gray-600 mb-2">
+                  {consulta.title}
                 </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+                {!(typeof consulta.clients === 'object' && consulta.clients) && (
+                  <div>
+                    <span className="font-medium">Cliente:</span>{' '}
+                    Não informado
+                  </div>
+                )}
                 <div>
                   <span className="font-medium">Data/Hora:</span>{' '}
                   {new Date(consulta.start_time).toLocaleString('pt-BR', {
