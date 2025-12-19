@@ -890,6 +890,7 @@ function NovoFormularioNutriContent() {
   }
 
   return (
+    <>
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
@@ -1519,5 +1520,6 @@ function NovoFormularioNutriContent() {
         </div>
       </div>
     )}
+    </>
   )
 }
