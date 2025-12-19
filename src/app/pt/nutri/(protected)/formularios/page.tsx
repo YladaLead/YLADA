@@ -22,6 +22,7 @@ function FormulariosNutriContent() {
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
   const [mostrarTemplates, setMostrarTemplates] = useState(true)
   const [userSlug, setUserSlug] = useState<string | null>(null)
+  const [mensagemCopiado, setMensagemCopiado] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -135,21 +136,35 @@ function FormulariosNutriContent() {
     return colors[tipo] || 'bg-gray-100 text-gray-800'
   }
 
-  const compartilharWhatsApp = (form: any) => {
+  const getLinkFormulario = (form: any) => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-    let linkFormulario = ''
     
     // Tentar usar link amigável primeiro
     if (userSlug && form.slug) {
-      linkFormulario = `${baseUrl}/pt/nutri/${userSlug}/formulario/${form.slug}`
+      return `${baseUrl}/pt/nutri/${userSlug}/formulario/${form.slug}`
     } else if (form.short_code) {
-      linkFormulario = `${baseUrl}/p/${form.short_code}`
+      return `${baseUrl}/p/${form.short_code}`
     } else {
-      linkFormulario = `${baseUrl}/f/${form.id}`
+      return `${baseUrl}/f/${form.id}`
     }
-    
-    const mensagem = encodeURIComponent(`Olá! Preciso que você preencha este formulário: ${linkFormulario}\n\nObrigado!`)
-    window.open(`https://wa.me/?text=${mensagem}`, '_blank')
+  }
+
+  const copiarLink = async (form: any) => {
+    const link = getLinkFormulario(form)
+    try {
+      await navigator.clipboard.writeText(link)
+      setMensagemCopiado('Link copiado!')
+      setTimeout(() => setMensagemCopiado(null), 2000)
+    } catch (err) {
+      console.error('Erro ao copiar:', err)
+      setMensagemCopiado('Erro ao copiar')
+      setTimeout(() => setMensagemCopiado(null), 2000)
+    }
+  }
+
+  const verQRCode = (form: any) => {
+    // Redireciona para página de envio que tem o QR Code
+    router.push(`/pt/nutri/formularios/${form.id}/enviar`)
   }
 
   if (loading || carregando) {
@@ -165,6 +180,14 @@ function FormulariosNutriContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Toast de notificação */}
+      {mensagemCopiado && (
+        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+          <span>✓</span>
+          <span>{mensagemCopiado}</span>
+        </div>
+      )}
+      
       <NutriSidebar 
         isMobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
@@ -258,6 +281,7 @@ function FormulariosNutriContent() {
                   </div>
 
                   <div className="space-y-2">
+                    {/* Linha 1: Editar e Respostas */}
                     <div className="flex gap-2">
                       <button
                         onClick={() => router.push(`/pt/nutri/formularios/${form.id}`)}
@@ -276,23 +300,25 @@ function FormulariosNutriContent() {
                           </span>
                         )}
                       </button>
+                    </div>
+                    
+                    {/* Linha 2: Copiar Link e QR Code */}
+                    <div className="flex gap-2">
                       <button
-                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}/enviar`)}
-                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                        onClick={() => copiarLink(form)}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center gap-2"
                       >
-                        Enviar
+                        <span>📋</span>
+                        Copiar Link
+                      </button>
+                      <button
+                        onClick={() => verQRCode(form)}
+                        className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                      >
+                        <span>📱</span>
+                        QR Code
                       </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        compartilharWhatsApp(form)
-                      }}
-                      className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      <span className="text-lg">💬</span>
-                      Compartilhar no WhatsApp
-                    </button>
                   </div>
                 </div>
               ))}
