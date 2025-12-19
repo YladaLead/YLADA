@@ -135,6 +135,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
           { title: 'Leads', icon: '🎯', href: '/pt/nutri/leads', badge: novosLeadsCount > 0 ? novosLeadsCount : undefined },
           { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
           { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
+          { title: 'Agenda', icon: '📅', href: '/pt/nutri/agenda' },
           { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
           { title: 'Formulários', icon: '📝', href: '/pt/nutri/formularios' },
           { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
