@@ -31,18 +31,6 @@ interface ValidationResult {
   validRows: number
 }
 
-interface ExtractedClient {
-  name: string
-  email?: string
-  phone?: string
-  weight?: number
-  height?: number
-  goal?: string
-  notes?: string
-  birth_date?: string
-  gender?: 'masculino' | 'feminino'
-}
-
 const FIELD_MAPPINGS = [
   { key: 'name', label: 'Nome', required: true },
   { key: 'email', label: 'Email', required: false },
@@ -57,7 +45,6 @@ const FIELD_MAPPINGS = [
 
 export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }: ImportPatientsModalProps) {
   const [step, setStep] = useState<'upload' | 'preview' | 'mapping' | 'validation' | 'importing' | 'success'>('upload')
-  const [importMode, setImportMode] = useState<'excel' | 'text'>('excel')
   const [files, setFiles] = useState<File[]>([])
   const [parsedData, setParsedData] = useState<ParsedData[]>([])
   const [fieldMappings, setFieldMappings] = useState<MappedField[]>([])
@@ -66,12 +53,6 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
   const [importProgress, setImportProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [isStandardTemplate, setIsStandardTemplate] = useState(false)
-  
-  // Estados para importação por texto
-  const [textInput, setTextInput] = useState('')
-  const [extractedClients, setExtractedClients] = useState<ExtractedClient[]>([])
-  const [processingText, setProcessingText] = useState(false)
-  const [editingClients, setEditingClients] = useState<ExtractedClient[]>([])
 
   const downloadTemplate = () => {
     const headers = FIELD_MAPPINGS.map(field => field.label)
@@ -557,105 +538,24 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
     }
   }
 
-  const processTextWithAI = async () => {
-    if (!textInput.trim()) {
-      setError('Por favor, cole ou digite o texto com informações dos pacientes')
-      return
-    }
-
-    setProcessingText(true)
-    setError(null)
-
-    try {
-      const response = await fetch('/api/nutri/import/text', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: textInput }),
-        credentials: 'include'
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Erro ao processar texto com IA')
-      }
-
-      const result = await response.json()
-      
-      if (result.clients && result.clients.length > 0) {
-        setExtractedClients(result.clients)
-        setEditingClients([...result.clients])
-        setStep('preview')
-      } else {
-        setError('Nenhum paciente foi encontrado no texto. Tente adicionar mais detalhes ou verifique se o texto contém informações de pacientes.')
-      }
-    } catch (err: any) {
-      setError(err.message || 'Erro ao processar texto com LYA')
-    } finally {
-      setProcessingText(false)
-    }
-  }
-
   const importData = async () => {
     setStep('importing')
     setImporting(true)
     setImportProgress(0)
     
     try {
-      let response: Response
-      
-      if (importMode === 'text' && editingClients.length > 0) {
-        // Importar dados extraídos do texto
-        // Converter para formato compatível com a API de processamento
-        const convertedData: ParsedData[] = [{
-          headers: FIELD_MAPPINGS.map(f => f.label),
-          rows: editingClients.map(client => [
-            client.name || '',
-            client.email || '',
-            client.phone || '',
-            client.weight?.toString() || '',
-            client.height?.toString() || '',
-            client.goal || '',
-            client.notes || '',
-            client.birth_date || '',
-            client.gender || ''
-          ]),
-          fileName: 'texto-livre',
-          totalRows: editingClients.length
-        }]
-
-        const standardMappings: MappedField[] = FIELD_MAPPINGS.map((field, index) => ({
-          sourceColumn: convertedData[0].headers[index] || '',
-          targetField: field.key,
-          required: field.required
-        }))
-
-        response = await fetch('/api/nutri/import/process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            data: convertedData,
-            mappings: standardMappings
-          }),
-          credentials: 'include'
-        })
-      } else {
-        // Importar dados do Excel
-        response = await fetch('/api/nutri/import/process', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            data: parsedData,
-            mappings: fieldMappings
-          }),
-          credentials: 'include'
-        })
-      }
+      // Importar dados do Excel/CSV
+      const response = await fetch('/api/nutri/import/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          data: parsedData,
+          mappings: fieldMappings
+        }),
+        credentials: 'include'
+      })
       
       if (!response.ok) {
         throw new Error('Erro na importação dos dados')
@@ -777,42 +677,6 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
           {/* Upload Step */}
           {step === 'upload' && (
             <div className="space-y-6">
-              {/* Seletor de Modo */}
-              <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-                  Escolha como deseja importar:
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setImportMode('excel')}
-                    className={`p-6 rounded-xl border-2 transition-all ${
-                      importMode === 'excel'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-4xl mb-2">📊</div>
-                    <div className="font-semibold text-gray-900 mb-1">Planilha Excel/CSV</div>
-                    <div className="text-sm text-gray-600">Para quem já tem planilhas organizadas</div>
-                  </button>
-                  <button
-                    onClick={() => setImportMode('text')}
-                    className={`p-6 rounded-xl border-2 transition-all ${
-                      importMode === 'text'
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-4xl mb-2">🤖</div>
-                    <div className="font-semibold text-gray-900 mb-1">LYA te ajuda a importar</div>
-                    <div className="text-sm text-gray-600">Cole suas anotações e deixe a LYA organizar</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Modo Excel */}
-              {importMode === 'excel' && (
-                <>
               {/* Template Padrão - Destaque Principal */}
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-8 text-center">
                 <div className="text-5xl mb-4">📋</div>
@@ -829,47 +693,11 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
                 </button>
               </div>
 
-              {/* Seção: IA Reestrutura Automaticamente */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="text-4xl">✨</div>
-                  <div className="flex-1">
-                    <h4 className="text-xl font-bold text-gray-900 mb-3">
-                      ✨ Seu modelo é diferente? Não tem problema!
-                    </h4>
-                    <p className="text-gray-700 mb-4">
-                      <strong>Nossa IA reestrutura automaticamente!</strong> Faça upload da sua planilha em qualquer formato e nossa inteligência artificial vai entender, mapear e organizar tudo automaticamente. Você não precisa fazer nada!
-                    </p>
-                    
-                    <div className="bg-white rounded-lg border-2 border-green-200 p-4 mb-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="text-3xl">🤖</div>
-                        <div>
-                          <h5 className="font-semibold text-gray-900 mb-1">Como funciona:</h5>
-                          <ul className="text-sm text-gray-700 space-y-1">
-                            <li>✅ Faça upload da sua planilha (qualquer formato)</li>
-                            <li>✅ A LYA analisa os cabeçalhos automaticamente</li>
-                            <li>✅ Mapeia e reestrutura no formato padrão</li>
-                            <li>✅ Pronto para importar!</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-                      <p className="text-sm text-gray-700">
-                        <strong>💡 Tudo acontece automaticamente!</strong> Basta fazer upload da sua planilha e deixar a IA trabalhar.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Opção de Upload */}
               <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-lg font-semibold text-gray-900">
-                    📤 Importar Planilha
+                    📤 Importar Planilha Excel ou CSV
                   </h4>
                   <button
                     onClick={downloadTemplate}
@@ -880,38 +708,28 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
                   </button>
                 </div>
                 <p className="text-sm text-gray-600 mb-4 text-center">
-                  Faça upload da sua planilha em qualquer formato. A LYA vai reestruturar automaticamente!
+                  Faça upload da sua planilha no formato padrão (Excel ou CSV)
                 </p>
-              <div
-                {...getRootProps()}
-                    className={`border-2 border-dashed rounded-lg p-8 transition-colors cursor-pointer text-center ${
-                  isDragActive 
-                        ? 'border-blue-500 bg-blue-100' 
-                        : 'border-blue-300 hover:border-blue-400 bg-gray-50'
-                }`}
-              >
-                <input {...getInputProps()} />
-                    <div className="text-5xl mb-3">📁</div>
-                    <p className="text-lg font-semibold text-gray-700 mb-2">
-                      {isDragActive ? 'Solte o arquivo aqui' : 'Arraste sua planilha aqui'}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      ou clique para selecionar (Excel, CSV)
-                </p>
-                  </div>
+                <div
+                  {...getRootProps()}
+                  className={`border-2 border-dashed rounded-lg p-8 transition-colors cursor-pointer text-center ${
+                    isDragActive 
+                      ? 'border-blue-500 bg-blue-100' 
+                      : 'border-blue-300 hover:border-blue-400 bg-gray-50'
+                  }`}
+                >
+                  <input {...getInputProps()} />
+                  <div className="text-5xl mb-3">📁</div>
+                  <p className="text-lg font-semibold text-gray-700 mb-2">
+                    {isDragActive ? 'Solte o arquivo aqui' : 'Arraste sua planilha aqui'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    ou clique para selecionar (Excel .xlsx/.xls ou CSV)
+                  </p>
+                </div>
               </div>
-                </>
-              )}
 
-              {/* Modo Texto Livre */}
-              {importMode === 'text' && (
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-8">
-                    <div className="text-5xl mb-4 text-center">🤖</div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
-                      LYA te ajuda a importar
-                    </h3>
-                    <p className="text-lg text-gray-700 mb-6 max-w-2xl mx-auto text-center">
+              {/* Seção removida - apenas Excel/CSV agora */}
                       <strong>Não precisa de Excel!</strong> Cole suas anotações em qualquer formato e a LYA vai extrair e organizar os dados dos pacientes automaticamente.
                     </p>
                     
@@ -966,154 +784,8 @@ Ana Costa, anacosta@gmail.com, (21) 99876-5432, 60kg, 160cm, melhora da saúde..
           {/* Preview Step */}
           {step === 'preview' && (
             <div>
-              {/* Preview para dados extraídos do texto */}
-              {importMode === 'text' && editingClients.length > 0 && (
-                <div className="space-y-6">
-                  <div className="text-center py-4">
-                    <div className="text-5xl mb-3">🤖</div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Dados Extraídos pela LYA
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {editingClients.length} paciente(s) encontrado(s). Revise e edite se necessário:
-                    </p>
-                  </div>
-
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {editingClients.map((client, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                              Nome *
-                            </label>
-                            <input
-                              type="text"
-                              value={client.name || ''}
-                              onChange={(e) => {
-                                const updated = [...editingClients]
-                                updated[index].name = e.target.value
-                                setEditingClients(updated)
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                              Email
-                            </label>
-                            <input
-                              type="email"
-                              value={client.email || ''}
-                              onChange={(e) => {
-                                const updated = [...editingClients]
-                                updated[index].email = e.target.value
-                                setEditingClients(updated)
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                              Telefone
-                            </label>
-                            <input
-                              type="text"
-                              value={client.phone || ''}
-                              onChange={(e) => {
-                                const updated = [...editingClients]
-                                updated[index].phone = e.target.value
-                                setEditingClients(updated)
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                              placeholder="(11) 98765-4321"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                              Peso (kg)
-                            </label>
-                            <input
-                              type="number"
-                              value={client.weight || ''}
-                              onChange={(e) => {
-                                const updated = [...editingClients]
-                                updated[index].weight = e.target.value ? parseFloat(e.target.value) : undefined
-                                setEditingClients(updated)
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                              Altura (cm)
-                            </label>
-                            <input
-                              type="number"
-                              value={client.height || ''}
-                              onChange={(e) => {
-                                const updated = [...editingClients]
-                                updated[index].height = e.target.value ? parseFloat(e.target.value) : undefined
-                                setEditingClients(updated)
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                              Objetivo
-                            </label>
-                            <input
-                              type="text"
-                              value={client.goal || ''}
-                              onChange={(e) => {
-                                const updated = [...editingClients]
-                                updated[index].goal = e.target.value
-                                setEditingClients(updated)
-                              }}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            Observações
-                          </label>
-                          <textarea
-                            value={client.notes || ''}
-                            onChange={(e) => {
-                              const updated = [...editingClients]
-                              updated[index].notes = e.target.value
-                              setEditingClients(updated)
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            rows={2}
-                          />
-                        </div>
-                        <button
-                          onClick={() => {
-                            const updated = editingClients.filter((_, i) => i !== index)
-                            setEditingClients(updated)
-                          }}
-                          className="mt-2 text-xs text-red-600 hover:text-red-800"
-                        >
-                          🗑️ Remover
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p className="text-sm text-green-800">
-                      ✅ {editingClients.length} paciente(s) pronto(s) para importar. Revise os dados acima e clique em "Importar" quando estiver satisfeito.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Preview para dados do Excel */}
-              {importMode === 'excel' && parsedData.length > 0 && (
+              {/* Preview para dados do Excel/CSV */}
+              {parsedData.length > 0 && (
                 <>
               {isStandardTemplate && (
                 <div className="text-center py-8">
@@ -1407,7 +1079,7 @@ Ana Costa, anacosta@gmail.com, (21) 99876-5432, 60kg, 160cm, melhora da saúde..
           </button>
           
           <div className="flex gap-3">
-            {step === 'preview' && importMode === 'text' && editingClients.length > 0 && (
+            {false && step === 'preview' && (
               <button
                 onClick={importData}
                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -1417,7 +1089,7 @@ Ana Costa, anacosta@gmail.com, (21) 99876-5432, 60kg, 160cm, melhora da saúde..
               </button>
             )}
             
-            {step === 'preview' && importMode === 'excel' && !isStandardTemplate && (
+            {step === 'preview' && !isStandardTemplate && (
               <button
                 onClick={() => setStep('mapping')}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

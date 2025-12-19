@@ -138,15 +138,29 @@ export async function POST(request: NextRequest) {
             clientData.notes = cleanValue
             break
           case 'weight':
+            // Peso não é armazenado diretamente na tabela clients
+            // Será armazenado nas observações ou pode ser usado para criar evolução depois
             const weight = parseFloat(cleanValue)
             if (!isNaN(weight) && weight > 0 && weight <= 500) {
-              clientData.current_weight = weight
+              // Adicionar peso nas observações se não houver
+              if (!clientData.notes) {
+                clientData.notes = `Peso atual: ${weight} kg`
+              } else if (!clientData.notes.includes('Peso')) {
+                clientData.notes = `${clientData.notes}\nPeso atual: ${weight} kg`
+              }
             }
             break
           case 'height':
+            // Altura não é armazenada diretamente na tabela clients
+            // Será armazenada nas observações ou pode ser usada para criar evolução depois
             const height = parseFloat(cleanValue)
             if (!isNaN(height) && height > 0 && height <= 250) {
-              clientData.height = height
+              // Adicionar altura nas observações se não houver
+              if (!clientData.notes) {
+                clientData.notes = `Altura: ${height} cm`
+              } else if (!clientData.notes.includes('Altura')) {
+                clientData.notes = `${clientData.notes}\nAltura: ${height} cm`
+              }
             }
             break
           case 'birth_date':
