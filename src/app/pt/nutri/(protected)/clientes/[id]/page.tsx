@@ -2252,7 +2252,7 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
     description: '',
     appointment_type: 'consulta',
     start_time: '',
-    end_time: '',
+    duration: '60', // Duração em minutos (padrão: 60 min = 1 hora)
     location_type: 'online',
     location_address: '',
     location_url: '',
@@ -2296,6 +2296,21 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
 
     carregarConsultas()
   }, [clientId, filtroStatus, filtroTipo])
+
+  // Calcular end_time baseado em start_time + duração
+  const calcularEndTime = (startTime: string, durationMinutes: string): string => {
+    if (!startTime || !durationMinutes) return ''
+    const start = new Date(startTime)
+    const duration = parseInt(durationMinutes) || 60
+    const end = new Date(start.getTime() + duration * 60000) // Adicionar minutos em milissegundos
+    
+    const ano = end.getFullYear()
+    const mes = String(end.getMonth() + 1).padStart(2, '0')
+    const dia = String(end.getDate()).padStart(2, '0')
+    const hora = String(end.getHours()).padStart(2, '0')
+    const minuto = String(end.getMinutes()).padStart(2, '0')
+    return `${ano}-${mes}-${dia}T${hora}:${minuto}`
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -2351,7 +2366,7 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
           description: '',
           appointment_type: 'consulta',
           start_time: '',
-          end_time: '',
+          duration: '60',
           location_type: 'online',
           location_address: '',
           location_url: '',
@@ -2540,18 +2555,37 @@ function AgendaTab({ cliente, clientId }: { cliente: any; clientId: string }) {
               </div>
 
               <div>
-                <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-2">
-                  Data e Hora Fim *
+                <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
+                  Duração da Consulta *
                 </label>
-                <input
-                  type="datetime-local"
-                  id="end_time"
-                  name="end_time"
-                  value={formData.end_time}
+                <select
+                  id="duration"
+                  name="duration"
+                  value={formData.duration}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                >
+                  <option value="15">15 minutos</option>
+                  <option value="30">30 minutos</option>
+                  <option value="45">45 minutos</option>
+                  <option value="60">1 hora</option>
+                  <option value="90">1 hora e 30 minutos</option>
+                  <option value="120">2 horas</option>
+                  <option value="180">3 horas</option>
+                </select>
+                {formData.start_time && formData.duration && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    <span className="font-medium">Término:</span>{' '}
+                    {new Date(calcularEndTime(formData.start_time, formData.duration)).toLocaleString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                )}
               </div>
 
               <div>
