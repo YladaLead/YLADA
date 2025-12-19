@@ -95,3 +95,31 @@ export function buildShortUrl(shortCode: string): string {
   return `${baseUrl}/p/${shortCode}`
 }
 
+/**
+ * Constrói URLs comuns para a LYA usar em respostas
+ * Retorna links clicáveis formatados em Markdown
+ */
+export function buildLyaLinks(profile: 'nutri' | 'coach' = 'nutri'): {
+  formularios: string
+  jornada: (dia?: number) => string
+  home: string
+  clientes: string
+  leads: string
+} {
+  const baseUrl = getAppUrl()
+  const prefix = profile === 'nutri' ? '/pt/nutri' : '/pt/coach'
+  
+  return {
+    formularios: `${baseUrl}${prefix}/formularios`,
+    jornada: (dia?: number) => {
+      if (dia) {
+        return `${baseUrl}${prefix}/metodo/jornada/dia/${dia}`
+      }
+      return `${baseUrl}${prefix}/metodo/jornada`
+    },
+    home: `${baseUrl}${prefix}/home`,
+    clientes: `${baseUrl}${prefix}/clientes`,
+    leads: `${baseUrl}${prefix}/leads`
+  }
+}
+

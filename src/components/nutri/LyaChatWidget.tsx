@@ -33,17 +33,17 @@ export default function LyaChatWidget() {
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender_type: 'lya',
-        message: 'Olá! Sou a LYA, sua mentora empresarial. Estou aqui para te ajudar a desenvolver sua mentalidade, organização e posicionamento como Nutri-Empresária.\n\n💡 **Novidade!** Agora posso te ajudar com formulários:\n\n• Criar formulários personalizados\n• Resumir respostas de clientes\n• Identificar padrões nos formulários\n\nComo posso te ajudar hoje?',
+        message: 'Olá! Sou a LYA, sua mentora empresarial. Estou aqui para te ajudar com organização, posicionamento e crescimento do seu negócio nutricional.\n\nComo posso te ajudar hoje?',
         created_at: new Date().toISOString()
       }])
     }
   }, [isOpen])
 
-  // Sugestões rápidas para formulários
+  // Sugestões rápidas
   const sugestoesRapidas = [
-    { emoji: '📝', texto: 'Criar formulário de anamnese', comando: 'LYA, cria uma anamnese básica pra mim' },
-    { emoji: '📊', texto: 'Ver padrões nas respostas', comando: 'LYA, identifica padrões nas respostas dos meus formulários' },
-    { emoji: '🍽️', texto: 'Criar recordatório 24h', comando: 'LYA, cria um formulário de recordatório alimentar 24h' },
+    { emoji: '💡', texto: 'Preciso de orientação', comando: 'Preciso de orientação sobre como organizar meu negócio' },
+    { emoji: '🆘', texto: 'Falar com suporte', comando: 'Preciso falar com suporte técnico' },
+    { emoji: '📚', texto: 'Ver minha jornada', comando: 'Onde estou na minha jornada? O que preciso fazer hoje?' },
   ]
 
   const sendMessage = async (messageText?: string) => {
