@@ -37,7 +37,20 @@ export default function PreencherFormularioPage() {
           
           // Se o formulário tem slug e user_slug, redirecionar para URL amigável
           if (form.slug && form.user_slug) {
-            window.location.replace(`/pt/c/${form.user_slug}/formulario/${form.slug}`)
+            // Determinar a rota baseada no perfil do usuário
+            const userArea = form.user_area || form.form_type
+            let redirectUrl = ''
+            
+            if (userArea === 'coach') {
+              redirectUrl = `/pt/c/${form.user_slug}/formulario/${form.slug}`
+            } else if (userArea === 'nutri') {
+              redirectUrl = `/pt/nutri/${form.user_slug}/formulario/${form.slug}`
+            } else {
+              // Fallback: tentar coach primeiro, depois nutri
+              redirectUrl = `/pt/c/${form.user_slug}/formulario/${form.slug}`
+            }
+            
+            window.location.replace(redirectUrl)
             return
           }
           // Se tem short_code, redirecionar para /p/{code}
