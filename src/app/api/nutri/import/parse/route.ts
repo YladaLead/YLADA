@@ -95,18 +95,28 @@ export async function POST(request: NextRequest) {
         let maxColumns = 0
         
         // Verificar as primeiras 20 linhas para encontrar cabeçalhos
+        // Headers geralmente têm texto descritivo, não números ou datas
         for (let i = 0; i < Math.min(20, jsonData.length); i++) {
           const row = jsonData[i] || []
-          // Contar células não vazias, mas também considerar o tamanho total do array
+          // Contar células não vazias
           const nonEmptyCells = row.filter(cell => 
             cell !== null && cell !== undefined && String(cell).trim() !== ''
           ).length
           
-          // Também considerar o tamanho total da linha (pode ter células vazias mas estrutura válida)
-          const rowLength = row.length
+          // Verificar se parece ser cabeçalho (texto descritivo, não números/datas)
+          const looksLikeHeader = row.some(cell => {
+            if (!cell) return false
+            const str = String(cell).trim().toLowerCase()
+            // Headers geralmente são palavras como "nome", "email", "telefone", etc.
+            return str.length > 2 && 
+                   !/^\d+([.,]\d+)?$/.test(str) && // Não é número
+                   !/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}$/.test(str) && // Não é data
+                   !str.includes('@') // Não é email
+          })
           
-          // Priorizar linhas com mais células não vazias, mas também considerar estrutura
-          const score = nonEmptyCells * 2 + (rowLength > maxCol ? 1 : 0)
+          const rowLength = row.length
+          // Priorizar linhas que parecem cabeçalhos e têm muitas células preenchidas
+          const score = (looksLikeHeader ? 10 : 0) + nonEmptyCells * 2 + (rowLength > maxCol ? 1 : 0)
           
           if (score > maxColumns || (score === maxColumns && nonEmptyCells > 0)) {
             maxColumns = score
@@ -114,7 +124,7 @@ export async function POST(request: NextRequest) {
           }
         }
         
-        console.log(`Linha de cabeçalho detectada: ${headerRowIndex + 1}, Células não vazias: ${maxColumns}`)
+        console.log(`📋 Linha de cabeçalho detectada: ${headerRowIndex + 1}, Score: ${maxColumns}`)
         
         // Extrair cabeçalhos da linha identificada
         const headerRow = jsonData[headerRowIndex] || []
@@ -175,20 +185,38 @@ export async function POST(request: NextRequest) {
         }
         
         // Extrair linhas de dados (pular a linha de cabeçalho)
-        rows = jsonData
-          .slice(headerRowIndex + 1)
-          .map(row => {
+        const rawRows = jsonData.slice(headerRowIndex + 1)
+        console.log(`📊 Total de linhas brutas após cabeçalho: ${rawRows.length}`)
+        
+        rows = rawRows
+          .map((row, rowIndex) => {
             // Garantir que todas as linhas tenham o mesmo número de colunas que os cabeçalhos
             const normalizedRow = Array(headers.length).fill('')
+            let hasAnyData = false
+            
             for (let i = 0; i < Math.min(row?.length || 0, headers.length); i++) {
               const cell = row[i]
-              normalizedRow[i] = cell !== null && cell !== undefined ? String(cell).trim() : ''
+              if (cell !== null && cell !== undefined) {
+                const cellValue = String(cell).trim()
+                normalizedRow[i] = cellValue
+                if (cellValue !== '') {
+                  hasAnyData = true
+                }
+              }
             }
-            return normalizedRow
+            
+            // Se a linha normalizada não tem dados, verificar se a linha original tinha
+            if (!hasAnyData && row && row.length > 0) {
+              hasAnyData = row.some(cell => 
+                cell !== null && cell !== undefined && String(cell).trim() !== ''
+              )
+            }
+            
+            return hasAnyData ? normalizedRow : null
           })
-          .filter(row => 
-            row.some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')
-          )
+          .filter(row => row !== null) as any[][]
+        
+        console.log(`✅ Linhas válidas após filtro: ${rows.length}`)
         
         // Remover colunas completamente vazias do final
         while (headers.length > 1) {
@@ -211,6 +239,14 @@ export async function POST(request: NextRequest) {
         
         console.log(`✅ Detectados ${headers.length} cabeçalhos:`, headers.slice(0, 10).join(', '))
         console.log(`✅ ${rows.length} linhas de dados processadas`)
+        if (rows.length > 0) {
+          console.log(`📋 Primeira linha de dados:`, rows[0].slice(0, 3).join(', '))
+        } else {
+          console.warn(`⚠️ Nenhuma linha de dados encontrada após processamento`)
+          console.log(`📊 Total de linhas brutas: ${jsonData.length}`)
+          console.log(`📊 Índice do cabeçalho: ${headerRowIndex}`)
+          console.log(`📊 Linhas após cabeçalho: ${jsonData.length - headerRowIndex - 1}`)
+        }
       } catch (excelError: any) {
         console.error('Erro específico ao processar Excel:', excelError)
         if (excelError.message?.includes('corrupt') || excelError.message?.includes('invalid')) {

@@ -115,7 +115,13 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
     ]
     
     const ws = XLSX.utils.aoa_to_sheet(wsData)
+    // Definir largura das colunas
     ws['!cols'] = FIELD_MAPPINGS.map(() => ({ wch: 30 }))
+    // Garantir que a primeira linha seja tratada como cabeçalho
+    ws['!ref'] = XLSX.utils.encode_range({
+      s: { c: 0, r: 0 },
+      e: { c: headers.length - 1, r: wsData.length - 1 }
+    })
     
     XLSX.utils.book_append_sheet(wb, ws, 'Pacientes')
     XLSX.writeFile(wb, 'template-importacao-pacientes.xlsx')
@@ -144,6 +150,11 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
       // Primeiro, fazer parse básico dos arquivos
       const parsed = await parseFiles(acceptedFiles)
       setImportProgress(30)
+      
+      // Verificar se há dados
+      if (!parsed[0] || !parsed[0].rows || parsed[0].rows.length === 0) {
+        throw new Error('Nenhum dado encontrado na planilha. Verifique se o arquivo contém linhas de dados além do cabeçalho.')
+      }
       
       // Verificar se é template padrão
       const isStandard = parsed[0]?.headers ? isStandardTemplateFormat(parsed[0].headers) : false
@@ -174,6 +185,11 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
           let finalMappings: MappedField[] = []
           
           for (const fileData of parsed) {
+            // Verificar se há dados antes de processar
+            if (!fileData.rows || fileData.rows.length === 0) {
+              throw new Error(`Nenhum dado encontrado no arquivo ${fileData.fileName}. Verifique se o arquivo contém linhas de dados além do cabeçalho.`)
+            }
+            
             const response = await fetch('/api/nutri/import/smart-parse', {
               method: 'POST',
               headers: {
