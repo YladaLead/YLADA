@@ -28,12 +28,23 @@ export default function PreencherFormularioPage() {
         const response = await fetch(`/api/public/formularios/${formId}`)
         
         if (!response.ok) {
-          throw new Error('Formulário não encontrado')
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Formulário não encontrado')
         }
 
         const data = await response.json()
         if (data.success && data.data.form) {
           const form = data.data.form
+          
+          console.log('📋 Formulário carregado:', {
+            id: form.id,
+            name: form.name,
+            slug: form.slug,
+            user_slug: form.user_slug,
+            user_area: form.user_area,
+            form_type: form.form_type,
+            short_code: form.short_code
+          })
           
           // Se o formulário tem slug e user_slug, redirecionar para URL amigável
           if (form.slug && form.user_slug) {
@@ -50,15 +61,19 @@ export default function PreencherFormularioPage() {
               redirectUrl = `/pt/c/${form.user_slug}/formulario/${form.slug}`
             }
             
+            console.log('🔄 Redirecionando para URL amigável:', redirectUrl)
             window.location.replace(redirectUrl)
             return
           }
           // Se tem short_code, redirecionar para /p/{code}
           if (form.short_code) {
+            console.log('🔄 Redirecionando para short code:', `/p/${form.short_code}`)
             window.location.replace(`/p/${form.short_code}`)
             return
           }
           
+          // Se não tem slug ou user_slug, renderizar diretamente na página /f/[formId]
+          console.log('📄 Renderizando formulário diretamente (sem redirecionamento)')
           setFormulario(form)
           // Determinar área baseado no perfil do usuário ou form_type
           const userArea = data.data.form.user_area
@@ -82,8 +97,8 @@ export default function PreencherFormularioPage() {
           setRespostas(respostasIniciais)
         }
       } catch (error: any) {
-        console.error('Erro ao carregar formulário:', error)
-        setErro('Formulário não encontrado ou não está mais disponível.')
+        console.error('❌ Erro ao carregar formulário:', error)
+        setErro(error.message || 'Formulário não encontrado ou não está mais disponível.')
       } finally {
         setCarregando(false)
       }
