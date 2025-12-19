@@ -27,6 +27,7 @@ export default function NutriHome() {
 function NutriHomeContent() {
   const { user, loading: authLoading, userProfile } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [lyaChatOpen, setLyaChatOpen] = useState(false)
   const { progress, loading: progressLoading } = useJornadaProgress()
   
   // Verificar se completou Dia 1 (current_day >= 2 ou completed_days >= 1)
@@ -36,24 +37,69 @@ function NutriHomeContent() {
   const currentDay = progress?.current_day || null
   const isFirstDays = currentDay === null || currentDay <= 1
   
-  // Extrair primeiro nome da usuária para saudação personalizada
-  const getUserFirstName = () => {
+  // Extrair nome da usuária para saudação personalizada
+  // Priorizar nome completo do perfil, depois metadata, depois email
+  const getUserName = () => {
+    // Se tem nome completo no perfil, usar ele (pode ter "Dra." já)
     if (userProfile?.nome_completo) {
-      return userProfile.nome_completo.split(' ')[0]
+      const nome = userProfile.nome_completo.trim()
+      // Se já tem "Dra." ou "Dra ", retornar como está
+      if (nome.toLowerCase().startsWith('dra.')) {
+        return nome
+      }
+      // Se não tem, pegar primeiro nome e adicionar "Dra."
+      const primeiroNome = nome.split(' ')[0]
+      return primeiroNome ? `Dra. ${primeiroNome}` : null
     }
+    // Tentar metadata
     if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name.split(' ')[0]
+      const nome = user.user_metadata.full_name.trim()
+      if (nome.toLowerCase().startsWith('dra.')) {
+        return nome
+      }
+      const primeiroNome = nome.split(' ')[0]
+      return primeiroNome ? `Dra. ${primeiroNome}` : null
     }
     if (user?.user_metadata?.name) {
-      return user.user_metadata.name.split(' ')[0]
+      const nome = user.user_metadata.name.trim()
+      if (nome.toLowerCase().startsWith('dra.')) {
+        return nome
+      }
+      const primeiroNome = nome.split(' ')[0]
+      return primeiroNome ? `Dra. ${primeiroNome}` : null
     }
+    // Fallback: email
     if (user?.email) {
-      return user.email.split('@')[0]
+      const emailPart = user.email.split('@')[0]
+      return emailPart ? `Dra. ${emailPart}` : null
     }
     return null
   }
   
-  const userName = getUserFirstName()
+  const userName = getUserName()
+  
+  // Função para abrir o chat LYA
+  const handleOpenLyaChat = () => {
+    setLyaChatOpen(true)
+    // Disparar evento para o widget ou tentar clicar no botão
+    setTimeout(() => {
+      const lyaButton = document.querySelector('button[aria-label="Abrir chat com Mentora LYA"]') as HTMLButtonElement
+      if (lyaButton) {
+        lyaButton.click()
+      }
+    }, 100)
+  }
+  
+  // Listener para evento customizado
+  useEffect(() => {
+    const handleOpenLya = () => {
+      handleOpenLyaChat()
+    }
+    window.addEventListener('open-lya-chat', handleOpenLya)
+    return () => {
+      window.removeEventListener('open-lya-chat', handleOpenLya)
+    }
+  }, [])
 
   // Aguardar autenticação E progresso da jornada (evita flash do Dia 1)
   if (authLoading || progressLoading) {
@@ -103,7 +149,7 @@ function NutriHomeContent() {
           {/* 🚨 REVELAÇÃO PROGRESSIVA: Conteúdo aparece quando faz sentido */}
           
           {/* Sempre visível: WelcomeCard e LyaAnaliseHoje */}
-          <WelcomeCard currentDay={currentDay} userName={userName} />
+          <WelcomeCard currentDay={currentDay} userName={userName} onOpenLyaChat={handleOpenLyaChat} />
           <div className="mb-8">
             <LyaAnaliseHoje />
           </div>

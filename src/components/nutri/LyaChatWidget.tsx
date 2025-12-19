@@ -27,6 +27,19 @@ export default function LyaChatWidget() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+  
+  // Listener para evento customizado de abrir chat
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setIsOpen(true)
+      setIsMinimized(false)
+    }
+    
+    window.addEventListener('open-lya-chat', handleOpenChat)
+    return () => {
+      window.removeEventListener('open-lya-chat', handleOpenChat)
+    }
+  }, [])
 
   // Mensagem inicial quando abre
   useEffect(() => {
@@ -194,6 +207,7 @@ export default function LyaChatWidget() {
         className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg z-50 transition-all group flex items-center gap-2 px-4 py-3"
         aria-label="Abrir chat com Mentora LYA"
         title="Falar com a Mentora LYA"
+        data-lya-widget="true"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />

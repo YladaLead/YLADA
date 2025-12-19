@@ -8,23 +8,45 @@ import Link from 'next/link'
 interface WelcomeCardProps {
   currentDay: number | null
   userName?: string | null
+  onOpenLyaChat?: () => void
 }
 
-export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) {
+export default function WelcomeCard({ currentDay, userName, onOpenLyaChat }: WelcomeCardProps) {
   const router = useRouter()
   const { progress } = useJornadaProgress()
   
   const phase = getLyaPhase(currentDay)
   const lyaConfig = getLyaConfig(phase)
   
+  // Função para abrir o widget LYA
+  const handleOpenLyaChat = () => {
+    if (onOpenLyaChat) {
+      onOpenLyaChat()
+    } else {
+      // Fallback: tentar encontrar o botão do widget LYA
+      const lyaButton = document.querySelector('button[aria-label="Abrir chat com Mentora LYA"]') as HTMLButtonElement
+      if (lyaButton) {
+        lyaButton.click()
+      } else {
+        // Se não encontrar, tentar disparar evento customizado
+        window.dispatchEvent(new CustomEvent('open-lya-chat'))
+      }
+    }
+  }
+  
   // 🎉 JORNADA CONCLUÍDA: Layout simplificado pós-30 dias
   if (currentDay && currentDay > 30) {
+    // Formatar nome com "Dra." se não tiver
+    const displayName = userName 
+      ? (userName.startsWith('Dra.') || userName.startsWith('Dra ') ? userName : `Dra. ${userName}`)
+      : 'Dra.'
+    
     return (
       <div className="mb-8">
         {/* Saudação simples */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Olá{userName ? `, ${userName}` : ''} 👋
+            Olá, {displayName} 👋
           </h1>
           <p className="text-gray-600 mt-1">
             A LYA está aqui para você 💜
@@ -40,11 +62,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
               <p className="text-sm text-gray-600">Estou aqui para qualquer dúvida ou desafio!</p>
             </div>
             <button
-              onClick={() => {
-                // Abrir widget da LYA
-                const lyaButton = document.querySelector('[data-lya-widget]') as HTMLButtonElement
-                if (lyaButton) lyaButton.click()
-              }}
+              onClick={handleOpenLyaChat}
               className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
             >
               Conversar
@@ -132,11 +150,13 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
         {/* Conteúdo */}
         <div className="relative z-10">
           {/* Saudação personalizada com nome */}
-          {userName && (
-            <p className="text-xl sm:text-2xl text-blue-50 mb-4">
-              Olá, <span className="font-semibold text-white">{userName}</span> 👋
-            </p>
-          )}
+          <p className="text-xl sm:text-2xl text-blue-50 mb-4">
+            Olá, <span className="font-semibold text-white">
+              {userName 
+                ? (userName.startsWith('Dra.') || userName.startsWith('Dra ') ? userName : `Dra. ${userName}`)
+                : 'Dra.'}
+            </span> 👋
+          </p>
           
           {/* Badge da LYA */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
