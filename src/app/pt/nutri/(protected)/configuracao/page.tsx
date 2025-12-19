@@ -288,12 +288,24 @@ function NutriConfiguracaoContent() {
 
       console.log('✅ Perfil Nutri salvo com sucesso:', responseData)
 
+      // Invalidar cache do perfil para forçar atualização
+      if (typeof window !== 'undefined' && user?.id) {
+        const cacheKey = `user_profile_${user.id}`
+        sessionStorage.removeItem(cacheKey)
+        console.log('🗑️ Cache do perfil invalidado')
+      }
+
       // Salvar com sucesso!
       setSalvoComSucesso(true)
       setErro(null)
       
       // Recarregar dados do perfil após salvar
       await carregarPerfil()
+      
+      // Forçar reload da página após 500ms para atualizar o nome na home
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
       
       // Mostrar mensagem de sucesso por mais tempo (8 segundos)
       setTimeout(() => setSalvoComSucesso(false), 8000)
