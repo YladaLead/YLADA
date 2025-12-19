@@ -257,3 +257,4 @@ export default function TabelaEvolucao({ evolucoes }: TabelaEvolucaoProps) {
     </div>
   )
 }
+

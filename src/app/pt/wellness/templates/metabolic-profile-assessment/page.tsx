@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { perfilMetabolicoDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Avaliação de Perfil Metabólico"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="⚡ Quer otimizar seu metabolismo?"
+              beneficios={[
+                'Plano nutricional para acelerar metabolismo',
+                'Estratégias para queima de gordura eficiente',
+                'Suplementação adequada, se necessário',
+                'Acompanhamento de resultados e ajustes'
+              ]}
             />
 
             <WellnessActionButtons

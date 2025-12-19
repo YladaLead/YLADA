@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { guiaHidratacaoDiagnosticos } from '@/lib/diagnostics'
@@ -455,9 +455,17 @@ export default function GuiaHidratacao({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Hidratação: ${resultado.nivelHidratacao === 'baixaHidratacao' ? 'Baixa' : resultado.nivelHidratacao === 'hidratacaoModerada' ? 'Moderada' : 'Alta'} | Necessidade: ${resultado.necessidadeAgua}L/dia`}
+              ferramenta="Guia de Hidratação"
+              resultadoTexto={`Nível: ${resultado.nivelHidratacao === 'baixaHidratacao' ? 'Baixa' : resultado.nivelHidratacao === 'hidratacaoModerada' ? 'Moderada' : 'Alta'} | ${resultado.necessidadeAgua}L/dia`}
+              mensagemConvite="💧 Quer dominar a arte da hidratação?"
+              beneficios={[
+                'Plano de hidratação estratégico personalizado',
+                'Orientações sobre tipos de água e eletrólitos',
+                'Cronograma adaptado à sua rotina',
+                'Impacto positivo em energia, pele e saúde'
+              ]}
             />
 
             <WellnessActionButtons

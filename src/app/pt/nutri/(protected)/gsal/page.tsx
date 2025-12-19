@@ -11,9 +11,7 @@ import Section from '@/components/shared/Section'
 import Card from '@/components/shared/Card'
 import KPICard from '@/components/shared/KPICard'
 import PrimaryButton from '@/components/shared/PrimaryButton'
-import RotinaMinimaChecklist from '@/components/nutri/RotinaMinimaChecklist'
 import AttachToolModal from '@/components/gsal/AttachToolModal'
-import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 
 export default function GSALPage() {
   return <GSALPageContent />
@@ -164,70 +162,15 @@ function GSALPageContent() {
               title="📊 Gestão de Clientes"
               subtitle="GSAL: Gerar, Servir, Acompanhar, Lucrar"
             >
-              {/* Explicação clara do GSAL */}
+              {/* Explicação simples do GSAL - Versão MVP */}
               <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                <p className="text-sm text-gray-800 mb-2">
-                  <strong>💡 O que é GSAL?</strong>
+                <p className="text-sm text-gray-800 mb-3">
+                  <strong>💡 GSAL</strong> é como você organiza sua gestão: <strong>Gerar</strong> oportunidades, <strong>Servir</strong> com valor, <strong>Acompanhar</strong> evolução e <strong>Lucrar</strong> de forma organizada.
                 </p>
-                <p className="text-sm text-gray-700 mb-3 leading-relaxed">
-                  GSAL é o jeito YLADA de organizar sua gestão de clientes em 4 etapas:
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                  <div className="flex items-start gap-2">
-                    <span className="text-green-600 font-bold">G</span>
-                    <div>
-                      <strong className="text-gray-800">Gerar</strong>
-                      <p className="text-xs text-gray-600">Fazer oportunidades aparecerem todo dia</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-green-600 font-bold">S</span>
-                    <div>
-                      <strong className="text-gray-800">Servir</strong>
-                      <p className="text-xs text-gray-600">Ajudar de verdade antes de vender</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-green-600 font-bold">A</span>
-                    <div>
-                      <strong className="text-gray-800">Acompanhar</strong>
-                      <p className="text-xs text-gray-600">Transformar interesse em cliente</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-green-600 font-bold">L</span>
-                    <div>
-                      <strong className="text-gray-800">Lucrar</strong>
-                      <p className="text-xs text-gray-600">Organizar sua agenda para crescer</p>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 italic border-t border-green-200 pt-3">
-                  💬 <strong>Dúvida?</strong> Pergunte para a LYA: "Como usar o GSAL?" ou "Preciso de ajuda com gestão de clientes"
+                <p className="text-xs text-gray-600 italic">
+                  💬 Dúvidas? Pergunte para a LYA: "Como usar o GSAL?"
                 </p>
               </div>
-              {/* Vídeo 4 — GSAL */}
-              <div className="mb-6">
-                <VideoPlayerYLADA
-                  videoUrl={process.env.NEXT_PUBLIC_VIDEO_GSAL}
-                  title="GSAL — Gestão Simplificada"
-                  description="Aprenda a usar o GSAL para gerenciar seus clientes de forma simples e eficiente."
-                />
-              </div>
-
-              {/* Rotina Mínima (Checklist Diário) */}
-              <Card className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">⚡ Rotina Mínima YLADA</h3>
-                    <p className="text-sm text-gray-600">Checklist diário para manter sua rotina organizada</p>
-                  </div>
-                  <PrimaryButton href="/pt/nutri/metodo/painel/diario">
-                    Abrir Painel Diário
-                  </PrimaryButton>
-                </div>
-                <RotinaMinimaChecklist />
-              </Card>
 
               {/* Painel Resumo (KPIs) */}
               <Card className="mb-6">
@@ -286,8 +229,15 @@ function GSALPageContent() {
                 </div>
               </Card>
 
-              {/* Links Rápidos */}
+              {/* Links Rápidos - MVP */}
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Link
+                  href="/pt/nutri/leads"
+                  className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow text-center"
+                >
+                  <div className="text-3xl mb-2">🎯</div>
+                  <p className="font-medium text-gray-900">Leads</p>
+                </Link>
                 <Link
                   href="/pt/nutri/clientes"
                   className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow text-center"
@@ -308,13 +258,6 @@ function GSALPageContent() {
                 >
                   <div className="text-3xl mb-2">📊</div>
                   <p className="font-medium text-gray-900">Acompanhamento</p>
-                </Link>
-                <Link
-                  href="/pt/nutri/relatorios-gestao"
-                  className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow text-center"
-                >
-                  <div className="text-3xl mb-2">📈</div>
-                  <p className="font-medium text-gray-900">Métricas</p>
                 </Link>
               </div>
             </Section>

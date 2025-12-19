@@ -551,3 +551,4 @@ interface CostMetrics {
 **TL;DR:** GPT-4o-mini é suficiente para 80% dos casos. Use sistema híbrido 
 para ter o melhor dos dois mundos: qualidade nos momentos críticos + custo 
 controlado no dia a dia. 🎯
+

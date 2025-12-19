@@ -265,3 +265,4 @@ Para dúvidas ou problemas, consulte:
 **Implementado com ❤️ para YLADA - Sistema de Gestão para Nutricionistas**
 
 *Data: 18 de Dezembro de 2025*
+

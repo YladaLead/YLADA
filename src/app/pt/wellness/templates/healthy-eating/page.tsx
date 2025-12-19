@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -270,9 +270,17 @@ export default function QuizAlimentacao({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`${resultado.perfil} (Score: ${resultado.score}/12) - ${resultado.descricao}`}
+              ferramenta="Alimentação Saudável"
+              resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
+              mensagemConvite="🥗 Quer transformar sua alimentação?"
+              beneficios={[
+                'Plano alimentar saudável e prático',
+                'Receitas simples e nutritivas',
+                'Educação nutricional personalizada',
+                'Mudanças sustentáveis e duradouras'
+              ]}
             />
 
             <WellnessActionButtons

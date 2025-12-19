@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import { getDiagnostico, DiagnosticoCompleto } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -175,7 +175,18 @@ export default function StoryInterativo({ config }: TemplateBaseProps) {
               </div>
             )}
 
-            <WellnessCTAButton config={config} resultadoTexto={`Nível: ${resultado.nivel}`} />
+            <LeadCapturePostResult
+              config={config}
+              ferramenta="Story Interativo"
+              resultadoTexto={`Nível: ${resultado.nivel}`}
+              mensagemConvite="📖 Quer continuar sua jornada de transformação?"
+              beneficios={[
+                'História personalizada para seu momento',
+                'Conteúdo exclusivo adaptado ao seu perfil',
+                'Acompanhamento da sua evolução',
+                'Novos capítulos conforme progresso'
+              ]}
+            />
           </div>
         )}
       </main>

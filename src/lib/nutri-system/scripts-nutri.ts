@@ -1490,3 +1490,4 @@ export function getScriptsNutriPorTipo(config: ScriptsNutriConfig): {
     indicacao: config.scripts.filter(s => s.tipo === 'indicacao')
   }
 }
+

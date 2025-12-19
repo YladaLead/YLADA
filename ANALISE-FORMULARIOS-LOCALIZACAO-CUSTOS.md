@@ -417,3 +417,4 @@ Modificar `NutriSidebar.tsx`:
 **Custo Total Estimado (100 nutricionistas):** R$ 500-1.250/mês
 **Economia vs Typeform:** R$ 2.000+/mês
 **ROI:** 4x-8x positivo! 🎉
+

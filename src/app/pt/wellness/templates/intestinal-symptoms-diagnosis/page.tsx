@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { sintomasIntestinaisDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function DiagnosticoSintomasIntestinais({ config }: TemplateBaseP
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Diagnóstico de Sintomas Intestinais"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🩺 Quer melhorar sua saúde intestinal?"
+              beneficios={[
+                'Plano alimentar para saúde digestiva',
+                'Identificação de possíveis alergias/intolerâncias',
+                'Protocolo de suplementação, se necessário',
+                'Estratégias para reduzir desconfortos'
+              ]}
             />
 
             <WellnessActionButtons

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { nutridoVsAlimentadoDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function VoceNutridoOuApenasAlimentado({ config }: TemplateBasePr
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Nutrido vs Alimentado"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🌱 Quer se sentir verdadeiramente nutrido?"
+              beneficios={[
+                'Plano nutricional focado em nutrição real',
+                'Educação sobre escolhas alimentares conscientes',
+                'Estratégias para deixar dietas restritivas',
+                'Transformação sustentável da sua relação com comida'
+              ]}
             />
 
             <WellnessActionButtons

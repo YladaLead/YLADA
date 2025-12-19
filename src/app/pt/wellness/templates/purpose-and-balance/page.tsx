@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { propositoEquilibrioDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function QuizPropositoEquilibrio({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Propósito e Equilíbrio"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🎯 Quer encontrar seu propósito e equilíbrio?"
+              beneficios={[
+                'Orientações personalizadas para seu propósito de vida',
+                'Estratégias para equilibrar todas as áreas',
+                'Plano de ação adaptado aos seus valores',
+                'Acompanhamento holístico'
+              ]}
             />
 
             <WellnessActionButtons

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -255,9 +255,17 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`${resultado.aguaDiaria}L de água/dia (${resultado.copos} copos) - ${resultado.interpretacao}`}
+              ferramenta="Calculadora de Hidratação"
+              resultadoTexto={`${resultado.aguaDiaria}L de água/dia (${resultado.copos} copos)`}
+              mensagemConvite="💧 Quer um plano completo de hidratação personalizado?"
+              beneficios={[
+                'Cronograma de hidratação adaptado à sua rotina',
+                'Dicas para criar lembretes personalizados',
+                'Ajustes conforme treino e clima',
+                'Melhorar pele, energia e desempenho físico'
+              ]}
             />
 
             <WellnessActionButtons

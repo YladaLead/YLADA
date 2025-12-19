@@ -543,3 +543,4 @@ export function getScriptsPorTipo(config: ScriptsFerramentaConfig): {
     indicacao: config.scripts.filter(s => s.tipo === 'indicacao')
   }
 }
+

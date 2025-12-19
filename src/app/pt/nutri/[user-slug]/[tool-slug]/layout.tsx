@@ -36,6 +36,19 @@ async function fetchToolFromSupabase(userSlug: string, toolSlug: string) {
   }
 
   try {
+    // Primeiro buscar o user_id pelo user_slug
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_id')
+      .eq('user_slug', userSlug)
+      .maybeSingle()
+
+    if (!profile) {
+      console.error('[OG Metadata] User profile not found:', userSlug)
+      return null
+    }
+
+    // Agora buscar o template pelo user_id
     const { data, error } = await supabaseAdmin
       .from('user_templates')
       .select(
@@ -43,11 +56,10 @@ async function fetchToolFromSupabase(userSlug: string, toolSlug: string) {
         id,
         title,
         description,
-        template_slug,
-        user_profiles!inner(user_slug)
+        template_slug
       `
       )
-      .eq('user_profiles.user_slug', userSlug)
+      .eq('user_id', profile.user_id)
       .eq('slug', toolSlug)
       .eq('profession', 'nutri')
       .single()

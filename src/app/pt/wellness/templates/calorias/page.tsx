@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoCalorias {
@@ -378,9 +378,17 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
             </div>
 
             {/* CTA */}
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultado={`${resultado.calorias.toLocaleString('pt-BR')} calorias diárias recomendadas para ${resultado.objetivo === 'perder' ? 'perder peso' : resultado.objetivo === 'manter' ? 'manter peso' : 'ganhar peso'}`}
+              ferramenta="Calculadora de Calorias"
+              resultadoTexto={`${resultado.calorias.toLocaleString('pt-BR')} calorias/dia para ${resultado.objetivo === 'perder' ? 'perder peso' : resultado.objetivo === 'manter' ? 'manter peso' : 'ganhar peso'}`}
+              mensagemConvite="🎯 Quer um plano alimentar completo?"
+              beneficios={[
+                'Cardápio personalizado com as calorias certas',
+                'Distribuição ideal de macronutrientes',
+                'Receitas práticas e saborosas',
+                'Alcançar seu objetivo de forma sustentável'
+              ]}
             />
           </div>
         </div>

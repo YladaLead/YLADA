@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { prontoEmagrecerDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function ProntoEmagrecer({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Pronto para Emagrecer"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🎯 Quer iniciar seu processo de emagrecimento de verdade?"
+              beneficios={[
+                'Plano personalizado para perda de peso sustentável',
+                'Estratégias para vencer bloqueios mentais',
+                'Suporte profissional durante toda jornada',
+                'Foco em mudanças permanentes, não dietas temporárias'
+              ]}
             />
 
             <WellnessActionButtons

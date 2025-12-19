@@ -61,3 +61,4 @@ WHERE tablename IN ('clients', 'programs')
 -- SE TODOS OS STATUS ESTIVEREM "✅ OK"
 -- A MIGRATION FOI EXECUTADA COM SUCESSO!
 -- ==========================================
+

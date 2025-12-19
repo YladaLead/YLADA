@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { checklistAlimentarDiagnosticos } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
@@ -459,9 +459,17 @@ export default function ChecklistAlimentar({ config }: TemplateBaseProps) {
             </div>
 
             {/* Botão CTA */}
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Checklist Alimentar: ${resultado.perfil} (${resultado.score} pontos)`}
+              ferramenta="Checklist Alimentar"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score} pontos)`}
+              mensagemConvite="✅ Quer melhorar ainda mais sua alimentação?"
+              beneficios={[
+                'Plano alimentar personalizado para seus pontos fracos',
+                'Estratégias práticas para implementar no dia a dia',
+                'Lista de alimentos essenciais para sua rotina',
+                'Acompanhamento e ajustes conforme evolução'
+              ]}
             />
 
             {/* Botões de Ação */}

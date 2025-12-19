@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { ganhosProsperidadeDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function QuizGanhosProsperidade({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Ganhos e Prosperidade"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="💰 Quer prosperar em todas as áreas da vida?"
+              beneficios={[
+                'Estratégias para prosperidade integral',
+                'Mindset de abundância e crescimento',
+                'Plano de ação personalizado',
+                'Acompanhamento holístico do progresso'
+              ]}
             />
 
             <WellnessActionButtons

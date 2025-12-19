@@ -492,3 +492,4 @@ Sistema completo de avaliações antropométricas implementado com sucesso, incl
 *Documentação criada em: 18 de Dezembro de 2025*
 *Desenvolvedor: Claude Sonnet 4.5*
 *Projeto: YLADA - Área Nutri*
+

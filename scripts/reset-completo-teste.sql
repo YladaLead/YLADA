@@ -70,3 +70,4 @@ GROUP BY up.email, up.diagnostico_completo, nd.user_id;
 
 
 
+

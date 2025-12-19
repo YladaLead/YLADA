@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { quizBemEstarDiagnosticos } from '@/lib/diagnostics'
@@ -321,9 +321,17 @@ export default function QuizPerfilBemestar({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`${resultado.perfil} (Score: ${resultado.score}/12) - ${resultado.descricao}`}
+              ferramenta="Perfil Wellness"
+              resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
+              mensagemConvite="✨ Quer elevar seu bem-estar ao próximo nível?"
+              beneficios={[
+                'Plano integrado de nutrição e bem-estar',
+                'Estratégias holísticas personalizadas',
+                'Orientações sobre estilo de vida saudável',
+                'Acompanhamento completo de bem-estar'
+              ]}
             />
 
             <WellnessActionButtons

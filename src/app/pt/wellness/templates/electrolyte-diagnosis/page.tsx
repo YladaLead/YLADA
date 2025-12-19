@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { eletrolitosDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function DiagnosticoEletrolitos({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Diagnóstico de Eletrólitos"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="⚡ Quer equilibrar seus eletrólitos?"
+              beneficios={[
+                'Plano de suplementação personalizado',
+                'Orientações sobre alimentação rica em minerais',
+                'Prevenção de cãibras e fadiga',
+                'Melhorar hidratação e desempenho físico'
+              ]}
             />
 
             <WellnessActionButtons

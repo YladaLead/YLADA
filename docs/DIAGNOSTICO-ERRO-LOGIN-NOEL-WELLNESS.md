@@ -493,3 +493,4 @@ O código estava enviando a string `'new'` como `threadId` quando não havia thr
 
 
 
+

@@ -157,6 +157,7 @@ function FormDropZone({ children }: { children: React.ReactNode }) {
   return (
     <div
       ref={setNodeRef}
+      data-drop-zone
       className={`min-h-[400px] transition-colors ${
         isOver ? 'bg-blue-50 border-blue-300' : 'bg-white'
       } border-2 border-dashed border-gray-200 rounded-lg p-6`}
@@ -633,6 +634,8 @@ function NovoFormularioNutriContent() {
     }
 
     const campoExistente = fields.findIndex(f => f.id === fieldEditando.id)
+    const isNovoCampo = campoExistente < 0
+    
     if (campoExistente >= 0) {
       const novosFields = [...fields]
       novosFields[campoExistente] = fieldEditando
@@ -643,6 +646,19 @@ function NovoFormularioNutriContent() {
 
     setFieldEditando(null)
     setMostrarModalCampo(false)
+    
+    // Scroll suave para o final da área de drop após adicionar novo campo
+    if (isNovoCampo) {
+      setTimeout(() => {
+        const dropZone = document.querySelector('[data-drop-zone]')
+        if (dropZone) {
+          const lastField = dropZone.lastElementChild
+          if (lastField) {
+            lastField.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }
+      }, 150)
+    }
   }
 
   const editarCampo = (campo: Field) => {
@@ -1024,6 +1040,18 @@ function NovoFormularioNutriContent() {
                           />
                         ))}
                       </SortableContext>
+                      
+                      {/* Área visual para arrastar próximo campo */}
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50/30 transition-all">
+                        <div className="text-center text-gray-400">
+                          <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                          </svg>
+                          <p className="text-sm font-medium">Arraste mais campos aqui</p>
+                          <p className="text-xs mt-1">ou clique duas vezes no componente →</p>
+                        </div>
+                      </div>
+                      
                       <div className="pt-4 border-t border-gray-200">
                         <button
                           type="button"

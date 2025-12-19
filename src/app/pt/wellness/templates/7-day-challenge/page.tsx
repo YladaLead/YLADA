@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { desafio7DiasDiagnosticos } from '@/lib/diagnostics'
@@ -380,9 +380,17 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Desafio: ${resultado.nivelDesafio === 'desafioBasico' ? 'Básico' : resultado.nivelDesafio === 'desafioModerado' ? 'Moderado' : 'Avançado'} | Objetivo: ${dados.objetivo}`}
+              ferramenta="Desafio 7 Dias"
+              resultadoTexto={`Nível: ${resultado.nivelDesafio === 'desafioBasico' ? 'Básico' : resultado.nivelDesafio === 'desafioModerado' ? 'Moderado' : 'Avançado'} | Objetivo: ${dados.objetivo}`}
+              mensagemConvite="🎯 Quer continuar evoluindo após o desafio?"
+              beneficios={[
+                'Plano de continuidade personalizado',
+                'Novos desafios para manter motivação',
+                'Acompanhamento profissional dos resultados',
+                'Ajustes conforme sua evolução'
+              ]}
             />
 
             <WellnessActionButtons

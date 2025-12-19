@@ -191,19 +191,26 @@ IMPORTANTE: Use linguagem natural e seja proativa em sugerir estas funcionalidad
 
 ## 📝 Templates Pré-definidos
 
-Foram criados 2 templates prontos:
+Foram criados 3 templates essenciais:
 
-1. **Anamnese Nutricional Básica** (25 campos)
-   - Dados pessoais
-   - Histórico de saúde
-   - Hábitos alimentares
+1. **Anamnese Nutricional Básica** (24 campos)
+   - Dados pessoais completos
+   - Histórico de saúde e medicamentos
+   - Hábitos alimentares e atividade física
    - Objetivo nutricional
 
 2. **Recordatório Alimentar 24h** (22 campos)
    - Registro detalhado de todas as refeições
-   - Horários
-   - Quantidades
-   - Observações
+   - Horários de cada refeição
+   - Quantidades e observações
+   - Consumo de água e suplementos
+
+3. **Acompanhamento Semanal** (20 campos)
+   - Peso e medidas corporais
+   - Aderência ao plano alimentar
+   - Dificuldades encontradas
+   - Qualidade do sono e níveis de ansiedade
+   - Sintomas e evolução
 
 ### Como Usar os Templates
 
@@ -388,3 +395,4 @@ Para expandir ainda mais:
 ---
 
 **🎉 Sistema pronto para uso! A LYA agora é uma assistente inteligente completa para gestão de formulários.**
+

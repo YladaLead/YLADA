@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { avaliacaoInicialDiagnosticos } from '@/lib/diagnostics'
@@ -347,9 +347,17 @@ export default function AvaliacaoInicial({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Avaliação Inicial"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🎯 Quer um plano personalizado baseado na sua avaliação?"
+              beneficios={[
+                'Plano nutricional completo adaptado ao seu perfil',
+                'Estratégias específicas para seus objetivos',
+                'Acompanhamento profissional personalizado',
+                'Ajustes conforme sua evolução'
+              ]}
             />
 
             <WellnessActionButtons

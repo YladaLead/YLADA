@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -295,9 +295,17 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
                 </ul>
               </div>
 
-              <WellnessCTAButton
+              <LeadCapturePostResult
                 config={config}
+                ferramenta="Calculadora de IMC"
                 resultadoTexto={`IMC: ${resultado.imc} - ${resultado.categoria}`}
+                mensagemConvite="✨ Quer alcançar seu peso ideal?"
+                beneficios={[
+                  'Plano alimentar personalizado para seu objetivo',
+                  'Estratégias para perder peso de forma saudável',
+                  'Acompanhamento nutricional profissional',
+                  'Manter resultados de forma sustentável'
+                ]}
               />
             </div>
 

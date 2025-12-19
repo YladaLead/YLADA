@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { tipoFomeDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function TipoFome({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Quiz Tipo de Fome"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🧠 Quer controlar sua relação com a comida?"
+              beneficios={[
+                'Estratégias para identificar fome real vs emocional',
+                'Técnicas de mindful eating personalizadas',
+                'Plano para reduzir compulsões alimentares',
+                'Acompanhamento comportamental'
+              ]}
             />
 
             <WellnessActionButtons

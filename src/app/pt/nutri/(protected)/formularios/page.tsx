@@ -228,6 +228,94 @@ function FormulariosNutriContent() {
             </div>
           </div>
 
+          {/* Lista de Formulários do Usuário */}
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Meus Formulários</h2>
+            <p className="text-sm text-gray-600 mt-1">Formulários que você criou</p>
+          </div>
+
+          {formularios.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {formularios.map((form) => (
+                <div
+                  key={form.id}
+                  className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{form.name}</h3>
+                      {form.description && (
+                        <p className="text-sm text-gray-600 mb-3">{form.description}</p>
+                      )}
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTipoColor(form.form_type)}`}>
+                        {getTipoLabel(form.form_type)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 mb-4">
+                    {form.structure?.fields?.length || 0} {form.structure?.fields?.length === 1 ? 'campo' : 'campos'}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}`)}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}/respostas`)}
+                        className="relative flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                      >
+                        Respostas
+                        {form.unread_responses > 0 && (
+                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
+                            {form.unread_responses > 9 ? '9+' : form.unread_responses}
+                          </span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}/enviar`)}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                      >
+                        Enviar
+                      </button>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        compartilharWhatsApp(form)
+                      }}
+                      className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <span className="text-lg">💬</span>
+                      Compartilhar no WhatsApp
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum formulário encontrado</h3>
+              <p className="text-gray-600 mb-6">
+                {filtroTipo !== 'todos'
+                  ? 'Tente ajustar os filtros'
+                  : 'Comece criando seu primeiro formulário personalizado'}
+              </p>
+              <Link
+                href="/pt/nutri/formularios/novo"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                <span>➕</span>
+                Criar Primeiro Formulário
+              </Link>
+            </div>
+          )}
+
           {/* Seção de Formulários Pré-montados */}
           {mostrarTemplates && templates.length > 0 && (
             <div className="mb-8">
@@ -291,94 +379,6 @@ function FormulariosNutriContent() {
               >
                 Mostrar formulários pré-montados ({templates.length})
               </button>
-            </div>
-          )}
-
-          {/* Lista de Formulários do Usuário */}
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Meus Formulários</h2>
-            <p className="text-sm text-gray-600 mt-1">Formulários que você criou</p>
-          </div>
-
-          {formularios.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {formularios.map((form) => (
-                <div
-                  key={form.id}
-                  className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{form.name}</h3>
-                      {form.description && (
-                        <p className="text-sm text-gray-600 mb-3">{form.description}</p>
-                      )}
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTipoColor(form.form_type)}`}>
-                        {getTipoLabel(form.form_type)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="text-xs text-gray-500 mb-4">
-                    {form.structure?.fields?.length || 0} {form.structure?.fields?.length === 1 ? 'campo' : 'campos'}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}`)}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}/respostas`)}
-                        className="relative flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                      >
-                        Respostas
-                        {form.unread_responses > 0 && (
-                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
-                            {form.unread_responses > 9 ? '9+' : form.unread_responses}
-                          </span>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => router.push(`/pt/nutri/formularios/${form.id}/enviar`)}
-                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                      >
-                        Enviar
-                      </button>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        compartilharWhatsApp(form)
-                      }}
-                      className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      <span className="text-lg">💬</span>
-                      Compartilhar no WhatsApp
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum formulário encontrado</h3>
-              <p className="text-gray-600 mb-6">
-                {filtroTipo !== 'todos'
-                  ? 'Tente ajustar os filtros'
-                  : 'Comece criando seu primeiro formulário personalizado'}
-              </p>
-              <Link
-                href="/pt/nutri/formularios/novo"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                <span>➕</span>
-                Criar Primeiro Formulário
-              </Link>
             </div>
           )}
         </div>

@@ -36,17 +36,22 @@ Implementação completa da integração inteligente entre o sistema de formulá
 - `src/app/pt/nutri/(protected)/formularios/page.tsx`
 
 ### 4. **Templates Pré-definidos** 📄
-Criação de 2 templates profissionais:
+Criação de 3 templates essenciais:
 
 #### Template 1: Anamnese Nutricional Básica
-- 25 campos completos
+- 24 campos completos
 - Dados pessoais, histórico de saúde, hábitos alimentares
 - Pronto para uso imediato
 
 #### Template 2: Recordatório Alimentar 24h
 - 22 campos detalhados
-- Registro de todas as refeições
+- Registro de todas as refeições do dia
 - Análise de consumo completa
+
+#### Template 3: Acompanhamento Semanal
+- 20 campos focados em evolução
+- Peso, medidas, aderência ao plano
+- Dificuldades e sintomas
 
 **Arquivo criado:**
 - `migrations/inserir-templates-formularios.sql`
@@ -217,7 +222,7 @@ Todas as implementações seguem as melhores práticas:
 ### Teste 6: Templates
 1. Execute migração: `migrations/inserir-templates-formularios.sql`
 2. Acesse página de formulários
-3. ✅ Devem aparecer 2 templates na seção "Formulários Pré-montados"
+3. ✅ Devem aparecer 3 templates na seção "Formulários Pré-montados"
 
 ---
 
@@ -227,7 +232,7 @@ Todas as implementações seguem as melhores práticas:
 - **7 arquivos novos criados**
 - **6 arquivos modificados**
 - **3 APIs da LYA criadas**
-- **2 templates profissionais**
+- **3 templates essenciais**
 - **1 documentação completa**
 
 **Linhas de código:** ~2.500 linhas
@@ -313,3 +318,4 @@ A LYA agora é uma verdadeira assistente para gestão de formulários, capaz de:
 ---
 
 **Desenvolvido com ❤️ para o Projeto YLADA**
+

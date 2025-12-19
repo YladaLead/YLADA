@@ -359,3 +359,4 @@ Se algo não funcionar:
 **Criado em:** 2025-12-18  
 **Versão:** 1.0  
 **Compatível com:** YLADA Nutri Platform v2.0+
+

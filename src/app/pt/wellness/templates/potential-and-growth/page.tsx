@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { potencialCrescimentoDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function QuizPotencialCrescimento({ config }: TemplateBaseProps) 
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Potencial e Crescimento"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🌱 Quer desbloquear todo seu potencial?"
+              beneficios={[
+                'Plano de desenvolvimento pessoal personalizado',
+                'Estratégias para superar limitações',
+                'Identificação de talentos e oportunidades',
+                'Acompanhamento de crescimento contínuo'
+              ]}
             />
 
             <WellnessActionButtons

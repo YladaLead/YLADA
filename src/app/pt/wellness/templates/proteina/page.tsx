@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -331,9 +331,17 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`${resultado.proteinaDiaria}g de proteína/dia - ${resultado.interpretacao}`}
+              ferramenta="Calculadora de Proteína"
+              resultadoTexto={`${resultado.proteinaDiaria}g de proteína/dia`}
+              mensagemConvite="💪 Quer otimizar sua ingestão de proteínas?"
+              beneficios={[
+                'Cardápio personalizado com fontes de proteína ideais',
+                'Distribuição estratégica ao longo do dia',
+                'Suplementação adequada, se necessário',
+                'Alcançar seus objetivos de forma mais rápida'
+              ]}
             />
 
             <WellnessActionButtons

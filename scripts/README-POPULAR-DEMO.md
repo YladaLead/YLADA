@@ -289,3 +289,4 @@ Duplique um dos casos e altere:
 **Criado em:** 2025-12-18  
 **Versão:** 1.0  
 **Compatível com:** Supabase PostgreSQL 15+
+

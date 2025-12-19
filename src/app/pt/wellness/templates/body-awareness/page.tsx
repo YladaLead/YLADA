@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { conheceSeuCorpoDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function VoceConheceSeuCorpo({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Consciência Corporal"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🧘 Quer melhorar sua conexão com seu corpo?"
+              beneficios={[
+                'Orientações para desenvolver consciência corporal',
+                'Estratégias de nutrição intuitiva',
+                'Técnicas para reconhecer sinais de fome e saciedade',
+                'Acompanhamento para mudança de hábitos sustentável'
+              ]}
             />
 
             <WellnessActionButtons

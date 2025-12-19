@@ -1,17 +1,19 @@
 -- =====================================================
 -- MIGRAÇÃO: Inserir Templates de Formulários
 -- Data: 2025-01-18
+-- Atualização: 2025-12-18 - Reduzido para 3 templates essenciais
 -- =====================================================
--- Templates pré-definidos para nutricionistas:
--- 1. Anamnese Básica
+-- Templates essenciais para nutricionistas:
+-- 1. Anamnese Nutricional Básica
 -- 2. Recordatório Alimentar 24h
+-- 3. Acompanhamento Semanal
 -- =====================================================
 
 -- Primeiro, vamos verificar se já existem templates com estes nomes
 -- e deletar se existirem (para evitar duplicação)
 DELETE FROM custom_forms 
 WHERE is_template = true 
-AND name IN ('Anamnese Nutricional Básica', 'Recordatório Alimentar 24h');
+AND name IN ('Anamnese Nutricional Básica', 'Recordatório Alimentar 24h', 'Acompanhamento Semanal');
 
 -- =====================================================
 -- TEMPLATE 1: ANAMNESE NUTRICIONAL BÁSICA
@@ -411,6 +413,218 @@ INSERT INTO custom_forms (
   NOW()
 );
 
+-- =====================================================
+-- TEMPLATE 3: ACOMPANHAMENTO SEMANAL
+-- =====================================================
+INSERT INTO custom_forms (
+  id,
+  user_id,
+  name,
+  description,
+  form_type,
+  structure,
+  is_active,
+  is_template,
+  slug,
+  created_at,
+  updated_at
+) VALUES (
+  gen_random_uuid(),
+  (SELECT id FROM auth.users LIMIT 1), -- User padrão do sistema
+  'Acompanhamento Semanal',
+  'Template para acompanhamento semanal ou mensal com evolução de peso, medidas e progresso.',
+  'avaliacao',
+  '{
+    "fields": [
+      {
+        "id": "nome",
+        "type": "text",
+        "label": "Nome",
+        "placeholder": "Digite seu nome",
+        "required": true
+      },
+      {
+        "id": "data_acompanhamento",
+        "type": "date",
+        "label": "Data do Acompanhamento",
+        "required": true
+      },
+      {
+        "id": "peso_atual",
+        "type": "text",
+        "label": "Peso Atual (kg)",
+        "placeholder": "Ex: 70",
+        "required": true
+      },
+      {
+        "id": "circunferencia_cintura",
+        "type": "text",
+        "label": "Circunferência da Cintura (cm)",
+        "placeholder": "Ex: 85",
+        "required": false
+      },
+      {
+        "id": "circunferencia_quadril",
+        "type": "text",
+        "label": "Circunferência do Quadril (cm)",
+        "placeholder": "Ex: 100",
+        "required": false
+      },
+      {
+        "id": "circunferencia_braco",
+        "type": "text",
+        "label": "Circunferência do Braço (cm)",
+        "placeholder": "Ex: 30",
+        "required": false
+      },
+      {
+        "id": "seguiu_plano",
+        "type": "radio",
+        "label": "Você conseguiu seguir o plano alimentar?",
+        "options": [
+          "Sim, segui totalmente",
+          "Segui parcialmente",
+          "Não consegui seguir"
+        ],
+        "required": true
+      },
+      {
+        "id": "dias_seguiu",
+        "type": "text",
+        "label": "Quantos dias da semana você seguiu o plano?",
+        "placeholder": "Ex: 5 de 7 dias",
+        "required": false
+      },
+      {
+        "id": "dificuldades",
+        "type": "checkbox",
+        "label": "Quais dificuldades você encontrou esta semana?",
+        "options": [
+          "Fome entre as refeições",
+          "Ansiedade/compulsão",
+          "Falta de tempo para preparar alimentos",
+          "Compromissos sociais",
+          "Falta de ingredientes",
+          "Enjoou dos alimentos",
+          "Nenhuma dificuldade",
+          "Outra"
+        ],
+        "required": false
+      },
+      {
+        "id": "dificuldades_detalhes",
+        "type": "textarea",
+        "label": "Descreva as dificuldades encontradas",
+        "placeholder": "Detalhe as situações difíceis desta semana",
+        "required": false
+      },
+      {
+        "id": "praticou_exercicio",
+        "type": "yesno",
+        "label": "Praticou atividade física esta semana?",
+        "required": true
+      },
+      {
+        "id": "exercicio_detalhes",
+        "type": "textarea",
+        "label": "Se sim, quais exercícios e quantos dias?",
+        "placeholder": "Ex: Academia 3x, Caminhada 2x",
+        "required": false
+      },
+      {
+        "id": "consumo_agua",
+        "type": "radio",
+        "label": "Como foi seu consumo de água esta semana?",
+        "options": [
+          "Excelente (2L ou mais por dia)",
+          "Bom (1,5 a 2L por dia)",
+          "Regular (menos de 1,5L por dia)",
+          "Ruim (quase não bebi água)"
+        ],
+        "required": true
+      },
+      {
+        "id": "qualidade_sono",
+        "type": "radio",
+        "label": "Como foi a qualidade do seu sono?",
+        "options": [
+          "Excelente",
+          "Boa",
+          "Regular",
+          "Ruim"
+        ],
+        "required": true
+      },
+      {
+        "id": "nivel_ansiedade",
+        "type": "radio",
+        "label": "Como foi seu nível de ansiedade/estresse?",
+        "options": [
+          "Baixo",
+          "Moderado",
+          "Alto",
+          "Muito alto"
+        ],
+        "required": true
+      },
+      {
+        "id": "habito_intestinal",
+        "type": "radio",
+        "label": "Como está seu hábito intestinal?",
+        "options": [
+          "Regular (todos os dias)",
+          "Às vezes constipado",
+          "Às vezes com diarreia",
+          "Irregular"
+        ],
+        "required": true
+      },
+      {
+        "id": "sintomas",
+        "type": "checkbox",
+        "label": "Você sentiu algum destes sintomas esta semana?",
+        "options": [
+          "Dor de cabeça",
+          "Cansaço excessivo",
+          "Inchaço",
+          "Gases",
+          "Náusea",
+          "Tontura",
+          "Nenhum sintoma",
+          "Outro"
+        ],
+        "required": false
+      },
+      {
+        "id": "como_se_sente",
+        "type": "textarea",
+        "label": "Como você está se sentindo em relação ao processo?",
+        "placeholder": "Compartilhe como você se sente com a sua evolução",
+        "required": false
+      },
+      {
+        "id": "duvidas",
+        "type": "textarea",
+        "label": "Tem alguma dúvida ou comentário?",
+        "placeholder": "Perguntas, sugestões ou observações",
+        "required": false
+      },
+      {
+        "id": "fotos_progresso",
+        "type": "yesno",
+        "label": "Você tirou fotos de progresso esta semana?",
+        "required": false,
+        "helpText": "Caso tenha tirado, você pode enviar por WhatsApp ou e-mail"
+      }
+    ]
+  }'::jsonb,
+  true,
+  true,
+  'acompanhamento-semanal',
+  NOW(),
+  NOW()
+);
+
 -- Confirmar inserção
 SELECT 
   id,
@@ -424,4 +638,5 @@ WHERE is_template = true
 ORDER BY created_at DESC;
 
 -- ✅ MIGRAÇÃO COMPLETA
-SELECT '✅ Templates de formulários criados com sucesso!' as status;
+SELECT '✅ 3 Templates essenciais de formulários criados com sucesso!' as status;
+

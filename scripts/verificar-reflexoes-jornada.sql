@@ -47,3 +47,4 @@ SELECT
   qual
 FROM pg_policies 
 WHERE tablename = 'journey_checklist_notes';
+

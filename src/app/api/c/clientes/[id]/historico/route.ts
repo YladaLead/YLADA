@@ -21,3 +21,4 @@ export { GET, POST } from '../../../../coach/clientes/[id]/historico/route'
 
 
 
+

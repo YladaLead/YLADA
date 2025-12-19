@@ -229,3 +229,4 @@ criar um Prompt Object no dashboard da OpenAI e referenciar via `LYA_PROMPT_ID`.
 
 **Atualizado: 18/12/2024**
 **Status: Pronto para produção com limites explícitos** ✅
+

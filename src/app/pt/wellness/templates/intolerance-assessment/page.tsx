@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { intoleranciaDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function AvaliacaoIntolerancia({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Avaliação de Intolerâncias"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="🔍 Quer identificar suas intolerâncias?"
+              beneficios={[
+                'Protocolo de dieta de eliminação personalizado',
+                'Identificação de alimentos gatilho',
+                'Cardápio sem alimentos problemáticos',
+                'Acompanhamento durante processo de investigação'
+              ]}
             />
 
             <WellnessActionButtons

@@ -212,3 +212,4 @@ RETORNE APENAS UM JSON válido (sem markdown, sem explicações) com esta estrut
     )
   }
 }
+

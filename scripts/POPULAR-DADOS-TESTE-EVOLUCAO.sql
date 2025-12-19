@@ -363,3 +363,4 @@ BEGIN
   RAISE NOTICE 'Acesse a área de clientes e veja a evolução de cada um!';
 
 END $$;
+

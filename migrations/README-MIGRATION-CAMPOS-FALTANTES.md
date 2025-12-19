@@ -226,3 +226,4 @@ Após executar esta migration:
 **Última atualização:** 2025-12-18  
 **Autor:** Sistema YLADA  
 **Status:** ✅ Pronto para produção
+

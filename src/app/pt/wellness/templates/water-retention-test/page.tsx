@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
-import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { retencaoLiquidosDiagnosticos } from '@/lib/diagnostics'
@@ -349,9 +349,17 @@ export default function TesteRetencaoLiquidos({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <WellnessCTAButton
+            <LeadCapturePostResult
               config={config}
-              resultadoTexto={`Perfil: ${resultado.perfil} | Pontuação: ${resultado.score}/15`}
+              ferramenta="Teste de Retenção de Líquidos"
+              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              mensagemConvite="💧 Quer reduzir a retenção de líquidos?"
+              beneficios={[
+                'Plano nutricional para desinchar',
+                'Alimentos e estratégias para reduzir edema',
+                'Orientações sobre hidratação adequada',
+                'Acompanhamento personalizado'
+              ]}
             />
 
             <WellnessActionButtons
