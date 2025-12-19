@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
@@ -72,90 +72,85 @@ function NutriAgendaContent() {
     carregarClientes()
   }, [user])
 
-  // Carregar consultas
-  useEffect(() => {
+  // Função para carregar consultas (pode ser chamada externamente)
+  const carregarConsultas = useCallback(async () => {
     if (!user) return
 
-    const carregarConsultas = async () => {
-      try {
-        setCarregando(true)
-        const params = new URLSearchParams()
+    try {
+      setCarregando(true)
+      const params = new URLSearchParams()
+      
+      // Para visualização semanal
+      if (viewMode === 'semanal') {
+        const inicioSemana = new Date(dataAtual)
+        inicioSemana.setDate(dataAtual.getDate() - dataAtual.getDay())
+        inicioSemana.setHours(0, 0, 0, 0)
         
-        // Para visualização semanal
-        if (viewMode === 'semanal') {
-          const inicioSemana = new Date(dataAtual)
-          inicioSemana.setDate(dataAtual.getDate() - dataAtual.getDay())
-          inicioSemana.setHours(0, 0, 0, 0)
-          
-          const fimSemana = new Date(inicioSemana)
-          fimSemana.setDate(inicioSemana.getDate() + 6)
-          fimSemana.setHours(23, 59, 59, 999)
-          
-          params.append('start_date', inicioSemana.toISOString())
-          params.append('end_date', fimSemana.toISOString())
-        } else if (viewMode === 'mensal') {
-          const inicioMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1)
-          const fimMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0, 23, 59, 59)
-          
-          params.append('start_date', inicioMes.toISOString())
-          params.append('end_date', fimMes.toISOString())
-        }
+        const fimSemana = new Date(inicioSemana)
+        fimSemana.setDate(inicioSemana.getDate() + 6)
+        fimSemana.setHours(23, 59, 59, 999)
         
-        if (filtroStatus !== 'todos') {
-          params.append('status', filtroStatus)
-        }
-        if (filtroTipo !== 'todos') {
-          params.append('appointment_type', filtroTipo)
-        }
-        params.append('limit', '200')
-        params.append('order', 'asc')
-
-        const response = await fetch(`/api/nutri/appointments?${params.toString()}`, {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          throw new Error('Erro ao carregar consultas')
-        }
-
-        const data = await response.json()
-        if (data.success) {
-          setConsultas(data.data.appointments || [])
-          
-          // Verificar notificações (consultas próximas em 15 minutos)
-          const agora = new Date()
-          const proximas = (data.data.appointments || []).filter((c: any) => {
-            const inicio = new Date(c.start_time)
-            const diff = (inicio.getTime() - agora.getTime()) / (1000 * 60) // minutos
-            return diff > 0 && diff <= 15 && c.status !== 'concluido' && c.status !== 'cancelado'
-          })
-          setNotificacoes(proximas)
-        }
-      } catch (error: any) {
-        console.error('Erro ao carregar consultas:', error)
-        setErro(error.message || 'Erro ao carregar consultas')
-      } finally {
-        setCarregando(false)
+        params.append('start_date', inicioSemana.toISOString())
+        params.append('end_date', fimSemana.toISOString())
+      } else if (viewMode === 'mensal') {
+        const inicioMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1)
+        const fimMes = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0, 23, 59, 59)
+        
+        params.append('start_date', inicioMes.toISOString())
+        params.append('end_date', fimMes.toISOString())
       }
-    }
+      
+      if (filtroStatus !== 'todos') {
+        params.append('status', filtroStatus)
+      }
+      if (filtroTipo !== 'todos') {
+        params.append('appointment_type', filtroTipo)
+      }
+      params.append('limit', '200')
+      params.append('order', 'asc')
 
-    carregarConsultas()
-    
-    // Verificar notificações a cada minuto
-    const interval = setInterval(() => {
-      if (consultas.length > 0) {
+      const response = await fetch(`/api/nutri/appointments?${params.toString()}`, {
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar consultas')
+      }
+
+      const data = await response.json()
+      if (data.success) {
+        setConsultas(data.data.appointments || [])
+        
+        // Verificar notificações (consultas próximas em 15 minutos)
         const agora = new Date()
-        const proximas = consultas.filter((c: any) => {
+        const proximas = (data.data.appointments || []).filter((c: any) => {
           const inicio = new Date(c.start_time)
-          const diff = (inicio.getTime() - agora.getTime()) / (1000 * 60)
+          const diff = (inicio.getTime() - agora.getTime()) / (1000 * 60) // minutos
           return diff > 0 && diff <= 15 && c.status !== 'concluido' && c.status !== 'cancelado'
         })
         setNotificacoes(proximas)
       }
+    } catch (error: any) {
+      console.error('Erro ao carregar consultas:', error)
+      setErro(error.message || 'Erro ao carregar consultas')
+    } finally {
+      setCarregando(false)
+    }
+  }, [user, viewMode, dataAtual, filtroStatus, filtroTipo])
+
+  // Carregar consultas quando necessário
+  useEffect(() => {
+    carregarConsultas()
+    
+    // Verificar notificações a cada minuto
+    const interval = setInterval(() => {
+      carregarConsultas().then(() => {
+        // Notificações serão atualizadas dentro de carregarConsultas
+      })
     }, 60000)
 
     return () => clearInterval(interval)
-  }, [user, viewMode, dataAtual, filtroStatus, filtroTipo])
+  }, [carregarConsultas])
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -261,8 +256,8 @@ function NutriAgendaContent() {
         throw new Error('Erro ao reagendar consulta')
       }
 
-      // Recarregar consultas
-      window.location.reload()
+      // Recarregar consultas sem recarregar a página
+      carregarConsultas()
     } catch (error: any) {
       console.error('Erro ao reagendar:', error)
       alert('Erro ao reagendar consulta. Tente novamente.')
@@ -543,8 +538,8 @@ function NutriAgendaContent() {
               onSuccess={() => {
                 setMostrarModalNovaConsulta(false)
                 setDataHoraPreenchida(null)
-                // Recarregar consultas
-                window.location.reload()
+                // Recarregar consultas sem recarregar a página
+                carregarConsultas()
               }}
             />
           )}
