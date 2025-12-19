@@ -6,6 +6,8 @@ import { Sparkles } from 'lucide-react'
 import NutriNavBar from '@/components/nutri/NutriNavBar'
 import ScriptsNutriModal from '@/components/nutri/ScriptsNutriModal'
 import { buildNutriToolUrl } from '@/lib/url-utils'
+import { useToast } from '@/hooks/useToast'
+import { ToastContainer } from '@/components/ui/Toast'
 
 type TemplateContent = {
   questions?: unknown[]
@@ -94,6 +96,7 @@ export default function TemplatesNutri() {
   const [loadingUserSlug, setLoadingUserSlug] = useState(true)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
   const [qrCopiado, setQrCopiado] = useState<string | null>(null)
+  const { toasts, showSuccess, showError, showWarning, removeToast } = useToast()
 
   // Carregar userSlug do perfil
   useEffect(() => {
@@ -248,16 +251,28 @@ export default function TemplatesNutri() {
     }
     try {
       if (!link || link.trim() === '') {
-        alert('⚠️ Link não disponível. Configure seu user_slug no perfil primeiro.')
+        showWarning('Link não disponível', {
+          message: 'Configure seu user_slug no perfil primeiro para gerar links.',
+        })
         return
       }
       await navigator.clipboard.writeText(link)
       setLinkCopiado(templateId)
       setTimeout(() => setLinkCopiado(null), 2000)
-      alert('✅ Link copiado!')
+      
+      // Encontrar o template para mostrar informações
+      const template = templates.find(t => t.id === templateId)
+      showSuccess('Link copiado!', {
+        message: template ? `Link da ferramenta "${template.nome}" copiado para a área de transferência.` : 'Link copiado para a área de transferência.',
+        link: link,
+        icon: 'link',
+        duration: 5000,
+      })
     } catch (error) {
       console.error('Erro ao copiar link:', error)
-      alert('⚠️ Erro ao copiar link. Tente selecionar e copiar manualmente.')
+      showError('Erro ao copiar link', {
+        message: 'Tente selecionar e copiar manualmente.',
+      })
     }
   }
 
@@ -269,7 +284,9 @@ export default function TemplatesNutri() {
     }
     try {
       if (!link) {
-        alert('Link não disponível. Configure seu perfil primeiro.')
+        showWarning('Link não disponível', {
+          message: 'Configure seu perfil primeiro para gerar QR codes.',
+        })
         return
       }
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`
@@ -281,21 +298,37 @@ export default function TemplatesNutri() {
       ])
       setQrCopiado(templateId)
       setTimeout(() => setQrCopiado(null), 2000)
-      alert('✅ QR Code copiado!')
+      
+      // Encontrar o template para mostrar informações
+      const template = templates.find(t => t.id === templateId)
+      showSuccess('QR Code copiado!', {
+        message: template ? `QR Code da ferramenta "${template.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
+        link: link,
+        icon: 'qr',
+        duration: 5000,
+      })
     } catch (error) {
       console.error('Erro ao copiar QR code:', error)
       try {
         // Fallback: copiar o link se QR code não funcionar
         await navigator.clipboard.writeText(link)
-        alert('✅ Link copiado (QR code não suportado, mas link foi copiado)!')
+        showSuccess('Link copiado', {
+          message: 'QR code não suportado, mas o link foi copiado para a área de transferência.',
+          link: link,
+          icon: 'link',
+          duration: 5000,
+        })
       } catch (e) {
-        alert('⚠️ Erro ao copiar. Tente salvar a imagem manualmente.')
+        showError('Erro ao copiar', {
+          message: 'Tente salvar a imagem manualmente.',
+        })
       }
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ToastContainer toasts={toasts} onClose={removeToast} />
       <NutriNavBar showTitle title="Atrair" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

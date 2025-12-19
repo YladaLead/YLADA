@@ -14,6 +14,8 @@ import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
 import ScriptsModal from '@/components/wellness/ScriptsModal'
+import { useToast } from '@/hooks/useToast'
+import { ToastContainer } from '@/components/ui/Toast'
 
 // Lazy load dos previews
 const DynamicTemplatePreview = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { ssr: false })
@@ -48,6 +50,7 @@ function LinksUnificadosPageContent() {
   const [previewAberto, setPreviewAberto] = useState<string | null>(null)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
   const [qrCopiado, setQrCopiado] = useState<string | null>(null)
+  const { toasts, showSuccess, showError, showWarning, removeToast } = useToast()
   const [homMensagemCopiada, setHomMensagemCopiada] = useState(false)
   const [scriptsAberto, setScriptsAberto] = useState<{
     nome: string
@@ -420,7 +423,9 @@ function LinksUnificadosPageContent() {
     try {
       if (!link || link.trim() === '') {
         console.error('❌ Link vazio para item:', id)
-        alert('⚠️ Link não disponível. Configure seu user_slug no perfil primeiro.')
+        showWarning('Link não disponível', {
+          message: 'Configure seu user_slug no perfil primeiro para gerar links.',
+        })
         return
       }
       
@@ -432,6 +437,15 @@ function LinksUnificadosPageContent() {
         setLinkCopiado(id)
         setTimeout(() => setLinkCopiado(null), 2000)
         console.log('✅ Link copiado com sucesso!')
+        
+        // Encontrar o item para mostrar informações
+        const item = itensUnificados.find(i => i.id === id)
+        showSuccess('Link copiado!', {
+          message: item ? `Link da ferramenta "${item.nome}" copiado para a área de transferência.` : 'Link copiado para a área de transferência.',
+          link: link,
+          icon: 'link',
+          duration: 5000,
+        })
         return
       }
       
@@ -452,12 +466,23 @@ function LinksUnificadosPageContent() {
         setLinkCopiado(id)
         setTimeout(() => setLinkCopiado(null), 2000)
         console.log('✅ Link copiado com fallback!')
+        
+        // Encontrar o item para mostrar informações
+        const item = itensUnificados.find(i => i.id === id)
+        showSuccess('Link copiado!', {
+          message: item ? `Link da ferramenta "${item.nome}" copiado para a área de transferência.` : 'Link copiado para a área de transferência.',
+          link: link,
+          icon: 'link',
+          duration: 5000,
+        })
       } else {
         throw new Error('Falha ao copiar com método fallback')
       }
     } catch (error) {
       console.error('❌ Erro ao copiar link:', error)
-      alert('⚠️ Erro ao copiar link. Tente selecionar e copiar manualmente.')
+      showError('Erro ao copiar link', {
+        message: 'Tente selecionar e copiar manualmente.',
+      })
     }
   }
 
@@ -469,7 +494,9 @@ function LinksUnificadosPageContent() {
     }
     try {
       if (!link) {
-        alert('Link não disponível. Configure seu perfil primeiro.')
+        showWarning('Link não disponível', {
+          message: 'Configure seu perfil primeiro para gerar QR codes.',
+        })
         return
       }
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`
@@ -481,15 +508,30 @@ function LinksUnificadosPageContent() {
       ])
       setQrCopiado(id)
       setTimeout(() => setQrCopiado(null), 2000)
-      alert('✅ QR Code copiado!')
+      
+      // Encontrar o item para mostrar informações
+      const item = itemsUnificados.find(i => i.id === id)
+      showSuccess('QR Code copiado!', {
+        message: item ? `QR Code da ferramenta "${item.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
+        link: link,
+        icon: 'qr',
+        duration: 5000,
+      })
     } catch (error) {
       console.error('Erro ao copiar QR code:', error)
       try {
         // Fallback: copiar o link se QR code não funcionar
         await navigator.clipboard.writeText(link)
-        alert('✅ Link copiado (QR code não suportado, mas link foi copiado)!')
+        showSuccess('Link copiado', {
+          message: 'QR code não suportado, mas o link foi copiado para a área de transferência.',
+          link: link,
+          icon: 'link',
+          duration: 5000,
+        })
       } catch (e) {
-        alert('⚠️ Erro ao copiar. Tente salvar a imagem manualmente.')
+        showError('Erro ao copiar', {
+          message: 'Tente salvar a imagem manualmente.',
+        })
       }
     }
   }
@@ -593,6 +635,7 @@ Você vai adorar! 😊`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <ToastContainer toasts={toasts} onClose={removeToast} />
       <WellnessNavBar showTitle title="Meus Links" />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

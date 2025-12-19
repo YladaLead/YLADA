@@ -7,6 +7,8 @@ import CoachSidebar from "@/components/coach/CoachSidebar"
 import { useAuth } from '@/contexts/AuthContext'
 import dynamic from 'next/dynamic'
 import FormPreviewModal from '@/components/coach/FormPreviewModal'
+import { useToast } from '@/hooks/useToast'
+import { ToastContainer } from '@/components/ui/Toast'
 
 // Lazy load do QRCode
 const QRCode = dynamic(() => import('@/components/QRCode'), { ssr: false })
@@ -29,6 +31,7 @@ function FormulariosCoachContent() {
   const [previewForm, setPreviewForm] = useState<any>(null)
   const [previewLink, setPreviewLink] = useState<string | null>(null)
   const [mostrarAvisoUserSlug, setMostrarAvisoUserSlug] = useState(false)
+  const { toasts, showSuccess, showError, showWarning, removeToast } = useToast()
 
   useEffect(() => {
     if (!user) return
@@ -282,6 +285,7 @@ function FormulariosCoachContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      <ToastContainer toasts={toasts} onClose={removeToast} />
       <CoachSidebar 
         isMobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
@@ -447,10 +451,17 @@ function FormulariosCoachContent() {
                         onClick={async () => {
                           try {
                             await navigator.clipboard.writeText(linkCompleto)
-                            alert('✅ Link copiado!')
+                            showSuccess('Link copiado!', {
+                              message: `Link do template "${template.nome}" copiado para a área de transferência.`,
+                              link: linkCompleto,
+                              icon: 'form',
+                              duration: 5000,
+                            })
                           } catch (error) {
                             console.error('Erro ao copiar link:', error)
-                            alert('⚠️ Erro ao copiar link.')
+                            showError('Erro ao copiar link', {
+                              message: 'Tente selecionar e copiar manualmente.',
+                            })
                           }
                         }}
                         className="px-3 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg transition-colors text-xs font-medium border border-purple-300"
@@ -470,14 +481,26 @@ function FormulariosCoachContent() {
                               await navigator.clipboard.write([
                                 new ClipboardItem({ 'image/png': blob })
                               ])
-                              alert('✅ QR Code copiado!')
+                              showSuccess('QR Code copiado!', {
+                                message: `QR Code do template "${template.nome}" copiado para a área de transferência.`,
+                                link: linkCompleto,
+                                icon: 'qr',
+                                duration: 5000,
+                              })
                             } catch (error) {
                               console.error('Erro ao copiar QR code:', error)
                               try {
                                 await navigator.clipboard.writeText(linkCompleto)
-                                alert('✅ Link copiado (QR code não suportado, mas link foi copiado)!')
+                                showSuccess('Link copiado', {
+                                  message: 'QR code não suportado, mas o link foi copiado para a área de transferência.',
+                                  link: linkCompleto,
+                                  icon: 'form',
+                                  duration: 5000,
+                                })
                               } catch (e) {
-                                alert('⚠️ Erro ao copiar. Tente salvar a imagem manualmente.')
+                                showError('Erro ao copiar', {
+                                  message: 'Tente salvar a imagem manualmente.',
+                                })
                               }
                             }
                           }}
@@ -570,10 +593,17 @@ function FormulariosCoachContent() {
                         onClick={async () => {
                           try {
                             await navigator.clipboard.writeText(linkCompleto)
-                            alert('✅ Link copiado!')
+                            showSuccess('Link copiado!', {
+                              message: `Link do formulário "${form.nome}" copiado para a área de transferência.`,
+                              link: linkCompleto,
+                              icon: 'form',
+                              duration: 5000,
+                            })
                           } catch (error) {
                             console.error('Erro ao copiar link:', error)
-                            alert('⚠️ Erro ao copiar link.')
+                            showError('Erro ao copiar link', {
+                              message: 'Tente selecionar e copiar manualmente.',
+                            })
                           }
                         }}
                         className="px-3 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg transition-colors text-xs font-medium border border-purple-300"
@@ -588,7 +618,12 @@ function FormulariosCoachContent() {
                           onClick={async () => {
                             try {
                               await navigator.clipboard.writeText(linkCurto)
-                              alert('✅ URL curta copiada!')
+                              showSuccess('URL curta copiada!', {
+                                message: `URL curta do formulário "${form.nome}" copiada para a área de transferência.`,
+                                link: linkCurto,
+                                icon: 'link',
+                                duration: 5000,
+                              })
                             } catch (error) {
                               console.error('Erro ao copiar:', error)
                             }
@@ -610,14 +645,21 @@ function FormulariosCoachContent() {
                             })
                               const data = await response.json()
                               if (response.ok && data.success) {
-                                alert('✅ URL curta gerada! Recarregue a página para ver.')
-                                window.location.reload()
+                                showSuccess('URL curta gerada!', {
+                                  message: 'Recarregue a página para ver a nova URL curta.',
+                                  duration: 5000,
+                                })
+                                setTimeout(() => window.location.reload(), 2000)
                               } else {
-                                alert('⚠️ Erro ao gerar URL curta: ' + (data.error || 'Tente novamente'))
+                                showError('Erro ao gerar URL curta', {
+                                  message: data.error || 'Tente novamente.',
+                                })
                               }
                             } catch (error) {
                               console.error('Erro ao gerar URL curta:', error)
-                              alert('⚠️ Erro ao gerar URL curta.')
+                              showError('Erro ao gerar URL curta', {
+                                message: 'Tente novamente mais tarde.',
+                              })
                             }
                           }}
                           className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-xs font-medium border border-gray-200"
@@ -638,14 +680,26 @@ function FormulariosCoachContent() {
                               await navigator.clipboard.write([
                                 new ClipboardItem({ 'image/png': blob })
                               ])
-                              alert('✅ QR Code copiado!')
+                              showSuccess('QR Code copiado!', {
+                                message: `QR Code do formulário "${form.nome}" copiado para a área de transferência.`,
+                                link: linkCompleto,
+                                icon: 'qr',
+                                duration: 5000,
+                              })
                             } catch (error) {
                               console.error('Erro ao copiar QR code:', error)
                               try {
                                 await navigator.clipboard.writeText(linkCompleto)
-                                alert('✅ Link copiado (QR code não suportado, mas link foi copiado)!')
+                                showSuccess('Link copiado', {
+                                  message: 'QR code não suportado, mas o link foi copiado para a área de transferência.',
+                                  link: linkCompleto,
+                                  icon: 'form',
+                                  duration: 5000,
+                                })
                               } catch (e) {
-                                alert('⚠️ Erro ao copiar. Tente salvar a imagem manualmente.')
+                                showError('Erro ao copiar', {
+                                  message: 'Tente salvar a imagem manualmente.',
+                                })
                               }
                             }
                           }}
