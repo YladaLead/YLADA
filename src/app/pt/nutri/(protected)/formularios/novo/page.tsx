@@ -891,12 +891,12 @@ function NovoFormularioNutriContent() {
 
   return (
     <>
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
       <div className="min-h-screen bg-gray-50 flex">
         <NutriSidebar isMobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
       
@@ -1383,10 +1383,10 @@ function NovoFormularioNutriContent() {
           )
         ) : null}
       </DragOverlay>
-    </DndContext>
+      </DndContext>
 
-    {/* Modal de Edição de Campo */}
-    {mostrarModalCampo && fieldEditando && (
+      {/* Modal de Edição de Campo */}
+      {mostrarModalCampo && fieldEditando && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
           <div className="p-4 lg:p-6">
