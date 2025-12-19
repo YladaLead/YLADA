@@ -217,10 +217,10 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
               className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
               style={config?.custom_colors
                 ? {
-                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                    backgroundColor: config.custom_colors.principal
                   }
                 : {
-                    background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)'
+                    backgroundColor: '#0891b2'
                   }}
             >
               Calcular Hidratação →

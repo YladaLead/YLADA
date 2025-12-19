@@ -142,7 +142,7 @@ export default function StoryInterativo({ config }: TemplateBaseProps) {
             <button
               onClick={gerarRoteiro}
               className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all hover:scale-[1.02] shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)' }}
+              style={{ backgroundColor: '#8b5cf6' }}
             >
               Gerar Roteiro →
             </button>

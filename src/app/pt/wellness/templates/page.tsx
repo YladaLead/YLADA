@@ -2022,7 +2022,7 @@ export default function WellnessTemplatesPage() {
                                         ⚠️ <strong>Atenção:</strong> Se você sente cansaço constante, dificuldade para perder peso ou problemas digestivos, pode ser um sinal de que seu corpo precisa de suporte para eliminar toxinas. Descubra agora!
                                       </p>
                                     </div>
-                                    <button className="mt-4 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors shadow-lg">
+                                    <button className="mt-4 w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-lg">
                                       ▶️ Começar Avaliação - É Grátis
                                     </button>
                                   </div>

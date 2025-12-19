@@ -296,7 +296,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
               {/* Botão Calcular */}
               <button
                 onClick={calcularCalorias}
-                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-lg font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-lg"
+                className="w-full bg-orange-500 text-white py-4 rounded-lg font-bold text-lg hover:bg-orange-600 transition-all shadow-lg"
               >
                 Calcular Minhas Calorias
               </button>

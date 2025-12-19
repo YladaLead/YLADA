@@ -340,10 +340,10 @@ export default function Desafio21Dias({ config }: TemplateBaseProps) {
               className="w-full mt-8 text-white py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg"
               style={config?.custom_colors
                 ? {
-                    background: `linear-gradient(135deg, ${config.custom_colors.principal} 0%, ${config.custom_colors.secundaria} 100%)`
+                    backgroundColor: config.custom_colors.principal
                   }
                 : {
-                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                    backgroundColor: '#059669'
                   }}
             >
               Gerar Meu Desafio de 21 Dias →
