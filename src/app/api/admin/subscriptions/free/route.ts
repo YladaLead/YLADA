@@ -177,6 +177,12 @@ export async function POST(request: NextRequest) {
     
     const periodEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString()
 
+    // Gerar ID único para stripe_subscription_id
+    // Usa timestamp + random para garantir unicidade mesmo em requisições simultâneas
+    const timestamp = Date.now()
+    const randomSuffix = Math.random().toString(36).substring(2, 15)
+    const stripeSubscriptionId = `free_${finalUserId}_${area}_${timestamp}_${randomSuffix}`
+
     // Criar assinatura gratuita
     const subscriptionData: any = {
       user_id: finalUserId,
@@ -187,11 +193,16 @@ export async function POST(request: NextRequest) {
       current_period_end: periodEnd,
       // Campos Stripe vazios para plano gratuito
       stripe_account: 'br',
-      stripe_subscription_id: `free_${finalUserId}_${area}_${Date.now()}`,
+      stripe_subscription_id: stripeSubscriptionId,
       stripe_customer_id: `free_${finalUserId}`,
       stripe_price_id: 'free',
       amount: 0,
       currency: 'brl',
+    }
+
+    // Log dos dados antes de inserir (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📝 Dados da subscription a ser criada:', JSON.stringify(subscriptionData, null, 2))
     }
 
     // Adicionar requires_manual_renewal apenas se a coluna existir
@@ -206,6 +217,8 @@ export async function POST(request: NextRequest) {
       if (error) {
         console.error('❌ Erro ao criar plano gratuito:', error)
         console.error('❌ Detalhes do erro:', JSON.stringify(error, null, 2))
+        console.error('❌ Código do erro:', error.code)
+        console.error('❌ Mensagem completa:', error.message)
         
         // Verificar se é erro de constraint
         if (error.message?.includes('plan_type') || error.message?.includes('check constraint')) {
@@ -219,8 +232,37 @@ export async function POST(request: NextRequest) {
           )
         }
         
+        // Verificar se é erro de UNIQUE constraint (stripe_subscription_id duplicado)
+        if (error.code === '23505' || error.message?.includes('unique') || error.message?.includes('duplicate')) {
+          return NextResponse.json(
+            { 
+              error: 'Erro: Já existe uma assinatura com este ID. Tente novamente.',
+              details: error.message,
+              code: error.code
+            },
+            { status: 409 }
+          )
+        }
+        
+        // Verificar se é erro de NOT NULL constraint
+        if (error.code === '23502' || error.message?.includes('null value')) {
+          return NextResponse.json(
+            { 
+              error: 'Erro: Campo obrigatório faltando. Verifique os logs do servidor.',
+              details: error.message,
+              code: error.code
+            },
+            { status: 500 }
+          )
+        }
+        
         return NextResponse.json(
-          { error: 'Erro ao criar plano gratuito', details: error.message },
+          { 
+            error: 'Erro ao criar plano gratuito', 
+            details: error.message,
+            code: error.code,
+            hint: error.hint
+          },
           { status: 500 }
         )
       }
