@@ -51,7 +51,13 @@ export interface Field {
 }
 
 // Componente para item de componente arrastável
-function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label: string; icon: string; description: string; suggestion: string } }) {
+function DraggableComponent({ 
+  fieldType, 
+  onDoubleClick 
+}: { 
+  fieldType: { type: FieldType; label: string; icon: string; description: string; suggestion: string }
+  onDoubleClick?: () => void
+}) {
   const {
     attributes,
     listeners,
@@ -71,7 +77,14 @@ function DraggableComponent({ fieldType }: { fieldType: { type: FieldType; label
       style={style}
       {...attributes}
       {...listeners}
-      className={`flex items-center gap-2 p-2 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-blue-500' : ''}`}
+      onDoubleClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (onDoubleClick) {
+          onDoubleClick()
+        }
+      }}
+      className={`flex items-center gap-2 p-3 text-left border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg border-blue-500 bg-blue-100' : ''}`}
     >
       <span className="text-lg">{fieldType.icon}</span>
       <div className="flex-1 min-w-0">
@@ -158,9 +171,9 @@ function FormDropZone({ children }: { children: React.ReactNode }) {
     <div
       ref={setNodeRef}
       data-drop-zone
-      className={`min-h-[400px] transition-colors ${
-        isOver ? 'bg-blue-50 border-blue-300' : 'bg-white'
-      } border-2 border-dashed border-gray-200 rounded-lg p-6`}
+      className={`min-h-[500px] w-full transition-all duration-200 ${
+        isOver ? 'bg-blue-100 border-blue-500 border-4 shadow-lg' : 'bg-white border-2 border-dashed border-gray-200'
+      } rounded-lg p-6`}
     >
       {children}
     </div>
@@ -1086,13 +1099,13 @@ function NovoFormularioNutriContent() {
                       </SortableContext>
                       
                       {/* Área visual para arrastar próximo campo */}
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50/30 transition-all">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-blue-400 hover:bg-blue-50/50 transition-all min-h-[120px] flex items-center justify-center">
                         <div className="text-center text-gray-400">
-                          <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                           </svg>
-                          <p className="text-sm font-medium">Arraste mais campos aqui</p>
-                          <p className="text-xs mt-1">ou clique duas vezes no componente →</p>
+                          <p className="text-sm font-medium mb-1">Arraste mais campos aqui</p>
+                          <p className="text-xs">ou clique duas vezes no componente →</p>
                         </div>
                       </div>
                       
@@ -1339,9 +1352,11 @@ function NovoFormularioNutriContent() {
                 </div>
                   <div className="grid grid-cols-1 gap-2">
                     {fieldTypes.map((fieldType) => (
-                      <div key={fieldType.type} onDoubleClick={() => adicionarCampo(fieldType.type)}>
-                        <DraggableComponent fieldType={fieldType} />
-                      </div>
+                      <DraggableComponent 
+                        key={fieldType.type}
+                        fieldType={fieldType}
+                        onDoubleClick={() => adicionarCampo(fieldType.type)}
+                      />
                     ))}
                   </div>
               </div>
