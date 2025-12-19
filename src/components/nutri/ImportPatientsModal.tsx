@@ -114,17 +114,30 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
       ]
     ]
     
-    const ws = XLSX.utils.aoa_to_sheet(wsData)
+    // Criar worksheet de forma mais explícita
+    const ws = XLSX.utils.aoa_to_sheet(wsData, { 
+      cellDates: false,
+      cellNF: false,
+      cellText: false
+    })
+    
     // Definir largura das colunas
     ws['!cols'] = FIELD_MAPPINGS.map(() => ({ wch: 30 }))
-    // Garantir que a primeira linha seja tratada como cabeçalho
-    ws['!ref'] = XLSX.utils.encode_range({
+    
+    // Garantir que o range está correto
+    const range = XLSX.utils.encode_range({
       s: { c: 0, r: 0 },
       e: { c: headers.length - 1, r: wsData.length - 1 }
     })
+    ws['!ref'] = range
     
     XLSX.utils.book_append_sheet(wb, ws, 'Pacientes')
-    XLSX.writeFile(wb, 'template-importacao-pacientes.xlsx')
+    
+    // Escrever arquivo com opções explícitas
+    XLSX.writeFile(wb, 'template-importacao-pacientes.xlsx', {
+      bookType: 'xlsx',
+      type: 'array'
+    })
   }
 
   const isStandardTemplateFormat = (headers: string[]): boolean => {

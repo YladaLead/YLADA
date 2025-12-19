@@ -75,23 +75,30 @@ export async function POST(request: NextRequest) {
         
         console.log(`Range da planilha: ${worksheet['!ref']}, Colunas: ${maxCol + 1}, Linhas: ${maxRow + 1}`)
         
-        // Converter para JSON - usar método mais direto que captura todas as linhas
-        // Primeiro, tentar com blankrows: true para capturar todas as linhas
+        // Converter para JSON - método mais simples e direto
+        // Usar header: 1 para obter array de arrays (linha por linha)
         let jsonData = XLSX.utils.sheet_to_json(worksheet, { 
           header: 1, 
-          defval: null,
-          blankrows: true, // Incluir linhas vazias
-          range: worksheet['!ref']
+          defval: '', // Usar string vazia em vez de null
+          blankrows: true, // Incluir todas as linhas, mesmo vazias
+          raw: false // Converter tudo para string
         }) as any[][]
         
-        // Se não capturou linhas, tentar sem blankrows
-        if (jsonData.length === 0 || (jsonData.length === 1 && jsonData[0].every(c => !c))) {
-          console.log('⚠️ Tentando método alternativo de leitura...')
-          jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+        // Se não capturou linhas suficientes, tentar método alternativo
+        if (jsonData.length <= 1) {
+          console.log('⚠️ Poucas linhas detectadas, tentando método alternativo...')
+          // Tentar sem blankrows para ver se captura mais
+          const altData = XLSX.utils.sheet_to_json(worksheet, { 
             header: 1, 
             defval: '',
-            blankrows: false
+            blankrows: false,
+            raw: false
           }) as any[][]
+          
+          if (altData.length > jsonData.length) {
+            jsonData = altData
+            console.log(`✅ Método alternativo capturou ${jsonData.length} linhas`)
+          }
         }
         
         console.log(`📊 Total de linhas no JSON: ${jsonData.length}`)
@@ -112,41 +119,28 @@ export async function POST(request: NextRequest) {
           console.warn('⚠️ Apenas 1 linha encontrada - pode ser apenas cabeçalho')
         }
         
-        // Encontrar a linha com mais colunas não vazias (provavelmente é a linha de cabeçalho)
+        // Detecção simplificada: primeira linha é sempre cabeçalho
+        // Isso é mais assertivo e funciona para templates padrão
         let headerRowIndex = 0
-        let maxColumns = 0
         
-        // Verificar as primeiras 20 linhas para encontrar cabeçalhos
-        // Headers geralmente têm texto descritivo, não números ou datas
-        for (let i = 0; i < Math.min(20, jsonData.length); i++) {
-          const row = jsonData[i] || []
-          // Contar células não vazias
-          const nonEmptyCells = row.filter(cell => 
-            cell !== null && cell !== undefined && String(cell).trim() !== ''
-          ).length
-          
-          // Verificar se parece ser cabeçalho (texto descritivo, não números/datas)
-          const looksLikeHeader = row.some(cell => {
-            if (!cell) return false
-            const str = String(cell).trim().toLowerCase()
-            // Headers geralmente são palavras como "nome", "email", "telefone", etc.
-            return str.length > 2 && 
-                   !/^\d+([.,]\d+)?$/.test(str) && // Não é número
-                   !/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}$/.test(str) && // Não é data
-                   !str.includes('@') // Não é email
-          })
-          
-          const rowLength = row.length
-          // Priorizar linhas que parecem cabeçalhos e têm muitas células preenchidas
-          const score = (looksLikeHeader ? 10 : 0) + nonEmptyCells * 2 + (rowLength > maxCol ? 1 : 0)
-          
-          if (score > maxColumns || (score === maxColumns && nonEmptyCells > 0)) {
-            maxColumns = score
-            headerRowIndex = i
+        // Verificar se a primeira linha parece ser cabeçalho
+        const firstRow = jsonData[0] || []
+        const firstRowText = firstRow.map(c => String(c || '').toLowerCase()).join(' ')
+        
+        // Se a primeira linha contém palavras-chave de cabeçalho, usar ela
+        const headerKeywords = ['nome', 'email', 'telefone', 'peso', 'altura', 'objetivo', 'observações', 'data', 'nascimento', 'gênero', 'genero']
+        const isHeaderRow = headerKeywords.some(keyword => firstRowText.includes(keyword))
+        
+        if (!isHeaderRow && jsonData.length > 1) {
+          // Se a primeira linha não parece cabeçalho, verificar a segunda
+          const secondRow = jsonData[1] || []
+          const secondRowText = secondRow.map(c => String(c || '').toLowerCase()).join(' ')
+          if (headerKeywords.some(keyword => secondRowText.includes(keyword))) {
+            headerRowIndex = 1
           }
         }
         
-        console.log(`📋 Linha de cabeçalho detectada: ${headerRowIndex + 1}, Score: ${maxColumns}`)
+        console.log(`📋 Linha de cabeçalho detectada: ${headerRowIndex + 1} (linha ${headerRowIndex + 1} de ${jsonData.length})`)
         
         // Extrair cabeçalhos da linha identificada
         const headerRow = jsonData[headerRowIndex] || []
@@ -209,6 +203,9 @@ export async function POST(request: NextRequest) {
         // Extrair linhas de dados (pular a linha de cabeçalho)
         const rawRows = jsonData.slice(headerRowIndex + 1)
         console.log(`📊 Total de linhas brutas após cabeçalho: ${rawRows.length}`)
+        console.log(`📊 Primeira linha bruta (primeiras 5 células):`, rawRows[0]?.slice(0, 5))
+        console.log(`📊 Segunda linha bruta (primeiras 5 células):`, rawRows[1]?.slice(0, 5))
+        console.log(`📊 Terceira linha bruta (primeiras 5 células):`, rawRows[2]?.slice(0, 5))
         
         rows = rawRows
           .map((row, rowIndex) => {
