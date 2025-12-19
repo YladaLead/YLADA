@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { ToolConfig } from '@/types/wellness'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 interface LeadCapturePostResultProps {
   config?: ToolConfig
@@ -35,6 +36,7 @@ export default function LeadCapturePostResult({
 
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [phoneCountryCode, setPhoneCountryCode] = useState('BR') // Padrão: Brasil
   const [enviando, setEnviando] = useState(false)
   const [sucesso, setSucesso] = useState(false)
 
@@ -88,6 +90,7 @@ export default function LeadCapturePostResult({
     const dadosEnvio = {
       name: nome,
       phone: whatsapp,
+      phone_country_code: phoneCountryCode, // Incluir código do país
       tool_slug: toolSlug,
       user_slug: userSlug,
       ferramenta,
@@ -106,8 +109,11 @@ export default function LeadCapturePostResult({
 
       const data = await response.json()
 
+      console.log('🔍 Resposta da API:', data)
+
       if (data.success) {
         setSucesso(true)
+        console.log('✅ Lead capturado com sucesso! ID:', data.data?.leadId)
         
         // Rastrear conversão
         if (config?.id || toolSlug) {
@@ -117,16 +123,21 @@ export default function LeadCapturePostResult({
             body: JSON.stringify({
               template_id: config?.id,
               slug: toolSlug,
-              lead_id: data.leadId
+              lead_id: data.data?.leadId
             })
-          }).catch(() => {}) // Silencioso
+          }).catch((err) => {
+            console.warn('⚠️ Erro ao rastrear conversão (não crítico):', err)
+          })
         }
       } else {
-        alert(data.error || 'Erro ao enviar contato. Tente novamente.')
+        console.error('❌ Erro na resposta da API:', data)
+        const errorMessage = data.error || data.debug?.message || 'Erro ao enviar contato. Tente novamente.'
+        alert(`Erro: ${errorMessage}`)
       }
-    } catch (error) {
-      console.error('Erro ao enviar contato:', error)
-      alert('Erro ao enviar contato. Tente novamente.')
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar contato:', error)
+      console.error('❌ Detalhes do erro:', error.message, error.stack)
+      alert(`Erro ao enviar contato: ${error.message || 'Erro desconhecido'}. Verifique o console para mais detalhes.`)
     } finally {
       setEnviando(false)
     }
@@ -192,13 +203,15 @@ export default function LeadCapturePostResult({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 WhatsApp <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
+              <PhoneInputWithCountry
                 value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="(11) 99999-9999"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                onChange={(phone, countryCode) => {
+                  setWhatsapp(phone)
+                  setPhoneCountryCode(countryCode || 'BR')
+                }}
+                defaultCountryCode={phoneCountryCode}
+                className="w-full"
+                placeholder="11 99999-9999"
               />
             </div>
 

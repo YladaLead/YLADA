@@ -133,6 +133,7 @@ export async function POST(
       name: lead.name || 'Cliente sem nome',
       email: lead.email || null,
       phone: lead.phone || null,
+      phone_country_code: lead.phone_country_code || 'BR', // Preservar país do lead
       converted_from_lead: true,
       lead_source: lead.additional_data?.source || lead.template_id || 'unknown',
       lead_template_id: lead.template_id || null,

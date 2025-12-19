@@ -91,6 +91,12 @@ export async function POST(
     if (!existingClient.phone && lead.phone) {
       updateData.phone = lead.phone
     }
+    // Preservar país do telefone do lead
+    if (lead.phone_country_code) {
+      updateData.phone_country_code = lead.phone_country_code
+    } else if (!existingClient.phone_country_code) {
+      updateData.phone_country_code = 'BR' // Padrão se não tiver
+    }
 
     // Adicionar dados adicionais se fornecidos
     if (additional_data) {

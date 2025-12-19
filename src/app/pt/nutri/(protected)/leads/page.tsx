@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -16,13 +16,14 @@ function NutriLeadsContent() {
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [filtroStatus, setFiltroStatus] = useState('todos')
-  const [filtroFerramenta, setFiltroFerramenta] = useState('todas')
   const [busca, setBusca] = useState('')
   const [leadsDb, setLeadsDb] = useState<any[] | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [leadParaConverter, setLeadParaConverter] = useState<any>(null)
   const [modalAberto, setModalAberto] = useState(false)
   const [convertendo, setConvertendo] = useState(false)
+  const [leadDetalhes, setLeadDetalhes] = useState<any>(null)
+  const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false)
   const [criarAvaliacaoInicial, setCriarAvaliacaoInicial] = useState(false)
   const [statusInicial, setStatusInicial] = useState('pre_consulta')
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
@@ -108,52 +109,54 @@ function NutriLeadsContent() {
     }
   ]
 
+  // Função para carregar leads (extraída para poder ser chamada após conversão)
+  const carregarLeads = useCallback(async () => {
+    if (!user) return
+    
+    try {
+      setCarregando(true)
+      const response = await fetch('/api/leads', {
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar leads')
+      }
+
+      const data = await response.json()
+      if (data.success && data.data.leads) {
+        const leadsMapeados = data.data.leads.map((l: any) => ({
+          id: l.id,
+          nome: l.name,
+          email: l.email,
+          telefone: l.phone,
+          idade: l.additional_data?.idade || null,
+          cidade: l.additional_data?.cidade || '-',
+          ferramenta: l.additional_data?.ferramenta || l.template_id || 'Ferramenta',
+          resultado: l.additional_data?.resultado || '-',
+          status: l.additional_data?.status || 'novo',
+          data: new Date(l.created_at).toISOString().slice(0, 10),
+          ultimoContato: l.additional_data?.ultimo_contato || null,
+          observacoes: l.additional_data?.observacoes || '',
+          score: l.additional_data?.score || 0,
+          leadOriginal: l // Guardar lead original para conversão
+        }))
+        setLeadsDb(leadsMapeados)
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar leads:', e)
+      setErro('Erro ao carregar leads. Tente novamente.')
+    } finally {
+      setCarregando(false)
+    }
+  }, [user])
+
   // Carregar leads reais da API
   useEffect(() => {
     if (!user) return
-
-    const carregarLeads = async () => {
-      try {
-        setCarregando(true)
-        const response = await fetch('/api/leads', {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          throw new Error('Erro ao carregar leads')
-        }
-
-        const data = await response.json()
-        if (data.success && data.data.leads) {
-          const leadsMapeados = data.data.leads.map((l: any) => ({
-            id: l.id,
-            nome: l.name,
-            email: l.email,
-            telefone: l.phone,
-            idade: l.additional_data?.idade || null,
-            cidade: l.additional_data?.cidade || '-',
-            ferramenta: l.additional_data?.ferramenta || l.template_id || 'Ferramenta',
-            resultado: l.additional_data?.resultado || '-',
-            status: l.additional_data?.status || 'novo',
-            data: new Date(l.created_at).toISOString().slice(0, 10),
-            ultimoContato: l.additional_data?.ultimo_contato || null,
-            observacoes: l.additional_data?.observacoes || '',
-            score: l.additional_data?.score || 0,
-            leadOriginal: l // Guardar lead original para conversão
-          }))
-          setLeadsDb(leadsMapeados)
-        }
-      } catch (e: any) {
-        console.error('Erro ao carregar leads:', e)
-        setErro('Erro ao carregar leads. Tente novamente.')
-      } finally {
-        setCarregando(false)
-      }
-    }
-
     carregarLeads()
     carregarAlertas()
-  }, [user, diasAlerta])
+  }, [user, diasAlerta, carregarLeads])
 
   const carregarAlertas = async () => {
     if (!user) return
@@ -193,17 +196,20 @@ function NutriLeadsContent() {
   }
 
   const status = ['todos', 'novo', 'contatado', 'convertido', 'perdido']
-  const ferramentas = ['todas', 'Quiz Interativo', 'Calculadora de IMC', 'Post de Curiosidades', 'Template Post Dica']
 
   const leadsFiltrados = leads.filter(lead => {
+    // Por padrão, não mostrar leads convertidos (a menos que filtro específico seja selecionado)
+    if (filtroStatus === 'todos' && lead.status === 'convertido') {
+      return false
+    }
+
     const statusMatch = filtroStatus === 'todos' || lead.status === filtroStatus
-    const ferramentaMatch = filtroFerramenta === 'todas' || lead.ferramenta === filtroFerramenta
     const buscaMatch = busca === '' || 
       lead.nome.toLowerCase().includes(busca.toLowerCase()) ||
       lead.email.toLowerCase().includes(busca.toLowerCase()) ||
       lead.cidade.toLowerCase().includes(busca.toLowerCase())
     
-    return statusMatch && ferramentaMatch && buscaMatch
+    return statusMatch && buscaMatch
   })
 
   const getStatusClasses = (status: string) => {
@@ -216,12 +222,6 @@ function NutriLeadsContent() {
     return statusClasses[status as keyof typeof statusClasses] || statusClasses.novo
   }
 
-  const getScoreClasses = (score: number) => {
-    if (score >= 90) return 'bg-green-100 text-green-800'
-    if (score >= 80) return 'bg-blue-100 text-blue-800'
-    if (score >= 70) return 'bg-yellow-100 text-yellow-800'
-    return 'bg-red-100 text-red-800'
-  }
 
   const abrirModalConversao = (lead: any) => {
     setLeadParaConverter(lead)
@@ -230,6 +230,11 @@ function NutriLeadsContent() {
     setStatusInicial('pre_consulta')
     setErro(null)
     setMensagemSucesso(null)
+  }
+
+  const abrirModalDetalhes = (lead: any) => {
+    setLeadDetalhes(lead)
+    setModalDetalhesAberto(true)
   }
 
   const converterLead = async () => {
@@ -261,6 +266,9 @@ function NutriLeadsContent() {
         setMensagemSucesso('Lead convertido em cliente com sucesso!')
         setModalAberto(false)
         
+        // Recarregar leads para remover o convertido da lista
+        carregarLeads()
+        
         // Redirecionar para o perfil do cliente após 1.5 segundos
         setTimeout(() => {
           router.push(`/pt/nutri/clientes/${data.data.client.id}`)
@@ -286,13 +294,13 @@ function NutriLeadsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <NutriSidebar 
         isMobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
       />
       
-      <div className="flex-1 lg:ml-56">
+      <div className="flex-1 lg:ml-56 min-w-0 overflow-x-hidden">
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
           <button
             onClick={() => setMobileMenuOpen(true)}
@@ -306,16 +314,11 @@ function NutriLeadsContent() {
           <div className="w-10"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8 w-full overflow-x-hidden">
           {/* Header */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Leads</h1>
-              <p className="text-gray-600 mt-1">Gerencie seus leads e converta em clientes</p>
-            </div>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-              Exportar Leads
-            </button>
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Leads</h1>
+            <p className="text-gray-600 mt-1">Gerencie seus leads e converta em clientes</p>
           </div>
 
           {erro && (
@@ -440,7 +443,7 @@ function NutriLeadsContent() {
 
         {/* Filtros */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-64">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Buscar
@@ -453,34 +456,18 @@ function NutriLeadsContent() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <div>
+            <div className="min-w-[180px]">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Status
               </label>
               <select
                 value={filtroStatus}
                 onChange={(e) => setFiltroStatus(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {status.map(statusItem => (
                   <option key={statusItem} value={statusItem}>
                     {statusItem === 'todos' ? 'Todos os status' : statusItem}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ferramenta
-              </label>
-              <select
-                value={filtroFerramenta}
-                onChange={(e) => setFiltroFerramenta(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {ferramentas.map(ferramenta => (
-                  <option key={ferramenta} value={ferramenta}>
-                    {ferramenta === 'todas' ? 'Todas as ferramentas' : ferramenta}
                   </option>
                 ))}
               </select>
@@ -495,8 +482,8 @@ function NutriLeadsContent() {
               Leads ({leadsFiltrados.length})
             </h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 max-w-full">
+            <table className="w-full min-w-full table-auto">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -515,9 +502,6 @@ function NutriLeadsContent() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Score
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
@@ -531,19 +515,19 @@ function NutriLeadsContent() {
                         <div className="text-sm text-gray-500">{lead.idade} anos • {lead.cidade}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div>
-                        <div className="text-sm text-gray-900">{lead.email}</div>
-                        <div className="text-sm text-gray-500">{lead.telefone}</div>
+                        <div className="text-sm text-gray-900 break-words">{lead.email}</div>
+                        <div className="text-sm text-gray-500 break-words">{lead.telefone}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{lead.ferramenta}</div>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 break-words">{lead.ferramenta}</div>
                       <div className="text-sm text-gray-500">{lead.data}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{lead.resultado}</div>
-                      <div className="text-sm text-gray-500">{lead.observacoes}</div>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 break-words">{lead.resultado}</div>
+                      <div className="text-sm text-gray-500 break-words">{lead.observacoes}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
@@ -567,13 +551,8 @@ function NutriLeadsContent() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getScoreClasses(lead.score)}`}>
-                        {lead.score}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                    <td className="px-6 py-4 text-sm font-medium">
+                      <div className="flex flex-wrap gap-2">
                         {lead.status !== 'convertido' && (
                           <button
                             onClick={() => abrirModalConversao(lead)}
@@ -582,10 +561,10 @@ function NutriLeadsContent() {
                             Converter em Cliente
                           </button>
                         )}
-                        <button className="text-blue-600 hover:text-blue-900">
-                          Contatar
-                        </button>
-                        <button className="text-gray-600 hover:text-gray-900">
+                        <button 
+                          onClick={() => abrirModalDetalhes(lead)}
+                          className="text-gray-600 hover:text-gray-900"
+                        >
                           Ver Detalhes
                         </button>
                       </div>
@@ -596,38 +575,199 @@ function NutriLeadsContent() {
             </table>
           </div>
         </div>
-
-        {/* Ações Rápidas */}
-        <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-              <span className="text-2xl mr-3">📧</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Campanha de Email</h3>
-                <p className="text-sm text-gray-600">Enviar email para leads selecionados</p>
-              </div>
-            </button>
-            
-            <button className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-              <span className="text-2xl mr-3">📊</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Relatório de Leads</h3>
-                <p className="text-sm text-gray-600">Gerar relatório detalhado</p>
-              </div>
-            </button>
-            
-            <button className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
-              <span className="text-2xl mr-3">🎯</span>
-              <div>
-                <h3 className="font-medium text-gray-900">Segmentação</h3>
-                <p className="text-sm text-gray-600">Criar segmentos de leads</p>
-              </div>
-            </button>
-          </div>
-        </div>
         </div>
       </div>
+
+      {/* Modal de Detalhes do Lead */}
+      {modalDetalhesAberto && leadDetalhes && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+              <h2 className="text-xl font-bold text-gray-900">Detalhes do Lead</h2>
+              <button
+                onClick={() => setModalDetalhesAberto(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Informações Básicas */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 uppercase mb-3">Informações Básicas</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">Nome</label>
+                    <p className="text-sm text-gray-900 mt-1">{leadDetalhes.nome}</p>
+                  </div>
+                  {leadDetalhes.idade && (
+                    <div>
+                      <label className="text-xs font-medium text-gray-500">Idade</label>
+                      <p className="text-sm text-gray-900 mt-1">{leadDetalhes.idade} anos</p>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">Email</label>
+                    <p className="text-sm text-gray-900 mt-1">{leadDetalhes.email || '-'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">Telefone</label>
+                    <p className="text-sm text-gray-900 mt-1">{leadDetalhes.telefone || '-'}</p>
+                  </div>
+                  {leadDetalhes.cidade && (
+                    <div>
+                      <label className="text-xs font-medium text-gray-500">Cidade</label>
+                      <p className="text-sm text-gray-900 mt-1">{leadDetalhes.cidade}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Informações da Ferramenta */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 uppercase mb-3">Ferramenta</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">Ferramenta</label>
+                    <p className="text-sm text-gray-900 mt-1">{leadDetalhes.ferramenta || '-'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">Data</label>
+                    <p className="text-sm text-gray-900 mt-1">{leadDetalhes.data || '-'}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-gray-500">Resultado</label>
+                    <p className="text-sm text-gray-900 mt-1">{leadDetalhes.resultado || '-'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status e Observações */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 uppercase mb-3">Status e Observações</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">Status</label>
+                    <div className="mt-1">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClasses(leadDetalhes.status)}`}>
+                        {leadDetalhes.status}
+                      </span>
+                    </div>
+                  </div>
+                  {leadDetalhes.ultimoContato && (
+                    <div>
+                      <label className="text-xs font-medium text-gray-500">Último Contato</label>
+                      <p className="text-sm text-gray-900 mt-1">{leadDetalhes.ultimoContato}</p>
+                    </div>
+                  )}
+                  {leadDetalhes.observacoes && (
+                    <div>
+                      <label className="text-xs font-medium text-gray-500">Observações</label>
+                      <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{leadDetalhes.observacoes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Dados Adicionais do Lead Original */}
+              {leadDetalhes.leadOriginal?.additional_data && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 uppercase mb-3">Informações da Captura</h3>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                    {leadDetalhes.leadOriginal.additional_data.origem && (
+                      <div className="flex items-start">
+                        <span className="text-xs font-medium text-gray-500 min-w-[120px]">Origem:</span>
+                        <span className="text-sm text-gray-900">
+                          {leadDetalhes.leadOriginal.additional_data.origem === 'captura_pos_resultado' 
+                            ? 'Capturado após resultado' 
+                            : leadDetalhes.leadOriginal.additional_data.origem}
+                        </span>
+                      </div>
+                    )}
+                    {leadDetalhes.leadOriginal.additional_data.ferramenta && (
+                      <div className="flex items-start">
+                        <span className="text-xs font-medium text-gray-500 min-w-[120px]">Ferramenta:</span>
+                        <span className="text-sm text-gray-900">{leadDetalhes.leadOriginal.additional_data.ferramenta}</span>
+                      </div>
+                    )}
+                    {leadDetalhes.leadOriginal.additional_data.resultado && (
+                      <div className="flex items-start">
+                        <span className="text-xs font-medium text-gray-500 min-w-[120px]">Resultado:</span>
+                        <span className="text-sm text-gray-900">{leadDetalhes.leadOriginal.additional_data.resultado}</span>
+                      </div>
+                    )}
+                    {leadDetalhes.leadOriginal.additional_data.user_slug && (
+                      <div className="flex items-start">
+                        <span className="text-xs font-medium text-gray-500 min-w-[120px]">Profissional:</span>
+                        <span className="text-sm text-gray-900">{leadDetalhes.leadOriginal.additional_data.user_slug}</span>
+                      </div>
+                    )}
+                    {leadDetalhes.leadOriginal.additional_data.tool_slug && (
+                      <div className="flex items-start">
+                        <span className="text-xs font-medium text-gray-500 min-w-[120px]">Slug da Ferramenta:</span>
+                        <span className="text-sm text-gray-900 font-mono text-xs">{leadDetalhes.leadOriginal.additional_data.tool_slug}</span>
+                      </div>
+                    )}
+                    {/* Outros campos que possam existir */}
+                    {Object.entries(leadDetalhes.leadOriginal.additional_data).map(([key, value]) => {
+                      // Pular campos já exibidos acima
+                      const camposExibidos = ['origem', 'ferramenta', 'resultado', 'user_slug', 'tool_slug']
+                      if (camposExibidos.includes(key)) return null
+                      
+                      // Traduzir chaves técnicas para linguagem amigável
+                      const labels: { [key: string]: string } = {
+                        'idade': 'Idade',
+                        'cidade': 'Cidade',
+                        'observacoes': 'Observações',
+                        'ultimo_contato': 'Último Contato',
+                        'score': 'Score',
+                        'source': 'Fonte',
+                        'ip_address': 'Endereço IP',
+                        'user_agent': 'Navegador'
+                      }
+                      
+                      const label = labels[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
+                      
+                      return (
+                        <div key={key} className="flex items-start">
+                          <span className="text-xs font-medium text-gray-500 min-w-[120px]">{label}:</span>
+                          <span className="text-sm text-gray-900">
+                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Botões de Ação */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                {leadDetalhes.status !== 'convertido' && (
+                  <button
+                    onClick={() => {
+                      setModalDetalhesAberto(false)
+                      abrirModalConversao(leadDetalhes)
+                    }}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    Converter em Cliente
+                  </button>
+                )}
+                <button
+                  onClick={() => setModalDetalhesAberto(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Conversão */}
       {modalAberto && leadParaConverter && (
