@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import { useAuth } from '@/hooks/useAuth'
+import RotinaMinimaChecklist from '@/components/nutri/RotinaMinimaChecklist'
 
 export default function PainelDiarioPage() {
   const { user } = useAuth()
@@ -13,14 +14,31 @@ export default function PainelDiarioPage() {
   useEffect(() => {
     const carregarStats = async () => {
       try {
-        // Buscar progresso da jornada
-        const res = await fetch('/api/nutri/metodo/jornada', {
-          credentials: 'include'
-        })
+        // Buscar progresso da jornada e indicadores do dia em paralelo
+        const [jornadaRes, indicadoresRes] = await Promise.all([
+          fetch('/api/nutri/metodo/jornada', {
+            credentials: 'include'
+          }),
+          fetch('/api/nutri/painel/stats', {
+            credentials: 'include'
+          })
+        ])
         
-        if (res.ok) {
-          const data = await res.json()
-          setStats(data.data?.stats)
+        if (jornadaRes.ok) {
+          const jornadaData = await jornadaRes.json()
+          setStats(jornadaData.data?.stats)
+        }
+
+        if (indicadoresRes.ok) {
+          const indicadoresData = await indicadoresRes.json()
+          if (indicadoresData.success && indicadoresData.data) {
+            setStats((prev: any) => ({
+              ...prev,
+              leadsHoje: indicadoresData.data.leadsHoje,
+              conversasAtivas: indicadoresData.data.conversasAtivas,
+              atendimentosAgendados: indicadoresData.data.atendimentosAgendados
+            }))
+          }
         }
       } catch (error) {
         console.error('Erro ao carregar stats:', error)
@@ -121,20 +139,32 @@ export default function PainelDiarioPage() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Leads Hoje</span>
-                  <span className="text-sm font-semibold text-green-600">0</span>
+                  <span className="text-sm font-semibold text-green-600">
+                    {stats?.leadsHoje ?? 0}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Conversas Ativas</span>
-                  <span className="text-sm font-semibold text-blue-600">0</span>
+                  <span className="text-sm font-semibold text-blue-600">
+                    {stats?.conversasAtivas ?? 0}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Atendimentos Agendados</span>
-                  <span className="text-sm font-semibold text-purple-600">0</span>
+                  <span className="text-sm font-semibold text-purple-600">
+                    {stats?.atendimentosAgendados ?? 0}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* Rotina Mínima */}
+        <div className="mt-6 bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">⚡ Rotina Mínima Diária</h2>
+          <RotinaMinimaChecklist />
+        </div>
 
         {/* Navegação */}
         <div className="mt-8 bg-white rounded-xl p-6 shadow-md border border-gray-200">

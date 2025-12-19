@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 const rotinaItems = [
   'Captar pelo menos 1 lead',
@@ -90,6 +91,34 @@ export default function RotinaMinimaChecklist() {
           </div>
         ))}
       </div>
+
+      {/* Dica sobre Agenda Estratégica */}
+      {rotinaItems[3] && (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-blue-600 text-lg">💡</span>
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                Como preencher sua Agenda Estratégica?
+              </h4>
+              <p className="text-xs text-gray-700 mb-3">
+                Sua agenda estratégica é o mapa do seu dia. Preencha com:
+              </p>
+              <ul className="text-xs text-gray-600 space-y-1 mb-3 list-disc list-inside">
+                <li><strong>Horários fixos de atendimento:</strong> Quando você está disponível para consultas</li>
+                <li><strong>Horários de captação:</strong> Quando você distribui ferramentas e gera leads</li>
+                <li><strong>Rotina mínima semanal:</strong> O que você faz cada dia da semana</li>
+              </ul>
+              <Link
+                href="/pt/nutri/metodo/painel/agenda"
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1"
+              >
+                Ir para Agenda Estratégica →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

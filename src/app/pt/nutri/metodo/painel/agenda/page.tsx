@@ -64,6 +64,11 @@ export default function AgendaEstrategicaPage() {
             <p className="text-sm text-gray-500 mt-2">
               Defina os horários fixos em que você estará disponível para atendimentos
             </p>
+            <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-xs text-gray-700">
+                <strong>💡 Dica:</strong> Seja específico! Ex: "Segunda e Quarta, 14h-17h" é melhor que "alguns dias da semana"
+              </p>
+            </div>
           </div>
 
           {/* Horários de Captação */}
@@ -79,6 +84,11 @@ export default function AgendaEstrategicaPage() {
             <p className="text-sm text-gray-500 mt-2">
               Defina os horários dedicados à captação e distribuição de ferramentas
             </p>
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-xs text-gray-700">
+                <strong>💡 Dica:</strong> Captação não precisa ser longa! 15-30 minutos por dia já faz diferença. Ex: "Todo dia, 8h-8h30 (postar ferramenta nas redes)"
+              </p>
+            </div>
           </div>
 
           {/* Rotina Mínima */}
@@ -94,6 +104,35 @@ export default function AgendaEstrategicaPage() {
             <p className="text-sm text-gray-500 mt-2">
               Defina sua rotina mínima semanal para manter consistência
             </p>
+            
+            {/* Dicas Educacionais */}
+            <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <span>📚</span> Dicas para sua Rotina Mínima
+              </h4>
+              <ul className="text-xs text-gray-700 space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span><strong>Seja realista:</strong> Defina apenas o que você consegue fazer consistentemente, não o ideal</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span><strong>Comece pequeno:</strong> É melhor fazer pouco todo dia do que muito uma vez</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span><strong>3 blocos essenciais:</strong> Um momento para atrair, um para atender, um para organizar</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span><strong>Revise semanalmente:</strong> Ajuste sua rotina conforme sua realidade muda</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span><strong>Use o checklist diário:</strong> Marque suas tarefas no Painel Diário para manter consistência</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Botão Salvar */}
