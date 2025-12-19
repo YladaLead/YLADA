@@ -198,6 +198,9 @@ export async function POST(request: NextRequest) {
       stripe_price_id: 'free',
       amount: 0,
       currency: 'brl',
+      // Timestamps explícitos para garantir que não falte
+      created_at: periodStart,
+      updated_at: periodStart,
     }
 
     // Log dos dados antes de inserir (apenas em desenvolvimento)
@@ -246,11 +249,17 @@ export async function POST(request: NextRequest) {
         
         // Verificar se é erro de NOT NULL constraint
         if (error.code === '23502' || error.message?.includes('null value')) {
+          // Extrair nome do campo que está faltando da mensagem de erro
+          const fieldMatch = error.message?.match(/column "([^"]+)"|column ([a-z_]+)/i)
+          const missingField = fieldMatch ? fieldMatch[1] || fieldMatch[2] : 'desconhecido'
+          
           return NextResponse.json(
             { 
-              error: 'Erro: Campo obrigatório faltando. Verifique os logs do servidor.',
+              error: `Erro: Campo obrigatório faltando: "${missingField}". Verifique os logs do servidor.`,
               details: error.message,
-              code: error.code
+              code: error.code,
+              missing_field: missingField,
+              hint: error.hint
             },
             { status: 500 }
           )
