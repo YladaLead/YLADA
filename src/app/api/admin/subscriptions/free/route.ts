@@ -241,12 +241,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
-
-    return NextResponse.json({
-      success: true,
-      subscription: data,
-      message: `Plano gratuito criado com sucesso. Válido por ${days} dias.`
-    })
   } catch (error: any) {
     console.error('❌ Erro ao criar plano gratuito:', error)
     return NextResponse.json(
