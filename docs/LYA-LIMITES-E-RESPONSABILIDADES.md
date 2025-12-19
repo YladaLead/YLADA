@@ -352,3 +352,4 @@ Mas ela:
 **Documentação atualizada: 18/12/2024**
 **Status: Prompts corrigidos com limites explícitos** ✅
 
+

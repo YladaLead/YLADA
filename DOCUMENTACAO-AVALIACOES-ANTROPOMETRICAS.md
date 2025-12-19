@@ -493,3 +493,4 @@ Sistema completo de avaliações antropométricas implementado com sucesso, incl
 *Desenvolvedor: Claude Sonnet 4.5*
 *Projeto: YLADA - Área Nutri*
 
+

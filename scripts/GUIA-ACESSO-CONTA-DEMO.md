@@ -360,3 +360,4 @@ Se algo não funcionar:
 **Versão:** 1.0  
 **Compatível com:** YLADA Nutri Platform v2.0+
 
+

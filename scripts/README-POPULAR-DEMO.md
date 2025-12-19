@@ -290,3 +290,4 @@ Duplique um dos casos e altere:
 **Versão:** 1.0  
 **Compatível com:** Supabase PostgreSQL 15+
 
+

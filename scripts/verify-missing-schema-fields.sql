@@ -253,3 +253,4 @@ ORDER BY ordinal_position;
 -- FIM DO SCRIPT DE VERIFICAÇÃO
 -- ==========================================
 
+

@@ -227,3 +227,4 @@ Após executar esta migration:
 **Autor:** Sistema YLADA  
 **Status:** ✅ Pronto para produção
 
+

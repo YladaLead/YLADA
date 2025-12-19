@@ -35,3 +35,4 @@ BEGIN
   RAISE NOTICE 'Todos os clientes e evoluções de teste foram excluídos.';
 END $$;
 
+

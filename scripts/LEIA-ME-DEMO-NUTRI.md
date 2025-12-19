@@ -230,3 +230,4 @@ O script busca automaticamente a conta `demo.nutri@ylada.com`
 
 **🎉 Pronto! Execute o script e faça login para ver tudo funcionando!**
 
+

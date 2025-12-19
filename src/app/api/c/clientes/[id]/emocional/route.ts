@@ -22,3 +22,4 @@ export { GET, POST } from '../../../../coach/clientes/[id]/emocional/route'
 
 
 
+

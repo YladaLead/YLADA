@@ -418,3 +418,4 @@ Modificar `NutriSidebar.tsx`:
 **Economia vs Typeform:** R$ 2.000+/mês
 **ROI:** 4x-8x positivo! 🎉
 
+

@@ -139,15 +139,20 @@ function FormulariosNutriContent() {
   const getLinkFormulario = (form: any) => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
     
-    // Tentar usar link amigável primeiro
-    if (userSlug && form.slug) {
-      return `${baseUrl}/pt/nutri/${userSlug}/formulario/${form.slug}`
-    } else if (form.short_code) {
+    // Seguir a mesma lógica dos quizzes e ferramentas:
+    // 1. Prioridade: short_code (se disponível)
+    // 2. URL amigável: /pt/nutri/{userSlug}/formulario/{slug} (se tem userSlug e slug)
+    // 3. Fallback: /f/{id} (se não tem slug ou userSlug)
+    
+    if (form.short_code) {
       return `${baseUrl}/p/${form.short_code}`
+    } else if (userSlug && form.slug) {
+      return `${baseUrl}/pt/nutri/${userSlug}/formulario/${form.slug}`
     } else {
+      // Fallback para UUID - será redirecionado automaticamente se tiver slug depois
       return `${baseUrl}/f/${form.id}`
     }
-    }
+  }
     
   const copiarLink = async (form: any) => {
     const link = getLinkFormulario(form)

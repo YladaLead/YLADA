@@ -62,3 +62,4 @@ WHERE tablename IN ('clients', 'programs')
 -- A MIGRATION FOI EXECUTADA COM SUCESSO!
 -- ==========================================
 
+

@@ -727,6 +727,16 @@ function NovoFormularioNutriContent() {
       return
     }
 
+    // Garantir que o slug seja gerado se não foi fornecido
+    let finalSlug = slug && slug.trim() ? slug.trim() : null
+    if (!finalSlug) {
+      // Gerar slug automaticamente a partir do nome
+      finalSlug = gerarSlug(formData.name.trim())
+      if (!finalSlug) {
+        finalSlug = `formulario-${Date.now()}`
+      }
+    }
+
     // Preparar payload
     const payload = {
       name: formData.name.trim(),
@@ -737,7 +747,7 @@ function NovoFormularioNutriContent() {
         nameAlign: formData.nameAlign,
         descriptionAlign: formData.descriptionAlign
       },
-      slug: slug && slug.trim() ? slug.trim() : null,
+      slug: finalSlug, // Sempre enviar slug (a API vai ajustar se necessário)
       generate_short_url: generateShortUrl,
       custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode.trim() : null
     }
