@@ -144,18 +144,61 @@ function FormulariosNutriContent() {
     // 2. URL amigável: /pt/nutri/{userSlug}/formulario/{slug} (se tem userSlug e slug)
     // 3. Fallback: /f/{id} (se não tem slug ou userSlug)
     
+    console.log('🔗 Gerando link para formulário:', {
+      formId: form.id,
+      formName: form.name,
+      formSlug: form.slug,
+      userSlug: userSlug,
+      shortCode: form.short_code,
+      hasSlug: !!form.slug,
+      hasUserSlug: !!userSlug
+    })
+    
     if (form.short_code) {
-      return `${baseUrl}/p/${form.short_code}`
+      const link = `${baseUrl}/p/${form.short_code}`
+      console.log('✅ Usando short_code:', link)
+      return link
     } else if (userSlug && form.slug) {
-      return `${baseUrl}/pt/nutri/${userSlug}/formulario/${form.slug}`
+      const link = `${baseUrl}/pt/nutri/${userSlug}/formulario/${form.slug}`
+      console.log('✅ Usando URL amigável:', link)
+      return link
     } else {
       // Fallback para UUID - será redirecionado automaticamente se tiver slug depois
-      return `${baseUrl}/f/${form.id}`
+      const link = `${baseUrl}/f/${form.id}`
+      console.warn('⚠️ Usando fallback UUID (sem userSlug ou slug):', {
+        link,
+        userSlug,
+        formSlug: form.slug,
+        reason: !userSlug ? 'sem userSlug' : 'sem slug no formulário'
+      })
+      return link
     }
   }
     
   const copiarLink = async (form: any) => {
+    // Se userSlug ainda não foi carregado, tentar carregar antes de gerar o link
+    if (!userSlug) {
+      try {
+        const profileResponse = await fetch('/api/nutri/profile', {
+          credentials: 'include'
+        })
+        
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json()
+          const slug = profileData.user_slug || null
+          if (slug) {
+            setUserSlug(slug)
+            // Aguardar um pouco para o state atualizar
+            await new Promise(resolve => setTimeout(resolve, 100))
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar user_slug ao copiar link:', error)
+      }
+    }
+    
     const link = getLinkFormulario(form)
+    console.log('📋 Link copiado:', link)
     try {
       await navigator.clipboard.writeText(link)
       setMensagemCopiado('Link copiado!')
