@@ -167,7 +167,7 @@ export default function LyaChatWidget() {
         return (
           <p key={index} className="mb-2">
             <span className="font-bold text-gray-900" style={{ fontWeight: 700 }}>{numero}.</span>{' '}
-            <span>{conteudo}</span>
+            <span className="text-gray-900">{conteudo}</span>
           </p>
         )
       }
@@ -185,7 +185,7 @@ export default function LyaChatWidget() {
                   </span>
                 )
               }
-              return <span key={i}>{parte}</span>
+              return <span key={i} className="text-gray-900">{parte}</span>
             })}
           </p>
         )
@@ -193,7 +193,7 @@ export default function LyaChatWidget() {
       
       // Linha normal
       return (
-        <p key={index} className="mb-2 text-gray-700">
+        <p key={index} className="mb-2 text-gray-900">
           {linha}
         </p>
       )
@@ -267,10 +267,10 @@ export default function LyaChatWidget() {
                       ? 'bg-blue-600 text-white'
                       : msg.sender_type === 'system'
                       ? 'bg-yellow-100 text-yellow-800 text-sm'
-                      : 'bg-white border border-gray-200 text-gray-800'
+                      : 'bg-white border border-gray-200 text-gray-900'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900">
                     {formatarMensagemLYA(msg.message)}
                   </div>
                   {msg.created_at && (
