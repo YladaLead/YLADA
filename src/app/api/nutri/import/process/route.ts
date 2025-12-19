@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireApiAuth } from '@/lib/auth'
+import { requireApiAuth } from '@/lib/api-auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -22,33 +22,52 @@ interface MappedField {
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação
-    const authResult = await requireApiAuth(request)
-    if (!authResult.success) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      )
+    const authResult = await requireApiAuth(request, ['nutri', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    
+    const { user } = authResult
 
     const { data, mappings }: { data: ParsedData[], mappings: MappedField[] } = await request.json()
 
     // Consolidar dados de todos os arquivos
     const allRows: any[][] = []
+    const allHeaders: string[][] = []
     data.forEach(fileData => {
+      allHeaders.push(fileData.headers)
       fileData.rows.forEach(row => {
         allRows.push(row)
       })
     })
+
+    console.log(`📊 Processando importação: ${allRows.length} linhas de ${data.length} arquivo(s)`)
+    console.log(`📋 Headers:`, allHeaders[0]?.slice(0, 5).join(', '))
 
     // Preparar dados para inserção
     const clientsToInsert: any[] = []
     const processedEmails = new Set<string>()
     const processedPhones = new Set<string>()
 
+    // Verificar se os headers estão no formato padrão (após smart-parse)
+    const standardHeaders = ['Nome', 'Email', 'Telefone', 'Peso Atual (kg)', 'Altura (cm)', 'Objetivo', 'Observações', 'Data de Nascimento', 'Gênero']
+    const isStandardFormat = allHeaders.length > 0 && 
+      allHeaders[0].length >= standardHeaders.length &&
+      allHeaders[0].slice(0, standardHeaders.length).every((h, i) => h === standardHeaders[i])
+    
+    console.log(`🔍 Formato padrão detectado: ${isStandardFormat}`)
+    if (isStandardFormat) {
+      console.log(`✅ Usando mapeamento por posição (smart-parse)`)
+    } else {
+      console.log(`📋 Usando mapeamento por nome de coluna`)
+      console.log(`📋 Headers recebidos:`, allHeaders[0]?.join(', '))
+      console.log(`📋 Mappings:`, mappings.map(m => `${m.targetField} -> ${m.sourceColumn}`).join(', '))
+    }
+
     for (let i = 0; i < allRows.length; i++) {
       const row = allRows[i]
       const clientData: any = {
-        user_id: authResult.userId,
+        user_id: user.id,
         status: 'lead', // Status padrão para importação
         converted_from_lead: false,
         lead_source: 'Importação de Planilha',
@@ -60,12 +79,35 @@ export async function POST(request: NextRequest) {
 
       // Mapear campos
       for (const mapping of mappings) {
-        if (!mapping.sourceColumn) continue
+        let columnIndex = -1
+        let value: any = null
 
-        const columnIndex = data[0].headers.indexOf(mapping.sourceColumn)
-        if (columnIndex === -1) continue
+        if (isStandardFormat) {
+          // Se está no formato padrão, usar a posição do campo diretamente
+          const fieldOrder = ['name', 'email', 'phone', 'weight', 'height', 'goal', 'notes', 'birth_date', 'gender']
+          columnIndex = fieldOrder.indexOf(mapping.targetField)
+          if (columnIndex >= 0 && columnIndex < row.length) {
+            value = row[columnIndex]
+          }
+        } else {
+          // Se não está no formato padrão, buscar pelo nome do header
+          if (!mapping.sourceColumn) continue
+          
+          // Tentar encontrar o header em qualquer um dos arquivos
+          for (const headers of allHeaders) {
+            const idx = headers.indexOf(mapping.sourceColumn)
+            if (idx !== -1) {
+              columnIndex = idx
+              break
+            }
+          }
+          
+          if (columnIndex === -1) continue
+          if (columnIndex < row.length) {
+            value = row[columnIndex]
+          }
+        }
 
-        const value = row[columnIndex]
         if (!value || String(value).trim() === '') continue
 
         const cleanValue = String(value).trim()
@@ -137,7 +179,7 @@ export async function POST(request: NextRequest) {
       const { data: existingClients } = await supabaseAdmin
         .from('clients')
         .select('email')
-        .eq('user_id', authResult.userId)
+        .eq('user_id', user.id)
         .in('email', existingEmails)
 
       if (existingClients && existingClients.length > 0) {
@@ -154,6 +196,7 @@ export async function POST(request: NextRequest) {
     // Inserir clientes em lotes
     const batchSize = 100
     let totalInserted = 0
+    const insertedClientIds: string[] = []
 
     for (let i = 0; i < clientsToInsert.length; i += batchSize) {
       const batch = clientsToInsert.slice(i, i + batchSize)
@@ -168,7 +211,45 @@ export async function POST(request: NextRequest) {
         throw new Error(`Erro ao inserir clientes: ${error.message}`)
       }
 
-      totalInserted += insertedClients?.length || 0
+      if (insertedClients) {
+        totalInserted += insertedClients.length
+        insertedClientIds.push(...insertedClients.map(c => c.id))
+      }
+    }
+
+    // Criar registros no histórico para cada cliente importado
+    if (insertedClientIds.length > 0) {
+      try {
+        const historyRecords = insertedClientIds.map(clientId => ({
+          client_id: clientId,
+          user_id: user.id,
+          activity_type: 'cliente_criado',
+          title: 'Paciente importado',
+          description: 'Paciente importado via planilha',
+          metadata: {
+            source: 'importacao_planilha',
+            import_date: new Date().toISOString()
+          },
+          created_by: user.id
+        }))
+
+        // Inserir histórico em lotes
+        const historyBatchSize = 100
+        for (let i = 0; i < historyRecords.length; i += historyBatchSize) {
+          const historyBatch = historyRecords.slice(i, i + historyBatchSize)
+          const { error: historyError } = await supabaseAdmin
+            .from('client_history')
+            .insert(historyBatch)
+
+          if (historyError) {
+            // Não falhar a importação se o histórico falhar, apenas logar
+            console.warn('Aviso: Não foi possível criar alguns registros no histórico:', historyError)
+          }
+        }
+      } catch (historyError) {
+        // Não falhar a importação se o histórico falhar
+        console.warn('Aviso: Erro ao criar registros no histórico:', historyError)
+      }
     }
 
     return NextResponse.json({

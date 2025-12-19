@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireApiAuth } from '@/lib/auth'
+import { requireApiAuth } from '@/lib/api-auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -22,13 +22,12 @@ interface MappedField {
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação
-    const authResult = await requireApiAuth(request)
-    if (!authResult.success) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      )
+    const authResult = await requireApiAuth(request, ['nutri', 'admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    
+    const { user } = authResult
 
     const { data, mappings }: { data: ParsedData[], mappings: MappedField[] } = await request.json()
 
@@ -47,11 +46,19 @@ export async function POST(request: NextRequest) {
 
     // Consolidar dados de todos os arquivos
     const allRows: any[][] = []
+    const allHeaders: string[][] = []
     data.forEach(fileData => {
+      allHeaders.push(fileData.headers)
       fileData.rows.forEach(row => {
         allRows.push(row)
       })
     })
+
+    // Verificar se os headers estão no formato padrão (após smart-parse)
+    const standardHeaders = ['Nome', 'Email', 'Telefone', 'Peso Atual (kg)', 'Altura (cm)', 'Objetivo', 'Observações', 'Data de Nascimento', 'Gênero']
+    const isStandardFormat = allHeaders.length > 0 && 
+      allHeaders[0].length >= standardHeaders.length &&
+      allHeaders[0].slice(0, standardHeaders.length).every((h, i) => h === standardHeaders[i])
 
     // Validar dados linha por linha
     const processedEmails = new Set<string>()
@@ -63,12 +70,34 @@ export async function POST(request: NextRequest) {
 
       // Validar campos obrigatórios
       for (const mapping of mappings) {
-        if (!mapping.sourceColumn) continue
+        let columnIndex = -1
+        let value: any = null
 
-        const columnIndex = data[0].headers.indexOf(mapping.sourceColumn)
-        if (columnIndex === -1) continue
-
-        const value = row[columnIndex]
+        if (isStandardFormat) {
+          // Se está no formato padrão, usar a posição do campo diretamente
+          const fieldOrder = ['name', 'email', 'phone', 'weight', 'height', 'goal', 'notes', 'birth_date', 'gender']
+          columnIndex = fieldOrder.indexOf(mapping.targetField)
+          if (columnIndex >= 0 && columnIndex < row.length) {
+            value = row[columnIndex]
+          }
+        } else {
+          // Se não está no formato padrão, buscar pelo nome do header
+          if (!mapping.sourceColumn) continue
+          
+          // Tentar encontrar o header em qualquer um dos arquivos
+          for (const headers of allHeaders) {
+            const idx = headers.indexOf(mapping.sourceColumn)
+            if (idx !== -1) {
+              columnIndex = idx
+              break
+            }
+          }
+          
+          if (columnIndex === -1) continue
+          if (columnIndex < row.length) {
+            value = row[columnIndex]
+          }
+        }
 
         if (mapping.required && (!value || String(value).trim() === '')) {
           errors.push(`Linha ${i + 2}: Campo obrigatório '${mapping.targetField}' está vazio`)
@@ -123,7 +152,7 @@ export async function POST(request: NextRequest) {
       const { data: existingClients } = await supabaseAdmin
         .from('clients')
         .select('email')
-        .eq('user_id', authResult.userId)
+        .eq('user_id', user.id)
         .in('email', Array.from(processedEmails))
 
       if (existingClients && existingClients.length > 0) {
