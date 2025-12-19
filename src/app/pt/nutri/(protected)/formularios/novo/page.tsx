@@ -1383,7 +1383,8 @@ function NovoFormularioNutriContent() {
           )
         ) : null}
       </DragOverlay>
-      </DndContext>
+      </div>
+    </DndContext>
 
       {/* Modal de Edição de Campo */}
       {mostrarModalCampo && fieldEditando && (
