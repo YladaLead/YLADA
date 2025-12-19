@@ -678,19 +678,34 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
           {step === 'upload' && (
             <div className="space-y-6">
               {/* Template Padrão - Destaque Principal */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-8 text-center">
-                <div className="text-5xl mb-4">📋</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Template Padrão</h3>
-                <p className="text-lg text-gray-700 mb-6 max-w-2xl mx-auto">
-                  Use nosso template padrão para garantir <strong>100% de precisão</strong> na importação. 
-                  Baixe, preencha e importe - tudo automático, sem erros!
-                </p>
-                <button
-                  onClick={downloadTemplate}
-                  className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  📥 Baixar Template Excel
-                </button>
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-8">
+                <div className="text-center mb-6">
+                  <div className="text-5xl mb-4">📋</div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Template Padrão</h3>
+                  <button
+                    onClick={downloadTemplate}
+                    className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    📥 Baixar Template Excel
+                  </button>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 mt-6">
+                  <h4 className="font-semibold text-gray-900 mb-4">📝 Como usar o template:</h4>
+                  <ol className="text-gray-700 space-y-3 text-left list-decimal list-inside">
+                    <li>Baixe o template clicando no botão acima</li>
+                    <li>Abra o arquivo Excel no seu computador</li>
+                    <li><strong>Apague os nomes e dados de exemplo</strong> (Anastácia, João, Maria Fernanda)</li>
+                    <li>Preencha com os <strong>dados reais dos seus pacientes</strong></li>
+                    <li>Salve o arquivo</li>
+                    <li>Volte aqui e faça upload da planilha preenchida</li>
+                  </ol>
+                  <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+                    <p className="text-sm text-gray-700">
+                      <strong>💡 Dica:</strong> Mantenha a primeira linha com os cabeçalhos (Nome, Email, Telefone, etc.) e preencha os dados dos seus pacientes nas linhas abaixo.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Opção de Upload */}
