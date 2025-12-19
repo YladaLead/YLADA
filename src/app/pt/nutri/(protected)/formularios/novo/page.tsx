@@ -701,8 +701,10 @@ function NovoFormularioNutriContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErro(null)
+    setMensagemSucesso(null)
 
-    if (!formData.name.trim()) {
+    // Validações
+    if (!formData.name || !formData.name.trim()) {
       setErro('Nome do formulário é obrigatório')
       return
     }
@@ -710,6 +712,31 @@ function NovoFormularioNutriContent() {
     if (fields.length === 0) {
       setErro('Adicione pelo menos um campo ao formulário')
       return
+    }
+
+    // Preparar payload
+    const payload = {
+      name: formData.name.trim(),
+      description: (formData.description || '').trim() || null,
+      form_type: 'questionario',
+      structure: {
+        fields: fields,
+        nameAlign: formData.nameAlign,
+        descriptionAlign: formData.descriptionAlign
+      },
+      slug: slug && slug.trim() ? slug.trim() : null,
+      generate_short_url: generateShortUrl,
+      custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode.trim() : null
+    }
+
+    // Log para debug (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📤 Enviando formulário:', {
+        name: payload.name,
+        description: payload.description,
+        fieldsCount: payload.structure.fields.length,
+        slug: payload.slug
+      })
     }
 
     setSalvando(true)
@@ -721,35 +748,44 @@ function NovoFormularioNutriContent() {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
-          form_type: 'questionario', // Tipo padrão, não precisa ser editável
-          structure: {
-            fields: fields,
-            nameAlign: formData.nameAlign,
-            descriptionAlign: formData.descriptionAlign
-          },
-          slug: slug || null, // Enviar slug se fornecido
-          generate_short_url: generateShortUrl,
-          custom_short_code: usarCodigoPersonalizado && customShortCode.length >= 3 && shortCodeDisponivel ? customShortCode : null
-        })
+        body: JSON.stringify(payload)
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        console.error('❌ Erro ao parsear resposta JSON:', parseError)
+        const textResponse = await response.text()
+        console.error('📄 Resposta do servidor (texto):', textResponse)
+        throw new Error('Resposta inválida do servidor')
+      }
 
       if (!response.ok) {
+        // Log detalhado do erro
+        console.error('❌ Erro ao criar formulário:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: data.error,
+          technical: data.technical,
+          payload: payload
+        })
+        
         throw new Error(data.error || 'Erro ao criar formulário')
       }
 
-      if (data.success) {
+      if (data.success && data.data?.form) {
+        console.log('✅ Formulário criado com sucesso:', data.data.form)
         setMensagemSucesso('Formulário criado com sucesso!')
         setTimeout(() => {
           router.push('/pt/nutri/formularios')
         }, 1500)
+      } else {
+        console.error('❌ Resposta inválida:', data)
+        throw new Error(data.error || 'Resposta inválida do servidor')
       }
     } catch (error: any) {
-      console.error('Erro ao criar formulário:', error)
+      console.error('❌ Erro ao criar formulário:', error)
       setErro(error.message || 'Erro ao criar formulário. Tente novamente.')
     } finally {
       setSalvando(false)
@@ -912,9 +948,13 @@ function NovoFormularioNutriContent() {
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        value={formData.name || ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value
+                          setFormData(prev => ({ ...prev, name: newValue }))
+                        }}
                         placeholder="Nome do Formulário *"
+                        required
                         className={`flex-1 text-xl lg:text-2xl font-bold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 -ml-2 hover:bg-blue-50 transition-colors ${
                           formData.nameAlign === 'center' ? 'text-center' :
                           formData.nameAlign === 'right' ? 'text-right' :
@@ -963,8 +1003,11 @@ function NovoFormularioNutriContent() {
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
                       <textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        value={formData.description || ''}
+                        onChange={(e) => {
+                          const newValue = e.target.value
+                          setFormData(prev => ({ ...prev, description: newValue }))
+                        }}
                         placeholder="Descrição do formulário (opcional)"
                         className={`flex-1 text-sm lg:text-base text-gray-600 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 -ml-2 hover:bg-blue-50 transition-colors resize-none ${
                           formData.descriptionAlign === 'center' ? 'text-center' :
@@ -1079,8 +1122,21 @@ function NovoFormularioNutriContent() {
                   </button>
                   <button
                     type="submit"
-                    disabled={salvando || fields.length === 0 || !formData.name.trim()}
+                    disabled={salvando || fields.length === 0 || !formData.name || !formData.name.trim()}
                     className="flex-1 bg-blue-600 text-white py-4 px-4 text-base rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    onClick={(e) => {
+                      // Validação adicional antes de submeter
+                      if (!formData.name || !formData.name.trim()) {
+                        e.preventDefault()
+                        setErro('Nome do formulário é obrigatório')
+                        return false
+                      }
+                      if (fields.length === 0) {
+                        e.preventDefault()
+                        setErro('Adicione pelo menos um campo ao formulário')
+                        return false
+                      }
+                    }}
                   >
                     {salvando ? 'Salvando...' : 'Criar Formulário'}
                   </button>
@@ -1117,7 +1173,7 @@ function NovoFormularioNutriContent() {
 
           {/* Right Sidebar - URL Curta e Componentes */}
           <div className="w-80 bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col">
-            <form onSubmit={handleSubmit} className="flex flex-col h-full">
+            <div className="flex flex-col h-full">
               {/* URL do Formulário (Slug) */}
               <div className="border-b border-gray-200 px-4 py-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1289,7 +1345,6 @@ function NovoFormularioNutriContent() {
                   </div>
               </div>
             </div>
-            </form>
           </div>
         </div>
       </div>

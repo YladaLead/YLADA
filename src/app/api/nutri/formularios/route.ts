@@ -147,6 +147,17 @@ export async function POST(request: NextRequest) {
 
     const authenticatedUserId = user.id
     const body = await request.json()
+    
+    // Log para debug (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📥 Recebendo criação de formulário:', {
+        userId: authenticatedUserId,
+        name: body.name,
+        description: body.description,
+        fieldsCount: body.structure?.fields?.length || 0
+      })
+    }
+    
     const {
       name,
       description,
@@ -160,7 +171,8 @@ export async function POST(request: NextRequest) {
     } = body
 
     // Validações
-    if (!name || name.trim() === '') {
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      console.error('❌ Validação falhou: nome inválido', { name, type: typeof name })
       return NextResponse.json(
         { error: 'Nome do formulário é obrigatório' },
         { status: 400 }
@@ -276,13 +288,23 @@ export async function POST(request: NextRequest) {
     // Preparar dados
     const formData: any = {
       user_id: authenticatedUserId,
-      name: name.trim(),
-      description: description || null,
+      name: (name || '').trim(),
+      description: (description || '').trim() || null,
       form_type: form_type,
       structure: structure,
       is_active: is_active,
       is_template: is_template,
       slug: finalSlug // Adicionar slug gerado
+    }
+    
+    // Log para debug (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('💾 Dados a serem inseridos:', {
+        name: formData.name,
+        description: formData.description,
+        slug: formData.slug,
+        fieldsCount: formData.structure?.fields?.length || 0
+      })
     }
 
     // Adicionar short_code se foi gerado

@@ -31,16 +31,17 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar user_id pelo user_slug
+    // Buscar user_id e perfil pelo user_slug
     const { data: userProfile, error: profileError } = await supabaseAdmin
       .from('user_profiles')
-      .select('user_id')
+      .select('user_id, perfil')
       .eq('user_slug', userSlug)
       .maybeSingle()
 
     console.log('👤 Perfil encontrado:', {
       hasProfile: !!userProfile,
       userId: userProfile?.user_id,
+      perfil: userProfile?.perfil,
       error: profileError?.message
     })
 
@@ -158,8 +159,19 @@ export async function GET(request: NextRequest) {
       isTemplate: form.is_template
     })
 
-    // Montar URL pública padronizada com o user_slug
-    const publicUrl = `/pt/coach/${userSlug}/formulario/${form.slug}`
+    // Montar URL pública padronizada com o user_slug baseado no perfil
+    // Determinar área baseado no perfil do usuário
+    const perfil = userProfile.perfil || 'nutri' // default para nutri
+    let publicUrl = ''
+    
+    if (perfil === 'coach') {
+      publicUrl = `/pt/c/${userSlug}/formulario/${form.slug}`
+    } else if (perfil === 'nutri') {
+      publicUrl = `/pt/nutri/${userSlug}/formulario/${form.slug}`
+    } else {
+      // Fallback para nutri se perfil não identificado
+      publicUrl = `/pt/nutri/${userSlug}/formulario/${form.slug}`
+    }
 
     return NextResponse.json({
       success: true,

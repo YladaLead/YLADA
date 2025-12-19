@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Pergunta {
   id: string
@@ -15,6 +16,7 @@ interface Pergunta {
 
 interface Quiz {
   id: string
+  user_id?: string
   titulo: string
   descricao: string
   emoji: string
@@ -64,6 +66,12 @@ export default function QuizPublicNutriPage() {
   const [respostas, setRespostas] = useState<Record<number, string>>({})
   const [respostasSalvas, setRespostasSalvas] = useState<Set<string>>(new Set()) // IDs das perguntas já salvas
   const [salvando, setSalvando] = useState(false)
+  const [branding, setBranding] = useState<{
+    logoUrl?: string
+    brandColor?: string
+    brandName?: string
+    professionalCredential?: string
+  } | null>(null)
 
   useEffect(() => {
     if (!slug) return
@@ -85,6 +93,21 @@ export default function QuizPublicNutriPage() {
 
         const data = await response.json()
         setQuiz(data)
+        
+        // Buscar branding do nutricionista se tiver user_id
+        if (data.user_id) {
+          try {
+            const brandingResponse = await fetch(`/api/public/nutri/branding/${data.user_id}`)
+            if (brandingResponse.ok) {
+              const brandingData = await brandingResponse.json()
+              if (brandingData.success && brandingData.data) {
+                setBranding(brandingData.data)
+              }
+            }
+          } catch (brandingError) {
+            console.warn('Erro ao carregar branding (não crítico):', brandingError)
+          }
+        }
       } catch (err) {
         console.error('Erro ao carregar quiz Nutri:', err)
         setError('Erro ao carregar quiz')
@@ -244,6 +267,41 @@ export default function QuizPublicNutriPage() {
         color: quiz.entrega.customizacao.corTexto
       }}
     >
+      {/* Header com Branding Personalizado */}
+      {branding?.logoUrl && (
+        <div 
+          className="text-white border-b"
+          style={{ 
+            backgroundColor: branding?.brandColor || quiz.cores.primaria
+          }}
+        >
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-center space-x-4">
+              <div className="relative w-12 h-12 bg-white rounded-lg overflow-hidden flex-shrink-0">
+                <Image
+                  src={branding.logoUrl}
+                  alt="Logo"
+                  fill
+                  className="object-contain p-2"
+                />
+              </div>
+              {branding?.brandName && (
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold">
+                    {branding.brandName}
+                  </h2>
+                  {branding?.professionalCredential && (
+                    <p className="text-xs opacity-90 mt-1">
+                      {branding.professionalCredential}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Landing Page */}
       {etapaAtual === 'landing' && (
         <div className="max-w-2xl mx-auto px-4 py-16 text-center">

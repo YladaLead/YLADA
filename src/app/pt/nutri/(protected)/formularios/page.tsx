@@ -147,8 +147,8 @@ function FormulariosNutriContent() {
     } else {
       return `${baseUrl}/f/${form.id}`
     }
-  }
-
+    }
+    
   const copiarLink = async (form: any) => {
     const link = getLinkFormulario(form)
     try {
@@ -251,14 +251,16 @@ function FormulariosNutriContent() {
             </div>
           </div>
 
-          {/* Lista de Formulários do Usuário */}
+          {/* Lista de Formulários (incluindo templates) */}
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Meus Formulários</h2>
-            <p className="text-sm text-gray-600 mt-1">Formulários que você criou</p>
+            <p className="text-sm text-gray-600 mt-1">Formulários que você criou e formulários pré-montados</p>
           </div>
 
-          {formularios.length > 0 ? (
+          {/* Combinar formulários do usuário e templates em uma única lista */}
+          {formularios.length > 0 || templates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {/* Formulários do usuário */}
               {formularios.map((form) => (
                 <div
                   key={form.id}
@@ -322,6 +324,74 @@ function FormulariosNutriContent() {
                   </div>
                 </div>
               ))}
+
+              {/* Templates com os mesmos 4 botões */}
+              {templates.map((template) => (
+                <div
+                  key={template.id}
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 shadow-sm border-2 border-blue-200 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{template.name}</h3>
+                      {template.description && (
+                        <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTipoColor(template.form_type)}`}>
+                          {getTipoLabel(template.form_type)}
+                        </span>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Pronto</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 mb-4">
+                    {template.structure?.fields?.length || 0} {template.structure?.fields?.length === 1 ? 'campo' : 'campos'}
+                  </div>
+
+                  <div className="space-y-2">
+                    {/* Linha 1: Editar e Respostas */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${template.id}`)}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => router.push(`/pt/nutri/formularios/${template.id}/respostas`)}
+                        className="relative flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                      >
+                        Respostas
+                        {template.unread_responses > 0 && (
+                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
+                            {template.unread_responses > 9 ? '9+' : template.unread_responses}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                    
+                    {/* Linha 2: Copiar Link e QR Code */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => copiarLink(template)}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                      >
+                        <span>📋</span>
+                        Copiar Link
+                      </button>
+                      <button
+                        onClick={() => verQRCode(template)}
+                        className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                      >
+                        <span>📱</span>
+                        QR Code
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
@@ -339,72 +409,6 @@ function FormulariosNutriContent() {
                 <span>➕</span>
                 Criar Primeiro Formulário
               </Link>
-            </div>
-          )}
-
-          {/* Seção de Formulários Pré-montados */}
-          {mostrarTemplates && templates.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">📋 Formulários Pré-montados</h2>
-                  <p className="text-sm text-gray-600 mt-1">Formulários prontos para usar. Clique para editar e personalizar</p>
-                </div>
-                <button
-                  onClick={() => setMostrarTemplates(false)}
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  Ocultar
-                </button>
-              </div>
-              
-              {carregandoTemplates ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {templates.map((template) => (
-                    <div
-                      key={template.id}
-                      className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 hover:border-blue-300 transition-all cursor-pointer"
-                      onClick={() => router.push(`/pt/nutri/formularios/novo?template=${template.id}`)}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Pronto</span>
-                      </div>
-                      {template.description && (
-                        <p className="text-sm text-gray-700 mb-4 line-clamp-2">{template.description}</p>
-                      )}
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
-                        <span className="px-2 py-1 bg-white rounded">{getTipoLabel(template.form_type)}</span>
-                        <span>{template.structure?.fields?.length || 0} campos</span>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/pt/nutri/formularios/novo?template=${template.id}`)
-                        }}
-                        className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                      >
-                        Usar este formulário
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {!mostrarTemplates && templates.length > 0 && (
-            <div className="mb-6">
-              <button
-                onClick={() => setMostrarTemplates(true)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Mostrar formulários pré-montados ({templates.length})
-              </button>
             </div>
           )}
         </div>
