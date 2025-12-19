@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { notifyNewLead } from '@/lib/lead-notifications'
 
 // POST - Capturar lead de ferramenta wellness
 export async function POST(request: NextRequest) {
@@ -176,6 +177,21 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔍 Lead salvo com sucesso! ID:', newLead.id)
+
+    // Enviar notificação por email (não bloqueia a resposta)
+    notifyNewLead({
+      leadId: newLead.id,
+      leadName: sanitizedData.name,
+      leadPhone: sanitizedData.phone,
+      leadEmail: null, // Wellness leads não capturam email
+      toolName: ferramenta || 'Ferramenta',
+      result: resultado || undefined,
+      userId: userId,
+      createdAt: new Date().toISOString()
+    }).catch((error) => {
+      // Não falhar a requisição se a notificação falhar
+      console.error('❌ Erro ao enviar notificação de lead (não crítico):', error)
+    })
 
     return NextResponse.json({
       success: true,
