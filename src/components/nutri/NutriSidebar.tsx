@@ -96,24 +96,13 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
   // Filtrar itens baseado na fase atual (mostrar bloqueados também, mas com indicador)
   const menuItems = useMemo(() => {
     // Todos os itens do menu (estrutura completa)
+    // Ordem reorganizada: áreas mais usadas no topo
     const allMenuItems: MenuSection[] = [
       {
         title: 'Home',
         icon: '🏠',
         href: '/pt/nutri/home',
         color: 'gray'
-      },
-      {
-        title: 'Jornada 30 Dias',
-        icon: '📘',
-        href: '/pt/nutri/metodo/jornada',
-        color: 'blue'
-      },
-      {
-        title: 'Sobre o Método',
-        icon: '📚',
-        href: '/pt/nutri/metodo/pilares',
-        color: 'purple'
       },
       {
         title: 'Captar',
@@ -141,6 +130,18 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
           { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
           { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
         ]
+      },
+      {
+        title: 'Jornada 30 Dias',
+        icon: '📘',
+        href: '/pt/nutri/metodo/jornada',
+        color: 'blue'
+      },
+      {
+        title: 'Sobre o Método',
+        icon: '📚',
+        href: '/pt/nutri/metodo/pilares',
+        color: 'purple'
       },
       {
         title: 'Materiais de Apoio',
