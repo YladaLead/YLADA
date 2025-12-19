@@ -1518,7 +1518,6 @@ function NovoFormularioNutriContent() {
           </div>
         </div>
       )}
-      </div>
     </DndContext>
   )
 }
