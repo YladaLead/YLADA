@@ -807,7 +807,7 @@ export default function NutriLandingPage() {
         </section>
 
         {/* BLOCO 13 — OFERTA (ESCOLHA SEU COMPROMISSO) */}
-        <section id="oferta" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#0B57FF] to-[#2572FF] relative">
+        <section id="oferta" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#0B57FF] to-[#2572FF] relative z-0">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-white">
@@ -824,9 +824,9 @@ export default function NutriLandingPage() {
                 <strong>Você não paga mais por menos recursos. Você paga menos quando se compromete mais.</strong>
               </p>
               
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div className="grid md:grid-cols-2 gap-8 mb-8 relative z-10">
                 {/* PLANO ANUAL FIDELIDADE */}
-                <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400">
+                <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 relative">
                   <div className="text-center mb-6">
                     <span className="inline-block bg-yellow-400 text-[#1A1A1A] px-4 py-2 rounded-full text-sm font-semibold mb-4">
                       ✨ Mais escolhido
@@ -870,15 +870,26 @@ export default function NutriLandingPage() {
                   </div>
                   
                   <button
-                    onClick={() => handleCheckout('annual')}
-                    className="w-full bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#2572FF] hover:to-[#0B57FF] transition-all shadow-xl"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleCheckout('annual')
+                    }}
+                    className="w-full bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#2572FF] hover:to-[#0B57FF] transition-all shadow-xl relative z-20 cursor-pointer"
+                    style={{ 
+                      touchAction: 'manipulation', 
+                      WebkitTapHighlightColor: 'transparent',
+                      pointerEvents: 'auto',
+                      position: 'relative',
+                      zIndex: 20
+                    }}
                   >
                     👉 Escolher Plano Anual
                   </button>
                 </div>
                 
                 {/* PLANO MENSAL FLEXÍVEL */}
-                <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-gray-300">
+                <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-gray-300 relative">
                   <div className="text-center mb-6">
                     <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Mensal Flexível</h3>
                     <p className="text-gray-600 mb-4">Para quem prefere começar com mais liberdade</p>
@@ -913,8 +924,19 @@ export default function NutriLandingPage() {
                   </div>
                   
                   <button
-                    onClick={() => handleCheckout('monthly')}
-                    className="w-full bg-gray-600 text-white px-6 py-4 rounded-xl text-lg font-bold hover:bg-gray-700 transition-all shadow-xl"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleCheckout('monthly')
+                    }}
+                    className="w-full bg-gray-600 text-white px-6 py-4 rounded-xl text-lg font-bold hover:bg-gray-700 transition-all shadow-xl relative z-20 cursor-pointer"
+                    style={{ 
+                      touchAction: 'manipulation', 
+                      WebkitTapHighlightColor: 'transparent',
+                      pointerEvents: 'auto',
+                      position: 'relative',
+                      zIndex: 20
+                    }}
                   >
                     👉 Escolher Plano Mensal
                   </button>
@@ -1079,7 +1101,7 @@ export default function NutriLandingPage() {
       {/* Botão flutuante fixo - LYA IA Vendedora */}
       <button
         onClick={openLyaWidget}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#2572FF] hover:to-[#0B57FF] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base"
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#2572FF] hover:to-[#0B57FF] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base pointer-events-auto"
         style={{ bottom: '80px' }}
       >
         <span className="text-xl sm:text-2xl">💬</span>
