@@ -289,7 +289,8 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       {
         id: 'p5',
         texto: 'Você prefere trabalhar pelo celular ou computador?',
-        tipo: 'sim_nao'
+        tipo: 'multipla_escolha',
+        opcoes: ['Celular', 'Computador']
       }
     ],
     diagnostico: {
@@ -375,7 +376,8 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       {
         id: 'p1',
         texto: 'Você prefere trabalhar pelo celular ou computador?',
-        tipo: 'sim_nao'
+        tipo: 'multipla_escolha',
+        opcoes: ['Celular', 'Computador']
       },
       {
         id: 'p2',
@@ -927,7 +929,8 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       {
         id: 'p3',
         texto: 'Você prefere trabalhar pelo celular ou computador?',
-        tipo: 'sim_nao'
+        tipo: 'multipla_escolha',
+        opcoes: ['Celular', 'Computador']
       },
       {
         id: 'p4',
