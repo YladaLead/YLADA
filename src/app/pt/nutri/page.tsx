@@ -20,6 +20,21 @@ export default function NutriLandingPage() {
   const handleCheckout = async (planType: 'annual' | 'monthly') => {
     try {
       console.log('🛒 Iniciando checkout:', planType)
+      
+      // Coletar e-mail se não estiver autenticado (para mobile)
+      let email = ''
+      if (typeof window !== 'undefined') {
+        // Tentar obter e-mail do localStorage ou prompt
+        const storedEmail = localStorage.getItem('checkout_email')
+        if (storedEmail) {
+          email = storedEmail
+        } else {
+          // No mobile, pode ser necessário coletar e-mail
+          // Por enquanto, vamos tentar sem e-mail e ver se funciona
+          console.log('ℹ️ E-mail não fornecido - tentando sem autenticação')
+        }
+      }
+      
       const response = await fetch('/api/nutri/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -27,20 +42,32 @@ export default function NutriLandingPage() {
         body: JSON.stringify({
           planType,
           productType: planType === 'annual' ? 'platform_annual' : 'platform_monthly',
-          paymentMethod: 'auto'
+          paymentMethod: 'auto',
+          language: 'pt',
+          ...(email && { email }) // Incluir e-mail apenas se fornecido
         })
       })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        console.error('❌ Erro na resposta:', errorData)
+        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`)
+      }
+      
       const data = await response.json()
       console.log('📦 Resposta checkout:', data)
+      
       if (data.url) {
-        window.location.href = data.url
+        // Usar window.location.assign para melhor compatibilidade mobile
+        window.location.assign(data.url)
       } else {
         console.error('❌ URL não retornada:', data)
-        alert('Erro ao processar pagamento. Tente novamente.')
+        throw new Error('URL de checkout não retornada pela API')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Erro no checkout:', error)
-      alert('Erro ao processar pagamento. Tente novamente.')
+      const errorMessage = error.message || 'Erro ao processar pagamento. Tente novamente.'
+      alert(errorMessage)
     }
   }
 
