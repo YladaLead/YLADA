@@ -146,7 +146,7 @@ export default function LyaSalesWidget({
   }
 
   return (
-    <div className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}>
+    <div className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`} style={{ zIndex: 50, pointerEvents: 'auto' }}>
       {/* Header */}
       <div className="bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center space-x-2">
