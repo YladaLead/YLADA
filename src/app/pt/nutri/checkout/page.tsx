@@ -10,6 +10,7 @@ export default function NutriCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly')
+  const [planLocked, setPlanLocked] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
@@ -54,8 +55,10 @@ export default function NutriCheckoutPage() {
       
       if (plan === 'annual') {
         setPlanType('annual')
+        setPlanLocked(true) // Bloquear alteração após definir pela URL
       } else if (plan === 'monthly') {
         setPlanType('monthly')
+        setPlanLocked(true) // Bloquear alteração após definir pela URL
       }
       
       if (canceledParam === 'true') {
@@ -178,24 +181,6 @@ export default function NutriCheckoutPage() {
     }
   }
 
-  const planDetails = {
-    monthly: {
-      price: 297.00,
-      priceFormatted: 'R$ 297,00',
-      period: 'mês',
-      description: 'Plano Mensal',
-    },
-    annual: {
-      price: 2364.00, // Valor total anual (12× de R$ 197)
-      priceFormatted: 'R$ 2.364,00',
-      period: 'ano',
-      description: 'Plano Anual',
-      monthlyEquivalent: 197.00, // Equivalente mensal (12× de R$ 197)
-      savings: 0, // Sem economia no plano anual
-    },
-  }
-
-  const currentPlan = planDetails[planType]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -246,64 +231,57 @@ export default function NutriCheckoutPage() {
             </div>
           )}
 
-          {/* Seleção de Plano */}
+          {/* Plano Selecionado (apenas exibição, sem opção de mudança) */}
           <div className="mb-8">
-            <div className="grid sm:grid-cols-2 gap-4">
-              {/* Plano Mensal */}
-              <button
-                onClick={() => setPlanType('monthly')}
-                className={`p-6 rounded-lg border-2 transition-all relative ${
-                  planType === 'monthly'
-                    ? 'border-blue-500 bg-blue-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30'
-                }`}
-              >
-                <div className="text-center">
-                  {planType === 'monthly' && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      SELECIONADO
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              Plano Selecionado
+            </h2>
+            <div className="max-w-md mx-auto">
+              {planType === 'monthly' ? (
+                <div className="p-6 rounded-lg border-2 border-blue-500 bg-blue-50 shadow-md relative">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    PLANO ESCOLHIDO
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Plano Mensal Flexível
+                    </h3>
+                    <div className="text-3xl font-bold text-blue-600 mb-1">
+                      R$ 297,00
                     </div>
-                  )}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Mensal
-                  </h3>
-                  <div className="text-3xl font-bold text-blue-600 mb-1">
-                    R$ 297,00
+                    <div className="text-sm text-gray-600">/mês</div>
+                    <p className="text-sm text-gray-600 mt-4">
+                      Liberdade para cancelar quando quiser
+                    </p>
                   </div>
-                  <div className="text-sm text-gray-600">/mês</div>
                 </div>
-              </button>
-
-              {/* Plano Anual */}
-              <button
-                onClick={() => setPlanType('annual')}
-                className={`p-6 rounded-lg border-2 transition-all relative ${
-                  planType === 'annual'
-                    ? 'border-blue-500 bg-blue-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30'
-                }`}
+              ) : (
+                <div className="p-6 rounded-lg border-2 border-blue-500 bg-blue-50 shadow-md relative">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    PLANO ESCOLHIDO
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Plano Anual Fidelidade
+                    </h3>
+                    <div className="text-3xl font-bold text-blue-600 mb-1">
+                      12× de R$ 197
+                    </div>
+                    <div className="text-sm text-gray-600 mb-2">Total: R$ 2.364,00/ano</div>
+                    <p className="text-sm text-gray-600 mt-4">
+                      Compromisso anual com economia clara
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="text-center mt-4">
+              <Link 
+                href="/pt/nutri#oferta"
+                className="text-sm text-blue-600 hover:text-blue-700 underline"
               >
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  RECOMENDADO
-                </div>
-                {planType === 'annual' && (
-                  <div className="absolute -top-3 right-4 bg-blue-700 text-white text-xs font-bold px-2 py-1 rounded">
-                    SELECIONADO
-                  </div>
-                )}
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Anual
-                  </h3>
-                  <div className="text-3xl font-bold text-blue-600 mb-1">
-                    R$ 197
-                  </div>
-                  <div className="text-sm text-gray-600">/mês</div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 2.364,00/ano (12× de R$ 197)
-                  </div>
-                </div>
-              </button>
+                Quer mudar de plano? Voltar para escolha
+              </Link>
             </div>
           </div>
 
@@ -364,5 +342,6 @@ export default function NutriCheckoutPage() {
     </div>
   )
 }
+
 
 
