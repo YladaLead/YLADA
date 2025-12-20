@@ -116,8 +116,10 @@ export default function NutriCheckoutPage() {
         signal: controller.signal,
         body: JSON.stringify({ 
           planType,
+          productType: planType === 'annual' ? 'platform_annual' : 'platform_monthly',
           language: 'pt', // Idioma português para Brasil
           email: userEmail, // E-mail (obrigatório mesmo se autenticado)
+          paymentMethod: 'auto'
         }),
       })
 

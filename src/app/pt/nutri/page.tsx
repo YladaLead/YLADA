@@ -17,58 +17,12 @@ export default function NutriLandingPage() {
     setLyaWidgetOpen(true)
   }
 
-  const handleCheckout = async (planType: 'annual' | 'monthly') => {
-    try {
-      console.log('🛒 Iniciando checkout:', planType)
-      
-      // Coletar e-mail se não estiver autenticado (para mobile)
-      let email = ''
-      if (typeof window !== 'undefined') {
-        // Tentar obter e-mail do localStorage ou prompt
-        const storedEmail = localStorage.getItem('checkout_email')
-        if (storedEmail) {
-          email = storedEmail
-        } else {
-          // No mobile, pode ser necessário coletar e-mail
-          // Por enquanto, vamos tentar sem e-mail e ver se funciona
-          console.log('ℹ️ E-mail não fornecido - tentando sem autenticação')
-        }
-      }
-      
-      const response = await fetch('/api/nutri/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          planType,
-          productType: planType === 'annual' ? 'platform_annual' : 'platform_monthly',
-          paymentMethod: 'auto',
-          language: 'pt',
-          ...(email && { email }) // Incluir e-mail apenas se fornecido
-        })
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
-        console.error('❌ Erro na resposta:', errorData)
-        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`)
-      }
-      
-      const data = await response.json()
-      console.log('📦 Resposta checkout:', data)
-      
-      if (data.url) {
-        // Usar window.location.assign para melhor compatibilidade mobile
-        window.location.assign(data.url)
-      } else {
-        console.error('❌ URL não retornada:', data)
-        throw new Error('URL de checkout não retornada pela API')
-      }
-    } catch (error: any) {
-      console.error('❌ Erro no checkout:', error)
-      const errorMessage = error.message || 'Erro ao processar pagamento. Tente novamente.'
-      alert(errorMessage)
-    }
+  const handleCheckout = (planType: 'annual' | 'monthly') => {
+    // Redirecionar para página de checkout dedicada (mais confiável no mobile)
+    // A página de checkout coleta e-mail e processa o pagamento
+    const checkoutUrl = `/pt/nutri/checkout?plan=${planType}`
+    console.log('🛒 Redirecionando para checkout:', checkoutUrl)
+    window.location.href = checkoutUrl
   }
 
   return (
