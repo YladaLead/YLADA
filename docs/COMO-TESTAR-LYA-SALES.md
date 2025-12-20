@@ -51,7 +51,7 @@ OPENAI_ASSISTANT_LYA_ID=asst_xxxxxxxxxxxxx
 
 2. **Verificar se o botão aparece:**
    - Deve ter um botão fixo no canto inferior direito
-   - Texto: "💬 Tirar dúvida com uma consultora"
+   - Texto: "💬 Fale Conosco"
    - Cor: Azul (`#0B57FF`)
 
 3. **Clicar no botão:**
@@ -438,6 +438,9 @@ Se todos os testes passarem, a LYA Sales está funcionando corretamente e pronta
 
 **Última atualização:** 2024-12-16
 **Versão:** 1.0.0
+
+
+
 
 
 

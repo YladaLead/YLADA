@@ -1138,7 +1138,7 @@ export default function NutriLandingPage() {
         style={{ bottom: '80px', zIndex: 40 }}
       >
         <span className="text-xl sm:text-2xl">💬</span>
-        <span>Tirar dúvida com uma consultora</span>
+        <span>Fale Conosco</span>
       </button>
 
       {/* Widget LYA IA Vendedora */}
