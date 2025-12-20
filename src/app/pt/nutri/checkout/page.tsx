@@ -336,6 +336,15 @@ export default function NutriCheckoutPage() {
             <p className="text-xs text-gray-500 mt-2">
               Ao continuar, você será redirecionado para a página de pagamento segura
             </p>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-xs text-blue-800 font-medium mb-1">
+                💡 Dica: PIX e Boleto disponíveis
+              </p>
+              <p className="text-xs text-blue-700">
+                No checkout do Mercado Pago, você verá as opções: <strong>Cartão, PIX e Boleto</strong> na tela inicial. 
+                Se não aparecer, clique em "Voltar" para ver todas as opções.
+              </p>
+            </div>
           </div>
         </div>
       </main>
