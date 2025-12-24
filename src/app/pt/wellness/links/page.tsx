@@ -698,14 +698,6 @@ function LinksUnificadosPageContent() {
 
   // Funções para HOM Gravada
   const linkYouTubeHOM = 'https://youtu.be/Uva_4zHdcqQ'
-  
-  // Gerar link próprio da HOM (como as ferramentas)
-  const gerarLinkHOM = (): string | null => {
-    if (!profile?.userSlug) {
-      return null
-    }
-    return buildWellnessToolUrl(profile.userSlug, 'hom')
-  }
 
   const copiarMensagemCompletaHOM = async () => {
     const linkHOM = gerarLinkHOM()
