@@ -171,7 +171,7 @@ export default function QuizPreTreino({ config = defaultConfig }: { config?: Tem
   if (etapa === 'landing') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <WellnessLanding
           title="🏋️ Qual o Pré-Treino Perfeito Para Você?"
           description="Descubra em 2 minutos se você precisa de energia leve ou forte para seus treinos e encontre a solução ideal"
@@ -191,7 +191,7 @@ export default function QuizPreTreino({ config = defaultConfig }: { config?: Tem
   if (etapa === 'resultado' && resultado) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-3xl font-bold mb-4">Seu Resultado</h2>

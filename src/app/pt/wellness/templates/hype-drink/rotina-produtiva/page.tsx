@@ -220,7 +220,7 @@ export default function QuizRotinaProdutiva({ config = defaultConfig }: { config
   if (etapa === 'landing') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-yellow-50 to-orange-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <WellnessLanding
           title="📈 Como Ter Uma Rotina Mais Produtiva?"
           description="Em 2 minutos, descubra o que está sabotando sua produtividade e como criar uma rotina que realmente funciona"
@@ -240,7 +240,7 @@ export default function QuizRotinaProdutiva({ config = defaultConfig }: { config
   if (etapa === 'resultado' && resultado) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-yellow-50 to-orange-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-3xl font-bold mb-4">Seu Resultado</h2>

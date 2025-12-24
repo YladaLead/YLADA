@@ -174,7 +174,7 @@ export default function QuizConstancia({ config = defaultConfig }: { config?: Te
   if (etapa === 'landing') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <WellnessLanding
           title="🎯 Por Que Você Não Consegue Manter a Rotina?"
           description="Descubra em 2 minutos o que está impedindo você de manter uma rotina constante e como resolver isso de forma simples"
@@ -194,7 +194,7 @@ export default function QuizConstancia({ config = defaultConfig }: { config?: Te
   if (etapa === 'resultado' && resultado) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-3xl font-bold mb-4">Seu Resultado</h2>

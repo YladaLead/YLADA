@@ -223,7 +223,7 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
   if (etapa === 'landing') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <WellnessLanding
           title="⚡ Descubra Como Ter Mais Energia o Dia Todo!"
           description="Em apenas 2 minutos, descubra o que está roubando sua energia e como recuperá-la de forma natural e sustentável"
@@ -243,7 +243,7 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
   if (etapa === 'resultado' && resultado) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
-        <WellnessHeader config={config} />
+        <WellnessHeader showLogoOnly={true} />
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-3xl font-bold mb-4">Seu Resultado</h2>
