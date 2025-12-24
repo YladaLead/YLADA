@@ -19,14 +19,7 @@ import { ToastContainer } from '@/components/ui/Toast'
 
 // Lazy load dos previews
 const DynamicTemplatePreview = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { ssr: false })
-
-// Templates Hype Drink para preview
-const TemplateHypeEnergiaFoco = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/energia-foco/page'), { ssr: false })
-const TemplateHypePreTreino = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/pre-treino/page'), { ssr: false })
-const TemplateHypeRotinaProdutiva = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/rotina-produtiva/page'), { ssr: false })
-const TemplateHypeConstancia = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/constancia/page'), { ssr: false })
-const TemplateHypeConsumoCafeina = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/consumo-cafeina/page'), { ssr: false })
-const TemplateHypeCustoEnergia = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/custo-energia/page'), { ssr: false })
+const WellnessLanding = dynamic(() => import('@/components/wellness/WellnessLanding'), { ssr: false })
 
 interface Template {
   id: string
@@ -1019,7 +1012,7 @@ Você vai adorar! 😊`
                     ✕
                   </button>
                 </div>
-                <div className="p-6">
+                <div className={item.metadata?.isHype ? 'p-0 overflow-hidden' : 'p-6'}>
                   {/* Preview do conteúdo completo */}
                   {item.metadata?.isQuiz && item.metadata?.template ? (
                     (() => {
@@ -1201,8 +1194,9 @@ Você vai adorar! 😊`
                     </div>
                   ) : item.metadata?.isHype ? (
                     (() => {
-                      // Renderizar template real do Hype Drink
+                      // Renderizar apenas o WellnessLanding para preview (sem header duplicado)
                       const slug = item.metadata?.template?.slug || item.id.replace('hype-', '')
+                      
                       const config = {
                         id: item.id,
                         name: item.nome,
@@ -1213,31 +1207,124 @@ Você vai adorar! 😊`
                         country_code: profile?.countryCode || 'BR'
                       }
                       
-                      switch (slug) {
-                        case 'energia-foco':
-                          return <TemplateHypeEnergiaFoco config={config} />
-                        case 'pre-treino':
-                          return <TemplateHypePreTreino config={config} />
-                        case 'rotina-produtiva':
-                          return <TemplateHypeRotinaProdutiva config={config} />
-                        case 'constancia':
-                          return <TemplateHypeConstancia config={config} />
-                        case 'consumo-cafeina':
-                          return <TemplateHypeConsumoCafeina config={config} />
-                        case 'custo-energia':
-                          return <TemplateHypeCustoEnergia config={config} />
-                        default:
-                          return (
-                            <div className="p-6">
-                              <h3 className="text-xl font-bold text-gray-900 mb-4">{item.icon} {item.nome}</h3>
-                              <p className="text-gray-700">{item.descricao}</p>
-                              <div className="mt-4 p-4 bg-white rounded border border-gray-200">
-                                <p className="text-xs text-gray-500 mb-2">Link:</p>
-                                <code className="text-sm text-gray-700 break-all">{item.link}</code>
+                      // Renderizar apenas a landing page de cada template
+                      const renderLanding = () => {
+                        switch (slug) {
+                          case 'energia-foco':
+                            return (
+                              <WellnessLanding
+                                config={config}
+                                title="⚡ Descubra Como Ter Mais Energia o Dia Todo!"
+                                description="Em apenas 2 minutos, descubra o que está roubando sua energia e como recuperá-la de forma natural e sustentável"
+                                benefits={[
+                                  'Identifique exatamente quando sua energia mais cai',
+                                  'Descubra alternativas ao café excessivo que causam ansiedade',
+                                  'Receba um plano personalizado para sua rotina',
+                                  'Conheça uma solução prática e natural para mais energia'
+                                ]}
+                                onStart={() => {}}
+                                ctaText="▶️ Descobrir Minha Energia Agora - É Grátis!"
+                              />
+                            )
+                          case 'pre-treino':
+                            return (
+                              <WellnessLanding
+                                config={config}
+                                title="🏋️ Qual o Pré-Treino Perfeito Para Você?"
+                                description="Descubra em 2 minutos se você precisa de energia leve ou forte para seus treinos e encontre a solução ideal"
+                                benefits={[
+                                  'Identifique seu perfil de treino e necessidades',
+                                  'Descubra se pré-treinos fortes causam ansiedade',
+                                  'Conheça uma alternativa leve e natural',
+                                  'Receba um plano personalizado para seus treinos'
+                                ]}
+                                onStart={() => {}}
+                                ctaText="▶️ Descobrir Meu Pré-Treino Ideal - Grátis!"
+                              />
+                            )
+                          case 'rotina-produtiva':
+                            return (
+                              <WellnessLanding
+                                config={config}
+                                title="📈 Como Ter Uma Rotina Mais Produtiva?"
+                                description="Em 2 minutos, descubra o que está sabotando sua produtividade e como criar uma rotina que realmente funciona"
+                                benefits={[
+                                  'Identifique os pontos que atrapalham sua produtividade',
+                                  'Descubra como manter energia constante o dia todo',
+                                  'Receba estratégias práticas para sua rotina',
+                                  'Conheça uma solução natural para mais foco e energia'
+                                ]}
+                                onStart={() => {}}
+                                ctaText="▶️ Melhorar Minha Produtividade Agora - Grátis!"
+                              />
+                            )
+                          case 'constancia':
+                            return (
+                              <WellnessLanding
+                                config={config}
+                                title="🎯 Por Que Você Não Consegue Manter a Rotina?"
+                                description="Descubra em 2 minutos o que está impedindo você de manter uma rotina constante e como resolver isso de forma simples"
+                                benefits={[
+                                  'Identifique os obstáculos que quebram sua rotina',
+                                  'Descubra como facilitar hábitos diários',
+                                  'Receba um plano prático para manter constância',
+                                  'Conheça uma solução que facilita sua rotina diária'
+                                ]}
+                                onStart={() => {}}
+                                ctaText="▶️ Descobrir Como Manter Rotina - Grátis!"
+                              />
+                            )
+                          case 'consumo-cafeina':
+                            return (
+                              <WellnessLanding
+                                config={config}
+                                title="☕ Você Está Exagerando no Café?"
+                                description="Descubra em 1 minuto se seu consumo de cafeína está causando ansiedade, insônia ou dependência - e encontre alternativas melhores"
+                                benefits={[
+                                  'Calcule exatamente quanto café você consome por dia',
+                                  'Descubra se está acima do recomendado (e os riscos)',
+                                  'Conheça alternativas que não causam ansiedade',
+                                  'Receba um plano para reduzir dependência de forma inteligente'
+                                ]}
+                                onStart={() => {}}
+                                ctaText="▶️ Calcular Meu Consumo Agora - Grátis!"
+                              />
+                            )
+                          case 'custo-energia':
+                            return (
+                              <WellnessLanding
+                                config={config}
+                                title="💰 Quanto a Falta de Energia Está Custando?"
+                                description="Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso"
+                                benefits={[
+                                  'Calcule quantas horas você perde por falta de energia',
+                                  'Descubra o custo financeiro real da baixa produtividade',
+                                  'Veja quanto você poderia ganhar com mais energia',
+                                  'Receba um plano para aumentar sua performance e renda'
+                                ]}
+                                onStart={() => {}}
+                                ctaText="▶️ Calcular Meu Custo Agora - Grátis!"
+                              />
+                            )
+                          default:
+                            return (
+                              <div className="p-6">
+                                <h3 className="text-xl font-bold text-gray-900 mb-4">{item.icon} {item.nome}</h3>
+                                <p className="text-gray-700">{item.descricao}</p>
+                                <div className="mt-4 p-4 bg-white rounded border border-gray-200">
+                                  <p className="text-xs text-gray-500 mb-2">Link:</p>
+                                  <code className="text-sm text-gray-700 break-all">{item.link}</code>
+                                </div>
                               </div>
-                            </div>
-                          )
+                            )
+                        }
                       }
+                      
+                      return (
+                        <div className="p-6">
+                          {renderLanding()}
+                        </div>
+                      )
                     })()
                   ) : item.metadata?.fluxo ? (
                     <div>
