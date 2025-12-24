@@ -218,6 +218,14 @@ function LinksUnificadosPageContent() {
     return buildWellnessToolUrl(profile.userSlug, slug)
   }
 
+  // Gerar link próprio da HOM (como as ferramentas)
+  const gerarLinkHOM = (): string | null => {
+    if (!profile?.userSlug) {
+      return null
+    }
+    return buildWellnessToolUrl(profile.userSlug, 'hom')
+  }
+
   // Função para remover duplicatas - manter apenas um template por nome
   const removerDuplicatas = (templatesList: Template[]): Template[] => {
     const seen = new Map<string, Template>()
@@ -394,6 +402,28 @@ function LinksUnificadosPageContent() {
 
   // Unificar todos os itens (recalcular quando profile mudar)
   const itensUnificados: ItemUnificado[] = useMemo(() => [
+    // HOM ao vivo
+    {
+      id: 'hom-agendadas',
+      nome: 'HOM ao vivo',
+      tipo: 'fluxo-recrutamento' as const,
+      categoria: 'Recrutamento',
+      link: `${baseUrl}/pt/wellness/system/recrutar/enviar-link`,
+      descricao: 'Segunda-feira às 20h • Quarta-feira às 9h',
+      icon: '📅',
+      metadata: { tipo: 'hom-agendadas' }
+    },
+    // HOM gravada
+    {
+      id: 'hom-gravada',
+      nome: 'Link da HOM gravada',
+      tipo: 'fluxo-recrutamento' as const,
+      categoria: 'Recrutamento',
+      link: gerarLinkHOM() || '',
+      descricao: 'Oportunidade: Bebidas Funcionais',
+      icon: '🎥',
+      metadata: { tipo: 'hom-gravada', linkHOM: gerarLinkHOM() }
+    },
     // Quizzes de Recrutamento (os 3 específicos)
     ...quizzesRecrutamento.map(t => ({
       id: `recrutamento-quiz-${t.id}`,
@@ -489,7 +519,7 @@ function LinksUnificadosPageContent() {
         metadata: { fluxo: f }
       }
     })
-  ], [templates, profile?.userSlug, ferramentasUsuario, templatesHype])
+  ], [templates, profile?.userSlug, ferramentasUsuario, templatesHype, baseUrl])
 
   // Debug: verificar quantos itens foram unificados
   useEffect(() => {
@@ -819,205 +849,6 @@ Você vai adorar! 😊`
               >
                 🥤 HYPE
               </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Links HOM - Como os quizzes, com botões funcionais */}
-        <div className="max-w-7xl mx-auto mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* HOM - Apresentações Agendadas (Ao Vivo) */}
-            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="text-4xl">📅</div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">
-                    HOM ao vivo
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Recrutamento
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Segunda-feira às 20h • Quarta-feira às 9h
-              </p>
-              
-              {/* Quatro Botões - Grid 2x2 */}
-              <div className="grid grid-cols-2 gap-2">
-                {/* Botão Preview */}
-                <button
-                  onClick={() => abrirPreview({
-                    id: 'hom-agendadas',
-                    nome: 'HOM ao vivo',
-                    tipo: 'fluxo-recrutamento' as const,
-                    categoria: 'Recrutamento',
-                    link: '/pt/wellness/system/recrutar/enviar-link',
-                    descricao: 'Segunda-feira às 20h • Quarta-feira às 9h',
-                    icon: '📅',
-                    metadata: { tipo: 'hom-agendadas' }
-                  })}
-                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
-                >
-                  👁️ Preview
-                </button>
-                
-                {/* Botão Copiar Link */}
-                <button
-                  onClick={(e) => {
-                    copiarLink('/pt/wellness/system/recrutar/enviar-link', 'hom-agendadas', e)
-                  }}
-                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                    linkCopiado === 'hom-agendadas'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-green-600 hover:bg-green-700 text-white'
-                  }`}
-                >
-                  {linkCopiado === 'hom-agendadas' ? '✓ Copiado!' : '📋 Copiar Link'}
-                </button>
-                
-                {/* Botão Copiar QR Code */}
-                <button
-                  onClick={(e) => {
-                    copiarQRCode('/pt/wellness/system/recrutar/enviar-link', 'hom-agendadas', e)
-                  }}
-                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                    qrCopiado === 'hom-agendadas'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-purple-600 hover:bg-purple-700 text-white'
-                  }`}
-                >
-                  {qrCopiado === 'hom-agendadas' ? '✓ Copiado!' : '📱 Copiar QR'}
-                </button>
-
-                {/* Botão Ver Scripts */}
-                <button
-                  onClick={() => {
-                    setScriptsAberto({
-                      nome: 'HOM Gravada',
-                      slug: 'hom',
-                      icon: '📅',
-                      link: `${baseUrl}/pt/wellness/system/recrutar/enviar-link`
-                    })
-                  }}
-                  className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors"
-                >
-                  📝 Scripts
-                </button>
-              </div>
-              
-              {/* Link */}
-              <p className="text-xs text-gray-400 mt-2 truncate" title={`${baseUrl}/pt/wellness/system/recrutar/enviar-link`}>
-                {`${baseUrl}/pt/wellness/system/recrutar/enviar-link`.replace(/^https?:\/\//, '')}
-              </p>
-            </div>
-
-            {/* HOM - Apresentação Gravada */}
-            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="text-4xl">🎥</div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">
-                    Link da HOM gravada
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Recrutamento
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Oportunidade: Bebidas Funcionais
-              </p>
-              
-              {/* Quatro Botões - Grid 2x2 */}
-              <div className="grid grid-cols-2 gap-2">
-                {/* Botão Preview */}
-                <button
-                  onClick={() => {
-                    const linkHOM = gerarLinkHOM()
-                    if (linkHOM) {
-                      abrirPreview({
-                        id: 'hom-gravada',
-                        nome: 'Link da HOM gravada',
-                        tipo: 'fluxo-recrutamento' as const,
-                        categoria: 'Recrutamento',
-                        link: linkHOM,
-                        descricao: 'Oportunidade: Bebidas Funcionais',
-                        icon: '🎥',
-                        metadata: { tipo: 'hom-gravada', linkHOM }
-                      })
-                    } else {
-                      alert('⚠️ Configure seu user_slug no perfil para gerar o link da HOM.')
-                    }
-                  }}
-                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
-                >
-                  👁️ Preview
-                </button>
-                
-                {/* Botão Copiar Link (copia mensagem completa) */}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    copiarMensagemCompletaHOM()
-                  }}
-                  disabled={!gerarLinkHOM()}
-                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                    !gerarLinkHOM()
-                      ? 'bg-gray-400 text-white cursor-not-allowed'
-                      : homMensagemCopiada
-                      ? 'bg-green-600 text-white'
-                      : 'bg-green-600 hover:bg-green-700 text-white'
-                  }`}
-                >
-                  {homMensagemCopiada ? '✓ Copiado!' : '📋 Copiar Link'}
-                </button>
-                
-                {/* Botão Copiar QR Code */}
-                <button
-                  onClick={(e) => {
-                    const linkHOM = gerarLinkHOM()
-                    if (linkHOM) {
-                      copiarQRCode(linkHOM, 'hom-gravada', e)
-                    } else {
-                      alert('⚠️ Configure seu user_slug no perfil para gerar o link da HOM.')
-                    }
-                  }}
-                  disabled={!gerarLinkHOM()}
-                  className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                    !gerarLinkHOM()
-                      ? 'bg-gray-400 text-white cursor-not-allowed'
-                      : qrCopiado === 'hom-gravada'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-purple-600 hover:bg-purple-700 text-white'
-                  }`}
-                >
-                  {qrCopiado === 'hom-gravada' ? '✓ Copiado!' : '📱 Copiar QR'}
-                </button>
-
-                {/* Botão Ver Scripts */}
-                <button
-                  onClick={() => {
-                    setScriptsAberto({
-                      nome: 'HOM Gravada',
-                      slug: 'hom-gravada',
-                      icon: '🎥',
-                      link: gerarLinkHOM() || undefined
-                    })
-                  }}
-                  className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-lg transition-colors"
-                >
-                  📝 Scripts
-                </button>
-              </div>
-              
-              {/* Link */}
-              {gerarLinkHOM() && (
-                <p className="text-xs text-gray-400 mt-2 truncate" title={gerarLinkHOM() || ''}>
-                  {gerarLinkHOM()?.replace(/^https?:\/\//, '')}
-                </p>
-              )}
             </div>
           </div>
         </div>
