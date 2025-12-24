@@ -10,6 +10,8 @@ export { calculadoraImcDiagnosticos } from './wellness/calculadora-imc'
 export { calculadoraProteinaDiagnosticos } from './wellness/calculadora-proteina'
 export { calculadoraAguaDiagnosticos } from './wellness/calculadora-agua'
 export { calculadoraCaloriasDiagnosticos } from './wellness/calculadora-calorias'
+export { calcConsumoCafeinaDiagnosticos } from './wellness/calc-consumo-cafeina'
+export { calcCustoEnergiaDiagnosticos } from './wellness/calc-custo-energia'
 
 // Checklists
 export { checklistAlimentarDiagnosticos } from './wellness/checklist-alimentar'
@@ -39,6 +41,10 @@ export { alimentacaoRotinaDiagnosticos } from './wellness/alimentacao-rotina'
 export { ganhosProsperidadeDiagnosticos } from './wellness/ganhos-prosperidade'
 export { potencialCrescimentoDiagnosticos } from './wellness/potencial-crescimento'
 export { propositoEquilibrioDiagnosticos } from './wellness/proposito-equilibrio'
+export { quizEnergiaFocoDiagnosticos } from './wellness/quiz-energia-foco'
+export { quizPreTreinoDiagnosticos } from './wellness/quiz-pre-treino'
+export { quizRotinaProdutivaDiagnosticos } from './wellness/quiz-rotina-produtiva'
+export { quizConstanciaDiagnosticos } from './wellness/quiz-constancia'
 
 // Guias e Conteúdos
 export { miniEbookDiagnosticos } from './wellness/mini-ebook'
