@@ -8,38 +8,45 @@ interface WellnessLandingProps {
   config?: ToolConfig
   defaultEmoji?: string
   defaultTitle?: string
+  title?: string // Título customizado (prioridade sobre defaultTitle)
   defaultDescription?: string | React.ReactNode
+  description?: string | React.ReactNode // Descrição customizada (prioridade sobre defaultDescription)
   benefits?: string[] // "Por que usar esta ferramenta"
   benefitsTitle?: string // Título customizado para a seção de benefícios
   discover?: string[] // "O que você vai descobrir"
   onStart: () => void
   buttonText?: string
+  ctaText?: string // Texto do botão CTA
 }
 
 export default function WellnessLanding({
   config,
   defaultEmoji = '📊',
   defaultTitle = 'Ferramenta Wellness',
+  title, // Título customizado (prioridade)
   defaultDescription,
+  description, // Descrição customizada (prioridade)
   benefits = [], // "Por que usar esta ferramenta"
   benefitsTitle, // Título customizado para a seção de benefícios
   discover = [], // "O que você vai descobrir"
   onStart,
-  buttonText = '▶️ Começar Agora - É Grátis'
+  buttonText = '▶️ Começar Agora - É Grátis',
+  ctaText // Texto do botão CTA (prioridade sobre buttonText)
 }: WellnessLandingProps) {
   const emoji = config?.emoji || defaultEmoji
-  const title = config?.title || defaultTitle
-  const description = config?.description || defaultDescription
+  const finalTitle = title || config?.title || defaultTitle
+  const finalDescription = description || config?.description || defaultDescription
+  const finalButtonText = ctaText || buttonText
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">
       <div className="text-center mb-8">
         <div className="text-6xl mb-4">{emoji}</div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
-        {typeof description === 'string' ? (
-          <p className="text-xl text-gray-600 mb-6">{description}</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">{finalTitle}</h2>
+        {typeof finalDescription === 'string' ? (
+          <p className="text-xl text-gray-600 mb-6">{finalDescription}</p>
         ) : (
-          <div className="text-gray-600 mb-6">{description}</div>
+          <div className="text-gray-600 mb-6">{finalDescription}</div>
         )}
       </div>
 
@@ -81,7 +88,7 @@ export default function WellnessLanding({
           textShadow: '0 1px 2px rgba(0,0,0,0.2)'
         }}
       >
-        {buttonText}
+        {finalButtonText}
       </button>
     </div>
   )

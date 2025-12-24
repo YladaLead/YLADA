@@ -126,16 +126,16 @@ export default function CalculadoraCustoEnergia({ config = defaultConfig }: { co
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
         <WellnessHeader config={config} />
         <WellnessLanding
-          title="Calcule o custo da falta de energia"
-          description="Uma calculadora para identificar o impacto da falta de energia na sua produtividade e como o Hype Drink pode ajudar"
+          title="💰 Quanto a Falta de Energia Está Custando?"
+          description="Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso"
           benefits={[
-            'Identifique horas improdutivas por falta de energia',
-            'Calcule o custo financeiro da baixa produtividade',
-            'Descubra como aumentar sua performance',
-            'Receba recomendações personalizadas'
+            'Calcule quantas horas você perde por falta de energia',
+            'Descubra o custo financeiro real da baixa produtividade',
+            'Veja quanto você poderia ganhar com mais energia',
+            'Receba um plano para aumentar sua performance e renda'
           ]}
           onStart={iniciarCalculo}
-          ctaText="Calcular Agora"
+          ctaText="▶️ Calcular Meu Custo Agora - Grátis!"
         />
       </div>
     )

@@ -173,16 +173,16 @@ export default function QuizPreTreino({ config = defaultConfig }: { config?: Tem
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
         <WellnessHeader config={config} />
         <WellnessLanding
-          title="Descubra o pré-treino ideal para você"
-          description="Um quiz para identificar se você precisa de um pré-treino leve ou forte e conhecer o Hype Drink como alternativa"
+          title="🏋️ Qual o Pré-Treino Perfeito Para Você?"
+          description="Descubra em 2 minutos se você precisa de energia leve ou forte para seus treinos e encontre a solução ideal"
           benefits={[
-            'Identifique seu perfil de treino',
-            'Descubra se pré-treinos fortes são adequados',
-            'Conheça alternativas mais leves',
-            'Receba recomendações personalizadas'
+            'Identifique seu perfil de treino e necessidades',
+            'Descubra se pré-treinos fortes causam ansiedade',
+            'Conheça uma alternativa leve e natural',
+            'Receba um plano personalizado para seus treinos'
           ]}
           onStart={iniciarQuiz}
-          ctaText="Começar Quiz"
+          ctaText="▶️ Descobrir Meu Pré-Treino Ideal - Grátis!"
         />
       </div>
     )

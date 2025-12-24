@@ -222,16 +222,16 @@ export default function QuizRotinaProdutiva({ config = defaultConfig }: { config
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-yellow-50 to-orange-50">
         <WellnessHeader config={config} />
         <WellnessLanding
-          title="Descubra como melhorar sua rotina produtiva"
-          description="Um quiz para identificar como melhorar sua produtividade e constância com o apoio do Hype Drink"
+          title="📈 Como Ter Uma Rotina Mais Produtiva?"
+          description="Em 2 minutos, descubra o que está sabotando sua produtividade e como criar uma rotina que realmente funciona"
           benefits={[
-            'Identifique pontos de melhoria na sua rotina',
-            'Descubra como manter produtividade constante',
-            'Receba recomendações personalizadas',
-            'Conheça o Hype Drink e seus benefícios'
+            'Identifique os pontos que atrapalham sua produtividade',
+            'Descubra como manter energia constante o dia todo',
+            'Receba estratégias práticas para sua rotina',
+            'Conheça uma solução natural para mais foco e energia'
           ]}
           onStart={iniciarQuiz}
-          ctaText="Começar Quiz"
+          ctaText="▶️ Melhorar Minha Produtividade Agora - Grátis!"
         />
       </div>
     )

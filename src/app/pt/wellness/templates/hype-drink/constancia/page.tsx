@@ -176,16 +176,16 @@ export default function QuizConstancia({ config = defaultConfig }: { config?: Te
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <WellnessHeader config={config} />
         <WellnessLanding
-          title="Descubra como manter constância na sua rotina"
-          description="Um quiz para identificar como manter uma rotina saudável todos os dias com o apoio do Hype Drink"
+          title="🎯 Por Que Você Não Consegue Manter a Rotina?"
+          description="Descubra em 2 minutos o que está impedindo você de manter uma rotina constante e como resolver isso de forma simples"
           benefits={[
-            'Identifique o que atrapalha sua constância',
-            'Descubra como facilitar a rotina diária',
-            'Receba recomendações personalizadas',
-            'Conheça o Hype Drink como facilitador'
+            'Identifique os obstáculos que quebram sua rotina',
+            'Descubra como facilitar hábitos diários',
+            'Receba um plano prático para manter constância',
+            'Conheça uma solução que facilita sua rotina diária'
           ]}
           onStart={iniciarQuiz}
-          ctaText="Começar Quiz"
+          ctaText="▶️ Descobrir Como Manter Rotina - Grátis!"
         />
       </div>
     )

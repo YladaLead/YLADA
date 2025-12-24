@@ -123,16 +123,16 @@ export default function CalculadoraConsumoCafeina({ config = defaultConfig }: { 
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
         <WellnessHeader config={config} />
         <WellnessLanding
-          title="Calcule seu consumo de cafeína"
-          description="Uma calculadora para identificar se seu consumo de cafeína está adequado e conhecer alternativas como o Hype Drink"
+          title="☕ Você Está Exagerando no Café?"
+          description="Descubra em 1 minuto se seu consumo de cafeína está causando ansiedade, insônia ou dependência - e encontre alternativas melhores"
           benefits={[
-            'Identifique seu consumo diário de cafeína',
-            'Descubra se está dentro do recomendado',
-            'Conheça alternativas mais equilibradas',
-            'Receba recomendações personalizadas'
+            'Calcule exatamente quanto café você consome por dia',
+            'Descubra se está acima do recomendado (e os riscos)',
+            'Conheça alternativas que não causam ansiedade',
+            'Receba um plano para reduzir dependência de forma inteligente'
           ]}
           onStart={iniciarCalculo}
-          ctaText="Calcular Agora"
+          ctaText="▶️ Calcular Meu Consumo Agora - Grátis!"
         />
       </div>
     )

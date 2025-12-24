@@ -225,16 +225,16 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
         <WellnessHeader config={config} />
         <WellnessLanding
-          title="Descubra como melhorar sua energia e foco"
-          description="Um quiz rápido para identificar seu nível de energia e foco ao longo do dia e receber recomendações personalizadas sobre o Hype Drink"
+          title="⚡ Descubra Como Ter Mais Energia o Dia Todo!"
+          description="Em apenas 2 minutos, descubra o que está roubando sua energia e como recuperá-la de forma natural e sustentável"
           benefits={[
-            'Identifique quando sua energia mais cai',
-            'Descubra alternativas ao café excessivo',
-            'Receba recomendações personalizadas',
-            'Conheça o Hype Drink e seus benefícios'
+            'Identifique exatamente quando sua energia mais cai',
+            'Descubra alternativas ao café excessivo que causam ansiedade',
+            'Receba um plano personalizado para sua rotina',
+            'Conheça uma solução prática e natural para mais energia'
           ]}
           onStart={iniciarQuiz}
-          ctaText="Começar Quiz"
+          ctaText="▶️ Descobrir Minha Energia Agora - É Grátis!"
         />
       </div>
     )
