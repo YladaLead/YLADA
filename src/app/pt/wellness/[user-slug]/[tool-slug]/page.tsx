@@ -71,6 +71,14 @@ const TemplateStory = dynamic(() => import('@/app/pt/wellness/templates/story-in
 // ⚠️ Template "Cardápio Detox" removido conforme solicitado
 const TemplateInitialAssessment = dynamic(() => import('@/app/pt/wellness/templates/initial-assessment/page'), { ssr: false })
 
+// Templates Hype Drink
+const TemplateHypeEnergiaFoco = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/energia-foco/page'), { ssr: false })
+const TemplateHypePreTreino = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/pre-treino/page'), { ssr: false })
+const TemplateHypeRotinaProdutiva = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/rotina-produtiva/page'), { ssr: false })
+const TemplateHypeConstancia = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/constancia/page'), { ssr: false })
+const TemplateHypeConsumoCafeina = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/consumo-cafeina/page'), { ssr: false })
+const TemplateHypeCustoEnergia = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/custo-energia/page'), { ssr: false })
+
 export default function FerramentaPersonalizadaPage() {
   const params = useParams()
   const router = useRouter()
@@ -81,9 +89,86 @@ export default function FerramentaPersonalizadaPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Verificar se é um template do Hype Drink (não precisa buscar no banco)
+  const isHypeDrinkTemplate = (slug: string): boolean => {
+    const hypeSlugs = [
+      'quiz-energia-foco',
+      'quiz-pre-treino',
+      'quiz-rotina-produtiva',
+      'quiz-constancia',
+      'calc-consumo-cafeina',
+      'calc-custo-energia'
+    ]
+    return hypeSlugs.includes(slug)
+  }
+
   useEffect(() => {
-    carregarFerramenta()
+    // Se for template do Hype Drink, buscar perfil do usuário para config
+    if (isHypeDrinkTemplate(toolSlug)) {
+      carregarPerfilUsuario()
+    } else {
+      carregarFerramenta()
+    }
   }, [userSlug, toolSlug])
+
+  const carregarPerfilUsuario = async () => {
+    try {
+      setLoading(true)
+      // Buscar perfil público do usuário para obter configurações (whatsapp, etc)
+      const response = await fetch(`/api/wellness/profile/by-slug?user_slug=${userSlug}`)
+      
+      let whatsapp = ''
+      let countryCode = 'BR'
+      
+      if (response.ok) {
+        const data = await response.json()
+        whatsapp = data.profile?.whatsapp || ''
+        countryCode = data.profile?.countryCode || 'BR'
+      }
+      
+      // Criar objeto mock para templates do Hype Drink
+      setTool({
+        id: `hype-${toolSlug}`,
+        title: 'Hype Drink',
+        description: 'Template Hype Drink',
+        emoji: '🥤',
+        custom_colors: {
+          principal: '#fbbf24',
+          secundaria: '#f59e0b'
+        },
+        cta_type: 'whatsapp',
+        whatsapp_number: whatsapp,
+        cta_button_text: 'Falar com Especialista',
+        template_slug: toolSlug,
+        user_profiles: {
+          user_slug: userSlug,
+          country_code: countryCode
+        }
+      } as Tool)
+    } catch (err: any) {
+      console.error('Erro ao carregar perfil:', err)
+      // Criar tool básico mesmo em caso de erro
+      setTool({
+        id: `hype-${toolSlug}`,
+        title: 'Hype Drink',
+        description: 'Template Hype Drink',
+        emoji: '🥤',
+        custom_colors: {
+          principal: '#fbbf24',
+          secundaria: '#f59e0b'
+        },
+        cta_type: 'whatsapp',
+        cta_button_text: 'Falar com Especialista',
+        template_slug: toolSlug,
+        user_profiles: {
+          user_slug: userSlug,
+          country_code: 'BR'
+        }
+      } as Tool)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const carregarFerramenta = async () => {
     try {
@@ -409,6 +494,19 @@ export default function FerramentaPersonalizadaPage() {
       case 'avaliacao-inicial':
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
+      // Templates Hype Drink
+      case 'quiz-energia-foco':
+        return <TemplateHypeEnergiaFoco config={config} />
+      case 'quiz-pre-treino':
+        return <TemplateHypePreTreino config={config} />
+      case 'quiz-rotina-produtiva':
+        return <TemplateHypeRotinaProdutiva config={config} />
+      case 'quiz-constancia':
+        return <TemplateHypeConstancia config={config} />
+      case 'calc-consumo-cafeina':
+        return <TemplateHypeConsumoCafeina config={config} />
+      case 'calc-custo-energia':
+        return <TemplateHypeCustoEnergia config={config} />
       default:
         // ✅ PADRÃO GENÉRICO: Verificar se o template tem content com questions
         // Se tiver, usar DynamicTemplatePreview automaticamente para TODOS os templates

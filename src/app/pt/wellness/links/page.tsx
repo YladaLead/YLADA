@@ -282,73 +282,72 @@ function LinksUnificadosPageContent() {
     )
   })
 
-  // Templates Hype Drink (6 templates específicos) - URLs diretas para /templates/hype-drink
+  // Templates Hype Drink (6 templates específicos) - URLs com slug do usuário
   const templatesHype = useMemo(() => {
     if (!profile?.userSlug) return []
     
-    const baseHypeUrl = `${baseUrl}/pt/wellness/templates/hype-drink`
-    return [
+    const templates = [
       {
         id: 'hype-energia-foco',
         nome: 'Quiz: Energia & Foco',
-        slug: 'energia-foco',
+        slug: 'quiz-energia-foco',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Descubra como melhorar sua energia e foco ao longo do dia',
-        icon: '⚡',
-        link: `${baseHypeUrl}/energia-foco`
+        icon: '⚡'
       },
       {
         id: 'hype-pre-treino',
         nome: 'Quiz: Pré-Treino Ideal',
-        slug: 'pre-treino',
+        slug: 'quiz-pre-treino',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Identifique o pré-treino ideal para você',
-        icon: '🏋️',
-        link: `${baseHypeUrl}/pre-treino`
+        icon: '🏋️'
       },
       {
         id: 'hype-rotina-produtiva',
         nome: 'Quiz: Rotina Produtiva',
-        slug: 'rotina-produtiva',
+        slug: 'quiz-rotina-produtiva',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Descubra como melhorar sua produtividade e constância',
-        icon: '📈',
-        link: `${baseHypeUrl}/rotina-produtiva`
+        icon: '📈'
       },
       {
         id: 'hype-constancia',
         nome: 'Quiz: Constância & Rotina',
-        slug: 'constancia',
+        slug: 'quiz-constancia',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Identifique como manter uma rotina saudável todos os dias',
-        icon: '🎯',
-        link: `${baseHypeUrl}/constancia`
+        icon: '🎯'
       },
       {
         id: 'hype-consumo-cafeina',
         nome: 'Calculadora: Consumo de Cafeína',
-        slug: 'consumo-cafeina',
+        slug: 'calc-consumo-cafeina',
         type: 'calculadora',
         categoria: 'HYPE',
         description: 'Calcule seu consumo de cafeína e identifique alternativas',
-        icon: '☕',
-        link: `${baseHypeUrl}/consumo-cafeina`
+        icon: '☕'
       },
       {
         id: 'hype-custo-energia',
         nome: 'Calculadora: Custo da Falta de Energia',
-        slug: 'custo-energia',
+        slug: 'calc-custo-energia',
         type: 'calculadora',
         categoria: 'HYPE',
         description: 'Calcule o impacto da falta de energia na sua produtividade',
-        icon: '💰',
-        link: `${baseHypeUrl}/custo-energia`
+        icon: '💰'
       }
     ]
+    
+    // Gerar links com slug do usuário (mesmo padrão dos outros fluxos)
+    return templates.map(t => ({
+      ...t,
+      link: buildWellnessToolUrl(profile.userSlug, t.slug)
+    }))
   }, [profile?.userSlug, baseUrl])
 
   // Templates de Vendas (todos os outros templates permitidos, exceto os 3 de recrutamento e os 6 de HYPE)
