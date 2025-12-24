@@ -20,6 +20,14 @@ import { ToastContainer } from '@/components/ui/Toast'
 // Lazy load dos previews
 const DynamicTemplatePreview = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { ssr: false })
 
+// Templates Hype Drink para preview
+const TemplateHypeEnergiaFoco = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/energia-foco/page'), { ssr: false })
+const TemplateHypePreTreino = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/pre-treino/page'), { ssr: false })
+const TemplateHypeRotinaProdutiva = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/rotina-produtiva/page'), { ssr: false })
+const TemplateHypeConstancia = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/constancia/page'), { ssr: false })
+const TemplateHypeConsumoCafeina = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/consumo-cafeina/page'), { ssr: false })
+const TemplateHypeCustoEnergia = dynamic(() => import('@/app/pt/wellness/templates/hype-drink/custo-energia/page'), { ssr: false })
+
 interface Template {
   id: string
   nome: string
@@ -290,7 +298,7 @@ function LinksUnificadosPageContent() {
       {
         id: 'hype-energia-foco',
         nome: 'Quiz: Energia & Foco',
-        slug: 'quiz-energia-foco',
+        slug: 'energia-foco',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Descubra como melhorar sua energia e foco ao longo do dia',
@@ -299,7 +307,7 @@ function LinksUnificadosPageContent() {
       {
         id: 'hype-pre-treino',
         nome: 'Quiz: Pré-Treino Ideal',
-        slug: 'quiz-pre-treino',
+        slug: 'pre-treino',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Identifique o pré-treino ideal para você',
@@ -308,7 +316,7 @@ function LinksUnificadosPageContent() {
       {
         id: 'hype-rotina-produtiva',
         nome: 'Quiz: Rotina Produtiva',
-        slug: 'quiz-rotina-produtiva',
+        slug: 'rotina-produtiva',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Descubra como melhorar sua produtividade e constância',
@@ -317,7 +325,7 @@ function LinksUnificadosPageContent() {
       {
         id: 'hype-constancia',
         nome: 'Quiz: Constância & Rotina',
-        slug: 'quiz-constancia',
+        slug: 'constancia',
         type: 'quiz',
         categoria: 'HYPE',
         description: 'Identifique como manter uma rotina saudável todos os dias',
@@ -326,7 +334,7 @@ function LinksUnificadosPageContent() {
       {
         id: 'hype-consumo-cafeina',
         nome: 'Calculadora: Consumo de Cafeína',
-        slug: 'calc-consumo-cafeina',
+        slug: 'consumo-cafeina',
         type: 'calculadora',
         categoria: 'HYPE',
         description: 'Calcule seu consumo de cafeína e identifique alternativas',
@@ -335,7 +343,7 @@ function LinksUnificadosPageContent() {
       {
         id: 'hype-custo-energia',
         nome: 'Calculadora: Custo da Falta de Energia',
-        slug: 'calc-custo-energia',
+        slug: 'custo-energia',
         type: 'calculadora',
         categoria: 'HYPE',
         description: 'Calcule o impacto da falta de energia na sua produtividade',
@@ -1369,30 +1377,45 @@ Você vai adorar! 😊`
                       </div>
                     </div>
                   ) : item.metadata?.isHype ? (
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">{item.icon} {item.nome}</h3>
-                      <div className="space-y-4">
-                        <p className="text-gray-700">{item.descricao}</p>
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                          <p className="text-yellow-800 font-semibold mb-2">🥤 Template Hype Drink</p>
-                          <p className="text-yellow-700 text-sm">
-                            Este template está disponível na área Hype Drink e pode ser usado para vender bebidas funcionais.
-                          </p>
-                        </div>
-                        <div className="flex gap-3 mt-4">
-                          {item.link && (
-                            <a
-                              href={item.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600"
-                            >
-                              Abrir Template →
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    (() => {
+                      // Renderizar template real do Hype Drink
+                      const slug = item.metadata?.template?.slug || item.id.replace('hype-', '')
+                      const config = {
+                        id: item.id,
+                        name: item.nome,
+                        description: item.descricao || '',
+                        slug: slug,
+                        profession: 'wellness' as const,
+                        whatsapp_number: profile?.whatsapp || '',
+                        country_code: profile?.countryCode || 'BR'
+                      }
+                      
+                      switch (slug) {
+                        case 'energia-foco':
+                          return <TemplateHypeEnergiaFoco config={config} />
+                        case 'pre-treino':
+                          return <TemplateHypePreTreino config={config} />
+                        case 'rotina-produtiva':
+                          return <TemplateHypeRotinaProdutiva config={config} />
+                        case 'constancia':
+                          return <TemplateHypeConstancia config={config} />
+                        case 'consumo-cafeina':
+                          return <TemplateHypeConsumoCafeina config={config} />
+                        case 'custo-energia':
+                          return <TemplateHypeCustoEnergia config={config} />
+                        default:
+                          return (
+                            <div className="p-6">
+                              <h3 className="text-xl font-bold text-gray-900 mb-4">{item.icon} {item.nome}</h3>
+                              <p className="text-gray-700">{item.descricao}</p>
+                              <div className="mt-4 p-4 bg-white rounded border border-gray-200">
+                                <p className="text-xs text-gray-500 mb-2">Link:</p>
+                                <code className="text-sm text-gray-700 break-all">{item.link}</code>
+                              </div>
+                            </div>
+                          )
+                      }
+                    })()
                   ) : item.metadata?.fluxo ? (
                     <div>
                       <FluxoDiagnostico

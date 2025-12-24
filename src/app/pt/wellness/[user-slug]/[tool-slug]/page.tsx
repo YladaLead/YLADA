@@ -92,12 +92,12 @@ export default function FerramentaPersonalizadaPage() {
   // Verificar se é um template do Hype Drink (não precisa buscar no banco)
   const isHypeDrinkTemplate = (slug: string): boolean => {
     const hypeSlugs = [
-      'quiz-energia-foco',
-      'quiz-pre-treino',
-      'quiz-rotina-produtiva',
-      'quiz-constancia',
-      'calc-consumo-cafeina',
-      'calc-custo-energia'
+      'energia-foco',
+      'pre-treino',
+      'rotina-produtiva',
+      'constancia',
+      'consumo-cafeina',
+      'custo-energia'
     ]
     return hypeSlugs.includes(slug)
   }
@@ -495,17 +495,17 @@ export default function FerramentaPersonalizadaPage() {
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
       // Templates Hype Drink
-      case 'quiz-energia-foco':
+      case 'energia-foco':
         return <TemplateHypeEnergiaFoco config={config} />
-      case 'quiz-pre-treino':
+      case 'pre-treino':
         return <TemplateHypePreTreino config={config} />
-      case 'quiz-rotina-produtiva':
+      case 'rotina-produtiva':
         return <TemplateHypeRotinaProdutiva config={config} />
-      case 'quiz-constancia':
+      case 'constancia':
         return <TemplateHypeConstancia config={config} />
-      case 'calc-consumo-cafeina':
+      case 'consumo-cafeina':
         return <TemplateHypeConsumoCafeina config={config} />
-      case 'calc-custo-energia':
+      case 'custo-energia':
         return <TemplateHypeCustoEnergia config={config} />
       default:
         // ✅ PADRÃO GENÉRICO: Verificar se o template tem content com questions
