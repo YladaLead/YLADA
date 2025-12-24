@@ -45,7 +45,7 @@ function LinksUnificadosPageContent() {
   const { profile, loading: loadingProfile } = useWellnessProfile()
   const [templates, setTemplates] = useState<Template[]>([])
   const [carregandoTemplates, setCarregandoTemplates] = useState(true)
-  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'recrutamento' | 'vendas'>('todos')
+  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'recrutamento' | 'vendas' | 'hype'>('todos')
   const [busca, setBusca] = useState('')
   const [previewAberto, setPreviewAberto] = useState<string | null>(null)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
@@ -282,12 +282,81 @@ function LinksUnificadosPageContent() {
     )
   })
 
-  // Templates de Vendas (todos os outros templates permitidos, exceto os 3 de recrutamento)
+  // Templates Hype Drink (6 templates específicos) - URLs diretas para /templates/hype-drink
+  const templatesHype = useMemo(() => {
+    if (!profile?.userSlug) return []
+    
+    const baseHypeUrl = `${baseUrl}/pt/wellness/templates/hype-drink`
+    return [
+      {
+        id: 'hype-energia-foco',
+        nome: 'Quiz: Energia & Foco',
+        slug: 'energia-foco',
+        type: 'quiz',
+        categoria: 'HYPE',
+        description: 'Descubra como melhorar sua energia e foco ao longo do dia',
+        icon: '⚡',
+        link: `${baseHypeUrl}/energia-foco`
+      },
+      {
+        id: 'hype-pre-treino',
+        nome: 'Quiz: Pré-Treino Ideal',
+        slug: 'pre-treino',
+        type: 'quiz',
+        categoria: 'HYPE',
+        description: 'Identifique o pré-treino ideal para você',
+        icon: '🏋️',
+        link: `${baseHypeUrl}/pre-treino`
+      },
+      {
+        id: 'hype-rotina-produtiva',
+        nome: 'Quiz: Rotina Produtiva',
+        slug: 'rotina-produtiva',
+        type: 'quiz',
+        categoria: 'HYPE',
+        description: 'Descubra como melhorar sua produtividade e constância',
+        icon: '📈',
+        link: `${baseHypeUrl}/rotina-produtiva`
+      },
+      {
+        id: 'hype-constancia',
+        nome: 'Quiz: Constância & Rotina',
+        slug: 'constancia',
+        type: 'quiz',
+        categoria: 'HYPE',
+        description: 'Identifique como manter uma rotina saudável todos os dias',
+        icon: '🎯',
+        link: `${baseHypeUrl}/constancia`
+      },
+      {
+        id: 'hype-consumo-cafeina',
+        nome: 'Calculadora: Consumo de Cafeína',
+        slug: 'consumo-cafeina',
+        type: 'calculadora',
+        categoria: 'HYPE',
+        description: 'Calcule seu consumo de cafeína e identifique alternativas',
+        icon: '☕',
+        link: `${baseHypeUrl}/consumo-cafeina`
+      },
+      {
+        id: 'hype-custo-energia',
+        nome: 'Calculadora: Custo da Falta de Energia',
+        slug: 'custo-energia',
+        type: 'calculadora',
+        categoria: 'HYPE',
+        description: 'Calcule o impacto da falta de energia na sua produtividade',
+        icon: '💰',
+        link: `${baseHypeUrl}/custo-energia`
+      }
+    ]
+  }, [profile?.userSlug, baseUrl])
+
+  // Templates de Vendas (todos os outros templates permitidos, exceto os 3 de recrutamento e os 6 de HYPE)
   const templatesVendas = templatesFiltrados.filter(t => {
     const slug = (t.slug || '').toLowerCase()
     const nome = (t.nome || '').toLowerCase()
     // Excluir os 3 de recrutamento
-    return !(
+    const isRecrutamento = (
       (slug.includes('ganhos') && slug.includes('prosperidade')) ||
       slug.includes('quiz-ganhos') ||
       (nome.includes('ganhos') && nome.includes('prosperidade')) ||
@@ -298,6 +367,22 @@ function LinksUnificadosPageContent() {
       slug.includes('quiz-proposito') ||
       (nome.includes('propósito') || nome.includes('proposito')) && (nome.includes('equilíbrio') || nome.includes('equilibrio'))
     )
+    // Excluir os 6 de HYPE
+    const isHype = (
+      slug.includes('energia-foco') ||
+      slug.includes('pre-treino') ||
+      slug.includes('rotina-produtiva') ||
+      slug.includes('constancia') ||
+      slug.includes('consumo-cafeina') ||
+      slug.includes('custo-energia') ||
+      nome.includes('energia') && nome.includes('foco') ||
+      nome.includes('pré-treino') || nome.includes('pre-treino') ||
+      nome.includes('rotina') && nome.includes('produtiva') ||
+      nome.includes('constância') || nome.includes('constancia') ||
+      nome.includes('consumo') && nome.includes('cafeína') ||
+      nome.includes('custo') && nome.includes('energia')
+    )
+    return !isRecrutamento && !isHype
   })
 
   // Unificar todos os itens (recalcular quando profile mudar)
@@ -322,6 +407,29 @@ function LinksUnificadosPageContent() {
           nome: t.nome || t.name
         }, 
         isQuiz: true 
+      }
+    })),
+    // Templates Hype Drink (6 templates específicos)
+    ...templatesHype.map(t => ({
+      id: `hype-${t.id}`,
+      nome: t.nome,
+      tipo: 'fluxo-vendas' as const, // Usar tipo vendas para compatibilidade
+      categoria: 'HYPE',
+      link: t.link || '',
+      descricao: t.description,
+      icon: t.icon,
+      metadata: { 
+        template: {
+          id: t.id,
+          slug: t.slug,
+          type: t.type,
+          name: t.nome,
+          nome: t.nome,
+          description: t.description,
+          icon: t.icon
+        }, 
+        isTemplate: true,
+        isHype: true
       }
     })),
     // Templates de Vendas (todos os outros templates)
@@ -374,7 +482,7 @@ function LinksUnificadosPageContent() {
         metadata: { fluxo: f }
       }
     })
-  ], [templates, profile?.userSlug, ferramentasUsuario])
+  ], [templates, profile?.userSlug, ferramentasUsuario, templatesHype])
 
   // Debug: verificar quantos itens foram unificados
   useEffect(() => {
@@ -395,11 +503,12 @@ function LinksUnificadosPageContent() {
 
   // Filtrar itens
   const itensFiltrados = itensUnificados.filter(item => {
-    // Filtro por tipo principal (todos, recrutamento ou vendas)
+    // Filtro por tipo principal (todos, recrutamento, vendas ou hype)
     const matchTipo = 
       filtroTipo === 'todos' ||
       (filtroTipo === 'recrutamento' && item.tipo === 'fluxo-recrutamento') ||
-      (filtroTipo === 'vendas' && item.tipo === 'fluxo-vendas')
+      (filtroTipo === 'vendas' && item.tipo === 'fluxo-vendas' && item.categoria !== 'HYPE') ||
+      (filtroTipo === 'hype' && item.categoria === 'HYPE')
     
     if (!matchTipo) return false
     
@@ -692,6 +801,16 @@ Você vai adorar! 😊`
                 }`}
               >
                 💰 Vendas
+              </button>
+              <button
+                onClick={() => setFiltroTipo('hype')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  filtroTipo === 'hype'
+                    ? 'bg-yellow-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
+              >
+                🥤 HYPE
               </button>
             </div>
           </div>
@@ -1245,6 +1364,31 @@ Você vai adorar! 😊`
                               className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700"
                             >
                               Abrir Página Completa →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : item.metadata?.isHype ? (
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">{item.icon} {item.nome}</h3>
+                      <div className="space-y-4">
+                        <p className="text-gray-700">{item.descricao}</p>
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                          <p className="text-yellow-800 font-semibold mb-2">🥤 Template Hype Drink</p>
+                          <p className="text-yellow-700 text-sm">
+                            Este template está disponível na área Hype Drink e pode ser usado para vender bebidas funcionais.
+                          </p>
+                        </div>
+                        <div className="flex gap-3 mt-4">
+                          {item.link && (
+                            <a
+                              href={item.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600"
+                            >
+                              Abrir Template →
                             </a>
                           )}
                         </div>
