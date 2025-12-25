@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ToolConfig } from '@/types/wellness'
+import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
 
 interface HypeDrinkCTAProps {
   config?: ToolConfig
@@ -22,9 +23,29 @@ export default function HypeDrinkCTA({
   const temUrlExterna = config?.cta_type === 'url_externa' && config?.external_url
   const temWhatsApp = config?.whatsapp_number
 
-  // Mensagem WhatsApp padrão
-  const mensagemWhatsApp = mensagemPersonalizada || 
-    `Olá! Completei o teste e gostaria de saber mais sobre o Hype Drink. ${resultado ? `Meu resultado: ${resultado}` : ''}`
+  // Obter mensagem WhatsApp: específica da ferramenta > personalizada > padrão
+  let mensagemWhatsApp = ''
+  let botaoTexto = config?.cta_button_text || 'Falar no WhatsApp sobre Hype Drink'
+  
+  // Tentar obter mensagem específica da ferramenta pelo slug (prioridade)
+  const toolSlug = config?.template_slug || config?.slug
+  if (toolSlug) {
+    const mensagemFerramenta = obterMensagemWhatsApp(toolSlug)
+    if (mensagemFerramenta) {
+      mensagemWhatsApp = mensagemFerramenta.mensagem
+      botaoTexto = mensagemFerramenta.botaoTexto || botaoTexto
+    }
+  }
+  
+  // Se não encontrou mensagem específica, usar personalizada ou padrão
+  if (!mensagemWhatsApp) {
+    if (mensagemPersonalizada) {
+      mensagemWhatsApp = mensagemPersonalizada
+    } else {
+      mensagemWhatsApp = mensagemPadraoWhatsApp.mensagem
+      botaoTexto = mensagemPadraoWhatsApp.botaoTexto || botaoTexto
+    }
+  }
 
   // Formatar número WhatsApp
   let numeroWhatsApp = ''
@@ -81,7 +102,7 @@ export default function HypeDrinkCTA({
           className="w-full inline-flex items-center justify-center px-8 py-5 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white font-bold text-xl rounded-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 animate-pulse-once"
         >
           <span className="mr-3 text-2xl">💬</span>
-          <span>{config.cta_button_text || 'Falar no WhatsApp sobre Hype Drink'}</span>
+          <span>{botaoTexto}</span>
           <span className="ml-3">→</span>
         </a>
         <p className="text-center text-sm text-gray-600 mt-3">
