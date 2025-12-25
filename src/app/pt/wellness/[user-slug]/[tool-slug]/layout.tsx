@@ -136,8 +136,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         baseUrl
       })
       
+      // Verificar se é um template Hype Drink (templates estáticos que não estão no banco)
+      const isHypeDrinkTemplate = (slug: string): boolean => {
+        const hypeSlugs = [
+          'energia-foco',
+          'pre-treino',
+          'rotina-produtiva',
+          'constancia',
+          'consumo-cafeina',
+          'custo-energia'
+        ]
+        return hypeSlugs.includes(slug.toLowerCase())
+      }
+      
       // Verificar se o slug parece ser um fluxo de recrutamento
-      // (tentativa de detectar mesmo sem dados completos)
       const slugLower = toolSlug.toLowerCase()
       const pareceFluxoRecrutamento = slugLower.includes('maes') || 
                                       slugLower.includes('renda') || 
@@ -149,7 +161,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       let fallbackTitle: string
       let fallbackDescription: string
       
-      if (pareceFluxoRecrutamento) {
+      if (isHypeDrinkTemplate(toolSlug)) {
+        // Se for template Hype Drink, usar imagem e mensagens específicas
+        const normalizedSlug = normalizeTemplateSlug(toolSlug)
+        inferredImage = getFullOGImageUrl(normalizedSlug, baseUrl, area)
+        const ogMessages = getOGMessages(normalizedSlug)
+        fallbackTitle = ogMessages.title || 'Ferramenta de Bem-Estar'
+        fallbackDescription = ogMessages.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
+        
+        console.log('[OG Metadata] 🥤 Hype Drink template detected (fallback):', {
+          toolSlug,
+          normalizedSlug,
+          inferredImage,
+          fallbackTitle
+        })
+      } else if (pareceFluxoRecrutamento) {
         // Se parece ser fluxo de recrutamento, usar imagem do quiz-potencial
         inferredImage = `${baseUrl}/images/og/wellness/quiz-potencial.jpg`
         fallbackTitle = toolSlug // Usar o slug como título (será formatado)
@@ -161,9 +187,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         fallbackDescription = 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
       }
       
+      // Garantir que a URL seja absoluta
+      const absoluteImageUrl = inferredImage.startsWith('http') 
+        ? inferredImage 
+        : `${baseUrl}${inferredImage.startsWith('/') ? inferredImage : `/${inferredImage}`}`
+      
       console.log('[OG Metadata] 🔍 Using inferred metadata (fallback):', {
         toolSlug,
-        inferredImage,
+        inferredImage: absoluteImageUrl,
+        fallbackTitle,
+        isHypeDrink: isHypeDrinkTemplate(toolSlug),
         pareceFluxoRecrutamento
       })
       
@@ -183,11 +216,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           type: 'website',
           locale: 'pt_BR',
           images: [{
-            url: inferredImage,
+            url: absoluteImageUrl,
             width: 1200,
             height: 630,
-            type: pareceFluxoRecrutamento ? 'image/jpeg' : 'image/png',
+            type: absoluteImageUrl.includes('.jpg') || absoluteImageUrl.includes('.jpeg') ? 'image/jpeg' : 'image/png',
           }],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: `${fallbackTitle} - WELLNESS`,
+          description: fallbackDescription,
+          images: [absoluteImageUrl],
         },
       }
     }
