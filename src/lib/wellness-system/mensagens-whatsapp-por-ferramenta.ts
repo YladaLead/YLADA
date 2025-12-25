@@ -407,65 +407,65 @@ export const mensagensWhatsAppPorFerramenta: Record<string, MensagemWhatsApp> = 
   // ============================================
   
   'energia-foco': {
-    mensagem: 'Olá! Acabei de descobrir meu perfil de energia e foco e queria saber mais sobre como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
-    botaoTexto: 'Quero Saber Mais sobre Energia'
+    mensagem: 'Olá! Descubra seu perfil de energia e foco e aprenda como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
+    botaoTexto: 'Descobrir Meu Perfil de Energia'
   },
   'quiz-energia-foco': {
-    mensagem: 'Olá! Acabei de descobrir meu perfil de energia e foco e queria saber mais sobre como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
-    botaoTexto: 'Quero Saber Mais sobre Energia'
+    mensagem: 'Olá! Descubra seu perfil de energia e foco e aprenda como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
+    botaoTexto: 'Descobrir Meu Perfil de Energia'
   },
   
   'pre-treino': {
-    mensagem: 'Olá! Acabei de descobrir qual é o pré-treino ideal para mim e queria saber mais sobre uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
-    botaoTexto: 'Quero Conhecer o Pré-Treino Ideal'
+    mensagem: 'Olá! Descubra qual é o pré-treino ideal para você e conheça uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
+    botaoTexto: 'Descobrir Meu Pré-Treino Ideal'
   },
   'quiz-pre-treino': {
-    mensagem: 'Olá! Acabei de descobrir qual é o pré-treino ideal para mim e queria saber mais sobre uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
-    botaoTexto: 'Quero Conhecer o Pré-Treino Ideal'
+    mensagem: 'Olá! Descubra qual é o pré-treino ideal para você e conheça uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
+    botaoTexto: 'Descobrir Meu Pré-Treino Ideal'
   },
   
   'rotina-produtiva': {
-    mensagem: 'Olá! Acabei de fazer o quiz de rotina produtiva e queria saber mais sobre como manter energia e foco constantes para aumentar minha produtividade ao longo do dia.',
-    botaoTexto: 'Quero Melhorar Minha Produtividade'
+    mensagem: 'Olá! Descubra o que está sabotando sua produtividade e aprenda como manter energia e foco constantes ao longo do dia.',
+    botaoTexto: 'Descobrir Como Ser Mais Produtivo'
   },
   'quiz-rotina-produtiva': {
-    mensagem: 'Olá! Acabei de fazer o quiz de rotina produtiva e queria saber mais sobre como manter energia e foco constantes para aumentar minha produtividade ao longo do dia.',
-    botaoTexto: 'Quero Melhorar Minha Produtividade'
+    mensagem: 'Olá! Descubra o que está sabotando sua produtividade e aprenda como manter energia e foco constantes ao longo do dia.',
+    botaoTexto: 'Descobrir Como Ser Mais Produtivo'
   },
   
   'constancia': {
-    mensagem: 'Olá! Acabei de fazer o quiz de constância e rotina e queria saber mais sobre como facilitar meus hábitos diários e manter uma rotina mais constante.',
-    botaoTexto: 'Quero Manter Minha Rotina'
+    mensagem: 'Olá! Descubra o que está impedindo você de manter uma rotina constante e aprenda estratégias práticas para facilitar seus hábitos diários.',
+    botaoTexto: 'Descobrir Como Manter Rotina'
   },
   'quiz-constancia': {
-    mensagem: 'Olá! Acabei de fazer o quiz de constância e rotina e queria saber mais sobre como facilitar meus hábitos diários e manter uma rotina mais constante.',
-    botaoTexto: 'Quero Manter Minha Rotina'
+    mensagem: 'Olá! Descubra o que está impedindo você de manter uma rotina constante e aprenda estratégias práticas para facilitar seus hábitos diários.',
+    botaoTexto: 'Descobrir Como Manter Rotina'
   },
   
   'consumo-cafeina': {
-    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína e descobri que está acima do recomendado. Queria saber mais sobre alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Quero Equilibrar Meu Consumo'
+    mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
+    botaoTexto: 'Calcular Meu Consumo de Cafeína'
   },
   'calc-consumo-cafeina': {
-    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína e descobri que está acima do recomendado. Queria saber mais sobre alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Quero Equilibrar Meu Consumo'
+    mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
+    botaoTexto: 'Calcular Meu Consumo de Cafeína'
   },
   'calculadora-consumo-cafeina': {
-    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína e descobri que está acima do recomendado. Queria saber mais sobre alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Quero Equilibrar Meu Consumo'
+    mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
+    botaoTexto: 'Calcular Meu Consumo de Cafeína'
   },
   
   'custo-energia': {
-    mensagem: 'Olá! Acabei de calcular quanto a falta de energia está custando para minha produtividade e queria saber mais sobre como recuperar essas horas e aumentar minha performance.',
-    botaoTexto: 'Quero Aumentar Minha Produtividade'
+    mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
+    botaoTexto: 'Calcular Meu Custo de Energia'
   },
   'calc-custo-energia': {
-    mensagem: 'Olá! Acabei de calcular quanto a falta de energia está custando para minha produtividade e queria saber mais sobre como recuperar essas horas e aumentar minha performance.',
-    botaoTexto: 'Quero Aumentar Minha Produtividade'
+    mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
+    botaoTexto: 'Calcular Meu Custo de Energia'
   },
   'calculadora-custo-energia': {
-    mensagem: 'Olá! Acabei de calcular quanto a falta de energia está custando para minha produtividade e queria saber mais sobre como recuperar essas horas e aumentar minha performance.',
-    botaoTexto: 'Quero Aumentar Minha Produtividade'
+    mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
+    botaoTexto: 'Calcular Meu Custo de Energia'
   },
   
   // ============================================
