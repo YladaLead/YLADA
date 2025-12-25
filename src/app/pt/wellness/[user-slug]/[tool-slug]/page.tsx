@@ -375,6 +375,8 @@ export default function FerramentaPersonalizadaPage() {
       cta_button_text: tool.cta_button_text,
       custom_whatsapp_message: tool.custom_whatsapp_message,
       country_code: countryCode, // Incluir country_code do perfil
+      template_slug: tool.template_slug || normalizedSlug, // Incluir template_slug para mensagens WhatsApp
+      slug: tool.template_slug || normalizedSlug, // Incluir slug como fallback
     }
 
     // ✅ Normalizar template_slug para garantir consistência
