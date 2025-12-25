@@ -285,7 +285,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             width: 1200,
             height: 630,
             alt: ogTitle,
-            type: isFluxoRecrutamento ? 'image/jpeg' : 'image/png',
+            type: ogImageUrl.includes('.jpg') || ogImageUrl.includes('.jpeg') ? 'image/jpeg' : 'image/png',
           },
         ],
         locale: 'pt_BR',
