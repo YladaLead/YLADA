@@ -403,6 +403,72 @@ export const mensagensWhatsAppPorFerramenta: Record<string, MensagemWhatsApp> = 
   },
   
   // ============================================
+  // FLUXOS HYPE DRINK
+  // ============================================
+  
+  'energia-foco': {
+    mensagem: 'Olá! Acabei de descobrir meu perfil de energia e foco e queria saber mais sobre como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
+    botaoTexto: 'Quero Saber Mais sobre Energia'
+  },
+  'quiz-energia-foco': {
+    mensagem: 'Olá! Acabei de descobrir meu perfil de energia e foco e queria saber mais sobre como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
+    botaoTexto: 'Quero Saber Mais sobre Energia'
+  },
+  
+  'pre-treino': {
+    mensagem: 'Olá! Acabei de descobrir qual é o pré-treino ideal para mim e queria saber mais sobre uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
+    botaoTexto: 'Quero Conhecer o Pré-Treino Ideal'
+  },
+  'quiz-pre-treino': {
+    mensagem: 'Olá! Acabei de descobrir qual é o pré-treino ideal para mim e queria saber mais sobre uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
+    botaoTexto: 'Quero Conhecer o Pré-Treino Ideal'
+  },
+  
+  'rotina-produtiva': {
+    mensagem: 'Olá! Acabei de fazer o quiz de rotina produtiva e queria saber mais sobre como manter energia e foco constantes para aumentar minha produtividade ao longo do dia.',
+    botaoTexto: 'Quero Melhorar Minha Produtividade'
+  },
+  'quiz-rotina-produtiva': {
+    mensagem: 'Olá! Acabei de fazer o quiz de rotina produtiva e queria saber mais sobre como manter energia e foco constantes para aumentar minha produtividade ao longo do dia.',
+    botaoTexto: 'Quero Melhorar Minha Produtividade'
+  },
+  
+  'constancia': {
+    mensagem: 'Olá! Acabei de fazer o quiz de constância e rotina e queria saber mais sobre como facilitar meus hábitos diários e manter uma rotina mais constante.',
+    botaoTexto: 'Quero Manter Minha Rotina'
+  },
+  'quiz-constancia': {
+    mensagem: 'Olá! Acabei de fazer o quiz de constância e rotina e queria saber mais sobre como facilitar meus hábitos diários e manter uma rotina mais constante.',
+    botaoTexto: 'Quero Manter Minha Rotina'
+  },
+  
+  'consumo-cafeina': {
+    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína e descobri que está acima do recomendado. Queria saber mais sobre alternativas mais equilibradas que não causam ansiedade ou dependência.',
+    botaoTexto: 'Quero Equilibrar Meu Consumo'
+  },
+  'calc-consumo-cafeina': {
+    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína e descobri que está acima do recomendado. Queria saber mais sobre alternativas mais equilibradas que não causam ansiedade ou dependência.',
+    botaoTexto: 'Quero Equilibrar Meu Consumo'
+  },
+  'calculadora-consumo-cafeina': {
+    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína e descobri que está acima do recomendado. Queria saber mais sobre alternativas mais equilibradas que não causam ansiedade ou dependência.',
+    botaoTexto: 'Quero Equilibrar Meu Consumo'
+  },
+  
+  'custo-energia': {
+    mensagem: 'Olá! Acabei de calcular quanto a falta de energia está custando para minha produtividade e queria saber mais sobre como recuperar essas horas e aumentar minha performance.',
+    botaoTexto: 'Quero Aumentar Minha Produtividade'
+  },
+  'calc-custo-energia': {
+    mensagem: 'Olá! Acabei de calcular quanto a falta de energia está custando para minha produtividade e queria saber mais sobre como recuperar essas horas e aumentar minha performance.',
+    botaoTexto: 'Quero Aumentar Minha Produtividade'
+  },
+  'calculadora-custo-energia': {
+    mensagem: 'Olá! Acabei de calcular quanto a falta de energia está custando para minha produtividade e queria saber mais sobre como recuperar essas horas e aumentar minha performance.',
+    botaoTexto: 'Quero Aumentar Minha Produtividade'
+  },
+  
+  // ============================================
   // OUTROS
   // ============================================
   

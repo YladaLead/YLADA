@@ -77,6 +77,22 @@ const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   // HOM (Herbalife Opportunity Meeting)
   'hom': 'hom-bebidas-funcionais.png', // Imagem específica da HOM (PNG para melhor qualidade)
   
+  // Fluxos Hype Drink
+  'energia-foco': 'hype-energia-foco.jpg',
+  'quiz-energia-foco': 'hype-energia-foco.jpg',
+  'pre-treino': 'hype-pre-treino.jpg',
+  'quiz-pre-treino': 'hype-pre-treino.jpg',
+  'rotina-produtiva': 'hype-rotina-produtiva.jpg',
+  'quiz-rotina-produtiva': 'hype-rotina-produtiva.jpg',
+  'constancia': 'hype-constancia.jpg',
+  'quiz-constancia': 'hype-constancia.jpg',
+  'consumo-cafeina': 'hype-consumo-cafeina.jpg',
+  'calc-consumo-cafeina': 'hype-consumo-cafeina.jpg',
+  'calculadora-consumo-cafeina': 'hype-consumo-cafeina.jpg',
+  'custo-energia': 'hype-custo-energia.jpg',
+  'calc-custo-energia': 'hype-custo-energia.jpg',
+  'calculadora-custo-energia': 'hype-custo-energia.jpg',
+  
   // Fallback padrão
   'default': 'default.jpg',
 }
