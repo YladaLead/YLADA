@@ -232,20 +232,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ogImageUrl
       })
     } else {
-      // Para outras ferramentas: usar imagem padrão e texto genérico
-      ogImageUrl = `${baseUrl}/images/wellness-hero-com-logo.png`
+      // Para outras ferramentas: usar imagem específica do template (mesma lógica do Nutri)
+      ogImageUrl = getFullOGImageUrl(normalizedSlug, baseUrl, area)
+      
+      // Garantir que a URL seja absoluta
+      const absoluteImageUrl = ogImageUrl.startsWith('http') 
+        ? ogImageUrl 
+        : `${baseUrl}${ogImageUrl.startsWith('/') ? ogImageUrl : `/${ogImageUrl}`}`
+      
+      ogImageUrl = absoluteImageUrl
       
       // Obter mensagens estimulantes baseadas no tipo de ferramenta
       const ogMessages = getOGMessages(normalizedSlug)
       
-      // Usar título e descrição da ferramenta ou texto genérico
-      ogTitle = tool.title || 'Ferramenta de Bem-Estar'
-      ogDescription = tool.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
+      // Usar mensagens estimulantes ou título/descrição personalizados do usuário (prioridade: ogMessages > tool.title/description)
+      ogTitle = ogMessages.title || tool.title || 'Ferramenta de Bem-Estar'
+      ogDescription = ogMessages.description || tool.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
       
       console.log('[OG Metadata] Ferramenta normal:', {
         normalizedSlug,
         ogImageUrl,
-        ogTitle
+        ogTitle,
+        ogDescription,
+        hasOGMessage: !!ogMessages.title
       })
     }
     

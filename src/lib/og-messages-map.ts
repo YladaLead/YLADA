@@ -187,6 +187,64 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     title: '🍹 Oportunidade: Bebidas Funcionais',
     description: 'Uma oportunidade de negócio que está transformando vidas. Assista à apresentação completa sobre o mercado de bebidas funcionais e descubra como começar. Pessoas querem mais energia, buscam saúde + praticidade. Produtos de alta rotatividade com margens atrativas para iniciantes. Simples de vender e de consumir.'
   },
+  
+  // Fluxos Hype Drink
+  'energia-foco': {
+    title: '⚡ Descubra Como Ter Mais Energia o Dia Todo!',
+    description: 'Em apenas 2 minutos, descubra o que está roubando sua energia e como recuperá-la de forma natural e sustentável'
+  },
+  'quiz-energia-foco': {
+    title: '⚡ Descubra Como Ter Mais Energia o Dia Todo!',
+    description: 'Em apenas 2 minutos, descubra o que está roubando sua energia e como recuperá-la de forma natural e sustentável'
+  },
+  'pre-treino': {
+    title: '🏋️ Qual o Pré-Treino Perfeito Para Você?',
+    description: 'Descubra em 2 minutos se você precisa de energia leve ou forte para seus treinos e encontre a solução ideal'
+  },
+  'quiz-pre-treino': {
+    title: '🏋️ Qual o Pré-Treino Perfeito Para Você?',
+    description: 'Descubra em 2 minutos se você precisa de energia leve ou forte para seus treinos e encontre a solução ideal'
+  },
+  'rotina-produtiva': {
+    title: '📈 Como Ter Uma Rotina Mais Produtiva?',
+    description: 'Em 2 minutos, descubra o que está sabotando sua produtividade e como criar uma rotina que realmente funciona'
+  },
+  'quiz-rotina-produtiva': {
+    title: '📈 Como Ter Uma Rotina Mais Produtiva?',
+    description: 'Em 2 minutos, descubra o que está sabotando sua produtividade e como criar uma rotina que realmente funciona'
+  },
+  'constancia': {
+    title: '🎯 Por Que Você Não Consegue Manter a Rotina?',
+    description: 'Descubra em 2 minutos o que está impedindo você de manter uma rotina constante e como resolver isso de forma simples'
+  },
+  'quiz-constancia': {
+    title: '🎯 Por Que Você Não Consegue Manter a Rotina?',
+    description: 'Descubra em 2 minutos o que está impedindo você de manter uma rotina constante e como resolver isso de forma simples'
+  },
+  'consumo-cafeina': {
+    title: '☕ Você Está Exagerando no Café?',
+    description: 'Descubra em 1 minuto se seu consumo de cafeína está causando ansiedade, insônia ou dependência - e encontre alternativas melhores'
+  },
+  'calc-consumo-cafeina': {
+    title: '☕ Você Está Exagerando no Café?',
+    description: 'Descubra em 1 minuto se seu consumo de cafeína está causando ansiedade, insônia ou dependência - e encontre alternativas melhores'
+  },
+  'calculadora-consumo-cafeina': {
+    title: '☕ Você Está Exagerando no Café?',
+    description: 'Descubra em 1 minuto se seu consumo de cafeína está causando ansiedade, insônia ou dependência - e encontre alternativas melhores'
+  },
+  'custo-energia': {
+    title: '💰 Quanto a Falta de Energia Está Custando?',
+    description: 'Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso'
+  },
+  'calc-custo-energia': {
+    title: '💰 Quanto a Falta de Energia Está Custando?',
+    description: 'Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso'
+  },
+  'calculadora-custo-energia': {
+    title: '💰 Quanto a Falta de Energia Está Custando?',
+    description: 'Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso'
+  },
 }
 
 /**
