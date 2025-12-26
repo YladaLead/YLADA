@@ -1,0 +1,26 @@
+Olá! 👋
+
+Para alterar sua senha provisória e criar uma senha permanente, siga estes passos:
+
+1️⃣ Faça login na área Wellness usando sua senha provisória
+
+2️⃣ Após entrar, acesse o menu "Configurações" (ícone de engrenagem no canto superior direito)
+
+3️⃣ Na seção "🔒 Segurança", você verá três campos:
+   • Senha Atual: digite sua senha provisória aqui
+   • Nova Senha: digite a senha que você deseja usar (mínimo de 6 caracteres)
+   • Confirmar Nova Senha: digite a mesma nova senha novamente
+
+4️⃣ Clique no botão "💾 Atualizar Senha"
+
+5️⃣ Após alguns segundos, você será automaticamente desconectado e redirecionado para a tela de login
+
+6️⃣ Faça login novamente usando sua NOVA senha (não use mais a senha provisória)
+
+⚠️ IMPORTANTE:
+• A senha provisória expira em 3 dias, então é importante alterá-la o quanto antes
+• Certifique-se de digitar a senha provisória corretamente (incluindo maiúsculas, minúsculas e caracteres especiais)
+• Sua nova senha deve ter pelo menos 6 caracteres
+
+Se tiver qualquer dificuldade ou dúvida, é só me avisar! 😊
+

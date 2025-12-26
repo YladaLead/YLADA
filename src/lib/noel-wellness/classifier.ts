@@ -47,6 +47,11 @@ const SUPORTE_KEYWORDS = [
   // Navegação
   'onde está', 'onde fica', 'como acesso', 'como encontrar',
   'não encontro', 'não vejo',
+  // Senha e autenticação
+  'senha', 'senhas', 'password', 'alterar senha', 'trocar senha',
+  'mudar senha', 'senha provisória', 'senha provisoria', 'nova senha',
+  'redefinir senha', 'esqueci senha', 'esqueci a senha',
+  'configurações', 'configuração', 'segurança', 'minha conta',
 ]
 
 const TECNICO_KEYWORDS = [
@@ -81,7 +86,7 @@ export function classifyIntention(query: string): ClassificationResult {
   
   // Detectar palavras específicas que definem o módulo
   const hasMentorIndicators = /(meta|objetivo|planejamento|pv|duplicação|equipe|motivação|rotina)/i.test(query)
-  const hasSuporteIndicators = /(sistema|plataforma|ferramenta|erro|não funciona|onde está|como acesso)/i.test(query)
+  const hasSuporteIndicators = /(sistema|plataforma|ferramenta|erro|não funciona|onde está|como acesso|senha|password|alterar senha|trocar senha|mudar senha|senha provisória|configurações|segurança)/i.test(query)
   const hasTecnicoIndicators = /(shake|bebida|herbalife|preparo|campanha|script|fluxo)/i.test(query)
   
   // Ajustar scores com indicadores fortes
@@ -161,6 +166,9 @@ export function isSuporteQuery(query: string): boolean {
     /(não|não consigo) (funciona|carrega|abre|encontro)/i,
     /(erro|bug|problema|travou)/i,
     /(ferramenta|dashboard|menu) (não|como|onde)/i,
+    /(como|onde) (alterar|trocar|mudar|redefinir) (a|minha|minha) (senha|password)/i,
+    /(senha|password) (provisória|provisoria|nova|atual)/i,
+    /(configurações|configuração|segurança|minha conta)/i,
   ]
   
   return suportePatterns.some(pattern => pattern.test(query))
