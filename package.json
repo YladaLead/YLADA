@@ -14,6 +14,8 @@
     "duplicar-templates-nutri": "tsx scripts/duplicar-templates-wellness-para-nutri.ts",
     "upload-wellness-video": "tsx scripts/upload-wellness-hero-video.ts",
     "upload-wellness-poster": "tsx scripts/upload-wellness-poster.ts",
+    "upload-nutri-video": "tsx scripts/upload-nutri-hero-video.ts",
+    "extract-nutri-poster": "tsx scripts/extract-nutri-video-poster.ts",
     "test-video-url": "tsx scripts/test-video-url.ts"
   },
   "dependencies": {

@@ -61,12 +61,9 @@ export const landingPageVideos = {
     return '/videos/nutri-hero.mp4'
   },
   get nutriHeroPoster() {
-    // Tentar usar poster do Supabase, fallback para local
-    try {
-      return getLandingPageAssetUrl('nutri-hero-poster.jpg')
-    } catch {
-      return '/videos/nutri-hero-poster.jpg'
-    }
+    // Usar imagem local como poster do vídeo
+    // Coloque a imagem em public/videos/nutri-hero-poster.jpg ou .png
+    return '/videos/nutri-hero-poster.jpg'
   },
 }
 
