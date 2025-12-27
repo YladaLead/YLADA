@@ -339,7 +339,7 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
               <button
                 key={index}
                 onClick={() => responder(index)}
-                className="w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all"
+                className="w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all text-gray-900 font-medium"
               >
                 {opcao}
               </button>

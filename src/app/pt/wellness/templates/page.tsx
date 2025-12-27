@@ -1453,7 +1453,7 @@ export default function WellnessTemplatesPage() {
                                                 checked={false}
                                                 readOnly
                                               />
-                                              <span className="text-gray-700">{opcao}</span>
+                                              <span className="text-gray-900 font-medium">{opcao}</span>
                                             </button>
                                           ))}
                                         </div>
@@ -1769,7 +1769,7 @@ export default function WellnessTemplatesPage() {
                                                 checked={false}
                                                 readOnly
                                               />
-                                              <span className="text-gray-700">{opcao}</span>
+                                              <span className="text-gray-900 font-medium">{opcao}</span>
                                             </button>
                                           ))}
                                         </div>
@@ -2352,7 +2352,7 @@ export default function WellnessTemplatesPage() {
                               {['Opção A', 'Opção B', 'Opção C'].map((opcao, idx) => (
                                 <label key={idx} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:border-purple-300">
                                   <input type="radio" className="mr-3" disabled />
-                                  <span className="text-gray-700">{opcao}</span>
+                                  <span className="text-gray-900 font-medium">{opcao}</span>
                                 </label>
                               ))}
                             </div>

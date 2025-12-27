@@ -287,7 +287,7 @@ export default function QuizPreTreino({ config = defaultConfig }: { config?: Tem
               <button
                 key={index}
                 onClick={() => responder(index)}
-                className="w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all"
+                className="w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all text-gray-900 font-medium"
               >
                 {opcao}
               </button>

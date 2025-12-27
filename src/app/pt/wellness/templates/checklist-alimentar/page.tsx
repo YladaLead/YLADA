@@ -312,7 +312,7 @@ export default function ChecklistAlimentar({ config }: TemplateBaseProps) {
                           <div className="w-3 h-3 rounded-full bg-green-600" />
                         )}
                       </div>
-                      <span className="text-gray-700 font-medium">{opcao}</span>
+                      <span className="text-gray-900 font-medium">{opcao}</span>
                     </div>
                   </button>
                 ))}

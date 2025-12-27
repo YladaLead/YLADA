@@ -252,7 +252,7 @@ export default function VoceAlimentandoConformeRotina({ config }: TemplateBasePr
                     onClick={() => responder(index)}
                     className="w-full text-left p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all transform hover:scale-[1.02]"
                   >
-                    <span className="text-gray-700">{opcao}</span>
+                    <span className="text-gray-900 font-medium">{opcao}</span>
                   </button>
                 ))}
               </div>
