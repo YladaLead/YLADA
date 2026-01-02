@@ -23,3 +23,13 @@ export { GET, POST } from '../../../../coach/clientes/[id]/avaliacoes/route'
 
 
 
+
+
+
+
+
+
+
+
+
+

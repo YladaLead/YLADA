@@ -19,12 +19,12 @@ export default function ChatIA({ isOpen, onClose, area = 'nutri' }: ChatIAProps)
   // 🚀 OTIMIZAÇÃO: useMemo para config (não muda entre renders)
   const configArea = useMemo(() => ({
     coach: {
-      nome: 'Coach de Bem-Estar',
-      nomeCurto: 'Coach',
+      nome: 'Carol',
+      nomeCurto: 'Carol',
       cor: 'purple',
       corHex: '#9333EA',
       corHexHover: '#7E22CE',
-      mensagemInicial: 'Olá! Sou a assistente IA da YLADA Coach. Posso te ajudar com dúvidas sobre:\n\n📋 Gestão de Clientes (cadastro, Kanban, status)\n📊 Evolução Física e Avaliações\n📅 Agenda e Consultas\n📝 Formulários Personalizados\n🔄 Conversão de Leads\n📈 Relatórios de Gestão\n🎯 Ferramentas de Captação\n📧 Autorizações por Email\n\nComo posso te ajudar hoje?'
+      mensagemInicial: 'Olá! Eu sou a Carol, sua assistente IA da YLADA Coach. Posso te ajudar com dúvidas sobre:\n\n📋 Gestão de Clientes (cadastro, Kanban, status)\n📊 Evolução Física e Avaliações\n📅 Agenda e Consultas\n📝 Formulários Personalizados\n🔄 Conversão de Leads\n📈 Relatórios de Gestão\n🎯 Ferramentas de Captação\n📧 Autorizações por Email\n\nComo posso te ajudar hoje?'
     },
     nutri: {
       nome: 'Nutricionista',
@@ -272,7 +272,7 @@ export default function ChatIA({ isOpen, onClose, area = 'nutri' }: ChatIAProps)
           <div className="flex items-center space-x-2">
             <span className="text-lg">🤖</span>
             <div>
-              <h3 className="font-semibold">Assistente IA {config.nomeCurto}</h3>
+              <h3 className="font-semibold">{area === 'coach' ? 'Carol' : `Assistente IA ${config.nomeCurto}`}</h3>
               <p className="text-xs opacity-90">Online agora</p>
             </div>
           </div>

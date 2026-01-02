@@ -28,6 +28,9 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   const secret = process.env.OPENAI_FUNCTION_SECRET
 
+  // ⚡ OTIMIZAÇÃO: Timeout de 15s por função para evitar travamentos
+  const functionTimeout = 15000 // 15 segundos por função
+
   try {
     let url = ''
     let body: any = {}
@@ -160,7 +163,7 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
         throw new Error(`Function desconhecida: ${functionName}`)
     }
 
-    // Fazer requisição para a rota local
+    // Fazer requisição para a rota local com timeout
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     }
@@ -170,38 +173,58 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
       headers['Authorization'] = `Bearer ${secret}`
     }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    })
+    // ⚡ OTIMIZAÇÃO: Timeout de 15s por função para evitar travamentos
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), functionTimeout)
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
-      console.error(`❌ [executeNoelFunction] Erro HTTP ${response.status} para ${functionName}:`, errorData)
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      })
       
-      // Criar erro com mais informações
-      const error = new Error(errorData.error || errorData.message || `Erro ao executar ${functionName}`)
-      ;(error as any).response = { data: errorData, status: response.status }
-      throw error
-    }
+      clearTimeout(timeoutId)
 
-    const data = await response.json()
-    
-    // Tratar diferentes formatos de resposta
-    if (data.success !== undefined) {
-      // Formato padrão: { success: true, data: ... }
-      return data.success ? data.data : null
-    } else if (data.sucesso !== undefined) {
-      // Formato calcularObjetivosCompletos: { sucesso: true, calculo: ..., texto_formatado: ... }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        console.error(`❌ [executeNoelFunction] Erro HTTP ${response.status} para ${functionName}:`, errorData)
+        
+        // Criar erro com mais informações
+        const error = new Error(errorData.error || errorData.message || `Erro ao executar ${functionName}`)
+        ;(error as any).response = { data: errorData, status: response.status }
+        throw error
+      }
+
+      const data = await response.json()
+      
+      // Tratar diferentes formatos de resposta
+      if (data.success !== undefined) {
+        // Formato padrão: { success: true, data: ... }
+        return data.success ? data.data : null
+      } else if (data.sucesso !== undefined) {
+        // Formato calcularObjetivosCompletos: { sucesso: true, calculo: ..., texto_formatado: ... }
+        return data
+      } else if (data.data) {
+        // Formato alternativo: { data: ... }
+        return data.data
+      }
+      
+      // Retornar dados completos se não tiver formato conhecido
       return data
-    } else if (data.data) {
-      // Formato alternativo: { data: ... }
-      return data.data
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId)
+      
+      // Se foi timeout, lançar erro específico
+      if (fetchError.name === 'AbortError') {
+        const timeoutError = new Error(`Timeout: A função ${functionName} demorou mais de ${functionTimeout/1000}s`)
+        console.error(`⏱️ [executeNoelFunction] Timeout em ${functionName} após ${functionTimeout/1000}s`)
+        throw timeoutError
+      }
+      
+      throw fetchError
     }
-    
-    // Retornar dados completos se não tiver formato conhecido
-    return data
   } catch (error: any) {
     console.error(`❌ Erro ao executar function ${functionName}:`, error)
     throw error

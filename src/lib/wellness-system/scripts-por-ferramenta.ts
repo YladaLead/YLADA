@@ -545,3 +545,13 @@ export function getScriptsPorTipo(config: ScriptsFerramentaConfig): {
 }
 
 
+
+
+
+
+
+
+
+
+
+

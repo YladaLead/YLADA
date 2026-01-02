@@ -54,7 +54,7 @@ export default function NovoPortalCoach() {
   const carregarUserSlug = async () => {
     try {
       setCarregandoSlug(true)
-      const response = await fetch('/api/wellness/profile', { // TODO: Criar /api/c/profile quando necessário
+      const response = await fetch('/api/coach/profile', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -208,7 +208,7 @@ export default function NovoPortalCoach() {
       }
 
       // Buscar user_slug para construir URL completa
-      const profileResponse = await fetch('/api/wellness/profile', {
+      const profileResponse = await fetch('/api/coach/profile', {
         credentials: 'include'
       })
       let userSlug = null

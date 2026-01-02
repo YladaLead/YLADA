@@ -54,3 +54,13 @@ JOIN information_schema.constraint_column_usage ccu
 WHERE tc.table_name = 'leads'
   AND tc.constraint_type = 'FOREIGN KEY'
   AND kcu.column_name = 'user_id';
+
+
+
+
+
+
+
+
+
+

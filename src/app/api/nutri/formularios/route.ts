@@ -313,10 +313,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir formulário
+    // Garantir que sempre retorne slug e short_code
     const { data: newForm, error } = await supabaseAdmin
       .from('custom_forms')
       .insert(formData)
-      .select()
+      .select('id, user_id, name, description, form_type, structure, is_active, is_template, slug, short_code, created_at, updated_at')
       .single()
 
     if (error) {

@@ -291,3 +291,13 @@ Duplique um dos casos e altere:
 **Compatível com:** Supabase PostgreSQL 15+
 
 
+
+
+
+
+
+
+
+
+
+

@@ -42,3 +42,13 @@ FROM information_schema.columns
 WHERE table_schema = 'public'
   AND table_name = 'leads'
   AND column_name = 'phone_country_code';
+
+
+
+
+
+
+
+
+
+

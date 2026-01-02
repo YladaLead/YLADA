@@ -150,3 +150,13 @@ ORDER BY column_name;
 - **API:** `src/app/api/admin/subscriptions/free/route.ts`
 - **Migração:** `migrations/add-free-to-plan-type.sql`
 - **Script de verificação:** `migrations/verificar-e-corrigir-plan-type-free.sql`
+
+
+
+
+
+
+
+
+
+

@@ -61,7 +61,7 @@ function EditarPortalCoachContent() {
   const carregarUserSlug = async () => {
     try {
       setCarregandoSlug(true)
-      const response = await fetch('/api/wellness/profile', { // TODO: Criar /api/c/profile quando necessário
+      const response = await fetch('/api/coach/profile', {
         credentials: 'include'
       })
       if (response.ok) {

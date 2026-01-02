@@ -137,3 +137,13 @@ JOIN user_profiles up ON au.id = up.user_id
 LEFT JOIN journey_progress jp ON au.id = jp.user_id AND jp.completed = true
 WHERE au.email = 'faulaandre@gmail.com'
 GROUP BY up.email, up.nome_completo, up.diagnostico_completo;
+
+
+
+
+
+
+
+
+
+

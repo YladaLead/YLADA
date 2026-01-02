@@ -231,3 +231,13 @@ GERE UMA ANÁLISE DE PADRÕES DESCRITIVOS (SEM DIAGNÓSTICO):`
 }
 
 
+
+
+
+
+
+
+
+
+
+

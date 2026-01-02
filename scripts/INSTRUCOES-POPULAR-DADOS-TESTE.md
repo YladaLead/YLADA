@@ -175,3 +175,13 @@ v_measurement_date := v_base_date + (i * 7);  -- Semanal ao invés de quinzenal
 **Pronto! 🎉 Agora você pode testar o sistema com dados realistas!**
 
 
+
+
+
+
+
+
+
+
+
+

@@ -574,7 +574,8 @@ const findDiagnosticsSource = (
   profession: 'nutri' | 'wellness' | 'coach'
 ): { slug: string; map: Record<string, DiagnosticosPorFerramenta> } | null => {
   const primaryMap = diagnosticsMapsByProfession[profession]
-  const fallbackMap = (profession === 'nutri' || profession === 'coach') ? diagnosticsMapsByProfession.wellness : undefined
+  // Coach não deve usar fallback - tem diagnósticos próprios e independentes
+  const fallbackMap = profession === 'nutri' ? diagnosticsMapsByProfession.wellness : undefined
   const mapsToCheck = [primaryMap, fallbackMap].filter(Boolean) as Array<Record<string, DiagnosticosPorFerramenta>>
 
   for (const candidate of candidates) {

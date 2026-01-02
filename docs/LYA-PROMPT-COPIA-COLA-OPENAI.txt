@@ -175,3 +175,13 @@ Você receberá os seguintes dados como variáveis:
 {{task}} - Tarefa específica para esta análise
 
 Use esses dados para gerar a análise seguindo o formato fixo acima.
+
+
+
+
+
+
+
+
+
+

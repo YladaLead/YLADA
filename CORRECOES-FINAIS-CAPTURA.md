@@ -158,3 +158,13 @@ const { data } = await supabaseAdmin
 **Status:** ✅ Implementado e testado  
 **Última atualização:** 18 de Dezembro de 2025 - 22:15
 
+
+
+
+
+
+
+
+
+
+

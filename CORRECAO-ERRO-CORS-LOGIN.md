@@ -111,3 +111,13 @@ SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
 4. **Verificar logs do Supabase:**
    - Supabase Dashboard → Logs → Auth Logs
    - Ver se há tentativas de login sendo registradas
+
+
+
+
+
+
+
+
+
+

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
+import { landingPageVideos } from '@/lib/landing-pages-assets'
 
 export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
@@ -179,10 +180,13 @@ export default function NutriLandingPage() {
                     controls
                     loop
                     playsInline
-                    poster="/videos/nutri-hero-poster.jpg"
+                    preload="metadata"
+                    poster={landingPageVideos.nutriHeroPoster}
+                    onError={(e) => {
+                      console.error('❌ Erro ao carregar vídeo:', e)
+                    }}
                   >
-                    <source src="/videos/nutri-hero.mp4" type="video/mp4" />
-                    <source src="/videos/nutri-hero.webm" type="video/webm" />
+                    <source src={landingPageVideos.nutriHero} type="video/mp4" />
                     Seu navegador não suporta vídeo HTML5.
                   </video>
                 </div>

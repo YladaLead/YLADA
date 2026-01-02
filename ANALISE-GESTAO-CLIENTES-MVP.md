@@ -598,3 +598,13 @@ Para considerar o MVP de Gestão de Clientes **funcional e pronto**:
 **Próxima revisão:** Após implementação das Prioridades Máximas
 
 
+
+
+
+
+
+
+
+
+
+

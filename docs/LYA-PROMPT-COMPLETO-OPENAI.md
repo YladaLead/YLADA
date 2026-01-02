@@ -223,3 +223,13 @@ Use esses dados para gerar a análise seguindo o formato fixo acima.
 
 **Atualizado: 19/12/2024**
 **Versão: 2.0 (com detecção de dificuldades e links clicáveis)**
+
+
+
+
+
+
+
+
+
+

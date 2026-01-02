@@ -353,3 +353,13 @@ Mas ela:
 **Status: Prompts corrigidos com limites explícitos** ✅
 
 
+
+
+
+
+
+
+
+
+
+

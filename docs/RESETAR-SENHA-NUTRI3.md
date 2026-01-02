@@ -112,3 +112,13 @@ Se o usuário `nutri3@ylada.com` não existir no Supabase:
 - Use essa senha para testes
 - Em produção, sempre use senhas fortes
 - Após resetar, faça login imediatamente para confirmar
+
+
+
+
+
+
+
+
+
+

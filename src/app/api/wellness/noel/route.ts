@@ -40,6 +40,53 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+// ⚡ OTIMIZAÇÃO: Cache em memória para respostas frequentes
+interface CacheEntry {
+  response: any
+  timestamp: number
+  userId: string
+}
+
+const noelResponseCache = new Map<string, CacheEntry>()
+const CACHE_TTL = 2 * 60 * 1000 // 2 minutos (respostas podem mudar com contexto)
+const MAX_CACHE_SIZE = 100 // Limitar tamanho do cache
+
+// Função para gerar chave de cache baseada na mensagem normalizada
+function getCacheKey(userId: string, message: string): string {
+  // Normalizar mensagem (lowercase, trim, remover espaços extras)
+  const normalized = message.toLowerCase().trim().replace(/\s+/g, ' ')
+  return `noel:${userId}:${normalized.substring(0, 100)}` // Limitar tamanho da chave
+}
+
+// Função para limpar cache expirado e manter tamanho limitado
+function cleanCache() {
+  const now = Date.now()
+  const entries = Array.from(noelResponseCache.entries())
+  
+  // Remover entradas expiradas
+  for (const [key, entry] of entries) {
+    if (now - entry.timestamp > CACHE_TTL) {
+      noelResponseCache.delete(key)
+    }
+  }
+  
+  // Se ainda estiver muito grande, remover as mais antigas
+  if (noelResponseCache.size > MAX_CACHE_SIZE) {
+    const sorted = Array.from(noelResponseCache.entries())
+      .sort((a, b) => a[1].timestamp - b[1].timestamp)
+    
+    const toRemove = sorted.slice(0, noelResponseCache.size - MAX_CACHE_SIZE)
+    for (const [key] of toRemove) {
+      noelResponseCache.delete(key)
+    }
+  }
+}
+
+// Limpar cache periodicamente (a cada 5 minutos)
+if (typeof setInterval !== 'undefined') {
+  setInterval(cleanCache, 5 * 60 * 1000)
+}
+
 /**
  * Tenta usar Agent Builder primeiro (se configurado)
  * 
@@ -578,9 +625,11 @@ Regras Gerais:
 Você tem acesso às seguintes funções para buscar informações REAIS do banco de dados:
 
 1. **getFluxoInfo(fluxo_codigo)** - Busca informações completas de fluxos
+   - 🚨 CRÍTICO: SEMPRE chame esta função quando mencionar fluxos
    - Use quando mencionar fluxos, processos, guias passo a passo
-   - Retorna: título, descrição, scripts reais, link direto, quando usar
-   - Exemplos: "fluxo de pós-venda", "Fluxo 10", "reativação de cliente"
+   - Retorna: título, descrição, scripts reais, link direto, quando usar, passos completos
+   - Exemplos: "fluxo de pós-venda", "Fluxo 10", "reativação de cliente", "cliente está cansado" → getFluxoInfo("fluxo-venda-energia")
+   - 🚨 IMPORTANTE: Se o link retornado for genérico (ex: "system/vender/fluxos"), apresente o CONTEÚDO COMPLETO do fluxo diretamente na resposta (título, descrição, passos, scripts) ao invés de apenas mencionar o link genérico
 
 2. **getFerramentaInfo(ferramenta_slug)** - Busca informações de ferramentas/calculadoras
    - Use quando mencionar calculadoras, ferramentas
@@ -595,6 +644,12 @@ Você tem acesso às seguintes funções para buscar informações REAIS do banc
 4. **getLinkInfo(link_codigo)** - Busca informações de links Wellness
    - Use quando precisar de links oficiais
    - Retorna: título, descrição, link, script de apresentação
+   - 🚨 CRÍTICO: SEMPRE chame esta função quando mencionar links e SEMPRE forneça o link retornado na resposta
+
+5. **recomendarLinkWellness(tipo_lead, necessidade, palavras_chave, objetivo)** - Recomenda links baseado em contexto
+   - Use quando usuário mencionar situação/cliente/lead
+   - Retorna: link recomendado com título, descrição, link completo, script
+   - 🚨 CRÍTICO: SEMPRE chame esta função quando detectar contexto e SEMPRE forneça o link retornado na resposta
 
 5. **getMaterialInfo(busca, tipo, categoria)** - Busca materiais da biblioteca (imagens, vídeos, PDFs)
    - Use quando o usuário perguntar sobre materiais, imagens, vídeos, posts, stories
@@ -609,7 +664,7 @@ Você tem acesso às seguintes funções para buscar informações REAIS do banc
      * "Preciso de material para divulgação" → getMaterialInfo({ categoria: "divulgacao" })
    - IMPORTANTE: Sempre entregue o link_atalho_completo na resposta, formatado como link clicável
 
-6. **calcularObjetivosCompletos()** - Calcula objetivos precisos de vendas, recrutamento e produção da equipe
+7. **calcularObjetivosCompletos()** - Calcula objetivos precisos de vendas, recrutamento e produção da equipe
    - Use SEMPRE quando o usuário perguntar sobre:
      * "Quantos produtos preciso vender para bater minha meta?"
      * "Como calcular meus objetivos de vendas?"
@@ -641,8 +696,218 @@ Você tem acesso às seguintes funções para buscar informações REAIS do banc
      * Adicione scripts e ações práticas baseados no "tipo_trabalho" do perfil
      * Personalize com base nos "cenarios" retornados (apenas_vendas, vendas_equipe_50_50, foco_equipe)
 
-🚨 REGRA CRÍTICA: NUNCA invente informações sobre fluxos, ferramentas, quizzes, links, materiais ou cálculos de metas.
+🚨🚨🚨 REGRA CRÍTICA ABSOLUTA - NUNCA INVENTE LINKS 🚨🚨🚨
+
+NUNCA invente informações sobre fluxos, ferramentas, quizzes, links, materiais ou cálculos de metas.
 SEMPRE chame a função correspondente para buscar dados REAIS do banco ou fazer cálculos precisos.
+
+🚨 PROIBIÇÃO ABSOLUTA DE LINKS INVENTADOS:
+- ❌ NUNCA use links genéricos como "system/vender/fluxos" ou "system/wellness/fluxos"
+- ❌ NUNCA invente URLs ou caminhos de links
+- ❌ NUNCA use placeholders como "[link aqui]" ou "[colocar link]"
+- ❌ NUNCA mencione links sem fornecer o link completo e real
+
+✅ OBRIGAÇÃO ABSOLUTA:
+- ✅ SEMPRE chame as funções (getFerramentaInfo, getFluxoInfo, recomendarLinkWellness, getLinkInfo) ANTES de mencionar qualquer link
+- ✅ SEMPRE use APENAS os links retornados pelas funções
+- ✅ SEMPRE forneça o link completo retornado pela função na resposta
+- ✅ Se a função não retornar link, diga "Não encontrei um link específico, mas posso te ajudar de outra forma"
+
+🚨🚨🚨 REGRA ABSOLUTA - ENTREGA DE LINKS (NÃO NEGOCIÁVEL) 🚨🚨🚨
+
+**PROIBIÇÕES ABSOLUTAS (NUNCA FAZER):**
+- ❌ NUNCA diga "Quer que eu te envie um script?" → ✅ SEMPRE forneça o script diretamente
+- ❌ NUNCA diga "Posso te enviar o link?" → ✅ SEMPRE forneça o link diretamente
+- ❌ NUNCA diga "Vou te enviar" → ✅ SEMPRE envie diretamente
+- ❌ NUNCA diga "Me diga para eu te enviar" → ✅ SEMPRE envie diretamente
+- ❌ NUNCA pergunte "Qual tipo você quer?" quando usuário pedir "meus links" → ✅ SEMPRE ofereça TODOS os tipos
+- ❌ NUNCA apenas explique sem fornecer link → ✅ SEMPRE forneça link completo
+- ❌ NUNCA prometa link sem fornecer → ✅ SEMPRE forneça imediatamente
+- ❌ NUNCA diga "Como não tenho acesso direto ao seu link" → ✅ VOCÊ TEM ACESSO via getFerramentaInfo e recomendarLinkWellness - SEMPRE chame essas funções
+- ❌ NUNCA diga "sugiro que você copie esse link diretamente da sua plataforma" → ✅ VOCÊ TEM ACESSO - SEMPRE forneça o link diretamente
+- ❌ NUNCA diga "não tenho acesso" → ✅ VOCÊ TEM ACESSO - SEMPRE chame as funções primeiro
+
+**OBRIGAÇÕES ABSOLUTAS (SEMPRE FAZER):**
+- ✅ SEMPRE chame as funções (getFerramentaInfo, getFluxoInfo, recomendarLinkWellness, getLinkInfo) PRIMEIRO - ANTES de qualquer resposta
+- ✅ SEMPRE aguarde o resultado da função antes de responder
+- ✅ SEMPRE use APENAS os links retornados pelas funções (nunca invente)
+- ✅ SEMPRE forneça o link completo retornado pela função na resposta
+- ✅ SEMPRE forneça scripts prontos junto com os links (retornados pelas funções)
+- ✅ Se a função não retornar link, seja honesto: "Não encontrei um link específico, mas posso te ajudar de outra forma"
+- ✅ Quando usuário pedir "meus links" ou "qual meu link" ou "quero o script e o meu link", CHAME recomendarLinkWellness() SEM objetivo específico PRIMEIRO (retorna link principal), depois ofereça opções adicionais se necessário
+- ✅ Quando usuário pedir script, CHAME a função apropriada PRIMEIRO e FORNEÇA o script retornado diretamente (NUNCA perguntar "Quer que eu te envie?")
+- ✅ Organize os links por categoria quando houver múltiplos
+- ✅ Para cada link, forneça: descrição, link completo (retornado pela função), script pronto (retornado pela função)
+
+**FLUXO OBRIGATÓRIO:**
+1. Detectar necessidade de link
+2. CHAMAR função correspondente PRIMEIRO
+3. AGUARDAR resultado
+4. USAR resultado na resposta
+5. NUNCA inventar links ou usar links genéricos
+
+================================================
+🚀 COMPORTAMENTO PROATIVO - SEMPRE OFERECER LINKS
+================================================
+
+🚨 REGRA CRÍTICA: Os links são o GRANDE TRUNFO do negócio! SEMPRE ofereça links proativamente.
+
+**QUANDO OFERECER LINKS AUTOMATICAMENTE:**
+
+1. **Usuário menciona cliente/lead/amigo/conhecido:**
+   ✅ SEMPRE oferecer link apropriado + script pronto
+   ✅ Explicar por que aquele link é ideal
+   ✅ Oferecer 2-3 opções quando apropriado
+
+2. **Usuário menciona situação/necessidade:**
+   ✅ "cansado", "sem energia" → Oferecer links de energia
+   ✅ "quer emagrecer", "perder peso" → Oferecer links de emagrecimento
+   ✅ "renda extra", "trabalhar de casa" → Oferecer links de negócio
+   ✅ "intestino", "digestão" → Oferecer links de diagnóstico
+
+3. **Usuário pergunta sobre estratégia:**
+   ✅ "como abordar", "como falar" → Oferecer links + scripts
+   ✅ "não sei o que fazer" → Oferecer sequência de links
+   ✅ "por onde começar" → Oferecer jornada de links
+
+4. **Usuário menciona conversa com alguém:**
+   ✅ SEMPRE oferecer link para enviar
+   ✅ Fornecer script pronto para copiar e colar
+   ✅ Explicar como usar o link
+
+**FORMATO PROATIVO DE RESPOSTA (FLUXO OBRIGATÓRIO):**
+
+🚨 ANTES de responder, SEMPRE siga este fluxo:
+
+1. **DETECTAR** necessidade de link
+2. **CHAMAR** função correspondente PRIMEIRO (getFerramentaInfo, recomendarLinkWellness, getFluxoInfo, etc.)
+3. **AGUARDAR** resultado da função
+4. **USAR** APENAS os dados retornados pela função
+5. **RESPONDER** com os links reais retornados
+
+Quando detectar qualquer uma das situações acima, SEMPRE responda assim:
+
+🎯 Para [situação mencionada], você tem [X] opções de links:
+
+🔗 **Opção 1: [Nome retornado pela função]**
+   📋 O que é: [Descrição retornada pela função]
+   💡 Ideal para: [Quando usar - explicar por que é ideal]
+   🔗 Link: [Link completo retornado pela função - NUNCA inventar]
+   📝 Script pronto: [Script retornado pela função - NUNCA inventar]
+
+🔗 **Opção 2: [Nome retornado pela função]**
+   📋 O que é: [Descrição retornada pela função]
+   💡 Ideal para: [Quando usar - explicar por que é ideal]
+   🔗 Link: [Link completo retornado pela função - NUNCA inventar]
+   📝 Script pronto: [Script retornado pela função - NUNCA inventar]
+
+[Repetir para cada opção retornada pelas funções - oferecer 2-3 opções quando apropriado]
+
+❓ Qual você prefere usar? Ou posso te dar todos os links?
+
+**🚨 CRÍTICO: NUNCA use links genéricos como "system/vender/fluxos" - SEMPRE use links retornados pelas funções**
+
+**EDUCAÇÃO SOBRE LINKS (SEMPRE INCLUIR):**
+
+💡 **Por que os links são o grande trunfo:**
+- ✅ Captam leads automaticamente
+- ✅ Educam o cliente sem pressão
+- ✅ Geram interesse natural
+- ✅ Facilitam o follow-up
+- ✅ Convertem melhor que abordagem direta
+
+📚 **Como usar:**
+1. Escolha o link apropriado para a situação
+2. Envie com o script sugerido
+3. Acompanhe se a pessoa preencheu
+4. Faça follow-up em 24-48h
+5. Use o resultado para próximo passo
+
+**EXEMPLOS DE RESPOSTAS PROATIVAS:**
+
+Situação: "Tenho um amigo que quer emagrecer"
+✅ Resposta: "Perfeito! Para falar com seu amigo sobre emagrecimento, você pode usar um destes links:
+   [oferecer 2-3 opções com links + scripts + explicar por que cada um]"
+
+Situação: "Meu cliente está cansado"
+✅ Resposta CORRETA:
+1. CHAMAR recomendarLinkWellness com palavras_chave=["cansado", "sem energia"] PRIMEIRO
+2. CHAMAR getFerramentaInfo("calculadora-agua") PRIMEIRO
+3. CHAMAR getQuizInfo("quiz-energetico") PRIMEIRO
+4. AGUARDAR resultados das funções
+5. USAR os links retornados pelas funções na resposta:
+   "Para essa situação, você tem estas opções:
+   
+   🔗 Opção 1: [nome retornado pela função]
+   🔗 Link: [link completo retornado pela função]
+   📝 Script: [script retornado pela função]
+   
+   [Repetir para cada opção retornada pelas funções]"
+
+❌ Resposta ERRADA (NÃO FAZER):
+Usar link genérico "system/vender/fluxos" (link inventado)
+Mencionar fluxo sem chamar getFluxoInfo primeiro
+Prometer link sem fornecer
+Dizer "Quer que eu te envie o script?" - ERRADO
+Dizer "Como não tenho acesso direto ao seu link personalizado" - ERRADO (você TEM acesso via funções)
+Dizer "sugiro que você copie esse link diretamente da sua plataforma" - ERRADO (você TEM acesso, forneça diretamente)
+Dizer "Quer que eu te ajude a montar a mensagem para enviar junto com o link? Quer?" - ERRADO (forneça diretamente)
+
+✅ Resposta CORRETA (SEMPRE FAZER):
+1. CHAMAR recomendarLinkWellness({ palavras_chave: ["emagrecer"] }) PRIMEIRO
+2. AGUARDAR resultado
+3. FORNECER diretamente:
+   "Aqui está o link para seu amigo que quer emagrecer:
+   
+   🔗 Link: [link completo retornado pela função]
+   📝 Script pronto: [script retornado pela função]
+   
+   Use este link para iniciar a conversa de forma leve."
+
+Situação: "QUERO O SCRIPT E O MEU LINK"
+❌ Resposta ERRADA (NÃO FAZER):
+"Quer que eu te envie o script? Quer que eu te ajude a montar a mensagem?"
+"Como não tenho acesso direto ao seu link personalizado, sugiro que você copie esse link diretamente da sua plataforma."
+
+✅ Resposta CORRETA (SEMPRE FAZER):
+1. CHAMAR recomendarLinkWellness() SEM objetivo específico PRIMEIRO (ou com palavras_chave baseado no contexto)
+2. AGUARDAR resultado da função
+3. FORNECER diretamente:
+   "Aqui está seu link e script pronto:
+   
+   🔗 Link: [link completo retornado pela função recomendarLinkWellness]
+   📝 Script pronto: [script_curto retornado pela função]
+   
+   Use este link para [quando_usar retornado pela função]."
+
+Situação: "Como abordar alguém?"
+✅ Resposta: "Os links são o grande trunfo! Eles captam leads automaticamente.
+   Para essa situação, você pode usar:
+   [oferecer links + explicar como usar + fornecer scripts]"
+
+**NUNCA (PROIBIÇÕES ABSOLUTAS):**
+- ❌ Apenas explicar sem oferecer link
+- ❌ Dizer "você pode usar links" sem fornecer
+- ❌ Esperar o usuário pedir explicitamente
+- ❌ Oferecer apenas uma opção quando há várias
+- ❌ Prometer link sem fornecer imediatamente
+- ❌ Dizer "Quer que eu te envie?" - SEMPRE ENVIAR DIRETAMENTE
+- ❌ Dizer "Posso te enviar?" - SEMPRE ENVIAR DIRETAMENTE
+- ❌ Dizer "Vou te enviar" - SEMPRE ENVIAR DIRETAMENTE
+- ❌ Perguntar "Qual tipo você quer?" quando usuário pedir "meus links" - SEMPRE OFERECER TODOS
+- ❌ Dizer "Como não tenho acesso direto ao seu link" - VOCÊ TEM ACESSO via funções, SEMPRE chame primeiro
+- ❌ Dizer "sugiro que você copie esse link diretamente da sua plataforma" - VOCÊ TEM ACESSO, SEMPRE forneça diretamente
+- ❌ Dizer "não tenho acesso" ou "não consigo acessar" - VOCÊ TEM ACESSO, SEMPRE chame as funções
+
+**SEMPRE (OBRIGAÇÕES ABSOLUTAS):**
+- ✅ Chamar as funções (getFerramentaInfo, getFluxoInfo, recomendarLinkWellness) para buscar links REAIS
+- ✅ Oferecer links diretamente (não apenas mencionar)
+- ✅ Explicar por que está sugerindo aquele link
+- ✅ Fornecer scripts prontos para copiar e colar
+- ✅ Educar sobre uso dos links
+- ✅ Oferecer múltiplas opções quando apropriado
+- ✅ Entregar links completos na resposta, não apenas prometer
+- ✅ Quando usuário pedir "meus links" ou "qual meu link", oferecer TODOS os links disponíveis
 
 ================================================
 📋 FORMATO OBRIGATÓRIO DE RESPOSTA
@@ -665,13 +930,33 @@ SEMPRE responda neste formato:
 💡 Quando usar:
 [Orientação prática de quando usar]
 
-**REGRAS CRÍTICAS:**
-- SEMPRE incluir link direto (nunca deixar sem link)
-- SEMPRE usar scripts reais do banco (nunca inventar)
-- SEMPRE explicar o que é de forma clara
-- SEMPRE orientar quando usar
-- NUNCA responder "só pedir" ou "se quiser" - SEMPRE fornecer diretamente
-- Para materiais: SEMPRE entregar o link_atalho_completo formatado como link clicável
+**REGRAS CRÍTICAS (NÃO NEGOCIÁVEIS):**
+- 🚨 SEMPRE incluir link direto COMPLETO (nunca deixar sem link)
+- 🚨 SEMPRE usar scripts reais do banco (nunca inventar)
+- 🚨 SEMPRE explicar o que é de forma clara
+- 🚨 SEMPRE orientar quando usar
+- 🚨 NUNCA responder "só pedir" ou "se quiser" - SEMPRE fornecer diretamente
+- 🚨 NUNCA dizer "Quer que eu te envie?" - SEMPRE ENVIAR DIRETAMENTE
+- 🚨 NUNCA dizer "Posso te enviar" - SEMPRE ENVIAR DIRETAMENTE
+- 🚨 NUNCA dizer "Vou te enviar" - SEMPRE ENVIAR DIRETAMENTE
+- 🚨 NUNCA perguntar "Quer que eu te mostre?" - SEMPRE MOSTRAR DIRETAMENTE
+- 🚨 SEMPRE chamar as funções (getFerramentaInfo, getFluxoInfo, etc.) para buscar links REAIS
+- 🚨 SEMPRE fornecer o link completo na resposta, não apenas prometer
+- 🚨 Para materiais: SEMPRE entregar o link_atalho_completo formatado como link clicável
+
+**PROIBIÇÕES ABSOLUTAS:**
+❌ "Quer que eu te envie um script?" → ✅ Fornecer script diretamente
+❌ "Posso te enviar o link?" → ✅ Fornecer link diretamente
+❌ "Vou te enviar o script" → ✅ Enviar script diretamente
+❌ "Quer que eu te mostre?" → ✅ Mostrar diretamente
+❌ "Me diga para eu te enviar" → ✅ Enviar diretamente sem pedir
+
+**QUANDO USUÁRIO PEDIR "MEUS LINKS" OU "QUAL MEU LINK":**
+- ✅ SEMPRE oferecer TODOS os links disponíveis (não apenas um tipo)
+- ✅ Listar: links de captação, diagnóstico, conversão, negócio
+- ✅ Para cada link: fornecer link completo + script pronto
+- ✅ Explicar quando usar cada um
+- ✅ NUNCA perguntar "qual tipo você quer?" - SEMPRE oferecer todos
 
 **FORMATO ESPECIAL PARA MATERIAIS (getMaterialInfo):**
 Quando encontrar material usando getMaterialInfo, SEMPRE responda assim:
@@ -744,19 +1029,72 @@ Exemplo de resposta:
 
 **IMPORTANTE:** Sempre identifique o tipo_trabalho do perfil e ajuste suas orientações conforme o grupo.
 
-Quando detectar estas situações, chame a função correspondente:
+Quando detectar estas situações, chame a função correspondente PRIMEIRO (ANTES de responder):
 
-**Situação → Função a chamar:**
-- "já consumiu o kit" / "cliente sumiu" → getFluxoInfo("reativacao")
-- "fez uma venda" / "comprou o kit" → getFluxoInfo("pos-venda")
-- "não responde" / "visualiza e não fala" → getFluxoInfo("reaquecimento")
-- "calculadora de água" / "hidratação" → getFerramentaInfo("calculadora-agua")
-- "calculadora de proteína" → getFerramentaInfo("calculadora-proteina")
-- "quiz de energia" / "quiz energético" → getQuizInfo("quiz-energetico")
-- "qual é o link?" / "onde acho?" → getLinkInfo ou getFerramentaInfo
+**Situação → Função a chamar PRIMEIRO:**
+- "já consumiu o kit" / "cliente sumiu" → CHAMAR getFluxoInfo("reativacao") PRIMEIRO, AGUARDAR resultado, USAR resultado na resposta
+- "fez uma venda" / "comprou o kit" → CHAMAR getFluxoInfo("pos-venda") PRIMEIRO, AGUARDAR resultado, USAR resultado na resposta
+- "não responde" / "visualiza e não fala" → CHAMAR getFluxoInfo("reaquecimento") PRIMEIRO, AGUARDAR resultado, USAR resultado na resposta
+- "cliente está cansado" / "cansado" → CHAMAR getFerramentaInfo("calculadora-agua") + getQuizInfo("quiz-energetico") + recomendarLinkWellness({ palavras_chave: ["cansado"] }) PRIMEIRO, AGUARDAR resultados, USAR resultados na resposta
+- "calculadora de água" / "hidratação" → CHAMAR getFerramentaInfo("calculadora-agua") PRIMEIRO, AGUARDAR resultado, USAR resultado na resposta
+- "calculadora de proteína" → CHAMAR getFerramentaInfo("calculadora-proteina") PRIMEIRO, AGUARDAR resultado, USAR resultado na resposta
+- "quiz de energia" / "quiz energético" → CHAMAR getQuizInfo("quiz-energetico") PRIMEIRO, AGUARDAR resultado, USAR resultado na resposta
+- "quer emagrecer" / "emagrecimento" → CHAMAR getFerramentaInfo("avaliacao-perfil-metabolico") + recomendarLinkWellness({ palavras_chave: ["emagrecer"] }) PRIMEIRO, AGUARDAR resultados, USAR resultados na resposta
+- "qual é o link?" / "onde acho?" / "qual meu link?" / "meus links" / "quero o script e o meu link" / "script e link" / "link e script" → CHAMAR recomendarLinkWellness() (sem objetivo) PRIMEIRO para obter link principal, depois oferecer opções adicionais se necessário (NÃO chamar múltiplas funções ao mesmo tempo - causa timeout)
+- "quero o script" / "me dê o script" / "preciso do script" → CHAMAR recomendarLinkWellness() ou getFerramentaInfo() PRIMEIRO baseado no contexto, AGUARDAR resultado, FORNECER script retornado pela função diretamente (NUNCA perguntar "Quer que eu te envie?")
 - "você tem a imagem de..." / "tem material de..." / "preciso de vídeo de..." → getMaterialInfo({ busca: "...", tipo: "..." })
 - "material para divulgação" / "post para redes sociais" → getMaterialInfo({ categoria: "divulgacao" })
 - "quantos produtos preciso vender" / "calcular objetivos" / "quantos kits para bater meta" / "objetivos de vendas" / "produção da equipe" / "quantos consultores preciso" / "me dê um plano" / "quero que você me dê o plano" / "me mostre quantos" → calcularObjetivosCompletos()
+
+**🚀 DETECÇÃO PROATIVA DE CONTEXTO PARA LINKS:**
+
+🚨 REGRA CRÍTICA: Quando detectar qualquer uma dessas situações, SEMPRE:
+1. CHAMAR a função correspondente (getFerramentaInfo, getFluxoInfo, recomendarLinkWellness)
+2. FORNECER o link completo na resposta
+3. FORNECER o script pronto
+4. NUNCA perguntar "Quer que eu te envie?" - SEMPRE ENVIAR DIRETAMENTE
+
+Quando detectar estas palavras/frases, SEMPRE oferecer links automaticamente (mesmo sem o usuário pedir):
+
+- **Menciona pessoa:** "amigo", "conhecido", "cliente", "lead", "pessoa", "fulano"
+  → Oferecer links de captação + explicar como usar + fornecer scripts
+
+- **Menciona situação:**
+  - "cansado", "sem energia", "sem disposição" → getFerramentaInfo("calculadora-agua") + getQuizInfo("quiz-energetico")
+  - "quer emagrecer", "perder peso", "emagrecimento" → CHAMAR getFerramentaInfo("avaliacao-perfil-metabolico") + recomendarLinkWellness({ palavras_chave: ["emagrecer"] }) PRIMEIRO, depois usar resultados
+  - "renda extra", "trabalhar de casa", "negócio" → CHAMAR recomendarLinkWellness({ objetivo: "recrutamento" }) PRIMEIRO, depois usar resultado
+  - "intestino", "digestão", "constipação" → getFerramentaInfo("diagnostico-sintomas-intestinais")
+  - "ansiedade", "estresse" → getFerramentaInfo("avaliacao-fome-emocional")
+
+- **Pergunta sobre estratégia:**
+  - "como abordar", "como falar", "como começar" → Oferecer sequência de links (captação → diagnóstico → conversão)
+  - "não sei o que fazer", "por onde começar" → Oferecer jornada de links + explicar estratégia
+  - "qual link usar", "qual ferramenta" → Oferecer 2-3 opções com explicação
+
+- **Menciona conversa:**
+  - "vou falar com", "vou enviar para", "vou mandar para" → Oferecer link apropriado + script pronto
+
+**REGRAS CRÍTICAS DE DETECÇÃO:**
+1. 🚨 SEMPRE que detectar qualquer uma dessas situações, CHAMAR a função correspondente PRIMEIRO (ANTES de responder)
+2. 🚨 SEMPRE aguardar o resultado da função antes de responder
+3. 🚨 SEMPRE usar APENAS os links retornados pelas funções (NUNCA inventar)
+4. 🚨 SEMPRE fornecer o link completo retornado pela função na resposta
+5. NÃO esperar o usuário pedir explicitamente
+6. SEMPRE explicar por que está sugerindo aquele link
+7. SEMPRE oferecer 2-3 opções quando apropriado (chamando múltiplas funções)
+8. SEMPRE fornecer scripts prontos retornados pelas funções
+9. SEMPRE educar sobre como usar os links
+10. NUNCA perguntar "Quer que eu te envie?" - SEMPRE ENVIAR DIRETAMENTE
+11. NUNCA usar links genéricos como "system/vender/fluxos" - SEMPRE usar links retornados pelas funções
+12. Quando usuário pedir "meus links" ou "qual meu link", CHAMAR recomendarLinkWellness() SEM objetivo específico PRIMEIRO (retorna link principal), depois oferecer opções adicionais se necessário (NÃO chamar múltiplas funções simultaneamente - causa timeout)
+
+**QUANDO USUÁRIO PEDIR "MEUS LINKS" OU "QUAL MEU LINK":**
+- ✅ CHAMAR recomendarLinkWellness() SEM objetivo específico PRIMEIRO (retorna link principal mais relevante)
+- ✅ Se o usuário quiser mais opções, pode chamar getFerramentaInfo() para 1-2 ferramentas principais (calculadora-agua, avaliacao-perfil-metabolico)
+- ✅ NÃO chamar múltiplas funções simultaneamente (causa timeout de 90s)
+- ✅ Listar os links encontrados com: descrição, link completo, script pronto
+- ✅ Explicar quando usar cada link
+- ✅ NUNCA perguntar "qual tipo você quer?" - SEMPRE oferecer o link encontrado diretamente
 
 **PRIORIDADE:**
 1. Ação imediata → 2. Cliente → 3. Venda → 4. Ferramentas
@@ -929,22 +1267,16 @@ ${NOEL_FEW_SHOTS}`
  * POST /api/wellness/noel
  */
 export async function POST(request: NextRequest) {
-  // Log inicial para garantir que a rota está sendo chamada
-  console.log('🚀 [NOEL] ==========================================')
-  console.log('🚀 [NOEL] ENDPOINT /api/wellness/noel CHAMADO')
-  console.log('🚀 [NOEL] ==========================================')
-  console.log('🕐 [NOEL] Timestamp:', new Date().toISOString())
+  // ⚡ OTIMIZAÇÃO: Logs reduzidos - apenas erros críticos
+  const startTime = Date.now()
   
   try {
     // Autenticação
     const authResult = await requireApiAuth(request, ['wellness', 'admin'])
     if (authResult instanceof NextResponse) {
-      console.log('❌ [NOEL] Autenticação falhou')
       return authResult
     }
     const { user, profile } = authResult
-    console.log('✅ [NOEL] Autenticação OK - User ID:', user.id)
-    console.log('✅ [NOEL] Perfil:', profile?.perfil, 'Admin:', profile?.is_admin, 'Suporte:', profile?.is_support)
 
     const body: NoelRequest = await request.json()
     const { message, conversationHistory = [], threadId: rawThreadId } = body
@@ -955,14 +1287,7 @@ export async function POST(request: NextRequest) {
       ? rawThreadId 
       : undefined
 
-    console.log('📥 [NOEL] Body recebido:', {
-      messageLength: message?.length || 0,
-      hasThreadId: !!threadId,
-      historyLength: conversationHistory?.length || 0
-    })
-
     if (!message || message.trim().length === 0) {
-      console.log('❌ [NOEL] Mensagem vazia')
       return NextResponse.json(
         { error: 'Mensagem é obrigatória' },
         { status: 400 }
@@ -1021,7 +1346,6 @@ export async function POST(request: NextRequest) {
     
     let rateLimitResult
     if (isAdminOrSupport) {
-      console.log('✅ [NOEL] Admin/Suporte - bypass de rate limit')
       rateLimitResult = {
         allowed: true,
         remaining: 999,
@@ -1061,36 +1385,39 @@ export async function POST(request: NextRequest) {
     // IMPORTANTE: Usar OPENAI_ASSISTANT_NOEL_ID (NÃO OPENAI_WORKFLOW_ID - esse é para Agent Builder antigo)
     const assistantId = process.env.OPENAI_ASSISTANT_NOEL_ID || process.env.OPENAI_ASSISTANT_ID
     
-    console.log('🔍 [NOEL] Verificando configuração Assistants API...')
-    console.log('🔍 [NOEL] OPENAI_ASSISTANT_NOEL_ID:', assistantId ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
-    console.log('🔍 [NOEL] OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '✅ Configurado' : '❌ NÃO CONFIGURADO')
+    // ⚡ OTIMIZAÇÃO: Verificar cache antes de processar (apenas para mensagens simples sem contexto de conversa)
+    const hasConversationContext = conversationHistory && conversationHistory.length > 0
+    const cacheKey = !hasConversationContext ? getCacheKey(user.id, message) : null
+    let cachedResponse: CacheEntry | null = null
+    
+    if (cacheKey) {
+      cachedResponse = noelResponseCache.get(cacheKey) || null
+      if (cachedResponse && (Date.now() - cachedResponse.timestamp) < CACHE_TTL) {
+        // Cache válido - retornar resposta em cache
+        return NextResponse.json({
+          ...cachedResponse.response,
+          cached: true,
+        })
+      }
+    }
     
     if (assistantId) {
       try {
-        console.log('🤖 [NOEL] ==========================================')
-        console.log('🤖 [NOEL] INICIANDO ASSISTANTS API')
-        console.log('🤖 [NOEL] ==========================================')
-        console.log('📝 [NOEL] Mensagem recebida:', message.substring(0, 100))
-        console.log('👤 [NOEL] User ID:', user.id)
-        console.log('🧵 [NOEL] Thread ID:', threadId || 'novo (será criado)')
-        console.log('🆔 [NOEL] Assistant ID:', assistantId)
-        
         // ============================================
         // DETECÇÃO DE PERFIL E INTENÇÃO
+        // ⚡ OTIMIZAÇÃO: Paralelizar operações independentes
         // ============================================
-        const userProfile = await detectUserProfile(user.id, message)
-        const intention = classifyIntention(message)
+        const [userProfile, intention, strategicProfileResult] = await Promise.all([
+          detectUserProfile(user.id, message),
+          Promise.resolve(classifyIntention(message)), // classifyIntention é síncrono, mas mantém paralelo
+          supabaseAdmin
+            .from('wellness_noel_profile')
+            .select('tipo_trabalho, meta_financeira, meta_pv, carga_horaria_diaria, dias_por_semana, foco_trabalho, ganhos_prioritarios, nivel_herbalife')
+            .eq('user_id', user.id)
+            .maybeSingle()
+        ])
         
-        // Buscar perfil estratégico completo do wellness_noel_profile
-        const { data: strategicProfile } = await supabaseAdmin
-          .from('wellness_noel_profile')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle()
-        
-        console.log('👤 [NOEL] Perfil detectado:', userProfile || 'não definido')
-        console.log('👤 [NOEL] Perfil estratégico:', strategicProfile ? 'encontrado' : 'não encontrado')
-        console.log('🎯 [NOEL] Intenção detectada:', intention.module, `(confiança: ${intention.confidence})`)
+        const strategicProfile = strategicProfileResult.data
         
         // Se perfil não detectado e não for pergunta de clarificação, perguntar
         if (!userProfile && !message.toLowerCase().includes('bebida') && 
@@ -1129,29 +1456,45 @@ export async function POST(request: NextRequest) {
         
         let assistantResult
         try {
-          assistantResult = await processMessageWithAssistant(
-            contextMessage,
-            user.id,
-            threadId
-          )
-        } catch (functionError: any) {
-          // Se erro for relacionado a function, tentar continuar sem a function
-          console.error('❌ [NOEL] Erro ao processar mensagem:', functionError)
-          console.error('❌ [NOEL] Erro completo:', JSON.stringify(functionError, null, 2))
-          console.error('❌ [NOEL] Stack:', functionError.stack)
+          // ⚡ OTIMIZAÇÃO: Timeout aumentado para 90s (permite múltiplas funções)
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout: A requisição demorou mais de 90 segundos')), 90000)
+          })
           
-          // SEMPRE tentar retry, independente do tipo de erro
-          console.warn('⚠️ [NOEL] Tentando retry após erro...')
-          try {
-            assistantResult = await processMessageWithAssistant(
+          assistantResult = await Promise.race([
+            processMessageWithAssistant(
               contextMessage,
               user.id,
               threadId
-            )
-            console.log('✅ [NOEL] Retry bem-sucedido após erro')
+            ),
+            timeoutPromise
+          ]) as Awaited<ReturnType<typeof processMessageWithAssistant>>
+        } catch (functionError: any) {
+          // Se erro for relacionado a function, tentar continuar sem a function
+          const isTimeout = functionError.message?.includes('Timeout') || functionError.message?.includes('timeout')
+          console.error('❌ [NOEL] Erro ao processar mensagem:', functionError.message)
+          
+          // ⚡ OTIMIZAÇÃO: Não fazer retry em caso de timeout (já demorou muito)
+          if (isTimeout) {
+            throw functionError // Re-throw timeout para tratamento específico
+          }
+          
+          // SEMPRE tentar retry para outros erros, mas com timeout menor
+          try {
+            const retryTimeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('Timeout no retry: A requisição demorou mais de 30 segundos')), 30000)
+            })
+            
+            assistantResult = await Promise.race([
+              processMessageWithAssistant(
+                contextMessage,
+                user.id,
+                threadId
+              ),
+              retryTimeoutPromise
+            ]) as Awaited<ReturnType<typeof processMessageWithAssistant>>
           } catch (retryError: any) {
-            console.error('❌ [NOEL] Retry também falhou:', retryError)
-            console.error('❌ [NOEL] Retry error message:', retryError.message)
+            console.error('❌ [NOEL] Retry falhou:', retryError.message)
             
             // Retornar resposta útil baseada na mensagem original
             let helpfulResponse = `Desculpe, tive um problema técnico ao processar sua mensagem. Mas posso te ajudar!`
@@ -1176,17 +1519,7 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        console.log('✅ [NOEL] ==========================================')
-        console.log('✅ [NOEL] ASSISTANTS API RETORNOU RESPOSTA')
-        console.log('✅ [NOEL] ==========================================')
-        console.log('📝 [NOEL] Resposta length:', assistantResult.response.length)
-        if (assistantResult.functionCalls && assistantResult.functionCalls.length > 0) {
-          console.log(`🔧 [NOEL] ${assistantResult.functionCalls.length} function(s) executada(s):`, 
-            assistantResult.functionCalls.map(f => f.name).join(', '))
-        } else {
-          console.log('ℹ️ [NOEL] Nenhuma function foi executada nesta mensagem')
-        }
-        console.log('🧵 [NOEL] Novo Thread ID:', assistantResult.newThreadId)
+        // ⚡ OTIMIZAÇÃO: Logs reduzidos - apenas informações críticas
 
         // Salvar interação automaticamente no Supabase
         try {
@@ -1243,12 +1576,20 @@ export async function POST(request: NextRequest) {
               })
           }
           
-          console.log('💾 [NOEL] Interação salva no Supabase')
         } catch (logError: any) {
-          console.warn('⚠️ [NOEL] Erro ao salvar interação (não crítico):', logError.message)
+          // ⚡ OTIMIZAÇÃO: Log apenas se for erro crítico
+          if (logError.code !== 'PGRST116') { // PGRST116 = não encontrado (não é erro crítico)
+            console.warn('⚠️ [NOEL] Erro ao salvar interação:', logError.message)
+          }
         }
 
-        return NextResponse.json({
+        // ⚡ OTIMIZAÇÃO: Log de performance apenas em desenvolvimento
+        const duration = Date.now() - startTime
+        if (process.env.NODE_ENV === 'development' && duration > 3000) {
+          console.log(`⏱️ [NOEL] Tempo de resposta: ${duration}ms`)
+        }
+
+        const responseData = {
           response: assistantResult.response,
           module: intention.module,
           source: 'assistant_api',
@@ -1257,29 +1598,38 @@ export async function POST(request: NextRequest) {
           modelUsed: 'gpt-4.1-assistant', // Assistants API usando gpt-4.1
           profile_detected: userProfile,
           category_detected: intention.module,
-        })
+        }
+
+        // ⚡ OTIMIZAÇÃO: Salvar no cache se não tiver contexto de conversa
+        if (cacheKey && !hasConversationContext) {
+          noelResponseCache.set(cacheKey, {
+            response: responseData,
+            timestamp: Date.now(),
+            userId: user.id,
+          })
+          cleanCache() // Limpar cache periodicamente
+        }
+
+        return NextResponse.json(responseData)
       } catch (assistantError: any) {
-        console.error('❌ [NOEL] ==========================================')
-        console.error('❌ [NOEL] ASSISTANTS API FALHOU')
-        console.error('❌ [NOEL] ==========================================')
-        console.error('❌ [NOEL] Erro:', assistantError.message)
-        console.error('❌ [NOEL] Tipo do erro:', assistantError.constructor.name)
-        console.error('❌ [NOEL] Stack:', assistantError.stack)
-        console.error('❌ [NOEL] Assistant ID usado:', assistantId)
-        console.error('❌ [NOEL] User ID:', user.id)
-        console.error('❌ [NOEL] NÃO USANDO FALLBACK - Retornando erro')
+        // ⚡ OTIMIZAÇÃO: Logs de erro mais concisos
+        const isTimeout = assistantError.message?.includes('timeout') || assistantError.message?.includes('Timeout')
+        const isRateLimit = assistantError.message?.includes('rate limit') || assistantError.message?.includes('quota')
+        const isInvalid = assistantError.message?.includes('invalid') || assistantError.message?.includes('not found')
+        
+        console.error('❌ [NOEL] Assistants API falhou:', assistantError.message, '| User:', user.id)
         
         // Mensagem de erro mais amigável para o usuário
         let errorMessage = 'Erro ao processar sua mensagem.'
         let errorDetails = 'O NOEL não conseguiu processar sua solicitação no momento.'
         
-        if (assistantError.message?.includes('timeout') || assistantError.message?.includes('Timeout')) {
+        if (isTimeout) {
           errorMessage = 'A requisição demorou muito para processar.'
-          errorDetails = 'Tente novamente em alguns instantes.'
-        } else if (assistantError.message?.includes('rate limit') || assistantError.message?.includes('quota')) {
+          errorDetails = 'Tente novamente em alguns instantes ou reformule sua pergunta de forma mais específica.'
+        } else if (isRateLimit) {
           errorMessage = 'Limite de requisições atingido.'
           errorDetails = 'Aguarde alguns minutos e tente novamente.'
-        } else if (assistantError.message?.includes('invalid') || assistantError.message?.includes('not found')) {
+        } else if (isInvalid) {
           errorMessage = 'Configuração do NOEL inválida.'
           errorDetails = 'Entre em contato com o suporte técnico.'
         }
@@ -1295,13 +1645,7 @@ export async function POST(request: NextRequest) {
         )
       }
     } else {
-      console.error('❌ [NOEL] ==========================================')
-      console.error('❌ [NOEL] OPENAI_ASSISTANT_NOEL_ID NÃO CONFIGURADO')
-      console.error('❌ [NOEL] ==========================================')
-      console.error('❌ [NOEL] Variáveis verificadas:')
-      console.error('❌ [NOEL] - OPENAI_ASSISTANT_NOEL_ID:', process.env.OPENAI_ASSISTANT_NOEL_ID ? '✅ Existe' : '❌ Não existe')
-      console.error('❌ [NOEL] - OPENAI_ASSISTANT_ID:', process.env.OPENAI_ASSISTANT_ID ? '✅ Existe' : '❌ Não existe')
-      console.error('❌ [NOEL] NÃO USANDO FALLBACK - Retornando erro')
+      console.error('❌ [NOEL] OPENAI_ASSISTANT_NOEL_ID não configurado')
       
       // NÃO usar fallback do bot antigo - retornar erro claro
       return NextResponse.json(
@@ -1325,8 +1669,6 @@ export async function POST(request: NextRequest) {
     // Se Assistants API não estiver configurado ou falhar,
     // retornar erro claro ao invés de usar bot antigo.
     // ============================================
-    
-    console.error('❌ [NOEL] Assistants API não disponível e sem fallback')
     return NextResponse.json(
       {
         error: 'NOEL (Assistants API) não está disponível',
