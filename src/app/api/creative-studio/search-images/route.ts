@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 
 /**
- * API Route para buscar imagens de APIs externas (Unsplash, Pexels)
+ * API Route para buscar imagens/vídeos de APIs externas (Unsplash, Pexels)
  * e criar imagens com DALL-E
  */
 export async function POST(request: NextRequest) {
@@ -21,6 +21,11 @@ export async function POST(request: NextRequest) {
         { error: 'Query é obrigatória' },
         { status: 400 }
       )
+    }
+
+    // Buscar vídeos do Pexels (gratuito)
+    if (type === 'search-videos') {
+      return await searchPexelsVideos(query, count)
     }
 
     // Buscar imagens do Pexels (gratuito, sem API key obrigatória)
@@ -115,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Tipo inválido. Use "search" ou "create"' },
+      { error: 'Tipo inválido. Use "search", "search-videos" ou "create"' },
       { status: 400 }
     )
   } catch (error: any) {
@@ -173,6 +178,70 @@ async function searchUnsplash(query: string, count: number) {
       },
       { status: 200 } // Retorna 200 mas com erro para não quebrar o fluxo
     )
+  }
+}
+
+// Função auxiliar para buscar vídeos no Pexels
+async function searchPexelsVideos(query: string, count: number) {
+  try {
+    const pexelsApiKey = process.env.PEXELS_API_KEY || ''
+    const headers: HeadersInit = {}
+    if (pexelsApiKey) {
+      headers['Authorization'] = pexelsApiKey
+    }
+
+    // Pexels Videos API
+    const pexelsUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`
+    
+    const response = await fetch(pexelsUrl, {
+      headers: pexelsApiKey ? headers : undefined,
+    })
+
+    if (!response.ok) {
+      // Se não tiver API key ou falhar, retornar erro amigável
+      if (response.status === 401) {
+        return NextResponse.json({
+          error: 'PEXELS_API_KEY não configurada. Configure nas variáveis de ambiente para buscar vídeos.',
+          videos: [],
+          total: 0,
+        }, { status: 200 }) // Retorna 200 para não quebrar o fluxo
+      }
+      throw new Error(`Pexels API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    
+    const videos = data.videos?.map((video: any) => ({
+      id: video.id,
+      url: video.video_files?.[0]?.link || video.video_files?.[video.video_files.length - 1]?.link,
+      thumbnail: video.image || video.picture,
+      duration: video.duration || 0,
+      width: video.width || 1920,
+      height: video.height || 1080,
+      photographer: video.user?.name || 'Pexels',
+      photographerUrl: video.user?.url || 'https://www.pexels.com',
+      source: 'pexels',
+      // Informações adicionais do vídeo
+      videoFiles: video.video_files?.map((file: any) => ({
+        quality: file.quality,
+        width: file.width,
+        height: file.height,
+        link: file.link,
+      })) || [],
+    })) || []
+
+    return NextResponse.json({
+      videos,
+      total: data.total_results || videos.length,
+      source: 'pexels',
+    })
+  } catch (error: any) {
+    console.error('Erro ao buscar vídeos:', error)
+    return NextResponse.json({
+      error: 'Não foi possível buscar vídeos. Configure PEXELS_API_KEY nas variáveis de ambiente.',
+      videos: [],
+      total: 0,
+    }, { status: 200 }) // Retorna 200 para não quebrar o fluxo
   }
 }
 

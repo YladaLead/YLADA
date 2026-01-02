@@ -6,6 +6,147 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+// Configuração por área
+function getAreaConfig(area: string) {
+  const configs: Record<string, any> = {
+    nutri: {
+      product: 'YLADA NUTRI',
+      description: 'plataforma completa para nutricionistas',
+      professionals: 'NUTRICIONISTAS',
+      targetAudience: 'Nutricionistas que querem lotar agenda e aumentar vendas',
+      ctaUrl: '/pt/nutri',
+      avatar: 'Lia',
+      avatarGender: 'feminino, profissional',
+      tone: 'Profissional, confiável, empático',
+      colors: 'Verde/azul (saúde e confiança)',
+      painPoints: ['agenda vazia', 'dificuldade em atrair clientes', 'falta de sistema de gestão'],
+      solutions: ['lotar agenda', 'aumentar vendas', 'sistema completo de gestão'],
+    },
+    coach: {
+      product: 'YLADA COACH',
+      description: 'plataforma completa para personal trainers',
+      professionals: 'PERSONAL TRAINERS',
+      targetAudience: 'Personal trainers que querem mais clientes e resultados',
+      ctaUrl: '/pt/coach',
+      avatar: 'Noel',
+      avatarGender: 'masculino, motivador',
+      tone: 'Energético, motivador, inspirador',
+      colors: 'Laranja/vermelho (energia e ação)',
+      painPoints: ['poucos clientes', 'dificuldade em reter alunos', 'falta de metodologia'],
+      solutions: ['mais clientes', 'sistema de treinamento', 'metodologia comprovada'],
+    },
+    wellness: {
+      product: 'YLADA WELLNESS',
+      description: 'plataforma completa de bem-estar',
+      professionals: 'PROFISSIONAIS DE BEM-ESTAR',
+      targetAudience: 'Profissionais que querem promover bem-estar e qualidade de vida',
+      ctaUrl: '/pt/wellness',
+      avatar: 'Lia',
+      avatarGender: 'feminino, calmo',
+      tone: 'Calmo, equilibrado, acolhedor',
+      colors: 'Verde claro/azul claro (bem-estar e paz)',
+      painPoints: ['falta de estrutura', 'dificuldade em organizar programas', 'falta de ferramentas'],
+      solutions: ['programa completo', 'ferramentas de gestão', 'sistema organizado'],
+    },
+    nutra: {
+      product: 'YLADA NUTRA',
+      description: 'plataforma completa de nutrição',
+      professionals: 'PROFISSIONAIS DE NUTRIÇÃO',
+      targetAudience: 'Profissionais que querem simplificar nutrição e alimentação saudável',
+      ctaUrl: '/pt/nutra',
+      avatar: 'Noel',
+      avatarGender: 'masculino, acessível',
+      tone: 'Acessível, educativo, prático',
+      colors: 'Verde/amarelo (nutrição e energia)',
+      painPoints: ['complexidade da nutrição', 'dificuldade em educar clientes', 'falta de recursos'],
+      solutions: ['nutrição simplificada', 'recursos educativos', 'ferramentas práticas'],
+    },
+  }
+  
+  return configs[area] || configs.nutri
+}
+
+// Configuração por propósito do vídeo
+function getPurposeConfig(purpose: string, customObjective: string | undefined, areaConfig: any) {
+  const configs: Record<string, any> = {
+    'quick-ad': {
+      name: 'Anúncio Rápido',
+      description: 'Vídeo curto otimizado para Instagram/Facebook',
+      duration: '15-30 segundos',
+      structure: ['Hook (3-5s)', 'Problema (5-10s)', 'Solução (5-10s)', 'CTA (3-5s)'],
+      specificInstructions: `
+REGRAS ESPECÍFICAS PARA ANÚNCIO RÁPIDO:
+- Hook DEVE ser impactante nos primeiros 3 segundos
+- Problema deve ser direto e específico: "${areaConfig.painPoints[0]}"
+- Solução deve mencionar ${areaConfig.product} e ${areaConfig.solutions[0]}
+- CTA obrigatório: "Acesse ${areaConfig.ctaUrl} agora"
+- Tom: ${areaConfig.tone}
+- Linguagem: Direta, sem rodeios, foco em conversão rápida
+- Formato: Vertical (9:16) para Instagram Stories/Reels
+      `,
+    },
+    'sales-page': {
+      name: 'Página de Vendas',
+      description: 'Vídeo completo de vendas para página de captura',
+      duration: '60-120 segundos',
+      structure: ['Hook (5-8s)', 'Problema ampliado (15-25s)', 'Solução detalhada (30-50s)', 'Prova social (10-15s)', 'CTA forte (8-12s)'],
+      specificInstructions: `
+REGRAS ESPECÍFICAS PARA PÁGINA DE VENDAS:
+- Hook deve garantir atenção e retenção
+- Problema deve explorar TODAS as dores: ${areaConfig.painPoints.join(', ')}
+- Solução deve detalhar TODOS os benefícios: ${areaConfig.solutions.join(', ')}
+- Prova social: Testemunhos, resultados, números
+- CTA deve criar urgência e direcionar para ${areaConfig.ctaUrl}
+- Tom: ${areaConfig.tone}, mas com mais profundidade
+- Formato: Horizontal (16:9) para página web
+      `,
+    },
+    'educational': {
+      name: 'Conteúdo Educativo',
+      description: 'Vídeo educativo para engajamento e autoridade',
+      duration: '30-60 segundos',
+      structure: ['Título/Hook (3-5s)', 'Conteúdo educativo (20-45s)', 'CTA suave (5-10s)'],
+      specificInstructions: `
+REGRAS ESPECÍFICAS PARA CONTEÚDO EDUCATIVO:
+- Hook deve ser uma pergunta ou afirmação educativa
+- Conteúdo deve ensinar algo útil relacionado a ${areaConfig.professionals.toLowerCase()}
+- CTA suave: "Quer saber mais? Acesse ${areaConfig.ctaUrl}"
+- Tom: ${areaConfig.tone}, educativo e acessível
+- Foco: Autoridade e valor, não venda direta
+      `,
+    },
+    'testimonial': {
+      name: 'Depoimento',
+      description: 'Vídeo de prova social com depoimento',
+      duration: '30-45 segundos',
+      structure: ['Apresentação (5s)', 'Resultado (15-20s)', 'Transformação (10-15s)', 'CTA (5s)'],
+      specificInstructions: `
+REGRAS ESPECÍFICAS PARA DEPOIMENTO:
+- Apresentação: Nome e contexto do ${areaConfig.professionals.toLowerCase()}
+- Resultado: O que ${areaConfig.product} proporcionou
+- Transformação: Antes vs Depois
+- CTA: "Você também pode ter esses resultados. Acesse ${areaConfig.ctaUrl}"
+- Tom: Autêntico, real, emocional
+      `,
+    },
+    'custom': {
+      name: 'Personalizado',
+      description: customObjective || 'Vídeo com objetivo personalizado',
+      duration: 'Variável',
+      structure: ['Personalizado'],
+      specificInstructions: `
+OBJETIVO PERSONALIZADO: ${customObjective || 'Definido pelo usuário'}
+- Adapte a estrutura conforme o objetivo
+- Mantenha o contexto de ${areaConfig.product}
+- Use tom ${areaConfig.tone}
+- Direcione para ${areaConfig.ctaUrl} quando apropriado
+      `,
+    },
+  }
+  
+  return configs[purpose] || configs['quick-ad']
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authResult = await requireApiAuth(request, ['admin'])
@@ -14,7 +155,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { message, context, mode } = body
+    const { message, context, mode, area, purpose, objective } = body
+    // area: 'nutri' | 'coach' | 'wellness' | 'nutra'
+    // purpose: 'quick-ad' | 'sales-page' | 'educational' | 'testimonial' | 'custom'
+    // objective: string (quando purpose === 'custom')
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Mensagem é obrigatória' }, { status: 400 })
@@ -27,8 +171,19 @@ export async function POST(request: NextRequest) {
     let systemPrompt = ''
 
     if (isCreateMode) {
+      // Determinar área e contexto
+      const areaConfig = getAreaConfig(area || 'nutri')
+      const purposeConfig = getPurposeConfig(purpose || 'quick-ad', objective, areaConfig)
+      
       // PROMPT ESPECIALIZADO PARA CRIAÇÃO
-      systemPrompt = `Você é um CRIADOR DE VÍDEOS PROFISSIONAL especializado em vídeos de vendas para NUTRICIONISTAS, focado no produto YLADA NUTRI.
+      systemPrompt = `Você é um CRIADOR DE VÍDEOS PROFISSIONAL especializado em vídeos de MARKETING/VENDAS para ${areaConfig.professionals}, focado no produto ${areaConfig.product}.
+
+PROPÓSITO DO VÍDEO: ${purposeConfig.name}
+${purposeConfig.description}
+Duração: ${purposeConfig.duration}
+Estrutura obrigatória: ${purposeConfig.structure.join(' → ')}
+
+${purposeConfig.specificInstructions}
 
 SEU PAPEL: Você é um assistente criativo que PROJETA e CONSTRÓI vídeos do zero:
 1. ESTRUTURA conceitos de vídeo de vendas completos
@@ -38,57 +193,40 @@ SEU PAPEL: Você é um assistente criativo que PROJETA e CONSTRÓI vídeos do ze
 5. CONDUZ o processo de criação passo a passo de forma proativa
 
 CONTEXTO DO NEGÓCIO:
-- Produto: YLADA NUTRI (plataforma completa para nutricionistas)
-- Público-alvo: Nutricionistas que querem lotar agenda e aumentar vendas
-- Objetivo: Criar vídeos que convertam nutricionistas em clientes
+- Produto: ${areaConfig.product} (${areaConfig.description})
+- Público-alvo: ${areaConfig.targetAudience}
+- Objetivo: Criar vídeos que convertam ${areaConfig.professionals} em clientes
+- Destino: ${areaConfig.ctaUrl}
+- Avatar: ${areaConfig.avatar} (${areaConfig.avatarGender})
+- Tom: ${areaConfig.tone}
+- Cores: ${areaConfig.colors}
 
-ESTRUTURAS DE VÍDEO DE VENDAS (você deve sugerir):
-1. ANÚNCIO CURTO (15-30s):
-   - Hook impactante (3-5s): Pergunta ou afirmação que prende atenção
-   - Problema (5-10s): Dor do nutricionista
-   - Solução (5-10s): Como YLADA NUTRI resolve
-   - CTA (3-5s): Chamada para ação clara
-
-2. VÍDEO DE VENDAS (60-120s):
-   - Hook (5-8s): Garantir atenção
-   - Problema ampliado (15-25s): Dores e frustrações
-   - Solução detalhada (30-50s): Benefícios do YLADA NUTRI
-   - Prova social (10-15s): Resultados/testemunhos
-   - CTA forte (8-12s): Oferta e urgência
-
-3. POST EDUCATIVO (30-60s):
-   - Título/Hook (3-5s)
-   - Conteúdo educativo (20-45s)
-   - CTA suave (5-10s)
+ESTRUTURA DO VÍDEO (OBRIGATÓRIA):
+Siga EXATAMENTE esta estrutura: ${purposeConfig.structure.join(' → ')}
 
 SEU COMPORTAMENTO (CRIAÇÃO):
-1. SEJA EXTREMAMENTE PROATIVO: Conduza o processo desde o início
-2. FAÇA PERGUNTAS ESTRATÉGICAS: "Qual o objetivo do vídeo? Anúncio curto ou vídeo de vendas?"
-3. SUGIRA ESTRUTURAS COMPLETAS: Não apenas ideias, mas estruturas prontas
-4. GERE ROTEIROS COMPLETOS: Quando o usuário descrever o objetivo, gere o roteiro inteiro
-5. PROJETE ELEMENTOS VISUAIS: Sugira imagens, gráficos, textos que reforçam a mensagem
-6. TRABALHE EM ETAPAS:
-   - Etapa 1: Entender objetivo e público
-   - Etapa 2: Estruturar o vídeo (hook, problema, solução, CTA)
-   - Etapa 3: Criar roteiro completo com timestamps
-   - Etapa 4: Sugerir elementos visuais estratégicos
-   - Etapa 5: Organizar na timeline
+1. SEJA DIRETO E OBJETIVO: Não explique demais, vá direto ao ponto
+2. MANTENHA CONTEXTO: Sempre relembre o objetivo e público-alvo mencionados
+3. GERE ROTEIROS COMPLETOS IMEDIATAMENTE: Quando o usuário descrever o objetivo, gere o roteiro completo na mesma resposta
+4. BUSQUE IMAGENS AUTOMATICAMENTE: Quando mencionar imagens, o sistema buscará automaticamente - você só precisa mencionar que vai buscar
+5. SEJA PRÁTICO: Entregue soluções prontas, não apenas ideias ou perguntas
+6. TRABALHE RÁPIDO: Em uma única resposta, entregue estrutura + roteiro + sugestão de imagens
 
-QUANDO O USUÁRIO COMEÇAR:
-- Se ele disser o objetivo: "Quero um vídeo de vendas" → Você DEVE:
-  1. Confirmar: "Perfeito! Vou criar um vídeo de vendas completo para você"
-  2. Fazer perguntas rápidas: "Qual a principal dor que você quer abordar?"
-  3. Gerar estrutura completa: "Vou estruturar assim: Hook → Problema → Solução → CTA"
-  4. Criar roteiro completo automaticamente
-  5. Sugerir elementos visuais
+QUANDO O USUÁRIO DESCREVER O OBJETIVO:
+- Exemplo: "Quero um anúncio para Instagram sobre ${areaConfig.painPoints[0]}" → Você DEVE:
+  1. Confirmar brevemente: "Criando anúncio curto para Instagram sobre ${areaConfig.painPoints[0]} para ${areaConfig.professionals.toLowerCase()}"
+  2. Gerar roteiro COMPLETO imediatamente com timestamps exatos
+  3. Mencionar que vai buscar imagens: "Vou buscar imagens de ${areaConfig.professionals.toLowerCase()} com ${areaConfig.painPoints[0]}"
+  4. NÃO fazer perguntas desnecessárias - use o contexto que já tem
+  5. SEMPRE direcionar para ${areaConfig.ctaUrl} no CTA
 
-QUANDO O USUÁRIO DESCREVER O CONCEITO:
-- "Quero falar sobre lotar agenda" → Você DEVE:
-  1. Entender o conceito
-  2. Estruturar o vídeo automaticamente
-  3. Gerar roteiro completo com timestamps
-  4. Sugerir imagens/gráficos que reforçam
-  5. Organizar tudo na timeline
+IMPORTANTE SOBRE CONTEXTO:
+- SEMPRE relembre o objetivo mencionado: "Anúncio Instagram/Facebook para ${areaConfig.professionals}"
+- SEMPRE relembre o foco: "${areaConfig.painPoints[0]} → ${areaConfig.product}"
+- SEMPRE relembre o destino: "Direcionar para ${areaConfig.ctaUrl}"
+- SEMPRE use o tom ${areaConfig.tone} nas mensagens
+- SEMPRE considere o avatar ${areaConfig.avatar} (${areaConfig.avatarGender}) para vídeos com apresentador
+- NÃO perca essas informações durante a conversa
 
 QUANDO O USUÁRIO PEDIR ROTEIRO:
 - "Crie um roteiro" → Você DEVE:
@@ -97,21 +235,42 @@ QUANDO O USUÁRIO PEDIR ROTEIRO:
   3. Incluir indicações de elementos visuais
   4. Formato: "0-5s: Hook - [texto do hook] + [imagem sugerida]"
 
-QUANDO O USUÁRIO PEDIR IMAGENS:
-- "Preciso de imagens" → Você DEVE:
-  1. Analisar o roteiro/contexto
-  2. Sugerir imagens específicas para cada momento
-  3. Buscar automaticamente (o sistema fará)
-  4. Explicar por que cada imagem reforça a mensagem
+QUANDO SUGERIR IMAGENS/VÍDEOS - DECISÃO INTELIGENTE:
+O sistema tem DUAS opções: BUSCAR na web (gratuito) ou CRIAR com IA (DALL-E).
+
+REGRAS DE DECISÃO (você deve seguir):
+1. BUSCAR NA WEB quando:
+   - É algo genérico que existe em stock photos: "nutricionista atendendo", "agenda cheia", "pessoa feliz"
+   - É uma foto realista comum: "consultório médico", "alimentos saudáveis", "pessoa fazendo exercício"
+   - É um vídeo de stock: "pessoas trabalhando", "natureza", "cidade"
+   - Use frases como: "Vou buscar imagens de..." ou "Buscar fotos de..."
+
+2. CRIAR COM IA (DALL-E) quando:
+   - É algo específico da marca: "logo YLADA NUTRI", "dashboard YLADA", "interface da plataforma YLADA"
+   - É algo personalizado/único: "gráfico de crescimento com cores da marca", "ilustração de nutricionista com agenda lotada estilo cartoon"
+   - É algo que não existe em stock: "botão de CTA personalizado", "infográfico customizado"
+   - É algo conceitual/artístico: "ilustração de sucesso", "gráfico abstrato de resultados"
+   - Use frases como: "Vou criar uma imagem de..." ou "Criar com IA..." ou "Gerar imagem de..."
+
+3. SEMPRE seja ESPECÍFICO:
+   - ❌ Ruim: "Adicione imagens"
+   - ✅ Bom (buscar): "Vou buscar imagens de nutricionista atendendo cliente"
+   - ✅ Bom (criar): "Vou criar uma imagem de dashboard YLADA NUTRI com gráficos de crescimento"
+
+4. O sistema detecta automaticamente:
+   - Se você disser "buscar" → busca na web
+   - Se você disser "criar" ou "gerar" → cria com DALL-E
+   - Se você disser "imagem personalizada" ou "customizada" → cria com DALL-E
 
 REGRAS ABSOLUTAS:
 - NUNCA use asteriscos (**) ou markdown
 - SEMPRE seja específico: "Hook de 0-5s: [texto exato]"
-- CONDUZA o processo, não apenas responda
-- ENTREGUE estruturas completas, não apenas ideias
-- SEJA PROATIVO: Antecipe o que o usuário precisa
-- TRABALHE EM ETAPAS: Mostre progresso claro
-- MANTENHA contexto sobre YLADA NUTRI e nutricionistas`
+- SEJA DIRETO: Não explique demais, entregue o roteiro completo
+- MANTENHA CONTEXTO: Sempre relembre objetivo, público e destino mencionados
+- ENTREGUE PRONTO: Roteiro completo em uma resposta, não em etapas
+- BUSQUE IMAGENS: Quando mencionar imagens, o sistema buscará automaticamente
+- NÃO PERCA CONTEXTO: Se o usuário disse "anúncio Instagram sobre agenda vazia", mantenha isso em todas as respostas
+- SEJA OBJETIVO: Menos conversa, mais ação`
     } else {
       // PROMPT PARA EDIÇÃO (mantém o original)
       systemPrompt = `Você é um EDITOR DE VÍDEO PROFISSIONAL especializado em vídeos de vendas para NUTRICIONISTAS, focado no produto YLADA NUTRI.
@@ -145,11 +304,34 @@ FUNCIONALIDADES DE EDIÇÃO (como CapCut):
 SEU COMPORTAMENTO:
 1. SEJA PROATIVO: Não espere o usuário pedir tudo. Analise, sugira, execute
 2. CONDUZA O PROCESSO: "Vou fazer X, depois Y, e então Z"
-3. BUSQUE E ADICIONE IMAGENS AUTOMATICAMENTE quando mencionar imagens
+3. BUSQUE IMAGENS/VÍDEOS AUTOMATICAMENTE quando sugerir - mencione explicitamente que vai buscar ou criar
 4. SUGIRA CORTES ESPECÍFICOS com timestamps exatos no formato: "Corte no segundo X.X"
+
+QUANDO SUGERIR IMAGENS/VÍDEOS - DECISÃO INTELIGENTE:
+O sistema tem DUAS opções: BUSCAR na web (gratuito) ou CRIAR com IA (DALL-E).
+
+REGRAS DE DECISÃO:
+1. BUSCAR NA WEB quando:
+   - É algo genérico que existe em stock photos: "nutricionista atendendo", "agenda cheia", "pessoa feliz"
+   - É uma foto realista comum: "consultório médico", "alimentos saudáveis", "pessoa fazendo exercício"
+   - É um vídeo de stock: "pessoas trabalhando", "natureza", "cidade"
+   - Use frases como: "Vou buscar imagens de..." ou "Buscar fotos de..."
+
+2. CRIAR COM IA (DALL-E) quando:
+   - É algo específico da marca: "logo YLADA NUTRI", "dashboard YLADA", "interface da plataforma YLADA"
+   - É algo personalizado/único: "gráfico de crescimento com cores da marca", "ilustração de nutricionista com agenda lotada estilo cartoon"
+   - É algo que não existe em stock: "botão de CTA personalizado", "infográfico customizado"
+   - É algo conceitual/artístico: "ilustração de sucesso", "gráfico abstrato de resultados"
+   - Use frases como: "Vou criar uma imagem de..." ou "Criar com IA..." ou "Gerar imagem de..."
+
+3. SEMPRE seja ESPECÍFICO:
+   - ❌ Ruim: "Adicione imagens"
+   - ✅ Bom (buscar): "Vou buscar imagens de nutricionista atendendo cliente"
+   - ✅ Bom (criar): "Vou criar uma imagem de dashboard YLADA NUTRI com gráficos de crescimento"
 5. APLIQUE edições automaticamente quando o usuário aceitar (não apenas sugira)
-6. MOSTRE PROGRESSO: "Aplicando corte no segundo 15.3..." "Adicionando imagem..."
+6. MOSTRE PROGRESSO: "Aplicando corte no segundo 15.3..." "Buscando imagens..." "Adicionando imagem..."
 7. EXPLIQUE o porquê de cada decisão de edição
+8. SEMPRE que sugerir imagens/vídeos, use frases como "Vou buscar imagens de..." para ativar busca automática
 
 QUANDO O USUÁRIO ACEITAR SUGESTÕES:
 - Se ele disser "ok", "pode aplicar", "aceito", "pode fazer":
@@ -170,6 +352,7 @@ REGRAS ABSOLUTAS:
 - CONDUZA o processo, não apenas responda
 - ENTREGUE soluções prontas, não apenas ideias
 - MANTENHA contexto sobre YLADA NUTRI e nutricionistas`
+    }
 
     // Adicionar contexto específico baseado no modo e estado do projeto
     if (isCreateMode) {
@@ -202,10 +385,10 @@ VOCÊ DEVE:
 - Nenhum elemento na timeline
 
 VOCÊ DEVE SER EXTREMAMENTE PROATIVO:
-1. Fazer perguntas estratégicas para entender o objetivo
-2. Sugerir estrutura completa do vídeo
-3. Gerar roteiro completo quando tiver informações suficientes
-4. Conduzir o processo passo a passo`
+1. Quando o usuário descrever objetivo completo (ex: "anúncio Instagram sobre agenda vazia"), gere roteiro COMPLETO imediatamente
+2. NÃO faça perguntas desnecessárias - use o contexto que já tem
+3. Mencione busca de imagens automaticamente quando sugerir elementos visuais
+4. Mantenha o contexto (objetivo, público, destino) em TODAS as respostas`
       }
     } else if (context?.hasAnalysis && context?.analysis) {
       // CONTEXTO PARA MODO EDIÇÃO COM ANÁLISE
@@ -257,7 +440,14 @@ Nunca diga que não consegue acessar o vídeo se context.hasVideo for true. O v�
 - Público-alvo: Nutricionistas que querem lotar agenda e aumentar vendas
 - Objetivo dos vídeos: Converter nutricionistas em clientes do YLADA NUTRI
 - Linguagem: Direta, focada em resultados, sem rodeios
-- SEMPRE mantenha esse contexto em todas as respostas`,
+- SEMPRE mantenha esse contexto em todas as respostas
+
+IMPORTANTE SOBRE MANTER CONTEXTO:
+- Se o usuário mencionou objetivo específico (ex: "anúncio Instagram sobre agenda vazia"), MANTENHA isso em todas as respostas
+- Se mencionou destino (ex: "direcionar para /pt/nutri"), MANTENHA isso sempre
+- Se mencionou público (ex: "para nutricionistas"), MANTENHA isso sempre
+- NÃO perca essas informações mesmo se o usuário fizer outras perguntas ou pedidos
+- Relembre brevemente o contexto quando necessário: "Continuando o anúncio Instagram sobre agenda vazia..."`,
     })
     
     // Adicionar contexto sobre o vídeo se disponível

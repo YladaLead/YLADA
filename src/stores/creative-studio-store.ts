@@ -27,6 +27,31 @@ interface CreativeStudioState {
     suggestions: any[]
   } | null
   
+  // Sugestões dinâmicas da conversa (atualizam conforme o chat)
+  dynamicSuggestions: Array<{
+    id: string
+    title: string
+    description: string
+    type: 'cut' | 'image' | 'video' | 'text' | 'general'
+    timestamp?: number
+    createdAt: number
+  }>
+  
+  // Cortes sugeridos (ainda não aplicados) para visualização
+  suggestedCuts: Array<{
+    timestamp: number
+    description?: string
+  }>
+  
+  // Resultados de busca (imagens e vídeos)
+  searchResults: {
+    images: Array<{ id: string; url: string; thumbnail: string; source: string }>
+    videos: Array<{ id: string; url: string; thumbnail: string; source: string; duration?: number }>
+    isSearching: boolean
+    searchQuery: string | null
+    lastSearchType: 'images' | 'videos' | null
+  }
+  
   // Undo/Redo
   history: Array<{ clips: VideoClip[]; script: ScriptSegment[] }>
   historyIndex: number
@@ -55,6 +80,23 @@ interface CreativeStudioState {
   setUploadedVideo: (file: File | null) => void
   setVideoAnalysis: (analysis: { transcription: string; scriptStructure: any[]; suggestions: any[] } | null) => void
   
+  // Sugestões dinâmicas
+  addDynamicSuggestion: (suggestion: Omit<CreativeStudioState['dynamicSuggestions'][0], 'id' | 'createdAt'>) => void
+  removeDynamicSuggestion: (id: string) => void
+  clearDynamicSuggestions: () => void
+  
+  // Cortes sugeridos
+  addSuggestedCut: (timestamp: number, description?: string) => void
+  removeSuggestedCut: (timestamp: number) => void
+  clearSuggestedCuts: () => void
+  
+  // Resultados de busca
+  setSearchResults: (results: Partial<CreativeStudioState['searchResults']>) => void
+  addSearchImages: (images: Array<{ id: string; url: string; thumbnail: string; source: string }>) => void
+  addSearchVideos: (videos: Array<{ id: string; url: string; thumbnail: string; source: string; duration?: number }>) => void
+  clearSearchResults: () => void
+  setSearching: (isSearching: boolean, type?: 'images' | 'videos', query?: string) => void
+  
   // Undo/Redo Actions
   saveToHistory: () => void
   undo: () => void
@@ -77,6 +119,15 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
   isGeneratingScript: false,
   uploadedVideo: null,
   videoAnalysis: null,
+  dynamicSuggestions: [],
+  suggestedCuts: [],
+  searchResults: {
+    images: [],
+    videos: [],
+    isSearching: false,
+    searchQuery: null,
+    lastSearchType: null,
+  },
   
   // Undo/Redo
   history: [{ clips: [], script: [] }],
@@ -145,6 +196,78 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
   setIsGeneratingScript: (generating) => set({ isGeneratingScript: generating }),
   setUploadedVideo: (file) => set({ uploadedVideo: file }),
   setVideoAnalysis: (analysis) => set({ videoAnalysis: analysis }),
+  
+  addDynamicSuggestion: (suggestion) =>
+    set((state) => ({
+      dynamicSuggestions: [
+        ...state.dynamicSuggestions,
+        {
+          ...suggestion,
+          id: `sug-${Date.now()}-${Math.random()}`,
+          createdAt: Date.now(),
+        },
+      ],
+    })),
+  removeDynamicSuggestion: (id) =>
+    set((state) => ({
+      dynamicSuggestions: state.dynamicSuggestions.filter((s) => s.id !== id),
+    })),
+  clearDynamicSuggestions: () => set({ dynamicSuggestions: [] }),
+  
+  addSuggestedCut: (timestamp, description) =>
+    set((state) => {
+      // Evitar duplicatas
+      if (state.suggestedCuts.some(c => Math.abs(c.timestamp - timestamp) < 0.1)) {
+        return state
+      }
+      return {
+        suggestedCuts: [...state.suggestedCuts, { timestamp, description }].sort((a, b) => a.timestamp - b.timestamp),
+      }
+    }),
+  removeSuggestedCut: (timestamp) =>
+    set((state) => ({
+      suggestedCuts: state.suggestedCuts.filter(c => Math.abs(c.timestamp - timestamp) >= 0.1),
+    })),
+  clearSuggestedCuts: () => set({ suggestedCuts: [] }),
+  
+  // Resultados de busca
+  setSearchResults: (results) =>
+    set((state) => ({
+      searchResults: { ...state.searchResults, ...results },
+    })),
+  addSearchImages: (images) =>
+    set((state) => ({
+      searchResults: {
+        ...state.searchResults,
+        images: [...state.searchResults.images, ...images],
+      },
+    })),
+  addSearchVideos: (videos) =>
+    set((state) => ({
+      searchResults: {
+        ...state.searchResults,
+        videos: [...state.searchResults.videos, ...videos],
+      },
+    })),
+  clearSearchResults: () =>
+    set({
+      searchResults: {
+        images: [],
+        videos: [],
+        isSearching: false,
+        searchQuery: null,
+        lastSearchType: null,
+      },
+    }),
+  setSearching: (isSearching, type, query) =>
+    set((state) => ({
+      searchResults: {
+        ...state.searchResults,
+        isSearching,
+        lastSearchType: type || null,
+        searchQuery: query || state.searchResults.searchQuery,
+      },
+    })),
   
   // Undo/Redo
   setIsUndoRedo: (value) => set({ isUndoRedo: value }),

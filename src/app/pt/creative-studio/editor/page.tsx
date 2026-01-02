@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Video, Upload, Sparkles, FileText, Play, Scissors, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Video, Upload, Sparkles, FileText, Play, Scissors, CheckCircle2, Search, Loader2 } from 'lucide-react'
 import { useCreativeStudioStore } from '@/stores/creative-studio-store'
 import { ScriptGenerator } from '@/components/creative-studio/ScriptGenerator'
 import { ScriptEditor } from '@/components/creative-studio/ScriptEditor'
@@ -12,11 +12,15 @@ import { Timeline } from '@/components/creative-studio/Timeline'
 import { FileUploader } from '@/components/creative-studio/FileUploader'
 import { EditorChat } from '@/components/creative-studio/EditorChat'
 import { SuggestionsPanel } from '@/components/creative-studio/SuggestionsPanel'
+import { SearchResultsPanel } from '@/components/creative-studio/SearchResultsPanel'
 
 export default function CreativeStudioEditorPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const mode = searchParams.get('mode') || 'edit' // 'edit' ou 'create'
+  const area = searchParams.get('area') || 'nutri' // 'nutri' | 'coach' | 'wellness' | 'nutra'
+  const purpose = searchParams.get('purpose') || 'quick-ad' // 'quick-ad' | 'sales-page' | 'educational' | 'testimonial' | 'custom'
+  const objective = searchParams.get('objective') || '' // Objetivo customizado
   
   const {
     activePanel,
@@ -29,16 +33,17 @@ export default function CreativeStudioEditorPage() {
     setVideoAnalysis,
     addClip,
     setScript,
+    dynamicSuggestions,
   } = useCreativeStudioStore()
 
   const videoLoadedRef = useRef(false)
-  const [leftWidth, setLeftWidth] = useState(66.666) // 2/3 por padrão
+  const [leftWidth, setLeftWidth] = useState(40) // 40% por padrão (área do vídeo)
   const [isResizing, setIsResizing] = useState(false)
   const [isResizingHorizontal, setIsResizingHorizontal] = useState(false)
   const [chatHeight, setChatHeight] = useState(60) // 60% da altura por padrão
   const containerRef = useRef<HTMLDivElement>(null)
   const horizontalResizerRef = useRef<HTMLDivElement>(null)
-  const [activeTab, setActiveTab] = useState<'script' | 'suggestions'>('script') // Aba ativa
+  const [activeTab, setActiveTab] = useState<'script' | 'suggestions' | 'search'>('script') // Aba ativa
 
   // Carregar vídeo automaticamente quando vier da página de análise (apenas se ainda não foi adicionado)
   useEffect(() => {
@@ -168,8 +173,8 @@ export default function CreativeStudioEditorPage() {
         const containerRect = containerRef.current.getBoundingClientRect()
         const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100
         
-        // Limitar entre 30% e 70%
-        const clampedWidth = Math.max(30, Math.min(70, newLeftWidth))
+        // Limitar entre 25% e 50% (mantendo área do vídeo menor que chat)
+        const clampedWidth = Math.max(25, Math.min(50, newLeftWidth))
         setLeftWidth(clampedWidth)
       }
 
@@ -249,29 +254,32 @@ export default function CreativeStudioEditorPage() {
           ref={containerRef}
           className="flex-1 flex flex-col lg:flex-row gap-3 lg:gap-0 min-h-0 relative"
         >
-          {/* Coluna Esquerda - Preview Fixo + Timeline */}
+          {/* Coluna Esquerda - Preview Fixo + Timeline - 40% com scroll vertical */}
           <div 
-            className="flex flex-col gap-2 sm:gap-3 min-h-0 lg:pr-2 w-full"
+            className="flex flex-col gap-2 sm:gap-3 min-h-0 lg:pr-2 w-full overflow-hidden"
             style={{ 
-              width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${leftWidth}%` : '100%' 
+              width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${leftWidth}%` : '100%',
+              height: typeof window !== 'undefined' && window.innerWidth >= 1024 ? '100%' : 'auto'
             }}
           >
-            {/* Preview Fixo - Mobile Responsive - Sempre visível no topo */}
-            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-2 sm:p-3">
-              <h3 className="text-xs font-semibold text-gray-700 mb-1 sm:mb-2 uppercase tracking-wide">Preview</h3>
-              {clips.length > 0 ? (
-                <div className="aspect-video bg-black rounded overflow-hidden">
-                  <VideoPlayer />
-                </div>
-              ) : (
-                <div className="aspect-video bg-gray-100 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
-                  <p className="text-gray-400 text-xs sm:text-sm px-2 text-center">Nenhum clip na timeline</p>
-                </div>
-              )}
-            </div>
+            {/* Área com scroll vertical independente */}
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 sm:space-y-3 pr-1">
+              {/* Preview Fixo - Mobile Responsive */}
+              <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-2 sm:p-3">
+                <h3 className="text-xs font-semibold text-gray-700 mb-1 sm:mb-2 uppercase tracking-wide">Preview</h3>
+                {clips.length > 0 ? (
+                  <div className="aspect-video bg-black rounded overflow-hidden">
+                    <VideoPlayer />
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-gray-100 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <p className="text-gray-400 text-xs sm:text-sm px-2 text-center">Nenhum clip na timeline</p>
+                  </div>
+                )}
+              </div>
 
-            {/* Timeline e Upload - Scrollável apenas se necessário */}
-            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 sm:space-y-3">
+              {/* Timeline e Upload - Scrollável dentro da área esquerda */}
+              <div className="space-y-2 sm:space-y-3">
               {/* Timeline - Mobile Responsive */}
               <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-2 sm:p-3">
                 <h3 className="text-xs font-semibold text-gray-700 mb-1 sm:mb-2 uppercase tracking-wide">Timeline</h3>
@@ -284,6 +292,7 @@ export default function CreativeStudioEditorPage() {
                 <div className="max-h-[200px] sm:max-h-[250px] overflow-y-auto">
                   <FileUploader />
                 </div>
+              </div>
               </div>
             </div>
           </div>
@@ -305,16 +314,24 @@ export default function CreativeStudioEditorPage() {
               width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${100 - leftWidth}%` : '100%' 
             }}
           >
-            {/* Chat com IA - Altura ajustável */}
+            {/* Chat com IA - Altura ajustável - ROLAGEM INDEPENDENTE */}
             <div 
               className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col"
               style={{ 
                 height: typeof window !== 'undefined' && window.innerWidth >= 1024 
                   ? `${chatHeight}%` 
+                  : '450px',
+                minHeight: typeof window !== 'undefined' && window.innerWidth >= 1024 
+                  ? '300px' 
                   : '450px'
               }}
             >
-              <EditorChat mode={mode as 'edit' | 'create'} />
+              <EditorChat 
+                mode={mode as 'edit' | 'create'} 
+                area={area as 'nutri' | 'coach' | 'wellness' | 'nutra'}
+                purpose={purpose as 'quick-ad' | 'sales-page' | 'educational' | 'testimonial' | 'custom'}
+                objective={objective}
+              />
             </div>
 
             {/* Resizer Horizontal - Barra para ajustar altura */}
@@ -351,7 +368,7 @@ export default function CreativeStudioEditorPage() {
                     <span className="ml-1 text-xs">({script.length})</span>
                   )}
                 </button>
-                {videoAnalysis && videoAnalysis.suggestions && videoAnalysis.suggestions.length > 0 && (
+                {(dynamicSuggestions.length > 0 || (videoAnalysis && videoAnalysis.suggestions && videoAnalysis.suggestions.length > 0)) && (
                   <button
                     onClick={() => setActiveTab('suggestions')}
                     className={`flex-1 px-3 py-2 text-xs sm:text-sm font-medium transition-colors relative ${
@@ -363,8 +380,29 @@ export default function CreativeStudioEditorPage() {
                     <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
                     Sugestões
                     <span className="ml-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                      {videoAnalysis.suggestions.length}
+                      {dynamicSuggestions.length + (videoAnalysis?.suggestions?.length || 0)}
                     </span>
+                  </button>
+                )}
+                {(searchResults.images.length > 0 || searchResults.videos.length > 0 || searchResults.isSearching) && (
+                  <button
+                    onClick={() => setActiveTab('search')}
+                    className={`flex-1 px-3 py-2 text-xs sm:text-sm font-medium transition-colors relative ${
+                      activeTab === 'search'
+                        ? 'bg-green-50 text-green-700 border-b-2 border-green-600'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Search className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                    Busca
+                    {(searchResults.images.length > 0 || searchResults.videos.length > 0) && (
+                      <span className="ml-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                        {searchResults.images.length + searchResults.videos.length}
+                      </span>
+                    )}
+                    {searchResults.isSearching && (
+                      <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 inline ml-1 animate-spin text-green-600" />
+                    )}
                   </button>
                 )}
               </div>
@@ -382,11 +420,16 @@ export default function CreativeStudioEditorPage() {
                       </div>
                     )}
                   </>
+                ) : activeTab === 'search' ? (
+                  <SearchResultsPanel />
                 ) : (
                   <>
-                    {videoAnalysis && videoAnalysis.suggestions && videoAnalysis.suggestions.length > 0 ? (
+                    {(dynamicSuggestions.length > 0 || (videoAnalysis && videoAnalysis.suggestions && videoAnalysis.suggestions.length > 0)) ? (
                       <SuggestionsPanel 
-                        suggestions={videoAnalysis.suggestions}
+                        suggestions={[
+                          ...dynamicSuggestions.map(s => ({ title: s.title, description: s.description })),
+                          ...(videoAnalysis?.suggestions || [])
+                        ]}
                         onApply={(applied) => {
                           console.log('Aplicar sugestões:', applied)
                         }}
